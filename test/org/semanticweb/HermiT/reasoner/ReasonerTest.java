@@ -5,7 +5,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.semanticweb.HermiT.Configuration;
@@ -36,126 +35,126 @@ public class ReasonerTest extends AbstractReasonerTest {
     public ReasonerTest(String name) {
         super(name);
     }
-    public void testBottomObjectPropertyAssertion() throws Exception {
-        loadOntologyWithAxioms(
-                "Declaration(NamedIndividual(:a))"+
-                "Declaration(NamedIndividual(:b))"+
-                "Declaration(NamedIndividual(:c))"+
-                "Declaration(ObjectProperty(:r))"+
-                "Declaration(ObjectProperty(:s))"+
-                "SubObjectPropertyOf(ObjectPropertyChain(:r :s) owl:bottomObjectProperty)"+
-                "ObjectPropertyAssertion(:r :a :b)"+
-                "ObjectPropertyAssertion(:s :b :c)");
-        createReasoner();
-        assertFalse(m_reasoner.isConsistent());
-    }
-    @SuppressWarnings("unchecked")
-    public void testDataPropertyEntailment() throws Exception {
-        loadOntologyWithAxioms(
-                "Declaration(DataProperty(:d1))"+
-                "Declaration(DataProperty(:d2))"+
-                "SubClassOf(owl:Thing DataSomeValuesFrom(:d1 xsd:int))"+
-                "SubClassOf(owl:Thing DataAllValuesFrom(:d1 DatatypeRestriction(xsd:int xsd:minInclusive \"1\"^^xsd:int xsd:maxInclusive \"1\"^^xsd:int)))"+
-                "SubClassOf(owl:Thing DataSomeValuesFrom(:d2 DataOneOf(\"1\"^^xsd:int)))");
-        createReasoner();
-        assertSuperDataProperties("d1", EQ("d2"));
-    }
-    public void testPropertyInstanceRetrieval() throws Exception {
-        loadOntologyWithAxioms(
-                "Declaration(ObjectProperty(:r))"+
-                "Declaration(ObjectProperty(:rp))"+
-                "Declaration(ObjectProperty(:s1))"+
-                "Declaration(ObjectProperty(:s2))"+
-                "Declaration(ObjectProperty(:s))"+
-                "Declaration(ObjectProperty(:t))"+
-                "Declaration(ObjectProperty(:tp))"+
-                "Declaration(NamedIndividual(:a))"+
-                "Declaration(NamedIndividual(:b))"+
-                "Declaration(NamedIndividual(:c))"+
-                "Declaration(NamedIndividual(:d))"+
-                "ObjectPropertyAssertion(:t :b :a)"+
-                "ObjectPropertyAssertion(:r :b :c)"+
-                "ObjectPropertyAssertion(:r :a :a)"+
-                "ObjectPropertyAssertion(:s :c :d)"+
-                "SubObjectPropertyOf(:r :s)"+
-                "SubObjectPropertyOf(:s1 ObjectInverseOf(:s2))"+
-                "SubObjectPropertyOf(ObjectPropertyChain(:r :s1 :s2) :rp)"+
-                "TransitiveObjectProperty(:t)"+
-                "SubObjectPropertyOf(:t :tp)"+
-                "ClassAssertion(ObjectSomeValuesFrom(:s1 owl:Thing) :c)"+
-                "ClassAssertion(ObjectSomeValuesFrom(:t ObjectSomeValuesFrom(:t ObjectSomeValuesFrom(:t ObjectOneOf(:d)))) :b)");
-        createReasoner();
-        Map<OWLNamedIndividual,Set<OWLNamedIndividual>> result=m_reasoner.getObjectPropertyInstances(NS_OP("r"));
-        assertTrue(result.keySet().size()==2);
-        assertTrue(result.containsKey(NS_NI("a"))&&result.get(NS_NI("a")).contains(NS_NI("a"))&&result.get(NS_NI("a")).size()==1);
-        assertTrue(result.containsKey(NS_NI("b"))&&result.get(NS_NI("b")).contains(NS_NI("c"))&&result.get(NS_NI("b")).size()==1);
-        result=m_reasoner.getObjectPropertyInstances(NS_OP("rp"));
-        assertTrue(result.containsKey(NS_NI("b"))&&result.get(NS_NI("b")).contains(NS_NI("c"))&&result.keySet().size()==1&&result.get(NS_NI("b")).size()==1);
-        result=m_reasoner.getObjectPropertyInstances(NS_OP("s1"));
-        assertTrue(result.isEmpty());
-        result=m_reasoner.getObjectPropertyInstances(NS_OP("s2"));
-        assertTrue(result.isEmpty());
-        result=m_reasoner.getObjectPropertyInstances(NS_OP("s"));
-        assertTrue(result.keySet().size()==3);
-        assertTrue(result.containsKey(NS_NI("a"))&&result.get(NS_NI("a")).contains(NS_NI("a"))&&result.get(NS_NI("a")).size()==1);
-        assertTrue(result.containsKey(NS_NI("b"))&&result.get(NS_NI("b")).contains(NS_NI("c"))&&result.get(NS_NI("b")).size()==1);
-        assertTrue(result.containsKey(NS_NI("c"))&&result.get(NS_NI("c")).contains(NS_NI("d"))&&result.get(NS_NI("c")).size()==1);
-        result=m_reasoner.getObjectPropertyInstances(NS_OP("t"));
-        assertTrue(result.keySet().size()==1);
-        assertTrue(result.containsKey(NS_NI("b"))&&result.get(NS_NI("b")).contains(NS_NI("d"))&&result.get(NS_NI("b")).contains(NS_NI("a"))&&result.get(NS_NI("b")).size()==2);
-        result=m_reasoner.getObjectPropertyInstances(NS_OP("tp"));
-        assertTrue(result.keySet().size()==1);
-        assertTrue(result.containsKey(NS_NI("b"))&&result.get(NS_NI("b")).contains(NS_NI("d"))&&result.get(NS_NI("b")).contains(NS_NI("a"))&&result.get(NS_NI("b")).size()==2);
-    }
-    public void testClassificationSubClassBug() throws Exception {
-        loadOntologyWithAxioms(
-                "Declaration(Class(:c1)) "+LB+
-                "Declaration(Class(:ps1)) "+LB+
-                "Declaration(Class(:DomainEntity)) "+LB+
-                "Declaration(Class(:ps3)) "+LB+
-                "Declaration(Class(:c4)) "+LB+
-                "Declaration(Class(:PetalShape)) "+LB+
-                "Declaration(Class(:Petal)) "+LB+
-                "Declaration(Class(:ps2)) "+LB+
-                "Declaration(Class(:Corolla)) "+LB+
-                "Declaration(Class(:c2)) "+LB+
-                "Declaration(ObjectProperty(:hasPart)) "+LB+
-                "Declaration(ObjectProperty(:hasShape)) "+LB+
-                "SubClassOf(:Petal ObjectIntersectionOf(:DomainEntity ObjectSomeValuesFrom(:hasShape :PetalShape))) "+LB+
-                "SubClassOf(:ps2 :PetalShape) "+LB+
-                "SubClassOf(:PetalShape :DomainEntity) "+LB+
-                "SubClassOf(:Corolla :DomainEntity) "+LB+
-                "SubClassOf(:c1 ObjectIntersectionOf(:Corolla ObjectExactCardinality(4 :hasPart :Petal))) "+LB+
-                "SubClassOf(:ps3 :PetalShape) "+LB+
-                "SubClassOf(:c2 ObjectIntersectionOf(:Corolla "+LB+ 
-                "ObjectAllValuesFrom(:hasPart ObjectUnionOf(ObjectComplementOf(:Petal) ObjectAllValuesFrom(:hasShape ObjectUnionOf(:ps1 :ps2)))) "+LB+
-                "ObjectExactCardinality(1 :hasPart ObjectIntersectionOf(:Petal ObjectSomeValuesFrom(:hasShape :ps1))) "+LB+
-                "ObjectExactCardinality(3 :hasPart ObjectIntersectionOf(:Petal ObjectSomeValuesFrom(:hasShape :ps2))))) "+LB+
-                "SubClassOf(:ps1 :PetalShape) "+LB+
-                "EquivalentClasses(:c4 ObjectIntersectionOf(:Corolla ObjectExactCardinality(4 :hasPart :Petal))) "+LB+
-                "DisjointClasses(:ps1 :ps2 :ps3) "+LB+
-                "DisjointClasses(:Corolla :Petal :PetalShape) "+LB+
-                "FunctionalObjectProperty(:hasShape)");
-        createReasoner();
-        assertSubsumedBy("c2", "c4", true);
-        m_reasoner.classify();
-        assertSubsumedBy("c2", "c4", true);
-    }
-    public void testNegativeObjectPropertyAssertionWithNonSimple() throws Exception {
-        loadOntologyWithAxioms(
-                "Declaration(Class(:A))"+
-                "Declaration(NamedIndividual(:a))"+
-                "Declaration(NamedIndividual(:b))"+
-                "Declaration(ObjectProperty(:r))"+
-                "Declaration(ObjectProperty(:t))"+
-                "SubClassOf(:A ObjectSomeValuesFrom(:t ObjectSomeValuesFrom(:t ObjectOneOf(:b))))"+
-                "TransitiveObjectProperty(:t)"+
-                "SubObjectPropertyOf(:t ObjectInverseOf(:r))"+
-                "ClassAssertion(:A :a)"+
-                "NegativeObjectPropertyAssertion(:r :b :a)");
-        createReasoner();
-        assertFalse(m_reasoner.isConsistent());
-    }
+//    public void testBottomObjectPropertyAssertion() throws Exception {
+//        loadOntologyWithAxioms(
+//                "Declaration(NamedIndividual(:a))"+
+//                "Declaration(NamedIndividual(:b))"+
+//                "Declaration(NamedIndividual(:c))"+
+//                "Declaration(ObjectProperty(:r))"+
+//                "Declaration(ObjectProperty(:s))"+
+//                "SubObjectPropertyOf(ObjectPropertyChain(:r :s) owl:bottomObjectProperty)"+
+//                "ObjectPropertyAssertion(:r :a :b)"+
+//                "ObjectPropertyAssertion(:s :b :c)");
+//        createReasoner();
+//        assertFalse(m_reasoner.isConsistent());
+//    }
+//    @SuppressWarnings("unchecked")
+//    public void testDataPropertyEntailment() throws Exception {
+//        loadOntologyWithAxioms(
+//                "Declaration(DataProperty(:d1))"+
+//                "Declaration(DataProperty(:d2))"+
+//                "SubClassOf(owl:Thing DataSomeValuesFrom(:d1 xsd:int))"+
+//                "SubClassOf(owl:Thing DataAllValuesFrom(:d1 DatatypeRestriction(xsd:int xsd:minInclusive \"1\"^^xsd:int xsd:maxInclusive \"1\"^^xsd:int)))"+
+//                "SubClassOf(owl:Thing DataSomeValuesFrom(:d2 DataOneOf(\"1\"^^xsd:int)))");
+//        createReasoner();
+//        assertSuperDataProperties("d1", EQ("d2"));
+//    }
+//    public void testPropertyInstanceRetrieval() throws Exception {
+//        loadOntologyWithAxioms(
+//                "Declaration(ObjectProperty(:r))"+
+//                "Declaration(ObjectProperty(:rp))"+
+//                "Declaration(ObjectProperty(:s1))"+
+//                "Declaration(ObjectProperty(:s2))"+
+//                "Declaration(ObjectProperty(:s))"+
+//                "Declaration(ObjectProperty(:t))"+
+//                "Declaration(ObjectProperty(:tp))"+
+//                "Declaration(NamedIndividual(:a))"+
+//                "Declaration(NamedIndividual(:b))"+
+//                "Declaration(NamedIndividual(:c))"+
+//                "Declaration(NamedIndividual(:d))"+
+//                "ObjectPropertyAssertion(:t :b :a)"+
+//                "ObjectPropertyAssertion(:r :b :c)"+
+//                "ObjectPropertyAssertion(:r :a :a)"+
+//                "ObjectPropertyAssertion(:s :c :d)"+
+//                "SubObjectPropertyOf(:r :s)"+
+//                "SubObjectPropertyOf(:s1 ObjectInverseOf(:s2))"+
+//                "SubObjectPropertyOf(ObjectPropertyChain(:r :s1 :s2) :rp)"+
+//                "TransitiveObjectProperty(:t)"+
+//                "SubObjectPropertyOf(:t :tp)"+
+//                "ClassAssertion(ObjectSomeValuesFrom(:s1 owl:Thing) :c)"+
+//                "ClassAssertion(ObjectSomeValuesFrom(:t ObjectSomeValuesFrom(:t ObjectSomeValuesFrom(:t ObjectOneOf(:d)))) :b)");
+//        createReasoner();
+//        Map<OWLNamedIndividual,Set<OWLNamedIndividual>> result=m_reasoner.getObjectPropertyInstances(NS_OP("r"));
+//        assertTrue(result.keySet().size()==2);
+//        assertTrue(result.containsKey(NS_NI("a"))&&result.get(NS_NI("a")).contains(NS_NI("a"))&&result.get(NS_NI("a")).size()==1);
+//        assertTrue(result.containsKey(NS_NI("b"))&&result.get(NS_NI("b")).contains(NS_NI("c"))&&result.get(NS_NI("b")).size()==1);
+//        result=m_reasoner.getObjectPropertyInstances(NS_OP("rp"));
+//        assertTrue(result.containsKey(NS_NI("b"))&&result.get(NS_NI("b")).contains(NS_NI("c"))&&result.keySet().size()==1&&result.get(NS_NI("b")).size()==1);
+//        result=m_reasoner.getObjectPropertyInstances(NS_OP("s1"));
+//        assertTrue(result.isEmpty());
+//        result=m_reasoner.getObjectPropertyInstances(NS_OP("s2"));
+//        assertTrue(result.isEmpty());
+//        result=m_reasoner.getObjectPropertyInstances(NS_OP("s"));
+//        assertTrue(result.keySet().size()==3);
+//        assertTrue(result.containsKey(NS_NI("a"))&&result.get(NS_NI("a")).contains(NS_NI("a"))&&result.get(NS_NI("a")).size()==1);
+//        assertTrue(result.containsKey(NS_NI("b"))&&result.get(NS_NI("b")).contains(NS_NI("c"))&&result.get(NS_NI("b")).size()==1);
+//        assertTrue(result.containsKey(NS_NI("c"))&&result.get(NS_NI("c")).contains(NS_NI("d"))&&result.get(NS_NI("c")).size()==1);
+//        result=m_reasoner.getObjectPropertyInstances(NS_OP("t"));
+//        assertTrue(result.keySet().size()==1);
+//        assertTrue(result.containsKey(NS_NI("b"))&&result.get(NS_NI("b")).contains(NS_NI("d"))&&result.get(NS_NI("b")).contains(NS_NI("a"))&&result.get(NS_NI("b")).size()==2);
+//        result=m_reasoner.getObjectPropertyInstances(NS_OP("tp"));
+//        assertTrue(result.keySet().size()==1);
+//        assertTrue(result.containsKey(NS_NI("b"))&&result.get(NS_NI("b")).contains(NS_NI("d"))&&result.get(NS_NI("b")).contains(NS_NI("a"))&&result.get(NS_NI("b")).size()==2);
+//    }
+//    public void testClassificationSubClassBug() throws Exception {
+//        loadOntologyWithAxioms(
+//                "Declaration(Class(:c1)) "+LB+
+//                "Declaration(Class(:ps1)) "+LB+
+//                "Declaration(Class(:DomainEntity)) "+LB+
+//                "Declaration(Class(:ps3)) "+LB+
+//                "Declaration(Class(:c4)) "+LB+
+//                "Declaration(Class(:PetalShape)) "+LB+
+//                "Declaration(Class(:Petal)) "+LB+
+//                "Declaration(Class(:ps2)) "+LB+
+//                "Declaration(Class(:Corolla)) "+LB+
+//                "Declaration(Class(:c2)) "+LB+
+//                "Declaration(ObjectProperty(:hasPart)) "+LB+
+//                "Declaration(ObjectProperty(:hasShape)) "+LB+
+//                "SubClassOf(:Petal ObjectIntersectionOf(:DomainEntity ObjectSomeValuesFrom(:hasShape :PetalShape))) "+LB+
+//                "SubClassOf(:ps2 :PetalShape) "+LB+
+//                "SubClassOf(:PetalShape :DomainEntity) "+LB+
+//                "SubClassOf(:Corolla :DomainEntity) "+LB+
+//                "SubClassOf(:c1 ObjectIntersectionOf(:Corolla ObjectExactCardinality(4 :hasPart :Petal))) "+LB+
+//                "SubClassOf(:ps3 :PetalShape) "+LB+
+//                "SubClassOf(:c2 ObjectIntersectionOf(:Corolla "+LB+ 
+//                "ObjectAllValuesFrom(:hasPart ObjectUnionOf(ObjectComplementOf(:Petal) ObjectAllValuesFrom(:hasShape ObjectUnionOf(:ps1 :ps2)))) "+LB+
+//                "ObjectExactCardinality(1 :hasPart ObjectIntersectionOf(:Petal ObjectSomeValuesFrom(:hasShape :ps1))) "+LB+
+//                "ObjectExactCardinality(3 :hasPart ObjectIntersectionOf(:Petal ObjectSomeValuesFrom(:hasShape :ps2))))) "+LB+
+//                "SubClassOf(:ps1 :PetalShape) "+LB+
+//                "EquivalentClasses(:c4 ObjectIntersectionOf(:Corolla ObjectExactCardinality(4 :hasPart :Petal))) "+LB+
+//                "DisjointClasses(:ps1 :ps2 :ps3) "+LB+
+//                "DisjointClasses(:Corolla :Petal :PetalShape) "+LB+
+//                "FunctionalObjectProperty(:hasShape)");
+//        createReasoner();
+//        assertSubsumedBy("c2", "c4", true);
+//        m_reasoner.classify();
+//        assertSubsumedBy("c2", "c4", true);
+//    }
+//    public void testNegativeObjectPropertyAssertionWithNonSimple() throws Exception {
+//        loadOntologyWithAxioms(
+//                "Declaration(Class(:A))"+
+//                "Declaration(NamedIndividual(:a))"+
+//                "Declaration(NamedIndividual(:b))"+
+//                "Declaration(ObjectProperty(:r))"+
+//                "Declaration(ObjectProperty(:t))"+
+//                "SubClassOf(:A ObjectSomeValuesFrom(:t ObjectSomeValuesFrom(:t ObjectOneOf(:b))))"+
+//                "TransitiveObjectProperty(:t)"+
+//                "SubObjectPropertyOf(:t ObjectInverseOf(:r))"+
+//                "ClassAssertion(:A :a)"+
+//                "NegativeObjectPropertyAssertion(:r :b :a)");
+//        createReasoner();
+//        assertFalse(m_reasoner.isConsistent());
+//    }
     public void testPropertyEnailmentFromAlan() throws Exception {
         loadOntologyWithAxioms(
                 "Declaration(Class(:a))"+

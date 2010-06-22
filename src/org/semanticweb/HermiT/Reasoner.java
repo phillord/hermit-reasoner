@@ -1843,10 +1843,8 @@ public class Reasoner implements OWLReasoner {
 
     protected DLOntology createDeltaDLOntology(Configuration configuration,DLOntology originalDLOntology,OWLAxiom... additionalAxioms) throws IllegalArgumentException {
         Set<OWLAxiom> additionalAxiomsSet=new HashSet<OWLAxiom>();
-        boolean containsBottomObjectProperty=false;
         for (OWLAxiom axiom : additionalAxioms) {
-            if (axiom.getObjectPropertiesInSignature().contains(getDataFactory().getOWLBottomObjectProperty())) containsBottomObjectProperty=true;
-            if (isUnsupportedExtensionAxiom(axiom) || (containsBottomObjectProperty && !m_dlOntology.containsObjectRole(AtomicRole.BOTTOM_OBJECT_ROLE)))
+            if (isUnsupportedExtensionAxiom(axiom))
                 throw new IllegalArgumentException("Internal error: unsupported extension axiom type.");
             additionalAxiomsSet.add(axiom);
         }
