@@ -134,6 +134,23 @@ public class OWLNormalization {
             return false;
         return ((OWLObjectOneOf)operand).getIndividuals().size()==1;
     }
+    protected OWLDataPropertyAssertionAxiom getDataPropertyAssertionFromSyntacticVariant(OWLClassAssertionAxiom axiom) {
+        OWLClassExpression ce=axiom.getClassExpression();
+        if (ce instanceof OWLDataHasValue) {
+            OWLDataHasValue hasValue=(OWLDataHasValue)ce;
+            return m_factory.getOWLDataPropertyAssertionAxiom(hasValue.getProperty(), axiom.getIndividual(), hasValue.getValue());
+        }
+        if (ce instanceof OWLDataSomeValuesFrom) {
+            OWLDataSomeValuesFrom someValuesFrom=(OWLDataSomeValuesFrom)ce;
+            OWLDataRange dr=someValuesFrom.getFiller();
+            if (dr instanceof OWLDataOneOf) {
+                OWLDataOneOf oneOf=(OWLDataOneOf)dr;
+                if (oneOf.getValues().size()==1) 
+                    return m_factory.getOWLDataPropertyAssertionAxiom(someValuesFrom.getProperty(), axiom.getIndividual(), oneOf.getValues().iterator().next());
+            }
+        }
+        return null;
+    }
     protected void normalizeRules(List<OWLClassExpression[]> inclusions,List<OWLDataRange[]> dataRangeInclusions,Collection<SWRLRule> rules) {
         // normalize rules, this might add new concept and data range inclusions
         // in case a rule atom uses a complex concept or data range
@@ -616,17 +633,22 @@ public class OWLNormalization {
             addFact(axiom);
         }
         public void visit(OWLClassAssertionAxiom axiom) {
-            OWLClassExpression description=positive(axiom.getClassExpression());
-            if (!isSimple(description)) {
-                OWLClassExpression definition=getDefinitionFor(description,m_alreadyExists);
-                if (!m_alreadyExists[0])
-                    m_inclusionsAsDisjunctions.add(new OWLClassExpression[] { negative(definition),description });
-                description=definition;
+            OWLDataPropertyAssertionAxiom dpa=getDataPropertyAssertionFromSyntacticVariant(axiom);
+            if (dpa!=null) {
+                addFact(dpa);
+            } else {
+                OWLClassExpression description=positive(axiom.getClassExpression());
+                if (!isSimple(description)) {
+                    OWLClassExpression definition=getDefinitionFor(description,m_alreadyExists);
+                    if (!m_alreadyExists[0])
+                        m_inclusionsAsDisjunctions.add(new OWLClassExpression[] { negative(definition),description });
+                    description=definition;
+                }
+                if (description==axiom.getClassExpression())
+                    addFact(axiom);
+                else
+                    addFact(m_factory.getOWLClassAssertionAxiom(description,axiom.getIndividual()));
             }
-            if (description==axiom.getClassExpression())
-                addFact(axiom);
-            else
-                addFact(m_factory.getOWLClassAssertionAxiom(description,axiom.getIndividual()));
         }
         public void visit(OWLObjectPropertyAssertionAxiom axiom) {
             addFact(m_factory.getOWLObjectPropertyAssertionAxiom(axiom.getProperty().getSimplified(),axiom.getSubject(),axiom.getObject()));
