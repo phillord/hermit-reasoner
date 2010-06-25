@@ -80,3 +80,13 @@ HermiT 1.2.3
   non-deterministic ontologies, new object property classification, HermiT will now 
   always track changes even when not instantiated as an OWLReasoner, Protege reasoner 
   preferences will be taken into account for the next Protege release   
+HermiT 1.2.4
+- some bug fixes (bottomObjectProperty encoding corrected, blocking cache cached 
+  inactive nodes under single blocking, correct INF/-INF parsing for doubles, no empty 
+  node sets in case the next node in the property hierarchy has only inverses), 
+  improved property instance retrieval, new disjunction ordering strategy, negative 
+  object property assertion encoding no longer requires nominals, command line 
+  outputs full IRIs instead of abbreviated ones with HermiT's prefixes, apply changes 
+  in non-buffering mode only when needed for a query, data values are stored also 
+  with their lexical form, new data property classification
+  

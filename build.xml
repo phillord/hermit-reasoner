@@ -6,7 +6,7 @@
     <!-- Note that on each released build, the ${updatefile} on the web site
          should be replaced, and the new version of the plugin should be
          posted at the (auto-generated) URL in that file. -->
-    <property name="version" value="1.2.3"/>
+    <property name="version" value="1.2.4"/>
 
     <!-- general info -->
     <property name="homepage" value="http://hermit-reasoner.com/"/>
