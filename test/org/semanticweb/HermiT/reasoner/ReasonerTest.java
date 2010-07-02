@@ -36,6 +36,33 @@ public class ReasonerTest extends AbstractReasonerTest {
     public ReasonerTest(String name) {
         super(name);
     }
+    @SuppressWarnings("unchecked")
+    public void testObjectPropertySubsumptionsNoNominals() throws Exception {
+        loadOntologyWithAxioms(
+                "Declaration(ObjectProperty(:op1))"+
+                "Declaration(ObjectProperty(:op2))"+
+                "Declaration(ObjectProperty(:op3))"+
+                "SubClassOf(ObjectSomeValuesFrom(:op1 owl:Thing) ObjectSomeValuesFrom(:op2 owl:Thing))"+
+                "SubObjectPropertyOf(:op1 :op3)"+
+                "SubObjectPropertyOf(:op2 :op3)"+
+                "FunctionalObjectProperty(:op3)");
+        createReasoner();
+        assertSuperObjectProperties("op1", EQ("op2"));
+    }
+    
+    @SuppressWarnings("unchecked")
+    public void testObjectPropertySubsumptionsNominals() throws Exception {
+        loadOntologyWithAxioms(
+                "Declaration(NamedIndividual(:a))"+
+                "Declaration(NamedIndividual(:b))"+
+                "Declaration(ObjectProperty(:op1))"+
+                "Declaration(ObjectProperty(:op2))"+
+                "ObjectPropertyAssertion(:op1 :a :b)"+
+                "ObjectPropertyDomain(:op2 ObjectOneOf(:a))"+
+                "ObjectPropertyRange(:op2 ObjectOneOf(:b))");
+        createReasoner();
+        assertSuperObjectProperties("op2", EQ("op1"));
+    }
     public void testBottomObjectPropertyAssertion() throws Exception {
         loadOntologyWithAxioms(
                 "Declaration(NamedIndividual(:a))"+
@@ -158,11 +185,11 @@ public class ReasonerTest extends AbstractReasonerTest {
     }
     public void testPropertyEnailmentFromAlan() throws Exception {
         loadOntologyWithAxioms(
-                "Declaration(Class(:a))"+
+                "Declaration(Class(:A))"+
                 "Declaration(NamedIndividual(:a1))"+
                 "Declaration(ObjectProperty(:p1))"+
                 "Declaration(ObjectProperty(:p2))"+
-                "EquivalentClasses(:a ObjectOneOf(:a1))"+
+                "EquivalentClasses(:A ObjectOneOf(:a1))"+
                 "ObjectPropertyDomain(:p1 :a)"+
                 "ObjectPropertyRange(:p1 :a)"+
                 "ObjectPropertyDomain(:p2 :a)"+
