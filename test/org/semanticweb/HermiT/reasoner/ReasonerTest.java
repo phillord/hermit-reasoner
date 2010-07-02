@@ -185,11 +185,11 @@ public class ReasonerTest extends AbstractReasonerTest {
     }
     public void testPropertyEnailmentFromAlan() throws Exception {
         loadOntologyWithAxioms(
-                "Declaration(Class(:A))"+
+                "Declaration(Class(:a))"+
                 "Declaration(NamedIndividual(:a1))"+
                 "Declaration(ObjectProperty(:p1))"+
                 "Declaration(ObjectProperty(:p2))"+
-                "EquivalentClasses(:A ObjectOneOf(:a1))"+
+                "EquivalentClasses(:a ObjectOneOf(:a1))"+
                 "ObjectPropertyDomain(:p1 :a)"+
                 "ObjectPropertyRange(:p1 :a)"+
                 "ObjectPropertyDomain(:p2 :a)"+
