@@ -28,6 +28,7 @@ import org.semanticweb.owlapi.model.OWLObjectMaxCardinality;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.OWLSubPropertyChainOfAxiom;
+import org.semanticweb.owlapi.reasoner.InferenceType;
 import org.semanticweb.owlapi.reasoner.NodeSet;
 import org.semanticweb.owlapi.vocab.OWLFacet;
 
@@ -47,7 +48,7 @@ public class ReasonerTest extends AbstractReasonerTest {
                 "SubObjectPropertyOf(:op2 :op3)"+
                 "FunctionalObjectProperty(:op3)");
         createReasoner();
-        assertSuperObjectProperties("op1", EQ("op2"));
+        assertDirectSuperObjectProperties("op1", EQ("op2"));
     }
     
     @SuppressWarnings("unchecked")
@@ -61,7 +62,7 @@ public class ReasonerTest extends AbstractReasonerTest {
                 "ObjectPropertyDomain(:op2 ObjectOneOf(:a))"+
                 "ObjectPropertyRange(:op2 ObjectOneOf(:b))");
         createReasoner();
-        assertSuperObjectProperties("op2", EQ("op1"));
+        assertDirectSuperObjectProperties("op2", EQ("op1"));
     }
     public void testBottomObjectPropertyAssertion() throws Exception {
         loadOntologyWithAxioms(
@@ -85,7 +86,7 @@ public class ReasonerTest extends AbstractReasonerTest {
                 "SubClassOf(owl:Thing DataAllValuesFrom(:d1 DatatypeRestriction(xsd:int xsd:minInclusive \"1\"^^xsd:int xsd:maxInclusive \"1\"^^xsd:int)))"+
                 "SubClassOf(owl:Thing DataSomeValuesFrom(:d2 DataOneOf(\"1\"^^xsd:int)))");
         createReasoner();
-        assertSuperDataProperties("d1", EQ("d2"));
+        assertDirectSuperDataProperties("d1", EQ("d2"));
     }
     public void testPropertyInstanceRetrieval() throws Exception {
         loadOntologyWithAxioms(
@@ -165,7 +166,7 @@ public class ReasonerTest extends AbstractReasonerTest {
                 "FunctionalObjectProperty(:hasShape)");
         createReasoner();
         assertSubsumedBy("c2", "c4", true);
-        m_reasoner.classify();
+        m_reasoner.precomputeInferences(InferenceType.CLASS_HIERARCHY);
         assertSubsumedBy("c2", "c4", true);
     }
     public void testNegativeObjectPropertyAssertionWithNonSimple() throws Exception {
@@ -227,57 +228,57 @@ public class ReasonerTest extends AbstractReasonerTest {
         );
         createReasoner();
 
-        assertSubObjectProperties("http://www.w3.org/2002/07/owl#bottomObjectProperty");
-        assertSubObjectProperties("r1", EQ("http://www.w3.org/2002/07/owl#bottomObjectProperty"));
-        assertSubObjectProperties("r2", EQ("http://www.w3.org/2002/07/owl#bottomObjectProperty"));
-        assertSubObjectProperties("r3", EQ("http://www.w3.org/2002/07/owl#bottomObjectProperty"));
-        assertSubObjectProperties("s1", EQ("http://www.w3.org/2002/07/owl#bottomObjectProperty"));
-        assertSubObjectProperties("s2", EQ("http://www.w3.org/2002/07/owl#bottomObjectProperty"));
-        assertSubObjectProperties("s3", EQ("http://www.w3.org/2002/07/owl#bottomObjectProperty"));
-        assertSubObjectProperties("s4", EQ("http://www.w3.org/2002/07/owl#bottomObjectProperty"));
-        assertSubObjectProperties("t1", EQ("r1"), EQ("r2"), EQ("r3"));
-        assertSubObjectProperties("t2", EQ("r1"), EQ("r3"));
-        assertSubObjectProperties("u", EQ("s1"), EQ("s2"), EQ("s3"), EQ("s4"));
-        assertSubObjectProperties("http://www.w3.org/2002/07/owl#topObjectProperty", EQ("u"), EQ("t1"), EQ("t2"));
+        assertDirectSubObjectProperties("http://www.w3.org/2002/07/owl#bottomObjectProperty");
+        assertDirectSubObjectProperties("r1", EQ("http://www.w3.org/2002/07/owl#bottomObjectProperty"));
+        assertDirectSubObjectProperties("r2", EQ("http://www.w3.org/2002/07/owl#bottomObjectProperty"));
+        assertDirectSubObjectProperties("r3", EQ("http://www.w3.org/2002/07/owl#bottomObjectProperty"));
+        assertDirectSubObjectProperties("s1", EQInv("r1"));
+        assertDirectSubObjectProperties("s2", EQInv("r2"), EQInv("r3"));
+        assertDirectSubObjectProperties("s3", EQInv("r1"));
+        assertDirectSubObjectProperties("s4", EQInv("r3"));
+        assertDirectSubObjectProperties("t1", EQInv("s1"), EQInv("s2"));
+        assertDirectSubObjectProperties("t2", EQInv("s3"), EQInv("s4"));
+        assertDirectSubObjectProperties("u", EQInv("t1"), EQInv("t2"));
+        assertDirectSubObjectProperties("http://www.w3.org/2002/07/owl#topObjectProperty", EQInv("u"), EQ("u"));
         
-        assertSubObjectPropertiesOfInverse("http://www.w3.org/2002/07/owl#bottomObjectProperty");
-        assertSubObjectPropertiesOfInverse("r1", EQ("http://www.w3.org/2002/07/owl#bottomObjectProperty"));
-        assertSubObjectPropertiesOfInverse("r2", EQ("http://www.w3.org/2002/07/owl#bottomObjectProperty"));
-        assertSubObjectPropertiesOfInverse("r3", EQ("http://www.w3.org/2002/07/owl#bottomObjectProperty"));
-        assertSubObjectPropertiesOfInverse("s1", EQ("r1"));
-        assertSubObjectPropertiesOfInverse("s2", EQ("r2"), EQ("r3"));
-        assertSubObjectPropertiesOfInverse("s3", EQ("r1"));
-        assertSubObjectPropertiesOfInverse("s4", EQ("r3"));
-        assertSubObjectPropertiesOfInverse("t1", EQ("s1"), EQ("s2"));
-        assertSubObjectPropertiesOfInverse("t2", EQ("s3"), EQ("s4"));
-        assertSubObjectPropertiesOfInverse("u", EQ("t1"), EQ("t2"));
-        assertSubObjectPropertiesOfInverse("http://www.w3.org/2002/07/owl#topObjectProperty", EQ("u"), EQ("t1"), EQ("t2"));
+        assertDirectSubObjectPropertiesOfInverse("http://www.w3.org/2002/07/owl#bottomObjectProperty");
+        assertDirectSubObjectPropertiesOfInverse("r1", EQ("http://www.w3.org/2002/07/owl#bottomObjectProperty"));
+        assertDirectSubObjectPropertiesOfInverse("r2", EQ("http://www.w3.org/2002/07/owl#bottomObjectProperty"));
+        assertDirectSubObjectPropertiesOfInverse("r3", EQ("http://www.w3.org/2002/07/owl#bottomObjectProperty"));
+        assertDirectSubObjectPropertiesOfInverse("s1", EQ("r1"));
+        assertDirectSubObjectPropertiesOfInverse("s2", EQ("r2"), EQ("r3"));
+        assertDirectSubObjectPropertiesOfInverse("s3", EQ("r1"));
+        assertDirectSubObjectPropertiesOfInverse("s4", EQ("r3"));
+        assertDirectSubObjectPropertiesOfInverse("t1", EQ("s1"), EQ("s2"));
+        assertDirectSubObjectPropertiesOfInverse("t2", EQ("s3"), EQ("s4"));
+        assertDirectSubObjectPropertiesOfInverse("u", EQ("t1"), EQ("t2"));
+        assertDirectSubObjectPropertiesOfInverse("http://www.w3.org/2002/07/owl#topObjectProperty", EQ("u"), EQInv("u"));
         
-        assertSuperObjectProperties("http://www.w3.org/2002/07/owl#bottomObjectProperty", EQ("s1"), EQ("s2"), EQ("s3"), EQ("s4"), EQ("r1"), EQ("r2"), EQ("r3"));
-        assertSuperObjectProperties("r1", EQ("t1"), EQ("t2"));
-        assertSuperObjectProperties("r2", EQ("t1"));
-        assertSuperObjectProperties("r3", EQ("t1"), EQ("t2"));
-        assertSuperObjectProperties("s1", EQ("u"));
-        assertSuperObjectProperties("s2", EQ("u"));
-        assertSuperObjectProperties("s3", EQ("u"));
-        assertSuperObjectProperties("s4", EQ("u"));
-        assertSuperObjectProperties("t1", EQ("http://www.w3.org/2002/07/owl#topObjectProperty"));
-        assertSuperObjectProperties("t2", EQ("http://www.w3.org/2002/07/owl#topObjectProperty"));
-        assertSuperObjectProperties("u", EQ("http://www.w3.org/2002/07/owl#topObjectProperty"));
-        assertSuperObjectProperties("http://www.w3.org/2002/07/owl#topObjectProperty");
+        assertDirectSuperObjectProperties("http://www.w3.org/2002/07/owl#bottomObjectProperty", EQInv("r1"), EQInv("r2"), EQInv("r3"), EQ("r1"), EQ("r2"), EQ("r3"));
+        assertDirectSuperObjectProperties("r1", EQInv("s1"), EQInv("s3"));
+        assertDirectSuperObjectProperties("r2", EQInv("s2"));
+        assertDirectSuperObjectProperties("r3", EQInv("s2"), EQInv("s4"));
+        assertDirectSuperObjectProperties("s1", EQInv("t1"));
+        assertDirectSuperObjectProperties("s2", EQInv("t1"));
+        assertDirectSuperObjectProperties("s3", EQInv("t2"));
+        assertDirectSuperObjectProperties("s4", EQInv("t2"));
+        assertDirectSuperObjectProperties("t1", EQInv("u"));
+        assertDirectSuperObjectProperties("t2", EQInv("u"));
+        assertDirectSuperObjectProperties("u", EQ("http://www.w3.org/2002/07/owl#topObjectProperty"));
+        assertDirectSuperObjectProperties("http://www.w3.org/2002/07/owl#topObjectProperty");
         
-        assertSuperObjectPropertiesOfInverse("http://www.w3.org/2002/07/owl#bottomObjectProperty", EQ("s1"), EQ("s2"), EQ("s3"), EQ("s4"), EQ("r1"), EQ("r2"), EQ("r3"));
-        assertSuperObjectPropertiesOfInverse("r1", EQ("s1"), EQ("s3"));
-        assertSuperObjectPropertiesOfInverse("r2", EQ("s2"));
-        assertSuperObjectPropertiesOfInverse("r3", EQ("s2"), EQ("s4"));
-        assertSuperObjectPropertiesOfInverse("s1", EQ("t1"));
-        assertSuperObjectPropertiesOfInverse("s2", EQ("t1"));
-        assertSuperObjectPropertiesOfInverse("s3", EQ("t2"));
-        assertSuperObjectPropertiesOfInverse("s4", EQ("t2"));
-        assertSuperObjectPropertiesOfInverse("t1", EQ("u"));
-        assertSuperObjectPropertiesOfInverse("t2", EQ("u"));
-        assertSuperObjectPropertiesOfInverse("u", EQ("http://www.w3.org/2002/07/owl#topObjectProperty"));
-        assertSuperObjectPropertiesOfInverse("http://www.w3.org/2002/07/owl#topObjectProperty");
+        assertDirectSuperObjectPropertiesOfInverse("http://www.w3.org/2002/07/owl#bottomObjectProperty", EQInv("r1"), EQInv("r2"), EQInv("r3"), EQ("r1"), EQ("r2"), EQ("r3"));
+        assertDirectSuperObjectPropertiesOfInverse("r1", EQ("s1"), EQ("s3"));
+        assertDirectSuperObjectPropertiesOfInverse("r2", EQ("s2"));
+        assertDirectSuperObjectPropertiesOfInverse("r3", EQ("s2"), EQ("s4"));
+        assertDirectSuperObjectPropertiesOfInverse("s1", EQ("t1"));
+        assertDirectSuperObjectPropertiesOfInverse("s2", EQ("t1"));
+        assertDirectSuperObjectPropertiesOfInverse("s3", EQ("t2"));
+        assertDirectSuperObjectPropertiesOfInverse("s4", EQ("t2"));
+        assertDirectSuperObjectPropertiesOfInverse("t1", EQ("u"));
+        assertDirectSuperObjectPropertiesOfInverse("t2", EQ("u"));
+        assertDirectSuperObjectPropertiesOfInverse("u", EQ("http://www.w3.org/2002/07/owl#topObjectProperty"));
+        assertDirectSuperObjectPropertiesOfInverse("http://www.w3.org/2002/07/owl#topObjectProperty");
     }
     public void testUnknownClassHierarcyPosition() throws Exception {
         loadOntologyWithAxioms(
@@ -305,6 +306,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         createReasoner();
         assertFalse(m_reasoner.isConsistent());
     }
+    @SuppressWarnings("unchecked")
     public void testRoleChains() throws Exception {
         loadOntologyWithAxioms("Declaration(ObjectProperty(:s1))"
             +"Declaration(ObjectProperty(:r))"
@@ -314,10 +316,7 @@ public class ReasonerTest extends AbstractReasonerTest {
             +"SubObjectPropertyOf(ObjectPropertyChain(:s1 :r ObjectInverseOf(:r)) :s2)");
 
         createReasoner();
-        OWLObjectProperty s1=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"s1"));
-        OWLObjectProperty s2=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"s2"));
-
-        assertTrue(m_reasoner.isSubObjectPropertyExpressionOf(s1, s2));
+        assertDirectSuperObjectProperties("s1", EQ("s2"));
     }
     public void testRoleChainsWithTransitiveSymmetric() throws Exception {
         loadOntologyWithAxioms("Declaration(ObjectProperty(:r))"
@@ -352,20 +351,15 @@ public class ReasonerTest extends AbstractReasonerTest {
                 +"TransitiveObjectProperty(:t)"
                 +"SymmetricObjectProperty(:t)");
         createReasoner();
-        OWLObjectProperty r=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"r"));
-        OWLObjectProperty t=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"t"));
-
-        assertTrue(m_reasoner.isSubObjectPropertyExpressionOf(r, t));
+        assertTrue(m_reasoner.getSuperObjectProperties(NS_OP("r"), true).getFlattened().contains(NS_OP("t")));
     }
+    @SuppressWarnings("unchecked")
     public void testRoleSubsumption() throws Exception {
         loadOntologyWithAxioms("ObjectPropertyDomain(:r ObjectOneOf(:a)) ObjectPropertyRange(:r ObjectOneOf(:b)) "
             + " ObjectPropertyAssertion(:r :a :b) ObjectPropertyAssertion(:t :a :c) ObjectPropertyAssertion(:t :c :b) "
             + " TransitiveObjectProperty(:t)");
         createReasoner();
-
-        OWLObjectProperty r=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"r"));
-        OWLObjectProperty t=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"t"));
-        assertTrue(m_reasoner.isSubObjectPropertyExpressionOf(r, t));
+        assertDirectSuperObjectProperties("r", EQ("t"));
     }
     public void testIsFunctionalData() throws Exception {
         loadOntologyWithAxioms("FunctionalDataProperty(:DP) SubDataPropertyOf(:SDP :DP)");
@@ -375,11 +369,9 @@ public class ReasonerTest extends AbstractReasonerTest {
         OWLDataProperty sdp=m_dataFactory.getOWLDataProperty(IRI.create(NS+"SDP"));
         OWLDataProperty andp=m_dataFactory.getOWLDataProperty(IRI.create(NS+"ANDP"));
 
-        assertTrue(m_reasoner.isFunctional(dp));
-
-        assertTrue(m_reasoner.isFunctional(sdp));
-
-        assertFalse(m_reasoner.isFunctional(andp));
+        assertTrue(m_reasoner.isEntailed(m_dataFactory.getOWLFunctionalDataPropertyAxiom(dp)));
+        assertTrue(m_reasoner.isEntailed(m_dataFactory.getOWLFunctionalDataPropertyAxiom(sdp)));
+        assertFalse(m_reasoner.isEntailed(m_dataFactory.getOWLFunctionalDataPropertyAxiom(andp)));
     }
     public void testIsFunctionalObject() throws Exception {
         loadOntologyWithAxioms("FunctionalObjectProperty(:OP) SubObjectPropertyOf(:SOP :OP)");
@@ -389,14 +381,14 @@ public class ReasonerTest extends AbstractReasonerTest {
         OWLObjectProperty sop=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"SOP"));
         OWLObjectProperty anop=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"ANOP"));
 
-        assertTrue(m_reasoner.isFunctional(op));
-        assertFalse(m_reasoner.isInverseFunctional(op));
-
-        assertTrue(m_reasoner.isFunctional(sop));
-        assertFalse(m_reasoner.isInverseFunctional(sop));
-
-        assertFalse(m_reasoner.isFunctional(anop));
-        assertFalse(m_reasoner.isInverseFunctional(anop));
+        assertTrue(m_reasoner.isEntailed(m_dataFactory.getOWLFunctionalObjectPropertyAxiom(op)));
+        assertFalse(m_reasoner.isEntailed(m_dataFactory.getOWLInverseFunctionalObjectPropertyAxiom(op)));
+        
+        assertTrue(m_reasoner.isEntailed(m_dataFactory.getOWLFunctionalObjectPropertyAxiom(sop)));
+        assertFalse(m_reasoner.isEntailed(m_dataFactory.getOWLInverseFunctionalObjectPropertyAxiom(sop)));
+        
+        assertFalse(m_reasoner.isEntailed(m_dataFactory.getOWLFunctionalObjectPropertyAxiom(anop)));
+        assertFalse(m_reasoner.isEntailed(m_dataFactory.getOWLInverseFunctionalObjectPropertyAxiom(anop)));
     }
     public void testIsInverseFunctionalObject() throws Exception {
         loadOntologyWithAxioms("InverseFunctionalObjectProperty(:OP) SubObjectPropertyOf(:SOP :OP)");
@@ -406,14 +398,14 @@ public class ReasonerTest extends AbstractReasonerTest {
         OWLObjectProperty sop=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"SOP"));
         OWLObjectProperty anop=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"ANOP"));
 
-        assertFalse(m_reasoner.isFunctional(op));
-        assertTrue(m_reasoner.isInverseFunctional(op));
+        assertFalse(m_reasoner.isEntailed(m_dataFactory.getOWLFunctionalObjectPropertyAxiom(op)));
+        assertTrue(m_reasoner.isEntailed(m_dataFactory.getOWLInverseFunctionalObjectPropertyAxiom(op)));
 
-        assertFalse(m_reasoner.isFunctional(sop));
-        assertTrue(m_reasoner.isInverseFunctional(sop));
+        assertFalse(m_reasoner.isEntailed(m_dataFactory.getOWLFunctionalObjectPropertyAxiom(sop)));
+        assertTrue(m_reasoner.isEntailed(m_dataFactory.getOWLInverseFunctionalObjectPropertyAxiom(sop)));
 
-        assertFalse(m_reasoner.isFunctional(anop));
-        assertFalse(m_reasoner.isInverseFunctional(anop));
+        assertFalse(m_reasoner.isEntailed(m_dataFactory.getOWLFunctionalObjectPropertyAxiom(anop)));
+        assertFalse(m_reasoner.isEntailed(m_dataFactory.getOWLInverseFunctionalObjectPropertyAxiom(anop)));
     }
     public void testIsReflexiveObject() throws Exception {
         loadOntologyWithAxioms("ReflexiveObjectProperty(:OP) SubObjectPropertyOf(:OP :SOP)");
@@ -423,9 +415,9 @@ public class ReasonerTest extends AbstractReasonerTest {
         OWLObjectProperty sop=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"SOP"));
         OWLObjectProperty anop=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"ANOP"));
 
-        assertTrue(m_reasoner.isReflexive(op));
-        assertTrue(m_reasoner.isReflexive(sop));
-        assertFalse(m_reasoner.isReflexive(anop));
+        assertTrue(m_reasoner.isEntailed(m_dataFactory.getOWLReflexiveObjectPropertyAxiom(op)));
+        assertTrue(m_reasoner.isEntailed(m_dataFactory.getOWLReflexiveObjectPropertyAxiom(sop)));
+        assertFalse(m_reasoner.isEntailed(m_dataFactory.getOWLReflexiveObjectPropertyAxiom(anop)));
     }
     public void testIsIrreflexiveObject() throws Exception {
         loadOntologyWithAxioms("IrreflexiveObjectProperty(:OP) SubObjectPropertyOf(:SOP :OP)");
@@ -435,9 +427,9 @@ public class ReasonerTest extends AbstractReasonerTest {
         OWLObjectProperty sop=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"SOP"));
         OWLObjectProperty anop=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"ANOP"));
 
-        assertTrue(m_reasoner.isIrreflexive(op));
-        assertTrue(m_reasoner.isIrreflexive(sop));
-        assertFalse(m_reasoner.isIrreflexive(anop));
+        assertTrue(m_reasoner.isEntailed(m_dataFactory.getOWLIrreflexiveObjectPropertyAxiom(op)));
+        assertTrue(m_reasoner.isEntailed(m_dataFactory.getOWLIrreflexiveObjectPropertyAxiom(sop)));
+        assertFalse(m_reasoner.isEntailed(m_dataFactory.getOWLIrreflexiveObjectPropertyAxiom(anop)));
     }
     public void testIsSymmetricObject() throws Exception {
         loadOntologyWithAxioms("SymmetricObjectProperty(:OP) SubObjectPropertyOf(:SOP1 :OP) SubObjectPropertyOf(:OP :SOP2)");
@@ -448,10 +440,10 @@ public class ReasonerTest extends AbstractReasonerTest {
         OWLObjectProperty sop2=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"SOP2"));
         OWLObjectProperty anop=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"ANOP"));
 
-        assertTrue(m_reasoner.isSymmetric(op));
-        assertFalse(m_reasoner.isSymmetric(sop1));
-        assertFalse(m_reasoner.isSymmetric(sop2));
-        assertFalse(m_reasoner.isSymmetric(anop));
+        assertTrue(m_reasoner.isEntailed(m_dataFactory.getOWLSymmetricObjectPropertyAxiom(op)));
+        assertFalse(m_reasoner.isEntailed(m_dataFactory.getOWLSymmetricObjectPropertyAxiom(sop1)));
+        assertFalse(m_reasoner.isEntailed(m_dataFactory.getOWLSymmetricObjectPropertyAxiom(sop2)));
+        assertFalse(m_reasoner.isEntailed(m_dataFactory.getOWLSymmetricObjectPropertyAxiom(anop)));
     }
     public void testIsAsymmetricObject() throws Exception {
         loadOntologyWithAxioms("AsymmetricObjectProperty(:OP) SubObjectPropertyOf(:SOP1 :OP) SubObjectPropertyOf(:OP :SOP2)");
@@ -462,10 +454,10 @@ public class ReasonerTest extends AbstractReasonerTest {
         OWLObjectProperty sop2=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"SOP2"));
         OWLObjectProperty anop=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"ANOP"));
 
-        assertTrue(m_reasoner.isAsymmetric(op));
-        assertTrue(m_reasoner.isAsymmetric(sop1));
-        assertFalse(m_reasoner.isAsymmetric(sop2));
-        assertFalse(m_reasoner.isAsymmetric(anop));
+        assertTrue(m_reasoner.isEntailed(m_dataFactory.getOWLAsymmetricObjectPropertyAxiom(op)));
+        assertTrue(m_reasoner.isEntailed(m_dataFactory.getOWLAsymmetricObjectPropertyAxiom(sop1)));
+        assertFalse(m_reasoner.isEntailed(m_dataFactory.getOWLAsymmetricObjectPropertyAxiom(sop2)));
+        assertFalse(m_reasoner.isEntailed(m_dataFactory.getOWLAsymmetricObjectPropertyAxiom(anop)));
     }
     public void testIsTransitiveObject() throws Exception {
         loadOntologyWithAxioms("TransitiveObjectProperty(:OP) SubObjectPropertyOf(:SOP1 :OP) SubObjectPropertyOf(:OP :SOP2)");
@@ -476,10 +468,10 @@ public class ReasonerTest extends AbstractReasonerTest {
         OWLObjectProperty sop2=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"SOP2"));
         OWLObjectProperty anop=m_dataFactory.getOWLObjectProperty(IRI.create(NS+"ANOP"));
 
-        assertTrue(m_reasoner.isTransitive(op));
-        assertFalse(m_reasoner.isTransitive(sop1));
-        assertFalse(m_reasoner.isTransitive(sop2));
-        assertFalse(m_reasoner.isTransitive(anop));
+        assertTrue(m_reasoner.isEntailed(m_dataFactory.getOWLTransitiveObjectPropertyAxiom(op)));
+        assertFalse(m_reasoner.isEntailed(m_dataFactory.getOWLTransitiveObjectPropertyAxiom(sop1)));
+        assertFalse(m_reasoner.isEntailed(m_dataFactory.getOWLTransitiveObjectPropertyAxiom(sop2)));
+        assertFalse(m_reasoner.isEntailed(m_dataFactory.getOWLTransitiveObjectPropertyAxiom(anop)));
     }
     public void testLearningBacktracking() throws Exception {
         String axioms = "SubClassOf(owl:Thing ObjectIntersectionOf(ObjectUnionOf(:C :D1) ObjectUnionOf(:C :D2) ObjectUnionOf(:C :D3) ObjectUnionOf(:C :D4) ObjectUnionOf(:C :D5) ObjectSomeValuesFrom(:r ObjectAllValuesFrom(ObjectInverseOf(:r) ObjectComplementOf(:C)))))";
@@ -521,24 +513,24 @@ public class ReasonerTest extends AbstractReasonerTest {
         OWLClass A = m_dataFactory.getOWLClass(IRI.create(AbstractReasonerTest.NS + "A"));
         assertTrue(m_reasoner.hasType(a2, A, false));
     }
-    public void testObjectPropertDomains() throws Exception {
-        String axioms = "SubClassOf(:A :B)"
-            + "ObjectPropertyDomain(:r :A)";
+    public void testObjectPropertyDomainsTimothyBug() throws Exception {
+//      If direct is true, a NodeSet containing named classes such that for each named class C in the node set, the set of reasoner axioms entails ObjectPropertyDomain(pe C) and the set of reasoner axioms entails DirectSubClassOf(ObjectSomeValuesFrom(pe owl:Thing) C)
+//      If direct is false, a NodeSet containing named classes such that for each named class C in the node set, the set of reasoner axioms entails ObjectPropertyDomain(pe C), that is, the set of reasoner axioms entails StrictSubClassOf(ObjectSomeValuesFrom(pe owl:Thing) C)
+        String axioms = "EquivalentClasses(:B ObjectSomeValuesFrom(:q owl:Thing))"
+            + "SubClassOf(:B :A)";
         loadOntologyWithAxioms(axioms);
-
-        OWLClass a = m_dataFactory.getOWLClass(IRI.create(AbstractReasonerTest.NS + "A"));
-        OWLClass b = m_dataFactory.getOWLClass(IRI.create(AbstractReasonerTest.NS + "B"));
-        OWLObjectProperty r = m_dataFactory.getOWLObjectProperty(IRI.create(AbstractReasonerTest.NS + "r"));
+        OWLClass A = m_dataFactory.getOWLClass(IRI.create(AbstractReasonerTest.NS + "A"));
+        OWLClass B = m_dataFactory.getOWLClass(IRI.create(AbstractReasonerTest.NS + "B"));
+        OWLObjectProperty q = m_dataFactory.getOWLObjectProperty(IRI.create(AbstractReasonerTest.NS + "q"));
         createReasoner();
-        NodeSet<OWLClass> resultDirect=m_reasoner.getObjectPropertyDomains(r, true);
-        NodeSet<OWLClass> result=m_reasoner.getObjectPropertyDomains(r, false);
-        assertTrue(result.containsEntity(a));
-        assertTrue(result.containsEntity(b));
+        NodeSet<OWLClass> resultDirect=m_reasoner.getObjectPropertyDomains(q, true);
+        NodeSet<OWLClass> result=m_reasoner.getObjectPropertyDomains(q, false);
+        assertTrue(result.containsEntity(A));
+        assertTrue(result.containsEntity(B));
         assertTrue(result.containsEntity(m_dataFactory.getOWLThing()));
         assertEquals(3,result.getFlattened().size());
-        assertTrue(resultDirect.containsEntity(a));
+        assertTrue(resultDirect.containsEntity(A));
         assertEquals(1,resultDirect.getFlattened().size());
-        assertTrue(m_reasoner.isSubObjectPropertyExpressionOf(r, r));
     }
     public void testDatatypeLiterals() throws Exception {
         loadReasonerFromResource("res/FS2RDF-literals-ar-consistent.f.owl");
@@ -630,35 +622,30 @@ public class ReasonerTest extends AbstractReasonerTest {
         OWLClass c = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#C"));
         OWLClass d = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#D"));
         OWLClass e = m_dataFactory.getOWLClass(IRI.create("file:/c/test.owl#E"));
-        assertTrue(m_reasoner.getAncestorClasses(c).containsEntity(c));
-        assertTrue(m_reasoner.getAncestorClasses(c).containsEntity(d));
-        assertTrue(m_reasoner.getAncestorClasses(c).containsEntity(e));
-        assertTrue(m_reasoner.getAncestorClasses(d).containsEntity(d));
-        assertTrue(m_reasoner.getAncestorClasses(d).containsEntity(e));
-        assertTrue(!m_reasoner.getAncestorClasses(d).containsEntity(c));
-        assertTrue(m_reasoner.getAncestorClasses(e).containsEntity(e));
-        assertTrue(!m_reasoner.getAncestorClasses(e).containsEntity(c));
-        assertTrue(!m_reasoner.getAncestorClasses(e).containsEntity(d));
+        assertTrue(m_reasoner.isEntailed(m_dataFactory.getOWLSubClassOfAxiom(c, c)));
+        assertTrue(m_reasoner.getSuperClasses(c,false).containsEntity(d));
+        assertTrue(m_reasoner.getSuperClasses(c,false).containsEntity(e));
+        assertTrue(m_reasoner.getSuperClasses(d,false).containsEntity(e));
+        assertFalse(m_reasoner.getSuperClasses(d,false).containsEntity(c));
+        assertFalse(m_reasoner.getSuperClasses(e,false).containsEntity(c));
+        assertFalse(m_reasoner.getSuperClasses(e,false).containsEntity(d));
 
-        assertTrue(m_reasoner.getDescendantClasses(c).containsEntity(c));
-        assertTrue(!m_reasoner.getDescendantClasses(c).containsEntity(d));
-        assertTrue(!m_reasoner.getDescendantClasses(c).containsEntity(e));
-        assertTrue(m_reasoner.getDescendantClasses(d).containsEntity(c));
-        assertTrue(m_reasoner.getDescendantClasses(d).containsEntity(d));
-        assertTrue(!m_reasoner.getDescendantClasses(d).containsEntity(e));
-        assertTrue(m_reasoner.getDescendantClasses(e).containsEntity(c));
-        assertTrue(m_reasoner.getDescendantClasses(e).containsEntity(d));
-        assertTrue(m_reasoner.getDescendantClasses(e).containsEntity(e));
+        assertFalse(m_reasoner.getSubClasses(c,false).containsEntity(d));
+        assertFalse(m_reasoner.getSubClasses(c,false).containsEntity(e));
+        assertTrue(m_reasoner.getSubClasses(d,false).containsEntity(c));
+        assertFalse(m_reasoner.getSubClasses(d,false).containsEntity(e));
+        assertTrue(m_reasoner.getSubClasses(e,false).containsEntity(c));
+        assertTrue(m_reasoner.getSubClasses(e,false).containsEntity(d));
 
-        assertTrue(m_reasoner.isSubClassOf(c, c));
-        assertTrue(m_reasoner.isSubClassOf(d, d));
-        assertTrue(m_reasoner.isSubClassOf(e, e));
-        assertTrue(m_reasoner.isSubClassOf(c, d));
-        assertTrue(m_reasoner.isSubClassOf(c, e));
-        assertTrue(m_reasoner.isSubClassOf(d, e));
-        assertTrue(!m_reasoner.isSubClassOf(d, c));
-        assertTrue(!m_reasoner.isSubClassOf(e, c));
-        assertTrue(!m_reasoner.isSubClassOf(e, d));
+        assertTrue(m_reasoner.isEntailed(m_dataFactory.getOWLSubClassOfAxiom(c, c)));
+        assertTrue(m_reasoner.isEntailed(m_dataFactory.getOWLSubClassOfAxiom(d, d)));
+        assertTrue(m_reasoner.isEntailed(m_dataFactory.getOWLSubClassOfAxiom(e, e)));
+        assertTrue(m_reasoner.isEntailed(m_dataFactory.getOWLSubClassOfAxiom(c, d)));
+        assertTrue(m_reasoner.isEntailed(m_dataFactory.getOWLSubClassOfAxiom(c, e)));
+        assertTrue(m_reasoner.isEntailed(m_dataFactory.getOWLSubClassOfAxiom(d, e)));
+        assertFalse(m_reasoner.isEntailed(m_dataFactory.getOWLSubClassOfAxiom(d, c)));
+        assertFalse(m_reasoner.isEntailed(m_dataFactory.getOWLSubClassOfAxiom(e, c)));
+        assertFalse(m_reasoner.isEntailed(m_dataFactory.getOWLSubClassOfAxiom(e, d)));
     }
     public void testSubAndSuperRoles() throws Exception {
         String axioms = "SubObjectPropertyOf(:r :s)"
@@ -667,42 +654,36 @@ public class ReasonerTest extends AbstractReasonerTest {
         OWLObjectProperty r = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
         OWLObjectProperty s = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#s"));
         OWLObjectProperty t = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#t"));
-        assertTrue(m_reasoner.getAncestorObjectProperties(r).containsEntity(r));
-        assertTrue(m_reasoner.getAncestorObjectProperties(r).containsEntity(s));
-        assertTrue(m_reasoner.getAncestorObjectProperties(r).containsEntity(t));
-        assertTrue(m_reasoner.getAncestorObjectProperties(s).containsEntity(s));
-        assertTrue(m_reasoner.getAncestorObjectProperties(s).containsEntity(t));
-        assertTrue(!m_reasoner.getAncestorObjectProperties(s).containsEntity(r));
-        assertTrue(m_reasoner.getAncestorObjectProperties(t).containsEntity(t));
-        assertTrue(!m_reasoner.getAncestorObjectProperties(t).containsEntity(r));
-        assertTrue(!m_reasoner.getAncestorObjectProperties(t).containsEntity(s));
+        assertTrue(m_reasoner.getSuperObjectProperties(r,false).containsEntity(s));
+        assertTrue(m_reasoner.getSuperObjectProperties(r,false).containsEntity(t));
+        assertTrue(m_reasoner.getSuperObjectProperties(s,false).containsEntity(t));
+        assertFalse(m_reasoner.getSuperObjectProperties(s,false).containsEntity(r));
+        assertFalse(m_reasoner.getSuperObjectProperties(t,false).containsEntity(r));
+        assertFalse(m_reasoner.getSuperObjectProperties(t,false).containsEntity(s));
 
-        assertTrue(m_reasoner.getDescendantObjectProperties(r).containsEntity(r));
-        assertTrue(!m_reasoner.getDescendantObjectProperties(r).containsEntity(s));
-        assertTrue(!m_reasoner.getDescendantObjectProperties(r).containsEntity(t));
-        assertTrue(m_reasoner.getDescendantObjectProperties(s).containsEntity(r));
-        assertTrue(m_reasoner.getDescendantObjectProperties(s).containsEntity(s));
-        assertTrue(!m_reasoner.getDescendantObjectProperties(s).containsEntity(t));
-        assertTrue(m_reasoner.getDescendantObjectProperties(t).containsEntity(r));
-        assertTrue(m_reasoner.getDescendantObjectProperties(t).containsEntity(s));
-        assertTrue(m_reasoner.getDescendantObjectProperties(t).containsEntity(t));
+        assertFalse(m_reasoner.getSubObjectProperties(r,false).containsEntity(s));
+        assertFalse(m_reasoner.getSubObjectProperties(r,false).containsEntity(t));
+        assertTrue(m_reasoner.getSubObjectProperties(s,false).containsEntity(r));
+        assertFalse(m_reasoner.getSubObjectProperties(s,false).containsEntity(t));
+        assertTrue(m_reasoner.getSubObjectProperties(t,false).containsEntity(r));
+        assertTrue(m_reasoner.getSubObjectProperties(t,false).containsEntity(s));
 
-        assertTrue(m_reasoner.isSubObjectPropertyExpressionOf(r, r));
-        assertTrue(m_reasoner.isSubObjectPropertyExpressionOf(s, s));
-        assertTrue(m_reasoner.isSubObjectPropertyExpressionOf(t, t));
-        assertTrue(m_reasoner.isSubObjectPropertyExpressionOf(r, s));
-        assertTrue(m_reasoner.isSubObjectPropertyExpressionOf(r, t));
-        assertTrue(m_reasoner.isSubObjectPropertyExpressionOf(s, t));
-        assertTrue(!m_reasoner.isSubObjectPropertyExpressionOf(s, r));
-        assertTrue(!m_reasoner.isSubObjectPropertyExpressionOf(t, r));
-        assertTrue(!m_reasoner.isSubObjectPropertyExpressionOf(t, s));
+        assertTrue(m_reasoner.isEntailed(m_dataFactory.getOWLSubObjectPropertyOfAxiom(r, r)));
+        assertTrue(m_reasoner.isEntailed(m_dataFactory.getOWLSubObjectPropertyOfAxiom(s, s)));
+        assertTrue(m_reasoner.isEntailed(m_dataFactory.getOWLSubObjectPropertyOfAxiom(t, t)));
+        assertTrue(m_reasoner.isEntailed(m_dataFactory.getOWLSubObjectPropertyOfAxiom(r, s)));
+        assertTrue(m_reasoner.isEntailed(m_dataFactory.getOWLSubObjectPropertyOfAxiom(r, t)));
+        assertTrue(m_reasoner.isEntailed(m_dataFactory.getOWLSubObjectPropertyOfAxiom(s, t)));
+        assertFalse(m_reasoner.isEntailed(m_dataFactory.getOWLSubObjectPropertyOfAxiom(s, r)));
+        assertFalse(m_reasoner.isEntailed(m_dataFactory.getOWLSubObjectPropertyOfAxiom(t, r)));
+        assertFalse(m_reasoner.isEntailed(m_dataFactory.getOWLSubObjectPropertyOfAxiom(t, s)));
     }
     public void testSubRolesChain() throws Exception {
         String axioms = "SubObjectPropertyOf(ObjectPropertyChain(:r) :s)";
         loadReasonerWithAxioms(axioms);
         OWLObjectProperty r = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#r"));
         OWLObjectProperty s = m_dataFactory.getOWLObjectProperty(IRI.create("file:/c/test.owl#s"));
-        assertTrue(!m_reasoner.getSubObjectProperties(s,true).containsEntity(s));
+        assertFalse(m_reasoner.getSubObjectProperties(s,true).containsEntity(s));
         assertTrue(m_reasoner.getSubObjectProperties(s,true).containsEntity(r));
     }
     public void testHasKeyEntailment() throws Exception {
@@ -1003,19 +984,15 @@ public class ReasonerTest extends AbstractReasonerTest {
     @SuppressWarnings("unchecked")
     public void testObjectPropertyHierarchy() throws Exception {
         String axioms =
-            "InverseObjectProperties( :r1 :r1i ) "+
-            "InverseObjectProperties( :r2 :r2i ) "+
-            "InverseObjectProperties( :r3 :r3i ) "+
-            "InverseObjectProperties( :r4 :r4i ) "+
             "SubObjectPropertyOf( :r4 :r2 ) "+
             "SubObjectPropertyOf( :r4 :r3 ) "+
             "SubObjectPropertyOf( :r3 :r5 ) "+
             "SubObjectPropertyOf( :r5 :r3 ) "+
-            "SubObjectPropertyOf( :r2i :r1i ) "+
-            "SubObjectPropertyOf( :r3i :r1i ) "+
+            "SubObjectPropertyOf( ObjectInverseOf(:r2) ObjectInverseOf(:r1) ) "+
+            "SubObjectPropertyOf( ObjectInverseOf(:r3) ObjectInverseOf(:r1) ) "+
             "SubObjectPropertyOf( :r4 :r1 ) "+
             "SubObjectPropertyOf( :r6 :r2 ) "+
-            "SubObjectPropertyOf( :r6 :r2i ) ";
+            "SubObjectPropertyOf( :r6 ObjectInverseOf(:r2) ) ";
         loadReasonerWithAxioms(axioms);
 
         assertEquivalentObjectProperties("r1",IRIs("r1"));
@@ -1025,10 +1002,10 @@ public class ReasonerTest extends AbstractReasonerTest {
         assertEquivalentObjectProperties("r5",IRIs("r3","r5"));
         assertEquivalentObjectProperties("r6",IRIs("r6"));
 
-        assertSuperObjectProperties("r3",EQ("r1"));
-        assertSuperObjectProperties("r4",EQ("r2"),EQ("r3","r5"));
-        assertSuperObjectProperties("r5",EQ("r1"));
-        assertSuperObjectProperties("r6",EQ("r2"),EQ("r2i"));
+        assertDirectSuperObjectProperties("r3",EQ("r1"));
+        assertDirectSuperObjectProperties("r4",EQ("r2"),EQ("r3","r5"));
+        assertDirectSuperObjectProperties("r5",EQ("r1"));
+        assertDirectSuperObjectProperties("r6",EQ("r2"),EQInv("r2"));
     }
 
     public void testSemanticObjectPropertyClassification() throws Exception {
@@ -1037,8 +1014,7 @@ public class ReasonerTest extends AbstractReasonerTest {
             "ObjectPropertyRange( :s ObjectOneOf( :a ) ) "+
             "EquivalentClasses( ObjectSomeValuesFrom( :r owl:Thing ) ObjectSomeValuesFrom( :s owl:Thing ) ) ";
         loadReasonerWithAxioms(axioms);
-
-        assertTrue(m_reasoner.isEquivalentObjectPropertyExpression(m_ontologyManager.getOWLDataFactory().getOWLObjectProperty(IRI.create(NS+"r")),m_ontologyManager.getOWLDataFactory().getOWLObjectProperty(IRI.create(NS+"s"))));
+        assertEquivalentObjectProperties("r", IRIs("s", "r"));
     }
 
     @SuppressWarnings("unchecked")
@@ -1061,11 +1037,11 @@ public class ReasonerTest extends AbstractReasonerTest {
         assertEquivalentDataProperties("r5",IRIs("r3","r5"));
         assertEquivalentDataProperties("r6",IRIs("r6"));
 
-        assertSuperDataProperties("r2",EQ("r1"));
-        assertSuperDataProperties("r3",EQ("r1"));
-        assertSuperDataProperties("r4",EQ("r2"),EQ("r3","r5"));
-        assertSuperDataProperties("r5",EQ("r1"));
-        assertSuperDataProperties("r6",EQ("r2"));
+        assertDirectSuperDataProperties("r2",EQ("r1"));
+        assertDirectSuperDataProperties("r3",EQ("r1"));
+        assertDirectSuperDataProperties("r4",EQ("r2"),EQ("r3","r5"));
+        assertDirectSuperDataProperties("r5",EQ("r1"));
+        assertDirectSuperDataProperties("r6",EQ("r2"));
     }
 
     public void testDataPropertySemantics() throws Exception {
@@ -1089,9 +1065,7 @@ public class ReasonerTest extends AbstractReasonerTest {
             "DataPropertyRange( :s xsd:nonPositiveInteger ) "+
             "EquivalentClasses( DataSomeValuesFrom( :r rdfs:Literal ) DataSomeValuesFrom( :s rdfs:Literal ) ) ";
         loadReasonerWithAxioms(axioms);
-        OWLDataProperty r=m_ontologyManager.getOWLDataFactory().getOWLDataProperty(IRI.create(AbstractReasonerTest.NS+"r"));
-        OWLDataProperty s=m_ontologyManager.getOWLDataFactory().getOWLDataProperty(IRI.create(AbstractReasonerTest.NS+"s"));
-        assertTrue(m_reasoner.isEquivalentDataProperty(r,s));
+        assertEquivalentDataProperties("r", IRIs("s", "r"));
     }
 
     public void testComplexConceptInstanceRetrieval() throws Exception {
@@ -2840,12 +2814,12 @@ public class ReasonerTest extends AbstractReasonerTest {
     public void testMissingCBug() throws Exception {
         String axioms = "EquivalentClasses(:C ObjectMinCardinality(0 :p owl:Nothing))";
         loadReasonerWithAxioms(axioms);
-        m_reasoner.classify();
+        m_reasoner.precomputeInferences(InferenceType.CLASS_HIERARCHY);
         CharArrayWriter buffer=new CharArrayWriter();
         PrintWriter output=new PrintWriter(buffer);
         m_reasoner.printHierarchies(output,true,true,true);
         output.flush();
-        m_reasoner.classify();
+        m_reasoner.precomputeInferences(InferenceType.CLASS_HIERARCHY);
         CharArrayWriter buffer2=new CharArrayWriter();
         PrintWriter output2=new PrintWriter(buffer2);
         m_reasoner.printHierarchies(output2,true,true,true);

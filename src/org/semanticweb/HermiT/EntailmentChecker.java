@@ -273,9 +273,9 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
         return reasoner.isSubClassOf(factory.getOWLThing(),factory.getOWLObjectAllValuesFrom(axiom.getProperty(),axiom.getRange()));
     }
     public Boolean visit(OWLInverseObjectPropertiesAxiom axiom) {
-        OWLObjectPropertyExpression prop1=axiom.getFirstProperty();
-        OWLObjectPropertyExpression prop2=axiom.getSecondProperty();
-        return reasoner.isEquivalentObjectPropertyExpression(prop1.getInverseProperty(),prop2);
+        OWLObjectPropertyExpression objectPropertyExpression1=axiom.getFirstProperty().getInverseProperty();
+        OWLObjectPropertyExpression objectPropertyExpression2=axiom.getSecondProperty();
+        return reasoner.isSubObjectPropertyExpressionOf(objectPropertyExpression1,objectPropertyExpression2) && reasoner.isSubObjectPropertyExpressionOf(objectPropertyExpression2,objectPropertyExpression1);
     }
     public Boolean visit(OWLSymmetricObjectPropertyAxiom axiom) {
         return reasoner.isSymmetric(axiom.getProperty());
@@ -296,10 +296,10 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
         Set<OWLObjectPropertyExpression> props=axiom.getProperties();
         Iterator<OWLObjectPropertyExpression> it=props.iterator();
         if (it.hasNext()) {
-            OWLObjectPropertyExpression prop1=it.next();
+            OWLObjectPropertyExpression objectPropertyExpression1=it.next();
             while (it.hasNext()) {
-                OWLObjectPropertyExpression prop2=it.next();
-                if (!reasoner.isEquivalentObjectPropertyExpression(prop1,prop2))
+                OWLObjectPropertyExpression objectPropertyExpression2=it.next();
+                if (!reasoner.isSubObjectPropertyExpressionOf(objectPropertyExpression1,objectPropertyExpression2) || !reasoner.isSubObjectPropertyExpressionOf(objectPropertyExpression2,objectPropertyExpression1))
                     return Boolean.FALSE;
             }
         }
@@ -340,7 +340,9 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
         if (it.hasNext()) {
             OWLDataProperty prop1=it.next().asOWLDataProperty();
             while (it.hasNext()) {
-                if (!reasoner.isEquivalentDataProperty(prop1.asOWLDataProperty(),it.next().asOWLDataProperty()))
+                OWLDataProperty dataProperty1=prop1.asOWLDataProperty();
+                OWLDataProperty dataProperty2=it.next().asOWLDataProperty();
+                if (!reasoner.isSubDataPropertyOf(dataProperty1,dataProperty2) || !reasoner.isSubDataPropertyOf(dataProperty2,dataProperty1))
                     return Boolean.FALSE;
             }
         }
@@ -380,7 +382,7 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
             OWLClassExpression first=i.next();
             while (i.hasNext()&&isEntailed) {
                 OWLClassExpression next=i.next();
-                isEntailed=reasoner.isEquivalentClass(first,next);
+                isEntailed=reasoner.isSubClassOf(first,next) && reasoner.isSubClassOf(next,first); 
             }
         }
         return isEntailed;

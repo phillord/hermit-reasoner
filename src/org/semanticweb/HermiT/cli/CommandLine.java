@@ -38,6 +38,7 @@ import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.reasoner.InferenceType;
 import org.semanticweb.owlapi.reasoner.Node;
 import org.semanticweb.owlapi.reasoner.NodeSet;
 
@@ -116,7 +117,7 @@ public class CommandLine {
         }
         public void run(Reasoner hermit,Prefixes prefixes,StatusOutput status,PrintWriter output) {
             status.log(2,"classifying...");
-            hermit.classify();
+            hermit.precomputeInferences(InferenceType.CLASS_HIERARCHY);
             if (file!=null) {
                 status.log(2,"writing taxonomy to "+file);
                 if (file.equals("-")) {

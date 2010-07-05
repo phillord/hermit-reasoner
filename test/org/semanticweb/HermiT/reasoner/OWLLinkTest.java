@@ -11,6 +11,7 @@ import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
+import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.RemoveAxiom;
@@ -45,7 +46,7 @@ public class OWLLinkTest extends AbstractReasonerTest {
         m_ontology=m_ontologyManager.loadOntology(IRI.create(mainOntology));
         createReasoner();
         OWLObjectProperty knows=m_dataFactory.getOWLObjectProperty(IRI.create(mainOntology+"#knows"));
-        NodeSet<OWLObjectProperty> peers=m_reasoner.getSubObjectProperties(knows, true);
+        NodeSet<OWLObjectPropertyExpression> peers=m_reasoner.getSubObjectProperties(knows, true);
         assertTrue(peers.getFlattened().size()==13); // Test A from the Bob paper
         peers=m_reasoner.getSubObjectProperties(knows, false);
         assertTrue(peers.getFlattened().size()==51); // Test B from the Bob paper
@@ -114,25 +115,25 @@ public class OWLLinkTest extends AbstractReasonerTest {
     }
     public void testInverses() throws Exception {
         loadReasonerFromResource("res/primer.owl");
-        m_reasoner.getDisjointObjectProperties(m_ontologyManager.getOWLDataFactory().getOWLObjectProperty(IRI.create(NS+"hasParent")),false);
+        m_reasoner.getDisjointObjectProperties(m_ontologyManager.getOWLDataFactory().getOWLObjectProperty(IRI.create(NS+"hasParent")));
     }
 
     public void testObjectProperties() throws Exception {
         m_ontology=m_ontologyManager.createOntology();
         m_ontologyManager.addAxiom(m_ontology,m_dataFactory.getOWLDeclarationAxiom(m_dataFactory.getOWLObjectProperty(IRI.create(NS+"hasParent"))));
         createReasoner();
-        m_reasoner.getDisjointObjectProperties(m_dataFactory.getOWLObjectProperty(IRI.create(NS+"hasParent")),false);
+        m_reasoner.getDisjointObjectProperties(m_dataFactory.getOWLObjectProperty(IRI.create(NS+"hasParent")));
     }
 
     public void testSuccessiveCalls() throws Exception {
         loadReasonerFromResource("res/primer.owl");
         try {
-            m_reasoner.getDisjointObjectProperties(m_dataFactory.getOWLObjectProperty(IRI.create(NS+"hasParent")),false);
+            m_reasoner.getDisjointObjectProperties(m_dataFactory.getOWLObjectProperty(IRI.create(NS+"hasParent")));
         }
         catch (Exception e) {
             e.printStackTrace();
         }
-        m_reasoner.getDisjointObjectProperties(m_dataFactory.getOWLObjectProperty(IRI.create(NS+"hasParent")),false);
+        m_reasoner.getDisjointObjectProperties(m_dataFactory.getOWLObjectProperty(IRI.create(NS+"hasParent")));
     }
     
     public void testBobTestC() throws Exception {
@@ -167,46 +168,46 @@ public class OWLLinkTest extends AbstractReasonerTest {
         OWLObjectProperty hasSpouse=m_dataFactory.getOWLObjectProperty(IRI.create("http://example.com/owl/families/hasSpouse"));
         assertTrue(m_reasoner.isEntailed(m_dataFactory.getOWLDisjointObjectPropertiesAxiom(hasParent,hasSpouse)));
         
-        NodeSet<OWLObjectProperty> result=m_reasoner.getDisjointObjectProperties(m_ontologyManager.getOWLDataFactory().getOWLObjectProperty(IRI.create(NS+"hasSpouse")),false);
-        Set<Node<OWLObjectProperty>> expectedSet=new HashSet<Node<OWLObjectProperty>>();
+        NodeSet<OWLObjectPropertyExpression> result=m_reasoner.getDisjointObjectProperties(m_ontologyManager.getOWLDataFactory().getOWLObjectProperty(IRI.create(NS+"hasSpouse")));
+        Set<Node<OWLObjectPropertyExpression>> expectedSet=new HashSet<Node<OWLObjectPropertyExpression>>();
         String[][] disjoints=new String[][]{
                 new String[]{"http://example.com/owl/families/hasFather"}, 
                 new String[] {"http://example.com/owl/families/hasParent"}, 
                 new String[] {"http://example.com/owl/families/hasChild", "http://example.org/otherOntologies/families/child"}
         };
-        OWLObjectProperty op;
-        Node<OWLObjectProperty> node;
-        for (String[] s : disjoints) {
-            Set<OWLObjectProperty> opSet=new HashSet<OWLObjectProperty>();
-            for (String ops : s) {
-                op=m_dataFactory.getOWLObjectProperty(IRI.create(ops));
-                opSet.add(op);
+        OWLObjectPropertyExpression ope;
+        Node<OWLObjectPropertyExpression> node;
+        for (String[] disjointStrings : disjoints) {
+            Set<OWLObjectPropertyExpression> opeSet=new HashSet<OWLObjectPropertyExpression>();
+            for (String opeString : disjointStrings) {
+                ope=m_dataFactory.getOWLObjectProperty(IRI.create(opeString));
+                opeSet.add(ope);
             }
-            node=new OWLObjectPropertyNode(opSet);
+            node=new OWLObjectPropertyNode(opeSet);
             expectedSet.add(node);
         }
         node=new OWLObjectPropertyNode(m_dataFactory.getOWLBottomObjectProperty());
         expectedSet.add(node);
-        NodeSet<OWLObjectProperty> expected=new OWLObjectPropertyNodeSet(expectedSet);
+        NodeSet<OWLObjectPropertyExpression> expected=new OWLObjectPropertyNodeSet(expectedSet);
         assertTrue(expected.getFlattened().size()==result.getFlattened().size());
         assertTrue(expected.getNodes().size()==result.getNodes().size());
-        for (OWLObjectProperty o : expected.getFlattened())
+        for (OWLObjectPropertyExpression o : expected.getFlattened())
             assertTrue(result.containsEntity(o));
         
-        result=m_reasoner.getDisjointObjectProperties(m_ontologyManager.getOWLDataFactory().getOWLObjectProperty(IRI.create(NS+"hasParent")),false);
-        expectedSet=new HashSet<Node<OWLObjectProperty>>();
+        result=m_reasoner.getDisjointObjectProperties(m_ontologyManager.getOWLDataFactory().getOWLObjectProperty(IRI.create(NS+"hasParent")));
+        expectedSet=new HashSet<Node<OWLObjectPropertyExpression>>();
         disjoints=new String[][]{
                 new String[]{"http://example.com/owl/families/hasSpouse"}, 
                 new String[] {"http://example.com/owl/families/hasWife"}, 
                 new String[] {"http://example.com/owl/families/hasChild", "http://example.org/otherOntologies/families/child"}
         };
-        for (String[] s : disjoints) {
-            Set<OWLObjectProperty> opSet=new HashSet<OWLObjectProperty>();
-            for (String ops : s) {
-                op=m_dataFactory.getOWLObjectProperty(IRI.create(ops));
-                opSet.add(op);
+        for (String[] disjointStrings : disjoints) {
+            Set<OWLObjectPropertyExpression> opeSet=new HashSet<OWLObjectPropertyExpression>();
+            for (String opeString : disjointStrings) {
+                ope=m_dataFactory.getOWLObjectProperty(IRI.create(opeString));
+                opeSet.add(ope);
             }
-            node=new OWLObjectPropertyNode(opSet);
+            node=new OWLObjectPropertyNode(opeSet);
             expectedSet.add(node);
         }
         node=new OWLObjectPropertyNode(m_dataFactory.getOWLBottomObjectProperty());
@@ -214,7 +215,7 @@ public class OWLLinkTest extends AbstractReasonerTest {
         expected=new OWLObjectPropertyNodeSet(expectedSet);
         assertTrue(expected.getFlattened().size()==result.getFlattened().size());
         assertTrue(expected.getNodes().size()==result.getNodes().size());
-        for (OWLObjectProperty o : expected.getFlattened())
+        for (OWLObjectPropertyExpression o : expected.getFlattened())
             assertTrue(result.containsEntity(o));
     }
     public void testDisjointClasses() throws Exception {
@@ -232,7 +233,7 @@ public class OWLLinkTest extends AbstractReasonerTest {
         node=new OWLClassNode(m_dataFactory.getOWLNothing());
         expectedSet.add(node);
         NodeSet<OWLClass> expected=new OWLClassNodeSet(expectedSet);
-        NodeSet<OWLClass> result=m_reasoner.getDisjointClasses(families, false);
+        NodeSet<OWLClass> result=m_reasoner.getDisjointClasses(families);
         assertTrue(expected.getFlattened().size()==result.getFlattened().size());
         assertTrue(expected.getNodes().size()==result.getNodes().size());
         for (OWLClass c : expected.getFlattened())

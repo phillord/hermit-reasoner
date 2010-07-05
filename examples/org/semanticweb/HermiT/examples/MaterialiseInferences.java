@@ -29,6 +29,7 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.reasoner.InferenceType;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.util.InferredAxiomGenerator;
 import org.semanticweb.owlapi.util.InferredClassAssertionAxiomGenerator;
@@ -59,9 +60,10 @@ public class MaterialiseInferences {
         ReasonerFactory factory = new ReasonerFactory();
         // The factory can now be used to obtain an instance of HermiT as an OWLReasoner. 
         OWLReasoner reasoner=factory.createReasoner(ontology);
-        // The call to prepareReasoner() is not required. It causes HermiT to compute the class, object, 
-        // and data property hierarchies, which would otherwise been done only if required. 
-        reasoner.prepareReasoner();
+        // The following call causes HermiT to compute the class, object, 
+        // and data property hierarchies as well as the class instances. 
+        // Hermit does not yet support precomputation of property instances. 
+        reasoner.precomputeInferences(InferenceType.CLASS_HIERARCHY, InferenceType.OBJECT_PROPERTY_HIERARCHY, InferenceType.DATA_PROPERTY_HIERARCHY, InferenceType.CLASS_ASSERTIONS);
         // We now have to decide which kinds of inferences we want to compute. For different types 
         // there are different InferredAxiomGenerator implementations available in the OWL API and 
         // we use the InferredSubClassAxiomGenerator and the InferredClassAssertionAxiomGenerator 

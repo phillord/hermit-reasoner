@@ -40,7 +40,7 @@ public class RulesTest extends AbstractReasonerTest {
         OWLNamedIndividual b=m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "b"));
         OWLClass A=m_dataFactory.getOWLClass(IRI.create(AbstractReasonerTest.NS + "A"));
         OWLClass B=m_dataFactory.getOWLClass(IRI.create(AbstractReasonerTest.NS + "B"));
-        assertFalse(m_reasoner.isSubClassOf(A, B));
+        assertFalse(m_reasoner.isEntailed(m_dataFactory.getOWLSubClassOfAxiom(A, B)));
         assertTrue(m_reasoner.getInstances(A, false).containsEntity(a));
         assertTrue(m_reasoner.getInstances(A, false).containsEntity(b));
         assertTrue(m_reasoner.getInstances(B, false).containsEntity(a));
@@ -61,7 +61,7 @@ public class RulesTest extends AbstractReasonerTest {
             + "ClassAssertion(:Location :kitchen)"+LB
             + "ObjectPropertyAssertion(:detects :sensor :pda)"+LB
             + "ObjectPropertyAssertion(:hasLocation :sensor :kitchen)"+LB
-            // B(x) -> C(x)
+            // BluetoothDevice(vbd) /\ BluetoothSensor(vbs) /\ Location(vl) /\ detects(vbs, vl) /\ hasLocation(vbs, vl) -> hasLocation(vbd, vl)
             + "DLSafeRule(" 
             + "  Body(" 
             + "    ClassAtom(:BluetoothDevice Variable(:vbd)) " 
@@ -424,7 +424,7 @@ public class RulesTest extends AbstractReasonerTest {
 		+ "ObjectPropertyAssertion(:r :a :b)"
 		// r(x, y) -> SameAs(x, y)
 		+ "DLSafeRule(Body(ObjectPropertyAtom(:r Variable(:x) Variable(:y))) Head(SameIndividualAtom(Variable(:x) Variable(:y))))";
-        loadOntologyWithAxioms(axioms);        
+        loadOntologyWithAxioms(axioms);
         createReasoner();
         assertTrue(!m_reasoner.isConsistent());
     }

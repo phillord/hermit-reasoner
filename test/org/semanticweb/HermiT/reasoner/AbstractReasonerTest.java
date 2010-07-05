@@ -120,15 +120,15 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
             superAtomicConcept=NS+superAtomicConcept;
         OWLClass subClass=m_dataFactory.getOWLClass(IRI.create(subAtomicConcept));
         OWLClass superClass=m_dataFactory.getOWLClass(IRI.create(superAtomicConcept));
-        boolean result=m_reasoner.isSubClassOf(subClass,superClass);
+        boolean result=m_reasoner.isEntailed(m_dataFactory.getOWLSubClassOfAxiom(subClass, superClass));
         assertEquals(expectedResult,result);
     }
 
     /**
      * Tests whether the possibly complex concept subConcept is subsumed by the possibly complex concept superConcept and asserts that this coincides with the expected result.
      */
-    protected void assertSubsumedBy(OWLClassExpression subConcept,OWLClassExpression superConcept,boolean expectedResult) {
-        boolean result=m_reasoner.isSubClassOf(subConcept,superConcept);
+    protected void assertSubsumedBy(OWLClassExpression subClass,OWLClassExpression superClass,boolean expectedResult) {
+        boolean result=m_reasoner.isEntailed(m_dataFactory.getOWLSubClassOfAxiom(subClass, superClass));
         assertEquals(expectedResult,result);
     }
 
@@ -173,13 +173,36 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     }
 
     /**
+     * Checks the direct superproperties of some object property.
+     */
+    protected void assertDirectSuperObjectProperties(String objectProperty,Set<String>... control) {
+        if (!objectProperty.contains("#"))
+            objectProperty=NS+objectProperty;
+        OWLObjectPropertyExpression ope=m_dataFactory.getOWLObjectProperty(IRI.create(objectProperty));
+        Set<Set<String>> actual=nodeSetOfOPEsToStrings(m_reasoner.getSuperObjectProperties(ope,true));
+        assertContainsAll(actual,control);
+    }
+
+    /**
+     * Checks the direct superproperties of some object property.
+     */
+    protected void assertDirectSuperObjectPropertiesOfInverse(String objectProperty,Set<String>... control) {
+        if (!objectProperty.contains("#"))
+            objectProperty=NS+objectProperty;
+        OWLObjectProperty op=m_dataFactory.getOWLObjectProperty(IRI.create(objectProperty));
+        OWLObjectPropertyExpression ope=m_dataFactory.getOWLObjectInverseOf(op);
+        Set<Set<String>> actual=nodeSetOfOPEsToStrings(m_reasoner.getSuperObjectProperties(ope,true));
+        assertContainsAll(actual,control);
+    }
+    
+    /**
      * Checks the superproperties of some object property.
      */
     protected void assertSuperObjectProperties(String objectProperty,Set<String>... control) {
         if (!objectProperty.contains("#"))
             objectProperty=NS+objectProperty;
         OWLObjectPropertyExpression ope=m_dataFactory.getOWLObjectProperty(IRI.create(objectProperty));
-        Set<Set<String>> actual=nodeSetOfOPEsToStrings(m_reasoner.getSuperObjectProperties(ope,true));
+        Set<Set<String>> actual=nodeSetOfOPEsToStrings(m_reasoner.getSuperObjectProperties(ope,false));
         assertContainsAll(actual,control);
     }
 
@@ -191,7 +214,30 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
             objectProperty=NS+objectProperty;
         OWLObjectProperty op=m_dataFactory.getOWLObjectProperty(IRI.create(objectProperty));
         OWLObjectPropertyExpression ope=m_dataFactory.getOWLObjectInverseOf(op);
-        Set<Set<String>> actual=nodeSetOfOPEsToStrings(m_reasoner.getSuperObjectProperties(ope,true));
+        Set<Set<String>> actual=nodeSetOfOPEsToStrings(m_reasoner.getSuperObjectProperties(ope,false));
+        assertContainsAll(actual,control);
+    }
+
+    /**
+     * Checks the direct subproperties of some object property.
+     */
+    protected void assertDirectSubObjectProperties(String objectProperty,Set<String>... control) {
+        if (!objectProperty.contains("#"))
+            objectProperty=NS+objectProperty;
+        OWLObjectPropertyExpression ope=m_dataFactory.getOWLObjectProperty(IRI.create(objectProperty));
+        Set<Set<String>> actual=nodeSetOfOPEsToStrings(m_reasoner.getSubObjectProperties(ope,true));
+        assertContainsAll(actual,control);
+    }
+
+    /**
+     * Checks the direct subproperties of the inverse of the given object property.
+     */
+    protected void assertDirectSubObjectPropertiesOfInverse(String objectProperty,Set<String>... control) {
+        if (!objectProperty.contains("#"))
+            objectProperty=NS+objectProperty;
+        OWLObjectProperty op=m_dataFactory.getOWLObjectProperty(IRI.create(objectProperty));
+        OWLObjectPropertyExpression ope=m_dataFactory.getOWLObjectInverseOf(op);
+        Set<Set<String>> actual=nodeSetOfOPEsToStrings(m_reasoner.getSubObjectProperties(ope,true));
         assertContainsAll(actual,control);
     }
 
@@ -202,7 +248,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
         if (!objectProperty.contains("#"))
             objectProperty=NS+objectProperty;
         OWLObjectPropertyExpression ope=m_dataFactory.getOWLObjectProperty(IRI.create(objectProperty));
-        Set<Set<String>> actual=nodeSetOfOPEsToStrings(m_reasoner.getSubObjectProperties(ope,true));
+        Set<Set<String>> actual=nodeSetOfOPEsToStrings(m_reasoner.getSubObjectProperties(ope,false));
         assertContainsAll(actual,control);
     }
 
@@ -214,10 +260,10 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
             objectProperty=NS+objectProperty;
         OWLObjectProperty op=m_dataFactory.getOWLObjectProperty(IRI.create(objectProperty));
         OWLObjectPropertyExpression ope=m_dataFactory.getOWLObjectInverseOf(op);
-        Set<Set<String>> actual=nodeSetOfOPEsToStrings(m_reasoner.getSubObjectProperties(ope,true));
+        Set<Set<String>> actual=nodeSetOfOPEsToStrings(m_reasoner.getSubObjectProperties(ope,false));
         assertContainsAll(actual,control);
     }
-
+    
     /**
      * Checks the equivalents of some object property.
      */
@@ -236,6 +282,17 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
         if (!dataProperty.contains("#"))
             dataProperty=NS+dataProperty;
         OWLDataProperty dp=m_dataFactory.getOWLDataProperty(IRI.create(dataProperty));
+        Set<Set<String>> actual=nodeSetOfDPsToStrings(m_reasoner.getSuperDataProperties(dp,false));
+        assertContainsAll(actual,control);
+    }
+    
+    /**
+     * Checks the direct superproperties of some data property.
+     */
+    protected void assertDirectSuperDataProperties(String dataProperty,Set<String>... control) {
+        if (!dataProperty.contains("#"))
+            dataProperty=NS+dataProperty;
+        OWLDataProperty dp=m_dataFactory.getOWLDataProperty(IRI.create(dataProperty));
         Set<Set<String>> actual=nodeSetOfDPsToStrings(m_reasoner.getSuperDataProperties(dp,true));
         assertContainsAll(actual,control);
     }
@@ -244,6 +301,17 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
      * Checks the subproperties of some data property.
      */
     protected void assertSubDataProperties(String dataProperty,Set<String>... control) {
+        if (!dataProperty.contains("#"))
+            dataProperty=NS+dataProperty;
+        OWLDataProperty dp=m_dataFactory.getOWLDataProperty(IRI.create(dataProperty));
+        Set<Set<String>> actual=nodeSetOfDPsToStrings(m_reasoner.getSubDataProperties(dp,false));
+        assertContainsAll(actual,control);
+    }
+    
+    /**
+     * Checks the direct subproperties of some data property.
+     */
+    protected void assertDirectSubDataProperties(String dataProperty,Set<String>... control) {
         if (!dataProperty.contains("#"))
             dataProperty=NS+dataProperty;
         OWLDataProperty dp=m_dataFactory.getOWLDataProperty(IRI.create(dataProperty));
@@ -270,18 +338,22 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
         assertTrue(new EntailmentChecker(m_reasoner,m_dataFactory).entails(axioms)==expectedResult);
     }
 
-    protected static Set<Set<String>> nodeSetOfOPEsToStrings(NodeSet<OWLObjectProperty> nodeSet) {
+    protected static Set<Set<String>> nodeSetOfOPEsToStrings(NodeSet<OWLObjectPropertyExpression> nodeSet) {
         Set<Set<String>> result=new HashSet<Set<String>>();
-        for (Node<OWLObjectProperty> node : nodeSet.getNodes()) {
+        for (Node<OWLObjectPropertyExpression> node : nodeSet.getNodes()) {
             result.add(nodeOfOPEs(node));
         }
         return result;
     }
 
-    protected static Set<String> nodeOfOPEs(Node<OWLObjectProperty> node) {
+    protected static Set<String> nodeOfOPEs(Node<OWLObjectPropertyExpression> node) {
         Set<String> translatedSet=new HashSet<String>();
-        for (OWLObjectProperty ope : node.getEntities()) {
-            translatedSet.add((ope).getIRI().toString());
+        for (OWLObjectPropertyExpression ope : node.getEntities()) {
+            if (ope.getSimplified().isAnonymous()) {
+                // inverse
+                translatedSet.add("InverseOf("+ope.getNamedProperty().getIRI().toString()+")");
+            } else 
+                translatedSet.add(ope.asOWLObjectProperty().getIRI().toString());
         }
         return translatedSet;
     }
@@ -398,7 +470,17 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
         }
         return result;
     }
-
+    
+    protected static Set<String> EQInv(String... args) {
+        Set<String> result=new HashSet<String>();
+        for (String arg : args) {
+            if (!arg.contains("#"))
+                arg=NS+arg;
+            result.add("InverseOf("+arg+")");
+        }
+        return result;
+    }
+    
     protected static String[] IRIs(String... args) {
         for (int index=0;index<args.length;index++)
             args[index]=IRI(args[index]);
