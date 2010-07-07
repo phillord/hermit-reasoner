@@ -91,8 +91,7 @@ public class QuasiOrderClassification {
                     continue;
                 }
             }
-            if (!processedConcepts.contains(element))
-                m_progressMonitor.elementClassified(element);
+            increaseProgressMonitor(processedConcepts,element);
         }
         Set<AtomicConcept> classifiedElements=new HashSet<AtomicConcept>();
         while (!unclassifiedElements.isEmpty()) {
@@ -104,19 +103,22 @@ public class QuasiOrderClassification {
                     break;
                 }
                 classifiedElements.add(element);
-                if (!processedConcepts.contains(element))
-                    m_progressMonitor.elementClassified(element);
+                increaseProgressMonitor(processedConcepts,element);
             }
             unclassifiedElements.removeAll(classifiedElements);
             if (unclassifiedElements.isEmpty())
                 break;
-            Hierarchy<AtomicConcept> smallHierarchy=buildSmallHierarchy(m_possibleSubsumptions.getSuccessors(unclassifiedElement));
+            Hierarchy<AtomicConcept> smallHierarchy=buildHierarchyOfUnknownPossible(m_possibleSubsumptions.getSuccessors(unclassifiedElement));
             checkUnknownSubsumersUsingEnhancedTraversal(hierarchyRelation,smallHierarchy.getTopNode(),unclassifiedElement);
             m_possibleSubsumptions.getSuccessors(unclassifiedElement).clear();
         }
         return buildTransitivelyReducedHierarchy(m_knownSubsumptions);
     }
-    protected Hierarchy<AtomicConcept> buildSmallHierarchy(Set<AtomicConcept> unknownSubsumers) {
+    private void increaseProgressMonitor(Set<AtomicConcept> processedConcepts,AtomicConcept element) {
+    	if (processedConcepts.add(element))
+            m_progressMonitor.elementClassified(element);
+	}
+	protected Hierarchy<AtomicConcept> buildHierarchyOfUnknownPossible(Set<AtomicConcept> unknownSubsumers) {
         Graph<AtomicConcept> smallKnownSubsumptions=new Graph<AtomicConcept>();
         for (AtomicConcept unknownSubsumer0 : unknownSubsumers) {
             smallKnownSubsumptions.addEdge(m_bottomElement,unknownSubsumer0);
@@ -130,52 +132,53 @@ public class QuasiOrderClassification {
     }
     protected Set<AtomicConcept> updateSubsumptionsUsingLeafNodeStrategy() {
         Hierarchy<AtomicConcept> hierarchy=buildTransitivelyReducedHierarchy(m_knownSubsumptions);
-        Set<HierarchyNode<AtomicConcept>> leafNodes=hierarchy.getBottomNode().getParentNodes();
+        Stack<HierarchyNode<AtomicConcept>> toProcess=new Stack<HierarchyNode<AtomicConcept>>();
+        toProcess.addAll( hierarchy.getBottomNode().getParentNodes() );
         Set<AtomicConcept> processedConcepts=new HashSet<AtomicConcept>();
-        for (HierarchyNode<AtomicConcept> leafNode : leafNodes) {
-            AtomicConcept leafNodeElement=leafNode.getRepresentative();
-            processedConcepts.add(leafNodeElement);
-            m_progressMonitor.elementClassified(leafNodeElement);
-            if (!m_possibleSubsumptions.getSuccessors(leafNodeElement).isEmpty() || isUnsatisfiable(leafNodeElement))
+        Set<HierarchyNode<AtomicConcept>> unsatHierarchyNodes=new HashSet<HierarchyNode<AtomicConcept>>();
+        while( !toProcess.empty() ){
+        	HierarchyNode<AtomicConcept> currentHierarchyElement = toProcess.pop();
+            AtomicConcept currentHierarchyConcept=currentHierarchyElement.getRepresentative();
+            increaseProgressMonitor(processedConcepts,currentHierarchyConcept);
+            if (!m_possibleSubsumptions.getSuccessors(currentHierarchyConcept).isEmpty() || isUnsatisfiable(currentHierarchyConcept))
                 continue;
-            getKnownSubsumersForConcept(leafNodeElement);
-            // If the leaf was unsatisfable go up to find satisfiable parents. Unsatisfiable parent information can be propagated downwards.
-            if (isUnsatisfiable(leafNodeElement)) {
-                Stack<HierarchyNode<AtomicConcept>> parentsToProcess=new Stack<HierarchyNode<AtomicConcept>>();
-                parentsToProcess.addAll(leafNode.getParentNodes());
-                HierarchyNode<AtomicConcept> lastUnsatNode=leafNode;
-                while (!parentsToProcess.isEmpty()) {
-                    HierarchyNode<AtomicConcept> parentNode=parentsToProcess.pop();
-                    AtomicConcept parentElement=parentNode.getRepresentative();
-                    if (isUnsatisfiable(parentElement))
-                        continue;
-                    getKnownSubsumersForConcept(parentElement);
-                    if (!isUnsatisfiable(parentElement)) {
-                        for (HierarchyNode<AtomicConcept> newUnsatNode : lastUnsatNode.getDescendantNodes()) {
-                            makeConceptUnsatisfiable(newUnsatNode.getRepresentative());
-                            parentsToProcess.remove(newUnsatNode);
-                        }
-                    }
-                    else {
-                        parentsToProcess.addAll(parentNode.getParentNodes());
-                        lastUnsatNode=parentNode;
-                    }
-                }
+            Node rootNodeOfModel=buildModelForConcept(currentHierarchyConcept);
+            // If the leaf was unsatisfable we go up to explore its parents, until a satisfiable parent is discovered. Each time a node is unsat this information is propagated downwards.
+            if (rootNodeOfModel==null) {
+            	makeConceptUnsatisfiable(currentHierarchyConcept);
+            	unsatHierarchyNodes.add(currentHierarchyElement);
+                toProcess.addAll(currentHierarchyElement.getParentNodes());
+                setNewDescendantsUnsat(currentHierarchyElement,unsatHierarchyNodes,toProcess);
+            }
+            else{
+            	 // TODO: Why does a change to .getCanonicalNode() below give incorrect results with ind. reuse? 
+                readKnownSubsumersFromRootNode(currentHierarchyConcept,rootNodeOfModel);
+                updatePossibleSubsumers();
             }
         }
         return processedConcepts;
     }
-    protected void getKnownSubsumersForConcept(AtomicConcept concept) {
+    private void setNewDescendantsUnsat(HierarchyNode<AtomicConcept> currentElement,Set<HierarchyNode<AtomicConcept>> unsatHierarchyNodes, Stack<HierarchyNode<AtomicConcept>> toProcess) {
+        Set<HierarchyNode<AtomicConcept>> visited=new HashSet<HierarchyNode<AtomicConcept>>();
+        Queue<HierarchyNode<AtomicConcept>> toVisit=new LinkedList<HierarchyNode<AtomicConcept>>(currentElement.getChildNodes());
+        while (!toVisit.isEmpty()) {
+            HierarchyNode<AtomicConcept> current=toVisit.poll();
+            if (visited.add(current) && !unsatHierarchyNodes.contains(current)){
+                toVisit.addAll(current.getChildNodes());
+                unsatHierarchyNodes.add(current);
+                makeConceptUnsatisfiable(current.getRepresentative());
+                toProcess.remove(current);
+            }
+        }
+	}
+	protected Node buildModelForConcept(AtomicConcept concept) {
         Individual freshIndividual=Individual.createAnonymous("fresh-individual");
         Map<Individual,Node> checkedNode=new HashMap<Individual,Node>();
         checkedNode.put(freshIndividual,null);
-        if (m_tableau.isSatisfiable(false,Collections.singleton(Atom.create(concept,freshIndividual)),null,null,null,checkedNode,getSatTestDescription(concept))) {
-            // TODO: Why does a change to .getCanonicalNode() below give incorrect results with ind. reuse? 
-            readKnownSubsumersFromRootNode(concept,checkedNode.get(freshIndividual));
-            updatePossibleSubsumers();
-        }
+        if (m_tableau.isSatisfiable(false,Collections.singleton(Atom.create(concept,freshIndividual)),null,null,null,checkedNode,getSatTestDescription(concept)))
+        	return checkedNode.get(freshIndividual);
         else
-            makeConceptUnsatisfiable(concept);
+        	return null;
     }
     protected void makeConceptUnsatisfiable(AtomicConcept concept) {
         addKnownSubsumption(concept,m_bottomElement);
@@ -275,13 +278,11 @@ public class QuasiOrderClassification {
         Set<HierarchyNode<AtomicConcept>> startSearch=Collections.singleton(startNode);
         Set<HierarchyNode<AtomicConcept>> visited=new HashSet<HierarchyNode<AtomicConcept>>(startSearch);
         Queue<HierarchyNode<AtomicConcept>> toProcess=new LinkedList<HierarchyNode<AtomicConcept>>(startSearch);
-
         if (isEveryChildANonSubsumer(startNode.getChildNodes(),pickedElement,2))
             return;
         while (!toProcess.isEmpty()) {
             HierarchyNode<AtomicConcept> current=toProcess.remove();
             Set<HierarchyNode<AtomicConcept>> subordinateElements=current.getChildNodes();
-
             for (HierarchyNode<AtomicConcept> subordinateElement : subordinateElements) {
                 AtomicConcept element=subordinateElement.getRepresentative();
                 if (visited.contains(subordinateElement))
