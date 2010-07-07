@@ -707,7 +707,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         String axioms = "DatatypeDefinition(:SSN DatatypeRestriction(xsd:string xsd:pattern \"[0-9]{3}-[0-9]{2}-[0-9]{4}\"))";
         loadReasonerWithAxioms(axioms);
         OWLDatatype dt=m_dataFactory.getOWLDatatype(IRI.create(ReasonerTest.NS + "SSN"));
-        OWLFacetRestriction fr=m_dataFactory.getOWLFacetRestriction(OWLFacet.PATTERN, m_dataFactory.getOWLTypedLiteral("[0-9]{3}-[0-9]{2}-[0-9]{4}"));
+        OWLFacetRestriction fr=m_dataFactory.getOWLFacetRestriction(OWLFacet.PATTERN, m_dataFactory.getOWLLiteral("[0-9]{3}-[0-9]{2}-[0-9]{4}"));
         OWLDataRange dr=m_dataFactory.getOWLDatatypeRestriction(m_dataFactory.getOWLDatatype(IRI.create("http://www.w3.org/2001/XMLSchema#string")), fr);
         OWLDatatypeDefinitionAxiom ddef=m_dataFactory.getOWLDatatypeDefinitionAxiom(dt, dr);
         assertEntails(ddef, true);

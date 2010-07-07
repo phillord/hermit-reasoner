@@ -105,8 +105,6 @@ import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
 import org.semanticweb.owlapi.model.OWLObjectUnionOf;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLSameIndividualAxiom;
-import org.semanticweb.owlapi.model.OWLStringLiteral;
-import org.semanticweb.owlapi.model.OWLTypedLiteral;
 import org.semanticweb.owlapi.model.SWRLAtom;
 import org.semanticweb.owlapi.model.SWRLBuiltInAtom;
 import org.semanticweb.owlapi.model.SWRLClassAtom;
@@ -833,12 +831,6 @@ public class OWLClausification {
                     m_headAtoms.add(Atom.create((DLPredicate)literalConcept,X));
             }
         }
-        public void visit(OWLTypedLiteral node) {
-            throw new IllegalStateException("Internal error: Invalid normal form. ");
-        }
-        public void visit(OWLStringLiteral node) {
-            throw new IllegalStateException("Internal error: Invalid normal form. ");
-        }
         public void visit(OWLFacetRestriction node) {
             throw new IllegalStateException("Internal error: Invalid normal form. ");
         }
@@ -853,6 +845,9 @@ public class OWLClausification {
                 if (!literalConcept.isAlwaysFalse())
                     m_headAtoms.add(Atom.create((DLPredicate)literalConcept,X));
             }
+        }
+        public void visit(OWLLiteral node) {
+            throw new IllegalStateException("Internal error: Invalid normal form. ");
         }
     }
 
@@ -931,32 +926,25 @@ public class OWLClausification {
         public Object visit(OWLFacetRestriction object) {
             throw new IllegalStateException("Internal error: should not get in here.");
         }
-        public Object visit(OWLTypedLiteral object) {
+        public Object visit(OWLLiteral object) {
             try {
-                return Constant.create(object.getLiteral(),object.getDatatype().getIRI().toString());
+//                "Family Guy" is an abbreviation for "Family Guy@"^^rdf:PlainLiteral Ñ a literal with the lexical form "Family Guy@" and the datatype rdf:PlainLiteral Ñ which denotes a string "Family Guy" without a language tag.
+//                Furthermore, "Padre de familia"@es is an abbreviation for the literal "Padre de familia@es"^^rdf:PlainLiteral, which denotes a pair consisting of the string "Padre de familia" and the language tag es.
+                if (object.isRDFPlainLiteral()) {
+                    if (object.hasLang()) {
+                        return Constant.create(object.getLiteral()+"@"+object.getLang(),Prefixes.s_semanticWebPrefixes.get("rdf")+"PlainLiteral");
+                    } else {
+                        return Constant.create(object.getLiteral()+"@",Prefixes.s_semanticWebPrefixes.get("rdf")+"PlainLiteral");
+                    }
+                } else {
+                    return Constant.create(object.getLiteral(),object.getDatatype().getIRI().toString());
+                }
             }
             catch (UnsupportedDatatypeException e) {
                 if (m_ignoreUnsupportedDatatypes) {
                     if (m_warningMonitor!=null)
                         m_warningMonitor.warning("Ignoring unsupported datatype '"+object.toString()+"'.");
                     return Constant.createAnonymous(object.getLiteral());
-                }
-                else
-                    throw e;
-            }
-        }
-        public Object visit(OWLStringLiteral object) {
-            try {
-                if (object.getLang()==null)
-                    return Constant.create(object.getLiteral(),Prefixes.s_semanticWebPrefixes.get("xsd")+"string");
-                else
-                    return Constant.create(object.getLiteral()+"@"+object.getLang(),Prefixes.s_semanticWebPrefixes.get("rdf")+"PlainLiteral");
-            }
-            catch (UnsupportedDatatypeException e) {
-                if (m_ignoreUnsupportedDatatypes) {
-                    if (m_warningMonitor!=null)
-                        m_warningMonitor.warning("Ignoring unsupported datatype '"+object.toString()+"'.");
-                    return AtomicConcept.create(object.toString());
                 }
                 else
                     throw e;

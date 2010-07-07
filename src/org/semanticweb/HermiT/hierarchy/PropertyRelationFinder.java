@@ -38,26 +38,27 @@ public class PropertyRelationFinder {
     public OWLAxiom[] getAxiomsForReadingOffCompexProperties(Set<Role> complexObjectRoles, Set<Individual> individuals, OWLDataFactory factory) {
         List<OWLAxiom> additionalAxioms=new ArrayList<OWLAxiom>();
         for (Individual ind : individuals)
-            if (!ind.isAnonymous()) m_nodesForIndividuals.put(ind,null);
+            //if (!ind.isAnonymous()) 
+            m_nodesForIndividuals.put(ind,null);
         
         for (Role objectRole : complexObjectRoles) {
             if (objectRole instanceof AtomicRole) {
                 OWLObjectProperty objectProperty=factory.getOWLObjectProperty(IRI.create(((AtomicRole)objectRole).getIRI()));
                 for (Individual ind : individuals) {
-                    if (!ind.isAnonymous()) {
-                        String indIRI=ind.getIRI();
-                        OWLClass classForIndividual=factory.getOWLClass(IRI.create("internal:individual-concept#"+indIRI));
-                        OWLAxiom axiom=factory.getOWLClassAssertionAxiom(classForIndividual,factory.getOWLNamedIndividual(IRI.create(indIRI)));
-                        additionalAxioms.add(axiom);
-                        AtomicConcept conceptForRole=AtomicConcept.create("internal:individual-concept#"+((AtomicRole)objectRole).getIRI()+"#"+indIRI);
-                        OWLClass classForRoleAndIndividual=factory.getOWLClass(IRI.create(conceptForRole.getIRI()));
-                        // A_a implies forall r.A_a^r
-                        axiom=factory.getOWLSubClassOfAxiom(classForIndividual,factory.getOWLObjectAllValuesFrom(objectProperty,classForRoleAndIndividual));
-                        additionalAxioms.add(axiom);
-                        // A_a^r implies forall r.A_a^r
-                        axiom=factory.getOWLSubClassOfAxiom(classForRoleAndIndividual,factory.getOWLObjectAllValuesFrom(objectProperty,classForRoleAndIndividual));
-                        additionalAxioms.add(axiom);
-                    }
+//                    if (!ind.isAnonymous()) {
+                    String indIRI=ind.getIRI();
+                    OWLClass classForIndividual=factory.getOWLClass(IRI.create("internal:individual-concept#"+indIRI));
+                    OWLAxiom axiom=factory.getOWLClassAssertionAxiom(classForIndividual,factory.getOWLNamedIndividual(IRI.create(indIRI)));
+                    additionalAxioms.add(axiom);
+                    AtomicConcept conceptForRole=AtomicConcept.create("internal:individual-concept#"+((AtomicRole)objectRole).getIRI()+"#"+indIRI);
+                    OWLClass classForRoleAndIndividual=factory.getOWLClass(IRI.create(conceptForRole.getIRI()));
+                    // A_a implies forall r.A_a^r
+                    axiom=factory.getOWLSubClassOfAxiom(classForIndividual,factory.getOWLObjectAllValuesFrom(objectProperty,classForRoleAndIndividual));
+                    additionalAxioms.add(axiom);
+                    // A_a^r implies forall r.A_a^r
+                    axiom=factory.getOWLSubClassOfAxiom(classForRoleAndIndividual,factory.getOWLObjectAllValuesFrom(objectProperty,classForRoleAndIndividual));
+                    additionalAxioms.add(axiom);
+//                    }
                 }
             }
         }
@@ -71,7 +72,7 @@ public class PropertyRelationFinder {
             individualsForNodes.put(indToNode.getValue().getCanonicalNode(), indToNode.getKey());
         }
         for (Individual ind : individualsForNodes.values()) {
-            if (!ind.isAnonymous()) {
+//            if (!ind.isAnonymous()) {
                 ExtensionTable.Retrieval retrieval=tableau.getExtensionManager().getTernaryExtensionTable().createRetrieval(new boolean[] { false,true,false },ExtensionTable.View.TOTAL);
                 retrieval.getBindingsBuffer()[1]=m_nodesForIndividuals.get(ind);
                 retrieval.open();
@@ -154,7 +155,6 @@ public class PropertyRelationFinder {
                     }
                 }
             }
-        }
+//        }
     }
-
 }

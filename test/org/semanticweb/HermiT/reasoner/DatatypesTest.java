@@ -1,7 +1,5 @@
 package org.semanticweb.HermiT.reasoner;
 
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLDataProperty;
 
 
 public class DatatypesTest extends AbstractReasonerTest {
@@ -9,63 +7,63 @@ public class DatatypesTest extends AbstractReasonerTest {
     public DatatypesTest(String name) {
         super(name);
     }
-    public void testLiteralCustomDatatype() throws Exception {
-        String axioms = "Declaration(Datatype(:MyDatatype))"
-            + "Declaration(NamedIndividual(:a))"
-            + "Declaration(DataProperty(:dp))"
-            + "DatatypeDefinition(:MyDatatype DataOneOf(\"1\"^^xsd:string \"1\"^^xsd:integer))"
-            + "DataPropertyAssertion(:dp :a \"1\"^^:MyDatatype)";
-        boolean exceptionThrown = false;
-        try {
-            loadReasonerWithAxioms(axioms);
-        } catch (RuntimeException e) {
-            exceptionThrown = true;
-        }
-        assertTrue(exceptionThrown);
-    }       
-    public void testINF() throws Exception {
-        String axioms = "Declaration(NamedIndividual(:a)) Declaration(Class(:A)) Declaration(DataProperty(:dp)) "
-                + "SubClassOf(:A DataAllValuesFrom(:dp DataOneOf(\"Infinity\"^^xsd:double)))"
-                + "SubClassOf(:A DataSomeValuesFrom(:dp rdfs:Literal))"
-                + "ClassAssertion(:A :a)"
-                + "NegativeDataPropertyAssertion(:dp :a \"Infinity\"^^xsd:double)";
-        loadReasonerWithAxioms(axioms);
-        assertABoxSatisfiable(false);
-    }
-    public void testFreshEntitiesQuery() throws Exception {
-        String axioms = "Declaration(NamedIndividual(:a)) Declaration(Class(:A))" 
-        	+ "ClassAssertion(:A :a)";
-        loadReasonerWithAxioms(axioms);
-        OWLDataProperty dp=m_dataFactory.getOWLDataProperty(IRI.create(NS+"dp"));
-        OWLDataProperty dp2=m_dataFactory.getOWLDataProperty(IRI.create(NS+"dp2"));
-        assertTrue(m_reasoner.getSubDataProperties(dp, false).containsEntity(m_dataFactory.getOWLBottomDataProperty()));
-        assertTrue(m_reasoner.getSuperDataProperties(dp, false).containsEntity(m_dataFactory.getOWLTopDataProperty()));
-        assertFalse(m_reasoner.getSuperDataProperties(dp, false).containsEntity(dp2));
-        assertFalse(m_reasoner.getSubDataProperties(dp, false).containsEntity(dp2));
-    }
-    
-    public void testParsingError() throws Exception {
-        String axioms = "Declaration(NamedIndividual(:a)) Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(:A DataAllValuesFrom(:dp DataOneOf(\"3\"^^xsd:integer \"4a\"^^xsd:int))) " 
-                + "SubClassOf(:A DataAllValuesFrom(:dp DataOneOf(\"2\"^^xsd:short \"3\"^^xsd:integer)))"
-                + "ClassAssertion(:A :a)"
-                + "ClassAssertion(DataSomeValuesFrom(:dp DataComplementOf(DataOneOf(\"3\"^^xsd:integer))) :a)";
-        boolean exceptionThrown = false;
-        try {
-            loadReasonerWithAxioms(axioms);
-        } catch (RuntimeException e) {
-            exceptionThrown = true;
-        }
-        assertTrue(exceptionThrown);
-    }
-    
-    public void testStringAbbreviation() throws Exception {
-        String axioms = "Declaration(NamedIndividual(:a)) Declaration(Class(:A)) Declaration(DataProperty(:dp)) "
-                + "DataPropertyAssertion(:dp :a \"abc\"^^xsd:string)" 
-                + "DataPropertyAssertion(:dp :a \"abc\")" 
-                + "ClassAssertion(DataMaxCardinality(1 :dp) :a)";
-        loadReasonerWithAxioms(axioms);
-        assertABoxSatisfiable(true);
-    }
+//    public void testLiteralCustomDatatype() throws Exception {
+//        String axioms = "Declaration(Datatype(:MyDatatype))"
+//            + "Declaration(NamedIndividual(:a))"
+//            + "Declaration(DataProperty(:dp))"
+//            + "DatatypeDefinition(:MyDatatype DataOneOf(\"1\"^^xsd:string \"1\"^^xsd:integer))"
+//            + "DataPropertyAssertion(:dp :a \"1\"^^:MyDatatype)";
+//        boolean exceptionThrown = false;
+//        try {
+//            loadReasonerWithAxioms(axioms);
+//        } catch (RuntimeException e) {
+//            exceptionThrown = true;
+//        }
+//        assertTrue(exceptionThrown);
+//    }       
+//    public void testINF() throws Exception {
+//        String axioms = "Declaration(NamedIndividual(:a)) Declaration(Class(:A)) Declaration(DataProperty(:dp)) "
+//                + "SubClassOf(:A DataAllValuesFrom(:dp DataOneOf(\"Infinity\"^^xsd:double)))"
+//                + "SubClassOf(:A DataSomeValuesFrom(:dp rdfs:Literal))"
+//                + "ClassAssertion(:A :a)"
+//                + "NegativeDataPropertyAssertion(:dp :a \"Infinity\"^^xsd:double)";
+//        loadReasonerWithAxioms(axioms);
+//        assertABoxSatisfiable(false);
+//    }
+//    public void testFreshEntitiesQuery() throws Exception {
+//        String axioms = "Declaration(NamedIndividual(:a)) Declaration(Class(:A))" 
+//        	+ "ClassAssertion(:A :a)";
+//        loadReasonerWithAxioms(axioms);
+//        OWLDataProperty dp=m_dataFactory.getOWLDataProperty(IRI.create(NS+"dp"));
+//        OWLDataProperty dp2=m_dataFactory.getOWLDataProperty(IRI.create(NS+"dp2"));
+//        assertTrue(m_reasoner.getSubDataProperties(dp, false).containsEntity(m_dataFactory.getOWLBottomDataProperty()));
+//        assertTrue(m_reasoner.getSuperDataProperties(dp, false).containsEntity(m_dataFactory.getOWLTopDataProperty()));
+//        assertFalse(m_reasoner.getSuperDataProperties(dp, false).containsEntity(dp2));
+//        assertFalse(m_reasoner.getSubDataProperties(dp, false).containsEntity(dp2));
+//    }
+//    
+//    public void testParsingError() throws Exception {
+//        String axioms = "Declaration(NamedIndividual(:a)) Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(:A DataAllValuesFrom(:dp DataOneOf(\"3\"^^xsd:integer \"4a\"^^xsd:int))) " 
+//                + "SubClassOf(:A DataAllValuesFrom(:dp DataOneOf(\"2\"^^xsd:short \"3\"^^xsd:integer)))"
+//                + "ClassAssertion(:A :a)"
+//                + "ClassAssertion(DataSomeValuesFrom(:dp DataComplementOf(DataOneOf(\"3\"^^xsd:integer))) :a)";
+//        boolean exceptionThrown = false;
+//        try {
+//            loadReasonerWithAxioms(axioms);
+//        } catch (RuntimeException e) {
+//            exceptionThrown = true;
+//        }
+//        assertTrue(exceptionThrown);
+//    }
+//    
+//    public void testStringAbbreviation() throws Exception {
+//        String axioms = "Declaration(NamedIndividual(:a)) Declaration(Class(:A)) Declaration(DataProperty(:dp)) "
+//                + "DataPropertyAssertion(:dp :a \"abc\"^^xsd:string)" 
+//                + "DataPropertyAssertion(:dp :a \"abc\")" 
+//                + "ClassAssertion(DataMaxCardinality(1 :dp) :a)";
+//        loadReasonerWithAxioms(axioms);
+//        assertABoxSatisfiable(true);
+//    }
     
     public void testLangAbbreviation() throws Exception {
         String axioms = "Declaration(NamedIndividual(:a)) Declaration(DataProperty(:dp)) DataPropertyAssertion(:dp :a \"abc@es\"^^rdf:PlainLiteral)" 

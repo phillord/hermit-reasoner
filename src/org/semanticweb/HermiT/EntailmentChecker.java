@@ -72,6 +72,7 @@ import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLInverseFunctionalObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLInverseObjectPropertiesAxiom;
 import org.semanticweb.owlapi.model.OWLIrreflexiveObjectPropertyAxiom;
+import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLNegativeDataPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLNegativeObjectPropertyAssertionAxiom;
@@ -90,7 +91,6 @@ import org.semanticweb.owlapi.model.OWLSubObjectPropertyOfAxiom;
 import org.semanticweb.owlapi.model.OWLSubPropertyChainOfAxiom;
 import org.semanticweb.owlapi.model.OWLSymmetricObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLTransitiveObjectPropertyAxiom;
-import org.semanticweb.owlapi.model.OWLTypedLiteral;
 import org.semanticweb.owlapi.model.SWRLRule;
 
 public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
@@ -475,7 +475,7 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
         }
         for (OWLDataPropertyExpression p : axiom.getDataPropertyExpressions()) {
             OWLDatatype anonymousConstantsDatatype=factory.getOWLDatatype(IRI.create("internal:anonymous-constants"));
-            OWLTypedLiteral constant=factory.getOWLTypedLiteral("internal:constant-"+i,anonymousConstantsDatatype);
+            OWLLiteral constant=factory.getOWLLiteral("internal:constant-"+i,anonymousConstantsDatatype);
             axioms.add(factory.getOWLDataPropertyAssertionAxiom(p,individualA,constant));
             axioms.add(factory.getOWLDataPropertyAssertionAxiom(p,individualB,constant));
             i++;

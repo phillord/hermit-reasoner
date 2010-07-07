@@ -32,7 +32,7 @@
     
     <!-- libraries -->
     <property name="libdir" value="${projectroot}/lib"/>
-    <property name="owlapi" value="${libdir}/owlapi-3.0.0.jar"/>
+    <property name="owlapi" value="${libdir}/owlapi-3.1.0.jar"/>
     <property name="automaton" value="${libdir}/dk.brics.automaton-1.11-2.jar"/>
     <property name="jautomaton" value="${libdir}/jautomata-core-2.0-alpha-1.jar"/>
     <property name="junit" value="${libdir}/junit-4.4.jar"/>
@@ -151,7 +151,7 @@
                 <attribute name="Bundle-Version" value="${version}"/>
                 <attribute name="Bundle-Activator" value="org.protege.editor.core.plugin.DefaultPluginActivator"/>
                 <attribute name="Bundle-ClassPath" value=".,org.semanticweb.${ant.project.name}.jar"/>
-                <attribute name="Require-Bundle" value="org.eclipse.equinox.registry,org.eclipse.equinox.common,org.protege.editor.core.application;bundle-version=4.1,org.protege.editor.owl;bundle-version=4.1,org.semanticweb.owl.owlapi;bundle-version=3.0"/>
+                <attribute name="Require-Bundle" value="org.eclipse.equinox.registry,org.eclipse.equinox.common,org.protege.editor.core.application;bundle-version=4.1,org.protege.editor.owl;bundle-version=4.1,org.semanticweb.owl.owlapi;bundle-version=3.1"/>
                 <attribute name="Update-Url" value="${updatefile}"/>
             </manifest>
             <fileset dir="${classdir}"/>        	
@@ -184,7 +184,7 @@
                 <attribute name="Bundle-Version" value="${version}"/>
                 <attribute name="Bundle-Activator" value="org.protege.editor.core.plugin.DefaultPluginActivator"/>
                 <attribute name="Bundle-ClassPath" value=".,org.semanticweb.${ant.project.name}.jar"/>
-                <attribute name="Require-Bundle" value="org.eclipse.equinox.registry,org.eclipse.equinox.common,org.protege.editor.core.application;bundle-version=4.1,org.protege.editor.owl;bundle-version=4.1,org.semanticweb.owl.owlapi;bundle-version=3.0"/>
+                <attribute name="Require-Bundle" value="org.eclipse.equinox.registry,org.eclipse.equinox.common,org.protege.editor.core.application;bundle-version=4.1,org.protege.editor.owl;bundle-version=4.1,org.semanticweb.owl.owlapi;bundle-version=3.1"/>
                 <attribute name="Update-Url" value="${updatefile}"/>
             </manifest>
             <fileset dir="${classdir}"/>

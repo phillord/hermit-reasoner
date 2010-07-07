@@ -39,6 +39,7 @@ import org.semanticweb.owlapi.model.OWLDataVisitorEx;
 import org.semanticweb.owlapi.model.OWLDatatype;
 import org.semanticweb.owlapi.model.OWLDatatypeRestriction;
 import org.semanticweb.owlapi.model.OWLFacetRestriction;
+import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLObjectAllValuesFrom;
 import org.semanticweb.owlapi.model.OWLObjectComplementOf;
 import org.semanticweb.owlapi.model.OWLObjectExactCardinality;
@@ -50,8 +51,6 @@ import org.semanticweb.owlapi.model.OWLObjectMinCardinality;
 import org.semanticweb.owlapi.model.OWLObjectOneOf;
 import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
 import org.semanticweb.owlapi.model.OWLObjectUnionOf;
-import org.semanticweb.owlapi.model.OWLStringLiteral;
-import org.semanticweb.owlapi.model.OWLTypedLiteral;
 
 public class ExpressionManager {
     protected final OWLDataFactory m_factory;
@@ -190,10 +189,7 @@ public class ExpressionManager {
         public OWLDataRange visit(OWLFacetRestriction node) {
             return null;
         }
-        public OWLDataRange visit(OWLTypedLiteral o) {
-            return null;
-        }
-        public OWLDataRange visit(OWLStringLiteral o) {
+        public OWLDataRange visit(OWLLiteral o) {
             return null;
         }
         public OWLDataRange visit(OWLDataIntersectionOf range) {
@@ -329,10 +325,7 @@ public class ExpressionManager {
         public OWLDataRange visit(OWLFacetRestriction o) {
             return null;
         }
-        public OWLDataRange visit(OWLTypedLiteral o) {
-            return null;
-        }
-        public OWLDataRange visit(OWLStringLiteral o) {
+        public OWLDataRange visit(OWLLiteral o) {
             return null;
         }
         public OWLDataRange visit(OWLDataIntersectionOf range) {
@@ -533,10 +526,7 @@ public class ExpressionManager {
         public OWLDataRange visit(OWLFacetRestriction o) {
             return null;
         }
-        public OWLDataRange visit(OWLTypedLiteral o) {
-            return null;
-        }
-        public OWLDataRange visit(OWLStringLiteral o) {
+        public OWLDataRange visit(OWLLiteral o) {
             return null;
         }
         public OWLDataRange visit(OWLDataIntersectionOf range) {

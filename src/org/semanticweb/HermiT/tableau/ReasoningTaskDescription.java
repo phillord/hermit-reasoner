@@ -15,7 +15,9 @@ public class ReasoningTaskDescription {
         DATA_ROLE_SATISFIABILITY("satisfiability of data role '{0}'"),
         OBJECT_ROLE_SUBSUMPTION("object role subsumption '{0}' => '{1}'"),
         DATA_ROLE_SUBSUMPTION("data role subsumption '{0}' => '{1}'"),
-        INSTANCE_OF("instantiation '{0}' => '{1}'"),
+        INSTANCE_OF("class instance '{0}'('{1}')"),
+        OBJECT_ROLE_INSTANCE_OF("object role instance '{0}'('{1}', '{2}')"),
+        DATA_ROLE_INSTANCE_OF("data role instance '{0}'('{1}', '{2}')"),
         ENTAILMENT("entailment of '{0}'"),
         DOMAIN("check if {0} is domain of {1}"),
         RANGE("check if {0} is range of {1}");
@@ -107,8 +109,14 @@ public class ReasoningTaskDescription {
     public static ReasoningTaskDescription isRoleSubsumedBy(Object subrole,Object superrole,boolean isObjectRole) {
         return new ReasoningTaskDescription(true,(isObjectRole ? StandardTestType.OBJECT_ROLE_SUBSUMPTION : StandardTestType.DATA_ROLE_SUBSUMPTION),subrole,superrole);
     }
-    public static ReasoningTaskDescription isInstanceOf(Object individual,Object atomicConcept) {
-        return new ReasoningTaskDescription(true,StandardTestType.INSTANCE_OF,individual,atomicConcept);
+    public static ReasoningTaskDescription isInstanceOf(Object atomicConcept,Object individual) {
+        return new ReasoningTaskDescription(true,StandardTestType.INSTANCE_OF,atomicConcept,individual);
+    }
+    public static ReasoningTaskDescription isObjectRoleInstanceOf(Object atomicRole,Object individual1,Object individual2) {
+        return new ReasoningTaskDescription(true,StandardTestType.OBJECT_ROLE_INSTANCE_OF,atomicRole,individual1,individual2);
+    }
+    public static ReasoningTaskDescription isDataRoleInstanceOf(Object atomicRole,Object individual1,Object individual2) {
+        return new ReasoningTaskDescription(true,StandardTestType.DATA_ROLE_INSTANCE_OF,atomicRole,individual1,individual2);
     }
     public static ReasoningTaskDescription isAxiomEntailed(Object axiom) {
         return new ReasoningTaskDescription(true,StandardTestType.ENTAILMENT,axiom);
