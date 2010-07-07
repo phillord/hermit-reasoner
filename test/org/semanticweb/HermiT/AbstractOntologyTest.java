@@ -209,7 +209,7 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
     protected OWLLiteral SL(String lexicalForm) {
         return m_dataFactory.getOWLLiteral(lexicalForm);
     }
-    protected OWLLiteral SL(String lexicalForm,String languageTag) {
+    protected OWLLiteral PL(String lexicalForm,String languageTag) {
         return m_dataFactory.getOWLLiteral(lexicalForm,languageTag);
     }
     protected OWLLiteral TL(String lexicalForm,String datatypeURI) {

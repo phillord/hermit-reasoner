@@ -39,7 +39,7 @@ public class ComplexConceptTest extends AbstractReasonerTest {
         OWLObjectProperty f = df.getOWLObjectProperty(IRI.create("file:/c/test.owl#f"));
         OWLDataProperty dp = df.getOWLDataProperty(IRI.create("file:/c/test.owl#dp"));
         
-        OWLClassExpression desc = df.getOWLObjectSomeValuesFrom(f, df.getOWLDataSomeValuesFrom(dp, df.getOWLDataOneOf(SL("abc",""))));
+        OWLClassExpression desc = df.getOWLObjectSomeValuesFrom(f, df.getOWLDataSomeValuesFrom(dp, df.getOWLDataOneOf(PL("abc",""))));
         assertInstanceOf(desc, a, true);
    }
  

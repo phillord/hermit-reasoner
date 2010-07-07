@@ -171,12 +171,12 @@ public class OWLReasonerTest extends AbstractReasonerTest {
         assertTrue(m_reasoner.isConsistent());
 
         assertContainsAll(m_reasoner.getDataPropertyValues(NS_NI("a"),NS_DP("dp")),
-            SL("RDFPlainLiteralwithEmptyLangTag"),
-            SL("RDFPlainLiteralWithLangTag","en-gb")
+            PL("RDFPlainLiteralwithEmptyLangTag",""),
+            PL("RDFPlainLiteralWithLangTag","en-gb")
         );
 
         assertContainsAll(m_reasoner.getDataPropertyValues(NS_NI("b"),NS_DP("dp")),
-            SL("abc")
+            PL("abc","")
         );
 
         assertContainsAll(m_reasoner.getDataPropertyValues(NS_NI("c"),NS_DP("dp")),
