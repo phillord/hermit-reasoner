@@ -108,9 +108,12 @@ public class QuasiOrderClassification {
             unclassifiedElements.removeAll(classifiedElements);
             if (unclassifiedElements.isEmpty())
                 break;
-            Hierarchy<AtomicConcept> smallHierarchy=buildHierarchyOfUnknownPossible(m_possibleSubsumptions.getSuccessors(unclassifiedElement));
-            checkUnknownSubsumersUsingEnhancedTraversal(hierarchyRelation,smallHierarchy.getTopNode(),unclassifiedElement);
-            m_possibleSubsumptions.getSuccessors(unclassifiedElement).clear();
+            Set<AtomicConcept> unknownPossibleSubsumers=m_possibleSubsumptions.getSuccessors(unclassifiedElement);
+            if (!isEveryPossibleSubsumerNonSubsumer(unknownPossibleSubsumers,unclassifiedElement,2,7)){
+	            Hierarchy<AtomicConcept> smallHierarchy=buildHierarchyOfUnknownPossible(unknownPossibleSubsumers);
+	            checkUnknownSubsumersUsingEnhancedTraversal(hierarchyRelation,smallHierarchy.getTopNode(),unclassifiedElement);
+            }
+            unknownPossibleSubsumers.clear();
         }
         return buildTransitivelyReducedHierarchy(m_knownSubsumptions);
     }
@@ -278,8 +281,6 @@ public class QuasiOrderClassification {
         Set<HierarchyNode<AtomicConcept>> startSearch=Collections.singleton(startNode);
         Set<HierarchyNode<AtomicConcept>> visited=new HashSet<HierarchyNode<AtomicConcept>>(startSearch);
         Queue<HierarchyNode<AtomicConcept>> toProcess=new LinkedList<HierarchyNode<AtomicConcept>>(startSearch);
-        if (isEveryChildANonSubsumer(startNode.getChildNodes(),pickedElement,2))
-            return;
         while (!toProcess.isEmpty()) {
             HierarchyNode<AtomicConcept> current=toProcess.remove();
             Set<HierarchyNode<AtomicConcept>> subordinateElements=current.getChildNodes();
@@ -297,17 +298,18 @@ public class QuasiOrderClassification {
             }
         }
     }
-    protected boolean isEveryChildANonSubsumer(Set<HierarchyNode<AtomicConcept>> unknownSubsumerNodes,AtomicConcept pickedElement,int childNumberThreshold) {
-        if (unknownSubsumerNodes.size()>childNumberThreshold) {
+    protected boolean isEveryPossibleSubsumerNonSubsumer(Set<AtomicConcept> unknownPossibleSubsumers,AtomicConcept pickedElement,int lowerBound,int upperBound) {
+        if (unknownPossibleSubsumers.size()>lowerBound && unknownPossibleSubsumers.size()<upperBound) {
             Individual freshIndividual=Individual.createAnonymous("fresh-individual");
             Atom subconceptAssertion=Atom.create(pickedElement,freshIndividual);
             Set<Atom> superconceptAssertions=new HashSet<Atom>();
-            for (HierarchyNode<AtomicConcept> unknownSupNode : unknownSubsumerNodes)
-                superconceptAssertions.add(Atom.create(unknownSupNode.getRepresentative(),freshIndividual));
-            Object[] superconcepts=new Object[superconceptAssertions.size()];
+            Object[] superconcepts=new Object[unknownPossibleSubsumers.size()];
             int index=0;
-            for (Atom atom : superconceptAssertions)
+            for (AtomicConcept unknownSupNode : unknownPossibleSubsumers){
+            	Atom atom = Atom.create(unknownSupNode,freshIndividual);
+                superconceptAssertions.add(atom);
                 superconcepts[index++]=atom.getDLPredicate();
+            }
             if (m_tableau.isSatisfiable(false,Collections.singleton(subconceptAssertion),null,null,superconceptAssertions,null,getSubsumedByListTestDescription(pickedElement,superconcepts))) {
                 prunePossibleSubsumers();
                 return true;
