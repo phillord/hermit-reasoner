@@ -47,9 +47,9 @@ public class OWLLinkTest extends AbstractReasonerTest {
         createReasoner();
         OWLObjectProperty knows=m_dataFactory.getOWLObjectProperty(IRI.create(mainOntology+"#knows"));
         NodeSet<OWLObjectPropertyExpression> peers=m_reasoner.getSubObjectProperties(knows, true);
-        assertTrue(peers.getFlattened().size()==13); // Test A from the Bob paper
+        assertTrue(peers.getFlattened().size()==20); // Test A from the Bob paper
         peers=m_reasoner.getSubObjectProperties(knows, false);
-        assertTrue(peers.getFlattened().size()==51); // Test B from the Bob paper
+        assertTrue(peers.getFlattened().size()==101); // Test B from the Bob paper
     }
     
     public void testUpdatesBuffered() throws Exception {
@@ -172,15 +172,22 @@ public class OWLLinkTest extends AbstractReasonerTest {
         Set<Node<OWLObjectPropertyExpression>> expectedSet=new HashSet<Node<OWLObjectPropertyExpression>>();
         String[][] disjoints=new String[][]{
                 new String[]{"http://example.com/owl/families/hasFather"}, 
-                new String[] {"http://example.com/owl/families/hasParent"}, 
-                new String[] {"http://example.com/owl/families/hasChild", "http://example.org/otherOntologies/families/child"}
+                new String[] {"http://example.com/owl/families/hasParent", "InverseOf(http://example.org/otherOntologies/families/child)", "InverseOf(http://example.com/owl/families/hasChild)"}, 
+                new String[] {"http://example.com/owl/families/hasChild", "http://example.org/otherOntologies/families/child", "InverseOf(http://example.com/owl/families/hasParent)"}, 
+                new String[] {"InverseOf(http://example.com/owl/families/hasFather)"}
         };
         OWLObjectPropertyExpression ope;
         Node<OWLObjectPropertyExpression> node;
         for (String[] disjointStrings : disjoints) {
             Set<OWLObjectPropertyExpression> opeSet=new HashSet<OWLObjectPropertyExpression>();
             for (String opeString : disjointStrings) {
-                ope=m_dataFactory.getOWLObjectProperty(IRI.create(opeString));
+                if (opeString.startsWith("InverseOf(")) {
+                    String opString=opeString.substring(10,opeString.length()-1);
+                    OWLObjectProperty op=m_dataFactory.getOWLObjectProperty(IRI.create(opString));
+                    ope=m_dataFactory.getOWLObjectInverseOf(op);
+                } else {
+                    ope=m_dataFactory.getOWLObjectProperty(IRI.create(opeString));
+                }
                 opeSet.add(ope);
             }
             node=new OWLObjectPropertyNode(opeSet);
@@ -197,14 +204,22 @@ public class OWLLinkTest extends AbstractReasonerTest {
         result=m_reasoner.getDisjointObjectProperties(m_ontologyManager.getOWLDataFactory().getOWLObjectProperty(IRI.create(NS+"hasParent")));
         expectedSet=new HashSet<Node<OWLObjectPropertyExpression>>();
         disjoints=new String[][]{
-                new String[]{"http://example.com/owl/families/hasSpouse"}, 
-                new String[] {"http://example.com/owl/families/hasWife"}, 
-                new String[] {"http://example.com/owl/families/hasChild", "http://example.org/otherOntologies/families/child"}
+                new String[] {"http://example.com/owl/families/hasSpouse", "InverseOf(http://example.com/owl/families/hasSpouse)"}, 
+                new String[] {"http://example.com/owl/families/hasWife"},
+                new String[] {"InverseOf(http://example.com/owl/families/hasWife)"}, 
+                new String[] {"http://example.com/owl/families/hasChild", "http://example.org/otherOntologies/families/child", "InverseOf(http://example.com/owl/families/hasParent)"}, 
+                new String[] {"InverseOf(http://example.com/owl/families/hasFather)"}
         };
         for (String[] disjointStrings : disjoints) {
             Set<OWLObjectPropertyExpression> opeSet=new HashSet<OWLObjectPropertyExpression>();
             for (String opeString : disjointStrings) {
-                ope=m_dataFactory.getOWLObjectProperty(IRI.create(opeString));
+                if (opeString.startsWith("InverseOf(")) {
+                    String opString=opeString.substring(10,opeString.length()-1);
+                    OWLObjectProperty op=m_dataFactory.getOWLObjectProperty(IRI.create(opString));
+                    ope=m_dataFactory.getOWLObjectInverseOf(op);
+                } else {
+                    ope=m_dataFactory.getOWLObjectProperty(IRI.create(opeString));
+                }
                 opeSet.add(ope);
             }
             node=new OWLObjectPropertyNode(opeSet);
