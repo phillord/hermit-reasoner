@@ -928,8 +928,6 @@ public class OWLClausification {
         }
         public Object visit(OWLLiteral object) {
             try {
-//                "Family Guy" is an abbreviation for "Family Guy@"^^rdf:PlainLiteral Ñ a literal with the lexical form "Family Guy@" and the datatype rdf:PlainLiteral Ñ which denotes a string "Family Guy" without a language tag.
-//                Furthermore, "Padre de familia"@es is an abbreviation for the literal "Padre de familia@es"^^rdf:PlainLiteral, which denotes a pair consisting of the string "Padre de familia" and the language tag es.
                 if (object.isRDFPlainLiteral()) {
                     if (object.hasLang()) {
                         return Constant.create(object.getLiteral()+"@"+object.getLang(),Prefixes.s_semanticWebPrefixes.get("rdf")+"PlainLiteral");

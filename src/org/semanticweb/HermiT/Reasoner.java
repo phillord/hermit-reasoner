@@ -776,14 +776,7 @@ public class Reasoner implements OWLReasoner {
             nodes=HierarchySearch.search(searchPredicate,Collections.singleton(m_atomicConceptHierarchy.getTopNode()),null);
             m_directObjectRoleDomains.put(role,nodes);
         }
-        if (direct) {
-            Set<HierarchyNode<AtomicConcept>> directNodes=new HashSet<HierarchyNode<AtomicConcept>>();
-            for (HierarchyNode<AtomicConcept> node : nodes) {
-                directNodes.addAll(node.getParentNodes());
-            }
-            nodes=directNodes;
-        } else 
-            nodes=HierarchyNode.getAncestorNodes(nodes);
+        if (!direct) nodes=HierarchyNode.getAncestorNodes(nodes);
         return atomicConceptHierarchyNodesToNodeSet(nodes);
     }
     public NodeSet<OWLClass> getObjectPropertyRanges(OWLObjectPropertyExpression propertyExpression,boolean direct) {
@@ -818,7 +811,7 @@ public class Reasoner implements OWLReasoner {
         return atomicConceptHierarchyNodesToNodeSet(nodes);
     }
     public Node<OWLObjectPropertyExpression> getInverseObjectProperties(OWLObjectPropertyExpression propertyExpression) {
-        return getEquivalentObjectProperties(propertyExpression.getInverseProperty());
+        return getEquivalentObjectProperties(propertyExpression.getSimplified());
     }
     public NodeSet<OWLObjectPropertyExpression> getDisjointObjectProperties(OWLObjectPropertyExpression propertyExpression) {
         checkPreConditions(propertyExpression);
@@ -1374,27 +1367,28 @@ public class Reasoner implements OWLReasoner {
         Set<OWLLiteral> result=new HashSet<OWLLiteral>();
         if (m_dlOntology.hasDatatypes()) {
             OWLDataFactory factory=getDataFactory();
-            Individual individual=H(namedIndividual);
             Set<OWLDataProperty> relevantDataProperties=getSubDataProperties(property,false).getFlattened();
             relevantDataProperties.add(property);
+            Set<OWLNamedIndividual> relevantIndividuals=getSameIndividuals(namedIndividual).getEntities();
             for (OWLDataProperty dataProperty : relevantDataProperties) {
                 AtomicRole atomicRole=H(dataProperty);
                 Map<Individual,Set<Constant>> dataPropertyAssertions=m_dlOntology.getDataPropertyAssertions().get(atomicRole);
                 if (dataPropertyAssertions!=null) {
-                    if (dataPropertyAssertions.containsKey(individual)) {
-                        for (Constant constant : dataPropertyAssertions.get(individual)) {
-                            String lexicalForm=constant.getLexicalForm();
-                            String datatypeURI=constant.getDatatypeURI();
-                            OWLLiteral literal;
-                            if ((Prefixes.s_semanticWebPrefixes.get("xsd")+"string").equals(datatypeURI))
-                                literal=factory.getOWLLiteral(lexicalForm);
-                            else if ((Prefixes.s_semanticWebPrefixes.get("rdf")+"PlainLiteral").equals(datatypeURI)) {
-                                int atPosition=lexicalForm.lastIndexOf('@');
-                                literal=factory.getOWLLiteral(lexicalForm.substring(0,atPosition),lexicalForm.substring(atPosition+1));
+                    for (OWLNamedIndividual ind : relevantIndividuals) {
+                        Individual individual=H(ind);
+                        if (dataPropertyAssertions.containsKey(individual)) {
+                            for (Constant constant : dataPropertyAssertions.get(individual)) {
+                                String lexicalForm=constant.getLexicalForm();
+                                String datatypeURI=constant.getDatatypeURI();
+                                OWLLiteral literal;
+                                if ((Prefixes.s_semanticWebPrefixes.get("rdf")+"PlainLiteral").equals(datatypeURI)) {
+                                    int atPosition=lexicalForm.lastIndexOf('@');
+                                    literal=factory.getOWLLiteral(lexicalForm.substring(0,atPosition),lexicalForm.substring(atPosition+1));
+                                } else {
+                                    literal=factory.getOWLLiteral(lexicalForm, factory.getOWLDatatype(IRI.create(datatypeURI)));
+                                }
+                                result.add(literal);
                             }
-                            else
-                                literal=factory.getOWLLiteral(lexicalForm,factory.getOWLDatatype(IRI.create(datatypeURI)));
-                            result.add(literal);
                         }
                     }
                 }
@@ -1547,30 +1541,6 @@ public class Reasoner implements OWLReasoner {
                 if (!individual.isAnonymous() && !Prefixes.isInternalIRI(individual.getIRI()))
                     result.add(individual);
     }
-//    protected Set<HierarchyNode<Role>> getDirectSuperObjectRoleNodes(final Individual individual1,final Individual individual2) {
-//        HierarchySearch.SearchPredicate<HierarchyNode<Role>> predicate=new HierarchySearch.SearchPredicate<HierarchyNode<Role>>() {
-//            public Set<HierarchyNode<Role>> getSuccessorElements(HierarchyNode<Role> u) {
-//                return u.getChildNodes();
-//            }
-//            public Set<HierarchyNode<Role>> getPredecessorElements(HierarchyNode<Role> u) {
-//                return u.getParentNodes();
-//            }
-//            public boolean trueOf(HierarchyNode<Role> u) {
-//                Role role=u.getRepresentative();
-//                if ((role instanceof AtomicRole && AtomicRole.TOP_OBJECT_ROLE.equals((AtomicRole)role)) || (role instanceof InverseRole && AtomicRole.TOP_OBJECT_ROLE.equals(((InverseRole)role).getInverseOf())))
-//                    return true;
-//                else {
-//                    if (role instanceof AtomicRole)
-//                        return !getTableau().isSatisfiable(true,true,null,Collections.singleton(Atom.create((AtomicRole)role,individual1,individual2)),null,null,null,ReasoningTaskDescription.isObjectRoleInstanceOf((AtomicRole)role,individual1,individual2));
-//                    else {
-//                        AtomicRole atomicRole=((InverseRole)role).getInverseOf();
-//                        return !getTableau().isSatisfiable(true,true,null,Collections.singleton(Atom.create(atomicRole,individual2,individual1)),null,null,null,ReasoningTaskDescription.isObjectRoleInstanceOf(atomicRole,individual2,individual1));
-//                    }
-//                }
-//            }
-//        };
-//        return HierarchySearch.search(predicate,Collections.singleton(m_objectRoleHierarchy.getTopNode()),null);
-//    }
     protected Set<HierarchyNode<AtomicConcept>> getDirectSuperConceptNodes(final Individual individual) {
         HierarchySearch.SearchPredicate<HierarchyNode<AtomicConcept>> predicate=new HierarchySearch.SearchPredicate<HierarchyNode<AtomicConcept>>() {
             public Set<HierarchyNode<AtomicConcept>> getSuccessorElements(HierarchyNode<AtomicConcept> u) {

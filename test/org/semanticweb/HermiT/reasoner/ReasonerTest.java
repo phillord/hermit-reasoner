@@ -514,8 +514,6 @@ public class ReasonerTest extends AbstractReasonerTest {
         assertTrue(m_reasoner.hasType(a2, A, false));
     }
     public void testObjectPropertyDomainsTimothyBug() throws Exception {
-//      If direct is true, a NodeSet containing named classes such that for each named class C in the node set, the set of reasoner axioms entails ObjectPropertyDomain(pe C) and the set of reasoner axioms entails DirectSubClassOf(ObjectSomeValuesFrom(pe owl:Thing) C)
-//      If direct is false, a NodeSet containing named classes such that for each named class C in the node set, the set of reasoner axioms entails ObjectPropertyDomain(pe C), that is, the set of reasoner axioms entails StrictSubClassOf(ObjectSomeValuesFrom(pe owl:Thing) C)
         String axioms = "EquivalentClasses(:B ObjectSomeValuesFrom(:q owl:Thing))"
             + "SubClassOf(:B :A)";
         loadOntologyWithAxioms(axioms);
@@ -529,7 +527,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         assertTrue(result.containsEntity(B));
         assertTrue(result.containsEntity(m_dataFactory.getOWLThing()));
         assertEquals(3,result.getFlattened().size());
-        assertTrue(resultDirect.containsEntity(A));
+        assertTrue(resultDirect.containsEntity(B));
         assertEquals(1,resultDirect.getFlattened().size());
     }
     public void testDatatypeLiterals() throws Exception {

@@ -1,11 +1,15 @@
 package org.semanticweb.HermiT.reasoner;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
+import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.reasoner.IndividualNodeSetPolicy;
 import org.semanticweb.owlapi.reasoner.Node;
 import org.semanticweb.owlapi.reasoner.NodeSet;
@@ -16,7 +20,39 @@ public class OWLReasonerTest extends AbstractReasonerTest {
     public OWLReasonerTest(String name) {
         super(name);
     }
-
+    public void testgetInverseObjectPropertyExpressions() throws Exception {
+        String axioms="SubObjectPropertyOf(:r ObjectInverseOf(:s))"
+            + "SubObjectPropertyOf(:s ObjectInverseOf(:t))"
+            + "SubObjectPropertyOf(:t :r)";
+        loadOntologyWithAxioms(axioms);
+        createOWLReasoner();
+        Node<OWLObjectPropertyExpression> r_inverses=m_reasoner.getInverseObjectProperties(OP(IRI("r")));
+        Node<OWLObjectPropertyExpression> invr_inverses=m_reasoner.getInverseObjectProperties(m_dataFactory.getOWLObjectInverseOf(OP(IRI("r"))));
+        Set<OWLObjectPropertyExpression> r_inverses_expected=new HashSet<OWLObjectPropertyExpression>();
+        r_inverses_expected.add(OP(IRI("r")));
+        r_inverses_expected.add(m_dataFactory.getOWLObjectInverseOf(OP(IRI("s"))));
+        r_inverses_expected.add(OP(IRI("t")));
+        Set<OWLObjectPropertyExpression> invr_inverses_expected=new HashSet<OWLObjectPropertyExpression>();
+        invr_inverses_expected.add(m_dataFactory.getOWLObjectInverseOf(OP(IRI("r"))));
+        invr_inverses_expected.add(m_dataFactory.getOWLObjectInverseOf(OP(IRI("t"))));
+        invr_inverses_expected.add(OP(IRI("s")));
+        assertEquals(r_inverses.getEntities(), r_inverses_expected);
+        assertEquals(invr_inverses.getEntities(), invr_inverses_expected);
+    }
+    public void testBottomObjectPropertySubs() throws Exception {
+        String axioms="SubObjectPropertyOf(:r :s)";
+        loadOntologyWithAxioms(axioms);
+        createOWLReasoner();
+        assertTrue(m_reasoner.getSubObjectProperties(m_dataFactory.getOWLBottomObjectProperty(), false).isEmpty());
+        assertTrue(m_reasoner.getSubObjectProperties(m_dataFactory.getOWLBottomObjectProperty(), true).isEmpty());
+    }
+    public void testTopObjectPropertySupers() throws Exception {
+        String axioms="SubObjectPropertyOf(:r :s)";
+        loadOntologyWithAxioms(axioms);
+        createOWLReasoner();
+        assertTrue(m_reasoner.getSuperObjectProperties(m_dataFactory.getOWLTopObjectProperty(), false).isEmpty());
+        assertTrue(m_reasoner.getSuperObjectProperties(m_dataFactory.getOWLTopObjectProperty(), true).isEmpty());
+    }  
     public void testIncrementalAddition() throws Exception {
         String axioms="SubClassOf(:A :B)";
         loadOntologyWithAxioms(axioms);
