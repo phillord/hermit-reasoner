@@ -95,7 +95,8 @@ public final class HyperresolutionManager implements Serializable {
                         firstTableRetrieval=extensionTable.createRetrieval(new boolean[extensionTable.getArity()],ExtensionTable.View.DELTA_OLD);
                         retrievalsByArity.put(arity,firstTableRetrieval);
                     }
-                    CompiledDLClauseInfo normalTupleConsumer=new CompiledDLClauseInfo(tableau,swappedDLClause,entry.getValue(),firstTableRetrieval,bufferSupply,valuesBufferManager,groundDisjunctionHeaderManager,unionDependencySetsBySize,m_tupleConsumersByDeltaPredicate.get(deltaDLPredicate));
+                    DLClauseEvaluator evaluator=new DLClauseEvaluator(tableau,swappedDLClause,entry.getValue(),firstTableRetrieval,bufferSupply,valuesBufferManager,groundDisjunctionHeaderManager,unionDependencySetsBySize);
+                    CompiledDLClauseInfo normalTupleConsumer=new CompiledDLClauseInfo(evaluator,m_tupleConsumersByDeltaPredicate.get(deltaDLPredicate));
                     m_tupleConsumersByDeltaPredicate.put(deltaDLPredicate,normalTupleConsumer);
                     if (deltaDLPredicate instanceof AtomicRole && deltaAtom.getArgument(0) instanceof Variable && deltaAtom.getArgument(1) instanceof Variable) {
                         AtomicRole deltaAtomicRole=(AtomicRole)deltaDLPredicate;
@@ -108,7 +109,7 @@ public final class HyperresolutionManager implements Serializable {
                             }
                             for (Atom guardingAtom : guardingAtomicConceptAtoms1) {
                                 AtomicConcept atomicConcept=(AtomicConcept)guardingAtom.getDLPredicate();
-                                CompiledDLClauseInfo optimizedTupleConsumer=new CompiledDLClauseInfo(tableau,swappedDLClause,entry.getValue(),firstTableRetrieval,bufferSupply,valuesBufferManager,groundDisjunctionHeaderManager,unionDependencySetsBySize,compiledDLClauseInfos.get(atomicConcept));
+                                CompiledDLClauseInfo optimizedTupleConsumer=new CompiledDLClauseInfo(evaluator,compiledDLClauseInfos.get(atomicConcept));
                                 compiledDLClauseInfos.put(atomicConcept,optimizedTupleConsumer);
                             }
                         }
@@ -120,12 +121,12 @@ public final class HyperresolutionManager implements Serializable {
                             }
                             for (Atom guardingAtom : guardingAtomicConceptAtoms2) {
                                 AtomicConcept atomicConcept=(AtomicConcept)guardingAtom.getDLPredicate();
-                                CompiledDLClauseInfo optimizedTupleConsumer=new CompiledDLClauseInfo(tableau,swappedDLClause,entry.getValue(),firstTableRetrieval,bufferSupply,valuesBufferManager,groundDisjunctionHeaderManager,unionDependencySetsBySize,compiledDLClauseInfos.get(atomicConcept));
+                                CompiledDLClauseInfo optimizedTupleConsumer=new CompiledDLClauseInfo(evaluator,compiledDLClauseInfos.get(atomicConcept));
                                 compiledDLClauseInfos.put(atomicConcept,optimizedTupleConsumer);
                             }
                         }
                         if (guardingAtomicConceptAtoms1.isEmpty() && guardingAtomicConceptAtoms2.isEmpty()) {
-                            CompiledDLClauseInfo unguardedTupleConsumer=new CompiledDLClauseInfo(tableau,swappedDLClause,entry.getValue(),firstTableRetrieval,bufferSupply,valuesBufferManager,groundDisjunctionHeaderManager,unionDependencySetsBySize,m_atomicRoleTupleConsumersUnguarded.get(deltaAtomicRole));
+                            CompiledDLClauseInfo unguardedTupleConsumer=new CompiledDLClauseInfo(evaluator,m_atomicRoleTupleConsumersUnguarded.get(deltaAtomicRole));
                             m_atomicRoleTupleConsumersUnguarded.put(deltaAtomicRole,unguardedTupleConsumer);
                         }
                     }
@@ -196,7 +197,7 @@ public final class HyperresolutionManager implements Serializable {
                     if (unguardedCompiledDLClauseInfo!=null && unoptimizedCompiledDLClauseInfo.m_indexInList>((Node)deltaOldTupleBuffer[1]).getNumberOfPositiveAtomicConcepts()+((Node)deltaOldTupleBuffer[2]).getNumberOfPositiveAtomicConcepts()+unguardedCompiledDLClauseInfo.m_indexInList) {
                         applyUnoptimized=false;
                         while (unguardedCompiledDLClauseInfo!=null && !m_extensionManager.containsClash()) {
-                            unguardedCompiledDLClauseInfo.evaluate();
+                            unguardedCompiledDLClauseInfo.m_evaluator.evaluate();
                             unguardedCompiledDLClauseInfo=unguardedCompiledDLClauseInfo.m_next;
                         }
                         if (!m_extensionManager.containsClash()) {
@@ -210,7 +211,7 @@ public final class HyperresolutionManager implements Serializable {
                                     if (atomicConceptObject instanceof AtomicConcept) {
                                         CompiledDLClauseInfo optimizedCompiledDLClauseInfo=compiledDLClauseInfos.get(atomicConceptObject);
                                         while (optimizedCompiledDLClauseInfo!=null && !m_extensionManager.containsClash()) {
-                                            optimizedCompiledDLClauseInfo.evaluate();
+                                            optimizedCompiledDLClauseInfo.m_evaluator.evaluate();
                                             optimizedCompiledDLClauseInfo=optimizedCompiledDLClauseInfo.m_next;
                                         }
                                     }
@@ -229,7 +230,7 @@ public final class HyperresolutionManager implements Serializable {
                                     if (atomicConceptObject instanceof AtomicConcept) {
                                         CompiledDLClauseInfo optimizedCompiledDLClauseInfo=compiledDLClauseInfos.get(atomicConceptObject);
                                         while (optimizedCompiledDLClauseInfo!=null && !m_extensionManager.containsClash()) {
-                                            optimizedCompiledDLClauseInfo.evaluate();
+                                            optimizedCompiledDLClauseInfo.m_evaluator.evaluate();
                                             optimizedCompiledDLClauseInfo=optimizedCompiledDLClauseInfo.m_next;
                                         }
                                     }
@@ -241,7 +242,7 @@ public final class HyperresolutionManager implements Serializable {
                 }
                 if (applyUnoptimized) {
                     while (unoptimizedCompiledDLClauseInfo!=null && !m_extensionManager.containsClash()) {
-                        unoptimizedCompiledDLClauseInfo.evaluate();
+                        unoptimizedCompiledDLClauseInfo.m_evaluator.evaluate();
                         unoptimizedCompiledDLClauseInfo=unoptimizedCompiledDLClauseInfo.m_next;
                     }
                 }
@@ -250,14 +251,15 @@ public final class HyperresolutionManager implements Serializable {
         }
     }
 
-    protected static final class CompiledDLClauseInfo extends DLClauseEvaluator {
+    protected static final class CompiledDLClauseInfo {
         private static final long serialVersionUID=2873489982404000730L;
 
+        protected final DLClauseEvaluator m_evaluator;
         protected final CompiledDLClauseInfo m_next;
         protected final int m_indexInList;
 
-        public CompiledDLClauseInfo(Tableau tableau,DLClause bodyDLClause,List<DLClause> headDLClauses,ExtensionTable.Retrieval firstAtomRetrieval,DLClauseEvaluator.BufferSupply bufferSupply,ValuesBufferManager valuesBufferManager,DLClauseEvaluator.GroundDisjunctionHeaderManager groundDisjunctionHeaderManager,Map<Integer,UnionDependencySet> unionDependencySetsBySize,CompiledDLClauseInfo next) {
-            super(tableau,bodyDLClause,headDLClauses,firstAtomRetrieval,bufferSupply,valuesBufferManager,groundDisjunctionHeaderManager,unionDependencySetsBySize);
+        public CompiledDLClauseInfo(DLClauseEvaluator evaluator,CompiledDLClauseInfo next) {
+            m_evaluator=evaluator;
             m_next=next;
             if (m_next==null)
                 m_indexInList=1;
