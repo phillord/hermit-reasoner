@@ -194,7 +194,7 @@ public final class HyperresolutionManager implements Serializable {
                 boolean applyUnoptimized=true;
                 if (unoptimizedCompiledDLClauseInfo!=null && deltaOldTupleBuffer[0] instanceof AtomicRole) {
                     CompiledDLClauseInfo unguardedCompiledDLClauseInfo=m_atomicRoleTupleConsumersUnguarded.get(deltaOldPredicate);
-                    if (unguardedCompiledDLClauseInfo!=null && unoptimizedCompiledDLClauseInfo.m_indexInList>((Node)deltaOldTupleBuffer[1]).getNumberOfPositiveAtomicConcepts()+((Node)deltaOldTupleBuffer[2]).getNumberOfPositiveAtomicConcepts()+unguardedCompiledDLClauseInfo.m_indexInList) {
+                    if (unoptimizedCompiledDLClauseInfo.m_indexInList>((Node)deltaOldTupleBuffer[1]).getNumberOfPositiveAtomicConcepts()+((Node)deltaOldTupleBuffer[2]).getNumberOfPositiveAtomicConcepts()+(unguardedCompiledDLClauseInfo==null ? 0 : unguardedCompiledDLClauseInfo.m_indexInList)) {
                         applyUnoptimized=false;
                         while (unguardedCompiledDLClauseInfo!=null && !m_extensionManager.containsClash()) {
                             unguardedCompiledDLClauseInfo.m_evaluator.evaluate();
