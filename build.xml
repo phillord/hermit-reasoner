@@ -77,7 +77,7 @@
 
     <target name="compile">
         <mkdir dir="${classdir}"/>
-        <javac destdir="${classdir}" deprecation="yes" debug="${debug}" debuglevel="lines,vars,source" target="1.5" source="1.5">
+        <javac includeantruntime="false" destdir="${classdir}" deprecation="yes" debug="${debug}" debuglevel="lines,vars,source" target="1.5" source="1.5">
             <compilerarg value="-Xlint:all-path"/>
             <src refid="sourcepath"/>
             <classpath refid="classpath"/>
@@ -222,7 +222,7 @@
 
     <target name="compiletest" depends="compile">
         <mkdir dir="${testclassdir}"/>
-        <javac destdir="${testclassdir}" deprecation="yes">
+        <javac destdir="${testclassdir}" deprecation="yes" includeantruntime="false">
             <compilerarg value="-Xlint:unchecked"/>
             <src refid="testsourcepath"/>
             <classpath refid="classpath"/>
