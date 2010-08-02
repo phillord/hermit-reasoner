@@ -50,7 +50,7 @@ public class BooleanDatatypeHandler implements DatatypeHandler {
     public void validateDatatypeRestriction(DatatypeRestriction datatypeRestriction) throws UnsupportedFacetException {
         assert XSD_BOOLEAN.equals(datatypeRestriction.getDatatypeURI());
         if (datatypeRestriction.getNumberOfFacetRestrictions()>0)
-            throw new UnsupportedFacetException("xsd:boolean does not provide any facets.");
+            throw new UnsupportedFacetException("The xsd:boolean datatype does not provide any facets, but the ontology contains a restriction on boolean with facets: "+this.toString());
     }
     public ValueSpaceSubset createValueSpaceSubset(DatatypeRestriction datatypeRestriction) {
         assert XSD_BOOLEAN.equals(datatypeRestriction.getDatatypeURI());

@@ -62,11 +62,11 @@ public class FloatDatatypeHandler implements DatatypeHandler {
         assert XSD_FLOAT.equals(datatypeRestriction.getDatatypeURI());
         for (int index=datatypeRestriction.getNumberOfFacetRestrictions()-1;index>=0;--index) {
             String facetURI=datatypeRestriction.getFacetURI(index);
-            if (!s_supportedFacetURIs.contains(facetURI))
-                throw new UnsupportedFacetException("Facet with URI '"+facetURI+"' is not supported on xsd:float.");
+            if (!s_supportedFacetURIs.contains(facetURI)) 
+                throw new UnsupportedFacetException("A facet with URI '"+facetURI+"' is not supported on xsd:float. The xsd:float datatype supports only xsd:minInclusive, xsd:maxInclusive, xsd:minExclusive, and xsd:maxExclusive, but the ontology contains a datatype restriction "+this.toString());
             Object facetDataValue=datatypeRestriction.getFacetValue(index).getDataValue();
-            if (!(facetDataValue instanceof Float))
-                throw new UnsupportedFacetException("Facet with URI '"+facetURI+"' takes only floats as values.");
+            if (!(facetDataValue instanceof Float)) 
+                throw new UnsupportedFacetException("The '"+facetURI+"' facet takes only floats as values when used on an xsd:float datatype, but the ontology contains a datatype restriction "+this.toString());
         }
     }
     public ValueSpaceSubset createValueSpaceSubset(DatatypeRestriction datatypeRestriction) {
@@ -191,7 +191,7 @@ public class FloatDatatypeHandler implements DatatypeHandler {
                     upperBoundInclusive=facetDataValue;
             }
             else
-                throw new IllegalStateException("Internal error: facet '"+facetURI+"' is not supported by xsd:double.");
+                throw new IllegalStateException("Internal error: facet '"+facetURI+"' is not supported by xsd:float.");
         }
         if (FloatInterval.isIntervalEmpty(lowerBoundInclusive,upperBoundInclusive))
             return null;

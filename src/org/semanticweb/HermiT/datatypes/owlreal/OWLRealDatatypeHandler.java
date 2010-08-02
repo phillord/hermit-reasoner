@@ -129,14 +129,14 @@ public class OWLRealDatatypeHandler implements DatatypeHandler {
         assert s_intervalsByDatatype.keySet().contains(datatypeRestriction.getDatatypeURI());
         for (int index=datatypeRestriction.getNumberOfFacetRestrictions()-1;index>=0;--index) {
             String facetURI=datatypeRestriction.getFacetURI(index);
-            if (!s_supportedFacetURIs.contains(facetURI))
-                throw new UnsupportedFacetException("Facet with URI '"+facetURI+"' is not supported on datatypes derived from owl:real.");
+            if (!s_supportedFacetURIs.contains(facetURI)) 
+                throw new UnsupportedFacetException("A facet with URI '"+facetURI+"' is not supported on datatypes derived from owl:real. The owl:real derived datatypes support only xsd:minInclusive, xsd:maxInclusive, xsd:minExclusive, and xsd:maxExclusive, but the ontology contains a datatype restriction "+this.toString());
             Constant facetValue=datatypeRestriction.getFacetValue(index);
             Object facetDataValue=facetValue.getDataValue();
             if (!(facetDataValue instanceof Number))
-                throw new UnsupportedFacetException("Facet with URI '"+facetURI+"' takes only numbers as values.");
+                throw new UnsupportedFacetException("The '"+facetURI+"' facet takes only numbers as values when used on a datatype derived from owl:real, but the ontology contains a datatype restriction "+this.toString()+" where "+facetDataValue+" is not a number. ");
             if (!Numbers.isValidNumber((Number)facetDataValue))
-                throw new UnsupportedFacetException("Facet with URI '"+facetURI+"' does not support '"+facetValue.toString()+"' as value.");
+                throw new UnsupportedFacetException("The facet with URI '"+facetURI+"' does not support '"+facetValue.toString()+"' as value. The value should be an integer, a decimal, or a rational, but this seems not to be the case in the datatype restriction "+this.toString());
         }
     }
     public ValueSpaceSubset createValueSpaceSubset(DatatypeRestriction datatypeRestriction) {

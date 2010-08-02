@@ -62,11 +62,11 @@ public class DoubleDatatypeHandler implements DatatypeHandler {
         assert XSD_DOUBLE.equals(datatypeRestriction.getDatatypeURI());
         for (int index=datatypeRestriction.getNumberOfFacetRestrictions()-1;index>=0;--index) {
             String facetURI=datatypeRestriction.getFacetURI(index);
-            if (!s_supportedFacetURIs.contains(facetURI))
-                throw new UnsupportedFacetException("Facet with URI '"+facetURI+"' is not supported on xsd:double.");
+            if (!s_supportedFacetURIs.contains(facetURI)) 
+                throw new UnsupportedFacetException("A facet with URI '"+facetURI+"' is not supported on xsd:double. The xsd:double datatype supports only xsd:minInclusive, xsd:maxInclusive, xsd:minExclusive, and xsd:maxExclusive, but the ontology contains a datatype restriction "+this.toString());
             Object facetDataValue=datatypeRestriction.getFacetValue(index).getDataValue();
-            if (!(facetDataValue instanceof Double))
-                throw new UnsupportedFacetException("Facet with URI '"+facetURI+"' takes only doubles as values.");
+            if (!(facetDataValue instanceof Double)) 
+                throw new UnsupportedFacetException("The '"+facetURI+"' facet takes only doubles as values when used on an xsd:double datatype, but the ontology contains a datatype restriction "+this.toString());
         }
     }
     public ValueSpaceSubset createValueSpaceSubset(DatatypeRestriction datatypeRestriction) {
