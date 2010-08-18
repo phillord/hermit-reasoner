@@ -14,7 +14,6 @@ import org.semanticweb.owlapi.reasoner.IndividualNodeSetPolicy;
 import org.semanticweb.owlapi.reasoner.Node;
 import org.semanticweb.owlapi.reasoner.NodeSet;
 
-
 public class OWLReasonerTest extends AbstractReasonerTest {
 
     public OWLReasonerTest(String name) {
@@ -336,7 +335,16 @@ public class OWLReasonerTest extends AbstractReasonerTest {
     }
 
     protected void loadSameAsTest(Configuration c) throws Exception {
-        String axioms="Declaration(NamedIndividual(:a1)) Declaration(NamedIndividual(:b1_1)) Declaration(NamedIndividual(:b1_2)) Declaration(NamedIndividual(:a2_1)) Declaration(NamedIndividual(:a2_2)) Declaration(NamedIndividual(:b2)) Declaration(ObjectProperty(:f)) "+"ObjectPropertyAssertion(:f :a1 :b1_1) "+"ObjectPropertyAssertion(:f :a1 :b1_2) "+"SameIndividual(:a2_1 :a2_2) "+"ClassAssertion(:A :a1) "+"ClassAssertion(:A :a2_1) "+"ClassAssertion(:C :b1_1) "+"ClassAssertion(:B :b2) "+"SubClassOf(:C :B) "+"FunctionalObjectProperty(:f) ";
+        String axioms="Declaration(NamedIndividual(:a1)) Declaration(NamedIndividual(:b1_1)) Declaration(NamedIndividual(:b1_2)) Declaration(NamedIndividual(:a2_1)) Declaration(NamedIndividual(:a2_2)) Declaration(NamedIndividual(:b2)) Declaration(ObjectProperty(:f)) "
+            +"ObjectPropertyAssertion(:f :a1 :b1_1) "
+            +"ObjectPropertyAssertion(:f :a1 :b1_2) "
+            +"SameIndividual(:a2_1 :a2_2) "
+            +"ClassAssertion(:A :a1) "
+            +"ClassAssertion(:A :a2_1) "
+            +"ClassAssertion(:C :b1_1) "
+            +"ClassAssertion(:B :b2) "
+            +"SubClassOf(:C :B) "
+            +"FunctionalObjectProperty(:f) ";
         loadOntologyWithAxioms(axioms);
         createOWLReasoner(c);
     }

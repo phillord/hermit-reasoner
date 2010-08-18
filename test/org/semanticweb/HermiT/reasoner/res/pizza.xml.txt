@@ -178,5 +178,7 @@ EquivalentClasses( owl:Nothing :CheeseyVegetableTopping :IceCream ) Declaration(
   SubObjectPropertyOf( :isIngredientOf owl:topObjectProperty ) EquivalentObjectProperties( :isIngredientOf ObjectInverseOf( :hasIngredient ) ) Declaration( ObjectProperty( :isIngredientOf ) )
     SubObjectPropertyOf( :isBaseOf :isIngredientOf ) EquivalentObjectProperties( :isBaseOf ObjectInverseOf( :hasBase ) ) Declaration( ObjectProperty( :isBaseOf ) )
     SubObjectPropertyOf( :isToppingOf :isIngredientOf ) EquivalentObjectProperties( :isToppingOf ObjectInverseOf( :hasTopping ) ) Declaration( ObjectProperty( :isToppingOf ) )
+  SubObjectPropertyOf( ObjectInverseOf( :hasCountryOfOrigin ) owl:topObjectProperty )
+  SubObjectPropertyOf( ObjectInverseOf( :hasSpiciness ) owl:topObjectProperty )
 
 )

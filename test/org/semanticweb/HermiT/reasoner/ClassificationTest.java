@@ -1,7 +1,5 @@
 package org.semanticweb.HermiT.reasoner;
 
-
-
 public class ClassificationTest extends AbstractReasonerTest {
 
     public ClassificationTest(String name) {

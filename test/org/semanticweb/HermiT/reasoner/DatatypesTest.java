@@ -3,8 +3,6 @@ package org.semanticweb.HermiT.reasoner;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLDataProperty;
 
-
-
 public class DatatypesTest extends AbstractReasonerTest {
 
     public DatatypesTest(String name) {

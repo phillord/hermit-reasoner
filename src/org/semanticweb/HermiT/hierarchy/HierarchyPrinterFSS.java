@@ -180,13 +180,6 @@ public class HierarchyPrinterFSS {
             m_objectProperties=objectProperties;
         }
         public boolean redirect(HierarchyNode<Role>[] nodes) {
-            if (isInverseRoleNode(nodes[0])) {
-                HierarchyNode<Role> inverseParent=getInverseNode(nodes[1]);
-                if (inverseParent.equals(nodes[1]))
-                    return false;
-                nodes[0]=getInverseNode(nodes[0]);
-                nodes[1]=inverseParent;
-            }
             return true;
         }
         public void visit(int level,HierarchyNode<Role> node,HierarchyNode<Role> parentNode,boolean firstVisit) {
@@ -249,13 +242,6 @@ public class HierarchyPrinterFSS {
                         }
                 m_out.println();
             }
-        }
-        protected boolean isInverseRoleNode(HierarchyNode<Role> node) {
-            return node.getRepresentative() instanceof InverseRole;
-        }
-        protected HierarchyNode<Role> getInverseNode(HierarchyNode<Role> node) {
-            Role redirectTo=node.getRepresentative().getInverse();
-            return m_hierarchy.getNodeForElement(redirectTo);
         }
         protected void print(Role role) {
             if (role instanceof AtomicRole)

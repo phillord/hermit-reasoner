@@ -84,7 +84,7 @@ public class DeterministicClassification {
         HierarchyNode<T> topNode=new HierarchyNode<T>(topElement);
         HierarchyNode<T> bottomNode=new HierarchyNode<T>(bottomElement);
         Hierarchy<T> hierarchy=new Hierarchy<T>(topNode,bottomNode);
-        // Compute SCCs, create hierarchy nodes, and topologically order them
+        // Compute SCCs (strongly connected components), create hierarchy nodes, and topologically order them
         List<HierarchyNode<T>> topologicalOrder=new ArrayList<HierarchyNode<T>>();
         visit(new Stack<GraphNode<T>>(),new DFSIndex(),graphNodes,graphNodes.get(bottomElement),hierarchy,topologicalOrder);
         // Process the nodes in the topological order

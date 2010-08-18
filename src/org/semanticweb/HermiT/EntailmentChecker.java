@@ -209,7 +209,7 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
             OWLNamedIndividual first=i.next().asOWLNamedIndividual();
             while (i.hasNext()) {
                 OWLNamedIndividual next=i.next().asOWLNamedIndividual();
-                if (!reasoner.hasType(first,factory.getOWLObjectOneOf(next),false))
+                if (!reasoner.isSameIndividual(first, next))
                     return Boolean.FALSE;
             }
         }

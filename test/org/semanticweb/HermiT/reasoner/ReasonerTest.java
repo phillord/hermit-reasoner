@@ -37,6 +37,34 @@ public class ReasonerTest extends AbstractReasonerTest {
     public ReasonerTest(String name) {
         super(name);
     }
+    public void testKeys3() throws Exception {
+        loadOntologyWithAxioms(
+                "Declaration( Class( :GriffinFamilyMember ) )"+
+                "Declaration( DataProperty( :hasName ) )"+
+                "HasKey( :GriffinFamilyMember () ( :hasName ) )"+
+                "DataPropertyAssertion( :hasName :Peter \"Peter\" )"+
+                "ClassAssertion( :GriffinFamilyMember :Peter )"+
+                "DataPropertyAssertion( :hasName :Peter_Griffin \"Peter\" )"+
+                "ClassAssertion( :GriffinFamilyMember :Peter_Griffin )"+
+                "DataPropertyAssertion( :hasName :StPeter \"Peter\" )");
+        createReasoner();
+        OWLNamedIndividual peter=NS_NI("Peter");
+        OWLNamedIndividual stpeter=NS_NI("StPeter");
+        assertTrue(!m_reasoner.isEntailed(m_dataFactory.getOWLSameIndividualAxiom(peter, stpeter)));
+    }
+    public void testEquivalentClassInstances() throws Exception {
+        loadOntologyWithAxioms(
+                "Declaration(Class(:Car))"+
+                "Declaration(Class(:Automobile))"+
+                "Declaration(NamedIndividual(:car))"+
+                "Declaration(NamedIndividual(:auto))"+
+                "EquivalentClasses(:Car :Automobile)"+
+                "ClassAssertion(:Car :car)"+
+                "ClassAssertion(:Automobile :auto)");
+        createReasoner();
+        assertTrue(m_reasoner.hasType(NS_NI("car"), NS_C("Automobile"), false));
+        assertTrue(m_reasoner.hasType(NS_NI("auto"), NS_C("Car"), false));
+    }
     @SuppressWarnings("unchecked")
     public void testObjectPropertySubsumptionsNoNominals() throws Exception {
         loadOntologyWithAxioms(

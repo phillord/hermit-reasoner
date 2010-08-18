@@ -195,6 +195,9 @@ public final class Node implements Serializable {
     public Node getMergedInto() {
         return m_mergedInto;
     }
+    public PermanentDependencySet getMergedIntoDependencySet() {
+        return m_mergedIntoDependencySet;
+    }
     public boolean isPruned() {
         return m_nodeState==NodeState.PRUNED;
     }

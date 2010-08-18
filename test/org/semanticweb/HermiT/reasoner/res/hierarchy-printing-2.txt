@@ -21,6 +21,12 @@ Ontology(<file:/c/test.owl#>
       SubObjectPropertyOf( :op4 :op2 ) Declaration( ObjectProperty( :op4 ) )
     SubObjectPropertyOf( :op3i :op6 ) EquivalentObjectProperties( :op3i ObjectInverseOf( :op3 ) ) Declaration( ObjectProperty( :op3i ) )
       SubObjectPropertyOf( :op1 :op3i )
+  SubObjectPropertyOf( ObjectInverseOf( :op6 ) owl:topObjectProperty )
+    SubObjectPropertyOf( :op3 ObjectInverseOf( :op6 ) ) EquivalentObjectProperties( :op3 ObjectInverseOf( :op3i ) ) Declaration( ObjectProperty( :op3 ) )
+      SubObjectPropertyOf( ObjectInverseOf( :op1 ) :op3 )
+    SubObjectPropertyOf( ObjectInverseOf( :op2 ) ObjectInverseOf( :op6 ) )
+      SubObjectPropertyOf( ObjectInverseOf( :op1 ) ObjectInverseOf( :op2 ) )
+      SubObjectPropertyOf( ObjectInverseOf( :op4 ) ObjectInverseOf( :op2 ) )
 
   SubDataPropertyOf( :dp1 owl:topDataProperty ) Declaration( DataProperty( :dp1 ) )
     SubDataPropertyOf( :dp2 :dp1 ) Declaration( DataProperty( :dp2 ) )
