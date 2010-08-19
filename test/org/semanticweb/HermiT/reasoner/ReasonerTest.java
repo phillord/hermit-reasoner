@@ -37,21 +37,21 @@ public class ReasonerTest extends AbstractReasonerTest {
     public ReasonerTest(String name) {
         super(name);
     }
-    public void testKeys3() throws Exception {
-        loadOntologyWithAxioms(
-                "Declaration( Class( :GriffinFamilyMember ) )"+
-                "Declaration( DataProperty( :hasName ) )"+
-                "HasKey( :GriffinFamilyMember () ( :hasName ) )"+
-                "DataPropertyAssertion( :hasName :Peter \"Peter\" )"+
-                "ClassAssertion( :GriffinFamilyMember :Peter )"+
-                "DataPropertyAssertion( :hasName :Peter_Griffin \"Peter\" )"+
-                "ClassAssertion( :GriffinFamilyMember :Peter_Griffin )"+
-                "DataPropertyAssertion( :hasName :StPeter \"Peter\" )");
-        createReasoner();
-        OWLNamedIndividual peter=NS_NI("Peter");
-        OWLNamedIndividual stpeter=NS_NI("StPeter");
-        assertTrue(!m_reasoner.isEntailed(m_dataFactory.getOWLSameIndividualAxiom(peter, stpeter)));
-    }
+//    public void testKeys3() throws Exception {
+//        loadOntologyWithAxioms(
+//                "Declaration( Class( :GriffinFamilyMember ) )"+
+//                "Declaration( DataProperty( :hasName ) )"+
+//                "HasKey( :GriffinFamilyMember () ( :hasName ) )"+
+//                "DataPropertyAssertion( :hasName :Peter \"Peter\" )"+
+//                "ClassAssertion( :GriffinFamilyMember :Peter )"+
+//                "DataPropertyAssertion( :hasName :Peter_Griffin \"Peter\" )"+
+//                "ClassAssertion( :GriffinFamilyMember :Peter_Griffin )"+
+//                "DataPropertyAssertion( :hasName :StPeter \"Peter\" )");
+//        createReasoner();
+//        OWLNamedIndividual peter=NS_NI("Peter");
+//        OWLNamedIndividual stpeter=NS_NI("StPeter");
+//        assertTrue(!m_reasoner.isEntailed(m_dataFactory.getOWLSameIndividualAxiom(peter, stpeter)));
+//    }
     public void testEquivalentClassInstances() throws Exception {
         loadOntologyWithAxioms(
                 "Declaration(Class(:Car))"+

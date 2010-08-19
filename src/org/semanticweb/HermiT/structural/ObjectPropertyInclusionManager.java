@@ -67,9 +67,8 @@ public class ObjectPropertyInclusionManager {
                     // turn not op(a b) into 
                     // C(a) and not C or forall op not{b}
                     OWLIndividual individual=negAssertion.getObject();
-                    OWLClass individualConcept;
-                    if (individual.isAnonymous()) individualConcept=factory.getOWLClass(IRI.create("internal:anon#"+individual.asOWLAnonymousIndividual().getID().toString()));
-                    else individualConcept=factory.getOWLClass(IRI.create("internal:nom#"+individual.asOWLNamedIndividual().getIRI().toString()));
+                    // neg. op assertions cannot contain anonymous individuals
+                    OWLClass individualConcept=factory.getOWLClass(IRI.create("internal:nom#"+individual.asOWLNamedIndividual().getIRI().toString()));
                     OWLClassExpression notIndividualConcept=factory.getOWLObjectComplementOf(individualConcept);
                     OWLClassExpression allNotIndividualConcept=factory.getOWLObjectAllValuesFrom(prop,notIndividualConcept);
                     OWLClassExpression definition=factory.getOWLClass(IRI.create("internal:def#"+(replacementIndex++)));

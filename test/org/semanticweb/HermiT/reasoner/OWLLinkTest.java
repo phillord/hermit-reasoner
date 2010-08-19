@@ -15,6 +15,7 @@ import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.RemoveAxiom;
+import org.semanticweb.owlapi.reasoner.ConsoleProgressMonitor;
 import org.semanticweb.owlapi.reasoner.Node;
 import org.semanticweb.owlapi.reasoner.NodeSet;
 import org.semanticweb.owlapi.reasoner.impl.OWLClassNode;
@@ -146,10 +147,13 @@ public class OWLLinkTest extends AbstractReasonerTest {
             m_ontologyManager.addIRIMapper(new SimpleIRIMapper(logicalIRI,physicalIRI));
         }
         m_ontology=m_ontologyManager.loadOntology(IRI.create(mainOntology));
-        createReasoner();
+        Configuration c=new Configuration();
+        c.reasonerProgressMonitor=new ConsoleProgressMonitor();
+        createReasoner(c,null);
+        m_reasoner.getPrefixes().declarePrefix("", "http://www.iyouit.eu/agent-inst.owl#");
         OWLNamedIndividual e1079=m_dataFactory.getOWLNamedIndividual(IRI.create(mainOntology+"#1079"));
         OWLObjectProperty colleague=m_dataFactory.getOWLObjectProperty(IRI.create(mainOntology+"#colleague"));
-        int[] expected= { 1086,1127,1098,1126,1096,1084,1079,1183 };
+        int[] expected= { 1079,1084,1086,1096,1098,1126,1127,1183 };
         Set<OWLNamedIndividual> expectedValues=new HashSet<OWLNamedIndividual>();
         for (int i=0;i<expected.length;i++) {
             expectedValues.add(m_dataFactory.getOWLNamedIndividual(IRI.create(mainOntology+"#"+expected[i])));

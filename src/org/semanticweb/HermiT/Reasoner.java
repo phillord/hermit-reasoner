@@ -414,47 +414,48 @@ public class Reasoner implements OWLReasoner {
     }
     protected void initialiseInstanceManager() {
         if (m_instanceManager==null) {
+            if (m_configuration.reasonerProgressMonitor!=null)
+                m_configuration.reasonerProgressMonitor.reasonerTaskStarted("Initializing class and property instance data structures");
             m_instanceManager=new InstanceManager(this, m_tableau, m_atomicConceptHierarchy, m_objectRoleHierarchy);
+            boolean isConsistent=true;
             if (m_isConsistent!=null && !m_isConsistent) 
                 m_instanceManager.setInconsistent();
             else {
-                if (m_configuration.reasonerProgressMonitor!=null)
-                    m_configuration.reasonerProgressMonitor.reasonerTaskStarted("Initializing class and property instance data structures");
+                int noAxioms=m_dlOntology.getDLClauses().size();
                 int noComplexRoles=m_dlOntology.getAllComplexObjectRoles().size();
                 if (m_dlOntology.hasInverseRoles()) noComplexRoles=noComplexRoles/2;
                 int noIndividuals=m_dlOntology.getAllIndividuals().size();
-                int noAxioms=m_dlOntology.getDLClauses().size();
+                int chunks=(((noComplexRoles*noIndividuals)/InstanceManager.thresholdForAdditionalAxioms))+1;
                 int stepsAdditionalAxioms=noComplexRoles*noIndividuals;
-                int stepsRewritingAdditionalAxioms=stepsAdditionalAxioms*50;
-                int stepsTableauExpansion=noAxioms+stepsAdditionalAxioms;
-                int stepsInitialiseKnownPossible=noIndividuals+noIndividuals*(2+noComplexRoles);
-                int steps=stepsAdditionalAxioms+stepsRewritingAdditionalAxioms+stepsTableauExpansion+stepsInitialiseKnownPossible;
-    //            int stepsAdditionalAxiomsRel=(int)(((double)stepsAdditionalAxioms/(double)steps)*100);
-    //            int stepsRewritingAdditionalAxiomsRel=(int)(((double)stepsRewritingAdditionalAxioms/(double)steps)*100);
-    //            int stepsTableauExpansionRel=(int)(((double)stepsTableauExpansion/(double)steps)*100);
-    //            int stepsInitialiseKnownPossibleRel=(int)(((double)stepsInitialiseKnownPossible/(double)steps)*100);
-                // constructing axioms: noComplexRoles*noIndividuals*3
-                OWLAxiom[] additionalAxioms=m_instanceManager.getAxiomsForReadingOffCompexProperties(m_dlOntology.getAllComplexObjectRoles(), getDataFactory(), m_configuration.reasonerProgressMonitor, steps);
-    //            long t=System.currentTimeMillis();
-                // rewriting axioms: noAxioms*noComplexRoles*noIndividuals*3, so detailed progress report possible yet
-                Tableau tableau=getTableau(additionalAxioms);
-                if (m_configuration.reasonerProgressMonitor!=null)
-                    m_configuration.reasonerProgressMonitor.reasonerTaskProgressChanged(stepsAdditionalAxioms+stepsRewritingAdditionalAxioms,steps);
-    //            t=System.currentTimeMillis()-t;
-    //            System.out.println("Time producing tableau: "+t+"ms.");
-    //            t=System.currentTimeMillis();
-                boolean isConsistent=tableau.isSatisfiable(true,true,null,null,null,null,m_instanceManager.getNodesForIndividuals(),new ReasoningTaskDescription(false,"Initial consistency check plus reading-off known and possible class and property instances."));
-                if (m_configuration.reasonerProgressMonitor!=null)
-                    m_configuration.reasonerProgressMonitor.reasonerTaskProgressChanged(stepsAdditionalAxioms+stepsRewritingAdditionalAxioms+stepsTableauExpansion,steps);
-    //            t=System.currentTimeMillis()-t;
-    //            System.out.println("Time expanding tableau: "+t+"ms.");
-                if (!isConsistent) {
-                    m_instanceManager.setInconsistent();
-                } else {
-    //                t=System.currentTimeMillis();
-                    m_instanceManager.initializeKnowAndPossibleInstances(tableau,m_dlOntology.getAllComplexObjectRoles(),m_configuration.reasonerProgressMonitor,stepsAdditionalAxioms+stepsRewritingAdditionalAxioms+stepsTableauExpansion,steps);
-    //                t=System.currentTimeMillis()-t;
-    //                System.out.println("Initialise datastructures: "+t+"ms.");
+                int stepsRewritingAdditionalAxioms=(5*noComplexRoles*noIndividuals)/chunks;
+                int stepsTableauExpansion=(stepsAdditionalAxioms/chunks)+noAxioms+noIndividuals;
+                int stepsInitialiseKnownPossible=noIndividuals+noComplexRoles*noIndividuals;
+                int steps=stepsAdditionalAxioms+(chunks*stepsRewritingAdditionalAxioms)+(chunks*stepsTableauExpansion)+stepsInitialiseKnownPossible;
+                int startIndividualIndex=0;
+                int completedSteps=0;
+                OWLAxiom[] additionalAxioms=m_instanceManager.getAxiomsForReadingOffCompexProperties(getDataFactory(), m_configuration.reasonerProgressMonitor, completedSteps, steps);
+                completedSteps+=stepsAdditionalAxioms/chunks;
+                boolean moreWork=true;
+                int loops=0;
+                while (moreWork) {
+                    Tableau tableau=getTableau(additionalAxioms);
+                    completedSteps+=stepsRewritingAdditionalAxioms;
+                    if (m_configuration.reasonerProgressMonitor!=null)
+                        m_configuration.reasonerProgressMonitor.reasonerTaskProgressChanged(completedSteps,steps);
+                    isConsistent=tableau.isSatisfiable(true,true,null,null,null,null,m_instanceManager.getNodesForIndividuals(),new ReasoningTaskDescription(false,"Initial consistency check plus reading-off known and possible class and property instances (individual "+startIndividualIndex+" to "+m_instanceManager.getCurentIndividualIndex()+")."));
+                    completedSteps+=stepsTableauExpansion;
+                    if (m_configuration.reasonerProgressMonitor!=null)
+                        m_configuration.reasonerProgressMonitor.reasonerTaskProgressChanged(completedSteps,steps);
+                    if (!isConsistent) {
+                        m_instanceManager.setInconsistent();
+                        break;
+                    } else
+                        completedSteps=m_instanceManager.initializeKnowAndPossibleInstances(tableau,m_configuration.reasonerProgressMonitor,startIndividualIndex,completedSteps,steps);
+                    startIndividualIndex=m_instanceManager.getCurentIndividualIndex();
+                    additionalAxioms=m_instanceManager.getAxiomsForReadingOffCompexProperties(getDataFactory(), m_configuration.reasonerProgressMonitor,completedSteps,steps);
+                    completedSteps+=stepsAdditionalAxioms/chunks;
+                    moreWork=additionalAxioms.length>0;
+                    loops++;
                 }
                 if (m_isConsistent==null) m_isConsistent=isConsistent;
                 if (m_configuration.reasonerProgressMonitor!=null)
