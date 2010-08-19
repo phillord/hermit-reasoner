@@ -15,7 +15,6 @@ import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.RemoveAxiom;
-import org.semanticweb.owlapi.reasoner.ConsoleProgressMonitor;
 import org.semanticweb.owlapi.reasoner.Node;
 import org.semanticweb.owlapi.reasoner.NodeSet;
 import org.semanticweb.owlapi.reasoner.impl.OWLClassNode;
@@ -147,9 +146,7 @@ public class OWLLinkTest extends AbstractReasonerTest {
             m_ontologyManager.addIRIMapper(new SimpleIRIMapper(logicalIRI,physicalIRI));
         }
         m_ontology=m_ontologyManager.loadOntology(IRI.create(mainOntology));
-        Configuration c=new Configuration();
-        c.reasonerProgressMonitor=new ConsoleProgressMonitor();
-        createReasoner(c,null);
+        createReasoner();
         m_reasoner.getPrefixes().declarePrefix("", "http://www.iyouit.eu/agent-inst.owl#");
         OWLNamedIndividual e1079=m_dataFactory.getOWLNamedIndividual(IRI.create(mainOntology+"#1079"));
         OWLObjectProperty colleague=m_dataFactory.getOWLObjectProperty(IRI.create(mainOntology+"#colleague"));

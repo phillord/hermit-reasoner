@@ -100,7 +100,6 @@ import org.semanticweb.owlapi.model.OWLObjectPropertyRangeAxiom;
 import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
 import org.semanticweb.owlapi.model.OWLObjectUnionOf;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLPropertyExpression;
 import org.semanticweb.owlapi.model.OWLReflexiveObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLSameIndividualAxiom;
 import org.semanticweb.owlapi.model.OWLSubAnnotationPropertyOfAxiom;
@@ -702,14 +701,7 @@ public class OWLNormalization {
                 addHasKey(axiom);
             else {
                 // Construct a new axiom that uses the concept definition.
-                Set<OWLPropertyExpression<OWLObjectPropertyExpression,OWLClassExpression>> objProps=new HashSet<OWLPropertyExpression<OWLObjectPropertyExpression,OWLClassExpression>>(axiom.getObjectPropertyExpressions());
-                if (!objProps.isEmpty()) {
-                    addHasKey(m_factory.getOWLHasKeyAxiom(description,objProps));
-                }
-                else {
-                    Set<OWLPropertyExpression<OWLDataPropertyExpression,OWLDataRange>> dataProps=new HashSet<OWLPropertyExpression<OWLDataPropertyExpression,OWLDataRange>>(axiom.getDataPropertyExpressions());
-                    addHasKey(m_factory.getOWLHasKeyAxiom(description,dataProps));
-                }
+                addHasKey(m_factory.getOWLHasKeyAxiom(description,axiom.getPropertyExpressions()));
             }
             for (OWLObjectPropertyExpression ope : axiom.getObjectPropertyExpressions())
                 m_axioms.m_objectPropertiesUsedInAxioms.add(ope.getNamedProperty());
