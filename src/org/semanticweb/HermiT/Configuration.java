@@ -321,11 +321,12 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
 	}
 	public static class PrepareReasonerInferences {
 	    public boolean classClassificationRequired=true;
-	    public boolean realisationRequired=true;
-	    public boolean dataPropertyClassificationRequired=true;
 	    public boolean objectPropertyClassificationRequired=true;
+	    public boolean dataPropertyClassificationRequired=true;
 	    public boolean objectPropertyDomainsRequired=true;
 	    public boolean objectPropertyRangesRequired=true;
+	    public boolean realisationRequired=true;
 	    public boolean objectPropertyRealisationRequired=true;
+	    public boolean dataPropertyRealisationRequired=true;
 	}
 }

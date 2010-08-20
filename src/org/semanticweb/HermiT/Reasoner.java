@@ -157,6 +157,7 @@ public class Reasoner implements OWLReasoner {
     protected Map<Role,Set<HierarchyNode<AtomicConcept>>> m_directObjectRoleDomains;
     protected Map<Role,Set<HierarchyNode<AtomicConcept>>> m_directObjectRoleRanges;
     protected Map<AtomicRole,Set<HierarchyNode<AtomicConcept>>> m_directDataRoleDomains;
+    protected Map<HierarchyNode<AtomicConcept>,Set<HierarchyNode<AtomicConcept>>> m_disjointClasses;
     protected InstanceManager m_instanceManager;
     
     /**
@@ -202,6 +203,7 @@ public class Reasoner implements OWLReasoner {
         else
             m_descriptionGraphs=descriptionGraphs;
         m_interruptFlag=new InterruptFlag(configuration.individualTaskTimeout);
+        m_disjointClasses=new HashMap<HierarchyNode<AtomicConcept>, Set<HierarchyNode<AtomicConcept>>>();
         loadOntology();
     }
 
@@ -238,6 +240,7 @@ public class Reasoner implements OWLReasoner {
         m_directObjectRoleDomains=new HashMap<Role,Set<HierarchyNode<AtomicConcept>>>();
         m_directObjectRoleRanges=new HashMap<Role,Set<HierarchyNode<AtomicConcept>>>();
         m_directDataRoleDomains=new HashMap<AtomicRole,Set<HierarchyNode<AtomicConcept>>>();
+        m_disjointClasses=new HashMap<HierarchyNode<AtomicConcept>,Set<HierarchyNode<AtomicConcept>>>();
         m_instanceManager=null;
     }
     public void interrupt() {
@@ -355,10 +358,13 @@ public class Reasoner implements OWLReasoner {
     }
     public Set<InferenceType> getPrecomputableInferenceTypes() {
         Set<InferenceType> supportedInferenceTypes=new HashSet<InferenceType>();
-        for (InferenceType inferenceType : InferenceType.values()) {
-            if (inferenceType!=InferenceType.OBJECT_PROPERTY_ASSERTIONS)
-                supportedInferenceTypes.add(inferenceType);
-        }
+        supportedInferenceTypes.add(InferenceType.CLASS_HIERARCHY);
+        supportedInferenceTypes.add(InferenceType.OBJECT_PROPERTY_HIERARCHY);
+        supportedInferenceTypes.add(InferenceType.DATA_PROPERTY_HIERARCHY);
+        supportedInferenceTypes.add(InferenceType.CLASS_ASSERTIONS);
+        supportedInferenceTypes.add(InferenceType.OBJECT_PROPERTY_ASSERTIONS);
+        supportedInferenceTypes.add(InferenceType.DATA_PROPERTY_ASSERTIONS);
+        supportedInferenceTypes.add(InferenceType.SAME_INDIVIDUAL);
         return supportedInferenceTypes;
     }
     public boolean isPrecomputed(InferenceType inferenceType) {
@@ -383,6 +389,7 @@ public class Reasoner implements OWLReasoner {
     public void precomputeInferences(InferenceType... inferenceTypes) throws ReasonerInterruptedException, TimeOutException, InconsistentOntologyException {
         checkPreConditions();
         boolean doAll=m_configuration.prepareReasonerInferences==null;
+        // doAll is only false when used via Protege, in that case the Protege preferences apply
         for (InferenceType inferenceType : inferenceTypes) {
             switch (inferenceType) {
             case CLASS_HIERARCHY:
@@ -398,7 +405,7 @@ public class Reasoner implements OWLReasoner {
                 if (doAll || m_configuration.prepareReasonerInferences.realisationRequired) {
                     realise();
                     if (m_configuration.individualNodeSetPolicy==IndividualNodeSetPolicy.BY_SAME_AS)
-                        computeSameAsEquivalenceClasses();
+                        precomputeSameAsEquivalenceClasses();
                 }
                 break;
             case OBJECT_PROPERTY_ASSERTIONS:
@@ -406,9 +413,19 @@ public class Reasoner implements OWLReasoner {
                     realiseObjectProperties();
                 break;
             case DATA_PROPERTY_ASSERTIONS:
-                throw new UnsupportedOperationException("HermiT does not yet support precomputation of property instances.");
-            default:
+                if (doAll || m_configuration.prepareReasonerInferences.dataPropertyRealisationRequired)
+                    classifyDataProperties(); // used to enriched stated instances
                 break;
+            case SAME_INDIVIDUAL:
+                if (doAll || m_configuration.individualNodeSetPolicy==IndividualNodeSetPolicy.BY_SAME_AS)
+                    precomputeSameAsEquivalenceClasses();
+                break;
+            case DIFFERENT_INDIVIDUALS:
+                throw new UnsupportedOperationException("Error: HermiT cannot precompute different individuals. That is a very expensive task because all pairs of individuals have to be tested despite the fact that such a test will most likely fail. ");
+            case DISJOINT_CLASSES:
+                precomputeDisjointClasses();
+            default:
+                throw new IllegalArgumentException("Error: Unknow inference type specified for precomputeInferences().");
             }
         }
     }
@@ -611,12 +628,52 @@ public class Reasoner implements OWLReasoner {
         return atomicConceptHierarchyNodeToNode(node);
     }
     public NodeSet<OWLClass> getDisjointClasses(OWLClassExpression classExpression) {
-        Node<OWLClass> equivalentToComplement=getEquivalentClasses(classExpression.getObjectComplementOf());
-        NodeSet<OWLClass> subsDisjoint=getSubClasses(classExpression.getObjectComplementOf(),false);
-        Set<Node<OWLClass>> result=new HashSet<Node<OWLClass>>();
-        if (equivalentToComplement.getSize() > 0) result.add(equivalentToComplement);
-        result.addAll(subsDisjoint.getNodes());
-        return new OWLClassNodeSet(result);
+        checkPreConditions(classExpression);
+        if (classExpression.isOWLNothing() || !m_isConsistent) {
+            HierarchyNode<AtomicConcept> node=getHierarchyNode(classExpression);
+            return atomicConceptHierarchyNodesToNodeSet(node.getAncestorNodes());
+        } else if (classExpression.isOWLThing()) {
+            return new OWLClassNodeSet(getDataFactory().getOWLNothing());
+        } else if (classExpression instanceof OWLClass) {
+            HierarchyNode<AtomicConcept> node=getHierarchyNode(classExpression);
+            Set<HierarchyNode<AtomicConcept>> disjoints=getDisjointConceptNodes(node);
+            return atomicConceptHierarchyNodesToNodeSet(disjoints);
+        } else {
+            Node<OWLClass> equivalentToComplement=getEquivalentClasses(classExpression.getObjectComplementOf());
+            NodeSet<OWLClass> subsDisjoint=getSubClasses(classExpression.getObjectComplementOf(),false);
+            Set<Node<OWLClass>> result=new HashSet<Node<OWLClass>>();
+            if (equivalentToComplement.getSize() > 0) result.add(equivalentToComplement);
+            result.addAll(subsDisjoint.getNodes());
+            return new OWLClassNodeSet(result);
+        }
+    }
+    protected void precomputeDisjointClasses() {
+        if (m_atomicConceptHierarchy==null || m_disjointClasses.keySet().size()<m_atomicConceptHierarchy.getAllNodes().size()-2) {
+            m_disjointClasses=new HashMap<HierarchyNode<AtomicConcept>, Set<HierarchyNode<AtomicConcept>>>();
+            checkPreConditions();
+            classifyClasses();
+            if (!m_isConsistent) 
+                return;
+            Collection<HierarchyNode<AtomicConcept>> nodes=m_atomicConceptHierarchy.getAllNodes();
+            nodes.remove(m_atomicConceptHierarchy.getTopNode());
+            nodes.remove(m_atomicConceptHierarchy.getBottomNode());
+            nodes.removeAll(m_disjointClasses.keySet());
+            for (HierarchyNode<AtomicConcept> node : nodes) {
+                getDisjointConceptNodes(node);
+            }
+        }
+    }
+    protected Set<HierarchyNode<AtomicConcept>> getDisjointConceptNodes(HierarchyNode<AtomicConcept> node) {
+        if (m_disjointClasses.containsKey(node))
+            return m_disjointClasses.get(node);
+        else {
+            OWLDataFactory factory=getDataFactory();
+            OWLClassExpression negated=factory.getOWLObjectComplementOf(factory.getOWLClass(IRI.create(node.getRepresentative().getIRI())));
+            HierarchyNode<AtomicConcept> equivalentToComplement=getHierarchyNode(negated);
+            Set<HierarchyNode<AtomicConcept>> disjoints=equivalentToComplement.getDescendantNodes();
+            m_disjointClasses.put(node, disjoints);
+            return disjoints;
+        }
     }
     protected HierarchyNode<AtomicConcept> getHierarchyNode(OWLClassExpression classExpression) {
         checkPreConditions(classExpression);
@@ -1269,7 +1326,7 @@ public class Reasoner implements OWLReasoner {
         initialiseInstanceManager();
         m_instanceManager.realizeObjectRoles(m_configuration.reasonerProgressMonitor);
     }
-    public void computeSameAsEquivalenceClasses() {
+    public void precomputeSameAsEquivalenceClasses() {
         checkPreConditions();
         initialiseInstanceManager();
         m_instanceManager.computeSameAsEquivalenceClasses();
@@ -2041,27 +2098,30 @@ public class Reasoner implements OWLReasoner {
                     preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_INHERITED_ANONYMOUS_CLASSES) ||
                     preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_SUPER_CLASSES);
 
-                // realisation
-                prepareReasonerInferences.realisationRequired=
-                    preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERED_CLASS_MEMBERS) ||
-                    preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_TYPES);
-
-                // data type classification
-                prepareReasonerInferences.dataPropertyClassificationRequired=
-                    preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_DATATYPE_PROPERTY_DOMAINS) ||
-                    preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_EQUIVALENT_DATATYPE_PROPERTIES) ||
-                    preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_SUPER_DATATYPE_PROPERTIES);
-
                 // object property classification
                 prepareReasonerInferences.objectPropertyClassificationRequired=
                     preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_EQUIVALENT_OBJECT_PROPERTIES) ||
                     preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_INVERSE_PROPERTIES) ||
                     preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_SUPER_OBJECT_PROPERTIES) ||
                     preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_OBJECT_PROPERTY_UNSATISFIABILITY);
+                
+                // data property classification
+                prepareReasonerInferences.dataPropertyClassificationRequired=
+                    preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_DATATYPE_PROPERTY_DOMAINS) ||
+                    preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_EQUIVALENT_DATATYPE_PROPERTIES) ||
+                    preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_SUPER_DATATYPE_PROPERTIES);
+
+                // realisation
+                prepareReasonerInferences.realisationRequired=
+                    preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERED_CLASS_MEMBERS) ||
+                    preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_TYPES);
 
                 // object property realisation
                 prepareReasonerInferences.objectPropertyRealisationRequired=preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_OBJECT_PROPERTY_ASSERTIONS);
 
+                // data property realisation
+                prepareReasonerInferences.dataPropertyRealisationRequired=true; // cannot be switched off, but is usually fast since we only compute obvious assertions by syntactic analysis 
+                
                 // object property domain & range
                 prepareReasonerInferences.objectPropertyDomainsRequired=preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_OBJECT_PROPERTY_DOMAINS);
                 prepareReasonerInferences.objectPropertyRangesRequired=preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_OBJECT_PROPERTY_RANGES);
