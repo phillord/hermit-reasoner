@@ -87,7 +87,7 @@ public class InstanceManager {
     protected boolean m_readingOffFoundPossibleConceptInstance;
     protected boolean m_readingOffFoundPossiblePropertyInstance;
     protected final Map<Individual,Set<Individual>> m_individualToEquivalenceClass;
-    protected final Map<Set<Individual>,Set<Set<Individual>>> m_individualToPossibleEquivalenceClass;
+    protected Map<Set<Individual>,Set<Set<Individual>>> m_individualToPossibleEquivalenceClass;
     protected final ExtensionTable.Retrieval m_binaryRetrieval0Bound;
     protected final ExtensionTable.Retrieval m_binaryRetrieval1Bound;
     protected final ExtensionTable.Retrieval m_binaryRetrieval01Bound;
@@ -111,7 +111,7 @@ public class InstanceManager {
             m_individualToEquivalenceClass.put(individual, equivalentIndividuals);
         }
         m_individualsForNodes=new HashMap<Node,Individual>();
-        m_individualToPossibleEquivalenceClass=new HashMap<Set<Individual>, Set<Set<Individual>>>();
+        m_individualToPossibleEquivalenceClass=null;
         m_atomicConceptElementManager=new AtomicConceptElementManager();
         m_topConceptElement=m_atomicConceptElementManager.getAtomicConceptElement(AtomicConcept.THING);
         m_bottomConceptElement=m_atomicConceptElementManager.getAtomicConceptElement(AtomicConcept.NOTHING);
@@ -465,6 +465,7 @@ public class InstanceManager {
         }
     }
     protected void initializeSameAs() {
+        m_individualToPossibleEquivalenceClass=new HashMap<Set<Individual>, Set<Set<Individual>>>();
         for (Node node : m_individualsForNodes.keySet()) {
             Node mergedInto=node.getMergedInto();
             if (mergedInto!=null) {
@@ -1514,6 +1515,9 @@ public class InstanceManager {
     }
     public boolean objectPropertyRealizationCompleted() {
         return m_roleRealizationCompleted;
+    }
+    public boolean sameAsIndividualsComputed() {
+        return m_individualToPossibleEquivalenceClass.isEmpty();
     }
     public int getCurentIndividualIndex() {
         return m_currentIndividualIndex;

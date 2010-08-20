@@ -376,11 +376,17 @@ public class Reasoner implements OWLReasoner {
         case DATA_PROPERTY_HIERARCHY:
             return m_dataRoleHierarchy!=null;
         case CLASS_ASSERTIONS:
-            return m_instanceManager.realizationCompleted();
+            return m_instanceManager!=null && m_instanceManager.realizationCompleted();
         case OBJECT_PROPERTY_ASSERTIONS:
-            return m_instanceManager.objectPropertyRealizationCompleted();
+            return m_instanceManager!=null && m_instanceManager.objectPropertyRealizationCompleted();
         case DATA_PROPERTY_ASSERTIONS:
+            return m_dataRoleHierarchy!=null; // used to find sub-propeties
+        case SAME_INDIVIDUAL:
+            return m_instanceManager!=null && m_instanceManager.sameAsIndividualsComputed();
+        case DIFFERENT_INDIVIDUALS:
             return false;
+        case DISJOINT_CLASSES:
+            return m_atomicConceptHierarchy!=null && m_disjointClasses.keySet().size()==m_atomicConceptHierarchy.getAllElements().size()-2;
         default:
             break;
         }
