@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.protege.editor.owl.model.inference.ProtegeOWLReasonerFactoryAdapter;
+import org.protege.editor.owl.model.inference.AbstractProtegeOWLReasonerInfo;
 import org.protege.editor.owl.model.inference.ReasonerPreferences;
 import org.semanticweb.HermiT.Configuration.BlockingStrategyType;
 import org.semanticweb.HermiT.Configuration.PrepareReasonerInferences;
@@ -410,7 +410,7 @@ public class Reasoner implements OWLReasoner {
             case CLASS_ASSERTIONS:
                 if (doAll || m_configuration.prepareReasonerInferences.realisationRequired) {
                     realise();
-                    if (m_configuration.individualNodeSetPolicy==IndividualNodeSetPolicy.BY_SAME_AS)
+                    if (m_configuration.individualNodeSetPolicy==IndividualNodeSetPolicy.BY_SAME_AS || m_configuration.prepareReasonerInferences.sameAs)
                         precomputeSameAsEquivalenceClasses();
                 }
                 break;
@@ -423,7 +423,7 @@ public class Reasoner implements OWLReasoner {
                     classifyDataProperties(); // used to enriched stated instances
                 break;
             case SAME_INDIVIDUAL:
-                if (doAll || m_configuration.individualNodeSetPolicy==IndividualNodeSetPolicy.BY_SAME_AS)
+                if (doAll || m_configuration.individualNodeSetPolicy==IndividualNodeSetPolicy.BY_SAME_AS || m_configuration.prepareReasonerInferences.sameAs)
                     precomputeSameAsEquivalenceClasses();
                 break;
             case DIFFERENT_INDIVIDUALS:
@@ -456,26 +456,47 @@ public class Reasoner implements OWLReasoner {
                 int steps=stepsAdditionalAxioms+(chunks*stepsRewritingAdditionalAxioms)+(chunks*stepsTableauExpansion)+stepsInitialiseKnownPossible;
                 int startIndividualIndex=0;
                 int completedSteps=0;
+                long t_additionalAxioms=0;
+                long t_tableauGeneration=0;
+                long t_tableauExpansion=0;
+                long t_readingOff=0;
+                long t=System.currentTimeMillis();
                 OWLAxiom[] additionalAxioms=m_instanceManager.getAxiomsForReadingOffCompexProperties(getDataFactory(), m_configuration.reasonerProgressMonitor, completedSteps, steps);
+                t_additionalAxioms+=(System.currentTimeMillis()-t);
+                //System.out.println("additional axioms: "+t_additionalAxioms);
+                t=System.currentTimeMillis();
                 completedSteps+=stepsAdditionalAxioms/chunks;
                 boolean moreWork=true;
                 int loops=0;
                 while (moreWork) {
                     Tableau tableau=getTableau(additionalAxioms);
+                    t_tableauGeneration+=(System.currentTimeMillis()-t);
+                    //System.out.println("tableau generation: "+t_tableauGeneration);
+                    t=System.currentTimeMillis();
                     completedSteps+=stepsRewritingAdditionalAxioms;
                     if (m_configuration.reasonerProgressMonitor!=null)
                         m_configuration.reasonerProgressMonitor.reasonerTaskProgressChanged(completedSteps,steps);
                     isConsistent=tableau.isSatisfiable(true,true,null,null,null,null,m_instanceManager.getNodesForIndividuals(),new ReasoningTaskDescription(false,"Initial consistency check plus reading-off known and possible class and property instances (individual "+startIndividualIndex+" to "+m_instanceManager.getCurentIndividualIndex()+")."));
+                    t_tableauExpansion+=(System.currentTimeMillis()-t);
+                    //System.out.println("tableau expansion: "+t_tableauExpansion);
+                    t=System.currentTimeMillis();
                     completedSteps+=stepsTableauExpansion;
                     if (m_configuration.reasonerProgressMonitor!=null)
                         m_configuration.reasonerProgressMonitor.reasonerTaskProgressChanged(completedSteps,steps);
                     if (!isConsistent) {
                         m_instanceManager.setInconsistent();
                         break;
-                    } else
+                    } else {
                         completedSteps=m_instanceManager.initializeKnowAndPossibleInstances(tableau,m_configuration.reasonerProgressMonitor,startIndividualIndex,completedSteps,steps);
+                        t_readingOff+=(System.currentTimeMillis()-t);
+                        //System.out.println("reading off: "+t_readingOff);
+                        t=System.currentTimeMillis();
+                    }
                     startIndividualIndex=m_instanceManager.getCurentIndividualIndex();
                     additionalAxioms=m_instanceManager.getAxiomsForReadingOffCompexProperties(getDataFactory(), m_configuration.reasonerProgressMonitor,completedSteps,steps);
+                    t_additionalAxioms+=(System.currentTimeMillis()-t);
+                    //System.out.println("additional axioms: "+t_additionalAxioms);
+                    t=System.currentTimeMillis();
                     completedSteps+=stepsAdditionalAxioms/chunks;
                     moreWork=additionalAxioms.length>0;
                     loops++;
@@ -660,7 +681,7 @@ public class Reasoner implements OWLReasoner {
             classifyClasses();
             if (!m_isConsistent) 
                 return;
-            Collection<HierarchyNode<AtomicConcept>> nodes=m_atomicConceptHierarchy.getAllNodes();
+            Set<HierarchyNode<AtomicConcept>> nodes=new HashSet<HierarchyNode<AtomicConcept>>(m_atomicConceptHierarchy.getAllNodes());
             nodes.remove(m_atomicConceptHierarchy.getTopNode());
             nodes.remove(m_atomicConceptHierarchy.getBottomNode());
             nodes.removeAll(m_disjointClasses.keySet());
@@ -2086,23 +2107,36 @@ public class Reasoner implements OWLReasoner {
 
     // The reasoner that tracks changes
 
-    public static class ProtegeReasonerFactory extends ProtegeOWLReasonerFactoryAdapter {
+    public static class ProtegeReasonerFactory extends AbstractProtegeOWLReasonerInfo {
+        protected final ReasonerFactory factory=new ReasonerFactory(); 
+        
+        public BufferingMode getRecommendedBuffering() {
+            return BufferingMode.BUFFERING;
+        }
+        public OWLReasonerFactory getReasonerFactory() {
+            return factory;
+        }
+            
         public OWLReasoner createReasoner(OWLOntology ontology,ReasonerProgressMonitor monitor) {
             ReasonerFactory factory=new ReasonerFactory();
             Configuration configuration=factory.getProtegeConfiguration(null);
             configuration.reasonerProgressMonitor=monitor;
             try {
                 // see whether the Protege version of the user already has the reasoner preferences tab
-                ProtegeOWLReasonerFactoryAdapter.class.getMethod("getOWLModelManager", (Class<?>[])null);
+                AbstractProtegeOWLReasonerInfo.class.getMethod("getOWLModelManager", (Class<?>[])null);
                 // if we are not thrown into the catch block, we can initialise the reasoner preferences
                 ReasonerPreferences preferences=this.getOWLModelManager().getReasonerPreferences();
                 PrepareReasonerInferences prepareReasonerInferences=new PrepareReasonerInferences();
+                
                 // class classification
                 prepareReasonerInferences.classClassificationRequired=
                     preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_CLASS_UNSATISFIABILITY) ||
                     preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_EQUIVALENT_CLASSES) ||
                     preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_INHERITED_ANONYMOUS_CLASSES) ||
-                    preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_SUPER_CLASSES);
+                    preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_SUPER_CLASSES) ||
+                    preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_OBJECT_PROPERTY_DOMAINS) ||
+                    preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_OBJECT_PROPERTY_RANGES) ||
+                    preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_DATATYPE_PROPERTY_DOMAINS);
 
                 // object property classification
                 prepareReasonerInferences.objectPropertyClassificationRequired=
@@ -2113,9 +2147,9 @@ public class Reasoner implements OWLReasoner {
                 
                 // data property classification
                 prepareReasonerInferences.dataPropertyClassificationRequired=
-                    preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_DATATYPE_PROPERTY_DOMAINS) ||
                     preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_EQUIVALENT_DATATYPE_PROPERTIES) ||
-                    preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_SUPER_DATATYPE_PROPERTIES);
+                    preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_SUPER_DATATYPE_PROPERTIES) ||
+                    preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_DATA_PROPERTY_ASSERTIONS);
 
                 // realisation
                 prepareReasonerInferences.realisationRequired=
@@ -2126,11 +2160,14 @@ public class Reasoner implements OWLReasoner {
                 prepareReasonerInferences.objectPropertyRealisationRequired=preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_OBJECT_PROPERTY_ASSERTIONS);
 
                 // data property realisation
-                prepareReasonerInferences.dataPropertyRealisationRequired=true; // cannot be switched off, but is usually fast since we only compute obvious assertions by syntactic analysis 
+                prepareReasonerInferences.dataPropertyRealisationRequired=preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_DATA_PROPERTY_ASSERTIONS); // cannot be switched off, but is usually fast since we only compute obvious assertions by syntactic analysis 
                 
                 // object property domain & range
                 prepareReasonerInferences.objectPropertyDomainsRequired=preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_OBJECT_PROPERTY_DOMAINS);
                 prepareReasonerInferences.objectPropertyRangesRequired=preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_OBJECT_PROPERTY_RANGES);
+                
+                // sameAs
+                prepareReasonerInferences.sameAs=preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_DATA_PROPERTY_ASSERTIONS); // we also substitute same individuals now
 
                 configuration.prepareReasonerInferences=prepareReasonerInferences;
             } catch (java.lang.NoSuchMethodException e) {

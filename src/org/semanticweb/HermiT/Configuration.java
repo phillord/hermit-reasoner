@@ -328,5 +328,6 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
 	    public boolean realisationRequired=true;
 	    public boolean objectPropertyRealisationRequired=true;
 	    public boolean dataPropertyRealisationRequired=true;
+	    public boolean sameAs=true;
 	}
 }
