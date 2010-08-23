@@ -2117,8 +2117,7 @@ public class Reasoner implements OWLReasoner {
             return factory;
         }
             
-        public OWLReasoner createReasoner(OWLOntology ontology,ReasonerProgressMonitor monitor) {
-            ReasonerFactory factory=new ReasonerFactory();
+        public OWLReasonerConfiguration getConfiguration(ReasonerProgressMonitor monitor) {
             Configuration configuration=factory.getProtegeConfiguration(null);
             configuration.reasonerProgressMonitor=monitor;
             try {
@@ -2175,7 +2174,7 @@ public class Reasoner implements OWLReasoner {
                 // version does not yet have the reasoner preferences tab that we can use to customize
                 // prepareReasoner()
             }
-            return factory.createHermiTOWLReasoner(configuration,ontology);
+            return configuration;
         }
         public void initialise() throws Exception {
         }
