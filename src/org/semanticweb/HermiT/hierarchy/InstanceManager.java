@@ -83,7 +83,8 @@ public class InstanceManager {
     protected boolean m_roleRealizationCompleted;
     protected boolean m_usesClassifiedConceptHierarchy;
     protected boolean m_usesClassifiedObjectRoleHierarchy;
-    protected boolean m_containsKnownOrPossibles;
+    protected boolean m_classesInitialised;
+    protected boolean m_propertiesInitialised;
     protected boolean m_readingOffFoundPossibleConceptInstance;
     protected boolean m_readingOffFoundPossiblePropertyInstance;
     protected final Map<Individual,Set<Individual>> m_individualToEquivalenceClass;
@@ -243,7 +244,7 @@ public class InstanceManager {
         };
         m_currentConceptHierarchy=atomicConceptHierarchy.transform(transformer,null);
         // clean up known and possibles
-        if (m_containsKnownOrPossibles) {
+        if (m_classesInitialised && m_individuals.length>0) {
             Queue<HierarchyNode<AtomicConceptElement>> toProcess=new LinkedList<HierarchyNode<AtomicConceptElement>>();
             toProcess.add(m_currentConceptHierarchy.m_bottomNode);
             while (!toProcess.isEmpty()) {
@@ -337,7 +338,7 @@ public class InstanceManager {
     public void setToClassifiedRoleHierarchy(final Hierarchy<Role> roleHierarchy) {
         m_currentRoleHierarchy=transformRoleHierarchy(roleHierarchy);
         // clean up known and possibles
-        if (m_containsKnownOrPossibles) {
+        if (m_propertiesInitialised && m_individuals.length>0) {
             Queue<HierarchyNode<RoleElement>> toProcess=new LinkedList<HierarchyNode<RoleElement>>();
             toProcess.add(m_currentRoleHierarchy.m_bottomNode);
             while (!toProcess.isEmpty()) {
@@ -420,23 +421,52 @@ public class InstanceManager {
             return new OWLAxiom[0];
         }
     }
-    public int initializeKnowAndPossibleInstances(Tableau tableau, ReasonerProgressMonitor monitor, int startIndividualIndex, int completedSteps, int steps) {
-        if (startIndividualIndex==0) {
+    public void initializeKnowAndPossibleClassInstances(Tableau tableau, ReasonerProgressMonitor monitor, int completedSteps, int steps) {
+        if (!m_classesInitialised) {
             initializeIndividualsForNodes();
-            initializeSameAs();
-        }
-        completedSteps=readOffByIndividual(tableau,m_individualsForNodes, monitor, completedSteps, steps, startIndividualIndex);
-        if (m_currentIndividualIndex==m_individuals.length-1) {
-            // we are done now with everything
+            if (!m_propertiesInitialised) {
+                // nothing has been read-off yet
+                initializeSameAs();
+            }
+            completedSteps=readOffClassInstancesByIndividual(tableau, monitor, completedSteps, steps);
             if (!m_readingOffFoundPossibleConceptInstance && m_usesClassifiedConceptHierarchy) 
                 m_realizationCompleted=true;
-            if (!m_readingOffFoundPossiblePropertyInstance) 
-                m_roleRealizationCompleted=true;
+            m_classesInitialised=true;
+            m_individualsForNodes.clear();
         }
-        m_containsKnownOrPossibles=true;
+    }
+    protected int readOffClassInstancesByIndividual(Tableau tableau, ReasonerProgressMonitor monitor, int completedSteps, int steps) {
+        for (Individual ind : m_individuals) {
+            Node nodeForIndividual=m_nodesForIndividuals.get(ind);
+            // read of concept instances and normal role instances only once, we don't slice that
+            boolean hasType=readOffTypes(ind,nodeForIndividual);
+            if (!hasType) 
+                m_topConceptElement.m_knownInstances.add(ind);
+            completedSteps++;
+            if (monitor!=null)
+                monitor.reasonerTaskProgressChanged(completedSteps,steps);
+        }
         return completedSteps;
     }
-    protected int readOffByIndividual(Tableau tableau,Map<Node,Individual> individualsForNodes, ReasonerProgressMonitor monitor, int completedSteps, int steps, int startIndividualIndex) {
+    public int initializeKnowAndPossiblePropertyInstances(Tableau tableau, ReasonerProgressMonitor monitor, int startIndividualIndex, int completedSteps, int steps) {
+        if (!m_propertiesInitialised) {
+            initializeIndividualsForNodes();
+            if (!m_classesInitialised) {
+                // nothing has been read-off yet
+                initializeSameAs();
+            }
+            completedSteps=readOffPropertyInstancesByIndividual(tableau,m_individualsForNodes, monitor, completedSteps, steps, startIndividualIndex);
+            if (m_currentIndividualIndex==m_individuals.length-1) {
+                // we are done now with everything
+                if (!m_readingOffFoundPossiblePropertyInstance) 
+                    m_roleRealizationCompleted=true;
+                m_propertiesInitialised=true;
+            }
+            m_individualsForNodes.clear();
+        }
+        return completedSteps;
+    }
+    protected int readOffPropertyInstancesByIndividual(Tableau tableau,Map<Node,Individual> individualsForNodes, ReasonerProgressMonitor monitor, int completedSteps, int steps, int startIndividualIndex) {
         // first round we go over all individuals
         int endIndex=(startIndividualIndex==0) ? m_individuals.length : m_currentIndividualIndex;
         for (int index=startIndividualIndex;index<endIndex;index++) {
@@ -444,9 +474,6 @@ public class InstanceManager {
             Node nodeForIndividual=m_nodesForIndividuals.get(ind);
             if (startIndividualIndex==0) {
                 // read of concept instances and normal role instances only once, we don't slice that
-                boolean hasType=readOffTypes(ind,nodeForIndividual);
-                if (!hasType) 
-                    m_topConceptElement.m_knownInstances.add(ind);
                 readOffPropertyInstances(ind,nodeForIndividual);
                 completedSteps++;
                 if (monitor!=null)
@@ -1522,7 +1549,13 @@ public class InstanceManager {
     public boolean sameAsIndividualsComputed() {
         return m_individualToPossibleEquivalenceClass.isEmpty();
     }
-    public int getCurentIndividualIndex() {
+    public boolean areClassesInitialised() {
+        return m_classesInitialised;
+    }
+    public boolean arePropertiesInitialised() {
+        return m_propertiesInitialised;
+    }
+    public int getCurrentIndividualIndex() {
         return m_currentIndividualIndex;
     }
     public Map<Individual, Node> getNodesForIndividuals() {

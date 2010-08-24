@@ -20,6 +20,7 @@ package org.semanticweb.HermiT;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -397,51 +398,42 @@ public class Reasoner implements OWLReasoner {
         checkPreConditions();
         boolean doAll=m_configuration.prepareReasonerInferences==null;
         // doAll is only false when used via Protege, in that case the Protege preferences apply
-        for (InferenceType inferenceType : inferenceTypes) {
-            switch (inferenceType) {
-            case CLASS_HIERARCHY:
-                if (doAll || m_configuration.prepareReasonerInferences.classClassificationRequired) classifyClasses();
-                break;
-            case OBJECT_PROPERTY_HIERARCHY:
-                if (doAll || m_configuration.prepareReasonerInferences.objectPropertyClassificationRequired) classifyObjectProperties();
-                break;
-            case DATA_PROPERTY_HIERARCHY:
-                if (doAll || m_configuration.prepareReasonerInferences.dataPropertyClassificationRequired) classifyDataProperties();
-                break;
-            case CLASS_ASSERTIONS:
-                if (doAll || m_configuration.prepareReasonerInferences.realisationRequired) {
-                    realise();
-                    if (m_configuration.individualNodeSetPolicy==IndividualNodeSetPolicy.BY_SAME_AS || m_configuration.prepareReasonerInferences.sameAs)
-                        precomputeSameAsEquivalenceClasses();
-                }
-                break;
-            case OBJECT_PROPERTY_ASSERTIONS:
-                if (doAll || m_configuration.prepareReasonerInferences.objectPropertyRealisationRequired)
-                    realiseObjectProperties();
-                break;
-            case DATA_PROPERTY_ASSERTIONS:
-                if (doAll || m_configuration.prepareReasonerInferences.dataPropertyRealisationRequired)
-                    classifyDataProperties(); // used to enriched stated instances
-                break;
-            case SAME_INDIVIDUAL:
-                if (doAll || m_configuration.individualNodeSetPolicy==IndividualNodeSetPolicy.BY_SAME_AS || m_configuration.prepareReasonerInferences.sameAs)
+        Set<InferenceType> requiredInferences=new HashSet<InferenceType>(Arrays.asList(inferenceTypes));
+        if (requiredInferences.contains(InferenceType.CLASS_HIERARCHY))
+            if (doAll || m_configuration.prepareReasonerInferences.classClassificationRequired) 
+                classifyClasses();
+        if (requiredInferences.contains(InferenceType.OBJECT_PROPERTY_HIERARCHY))
+            if (doAll || m_configuration.prepareReasonerInferences.objectPropertyClassificationRequired) 
+                classifyObjectProperties();
+        if (requiredInferences.contains(InferenceType.DATA_PROPERTY_HIERARCHY))
+            if (doAll || m_configuration.prepareReasonerInferences.dataPropertyClassificationRequired) 
+                classifyDataProperties();
+        if (requiredInferences.contains(InferenceType.CLASS_ASSERTIONS))
+            if (doAll || m_configuration.prepareReasonerInferences.realisationRequired) {
+                realise();
+                if (m_configuration.individualNodeSetPolicy==IndividualNodeSetPolicy.BY_SAME_AS || (m_configuration.prepareReasonerInferences!=null&&m_configuration.prepareReasonerInferences.sameAs))
                     precomputeSameAsEquivalenceClasses();
-                break;
-            case DIFFERENT_INDIVIDUALS:
-                throw new UnsupportedOperationException("Error: HermiT cannot precompute different individuals. "+System.getProperty("line.separator")+"That is a very expensive task because all pairs of individuals have to be tested despite the fact that such a test will most likely fail. ");
-            case DISJOINT_CLASSES:
-                precomputeDisjointClasses();
-                break;
-            default:
-                throw new IllegalArgumentException("Error: Unknow inference type specified for precomputeInferences():"+inferenceType);
             }
-        }
+        if (requiredInferences.contains(InferenceType.OBJECT_PROPERTY_ASSERTIONS))
+            if (doAll || m_configuration.prepareReasonerInferences.objectPropertyRealisationRequired)
+                realiseObjectProperties();
+        if (requiredInferences.contains(InferenceType.DATA_PROPERTY_ASSERTIONS))
+            if (doAll || m_configuration.prepareReasonerInferences.dataPropertyRealisationRequired)
+                classifyDataProperties(); // used to enriched stated instances
+        if (requiredInferences.contains(InferenceType.SAME_INDIVIDUAL))
+            if (doAll || m_configuration.prepareReasonerInferences.sameAs)
+                precomputeSameAsEquivalenceClasses();
+        if (requiredInferences.contains(InferenceType.DIFFERENT_INDIVIDUALS))
+                throw new UnsupportedOperationException("Error: HermiT cannot precompute different individuals. "+System.getProperty("line.separator")+"That is a very expensive task because all pairs of individuals have to be tested despite the fact that such a test will most likely fail. ");
+        if (requiredInferences.contains(InferenceType.DISJOINT_CLASSES))
+            precomputeDisjointClasses();
     }
-    protected void initialiseInstanceManager() {
-        if (m_instanceManager==null) {
+    protected void initialisePropertiesInstanceManager() {
+        if (m_instanceManager==null || !m_instanceManager.arePropertiesInitialised()) {
             if (m_configuration.reasonerProgressMonitor!=null)
-                m_configuration.reasonerProgressMonitor.reasonerTaskStarted("Initializing class and property instance data structures");
-            m_instanceManager=new InstanceManager(this, m_tableau, m_atomicConceptHierarchy, m_objectRoleHierarchy);
+                m_configuration.reasonerProgressMonitor.reasonerTaskStarted("Initializing property instance data structures");
+            if (m_instanceManager==null) 
+                m_instanceManager=new InstanceManager(this, m_tableau, m_atomicConceptHierarchy, m_objectRoleHierarchy);
             boolean isConsistent=true;
             if (m_isConsistent!=null && !m_isConsistent) 
                 m_instanceManager.setInconsistent();
@@ -478,7 +470,7 @@ public class Reasoner implements OWLReasoner {
                     completedSteps+=stepsRewritingAdditionalAxioms;
                     if (m_configuration.reasonerProgressMonitor!=null)
                         m_configuration.reasonerProgressMonitor.reasonerTaskProgressChanged(completedSteps,steps);
-                    isConsistent=tableau.isSatisfiable(true,true,null,null,null,null,m_instanceManager.getNodesForIndividuals(),new ReasoningTaskDescription(false,"Initial consistency check plus reading-off known and possible class and property instances (individual "+startIndividualIndex+" to "+m_instanceManager.getCurentIndividualIndex()+")."));
+                    isConsistent=tableau.isSatisfiable(true,true,null,null,null,null,m_instanceManager.getNodesForIndividuals(),new ReasoningTaskDescription(false,"Initial consistency check plus reading-off known and possible class and property instances (individual "+startIndividualIndex+" to "+m_instanceManager.getCurrentIndividualIndex()+")."));
                     t_tableauExpansion+=(System.currentTimeMillis()-t);
                     //System.out.println("tableau expansion: "+t_tableauExpansion);
                     t=System.currentTimeMillis();
@@ -489,12 +481,12 @@ public class Reasoner implements OWLReasoner {
                         m_instanceManager.setInconsistent();
                         break;
                     } else {
-                        completedSteps=m_instanceManager.initializeKnowAndPossibleInstances(tableau,m_configuration.reasonerProgressMonitor,startIndividualIndex,completedSteps,steps);
+                        completedSteps=m_instanceManager.initializeKnowAndPossiblePropertyInstances(tableau,m_configuration.reasonerProgressMonitor,startIndividualIndex,completedSteps,steps);
                         t_readingOff+=(System.currentTimeMillis()-t);
                         //System.out.println("reading off: "+t_readingOff);
                         t=System.currentTimeMillis();
                     }
-                    startIndividualIndex=m_instanceManager.getCurentIndividualIndex();
+                    startIndividualIndex=m_instanceManager.getCurrentIndividualIndex();
                     additionalAxioms=m_instanceManager.getAxiomsForReadingOffCompexProperties(getDataFactory(), m_configuration.reasonerProgressMonitor,completedSteps,steps);
                     t_additionalAxioms+=(System.currentTimeMillis()-t);
                     //System.out.println("additional axioms: "+t_additionalAxioms);
@@ -503,10 +495,56 @@ public class Reasoner implements OWLReasoner {
                     moreWork=additionalAxioms.length>0;
                     loops++;
                 }
-                if (m_isConsistent==null) m_isConsistent=isConsistent;
-                if (m_configuration.reasonerProgressMonitor!=null)
-                    m_configuration.reasonerProgressMonitor.reasonerTaskStopped();
+                if (m_isConsistent==null) 
+                    m_isConsistent=isConsistent;
             }
+            if (m_configuration.reasonerProgressMonitor!=null)
+                m_configuration.reasonerProgressMonitor.reasonerTaskStopped();
+        }
+    }
+    protected void initialiseClassInstanceManager() {
+        if (m_instanceManager==null || !m_instanceManager.areClassesInitialised()) {
+            if (m_configuration.reasonerProgressMonitor!=null)
+                m_configuration.reasonerProgressMonitor.reasonerTaskStarted("Initializing class instance data structures");
+            if (m_instanceManager==null) 
+                m_instanceManager=new InstanceManager(this, m_tableau, m_atomicConceptHierarchy, m_objectRoleHierarchy);
+            boolean isConsistent=true;
+            if (m_isConsistent!=null && !m_isConsistent) 
+                m_instanceManager.setInconsistent();
+            else {
+                int noAxioms=m_dlOntology.getDLClauses().size();
+                int noIndividuals=m_dlOntology.getAllIndividuals().size();
+                int stepsTableauExpansion=noAxioms+noIndividuals;
+                int stepsInitialiseKnownPossible=noIndividuals;
+                int steps=stepsTableauExpansion+stepsInitialiseKnownPossible;
+                int completedSteps=0;
+                long t_tableauGeneration=0;
+                long t_tableauExpansion=0;
+                long t_readingOff=0;
+                long t=System.currentTimeMillis();
+                t=System.currentTimeMillis();
+                Tableau tableau=getTableau();
+                t_tableauGeneration+=(System.currentTimeMillis()-t);
+                //System.out.println("tableau generation: "+t_tableauGeneration);
+                t=System.currentTimeMillis();
+                isConsistent=tableau.isSatisfiable(true,true,null,null,null,null,m_instanceManager.getNodesForIndividuals(),new ReasoningTaskDescription(false,"Initial tableau for reading-off known and possible class instances."));
+                t_tableauExpansion+=(System.currentTimeMillis()-t);
+                //System.out.println("tableau expansion: "+t_tableauExpansion);
+                t=System.currentTimeMillis();
+                completedSteps+=stepsTableauExpansion;
+                if (m_configuration.reasonerProgressMonitor!=null)
+                    m_configuration.reasonerProgressMonitor.reasonerTaskProgressChanged(completedSteps,steps);
+                if (!isConsistent) {
+                    m_instanceManager.setInconsistent();
+                } else {
+                    m_instanceManager.initializeKnowAndPossibleClassInstances(tableau,m_configuration.reasonerProgressMonitor,completedSteps,steps);
+                    t_readingOff+=(System.currentTimeMillis()-t);
+                    //System.out.println("reading off: "+t_readingOff);
+                }
+                if (m_isConsistent==null) m_isConsistent=isConsistent;
+            }
+            if (m_configuration.reasonerProgressMonitor!=null)
+                m_configuration.reasonerProgressMonitor.reasonerTaskStopped();
         }
     }
     public boolean isConsistent() {
@@ -1355,17 +1393,17 @@ public class Reasoner implements OWLReasoner {
     protected void realise() {
         checkPreConditions();
         classifyClasses();
-        initialiseInstanceManager();
+        initialiseClassInstanceManager();
         m_instanceManager.realize(m_configuration.reasonerProgressMonitor);
     }
     protected void realiseObjectProperties() {
         checkPreConditions();
-        initialiseInstanceManager();
+        initialisePropertiesInstanceManager();
         m_instanceManager.realizeObjectRoles(m_configuration.reasonerProgressMonitor);
     }
     protected void precomputeSameAsEquivalenceClasses() {
         checkPreConditions();
-        initialiseInstanceManager();
+        initialiseClassInstanceManager();
         if (m_configuration.reasonerProgressMonitor!=null)
             m_configuration.reasonerProgressMonitor.reasonerTaskStarted("Precompute same individuals");
         m_instanceManager.computeSameAsEquivalenceClasses(m_configuration.reasonerProgressMonitor);
@@ -1376,7 +1414,7 @@ public class Reasoner implements OWLReasoner {
         checkPreConditions(namedIndividual);
         if (direct)
             classifyClasses();
-        initialiseInstanceManager();
+        initialiseClassInstanceManager();
         Set<HierarchyNode<AtomicConceptElement>> result=m_instanceManager.getTypes(H(namedIndividual),direct);
         return atomicConceptElementHierarchyNodesToNodeSet(result);
     }
@@ -1385,7 +1423,7 @@ public class Reasoner implements OWLReasoner {
         if (!m_isConsistent) return true;
         if (direct)
             classifyClasses();
-        initialiseInstanceManager();
+        initialiseClassInstanceManager();
         if (type instanceof OWLClass)
             return m_instanceManager.hasType(H(namedIndividual),H((OWLClass)type),direct);
         else {
@@ -1403,7 +1441,7 @@ public class Reasoner implements OWLReasoner {
         }
         if (direct || !(classExpression instanceof OWLClass))
             classifyClasses();
-        initialiseInstanceManager();
+        initialiseClassInstanceManager();
         Set<Individual> result=new HashSet<Individual>();
         if (classExpression instanceof OWLClass)
             result=m_instanceManager.getInstances(H((OWLClass)classExpression),direct);
@@ -1435,13 +1473,13 @@ public class Reasoner implements OWLReasoner {
     public boolean isSameIndividual(OWLNamedIndividual namedIndividual1, OWLNamedIndividual namedIndividual2) {
         checkPreConditions(namedIndividual1,namedIndividual2);
         if (!m_isConsistent) return true;
-        initialiseInstanceManager();
+        initialiseClassInstanceManager();
         return m_instanceManager.isSameIndividual(H(namedIndividual1),H(namedIndividual2));
     }
     public Node<OWLNamedIndividual> getSameIndividuals(OWLNamedIndividual namedIndividual) {
         checkPreConditions(namedIndividual);
         if (!m_isConsistent) return new OWLNamedIndividualNode(getAllNamedIndividuals());
-        initialiseInstanceManager();
+        initialiseClassInstanceManager();
         Set<Individual> sameIndividuals=m_instanceManager.getSameAsIndividuals(H(namedIndividual));
         OWLDataFactory factory=getDataFactory();
         Set<OWLNamedIndividual> result=new HashSet<OWLNamedIndividual>();
@@ -1466,7 +1504,7 @@ public class Reasoner implements OWLReasoner {
     }
     public NodeSet<OWLNamedIndividual> getObjectPropertyValues(OWLNamedIndividual namedIndividual,OWLObjectPropertyExpression propertyExpression) {
         checkPreConditions(namedIndividual,propertyExpression);
-        initialiseInstanceManager();
+        initialisePropertiesInstanceManager();
         Role role=H(propertyExpression.getNamedProperty());
         if (propertyExpression.getSimplified().isAnonymous()) 
             role=InverseRole.create((AtomicRole)role);
@@ -1477,7 +1515,7 @@ public class Reasoner implements OWLReasoner {
     public Map<OWLNamedIndividual,Set<OWLNamedIndividual>> getObjectPropertyInstances(OWLObjectProperty property) {
         checkPreConditions(property);
         AtomicRole role=H(property);
-        initialiseInstanceManager();
+        initialisePropertiesInstanceManager();
         Map<Individual,Set<Individual>> relations=m_instanceManager.getObjectPropertyInstances(role);
         Map<OWLNamedIndividual,Set<OWLNamedIndividual>> result=new HashMap<OWLNamedIndividual, Set<OWLNamedIndividual>>();
         OWLDataFactory factory=getDataFactory();
@@ -1492,7 +1530,7 @@ public class Reasoner implements OWLReasoner {
     public boolean hasObjectPropertyRelationship(OWLNamedIndividual subject,OWLObjectPropertyExpression propertyExpression,OWLNamedIndividual object) {
         checkPreConditions(subject,propertyExpression,object);
         if (!m_isConsistent) return true;
-        initialiseInstanceManager();
+        initialisePropertiesInstanceManager();
         OWLObjectProperty property=propertyExpression.getNamedProperty();
         if (propertyExpression.getSimplified().isAnonymous()) {
             OWLNamedIndividual tmp=subject;
@@ -1570,7 +1608,7 @@ public class Reasoner implements OWLReasoner {
         if (m_configuration.individualNodeSetPolicy==IndividualNodeSetPolicy.BY_SAME_AS) {
             // group the individuals by same as equivalence classes
             while (!individuals.isEmpty()) {
-                initialiseInstanceManager();
+                initialiseClassInstanceManager();
                 Individual individual=individuals.iterator().next();
                 Set<Individual> sameIndividuals=m_instanceManager.getSameAsIndividuals(individual);
                 Set<OWLNamedIndividual> sameNamedIndividuals=new HashSet<OWLNamedIndividual>();
