@@ -365,6 +365,7 @@ public class Reasoner implements OWLReasoner {
         supportedInferenceTypes.add(InferenceType.OBJECT_PROPERTY_ASSERTIONS);
         supportedInferenceTypes.add(InferenceType.DATA_PROPERTY_ASSERTIONS);
         supportedInferenceTypes.add(InferenceType.SAME_INDIVIDUAL);
+        supportedInferenceTypes.add(InferenceType.DISJOINT_CLASSES);
         return supportedInferenceTypes;
     }
     public boolean isPrecomputed(InferenceType inferenceType) {
@@ -427,11 +428,12 @@ public class Reasoner implements OWLReasoner {
                     precomputeSameAsEquivalenceClasses();
                 break;
             case DIFFERENT_INDIVIDUALS:
-                throw new UnsupportedOperationException("Error: HermiT cannot precompute different individuals. That is a very expensive task because all pairs of individuals have to be tested despite the fact that such a test will most likely fail. ");
+                throw new UnsupportedOperationException("Error: HermiT cannot precompute different individuals. "+System.getProperty("line.separator")+"That is a very expensive task because all pairs of individuals have to be tested despite the fact that such a test will most likely fail. ");
             case DISJOINT_CLASSES:
                 precomputeDisjointClasses();
+                break;
             default:
-                throw new IllegalArgumentException("Error: Unknow inference type specified for precomputeInferences().");
+                throw new IllegalArgumentException("Error: Unknow inference type specified for precomputeInferences():"+inferenceType);
             }
         }
     }
@@ -685,9 +687,17 @@ public class Reasoner implements OWLReasoner {
             nodes.remove(m_atomicConceptHierarchy.getTopNode());
             nodes.remove(m_atomicConceptHierarchy.getBottomNode());
             nodes.removeAll(m_disjointClasses.keySet());
+            int steps=nodes.size();
+            int step=0;
+            if (m_configuration.reasonerProgressMonitor!=null)
+                m_configuration.reasonerProgressMonitor.reasonerTaskStarted("Compute disjoint classes");
             for (HierarchyNode<AtomicConcept> node : nodes) {
                 getDisjointConceptNodes(node);
+                if (m_configuration.reasonerProgressMonitor!=null)
+                    m_configuration.reasonerProgressMonitor.reasonerTaskProgressChanged(++step, steps);
             }
+            if (m_configuration.reasonerProgressMonitor!=null)
+                m_configuration.reasonerProgressMonitor.reasonerTaskStopped();
         }
     }
     protected Set<HierarchyNode<AtomicConcept>> getDisjointConceptNodes(HierarchyNode<AtomicConcept> node) {
@@ -1353,10 +1363,14 @@ public class Reasoner implements OWLReasoner {
         initialiseInstanceManager();
         m_instanceManager.realizeObjectRoles(m_configuration.reasonerProgressMonitor);
     }
-    public void precomputeSameAsEquivalenceClasses() {
+    protected void precomputeSameAsEquivalenceClasses() {
         checkPreConditions();
         initialiseInstanceManager();
-        m_instanceManager.computeSameAsEquivalenceClasses();
+        if (m_configuration.reasonerProgressMonitor!=null)
+            m_configuration.reasonerProgressMonitor.reasonerTaskStarted("Precompute same individuals");
+        m_instanceManager.computeSameAsEquivalenceClasses(m_configuration.reasonerProgressMonitor);
+        if (m_configuration.reasonerProgressMonitor!=null)
+            m_configuration.reasonerProgressMonitor.reasonerTaskStopped();
     }
     public NodeSet<OWLClass> getTypes(OWLNamedIndividual namedIndividual,boolean direct) {
         checkPreConditions(namedIndividual);

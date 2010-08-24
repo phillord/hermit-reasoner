@@ -1478,10 +1478,13 @@ public class InstanceManager {
     public boolean isSameIndividual(Individual individual1, Individual individual2) {
         return (!m_tableau.isSatisfiable(true,true,Collections.singleton(Atom.create(Inequality.INSTANCE,individual1,individual2)),null,null,null,null,new ReasoningTaskDescription(true,"is {0} same as {1}",individual1,individual2)));
     }
-    public void computeSameAsEquivalenceClasses() {
+    public void computeSameAsEquivalenceClasses(ReasonerProgressMonitor progressMonitor) {
+        int steps=m_individualToPossibleEquivalenceClass.keySet().size();
         while (!m_individualToPossibleEquivalenceClass.isEmpty()) {
             Set<Individual> equivalenceClass=m_individualToPossibleEquivalenceClass.keySet().iterator().next();
             getSameAsIndividuals(equivalenceClass.iterator().next());
+            if (progressMonitor!=null)
+                progressMonitor.reasonerTaskProgressChanged(steps-m_individualToPossibleEquivalenceClass.keySet().size(), steps);
         }
     }
     protected boolean isInstance(Individual individual,AtomicConcept atomicConcept) {
