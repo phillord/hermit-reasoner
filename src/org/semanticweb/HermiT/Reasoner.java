@@ -56,7 +56,6 @@ import org.semanticweb.HermiT.hierarchy.HierarchySearch;
 import org.semanticweb.HermiT.hierarchy.InstanceManager;
 import org.semanticweb.HermiT.hierarchy.QuasiOrderClassification;
 import org.semanticweb.HermiT.hierarchy.QuasiOrderClassificationForRoles;
-import org.semanticweb.HermiT.hierarchy.AtomicConceptElementManager.AtomicConceptElement;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
@@ -433,7 +432,7 @@ public class Reasoner implements OWLReasoner {
             if (m_configuration.reasonerProgressMonitor!=null)
                 m_configuration.reasonerProgressMonitor.reasonerTaskStarted("Initializing property instance data structures");
             if (m_instanceManager==null) 
-                m_instanceManager=new InstanceManager(this, m_tableau, m_atomicConceptHierarchy, m_objectRoleHierarchy);
+                m_instanceManager=new InstanceManager(m_interruptFlag,this, m_tableau, m_atomicConceptHierarchy, m_objectRoleHierarchy);
             boolean isConsistent=true;
             if (m_isConsistent!=null && !m_isConsistent) 
                 m_instanceManager.setInconsistent();
@@ -507,7 +506,7 @@ public class Reasoner implements OWLReasoner {
             if (m_configuration.reasonerProgressMonitor!=null)
                 m_configuration.reasonerProgressMonitor.reasonerTaskStarted("Initializing class instance data structures");
             if (m_instanceManager==null) 
-                m_instanceManager=new InstanceManager(this, m_tableau, m_atomicConceptHierarchy, m_objectRoleHierarchy);
+                m_instanceManager=new InstanceManager(m_interruptFlag,this, m_tableau, m_atomicConceptHierarchy, m_objectRoleHierarchy);
             boolean isConsistent=true;
             if (m_isConsistent!=null && !m_isConsistent) 
                 m_instanceManager.setInconsistent();
@@ -518,19 +517,19 @@ public class Reasoner implements OWLReasoner {
                 int stepsInitialiseKnownPossible=noIndividuals;
                 int steps=stepsTableauExpansion+stepsInitialiseKnownPossible;
                 int completedSteps=0;
-                long t_tableauGeneration=0;
-                long t_tableauExpansion=0;
-                long t_readingOff=0;
-                long t=System.currentTimeMillis();
-                t=System.currentTimeMillis();
+                //long t_tableauGeneration=0;
+//                long t_tableauExpansion=0;
+//                long t_readingOff=0;
+//                long t;//=System.currentTimeMillis();
+                //t=System.currentTimeMillis();
                 Tableau tableau=getTableau();
-                t_tableauGeneration+=(System.currentTimeMillis()-t);
+                //t_tableauGeneration+=(System.currentTimeMillis()-t);
                 //System.out.println("tableau generation: "+t_tableauGeneration);
-                t=System.currentTimeMillis();
+//                t=System.currentTimeMillis();
                 isConsistent=tableau.isSatisfiable(true,true,null,null,null,null,m_instanceManager.getNodesForIndividuals(),new ReasoningTaskDescription(false,"Initial tableau for reading-off known and possible class instances."));
-                t_tableauExpansion+=(System.currentTimeMillis()-t);
-                //System.out.println("tableau expansion: "+t_tableauExpansion);
-                t=System.currentTimeMillis();
+//                t_tableauExpansion+=(System.currentTimeMillis()-t);
+//                System.out.println("tableau expansion: "+t_tableauExpansion);
+//                t=System.currentTimeMillis();
                 completedSteps+=stepsTableauExpansion;
                 if (m_configuration.reasonerProgressMonitor!=null)
                     m_configuration.reasonerProgressMonitor.reasonerTaskProgressChanged(completedSteps,steps);
@@ -538,8 +537,8 @@ public class Reasoner implements OWLReasoner {
                     m_instanceManager.setInconsistent();
                 } else {
                     m_instanceManager.initializeKnowAndPossibleClassInstances(tableau,m_configuration.reasonerProgressMonitor,completedSteps,steps);
-                    t_readingOff+=(System.currentTimeMillis()-t);
-                    //System.out.println("reading off: "+t_readingOff);
+//                    t_readingOff+=(System.currentTimeMillis()-t);
+//                    System.out.println("all reading off: "+t_readingOff);
                 }
                 if (m_isConsistent==null) m_isConsistent=isConsistent;
             }
@@ -1415,8 +1414,8 @@ public class Reasoner implements OWLReasoner {
         if (direct)
             classifyClasses();
         initialiseClassInstanceManager();
-        Set<HierarchyNode<AtomicConceptElement>> result=m_instanceManager.getTypes(H(namedIndividual),direct);
-        return atomicConceptElementHierarchyNodesToNodeSet(result);
+        Set<HierarchyNode<AtomicConcept>> result=m_instanceManager.getTypes(H(namedIndividual),direct);
+        return atomicConceptHierarchyNodesToNodeSet(result);
     }
     public boolean hasType(OWLNamedIndividual namedIndividual,OWLClassExpression type,boolean direct) {
         checkPreConditions(namedIndividual,type);
@@ -2055,25 +2054,6 @@ public class Reasoner implements OWLReasoner {
         Set<Node<OWLClass>> result=new HashSet<Node<OWLClass>>();
         for (HierarchyNode<AtomicConcept> hierarchyNode : hierarchyNodes) {
             Node<OWLClass> node=atomicConceptHierarchyNodeToNode(hierarchyNode);
-            if (node.getSize()!=0)
-                result.add(node);
-        }
-        return new OWLClassNodeSet(result);
-    }
-    protected Node<OWLClass> atomicConceptElementHierarchyNodeToNode(HierarchyNode<AtomicConceptElement> hierarchyNode) {
-        Set<OWLClass> result=new HashSet<OWLClass>();
-        OWLDataFactory factory=getDataFactory();
-        for (AtomicConceptElement conceptElement : hierarchyNode.getEquivalentElements()) {
-            String iri=conceptElement.getAtomicConcept().getIRI();
-            if (!Prefixes.isInternalIRI(iri))
-                result.add(factory.getOWLClass(IRI.create(iri)));
-        }
-        return new OWLClassNode(result);
-    }
-    protected NodeSet<OWLClass> atomicConceptElementHierarchyNodesToNodeSet(Collection<HierarchyNode<AtomicConceptElement>> hierarchyNodes) {
-        Set<Node<OWLClass>> result=new HashSet<Node<OWLClass>>();
-        for (HierarchyNode<AtomicConceptElement> hierarchyNode : hierarchyNodes) {
-            Node<OWLClass> node=atomicConceptElementHierarchyNodeToNode(hierarchyNode);
             if (node.getSize()!=0)
                 result.add(node);
         }

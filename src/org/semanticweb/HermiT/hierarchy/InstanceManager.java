@@ -32,7 +32,6 @@ import java.util.Set;
 import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.HermiT.graph.Graph;
-import org.semanticweb.HermiT.hierarchy.AtomicConceptElementManager.AtomicConceptElement;
 import org.semanticweb.HermiT.hierarchy.DeterministicClassification.GraphNode;
 import org.semanticweb.HermiT.hierarchy.RoleElementManager.RoleElement;
 import org.semanticweb.HermiT.model.Atom;
@@ -47,6 +46,7 @@ import org.semanticweb.HermiT.model.InverseRole;
 import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.tableau.ExtensionManager;
 import org.semanticweb.HermiT.tableau.ExtensionTable;
+import org.semanticweb.HermiT.tableau.InterruptFlag;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.NodeType;
 import org.semanticweb.HermiT.tableau.ReasoningTaskDescription;
@@ -63,14 +63,15 @@ import org.semanticweb.owlapi.reasoner.ReasonerProgressMonitor;
 public class InstanceManager {
     public static final int thresholdForAdditionalAxioms=10000;
     
+    protected final InterruptFlag m_interruptFlag;
     protected final Reasoner m_reasoner;
     protected final Tableau m_tableau;
     protected final Individual[] m_individuals;
     protected final HashSet<AtomicRole> m_complexRoles;
-    protected final AtomicConceptElementManager m_atomicConceptElementManager;
-    protected final AtomicConceptElement m_topConceptElement;
-    protected final AtomicConceptElement m_bottomConceptElement;
-    protected Hierarchy<AtomicConceptElement> m_currentConceptHierarchy;
+    protected final Map<AtomicConcept,AtomicConceptElement> m_conceptToElement;
+    protected final AtomicConcept m_topConcept;
+    protected final AtomicConcept m_bottomConcept;
+    protected Hierarchy<AtomicConcept> m_currentConceptHierarchy;
     protected final RoleElementManager m_roleElementManager;
     protected final RoleElement m_topRoleElement;
     protected final RoleElement m_bottomRoleElement;
@@ -97,91 +98,100 @@ public class InstanceManager {
     protected final ExtensionTable.Retrieval m_ternaryRetrieval012Bound;
     protected int m_currentIndividualIndex=0;
     
-    public InstanceManager(Reasoner reasoner, Tableau tableau, Hierarchy<AtomicConcept> atomicConceptHierarchy, Hierarchy<Role> objectRoleHierarchy) {
-        m_reasoner=reasoner;
-        m_tableau=tableau;
-        DLOntology dlo=m_reasoner.getDLOntology();
-        m_individuals=new ArrayList<Individual>(dlo.getAllIndividuals()).toArray(new Individual[0]);
-        m_complexRoles=new HashSet<AtomicRole>();
-        m_individualToEquivalenceClass=new HashMap<Individual, Set<Individual>>();
-        m_nodesForIndividuals=new HashMap<Individual,Node>();
-        for (Individual individual : m_individuals) {
-            m_nodesForIndividuals.put(individual,null);
-            Set<Individual> equivalentIndividuals=new HashSet<Individual>();
-            equivalentIndividuals.add(individual);
-            m_individualToEquivalenceClass.put(individual, equivalentIndividuals);
-        }
-        m_individualsForNodes=new HashMap<Node,Individual>();
-        m_individualToPossibleEquivalenceClass=null;
-        m_atomicConceptElementManager=new AtomicConceptElementManager();
-        m_topConceptElement=m_atomicConceptElementManager.getAtomicConceptElement(AtomicConcept.THING);
-        m_bottomConceptElement=m_atomicConceptElementManager.getAtomicConceptElement(AtomicConcept.NOTHING);
-        m_roleElementManager=new RoleElementManager();
-        m_topRoleElement=m_roleElementManager.getRoleElement(AtomicRole.TOP_OBJECT_ROLE);
-        m_bottomRoleElement=m_roleElementManager.getRoleElement(AtomicRole.BOTTOM_OBJECT_ROLE);
-        m_usesInverseRoles=dlo.hasInverseRoles();
-        
-        Graph<AtomicConceptElement> knownConceptSubsumptions=null;
-        Graph<Role> knownRoleSubsumptions=null;
-        Set<AtomicConcept> atomicConcepts=null;
-        Set<Role> roles=null;
-        if (atomicConceptHierarchy!=null) {
-            setToClassifiedConceptHierarchy(atomicConceptHierarchy);
-        } else {
-            knownConceptSubsumptions=new Graph<AtomicConceptElement>();
-            atomicConcepts=new HashSet<AtomicConcept>();
-            atomicConcepts.add(AtomicConcept.THING);
-            atomicConcepts.add(AtomicConcept.NOTHING);
-            atomicConcepts.addAll(dlo.getAllAtomicConcepts());
-            for (AtomicConcept atomicConcept : atomicConcepts) {
-                if (!Prefixes.isInternalIRI(atomicConcept.getIRI())) {
-                    AtomicConceptElement element=m_atomicConceptElementManager.getAtomicConceptElement(atomicConcept);
-                    addKnownConceptSubsumption(knownConceptSubsumptions,element,element);
-                    addKnownConceptSubsumption(knownConceptSubsumptions,element,m_topConceptElement);
-                    addKnownConceptSubsumption(knownConceptSubsumptions,m_bottomConceptElement,element);
-                }
+    public InstanceManager(InterruptFlag interruptFlag, Reasoner reasoner, Tableau tableau, Hierarchy<AtomicConcept> atomicConceptHierarchy, Hierarchy<Role> objectRoleHierarchy) {
+        m_interruptFlag=interruptFlag;
+        m_interruptFlag.startTask();
+        try {
+            m_reasoner=reasoner;
+            m_tableau=tableau;
+            DLOntology dlo=m_reasoner.getDLOntology();
+            m_individuals=new ArrayList<Individual>(dlo.getAllIndividuals()).toArray(new Individual[0]);
+            m_complexRoles=new HashSet<AtomicRole>();
+            m_individualToEquivalenceClass=new HashMap<Individual, Set<Individual>>();
+            m_nodesForIndividuals=new HashMap<Individual,Node>();
+            for (Individual individual : m_individuals) {
+                m_nodesForIndividuals.put(individual,null);
+                Set<Individual> equivalentIndividuals=new HashSet<Individual>();
+                equivalentIndividuals.add(individual);
+                m_individualToEquivalenceClass.put(individual, equivalentIndividuals);
+                m_interruptFlag.checkInterrupt();
             }
-            addKnownConceptSubsumption(knownConceptSubsumptions,m_bottomConceptElement,m_bottomConceptElement);
-        }
-        Set<Role> complexRoles=dlo.getAllComplexObjectRoles();
-        if (objectRoleHierarchy!=null) {
-            setToClassifiedRoleHierarchy(objectRoleHierarchy);
-            for (Role role : complexRoles)
-                if (role instanceof AtomicRole && role!=AtomicRole.TOP_OBJECT_ROLE && role!=AtomicRole.BOTTOM_OBJECT_ROLE)
-                    m_complexRoles.add((AtomicRole)role);
-        } else {
-            knownRoleSubsumptions=new Graph<Role>();
-            roles=new HashSet<Role>();
-            roles.add(AtomicRole.TOP_OBJECT_ROLE);
-            roles.add(AtomicRole.BOTTOM_OBJECT_ROLE);
-            roles.addAll(dlo.getAllAtomicObjectRoles());
-            for (Role role : roles) {
-                if (!Prefixes.isInternalIRI(((AtomicRole)role).getIRI())) {
+            m_individualsForNodes=new HashMap<Node,Individual>();
+            m_individualToPossibleEquivalenceClass=null;
+            
+            m_topConcept=AtomicConcept.THING;
+            m_bottomConcept=AtomicConcept.NOTHING;
+            m_conceptToElement=new HashMap<AtomicConcept, AtomicConceptElement>();
+            m_conceptToElement.put(m_topConcept, new AtomicConceptElement(null, null));
+            Graph<AtomicConcept> knownConceptSubsumptions=null;
+            Set<AtomicConcept> atomicConcepts=null;
+            if (atomicConceptHierarchy!=null) {
+                m_currentConceptHierarchy=atomicConceptHierarchy;
+            } else {
+                knownConceptSubsumptions=new Graph<AtomicConcept>();
+                atomicConcepts=new HashSet<AtomicConcept>();
+                atomicConcepts.add(m_topConcept);
+                atomicConcepts.add(m_bottomConcept);
+                for (AtomicConcept atomicConcept : dlo.getAllAtomicConcepts()) {
+                    if (!Prefixes.isInternalIRI(atomicConcept.getIRI())) {
+                        atomicConcepts.add(atomicConcept);
+                        addKnownConceptSubsumption(knownConceptSubsumptions,atomicConcept,atomicConcept);
+                        addKnownConceptSubsumption(knownConceptSubsumptions,atomicConcept,m_topConcept);
+                        addKnownConceptSubsumption(knownConceptSubsumptions,m_bottomConcept,atomicConcept);
+                    }
+                    m_interruptFlag.checkInterrupt();
+                }
+                addKnownConceptSubsumption(knownConceptSubsumptions,m_bottomConcept,m_bottomConcept);
+            }
+            
+            m_roleElementManager=new RoleElementManager();
+            Graph<Role> knownRoleSubsumptions=null;
+            m_topRoleElement=m_roleElementManager.getRoleElement(AtomicRole.TOP_OBJECT_ROLE);
+            m_bottomRoleElement=m_roleElementManager.getRoleElement(AtomicRole.BOTTOM_OBJECT_ROLE);
+            m_usesInverseRoles=dlo.hasInverseRoles();
+            Set<Role> roles=null;
+            Set<Role> complexRoles=dlo.getAllComplexObjectRoles();
+            if (objectRoleHierarchy!=null) {
+                setToClassifiedRoleHierarchy(objectRoleHierarchy);
+                for (Role role : complexRoles)
+                    if (role instanceof AtomicRole && role!=AtomicRole.TOP_OBJECT_ROLE && role!=AtomicRole.BOTTOM_OBJECT_ROLE)
+                        m_complexRoles.add((AtomicRole)role);
+            } else {
+                knownRoleSubsumptions=new Graph<Role>();
+                roles=new HashSet<Role>();
+                roles.add(AtomicRole.TOP_OBJECT_ROLE);
+                roles.add(AtomicRole.BOTTOM_OBJECT_ROLE);
+                roles.addAll(dlo.getAllAtomicObjectRoles());
+                for (Role role : roles) {
                     addKnownRoleSubsumption(knownRoleSubsumptions,role,role);
                     addKnownRoleSubsumption(knownRoleSubsumptions,role,AtomicRole.TOP_OBJECT_ROLE);
                     addKnownRoleSubsumption(knownRoleSubsumptions,AtomicRole.BOTTOM_OBJECT_ROLE,role);
+                    if (complexRoles.contains(role) && role instanceof AtomicRole && role!=AtomicRole.TOP_OBJECT_ROLE && role!=AtomicRole.BOTTOM_OBJECT_ROLE)
+                        m_complexRoles.add((AtomicRole)role);
+                    m_interruptFlag.checkInterrupt();
                 }
-                if (complexRoles.contains(role) && role instanceof AtomicRole && role!=AtomicRole.TOP_OBJECT_ROLE && role!=AtomicRole.BOTTOM_OBJECT_ROLE)
-                    m_complexRoles.add((AtomicRole)role);
+                addKnownRoleSubsumption(knownRoleSubsumptions,AtomicRole.BOTTOM_OBJECT_ROLE,AtomicRole.BOTTOM_OBJECT_ROLE);
             }
-            addKnownRoleSubsumption(knownRoleSubsumptions,AtomicRole.BOTTOM_OBJECT_ROLE,AtomicRole.BOTTOM_OBJECT_ROLE);
+            if (atomicConceptHierarchy==null || objectRoleHierarchy==null) {
+                updateKnownSubsumptionsUsingToldSubsumers(dlo.getDLClauses(),knownConceptSubsumptions,atomicConcepts,knownRoleSubsumptions,roles);
+            }
+            if (atomicConceptHierarchy==null)
+                m_currentConceptHierarchy=buildTransitivelyReducedConceptHierarchy(knownConceptSubsumptions);
+            if (objectRoleHierarchy==null)
+                m_currentRoleHierarchy=buildTransitivelyReducedRoleHierarchy(knownRoleSubsumptions);
+            ExtensionManager extensionManager=m_tableau.getExtensionManager();
+            m_binaryRetrieval0Bound=extensionManager.getBinaryExtensionTable().createRetrieval(new boolean[] { true, false }, ExtensionTable.View.TOTAL);
+            m_binaryRetrieval1Bound=extensionManager.getBinaryExtensionTable().createRetrieval(new boolean[] { false, true }, ExtensionTable.View.TOTAL);
+            m_binaryRetrieval01Bound=extensionManager.getBinaryExtensionTable().createRetrieval(new boolean[] { true, true }, ExtensionTable.View.TOTAL);
+            m_ternaryRetrieval1Bound=extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { false,true,false }, ExtensionTable.View.TOTAL);
+            m_ternaryRetrieval0Bound=extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,false,false }, ExtensionTable.View.TOTAL);
+            m_ternaryRetrieval012Bound=extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,true,true }, ExtensionTable.View.TOTAL);
         }
-        if (atomicConceptHierarchy==null || objectRoleHierarchy==null) {
-            updateKnownSubsumptionsUsingToldSubsumers(dlo.getDLClauses(),knownConceptSubsumptions,atomicConcepts,knownRoleSubsumptions,roles);
+        finally {
+            m_interruptFlag.endTask();
         }
-        if (atomicConceptHierarchy==null)
-            m_currentConceptHierarchy=buildTransitivelyReducedConceptHierarchy(knownConceptSubsumptions);
-        if (objectRoleHierarchy==null)
-            m_currentRoleHierarchy=buildTransitivelyReducedRoleHierarchy(knownRoleSubsumptions);
-        ExtensionManager extensionManager=m_tableau.getExtensionManager();
-        m_binaryRetrieval0Bound=extensionManager.getBinaryExtensionTable().createRetrieval(new boolean[] { true, false }, ExtensionTable.View.TOTAL);
-        m_binaryRetrieval1Bound=extensionManager.getBinaryExtensionTable().createRetrieval(new boolean[] { false, true }, ExtensionTable.View.TOTAL);
-        m_binaryRetrieval01Bound=extensionManager.getBinaryExtensionTable().createRetrieval(new boolean[] { true, true }, ExtensionTable.View.TOTAL);
-        m_ternaryRetrieval1Bound=extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { false,true,false }, ExtensionTable.View.TOTAL);
-        m_ternaryRetrieval0Bound=extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,false,false }, ExtensionTable.View.TOTAL);
-        m_ternaryRetrieval012Bound=extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,true,true }, ExtensionTable.View.TOTAL);
     }
-    protected void addKnownConceptSubsumption(Graph<AtomicConceptElement> knownSubsumptions,AtomicConceptElement subConcept,AtomicConceptElement superConcept) {
+    protected void addKnownConceptSubsumption(Graph<AtomicConcept> knownSubsumptions,AtomicConcept subConcept,AtomicConcept superConcept) {
         knownSubsumptions.addEdge(subConcept,superConcept);
     }
     protected void addKnownRoleSubsumption(Graph<Role> knownSubsumptions,Role subRole,Role superRole) {
@@ -189,7 +199,7 @@ public class InstanceManager {
         if (m_usesInverseRoles)
             knownSubsumptions.addEdge(subRole.getInverse(),superRole.getInverse());
     }
-    protected void updateKnownSubsumptionsUsingToldSubsumers(Set<DLClause> dlClauses, Graph<AtomicConceptElement> knownConceptSubsumptions,Set<AtomicConcept> concepts,Graph<Role> knownRoleSubsumptions,Set<Role> roles) {
+    protected void updateKnownSubsumptionsUsingToldSubsumers(Set<DLClause> dlClauses, Graph<AtomicConcept> knownConceptSubsumptions,Set<AtomicConcept> concepts,Graph<Role> knownRoleSubsumptions,Set<Role> roles) {
         boolean requiresConceptSubsumers=knownConceptSubsumptions!=null;
         boolean requiresRoleSubsumers=knownRoleSubsumptions!=null;
         if (requiresConceptSubsumers || requiresRoleSubsumers) {
@@ -201,7 +211,7 @@ public class InstanceManager {
                         AtomicConcept headConcept=(AtomicConcept)headPredicate;
                         AtomicConcept bodyConcept=(AtomicConcept)bodyPredicate;
                         if (concepts.contains(headConcept) && concepts.contains(bodyConcept))
-                            addKnownConceptSubsumption(knownConceptSubsumptions,m_atomicConceptElementManager.getAtomicConceptElement(bodyConcept),m_atomicConceptElementManager.getAtomicConceptElement(headConcept));
+                            addKnownConceptSubsumption(knownConceptSubsumptions,bodyConcept,headConcept);
                     } else if (requiresRoleSubsumers && headPredicate instanceof AtomicRole && bodyPredicate instanceof AtomicRole) {
                         AtomicRole headRole=(AtomicRole)headPredicate;
                         AtomicRole bodyRole=(AtomicRole)bodyPredicate;
@@ -215,51 +225,67 @@ public class InstanceManager {
                         }
                     }
                 }
+                m_interruptFlag.checkInterrupt();
             }
         }
     }
-    protected Hierarchy<AtomicConceptElement> buildTransitivelyReducedConceptHierarchy(Graph<AtomicConceptElement> knownSubsumptions) {
-        final Map<AtomicConceptElement,GraphNode<AtomicConceptElement>> allSubsumers=new HashMap<AtomicConceptElement,GraphNode<AtomicConceptElement>>();
-        for (AtomicConceptElement element : knownSubsumptions.getElements())
-            allSubsumers.put(element,new GraphNode<AtomicConceptElement>(element,knownSubsumptions.getSuccessors(element)));
-        return DeterministicClassification.buildHierarchy(m_topConceptElement,m_bottomConceptElement,allSubsumers);
+    protected Hierarchy<AtomicConcept> buildTransitivelyReducedConceptHierarchy(Graph<AtomicConcept> knownSubsumptions) {
+        final Map<AtomicConcept,GraphNode<AtomicConcept>> allSubsumers=new HashMap<AtomicConcept,GraphNode<AtomicConcept>>();
+        for (AtomicConcept element : knownSubsumptions.getElements())
+            allSubsumers.put(element,new GraphNode<AtomicConcept>(element,knownSubsumptions.getSuccessors(element)));
+        m_interruptFlag.checkInterrupt();
+        return DeterministicClassification.buildHierarchy(m_topConcept,m_bottomConcept,allSubsumers);
     }
     public void setToClassifiedConceptHierarchy(Hierarchy<AtomicConcept> atomicConceptHierarchy) {
-        Hierarchy.Transformer<AtomicConcept,AtomicConceptElement> transformer=new Hierarchy.Transformer<AtomicConcept,AtomicConceptElement>() {
-            public AtomicConceptElement transform(AtomicConcept atomicConcept) {
-                return m_atomicConceptElementManager.getAtomicConceptElement(atomicConcept);
-            }
-            public AtomicConceptElement determineRepresentative(AtomicConcept oldRepresentative,Set<AtomicConceptElement> newEquivalentElements) {
-                AtomicConceptElement representative=transform(oldRepresentative);
-                for (AtomicConceptElement newEquiv : newEquivalentElements) {
-                    if (!newEquiv.equals(representative)) {
-                        representative.m_knownInstances.addAll(newEquiv.m_knownInstances);
-                        representative.m_possibleInstances.retainAll(newEquiv.m_possibleInstances);
-                        newEquiv.m_knownInstances.clear();
-                        newEquiv.m_possibleInstances.clear();
-                    }
-                }
-                return representative;
-            }
-        };
-        m_currentConceptHierarchy=atomicConceptHierarchy.transform(transformer,null);
-        // clean up known and possibles
+        m_currentConceptHierarchy=atomicConceptHierarchy;
         if (m_classesInitialised && m_individuals.length>0) {
-            Queue<HierarchyNode<AtomicConceptElement>> toProcess=new LinkedList<HierarchyNode<AtomicConceptElement>>();
-            toProcess.add(m_currentConceptHierarchy.m_bottomNode);
-            while (!toProcess.isEmpty()) {
-                HierarchyNode<AtomicConceptElement> current=toProcess.remove();
-                AtomicConceptElement atomicConceptElement=current.getRepresentative();
-                Set<HierarchyNode<AtomicConceptElement>> ancestors=current.getAncestorNodes();
-                ancestors.remove(current);
-                for (HierarchyNode<AtomicConceptElement> ancestor : ancestors) {
-                    ancestor.getRepresentative().m_knownInstances.removeAll(atomicConceptElement.m_knownInstances);
-                    ancestor.getRepresentative().m_possibleInstances.removeAll(atomicConceptElement.m_knownInstances);
-                    ancestor.getRepresentative().m_possibleInstances.removeAll(atomicConceptElement.m_possibleInstances);
+            for (HierarchyNode<AtomicConcept> node : m_currentConceptHierarchy.getAllNodes()) {
+                if (node.m_representative!=m_bottomConcept) {
+                    AtomicConcept representativeConcept=node.getRepresentative();
+                    Set<Individual> known=new HashSet<Individual>();
+                    Set<Individual> possible=null;
+                    for (AtomicConcept concept : node.getEquivalentElements()) {
+                        if (m_conceptToElement.containsKey(concept)) {
+                            AtomicConceptElement element=m_conceptToElement.get(concept);
+                            known.addAll(element.m_knownInstances);
+                            if (possible==null) {
+                                possible=new HashSet<Individual>(element.m_possibleInstances);
+                            } else {
+                                possible.retainAll(element.m_possibleInstances);
+                            }
+                            m_conceptToElement.remove(concept);
+                        }
+                    }
+                    if (possible!=null)
+                        possible.removeAll(known);
+                    if (!known.isEmpty()||possible!=null) 
+                        m_conceptToElement.put(representativeConcept, new AtomicConceptElement(known, possible));
                 }
-                for (HierarchyNode<AtomicConceptElement> parent : current.getParentNodes())
-                    if (!toProcess.contains(parent)) 
-                        toProcess.add(parent);
+            }
+            // clean up known and possibles
+            Queue<HierarchyNode<AtomicConcept>> toProcess=new LinkedList<HierarchyNode<AtomicConcept>>();
+            toProcess.addAll(m_currentConceptHierarchy.m_bottomNode.m_parentNodes);
+            while (!toProcess.isEmpty()) {
+                HierarchyNode<AtomicConcept> current=toProcess.remove();
+                AtomicConcept currentConcept=current.getRepresentative();
+                AtomicConceptElement currentElement=m_conceptToElement.get(currentConcept);
+                if (currentElement!=null) {
+                    Set<HierarchyNode<AtomicConcept>> ancestors=current.getAncestorNodes();
+                    ancestors.remove(current);
+                    for (HierarchyNode<AtomicConcept> ancestor : ancestors) {
+                        AtomicConcept ancestorConcept=ancestor.getRepresentative();
+                        AtomicConceptElement ancestorElement=m_conceptToElement.get(ancestorConcept);
+                        if (ancestorElement!=null) {
+                            ancestorElement.m_knownInstances.removeAll(currentElement.m_knownInstances);
+                            ancestorElement.m_possibleInstances.removeAll(currentElement.m_knownInstances);
+                            ancestorElement.m_possibleInstances.removeAll(currentElement.m_possibleInstances);
+                        }
+                    }
+                    for (HierarchyNode<AtomicConcept> parent : current.getParentNodes())
+                        if (!toProcess.contains(parent)) 
+                            toProcess.add(parent);
+                }
+                m_interruptFlag.checkInterrupt();
             }
         }
         m_usesClassifiedConceptHierarchy=true;
@@ -268,6 +294,7 @@ public class InstanceManager {
         final Map<Role,GraphNode<Role>> allSubsumers=new HashMap<Role,GraphNode<Role>>();
         for (Role role : knownSubsumptions.getElements())
             allSubsumers.put(role,new GraphNode<Role>(role,knownSubsumptions.getSuccessors(role)));
+        m_interruptFlag.checkInterrupt();
         return transformRoleHierarchy(DeterministicClassification.buildHierarchy(AtomicRole.TOP_OBJECT_ROLE,AtomicRole.BOTTOM_OBJECT_ROLE,allSubsumers));
     }
     /**
@@ -280,6 +307,7 @@ public class InstanceManager {
         Hierarchy<Role> newHierarchy=removeInverses(roleHierarchy);
         Hierarchy.Transformer<Role,RoleElement> transformer=new Hierarchy.Transformer<Role,RoleElement>() {
             public RoleElement transform(Role role) {
+                m_interruptFlag.checkInterrupt();
                 return m_roleElementManager.getRoleElement(role);
             }
             public RoleElement determineRepresentative(Role oldRepresentative,Set<RoleElement> newEquivalentElements) {
@@ -304,6 +332,7 @@ public class InstanceManager {
                         newEquiv.m_possibleRelations.clear();
                     }
                 }
+                m_interruptFlag.checkInterrupt();
                 return representative;
             }
         };
@@ -323,6 +352,7 @@ public class InstanceManager {
             allSubsumers.put(current,new GraphNode<Role>(current,atomicRepresentatives));
             toProcess.addAll(atomicRepresentatives);
             toProcess.removeAll(visited);
+            m_interruptFlag.checkInterrupt();
         }
         Hierarchy<Role> newHierarchy=DeterministicClassification.buildHierarchy(m_topRoleElement.m_role,m_bottomRoleElement.m_role,allSubsumers);
         for (Role element : newHierarchy.m_nodesByElements.keySet()) {
@@ -332,6 +362,7 @@ public class InstanceManager {
                 if (equivalent instanceof AtomicRole)
                     newNode.m_equivalentElements.add(equivalent);
             }
+            m_interruptFlag.checkInterrupt();
         }
         return newHierarchy;
     }
@@ -376,6 +407,7 @@ public class InstanceManager {
                 for (HierarchyNode<RoleElement> parent : current.getParentNodes())
                     if (!toProcess.contains(parent)) 
                         toProcess.add(parent);
+                m_interruptFlag.checkInterrupt();
             }
         }
         m_usesClassifiedObjectRoleHierarchy=true;
@@ -397,23 +429,29 @@ public class InstanceManager {
         if (m_complexRoles.size()>0) {
             int noAdditionalAxioms=0;
             List<OWLAxiom> additionalAxioms=new ArrayList<OWLAxiom>();
-            for (;m_currentIndividualIndex<m_individuals.length && noAdditionalAxioms < thresholdForAdditionalAxioms;m_currentIndividualIndex++) {
-                Individual ind=m_individuals[m_currentIndividualIndex];
-                for (AtomicRole objectRole : m_complexRoles) {
-                    completedSteps++;
-                    if (monitor!=null)
-                        monitor.reasonerTaskProgressChanged(completedSteps,steps);
-                    OWLObjectProperty objectProperty=factory.getOWLObjectProperty(IRI.create(((AtomicRole)objectRole).getIRI()));
-                    String indIRI=ind.getIRI();
-                    OWLClass classForIndividual=factory.getOWLClass(IRI.create("internal:individual-concept#"+indIRI));
-                    OWLAxiom axiom=factory.getOWLClassAssertionAxiom(classForIndividual,factory.getOWLNamedIndividual(IRI.create(indIRI)));
-                    additionalAxioms.add(axiom); // A_a(a)
-                    AtomicConcept conceptForRole=AtomicConcept.create("internal:individual-concept#"+((AtomicRole)objectRole).getIRI()+"#"+indIRI);
-                    OWLClass classForRoleAndIndividual=factory.getOWLClass(IRI.create(conceptForRole.getIRI()));
-                    axiom=factory.getOWLSubClassOfAxiom(classForIndividual,factory.getOWLObjectAllValuesFrom(objectProperty,classForRoleAndIndividual));
-                    additionalAxioms.add(axiom); // A_a implies forall r.A_a^r
-                    noAdditionalAxioms+=2;
+            m_interruptFlag.startTask();
+            try {
+                for (;m_currentIndividualIndex<m_individuals.length && noAdditionalAxioms < thresholdForAdditionalAxioms;m_currentIndividualIndex++) {
+                    Individual ind=m_individuals[m_currentIndividualIndex];
+                    for (AtomicRole objectRole : m_complexRoles) {
+                        completedSteps++;
+                        if (monitor!=null)
+                            monitor.reasonerTaskProgressChanged(completedSteps,steps);
+                        OWLObjectProperty objectProperty=factory.getOWLObjectProperty(IRI.create(((AtomicRole)objectRole).getIRI()));
+                        String indIRI=ind.getIRI();
+                        OWLClass classForIndividual=factory.getOWLClass(IRI.create("internal:individual-concept#"+indIRI));
+                        OWLAxiom axiom=factory.getOWLClassAssertionAxiom(classForIndividual,factory.getOWLNamedIndividual(IRI.create(indIRI)));
+                        additionalAxioms.add(axiom); // A_a(a)
+                        AtomicConcept conceptForRole=AtomicConcept.create("internal:individual-concept#"+((AtomicRole)objectRole).getIRI()+"#"+indIRI);
+                        OWLClass classForRoleAndIndividual=factory.getOWLClass(IRI.create(conceptForRole.getIRI()));
+                        axiom=factory.getOWLSubClassOfAxiom(classForIndividual,factory.getOWLObjectAllValuesFrom(objectProperty,classForRoleAndIndividual));
+                        additionalAxioms.add(axiom); // A_a implies forall r.A_a^r
+                        noAdditionalAxioms+=2;
+                        m_interruptFlag.checkInterrupt();
+                    }
                 }
+            } finally {
+                m_interruptFlag.endTask();
             }
             OWLAxiom[] additionalAxiomsArray=new OWLAxiom[additionalAxioms.size()];
             return additionalAxioms.toArray(additionalAxiomsArray);
@@ -423,16 +461,27 @@ public class InstanceManager {
     }
     public void initializeKnowAndPossibleClassInstances(Tableau tableau, ReasonerProgressMonitor monitor, int completedSteps, int steps) {
         if (!m_classesInitialised) {
-            initializeIndividualsForNodes();
-            if (!m_propertiesInitialised) {
-                // nothing has been read-off yet
-                initializeSameAs();
+            m_interruptFlag.startTask();
+            try {
+//                long t=System.currentTimeMillis();
+                initializeIndividualsForNodes();
+//                System.out.println("Initialise individuals for nodes: "+(System.currentTimeMillis()-t));
+                if (!m_propertiesInitialised) {
+                    // nothing has been read-off yet
+//                    t=System.currentTimeMillis();
+                    initializeSameAs();
+//                    System.out.println("Initialise same as: "+(System.currentTimeMillis()-t));
+                }
+//                t=System.currentTimeMillis();
+                completedSteps=readOffClassInstancesByIndividual(tableau, monitor, completedSteps, steps);
+//                System.out.println("Read off class instances: "+(System.currentTimeMillis()-t));
+                if (!m_readingOffFoundPossibleConceptInstance && m_usesClassifiedConceptHierarchy) 
+                    m_realizationCompleted=true;
+                m_classesInitialised=true;
+                m_individualsForNodes.clear();
+            } finally {
+                m_interruptFlag.endTask();
             }
-            completedSteps=readOffClassInstancesByIndividual(tableau, monitor, completedSteps, steps);
-            if (!m_readingOffFoundPossibleConceptInstance && m_usesClassifiedConceptHierarchy) 
-                m_realizationCompleted=true;
-            m_classesInitialised=true;
-            m_individualsForNodes.clear();
         }
     }
     protected int readOffClassInstancesByIndividual(Tableau tableau, ReasonerProgressMonitor monitor, int completedSteps, int steps) {
@@ -441,28 +490,34 @@ public class InstanceManager {
             // read of concept instances and normal role instances only once, we don't slice that
             boolean hasType=readOffTypes(ind,nodeForIndividual);
             if (!hasType) 
-                m_topConceptElement.m_knownInstances.add(ind);
+                m_conceptToElement.get(m_topConcept).m_knownInstances.add(ind);
             completedSteps++;
             if (monitor!=null)
                 monitor.reasonerTaskProgressChanged(completedSteps,steps);
+            m_interruptFlag.checkInterrupt();
         }
         return completedSteps;
     }
     public int initializeKnowAndPossiblePropertyInstances(Tableau tableau, ReasonerProgressMonitor monitor, int startIndividualIndex, int completedSteps, int steps) {
         if (!m_propertiesInitialised) {
-            initializeIndividualsForNodes();
-            if (!m_classesInitialised) {
-                // nothing has been read-off yet
-                initializeSameAs();
-            }
-            completedSteps=readOffPropertyInstancesByIndividual(tableau,m_individualsForNodes, monitor, completedSteps, steps, startIndividualIndex);
-            if (m_currentIndividualIndex==m_individuals.length-1) {
-                // we are done now with everything
-                if (!m_readingOffFoundPossiblePropertyInstance) 
-                    m_roleRealizationCompleted=true;
-                m_propertiesInitialised=true;
-            }
-            m_individualsForNodes.clear();
+            m_interruptFlag.startTask();
+            try {
+                initializeIndividualsForNodes();
+                if (!m_classesInitialised) {
+                    // nothing has been read-off yet
+                    initializeSameAs();
+                }
+                completedSteps=readOffPropertyInstancesByIndividual(tableau,m_individualsForNodes, monitor, completedSteps, steps, startIndividualIndex);
+                if (m_currentIndividualIndex==m_individuals.length-1) {
+                    // we are done now with everything
+                    if (!m_readingOffFoundPossiblePropertyInstance) 
+                        m_roleRealizationCompleted=true;
+                    m_propertiesInitialised=true;
+                }
+                m_individualsForNodes.clear();
+            } finally {
+                m_interruptFlag.endTask();
+            }   
         }
         return completedSteps;
     }
@@ -482,6 +537,7 @@ public class InstanceManager {
             // read-off complex role instances only for the slice for which extra axioms have been added
             if (index<m_currentIndividualIndex)
                 completedSteps=readOffComplexRoleSuccessors(ind,nodeForIndividual, monitor, completedSteps, steps);
+            m_interruptFlag.checkInterrupt();
         }
         return completedSteps;
     }
@@ -489,6 +545,7 @@ public class InstanceManager {
         for (Individual ind : m_individuals) {
             Node node=m_nodesForIndividuals.get(ind);
             m_individualsForNodes.put(node, ind);
+            m_interruptFlag.checkInterrupt();
         }
     }
     protected void initializeSameAs() {
@@ -512,6 +569,7 @@ public class InstanceManager {
                     possibleEquivalenceClasses.add(individual2Equivalences);
                 }
             }
+            m_interruptFlag.checkInterrupt();
         }
     }
     protected boolean readOffTypes(Individual ind, Node nodeForIndividual) {
@@ -523,17 +581,24 @@ public class InstanceManager {
             Object predicate=tupleBuffer[0];
             if (predicate instanceof AtomicConcept) {
                 AtomicConcept atomicConcept=(AtomicConcept)predicate;
-                if (!atomicConcept.equals(AtomicConcept.THING) && !Prefixes.isInternalIRI(atomicConcept.getIRI())) {
-                    AtomicConceptElement representative=m_currentConceptHierarchy.getNodeForElement(m_atomicConceptElementManager.getAtomicConceptElement(atomicConcept)).getRepresentative();
+                if (!atomicConcept.equals(m_topConcept) && !Prefixes.isInternalIRI(atomicConcept.getIRI())) {
+                    HierarchyNode<AtomicConcept> node=m_currentConceptHierarchy.getNodeForElement(atomicConcept);
+                    AtomicConcept representative=node.getRepresentative();
+                    AtomicConceptElement element=m_conceptToElement.get(representative);
+                    if (element==null) {
+                        element=new AtomicConceptElement(null, null);
+                        m_conceptToElement.put(representative, element);
+                    }
                     hasBeenAdded=true;
                     if (m_binaryRetrieval1Bound.getDependencySet().isEmpty())
-                        addKnownConceptInstance(representative, ind);
+                        addKnownConceptInstance(node, element, ind);
                     else {
-                        addPossibleConceptInstance(representative, ind);
+                        addPossibleConceptInstance(node, element, ind);
                         m_readingOffFoundPossibleConceptInstance=true;
                     }
                 }
             }
+            m_interruptFlag.checkInterrupt();
             m_binaryRetrieval1Bound.next();
         }
         return hasBeenAdded;
@@ -560,6 +625,7 @@ public class InstanceManager {
                     }
                 }
             }
+            m_interruptFlag.checkInterrupt();
             m_ternaryRetrieval1Bound.next();
         }
     }
@@ -583,6 +649,7 @@ public class InstanceManager {
                         m_readingOffFoundPossiblePropertyInstance=true;
                     }
                 }
+                m_interruptFlag.checkInterrupt();
                 m_binaryRetrieval0Bound.next();
             }
             completedSteps++;
@@ -591,492 +658,490 @@ public class InstanceManager {
         }
         return completedSteps;
     }
-    protected Individual[][] traverseDepthFirst(HierarchyNode<AtomicConceptElement> node,HierarchyNode<AtomicConceptElement> parentNode,Set<Individual> parentKnownInstances,Set<Individual> parentPossibleInstances,Set<HierarchyNode<AtomicConceptElement>> visited,Map<Node,Individual> individualsForNodes) {
-        boolean firstVisit=visited.add(node);
-        Set<Individual> childKnown=new HashSet<Individual>();
-        Set<Individual> childPossible=new HashSet<Individual>();
-        if (firstVisit && node!=m_currentConceptHierarchy.m_bottomNode) {
-            Set<Individual> knownInstances=new HashSet<Individual>();
-            Set<Individual> possibleInstances=new HashSet<Individual>();
-            //Object[] tupleBuffer;
-            m_binaryRetrieval01Bound.getBindingsBuffer()[0]=node.m_representative.m_atomicConcept;
-            for (Individual knownInstance : parentKnownInstances) {
-                m_binaryRetrieval01Bound.getBindingsBuffer()[1]=m_nodesForIndividuals.get(knownInstance).getCanonicalNode();
-                m_binaryRetrieval01Bound.open();
-                //tupleBuffer=m_binaryRetrieval01Bound.getTupleBuffer();
-                if (!m_binaryRetrieval01Bound.afterLast()) {
-                    if (m_binaryRetrieval01Bound.getDependencySet().isEmpty()) {
-                        knownInstances.add(knownInstance);
-                    } else 
-                        possibleInstances.add(knownInstance);
-                }
-            }
-            for (Individual possibleInstance : parentPossibleInstances) {
-                m_binaryRetrieval01Bound.getBindingsBuffer()[1]=m_nodesForIndividuals.get(possibleInstance).getCanonicalNode();
-                m_binaryRetrieval01Bound.open();
-                //tupleBuffer=m_binaryRetrieval01Bound.getTupleBuffer();
-                if (!m_binaryRetrieval01Bound.afterLast()) {
-                    if (m_binaryRetrieval01Bound.getDependencySet().isEmpty()) {
-                        knownInstances.add(possibleInstance);
-                    } else 
-                        possibleInstances.add(possibleInstance);
-                }
-            }
-            // don't store here what is already stored in a child node
-            for (HierarchyNode<AtomicConceptElement> childNode : node.m_childNodes) {
-                Individual[][] childResult=traverseDepthFirst(childNode,node,knownInstances,possibleInstances,visited,individualsForNodes);
-                childKnown.addAll(Arrays.asList(childResult[0]));
-                childPossible.addAll(Arrays.asList(childResult[1]));
-            }
-            knownInstances.removeAll(childKnown);
-            possibleInstances.removeAll(childKnown);
-            possibleInstances.removeAll(childPossible);
-            node.m_representative.m_knownInstances.addAll(knownInstances);
-            node.m_representative.m_possibleInstances.addAll(possibleInstances);
-            // used to tell the parent what is already stored in descendant nodes
-            childKnown.addAll(knownInstances);
-            childPossible.addAll(possibleInstances);
+//    protected Individual[][] traverseDepthFirst(HierarchyNode<AtomicConceptElement> node,HierarchyNode<AtomicConceptElement> parentNode,Set<Individual> parentKnownInstances,Set<Individual> parentPossibleInstances,Set<HierarchyNode<AtomicConceptElement>> visited,Map<Node,Individual> individualsForNodes) {
+//        boolean firstVisit=visited.add(node);
+//        Set<Individual> childKnown=new HashSet<Individual>();
+//        Set<Individual> childPossible=new HashSet<Individual>();
+//        if (firstVisit && node!=m_currentConceptHierarchy.m_bottomNode) {
+//            Set<Individual> knownInstances=new HashSet<Individual>();
+//            Set<Individual> possibleInstances=new HashSet<Individual>();
+//            //Object[] tupleBuffer;
+//            m_binaryRetrieval01Bound.getBindingsBuffer()[0]=node.m_representative.m_atomicConcept;
+//            for (Individual knownInstance : parentKnownInstances) {
+//                m_binaryRetrieval01Bound.getBindingsBuffer()[1]=m_nodesForIndividuals.get(knownInstance).getCanonicalNode();
+//                m_binaryRetrieval01Bound.open();
+//                //tupleBuffer=m_binaryRetrieval01Bound.getTupleBuffer();
+//                if (!m_binaryRetrieval01Bound.afterLast()) {
+//                    if (m_binaryRetrieval01Bound.getDependencySet().isEmpty()) {
+//                        knownInstances.add(knownInstance);
+//                    } else 
+//                        possibleInstances.add(knownInstance);
+//                }
+//            }
+//            for (Individual possibleInstance : parentPossibleInstances) {
+//                m_binaryRetrieval01Bound.getBindingsBuffer()[1]=m_nodesForIndividuals.get(possibleInstance).getCanonicalNode();
+//                m_binaryRetrieval01Bound.open();
+//                //tupleBuffer=m_binaryRetrieval01Bound.getTupleBuffer();
+//                if (!m_binaryRetrieval01Bound.afterLast()) {
+//                    if (m_binaryRetrieval01Bound.getDependencySet().isEmpty()) {
+//                        knownInstances.add(possibleInstance);
+//                    } else 
+//                        possibleInstances.add(possibleInstance);
+//                }
+//            }
+//            // don't store here what is already stored in a child node
+//            for (HierarchyNode<AtomicConceptElement> childNode : node.m_childNodes) {
+//                Individual[][] childResult=traverseDepthFirst(childNode,node,knownInstances,possibleInstances,visited,individualsForNodes);
+//                childKnown.addAll(Arrays.asList(childResult[0]));
+//                childPossible.addAll(Arrays.asList(childResult[1]));
+//            }
+//            knownInstances.removeAll(childKnown);
+//            possibleInstances.removeAll(childKnown);
+//            possibleInstances.removeAll(childPossible);
+//            node.m_representative.m_knownInstances.addAll(knownInstances);
+//            node.m_representative.m_possibleInstances.addAll(possibleInstances);
+//            // used to tell the parent what is already stored in descendant nodes
+//            childKnown.addAll(knownInstances);
+//            childPossible.addAll(possibleInstances);
+//        }
+//        Individual[][] result=new Individual[2][];
+//        result[0]=childKnown.toArray(new Individual[0]);
+//        result[1]=childPossible.toArray(new Individual[0]);
+//        return result;
+//    }
+//    @SuppressWarnings("unchecked")
+//    protected Object[] traverseDepthFirstRoles(HierarchyNode<RoleElement> node,HierarchyNode<RoleElement> parentNode,Map<Individual,Set<Individual>> parentKnownRelations,Map<Individual,Set<Individual>> parentPossibleRelations,Set<HierarchyNode<RoleElement>> visited,Map<Node,Individual> individualsForNodes,Set<Role> complexObjectRoles) {
+//        boolean firstVisit=visited.add(node);
+//        Map<Individual,Set<Individual>> descendantKnown=new HashMap<Individual,Set<Individual>>();
+//        Map<Individual,Set<Individual>> descendantPossible=new HashMap<Individual,Set<Individual>>();
+//        if (firstVisit && node!=m_currentRoleHierarchy.m_bottomNode) {
+//            Map<Individual,Set<Individual>> knownInstances=new HashMap<Individual,Set<Individual>>();
+//            Map<Individual,Set<Individual>> possibleInstances=new HashMap<Individual,Set<Individual>>();
+//            AtomicRole atomicRole=(AtomicRole)node.m_representative.m_role;
+//            m_ternaryRetrieval012Bound.getBindingsBuffer()[0]=atomicRole;
+//            for (Individual individual : parentKnownRelations.keySet()) {
+//                Node individual1Node=m_nodesForIndividuals.get(individual).getCanonicalNode();
+//                m_ternaryRetrieval012Bound.getBindingsBuffer()[1]=individual1Node;
+//                AtomicConcept conceptForRole=AtomicConcept.create("internal:individual-concept#"+atomicRole.getIRI()+"#"+individualsForNodes.get(individual1Node));
+//                for (Individual successor : parentKnownRelations.get(individual)) {
+//                    Node individual2Node=m_nodesForIndividuals.get(successor).getCanonicalNode();
+//                    m_ternaryRetrieval012Bound.getBindingsBuffer()[2]=individual2Node;
+//                    m_ternaryRetrieval012Bound.open();
+//                    if (!m_ternaryRetrieval012Bound.afterLast()) {
+//                        Map<Individual,Set<Individual>> relevantRelation;
+//                        if (m_ternaryRetrieval012Bound.getDependencySet().isEmpty())
+//                            relevantRelation=knownInstances;
+//                        else 
+//                            relevantRelation=possibleInstances;
+//                        Set<Individual> successors=relevantRelation.get(individual);
+//                        if (successors==null) {
+//                            successors=new HashSet<Individual>();
+//                            relevantRelation.put(individual, successors);
+//                        }
+//                        successors.add(successor);
+//                    }
+//                    if (complexObjectRoles.contains(atomicRole)) {
+//                        m_binaryRetrieval01Bound.getBindingsBuffer()[0]=conceptForRole;
+//                        m_binaryRetrieval01Bound.getBindingsBuffer()[1]=individual2Node;
+//                        m_binaryRetrieval0Bound.open();
+//                        if (!m_binaryRetrieval01Bound.afterLast()) {
+//                            Map<Individual,Set<Individual>> relevantRelation;
+//                            if (m_binaryRetrieval0Bound.getDependencySet().isEmpty())
+//                                relevantRelation=knownInstances;
+//                            else 
+//                                relevantRelation=possibleInstances;
+//                            Set<Individual> successors=relevantRelation.get(individual);
+//                            if (successors==null) {
+//                                successors=new HashSet<Individual>();
+//                                relevantRelation.put(individual, successors);
+//                            }
+//                            successors.add(successor);
+//                        }
+//                    }
+//                }
+//            }
+//            for (Individual individual : parentPossibleRelations.keySet()) {
+//                Node individual1Node=m_nodesForIndividuals.get(individual).getCanonicalNode();
+//                m_ternaryRetrieval012Bound.getBindingsBuffer()[1]=individual1Node;
+//                AtomicConcept conceptForRole=AtomicConcept.create("internal:individual-concept#"+atomicRole.getIRI()+"#"+individualsForNodes.get(individual1Node));
+//                for (Individual successor : parentPossibleRelations.get(individual)) {
+//                    Node individual2Node=m_nodesForIndividuals.get(successor).getCanonicalNode();
+//                    m_ternaryRetrieval012Bound.getBindingsBuffer()[2]=individual2Node;
+//                    m_ternaryRetrieval012Bound.open();
+//                    if (!m_ternaryRetrieval012Bound.afterLast()) {
+//                        Map<Individual,Set<Individual>> relevantRelation;
+//                        if (m_ternaryRetrieval012Bound.getDependencySet().isEmpty())
+//                            relevantRelation=knownInstances;
+//                        else 
+//                            relevantRelation=possibleInstances;
+//                        Set<Individual> successors=relevantRelation.get(individual);
+//                        if (successors==null) {
+//                            successors=new HashSet<Individual>();
+//                            relevantRelation.put(individual, successors);
+//                        }
+//                        successors.add(successor);
+//                    }
+//                    if (complexObjectRoles.contains(atomicRole)) {
+//                        m_binaryRetrieval01Bound.getBindingsBuffer()[0]=conceptForRole;
+//                        m_binaryRetrieval01Bound.getBindingsBuffer()[1]=individual2Node;
+//                        m_binaryRetrieval0Bound.open();
+//                        if (!m_binaryRetrieval01Bound.afterLast()) {
+//                            Map<Individual,Set<Individual>> relevantRelation;
+//                            if (m_binaryRetrieval0Bound.getDependencySet().isEmpty())
+//                                relevantRelation=knownInstances;
+//                            else 
+//                                relevantRelation=possibleInstances;
+//                            Set<Individual> successors=relevantRelation.get(individual);
+//                            if (successors==null) {
+//                                successors=new HashSet<Individual>();
+//                                relevantRelation.put(individual, successors);
+//                            }
+//                            successors.add(successor);
+//                        }
+//                    }
+//                }
+//            }
+//            // don't store here what is already stored in a child node
+//            for (HierarchyNode<RoleElement> childNode : node.m_childNodes) {
+//                Object[] storedInDescendants=traverseDepthFirstRoles(childNode,node,knownInstances,possibleInstances,visited,individualsForNodes,complexObjectRoles);
+//                Map<Individual,Set<Individual>> thisDescendantKnown=(HashMap<Individual,Set<Individual>>)storedInDescendants[0];
+//                Map<Individual,Set<Individual>> thisDescendantPossible=(HashMap<Individual,Set<Individual>>)storedInDescendants[1];
+//                for (Individual individual : thisDescendantKnown.keySet())
+//                    if (descendantKnown.containsKey(individual))
+//                        descendantKnown.get(individual).addAll(thisDescendantKnown.get(individual));
+//                    else
+//                        descendantKnown.put(individual, thisDescendantKnown.get(individual));
+//                for (Individual individual : thisDescendantPossible.keySet())
+//                    if (descendantPossible.containsKey(individual))
+//                        descendantPossible.get(individual).addAll(thisDescendantPossible.get(individual));
+//                    else
+//                        descendantPossible.put(individual, thisDescendantPossible.get(individual));
+//            }
+//            for (Individual individual : descendantKnown.keySet()) {
+//                Set<Individual> successors=knownInstances.get(individual);
+//                if (successors!=null) {
+//                    successors.removeAll(descendantKnown.get(individual));
+//                    if (successors.isEmpty())
+//                        knownInstances.remove(individual);
+//                }
+//                successors=possibleInstances.get(individual);
+//                if (successors!=null) {
+//                    successors.removeAll(descendantKnown.get(individual));
+//                    if (successors.isEmpty())
+//                        possibleInstances.remove(individual);
+//                }
+//            }
+//            for (Individual individual : descendantPossible.keySet()) {
+//                Set<Individual> successors=possibleInstances.get(individual);
+//                if (successors!=null) {
+//                    successors.removeAll(descendantPossible.get(individual));
+//                    if (successors.isEmpty())
+//                        possibleInstances.remove(individual);
+//                }
+//            }
+//            Map<Individual,Set<Individual>> map=node.m_representative.m_knownRelations;
+//            for (Individual individual : knownInstances.keySet())
+//                map.put(individual, knownInstances.get(individual));
+//            map=node.m_representative.m_possibleRelations;
+//            for (Individual individual : possibleInstances.keySet())
+//                map.put(individual, possibleInstances.get(individual));
+//            // used to tell the parent what is already stored in descendant nodes
+//            for (Individual individual : knownInstances.keySet()) {
+//                Set<Individual> successors=descendantKnown.get(individual);
+//                if (successors==null) {
+//                    successors=new HashSet<Individual>();
+//                    descendantKnown.put(individual, successors);
+//                }
+//                successors.addAll(knownInstances.get(individual));
+//            }
+//            for (Individual individual : possibleInstances.keySet()) {
+//                Set<Individual> successors=descendantPossible.get(individual);
+//                if (successors==null) {
+//                    successors=new HashSet<Individual>();
+//                    descendantPossible.put(individual, successors);
+//                }
+//                successors.addAll(possibleInstances.get(individual));
+//            }
+//        }
+//        Object[] result=new Object[2];
+//        result[0]=descendantKnown;
+//        result[1]=descendantPossible;
+//        return result;
+//    }
+//    @SuppressWarnings("unchecked")
+//    protected boolean[] readOfByPredicate(Tableau tableau,Set<Role> complexObjectRoles,Map<Node,Individual> individualsForNodes,Map<Node,Set<Node>> canonicalNodeToOriginalNodes) {
+//        boolean[] hasPossibles=new boolean[2];
+//        Object[] tupleBuffer;
+//        Set<AtomicConcept> concepts=new HashSet<AtomicConcept>(m_atomicConceptElementManager.m_conceptToElement.keySet());
+//        concepts.remove(AtomicConcept.THING);
+//        concepts.remove(AtomicConcept.NOTHING);
+//        Set<HierarchyNode<AtomicConceptElement>> visited=new HashSet<HierarchyNode<AtomicConceptElement>>();
+//        Set<Individual> topInstances=new HashSet<Individual>(Arrays.asList(m_individuals));
+//        HierarchyNode<AtomicConceptElement> topNode=m_currentConceptHierarchy.getNodeForElement(m_topConceptElement);
+//        for (HierarchyNode<AtomicConceptElement> topChild : topNode.m_childNodes) {
+//            Set<Individual> knownInstances=new HashSet<Individual>();
+//            Set<Individual> possibleInstances=new HashSet<Individual>();
+//            m_binaryRetrieval0Bound.getBindingsBuffer()[0]=topChild.m_representative.m_atomicConcept;
+//            m_binaryRetrieval0Bound.open();
+//            tupleBuffer=m_binaryRetrieval0Bound.getTupleBuffer();
+//            while (!m_binaryRetrieval0Bound.afterLast()) {
+//                Node individualNode=(Node)tupleBuffer[1];
+//                if (individualNode.getNodeType()==NodeType.NAMED_NODE && individualNode.isActive() && individualsForNodes.containsKey(individualNode)) {
+//                    Set<Individual> relevantIndividuals=new HashSet<Individual>();
+//                    Set<Individual> possiblyRelevantIndividuals=new HashSet<Individual>();
+//                    relevantIndividuals.add(individualsForNodes.get(individualNode));
+//                    if (canonicalNodeToOriginalNodes.containsKey(individualNode)) 
+//                        for (Node mergedNode : canonicalNodeToOriginalNodes.get(individualNode)) { 
+//                            if (mergedNode.getMergedIntoDependencySet().isEmpty()) 
+//                                relevantIndividuals.add(individualsForNodes.get(mergedNode));
+//                            else {
+//                                possiblyRelevantIndividuals.add(individualsForNodes.get(mergedNode));
+//                                hasPossibles[0]=true;
+//                            }
+//                        }
+//                    for (Individual individual : relevantIndividuals)
+//                        if (m_binaryRetrieval0Bound.getDependencySet().isEmpty())
+//                            knownInstances.add(individual);
+//                        else {
+//                            possibleInstances.add(individual);
+//                            hasPossibles[0]=true;
+//                        }
+//                    for (Individual individual : possiblyRelevantIndividuals) {
+//                        possibleInstances.add(individual);
+//                        hasPossibles[0]=true;
+//                    }
+//                }
+//                m_binaryRetrieval0Bound.next();
+//            }
+//            topInstances.removeAll(knownInstances);
+//            topInstances.removeAll(possibleInstances);
+//            // find out which ones are stored at a descendant already
+//            Set<Individual> descendantKnown=new HashSet<Individual>();
+//            Set<Individual> descendantPossible=new HashSet<Individual>();
+//            for (HierarchyNode<AtomicConceptElement> child : topChild.m_childNodes) {
+//                Individual[][] storedInDescendants=traverseDepthFirst(child, topChild, knownInstances, possibleInstances, visited, individualsForNodes);
+//                descendantKnown.addAll(Arrays.asList(storedInDescendants[0]));
+//                descendantPossible.addAll(Arrays.asList(storedInDescendants[1]));
+//            }
+//            knownInstances.removeAll(descendantKnown);
+//            possibleInstances.removeAll(descendantKnown);
+//            possibleInstances.removeAll(descendantPossible);
+//            if (!descendantPossible.isEmpty()) 
+//                hasPossibles[0]=true;
+//            topChild.m_representative.m_knownInstances.addAll(knownInstances);
+//            topChild.m_representative.m_possibleInstances.addAll(possibleInstances);
+//        }
+//        topNode.m_representative.m_knownInstances.addAll(topInstances); // used in complex concept instance retrieval, where we traverse also the ancestor nodes and test the individuals stored there
+//        
+//        //roles
+//        Set<Role> roles=new HashSet<Role>(m_roleElementManager.m_roleToElement.keySet());
+//        roles.remove(AtomicRole.TOP_OBJECT_ROLE);
+//        roles.remove(AtomicRole.BOTTOM_OBJECT_ROLE);
+//        Set<HierarchyNode<RoleElement>> visitedRoles=new HashSet<HierarchyNode<RoleElement>>();
+//        HierarchyNode<RoleElement> topRoleNode=m_currentRoleHierarchy.getNodeForElement(m_topRoleElement);
+//        for (HierarchyNode<RoleElement> topChild : topRoleNode.m_childNodes) {
+//            Role role=topChild.m_representative.m_role;
+//            Map<Individual,Set<Individual>> knownInstances=new HashMap<Individual,Set<Individual>>();
+//            Map<Individual,Set<Individual>> possibleInstances=new HashMap<Individual,Set<Individual>>();
+//            m_ternaryRetrieval0Bound.getBindingsBuffer()[0]=role;
+//            m_ternaryRetrieval0Bound.open();
+//            tupleBuffer=m_ternaryRetrieval0Bound.getTupleBuffer();
+//            while (!m_ternaryRetrieval0Bound.afterLast()) {
+//                Node individual1Node=(Node)tupleBuffer[1];
+//                Node individual2Node=(Node)tupleBuffer[2];
+//                if (individual1Node.getNodeType()==NodeType.NAMED_NODE && individual2Node.getNodeType()==NodeType.NAMED_NODE && individual1Node.isActive() && individual2Node.isActive()) {
+//                    hasPossibles[1]=computeKnownAndPossibles(knownInstances,possibleInstances,individual1Node,individual2Node,individualsForNodes,canonicalNodeToOriginalNodes,m_ternaryRetrieval0Bound.getDependencySet().isEmpty());
+//                }
+//                m_ternaryRetrieval0Bound.next();
+//            }
+//            if (complexObjectRoles.contains(role)) {
+//                AtomicRole atomicRole=(AtomicRole)role;
+//                for (Node node : individualsForNodes.keySet()) {
+//                    if (node.isActive() && node.getMergedInto()==null) {
+//                        Individual individual=individualsForNodes.get(node);
+//                        AtomicConcept conceptForRole=AtomicConcept.create("internal:individual-concept#"+atomicRole.getIRI()+"#"+individual.getIRI());
+//                        m_binaryRetrieval0Bound.getBindingsBuffer()[0]=conceptForRole;
+//                        m_binaryRetrieval0Bound.open();
+//                        tupleBuffer=m_binaryRetrieval0Bound.getTupleBuffer();
+//                        while (!m_binaryRetrieval0Bound.afterLast()) {
+//                            Node individual2Node=((Node)tupleBuffer[1]).getCanonicalNode();
+//                            if (individual2Node.isActive() && individual2Node.getNodeType()==NodeType.NAMED_NODE) {
+//                                hasPossibles[1]=computeKnownAndPossibles(knownInstances,possibleInstances,node,individual2Node,individualsForNodes,canonicalNodeToOriginalNodes,m_binaryRetrieval0Bound.getDependencySet().isEmpty());
+//                            }
+//                            m_binaryRetrieval0Bound.next();
+//                        }
+//                    }
+//                }
+//            }
+//            
+//            // find out which ones are stored at a descendant already
+//            Map<Individual,Set<Individual>> descendantKnown=new HashMap<Individual,Set<Individual>>();
+//            Map<Individual,Set<Individual>> descendantPossible=new HashMap<Individual,Set<Individual>>();
+//            for (HierarchyNode<RoleElement> child : topChild.m_childNodes) {
+//                Object[] storedInDescendants=traverseDepthFirstRoles(child, topChild, knownInstances, possibleInstances, visitedRoles, individualsForNodes, complexObjectRoles);
+//                Map<Individual,Set<Individual>> thisDescendantKnown=(HashMap<Individual,Set<Individual>>)storedInDescendants[0];
+//                for (Individual individual : thisDescendantKnown.keySet())
+//                    if (descendantKnown.containsKey(individual))
+//                        descendantKnown.get(individual).addAll(thisDescendantKnown.get(individual));
+//                    else
+//                        descendantKnown.put(individual, thisDescendantKnown.get(individual));
+//                Map<Individual,Set<Individual>> thisDescendantPossible=(HashMap<Individual,Set<Individual>>)storedInDescendants[1];
+//                for (Individual individual : thisDescendantPossible.keySet())
+//                    if (descendantPossible.containsKey(individual))
+//                        descendantPossible.get(individual).addAll(thisDescendantPossible.get(individual));
+//                    else
+//                        descendantPossible.put(individual, thisDescendantPossible.get(individual));
+//            }
+//            if (!descendantPossible.isEmpty())
+//                hasPossibles[1]=true;
+//            
+//            for (Individual individual : descendantKnown.keySet()) {
+//                Set<Individual> successors=knownInstances.get(individual);
+//                if (successors!=null) {
+//                    successors.removeAll(descendantKnown.get(individual));
+//                    if (successors.isEmpty())
+//                        knownInstances.remove(individual);
+//                }
+//                successors=possibleInstances.get(individual);
+//                if (successors!=null) {
+//                    successors.removeAll(descendantKnown.get(individual));
+//                    if (successors.isEmpty())
+//                        possibleInstances.remove(individual);
+//                }
+//            }
+//            for (Individual individual : descendantPossible.keySet()) {
+//                Set<Individual> successors=possibleInstances.get(individual);
+//                if (successors!=null) {
+//                    successors.removeAll(descendantPossible.get(individual));
+//                    if (successors.isEmpty())
+//                        possibleInstances.remove(individual);
+//                }
+//            }
+//            
+//            Map<Individual,Set<Individual>> map=topChild.m_representative.m_knownRelations;
+//            for (Individual individual : knownInstances.keySet())
+//                map.put(individual, knownInstances.get(individual));
+//            map=topChild.m_representative.m_possibleRelations;
+//            for (Individual individual : possibleInstances.keySet())
+//                map.put(individual, possibleInstances.get(individual));
+//        }
+//        return hasPossibles;
+//    }
+//    protected boolean computeKnownAndPossibles(Map<Individual,Set<Individual>> knownInstances,Map<Individual,Set<Individual>> possibleInstances,Node individual1Node,Node individual2Node,Map<Node,Individual> individualsForNodes,Map<Node,Set<Node>> canonicalNodeToOriginalNodes,boolean isDeterministicFact) {
+//        boolean hasPossibles=false;
+//        Set<Individual> relevantIndividual1s=new HashSet<Individual>();
+//        Set<Individual> possiblyRelevantIndividual1s=new HashSet<Individual>();
+//        Set<Individual> relevantIndividual2s=new HashSet<Individual>();
+//        Set<Individual> possiblyRelevantIndividual2s=new HashSet<Individual>();
+//        if (isDeterministicFact) {
+//            relevantIndividual1s.add(individualsForNodes.get(individual1Node));
+//            relevantIndividual2s.add(individualsForNodes.get(individual2Node));
+//        } else {
+//            isDeterministicFact=false;
+//            hasPossibles=true;
+//            possiblyRelevantIndividual1s.add(individualsForNodes.get(individual1Node));
+//            possiblyRelevantIndividual2s.add(individualsForNodes.get(individual2Node));
+//        } 
+//        if (canonicalNodeToOriginalNodes.containsKey(individual1Node)) 
+//            for (Node mergedNode : canonicalNodeToOriginalNodes.get(individual1Node)) 
+//                if (isDeterministicFact && mergedNode.getMergedIntoDependencySet().isEmpty()) 
+//                    relevantIndividual1s.add(individualsForNodes.get(mergedNode));
+//                else {
+//                    possiblyRelevantIndividual1s.add(individualsForNodes.get(mergedNode));
+//                    hasPossibles=true;
+//                }
+//        if (canonicalNodeToOriginalNodes.containsKey(individual2Node)) 
+//            for (Node mergedNode : canonicalNodeToOriginalNodes.get(individual2Node)) 
+//                if (isDeterministicFact && mergedNode.getMergedIntoDependencySet().isEmpty()) 
+//                    relevantIndividual2s.add(individualsForNodes.get(mergedNode));
+//                else {
+//                    possiblyRelevantIndividual2s.add(individualsForNodes.get(mergedNode));
+//                    hasPossibles=true;
+//                }
+//        for (Individual individual : relevantIndividual1s) {
+//            if (!relevantIndividual2s.isEmpty()) {
+//                Set<Individual> knownSuccessors=knownInstances.get(individual);
+//                if (knownSuccessors==null) {
+//                    knownSuccessors=new HashSet<Individual>();
+//                    knownInstances.put(individual, knownSuccessors);
+//                }
+//                for (Individual successor : relevantIndividual2s)
+//                    knownSuccessors.add(successor);
+//            }
+//        }
+//        for (Individual individual : relevantIndividual1s) {
+//            if (!possiblyRelevantIndividual2s.isEmpty()) {
+//                Set<Individual> possibleSuccessors=possibleInstances.get(individual);
+//                if (possibleSuccessors==null) {
+//                    possibleSuccessors=new HashSet<Individual>();
+//                    possibleInstances.put(individual, possibleSuccessors);
+//                }
+//                for (Individual successor : possiblyRelevantIndividual2s)
+//                    possibleSuccessors.add(successor);
+//            }
+//        }
+//        for (Individual individual : possiblyRelevantIndividual1s) {
+//            if (!relevantIndividual2s.isEmpty()) {
+//                Set<Individual> possibleSuccessors=possibleInstances.get(individual);
+//                if (possibleSuccessors==null) {
+//                    possibleSuccessors=new HashSet<Individual>();
+//                    possibleInstances.put(individual, possibleSuccessors);
+//                }
+//                for (Individual successor : relevantIndividual2s)
+//                    possibleSuccessors.add(successor);
+//            }
+//        }
+//        for (Individual individual : possiblyRelevantIndividual1s) {
+//            if (!possiblyRelevantIndividual2s.isEmpty()) {
+//                Set<Individual> possibleSuccessors=possibleInstances.get(individual);
+//                if (possibleSuccessors==null) {
+//                    possibleSuccessors=new HashSet<Individual>();
+//                    possibleInstances.put(individual, possibleSuccessors);
+//                }
+//                for (Individual successor : possiblyRelevantIndividual2s)
+//                    possibleSuccessors.add(successor);
+//            }
+//        }
+//        return hasPossibles;
+//    }
+    protected void addKnownConceptInstance(HierarchyNode<AtomicConcept> currentNode, AtomicConceptElement element, Individual instance) {
+        Set<HierarchyNode<AtomicConcept>> nodes=currentNode.getDescendantNodes();
+        for (HierarchyNode<AtomicConcept> node : nodes) {
+            AtomicConceptElement descendantElement=m_conceptToElement.get(node.getRepresentative());
+            if (descendantElement!=null && descendantElement.m_knownInstances.contains(instance))
+                return;
+            m_interruptFlag.checkInterrupt();
         }
-        Individual[][] result=new Individual[2][];
-        result[0]=childKnown.toArray(new Individual[0]);
-        result[1]=childPossible.toArray(new Individual[0]);
-        return result;
+        element.m_knownInstances.add(instance);
+        nodes=currentNode.getAncestorNodes();
+        nodes.remove(currentNode);
+        for (HierarchyNode<AtomicConcept> node : nodes) {
+            AtomicConceptElement ancestorElement=m_conceptToElement.get(node.getRepresentative());
+            if (ancestorElement!=null) {
+                ancestorElement.m_knownInstances.remove(instance);
+                ancestorElement.m_possibleInstances.remove(instance);
+            }
+        }
     }
-    @SuppressWarnings("unchecked")
-    protected Object[] traverseDepthFirstRoles(HierarchyNode<RoleElement> node,HierarchyNode<RoleElement> parentNode,Map<Individual,Set<Individual>> parentKnownRelations,Map<Individual,Set<Individual>> parentPossibleRelations,Set<HierarchyNode<RoleElement>> visited,Map<Node,Individual> individualsForNodes,Set<Role> complexObjectRoles) {
-        boolean firstVisit=visited.add(node);
-        Map<Individual,Set<Individual>> descendantKnown=new HashMap<Individual,Set<Individual>>();
-        Map<Individual,Set<Individual>> descendantPossible=new HashMap<Individual,Set<Individual>>();
-        if (firstVisit && node!=m_currentRoleHierarchy.m_bottomNode) {
-            Map<Individual,Set<Individual>> knownInstances=new HashMap<Individual,Set<Individual>>();
-            Map<Individual,Set<Individual>> possibleInstances=new HashMap<Individual,Set<Individual>>();
-            AtomicRole atomicRole=(AtomicRole)node.m_representative.m_role;
-            m_ternaryRetrieval012Bound.getBindingsBuffer()[0]=atomicRole;
-            for (Individual individual : parentKnownRelations.keySet()) {
-                Node individual1Node=m_nodesForIndividuals.get(individual).getCanonicalNode();
-                m_ternaryRetrieval012Bound.getBindingsBuffer()[1]=individual1Node;
-                AtomicConcept conceptForRole=AtomicConcept.create("internal:individual-concept#"+atomicRole.getIRI()+"#"+individualsForNodes.get(individual1Node));
-                for (Individual successor : parentKnownRelations.get(individual)) {
-                    Node individual2Node=m_nodesForIndividuals.get(successor).getCanonicalNode();
-                    m_ternaryRetrieval012Bound.getBindingsBuffer()[2]=individual2Node;
-                    m_ternaryRetrieval012Bound.open();
-                    if (!m_ternaryRetrieval012Bound.afterLast()) {
-                        Map<Individual,Set<Individual>> relevantRelation;
-                        if (m_ternaryRetrieval012Bound.getDependencySet().isEmpty())
-                            relevantRelation=knownInstances;
-                        else 
-                            relevantRelation=possibleInstances;
-                        Set<Individual> successors=relevantRelation.get(individual);
-                        if (successors==null) {
-                            successors=new HashSet<Individual>();
-                            relevantRelation.put(individual, successors);
-                        }
-                        successors.add(successor);
-                    }
-                    if (complexObjectRoles.contains(atomicRole)) {
-                        m_binaryRetrieval01Bound.getBindingsBuffer()[0]=conceptForRole;
-                        m_binaryRetrieval01Bound.getBindingsBuffer()[1]=individual2Node;
-                        m_binaryRetrieval0Bound.open();
-                        if (!m_binaryRetrieval01Bound.afterLast()) {
-                            Map<Individual,Set<Individual>> relevantRelation;
-                            if (m_binaryRetrieval0Bound.getDependencySet().isEmpty())
-                                relevantRelation=knownInstances;
-                            else 
-                                relevantRelation=possibleInstances;
-                            Set<Individual> successors=relevantRelation.get(individual);
-                            if (successors==null) {
-                                successors=new HashSet<Individual>();
-                                relevantRelation.put(individual, successors);
-                            }
-                            successors.add(successor);
-                        }
-                    }
-                }
-            }
-            for (Individual individual : parentPossibleRelations.keySet()) {
-                Node individual1Node=m_nodesForIndividuals.get(individual).getCanonicalNode();
-                m_ternaryRetrieval012Bound.getBindingsBuffer()[1]=individual1Node;
-                AtomicConcept conceptForRole=AtomicConcept.create("internal:individual-concept#"+atomicRole.getIRI()+"#"+individualsForNodes.get(individual1Node));
-                for (Individual successor : parentPossibleRelations.get(individual)) {
-                    Node individual2Node=m_nodesForIndividuals.get(successor).getCanonicalNode();
-                    m_ternaryRetrieval012Bound.getBindingsBuffer()[2]=individual2Node;
-                    m_ternaryRetrieval012Bound.open();
-                    if (!m_ternaryRetrieval012Bound.afterLast()) {
-                        Map<Individual,Set<Individual>> relevantRelation;
-                        if (m_ternaryRetrieval012Bound.getDependencySet().isEmpty())
-                            relevantRelation=knownInstances;
-                        else 
-                            relevantRelation=possibleInstances;
-                        Set<Individual> successors=relevantRelation.get(individual);
-                        if (successors==null) {
-                            successors=new HashSet<Individual>();
-                            relevantRelation.put(individual, successors);
-                        }
-                        successors.add(successor);
-                    }
-                    if (complexObjectRoles.contains(atomicRole)) {
-                        m_binaryRetrieval01Bound.getBindingsBuffer()[0]=conceptForRole;
-                        m_binaryRetrieval01Bound.getBindingsBuffer()[1]=individual2Node;
-                        m_binaryRetrieval0Bound.open();
-                        if (!m_binaryRetrieval01Bound.afterLast()) {
-                            Map<Individual,Set<Individual>> relevantRelation;
-                            if (m_binaryRetrieval0Bound.getDependencySet().isEmpty())
-                                relevantRelation=knownInstances;
-                            else 
-                                relevantRelation=possibleInstances;
-                            Set<Individual> successors=relevantRelation.get(individual);
-                            if (successors==null) {
-                                successors=new HashSet<Individual>();
-                                relevantRelation.put(individual, successors);
-                            }
-                            successors.add(successor);
-                        }
-                    }
-                }
-            }
-            // don't store here what is already stored in a child node
-            for (HierarchyNode<RoleElement> childNode : node.m_childNodes) {
-                Object[] storedInDescendants=traverseDepthFirstRoles(childNode,node,knownInstances,possibleInstances,visited,individualsForNodes,complexObjectRoles);
-                Map<Individual,Set<Individual>> thisDescendantKnown=(HashMap<Individual,Set<Individual>>)storedInDescendants[0];
-                Map<Individual,Set<Individual>> thisDescendantPossible=(HashMap<Individual,Set<Individual>>)storedInDescendants[1];
-                for (Individual individual : thisDescendantKnown.keySet())
-                    if (descendantKnown.containsKey(individual))
-                        descendantKnown.get(individual).addAll(thisDescendantKnown.get(individual));
-                    else
-                        descendantKnown.put(individual, thisDescendantKnown.get(individual));
-                for (Individual individual : thisDescendantPossible.keySet())
-                    if (descendantPossible.containsKey(individual))
-                        descendantPossible.get(individual).addAll(thisDescendantPossible.get(individual));
-                    else
-                        descendantPossible.put(individual, thisDescendantPossible.get(individual));
-            }
-            for (Individual individual : descendantKnown.keySet()) {
-                Set<Individual> successors=knownInstances.get(individual);
-                if (successors!=null) {
-                    successors.removeAll(descendantKnown.get(individual));
-                    if (successors.isEmpty())
-                        knownInstances.remove(individual);
-                }
-                successors=possibleInstances.get(individual);
-                if (successors!=null) {
-                    successors.removeAll(descendantKnown.get(individual));
-                    if (successors.isEmpty())
-                        possibleInstances.remove(individual);
-                }
-            }
-            for (Individual individual : descendantPossible.keySet()) {
-                Set<Individual> successors=possibleInstances.get(individual);
-                if (successors!=null) {
-                    successors.removeAll(descendantPossible.get(individual));
-                    if (successors.isEmpty())
-                        possibleInstances.remove(individual);
-                }
-            }
-            Map<Individual,Set<Individual>> map=node.m_representative.m_knownRelations;
-            for (Individual individual : knownInstances.keySet())
-                map.put(individual, knownInstances.get(individual));
-            map=node.m_representative.m_possibleRelations;
-            for (Individual individual : possibleInstances.keySet())
-                map.put(individual, possibleInstances.get(individual));
-            // used to tell the parent what is already stored in descendant nodes
-            for (Individual individual : knownInstances.keySet()) {
-                Set<Individual> successors=descendantKnown.get(individual);
-                if (successors==null) {
-                    successors=new HashSet<Individual>();
-                    descendantKnown.put(individual, successors);
-                }
-                successors.addAll(knownInstances.get(individual));
-            }
-            for (Individual individual : possibleInstances.keySet()) {
-                Set<Individual> successors=descendantPossible.get(individual);
-                if (successors==null) {
-                    successors=new HashSet<Individual>();
-                    descendantPossible.put(individual, successors);
-                }
-                successors.addAll(possibleInstances.get(individual));
-            }
+    protected void addPossibleConceptInstance(HierarchyNode<AtomicConcept> currentNode, AtomicConceptElement element, Individual instance) {
+        Set<HierarchyNode<AtomicConcept>> nodes=currentNode.getDescendantNodes();
+        for (HierarchyNode<AtomicConcept> node : nodes) {
+            AtomicConceptElement descendantElement=m_conceptToElement.get(node.getRepresentative());
+            if (descendantElement!=null && (descendantElement.m_knownInstances.contains(instance) || descendantElement.m_possibleInstances.contains(instance)))
+                return;
+            m_interruptFlag.checkInterrupt();
         }
-        Object[] result=new Object[2];
-        result[0]=descendantKnown;
-        result[1]=descendantPossible;
-        return result;
-    }
-    @SuppressWarnings("unchecked")
-    protected boolean[] readOfByPredicate(Tableau tableau,Set<Role> complexObjectRoles,Map<Node,Individual> individualsForNodes,Map<Node,Set<Node>> canonicalNodeToOriginalNodes) {
-        boolean[] hasPossibles=new boolean[2];
-        Object[] tupleBuffer;
-        Set<AtomicConcept> concepts=new HashSet<AtomicConcept>(m_atomicConceptElementManager.m_conceptToElement.keySet());
-        concepts.remove(AtomicConcept.THING);
-        concepts.remove(AtomicConcept.NOTHING);
-        Set<HierarchyNode<AtomicConceptElement>> visited=new HashSet<HierarchyNode<AtomicConceptElement>>();
-        Set<Individual> topInstances=new HashSet<Individual>(Arrays.asList(m_individuals));
-        HierarchyNode<AtomicConceptElement> topNode=m_currentConceptHierarchy.getNodeForElement(m_topConceptElement);
-        for (HierarchyNode<AtomicConceptElement> topChild : topNode.m_childNodes) {
-            Set<Individual> knownInstances=new HashSet<Individual>();
-            Set<Individual> possibleInstances=new HashSet<Individual>();
-            m_binaryRetrieval0Bound.getBindingsBuffer()[0]=topChild.m_representative.m_atomicConcept;
-            m_binaryRetrieval0Bound.open();
-            tupleBuffer=m_binaryRetrieval0Bound.getTupleBuffer();
-            while (!m_binaryRetrieval0Bound.afterLast()) {
-                Node individualNode=(Node)tupleBuffer[1];
-                if (individualNode.getNodeType()==NodeType.NAMED_NODE && individualNode.isActive() && individualsForNodes.containsKey(individualNode)) {
-                    Set<Individual> relevantIndividuals=new HashSet<Individual>();
-                    Set<Individual> possiblyRelevantIndividuals=new HashSet<Individual>();
-                    relevantIndividuals.add(individualsForNodes.get(individualNode));
-                    if (canonicalNodeToOriginalNodes.containsKey(individualNode)) 
-                        for (Node mergedNode : canonicalNodeToOriginalNodes.get(individualNode)) { 
-                            if (mergedNode.getMergedIntoDependencySet().isEmpty()) 
-                                relevantIndividuals.add(individualsForNodes.get(mergedNode));
-                            else {
-                                possiblyRelevantIndividuals.add(individualsForNodes.get(mergedNode));
-                                hasPossibles[0]=true;
-                            }
-                        }
-                    for (Individual individual : relevantIndividuals)
-                        if (m_binaryRetrieval0Bound.getDependencySet().isEmpty())
-                            knownInstances.add(individual);
-                        else {
-                            possibleInstances.add(individual);
-                            hasPossibles[0]=true;
-                        }
-                    for (Individual individual : possiblyRelevantIndividuals) {
-                        possibleInstances.add(individual);
-                        hasPossibles[0]=true;
-                    }
-                }
-                m_binaryRetrieval0Bound.next();
+        element.m_possibleInstances.add(instance);
+        nodes=currentNode.getAncestorNodes();
+        nodes.remove(currentNode);
+        for (HierarchyNode<AtomicConcept> node : nodes) {
+            AtomicConceptElement ancestorElement=m_conceptToElement.get(node.getRepresentative());
+            if (ancestorElement!=null) {
+                ancestorElement.m_possibleInstances.remove(instance);
+                if (ancestorElement.m_possibleInstances.isEmpty() && ancestorElement.m_knownInstances.isEmpty())
+                    m_conceptToElement.remove(node.getRepresentative());
             }
-            topInstances.removeAll(knownInstances);
-            topInstances.removeAll(possibleInstances);
-            // find out which ones are stored at a descendant already
-            Set<Individual> descendantKnown=new HashSet<Individual>();
-            Set<Individual> descendantPossible=new HashSet<Individual>();
-            for (HierarchyNode<AtomicConceptElement> child : topChild.m_childNodes) {
-                Individual[][] storedInDescendants=traverseDepthFirst(child, topChild, knownInstances, possibleInstances, visited, individualsForNodes);
-                descendantKnown.addAll(Arrays.asList(storedInDescendants[0]));
-                descendantPossible.addAll(Arrays.asList(storedInDescendants[1]));
-            }
-            knownInstances.removeAll(descendantKnown);
-            possibleInstances.removeAll(descendantKnown);
-            possibleInstances.removeAll(descendantPossible);
-            if (!descendantPossible.isEmpty()) 
-                hasPossibles[0]=true;
-            topChild.m_representative.m_knownInstances.addAll(knownInstances);
-            topChild.m_representative.m_possibleInstances.addAll(possibleInstances);
-        }
-        topNode.m_representative.m_knownInstances.addAll(topInstances); // used in complex concept instance retrieval, where we traverse also the ancestor nodes and test the individuals stored there
-        
-        //roles
-        Set<Role> roles=new HashSet<Role>(m_roleElementManager.m_roleToElement.keySet());
-        roles.remove(AtomicRole.TOP_OBJECT_ROLE);
-        roles.remove(AtomicRole.BOTTOM_OBJECT_ROLE);
-        Set<HierarchyNode<RoleElement>> visitedRoles=new HashSet<HierarchyNode<RoleElement>>();
-        HierarchyNode<RoleElement> topRoleNode=m_currentRoleHierarchy.getNodeForElement(m_topRoleElement);
-        for (HierarchyNode<RoleElement> topChild : topRoleNode.m_childNodes) {
-            Role role=topChild.m_representative.m_role;
-            Map<Individual,Set<Individual>> knownInstances=new HashMap<Individual,Set<Individual>>();
-            Map<Individual,Set<Individual>> possibleInstances=new HashMap<Individual,Set<Individual>>();
-            m_ternaryRetrieval0Bound.getBindingsBuffer()[0]=role;
-            m_ternaryRetrieval0Bound.open();
-            tupleBuffer=m_ternaryRetrieval0Bound.getTupleBuffer();
-            while (!m_ternaryRetrieval0Bound.afterLast()) {
-                Node individual1Node=(Node)tupleBuffer[1];
-                Node individual2Node=(Node)tupleBuffer[2];
-                if (individual1Node.getNodeType()==NodeType.NAMED_NODE && individual2Node.getNodeType()==NodeType.NAMED_NODE && individual1Node.isActive() && individual2Node.isActive()) {
-                    hasPossibles[1]=computeKnownAndPossibles(knownInstances,possibleInstances,individual1Node,individual2Node,individualsForNodes,canonicalNodeToOriginalNodes,m_ternaryRetrieval0Bound.getDependencySet().isEmpty());
-                }
-                m_ternaryRetrieval0Bound.next();
-            }
-            if (complexObjectRoles.contains(role)) {
-                AtomicRole atomicRole=(AtomicRole)role;
-                for (Node node : individualsForNodes.keySet()) {
-                    if (node.isActive() && node.getMergedInto()==null) {
-                        Individual individual=individualsForNodes.get(node);
-                        AtomicConcept conceptForRole=AtomicConcept.create("internal:individual-concept#"+atomicRole.getIRI()+"#"+individual.getIRI());
-                        m_binaryRetrieval0Bound.getBindingsBuffer()[0]=conceptForRole;
-                        m_binaryRetrieval0Bound.open();
-                        tupleBuffer=m_binaryRetrieval0Bound.getTupleBuffer();
-                        while (!m_binaryRetrieval0Bound.afterLast()) {
-                            Node individual2Node=((Node)tupleBuffer[1]).getCanonicalNode();
-                            if (individual2Node.isActive() && individual2Node.getNodeType()==NodeType.NAMED_NODE) {
-                                hasPossibles[1]=computeKnownAndPossibles(knownInstances,possibleInstances,node,individual2Node,individualsForNodes,canonicalNodeToOriginalNodes,m_binaryRetrieval0Bound.getDependencySet().isEmpty());
-                            }
-                            m_binaryRetrieval0Bound.next();
-                        }
-                    }
-                }
-            }
-            
-            // find out which ones are stored at a descendant already
-            Map<Individual,Set<Individual>> descendantKnown=new HashMap<Individual,Set<Individual>>();
-            Map<Individual,Set<Individual>> descendantPossible=new HashMap<Individual,Set<Individual>>();
-            for (HierarchyNode<RoleElement> child : topChild.m_childNodes) {
-                Object[] storedInDescendants=traverseDepthFirstRoles(child, topChild, knownInstances, possibleInstances, visitedRoles, individualsForNodes, complexObjectRoles);
-                Map<Individual,Set<Individual>> thisDescendantKnown=(HashMap<Individual,Set<Individual>>)storedInDescendants[0];
-                for (Individual individual : thisDescendantKnown.keySet())
-                    if (descendantKnown.containsKey(individual))
-                        descendantKnown.get(individual).addAll(thisDescendantKnown.get(individual));
-                    else
-                        descendantKnown.put(individual, thisDescendantKnown.get(individual));
-                Map<Individual,Set<Individual>> thisDescendantPossible=(HashMap<Individual,Set<Individual>>)storedInDescendants[1];
-                for (Individual individual : thisDescendantPossible.keySet())
-                    if (descendantPossible.containsKey(individual))
-                        descendantPossible.get(individual).addAll(thisDescendantPossible.get(individual));
-                    else
-                        descendantPossible.put(individual, thisDescendantPossible.get(individual));
-            }
-            if (!descendantPossible.isEmpty())
-                hasPossibles[1]=true;
-            
-            for (Individual individual : descendantKnown.keySet()) {
-                Set<Individual> successors=knownInstances.get(individual);
-                if (successors!=null) {
-                    successors.removeAll(descendantKnown.get(individual));
-                    if (successors.isEmpty())
-                        knownInstances.remove(individual);
-                }
-                successors=possibleInstances.get(individual);
-                if (successors!=null) {
-                    successors.removeAll(descendantKnown.get(individual));
-                    if (successors.isEmpty())
-                        possibleInstances.remove(individual);
-                }
-            }
-            for (Individual individual : descendantPossible.keySet()) {
-                Set<Individual> successors=possibleInstances.get(individual);
-                if (successors!=null) {
-                    successors.removeAll(descendantPossible.get(individual));
-                    if (successors.isEmpty())
-                        possibleInstances.remove(individual);
-                }
-            }
-            
-            Map<Individual,Set<Individual>> map=topChild.m_representative.m_knownRelations;
-            for (Individual individual : knownInstances.keySet())
-                map.put(individual, knownInstances.get(individual));
-            map=topChild.m_representative.m_possibleRelations;
-            for (Individual individual : possibleInstances.keySet())
-                map.put(individual, possibleInstances.get(individual));
-        }
-        return hasPossibles;
-    }
-    protected boolean computeKnownAndPossibles(Map<Individual,Set<Individual>> knownInstances,Map<Individual,Set<Individual>> possibleInstances,Node individual1Node,Node individual2Node,Map<Node,Individual> individualsForNodes,Map<Node,Set<Node>> canonicalNodeToOriginalNodes,boolean isDeterministicFact) {
-        boolean hasPossibles=false;
-        Set<Individual> relevantIndividual1s=new HashSet<Individual>();
-        Set<Individual> possiblyRelevantIndividual1s=new HashSet<Individual>();
-        Set<Individual> relevantIndividual2s=new HashSet<Individual>();
-        Set<Individual> possiblyRelevantIndividual2s=new HashSet<Individual>();
-        if (isDeterministicFact) {
-            relevantIndividual1s.add(individualsForNodes.get(individual1Node));
-            relevantIndividual2s.add(individualsForNodes.get(individual2Node));
-        } else {
-            isDeterministicFact=false;
-            hasPossibles=true;
-            possiblyRelevantIndividual1s.add(individualsForNodes.get(individual1Node));
-            possiblyRelevantIndividual2s.add(individualsForNodes.get(individual2Node));
-        } 
-        if (canonicalNodeToOriginalNodes.containsKey(individual1Node)) 
-            for (Node mergedNode : canonicalNodeToOriginalNodes.get(individual1Node)) 
-                if (isDeterministicFact && mergedNode.getMergedIntoDependencySet().isEmpty()) 
-                    relevantIndividual1s.add(individualsForNodes.get(mergedNode));
-                else {
-                    possiblyRelevantIndividual1s.add(individualsForNodes.get(mergedNode));
-                    hasPossibles=true;
-                }
-        if (canonicalNodeToOriginalNodes.containsKey(individual2Node)) 
-            for (Node mergedNode : canonicalNodeToOriginalNodes.get(individual2Node)) 
-                if (isDeterministicFact && mergedNode.getMergedIntoDependencySet().isEmpty()) 
-                    relevantIndividual2s.add(individualsForNodes.get(mergedNode));
-                else {
-                    possiblyRelevantIndividual2s.add(individualsForNodes.get(mergedNode));
-                    hasPossibles=true;
-                }
-        for (Individual individual : relevantIndividual1s) {
-            if (!relevantIndividual2s.isEmpty()) {
-                Set<Individual> knownSuccessors=knownInstances.get(individual);
-                if (knownSuccessors==null) {
-                    knownSuccessors=new HashSet<Individual>();
-                    knownInstances.put(individual, knownSuccessors);
-                }
-                for (Individual successor : relevantIndividual2s)
-                    knownSuccessors.add(successor);
-            }
-        }
-        for (Individual individual : relevantIndividual1s) {
-            if (!possiblyRelevantIndividual2s.isEmpty()) {
-                Set<Individual> possibleSuccessors=possibleInstances.get(individual);
-                if (possibleSuccessors==null) {
-                    possibleSuccessors=new HashSet<Individual>();
-                    possibleInstances.put(individual, possibleSuccessors);
-                }
-                for (Individual successor : possiblyRelevantIndividual2s)
-                    possibleSuccessors.add(successor);
-            }
-        }
-        for (Individual individual : possiblyRelevantIndividual1s) {
-            if (!relevantIndividual2s.isEmpty()) {
-                Set<Individual> possibleSuccessors=possibleInstances.get(individual);
-                if (possibleSuccessors==null) {
-                    possibleSuccessors=new HashSet<Individual>();
-                    possibleInstances.put(individual, possibleSuccessors);
-                }
-                for (Individual successor : relevantIndividual2s)
-                    possibleSuccessors.add(successor);
-            }
-        }
-        for (Individual individual : possiblyRelevantIndividual1s) {
-            if (!possiblyRelevantIndividual2s.isEmpty()) {
-                Set<Individual> possibleSuccessors=possibleInstances.get(individual);
-                if (possibleSuccessors==null) {
-                    possibleSuccessors=new HashSet<Individual>();
-                    possibleInstances.put(individual, possibleSuccessors);
-                }
-                for (Individual successor : possiblyRelevantIndividual2s)
-                    possibleSuccessors.add(successor);
-            }
-        }
-        return hasPossibles;
-    }
-    protected void addKnownConceptInstance(AtomicConceptElement element, Individual instance) {
-        if (!element.equals(m_topConceptElement)) {
-            HierarchyNode<AtomicConceptElement> currentNode=m_currentConceptHierarchy.getNodeForElement(element);
-            Set<HierarchyNode<AtomicConceptElement>> nodes=currentNode.getDescendantNodes();
-            for (HierarchyNode<AtomicConceptElement> node : nodes) {
-                for (AtomicConceptElement descendantElement : node.getEquivalentElements()) {
-                    if (descendantElement.m_knownInstances.contains(instance)) 
-                        return;
-                }
-            }
-            element.m_knownInstances.add(instance);
-            nodes=currentNode.getAncestorNodes();
-            nodes.remove(currentNode);
-            for (HierarchyNode<AtomicConceptElement> node : nodes)
-                node.getRepresentative().m_knownInstances.remove(instance);
-        }
-    }
-    protected void addPossibleConceptInstance(AtomicConceptElement element, Individual instance) {
-        if (!element.equals(m_topConceptElement)) {
-            HierarchyNode<AtomicConceptElement> currentNode=m_currentConceptHierarchy.getNodeForElement(element);
-            Set<HierarchyNode<AtomicConceptElement>> nodes=currentNode.getDescendantNodes();
-            for (HierarchyNode<AtomicConceptElement> node : nodes) {
-                for (AtomicConceptElement descendantElement : node.getEquivalentElements()) {
-                    Set<Individual> possibleInstances=descendantElement.m_possibleInstances;
-                    if (possibleInstances!=null && possibleInstances.contains(instance)) 
-                        return;
-                }
-            }
-            Set<Individual> possibleInstances=element.m_possibleInstances;
-            if (possibleInstances==null) 
-                possibleInstances=new HashSet<Individual>();
-            possibleInstances.add(instance);
-            nodes=currentNode.getAncestorNodes();
-            nodes.remove(currentNode);
-            for (HierarchyNode<AtomicConceptElement> node : nodes) {
-                for (AtomicConceptElement ancestorElement : node.getEquivalentElements()) {
-                    if (ancestorElement.m_possibleInstances!=null) 
-                        ancestorElement.m_possibleInstances.remove(instance);
-                }
-            }
+            m_interruptFlag.checkInterrupt();
         }
     }
     protected void addKnownRoleInstance(RoleElement element, Individual individual1, Individual individual2) {
@@ -1088,12 +1153,15 @@ public class InstanceManager {
                     if (descendantElement.isKnown(individual1,individual2)) 
                         return;
                 }
+                m_interruptFlag.checkInterrupt();
             }
             element.addKnown(individual1, individual2);
             nodes=currentNode.getAncestorNodes();
             nodes.remove(currentNode);
-            for (HierarchyNode<RoleElement> node : nodes)
+            for (HierarchyNode<RoleElement> node : nodes) {
                 node.getRepresentative().removeKnown(individual1, individual2);
+                m_interruptFlag.checkInterrupt();
+            }
         }
     }
     protected void addPossibleRoleInstance(RoleElement element, Individual individual1, Individual individual2) {
@@ -1105,6 +1173,7 @@ public class InstanceManager {
                     if (descendantElement.isPossible(individual1, individual2)) 
                         return;
                 }
+                m_interruptFlag.checkInterrupt();
             }
             element.addPossible(individual1, individual2);
             nodes=currentNode.getAncestorNodes();
@@ -1114,6 +1183,7 @@ public class InstanceManager {
                     if (ancestorElement.isPossible(individual1,individual2)) 
                         ancestorElement.removePossible(individual1, individual2);
                 }
+                m_interruptFlag.checkInterrupt();
             }
         }
     }
@@ -1128,47 +1198,57 @@ public class InstanceManager {
     }
     public void realize(ReasonerProgressMonitor monitor) {
         assert m_usesClassifiedConceptHierarchy==true;
-        if (monitor!=null)
-            monitor.reasonerTaskStarted("Computing instances for all classes");
-        int numHierarchyNodes=m_currentConceptHierarchy.m_nodesByElements.values().size();
-        int currentHierarchyNode=0;
-        Queue<HierarchyNode<AtomicConceptElement>> toProcess=new LinkedList<HierarchyNode<AtomicConceptElement>>();
-        Set<HierarchyNode<AtomicConceptElement>> visited=new HashSet<HierarchyNode<AtomicConceptElement>>();
-        toProcess.add(m_currentConceptHierarchy.m_bottomNode);
-        while (!toProcess.isEmpty()) {
+        if (m_readingOffFoundPossibleConceptInstance) {
             if (monitor!=null)
-                monitor.reasonerTaskProgressChanged(currentHierarchyNode,numHierarchyNodes);
-            HierarchyNode<AtomicConceptElement> current=toProcess.remove();
-            visited.add(current);
-            currentHierarchyNode++;
-            AtomicConceptElement atomicConceptElement=current.getRepresentative();
-            AtomicConcept atomicConcept=atomicConceptElement.getAtomicConcept();
-            Set<HierarchyNode<AtomicConceptElement>> parents=current.getParentNodes();
-            for (HierarchyNode<AtomicConceptElement> parent : parents) {
-                if (!visited.contains(parent) && !toProcess.contains(parent)) 
-                    toProcess.add(parent);
-            }
-            if (atomicConceptElement.hasPossibles()) {
-                Set<Individual> nonInstances=new HashSet<Individual>();
-                for (Individual individual : atomicConceptElement.getPossibleInstances()) {
-                    if (isInstance(individual, atomicConcept)) 
-                        atomicConceptElement.m_knownInstances.add(individual);
-                    else {
-                        nonInstances.add(individual);
+                monitor.reasonerTaskStarted("Computing instances for all classes");
+            int numHierarchyNodes=m_currentConceptHierarchy.m_nodesByElements.values().size();
+            int currentHierarchyNode=0;
+            Queue<HierarchyNode<AtomicConcept>> toProcess=new LinkedList<HierarchyNode<AtomicConcept>>();
+            Set<HierarchyNode<AtomicConcept>> visited=new HashSet<HierarchyNode<AtomicConcept>>();
+            toProcess.addAll(m_currentConceptHierarchy.m_bottomNode.m_parentNodes);
+            int possibles=0;
+            while (!toProcess.isEmpty()) {
+                if (monitor!=null)
+                    monitor.reasonerTaskProgressChanged(currentHierarchyNode,numHierarchyNodes);
+                HierarchyNode<AtomicConcept> current=toProcess.remove();
+                visited.add(current);
+                currentHierarchyNode++;
+                AtomicConcept atomicConcept=current.getRepresentative();
+                AtomicConceptElement atomicConceptElement=m_conceptToElement.get(atomicConcept);
+                if (atomicConceptElement!=null) {
+                    Set<HierarchyNode<AtomicConcept>> parents=current.getParentNodes();
+                    for (HierarchyNode<AtomicConcept> parent : parents) {
+                        if (!visited.contains(parent) && !toProcess.contains(parent)) 
+                            toProcess.add(parent);
+                    }
+                    if (atomicConceptElement.hasPossibles()) {
+                        possibles+=atomicConceptElement.m_possibleInstances.size();
+                        Set<Individual> nonInstances=new HashSet<Individual>();
+                        for (Individual individual : atomicConceptElement.getPossibleInstances()) {
+                            if (isInstance(individual, atomicConcept)) 
+                                atomicConceptElement.m_knownInstances.add(individual);
+                            else {
+                                nonInstances.add(individual);
+                            }
+                        }
+                        atomicConceptElement.m_possibleInstances.clear();
+                        for (HierarchyNode<AtomicConcept> parent : parents) {
+                            AtomicConcept parentRepresentative=parent.getRepresentative();
+                            AtomicConceptElement parentElement=m_conceptToElement.get(parentRepresentative);
+                            if (parentElement==null) {
+                                parentElement=new AtomicConceptElement(null, nonInstances);
+                                m_conceptToElement.put(parentRepresentative, parentElement);
+                            } else if (parentRepresentative.equals(m_topConcept))
+                                m_conceptToElement.get(m_topConcept).m_knownInstances.addAll(nonInstances);
+                            else 
+                                parentElement.addPossibles(nonInstances);
+                        }
                     }
                 }
-                atomicConceptElement.m_possibleInstances.clear();
-                for (HierarchyNode<AtomicConceptElement> parent : parents) {
-                    AtomicConceptElement parentRepresentative=parent.getRepresentative();
-                    if (parentRepresentative.equals(m_topConceptElement))
-                        m_topConceptElement.m_knownInstances.addAll(nonInstances);
-                    else 
-                        parentRepresentative.addPossibles(nonInstances);
-                }
             }
+            if (monitor!=null)
+                monitor.reasonerTaskStopped();
         }
-        if (monitor!=null)
-            monitor.reasonerTaskStopped();
     }
     public void realizeObjectRoles(ReasonerProgressMonitor monitor) {
         assert m_usesClassifiedObjectRoleHierarchy==true;
@@ -1213,117 +1293,151 @@ public class InstanceManager {
         if (monitor!=null)
             monitor.reasonerTaskStopped();
     }
-    public Set<HierarchyNode<AtomicConceptElement>> getTypes(Individual individual,boolean direct) {
+    public Set<HierarchyNode<AtomicConcept>> getTypes(Individual individual,boolean direct) {
         if (m_isInconsistent) 
             return Collections.singleton(m_currentConceptHierarchy.m_bottomNode);
         assert !direct || m_usesClassifiedConceptHierarchy;
-        Set<HierarchyNode<AtomicConceptElement>> result=new HashSet<HierarchyNode<AtomicConceptElement>>();
-        Queue<HierarchyNode<AtomicConceptElement>> toProcess=new LinkedList<HierarchyNode<AtomicConceptElement>>();
+        Set<HierarchyNode<AtomicConcept>> result=new HashSet<HierarchyNode<AtomicConcept>>();
+        Queue<HierarchyNode<AtomicConcept>> toProcess=new LinkedList<HierarchyNode<AtomicConcept>>();
         toProcess.add(m_currentConceptHierarchy.m_bottomNode);
         while (!toProcess.isEmpty()) {
-            HierarchyNode<AtomicConceptElement> current=toProcess.remove();
-            Set<HierarchyNode<AtomicConceptElement>> parents=current.getParentNodes();
-            AtomicConceptElement atomicConceptElement=current.getRepresentative();
-            AtomicConcept atomicConcept=atomicConceptElement.getAtomicConcept();
-            if (atomicConceptElement.isPossible(individual)) {
+            HierarchyNode<AtomicConcept> current=toProcess.remove();
+            Set<HierarchyNode<AtomicConcept>> parents=current.getParentNodes();
+            AtomicConcept atomicConcept=current.getRepresentative();
+            AtomicConceptElement atomicConceptElement=m_conceptToElement.get(atomicConcept);
+            if (atomicConceptElement!=null && atomicConceptElement.isPossible(individual)) {
                 if (isInstance(individual, atomicConcept)) { 
                     atomicConceptElement.setToKnown(individual);
                 } else {
-                    for (HierarchyNode<AtomicConceptElement> parent : parents)
-                        parent.getRepresentative().addPossible(individual);
+                    for (HierarchyNode<AtomicConcept> parent : parents) {
+                        AtomicConcept parentRepresentative=parent.getRepresentative();
+                        AtomicConceptElement parentElement=m_conceptToElement.get(parentRepresentative);
+                        if (parentElement==null) {
+                            parentElement=new AtomicConceptElement(null, null);
+                            m_conceptToElement.put(parentRepresentative,parentElement);
+                        }
+                        parentElement.addPossible(individual);
+                    }
                 }
             }
             if (atomicConceptElement.isKnown(individual) && !Prefixes.isInternalIRI(atomicConcept.getIRI())) 
                 result.add(current);
             if (!atomicConceptElement.isKnown(individual) || !direct)
-                for (HierarchyNode<AtomicConceptElement> parent : parents)
+                for (HierarchyNode<AtomicConcept> parent : parents)
                     if (!toProcess.contains(parent)) 
                         toProcess.add(parent);
         }
         return result;
     }
     public boolean hasType(Individual individual,AtomicConcept atomicConcept,boolean direct) {
-        AtomicConceptElement element=m_atomicConceptElementManager.getAtomicConceptElement(atomicConcept);
-        HierarchyNode<AtomicConceptElement> currentNode=m_currentConceptHierarchy.getNodeForElement(element);
-        return hasType(individual, currentNode, direct);
+        HierarchyNode<AtomicConcept> node=m_currentConceptHierarchy.getNodeForElement(atomicConcept);
+        return hasType(individual, node, direct);
     }
-    public boolean hasType(Individual individual,HierarchyNode<AtomicConceptElement> node,boolean direct) {
+    public boolean hasType(Individual individual,HierarchyNode<AtomicConcept> node,boolean direct) {
         assert !direct || m_usesClassifiedConceptHierarchy;
-        AtomicConceptElement representativeElement=node.getRepresentative();
-        if (representativeElement.isKnown(individual) || (!direct && representativeElement.equals(m_topConceptElement))) 
+        AtomicConcept representative=node.getRepresentative();
+        if (representative==m_bottomConcept) 
+            return false;
+        AtomicConceptElement element=m_conceptToElement.get(representative);
+        if ((element!=null && element.isKnown(individual)) || (!direct && node==m_currentConceptHierarchy.m_topNode)) 
             return true;
-        if (representativeElement.isPossible(individual)) {
-            if (isInstance(individual, representativeElement.getAtomicConcept())) { 
-                representativeElement.setToKnown(individual);
+        if (element!=null && element.isPossible(individual)) {
+            if (isInstance(individual, representative)) { 
+                element.setToKnown(individual);
                 return true;
-            } else
-                for (HierarchyNode<AtomicConceptElement> parent : node.getParentNodes())
-                    parent.getRepresentative().addPossible(individual);
+            } else {
+                element.m_possibleInstances.remove(individual);
+                if (element.m_knownInstances.isEmpty() && element.m_possibleInstances.isEmpty()) 
+                    m_conceptToElement.remove(representative);
+                for (HierarchyNode<AtomicConcept> parent : node.getParentNodes()) {
+                    AtomicConcept parentConcept=parent.getRepresentative();
+                    AtomicConceptElement parentElement=m_conceptToElement.get(parentConcept);
+                    if (parentElement==null) {
+                        parentElement=new AtomicConceptElement(null, null);
+                        m_conceptToElement.put(parentConcept, parentElement);
+                    }
+                    parentElement.addPossible(individual);
+                }
+            }
         } else if (!direct)
-            for (HierarchyNode<AtomicConceptElement> child : node.getChildNodes())
+            for (HierarchyNode<AtomicConcept> child : node.getChildNodes())
                 if (hasType(individual, child, false))
                     return true;
         return false;
     }
     public Set<Individual> getInstances(AtomicConcept atomicConcept, boolean direct) {
         Set<Individual> result=new HashSet<Individual>();
-        AtomicConceptElement element=m_atomicConceptElementManager.getAtomicConceptElement(atomicConcept);
-        HierarchyNode<AtomicConceptElement> currentNode=m_currentConceptHierarchy.getNodeForElement(element);
-        if (currentNode==null) return result; // unknown concept
-        getInstancesForNode(currentNode,result,direct);
+        HierarchyNode<AtomicConcept> node=m_currentConceptHierarchy.getNodeForElement(atomicConcept);
+        if (node==null) return result; // unknown concept
+        getInstancesForNode(node,result,direct);
         return result;
     }
     public Set<Individual> getInstances(HierarchyNode<AtomicConcept> node,boolean direct) {
         Set<Individual> result=new HashSet<Individual>();
-        HierarchyNode<AtomicConceptElement> elementNode=m_currentConceptHierarchy.getNodeForElement(m_atomicConceptElementManager.getAtomicConceptElement(node.getRepresentative()));
-        if (elementNode==null) {
+        HierarchyNode<AtomicConcept> nodeFromCurrentHierarchy=m_currentConceptHierarchy.getNodeForElement(node.m_representative);
+        if (nodeFromCurrentHierarchy==null) {
             // complex concept instances
             if (!direct) {
                 for (HierarchyNode<AtomicConcept> child : node.getChildNodes()) {
-                    elementNode=m_currentConceptHierarchy.getNodeForElement(m_atomicConceptElementManager.getAtomicConceptElement(child.getRepresentative()));
-                    getInstancesForNode(elementNode, result, direct);
+                    getInstancesForNode(child, result, direct);
                 }
             }
         } else
-            getInstancesForNode(elementNode, result, direct);
+            getInstancesForNode(nodeFromCurrentHierarchy, result, direct);
         return result;
     }
-    protected void getInstancesForNode(HierarchyNode<AtomicConceptElement> node,Set<Individual> result,boolean direct) {
+    protected void getInstancesForNode(HierarchyNode<AtomicConcept> node,Set<Individual> result,boolean direct) {
         assert !direct || m_usesClassifiedConceptHierarchy;
-        AtomicConceptElement representativeElement=node.getRepresentative();
-        if (!direct && representativeElement.equals(m_topConceptElement)) {
+        AtomicConcept representative=node.getRepresentative();
+        if (!direct && representative.equals(m_topConcept)) {
             for (Individual individual : m_individuals)
                 if (isResultRelevantIndividual(individual))
                     result.add(individual);
             return;
         }
-        Set<Individual> possibleInstances=representativeElement.getPossibleInstances();
-        if (!possibleInstances.isEmpty()) {
-            for (Individual possibleInstance : new HashSet<Individual>(possibleInstances))
-                if (isInstance(possibleInstance, representativeElement.getAtomicConcept()))
-                    representativeElement.setToKnown(possibleInstance);
-                else
-                    for (HierarchyNode<AtomicConceptElement> parent : node.getParentNodes())
-                        parent.getRepresentative().addPossible(possibleInstance);
-        }
-        for (Individual individual : representativeElement.getKnownInstances()) {
-            if (isResultRelevantIndividual(individual)) {
-                boolean isDirect=true;
-                if (direct) {
-                    for (HierarchyNode<AtomicConceptElement> child : node.getChildNodes()) {
-                        if (hasType(individual, child, false)) {
-                            isDirect=false;
-                            break;
+        AtomicConceptElement representativeElement=m_conceptToElement.get(representative);
+        if (representativeElement!=null) {
+            Set<Individual> possibleInstances=representativeElement.getPossibleInstances();
+            if (!possibleInstances.isEmpty()) {
+                for (Individual possibleInstance : new HashSet<Individual>(possibleInstances)) {
+                    if (isInstance(possibleInstance, representative))
+                        representativeElement.setToKnown(possibleInstance);
+                    else {
+                        representativeElement.m_possibleInstances.remove(possibleInstance);
+                        if (representativeElement.m_knownInstances.isEmpty() && representativeElement.m_possibleInstances.isEmpty()) 
+                            m_conceptToElement.remove(representative);
+                        for (HierarchyNode<AtomicConcept> parent : node.getParentNodes()) {
+                            AtomicConcept parentConcept=parent.getRepresentative();
+                            AtomicConceptElement parentElement=m_conceptToElement.get(parentConcept);
+                            if (parentElement==null) {
+                                parentElement=new AtomicConceptElement(null, null);
+                                m_conceptToElement.put(parentConcept, parentElement);
+                            }
+                            parentElement.addPossible(possibleInstance);
                         }
                     }
                 }
-                if (!direct || isDirect) 
-                    result.add(individual);
+            }
+            for (Individual individual : representativeElement.getKnownInstances()) {
+                if (isResultRelevantIndividual(individual)) {
+                    boolean isDirect=true;
+                    if (direct) {
+                        for (HierarchyNode<AtomicConcept> child : node.getChildNodes()) {
+                            if (hasType(individual, child, false)) {
+                                isDirect=false;
+                                break;
+                            }
+                        }
+                    }
+                    if (!direct || isDirect) 
+                        result.add(individual);
+                }
             }
         }
         if (!direct)
-            for (HierarchyNode<AtomicConceptElement> child : node.getChildNodes())
-                getInstancesForNode(child, result, false);
+            for (HierarchyNode<AtomicConcept> child : node.getChildNodes())
+                if (child!=m_currentConceptHierarchy.m_bottomNode) 
+                    getInstancesForNode(child, result, false);
     }
     
     public boolean hasObjectRoleRelationship(AtomicRole role, Individual individual1, Individual individual2) {
@@ -1359,7 +1473,7 @@ public class InstanceManager {
     }
     protected void getObjectPropertyInstances(HierarchyNode<RoleElement> node,Map<Individual,Set<Individual>> result) {
         RoleElement representativeElement=node.getRepresentative();
-        if (representativeElement.equals(m_topConceptElement) || m_isInconsistent) {
+        if (representativeElement.equals(m_topRoleElement) || m_isInconsistent) {
             Set<Individual> allResultRelevantIndividuals=new HashSet<Individual>();
             for (Individual individual : m_individuals)
                 if (isResultRelevantIndividual(individual)) {
@@ -1413,7 +1527,7 @@ public class InstanceManager {
     }
     protected void getObjectPropertySubjects(HierarchyNode<RoleElement> node, Individual object, Set<Individual> result) {
         RoleElement representativeElement=node.getRepresentative();
-        if (representativeElement.equals(m_topConceptElement) || m_isInconsistent) {
+        if (representativeElement.equals(m_topRoleElement) || m_isInconsistent) {
             for (Individual ind : m_individuals)
                 if (isResultRelevantIndividual(ind))
                     result.add(ind);
@@ -1438,7 +1552,7 @@ public class InstanceManager {
     }
     protected void getObjectPropertyValues(HierarchyNode<RoleElement> node, Individual subject, Set<Individual> result) {
         RoleElement representativeElement=node.getRepresentative();
-        if (representativeElement.equals(m_topConceptElement) || m_isInconsistent) {
+        if (representativeElement.equals(m_topRoleElement) || m_isInconsistent) {
             for (Individual ind : m_individuals)
                 if (isResultRelevantIndividual(ind))
                     result.add(ind);
@@ -1561,16 +1675,10 @@ public class InstanceManager {
     public Map<Individual, Node> getNodesForIndividuals() {
         return m_nodesForIndividuals;
     }
-    public AtomicConceptElement getTopConceptElement() {
-        return m_topConceptElement;
-    }
-    public AtomicConceptElement getBottomConceptElement() {
-        return m_bottomConceptElement;
-    }
-    public HierarchyNode<AtomicConceptElement> getTopConceptNode() {
+    public HierarchyNode<AtomicConcept> getTopConceptNode() {
         return m_currentConceptHierarchy.getTopNode();
     }
-    public HierarchyNode<AtomicConceptElement> getBottomConceptNode() {
+    public HierarchyNode<AtomicConcept> getBottomConceptNode() {
         return m_currentConceptHierarchy.getBottomNode();
     }
     public RoleElement getTopRoleElement() {
