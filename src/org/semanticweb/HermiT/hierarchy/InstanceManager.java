@@ -258,7 +258,7 @@ public class InstanceManager {
                     }
                     if (possible!=null)
                         possible.removeAll(known);
-                    if (!known.isEmpty()||possible!=null) 
+                    if (!known.isEmpty()||possible!=null||representativeConcept==m_topConcept) 
                         m_conceptToElement.put(representativeConcept, new AtomicConceptElement(known, possible));
                 }
             }
@@ -489,7 +489,7 @@ public class InstanceManager {
             Node nodeForIndividual=m_nodesForIndividuals.get(ind);
             // read of concept instances and normal role instances only once, we don't slice that
             boolean hasType=readOffTypes(ind,nodeForIndividual);
-            if (!hasType) 
+            if (!hasType)
                 m_conceptToElement.get(m_topConcept).m_knownInstances.add(ind);
             completedSteps++;
             if (monitor!=null)
