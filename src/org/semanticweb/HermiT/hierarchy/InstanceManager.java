@@ -489,8 +489,15 @@ public class InstanceManager {
             Node nodeForIndividual=m_nodesForIndividuals.get(ind);
             // read of concept instances and normal role instances only once, we don't slice that
             boolean hasType=readOffTypes(ind,nodeForIndividual);
-            if (!hasType)
-                m_conceptToElement.get(m_topConcept).m_knownInstances.add(ind);
+            if (!hasType) {
+                AtomicConceptElement topElement=m_conceptToElement.get(m_topConcept);
+                if (topElement==null) {
+                    System.out.println("Ups, the top element was null");
+                    topElement=new AtomicConceptElement(null, null);
+                    m_conceptToElement.put(m_topConcept, topElement);
+                }
+                topElement.m_knownInstances.add(ind);
+            }
             completedSteps++;
             if (monitor!=null)
                 monitor.reasonerTaskProgressChanged(completedSteps,steps);
@@ -1138,7 +1145,7 @@ public class InstanceManager {
             AtomicConceptElement ancestorElement=m_conceptToElement.get(node.getRepresentative());
             if (ancestorElement!=null) {
                 ancestorElement.m_possibleInstances.remove(instance);
-                if (ancestorElement.m_possibleInstances.isEmpty() && ancestorElement.m_knownInstances.isEmpty())
+                if (ancestorElement.m_possibleInstances.isEmpty() && ancestorElement.m_knownInstances.isEmpty() && node.getRepresentative()!=m_topConcept)
                     m_conceptToElement.remove(node.getRepresentative());
             }
             m_interruptFlag.checkInterrupt();
@@ -1347,7 +1354,7 @@ public class InstanceManager {
                 return true;
             } else {
                 element.m_possibleInstances.remove(individual);
-                if (element.m_knownInstances.isEmpty() && element.m_possibleInstances.isEmpty()) 
+                if (element.m_knownInstances.isEmpty() && element.m_possibleInstances.isEmpty() && representative!=m_topConcept) 
                     m_conceptToElement.remove(representative);
                 for (HierarchyNode<AtomicConcept> parent : node.getParentNodes()) {
                     AtomicConcept parentConcept=parent.getRepresentative();
@@ -1404,7 +1411,7 @@ public class InstanceManager {
                         representativeElement.setToKnown(possibleInstance);
                     else {
                         representativeElement.m_possibleInstances.remove(possibleInstance);
-                        if (representativeElement.m_knownInstances.isEmpty() && representativeElement.m_possibleInstances.isEmpty()) 
+                        if (representativeElement.m_knownInstances.isEmpty() && representativeElement.m_possibleInstances.isEmpty() && representative!=m_topConcept) 
                             m_conceptToElement.remove(representative);
                         for (HierarchyNode<AtomicConcept> parent : node.getParentNodes()) {
                             AtomicConcept parentConcept=parent.getRepresentative();
