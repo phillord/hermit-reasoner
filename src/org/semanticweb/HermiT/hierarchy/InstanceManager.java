@@ -516,7 +516,7 @@ public class InstanceManager {
                     initializeSameAs();
                 }
                 completedSteps=readOffPropertyInstancesByIndividual(tableau,m_individualsForNodes, monitor, completedSteps, steps, startIndividualIndex);
-                if (m_currentIndividualIndex==m_individuals.length-1) {
+                if (m_currentIndividualIndex>=m_individuals.length-1) {
                     // we are done now with everything
                     if (!m_readingOffFoundPossiblePropertyInstance) 
                         m_roleRealizationCompleted=true;
@@ -1206,7 +1206,7 @@ public class InstanceManager {
     }
     public void realize(ReasonerProgressMonitor monitor) {
         assert m_usesClassifiedConceptHierarchy==true;
-        if (m_readingOffFoundPossibleConceptInstance) {
+        if (m_readingOffFoundPossibleConceptInstance && !m_realizationCompleted) {
             if (monitor!=null)
                 monitor.reasonerTaskStarted("Computing instances for all classes");
             int numHierarchyNodes=m_currentConceptHierarchy.m_nodesByElements.values().size();
@@ -1258,50 +1258,53 @@ public class InstanceManager {
             if (monitor!=null)
                 monitor.reasonerTaskStopped();
         }
+        m_realizationCompleted=true;
     }
     public void realizeObjectRoles(ReasonerProgressMonitor monitor) {
-        assert m_usesClassifiedObjectRoleHierarchy==true;
-        if (monitor!=null)
-            monitor.reasonerTaskStarted("Computing instances for all object properties...");
-        int numHierarchyNodes=m_currentRoleHierarchy.m_nodesByElements.values().size();
-        int currentHierarchyNode=0;
-        Queue<HierarchyNode<RoleElement>> toProcess=new LinkedList<HierarchyNode<RoleElement>>();
-        Set<HierarchyNode<RoleElement>> visited=new HashSet<HierarchyNode<RoleElement>>();
-        toProcess.add(m_currentRoleHierarchy.m_bottomNode);
-        while (!toProcess.isEmpty()) {
+        if (m_readingOffFoundPossiblePropertyInstance && !m_roleRealizationCompleted) {
             if (monitor!=null)
-                monitor.reasonerTaskProgressChanged(currentHierarchyNode,numHierarchyNodes);
-            HierarchyNode<RoleElement> current=toProcess.remove();
-            visited.add(current);
-            currentHierarchyNode++;
-            RoleElement roleElement=current.getRepresentative();
-            Role role=roleElement.getRole();
-            Set<HierarchyNode<RoleElement>> parents=current.getParentNodes();
-            for (HierarchyNode<RoleElement> parent : parents)
-                if (!toProcess.contains(parent) && !visited.contains(parent)) 
-                    toProcess.add(parent);
-            if (roleElement.hasPossibles()) {
-                for (Individual individual : roleElement.m_possibleRelations.keySet()) {
-                    Set<Individual> nonInstances=new HashSet<Individual>();
-                    for (Individual successor : roleElement.m_possibleRelations.get(individual)) {
-                        if (isRoleInstance(role, individual, successor)) 
-                            roleElement.addKnown(individual, successor);
-                        else {
-                            nonInstances.add(individual);
+                monitor.reasonerTaskStarted("Computing instances for all object properties...");
+            int numHierarchyNodes=m_currentRoleHierarchy.m_nodesByElements.values().size();
+            int currentHierarchyNode=0;
+            Queue<HierarchyNode<RoleElement>> toProcess=new LinkedList<HierarchyNode<RoleElement>>();
+            Set<HierarchyNode<RoleElement>> visited=new HashSet<HierarchyNode<RoleElement>>();
+            toProcess.add(m_currentRoleHierarchy.m_bottomNode);
+            while (!toProcess.isEmpty()) {
+                if (monitor!=null)
+                    monitor.reasonerTaskProgressChanged(currentHierarchyNode,numHierarchyNodes);
+                HierarchyNode<RoleElement> current=toProcess.remove();
+                visited.add(current);
+                currentHierarchyNode++;
+                RoleElement roleElement=current.getRepresentative();
+                Role role=roleElement.getRole();
+                Set<HierarchyNode<RoleElement>> parents=current.getParentNodes();
+                for (HierarchyNode<RoleElement> parent : parents)
+                    if (!toProcess.contains(parent) && !visited.contains(parent)) 
+                        toProcess.add(parent);
+                if (roleElement.hasPossibles()) {
+                    for (Individual individual : roleElement.m_possibleRelations.keySet()) {
+                        Set<Individual> nonInstances=new HashSet<Individual>();
+                        for (Individual successor : roleElement.m_possibleRelations.get(individual)) {
+                            if (isRoleInstance(role, individual, successor)) 
+                                roleElement.addKnown(individual, successor);
+                            else {
+                                nonInstances.add(individual);
+                            }
+                        }
+                        for (HierarchyNode<RoleElement> parent : parents) {
+                            RoleElement parentRepresentative=parent.getRepresentative();
+                            if (!parentRepresentative.equals(m_topRoleElement))
+                                parentRepresentative.addPossibles(individual, nonInstances);
                         }
                     }
-                    for (HierarchyNode<RoleElement> parent : parents) {
-                        RoleElement parentRepresentative=parent.getRepresentative();
-                        if (!parentRepresentative.equals(m_topRoleElement))
-                            parentRepresentative.addPossibles(individual, nonInstances);
-                    }
+                    roleElement.m_possibleRelations.clear();
                 }
-                roleElement.m_possibleRelations.clear();
+                m_interruptFlag.checkInterrupt();
             }
-            m_interruptFlag.checkInterrupt();
+            if (monitor!=null)
+                monitor.reasonerTaskStopped();
         }
-        if (monitor!=null)
-            monitor.reasonerTaskStopped();
+        m_roleRealizationCompleted=true;
     }
     public Set<HierarchyNode<AtomicConcept>> getTypes(Individual individual,boolean direct) {
         if (m_isInconsistent) 
@@ -1631,12 +1634,16 @@ public class InstanceManager {
     }
     public void computeSameAsEquivalenceClasses(ReasonerProgressMonitor progressMonitor) {
         int steps=m_individualToPossibleEquivalenceClass.keySet().size();
+        if (steps>0 && progressMonitor!=null)
+            progressMonitor.reasonerTaskStarted("Precompute same individuals");
         while (!m_individualToPossibleEquivalenceClass.isEmpty()) {
             Set<Individual> equivalenceClass=m_individualToPossibleEquivalenceClass.keySet().iterator().next();
             getSameAsIndividuals(equivalenceClass.iterator().next());
             if (progressMonitor!=null)
                 progressMonitor.reasonerTaskProgressChanged(steps-m_individualToPossibleEquivalenceClass.keySet().size(), steps);
         }
+        if (progressMonitor!=null)
+            progressMonitor.reasonerTaskStopped();
     }
     protected boolean isInstance(Individual individual,AtomicConcept atomicConcept) {
         return !m_tableau.isSatisfiable(true,true,null,Collections.singleton(Atom.create(atomicConcept,individual)),null,null,null,ReasoningTaskDescription.isInstanceOf(atomicConcept,individual));

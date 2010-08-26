@@ -441,7 +441,7 @@ public class Reasoner implements OWLReasoner {
                 int noComplexRoles=m_dlOntology.getAllComplexObjectRoles().size();
                 if (m_dlOntology.hasInverseRoles()) noComplexRoles=noComplexRoles/2;
                 int noIndividuals=m_dlOntology.getAllIndividuals().size();
-                int chunks=(((noComplexRoles*noIndividuals)/InstanceManager.thresholdForAdditionalAxioms))+1;
+                int chunks=(((2*noComplexRoles*noIndividuals)/InstanceManager.thresholdForAdditionalAxioms))+1;
                 int stepsAdditionalAxioms=noComplexRoles*noIndividuals;
                 int stepsRewritingAdditionalAxioms=(5*noComplexRoles*noIndividuals)/chunks;
                 int stepsTableauExpansion=(stepsAdditionalAxioms/chunks)+noAxioms+noIndividuals;
@@ -1403,11 +1403,7 @@ public class Reasoner implements OWLReasoner {
     protected void precomputeSameAsEquivalenceClasses() {
         checkPreConditions();
         initialiseClassInstanceManager();
-        if (m_configuration.reasonerProgressMonitor!=null)
-            m_configuration.reasonerProgressMonitor.reasonerTaskStarted("Precompute same individuals");
         m_instanceManager.computeSameAsEquivalenceClasses(m_configuration.reasonerProgressMonitor);
-        if (m_configuration.reasonerProgressMonitor!=null)
-            m_configuration.reasonerProgressMonitor.reasonerTaskStopped();
     }
     public NodeSet<OWLClass> getTypes(OWLNamedIndividual namedIndividual,boolean direct) {
         checkPreConditions(namedIndividual);
@@ -1503,6 +1499,10 @@ public class Reasoner implements OWLReasoner {
     }
     public NodeSet<OWLNamedIndividual> getObjectPropertyValues(OWLNamedIndividual namedIndividual,OWLObjectPropertyExpression propertyExpression) {
         checkPreConditions(namedIndividual,propertyExpression);
+        if (!m_isConsistent) {
+            Node<OWLNamedIndividual> node=new OWLNamedIndividualNode(getAllNamedIndividuals());
+            return new OWLNamedIndividualNodeSet(Collections.singleton(node));
+        }
         initialisePropertiesInstanceManager();
         Role role=H(propertyExpression.getNamedProperty());
         if (propertyExpression.getSimplified().isAnonymous()) 
@@ -1513,10 +1513,16 @@ public class Reasoner implements OWLReasoner {
     }
     public Map<OWLNamedIndividual,Set<OWLNamedIndividual>> getObjectPropertyInstances(OWLObjectProperty property) {
         checkPreConditions(property);
-        AtomicRole role=H(property);
-        initialisePropertiesInstanceManager();
-        Map<Individual,Set<Individual>> relations=m_instanceManager.getObjectPropertyInstances(role);
         Map<OWLNamedIndividual,Set<OWLNamedIndividual>> result=new HashMap<OWLNamedIndividual, Set<OWLNamedIndividual>>();
+        if (!m_isConsistent) {
+            Set<OWLNamedIndividual> all=getAllNamedIndividuals();
+            for (OWLNamedIndividual ind : all)
+                result.put(ind, all);
+            return result;
+        }
+        initialisePropertiesInstanceManager();
+        AtomicRole role=H(property);
+        Map<Individual,Set<Individual>> relations=m_instanceManager.getObjectPropertyInstances(role);
         OWLDataFactory factory=getDataFactory();
         for (Individual individual : relations.keySet()) {
             Set<OWLNamedIndividual> successors=new HashSet<OWLNamedIndividual>();
