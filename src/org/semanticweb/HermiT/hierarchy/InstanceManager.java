@@ -456,6 +456,7 @@ public class InstanceManager {
             OWLAxiom[] additionalAxiomsArray=new OWLAxiom[additionalAxioms.size()];
             return additionalAxioms.toArray(additionalAxiomsArray);
         } else {
+            m_currentIndividualIndex=m_individuals.length-1;
             return new OWLAxiom[0];
         }
     }
@@ -1252,6 +1253,7 @@ public class InstanceManager {
                         }
                     }
                 }
+                m_interruptFlag.checkInterrupt();
             }
             if (monitor!=null)
                 monitor.reasonerTaskStopped();
@@ -1296,6 +1298,7 @@ public class InstanceManager {
                 }
                 roleElement.m_possibleRelations.clear();
             }
+            m_interruptFlag.checkInterrupt();
         }
         if (monitor!=null)
             monitor.reasonerTaskStopped();
