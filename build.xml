@@ -295,18 +295,19 @@
     	 <mkdir dir="${reports}"/>
     	 <mkdir dir="${reports}/raw"/>
     	 <mkdir dir="${reports}/html"/>
-    	 <junit fork="yes" printsummary="yes" haltonerror="false" haltonfailure="false" maxmemory="700m" showoutput="yes" filtertrace="true">
+    	 <junit fork="yes" printsummary="yes" haltonerror="false" haltonfailure="false" maxmemory="700m" filtertrace="true">
     	 	<assertions>
     	 	  <enable/>
     	 	</assertions>
     	 	<formatter type="xml"/>
+    	 	<formatter type="brief"/>
             <classpath>
                 <pathelement location="${testclassdir}"/>
             </classpath>
             <classpath refid="classpath"/>
             <classpath refid="testclasspath"/>
     	 	<!-- change to AllTests -->
-    	 	<test name="org.semanticweb.HermiT.AllQuickTests" todir="${reports}/raw" outfile="AllTests"/>
+    	 	<test name="org.semanticweb.HermiT.reasoner.RulesTest" todir="${reports}/raw" outfile="AllTests"/>
     	  </junit>
 
     	  <junitreport todir="${reports}/raw">
