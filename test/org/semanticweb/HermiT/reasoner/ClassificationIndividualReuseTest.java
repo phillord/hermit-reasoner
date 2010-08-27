@@ -10,12 +10,6 @@ public class ClassificationIndividualReuseTest extends ClassificationTest {
     public void testGalenIansFullUndoctored() throws Exception {
         // omitted for now until we get this under control
     }
-    public void testWine() throws Exception {
-    }
-    public void testPizza() throws Exception {
-    }
-    public void testPropreo() throws Exception {
-    }
     public void testDolce() throws Exception {
         loadReasonerFromResource("res/dolce_all.xml");
         assertHierarchies("res/dolce_all.xml.txt");
