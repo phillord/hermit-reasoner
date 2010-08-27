@@ -283,15 +283,6 @@
     </target>
 
     <target name="test-hard" depends="compiletest">
-        <!--<java classname="org.semanticweb.HermiT.AllTests" fork="true">
-            <jvmarg value="-enableassertions"/>
-            <jvmarg value="-Xmx700M"/>
-            <classpath>
-                <pathelement location="${testclassdir}"/>
-            </classpath>
-            <classpath refid="classpath"/>
-            <classpath refid="testclasspath"/>
-        </java>-->
     	 <mkdir dir="${reports}"/>
     	 <mkdir dir="${reports}/raw"/>
     	 <mkdir dir="${reports}/html"/>
