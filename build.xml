@@ -306,8 +306,7 @@
             </classpath>
             <classpath refid="classpath"/>
             <classpath refid="testclasspath"/>
-    	 	<!-- change to AllTests -->
-    	 	<test name="org.semanticweb.HermiT.reasoner.RulesTest" todir="${reports}/raw" outfile="AllTests"/>
+    	 	<test name="org.semanticweb.HermiT.AllTests" todir="${reports}/raw" outfile="AllTests"/>
     	  </junit>
 
     	  <junitreport todir="${reports}/raw">
