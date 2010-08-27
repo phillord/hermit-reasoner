@@ -21,7 +21,7 @@
     <property name="builddir" value="${projectroot}/build"/>
     <property name="classdir" value="${builddir}/class"/>
     <property name="testclassdir" value="${builddir}/testclass"/>
-	<property name="nightlybuilddir" location="~/nightlybuild/"/>
+	<property name="reports" location="${builddir}/testreports"/>
 	
     <!-- structure of the release -->
     <property name="releasedir" value="${builddir}/release"/>
@@ -283,7 +283,7 @@
     </target>
 
     <target name="test-hard" depends="compiletest">
-        <java classname="org.semanticweb.HermiT.AllTests" fork="true">
+        <!--<java classname="org.semanticweb.HermiT.AllTests" fork="true">
             <jvmarg value="-enableassertions"/>
             <jvmarg value="-Xmx700M"/>
             <classpath>
@@ -291,7 +291,32 @@
             </classpath>
             <classpath refid="classpath"/>
             <classpath refid="testclasspath"/>
-        </java>
+        </java>-->
+    	 <mkdir dir="${reports}"/>
+    	 <mkdir dir="${reports}/raw"/>
+    	 <mkdir dir="${reports}/html"/>
+    	 <junit fork="yes" printsummary="yes" haltonerror="false" haltonfailure="false" maxmemory="700m" showoutput="yes" filtertrace="true">
+    	 	<assertions>
+    	 	  <enable/>
+    	 	</assertions>
+    	 	<formatter type="xml"/>
+            <classpath>
+                <pathelement location="${testclassdir}"/>
+            </classpath>
+            <classpath refid="classpath"/>
+            <classpath refid="testclasspath"/>
+    	 	<!-- change to AllTests -->
+    	 	<test name="org.semanticweb.HermiT.AllQuickTests" todir="${reports}/raw" outfile="AllTests"/>
+    	  </junit>
+
+    	  <junitreport todir="${reports}/raw">
+    	    <fileset dir="${reports}/raw">
+    	    	<include name="AllTests.xml" />
+    	    </fileset>
+    	    <report format="noframes" todir="${reports}/html">
+    	    	<param name="TITLE" expression="HermiT JUnit Test Results"/>
+    	    </report>
+    	  </junitreport>
     </target>
             	
     <!-- AUXILIARY TARGETS -->
