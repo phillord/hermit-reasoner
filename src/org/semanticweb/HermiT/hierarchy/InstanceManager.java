@@ -1333,12 +1333,16 @@ public class InstanceManager {
                     }
                 }
             }
-            if (atomicConceptElement.isKnown(individual) && !Prefixes.isInternalIRI(atomicConcept.getIRI())) 
-                result.add(current);
-            if (!atomicConceptElement.isKnown(individual) || !direct)
+            if (atomicConceptElement!=null && atomicConceptElement.isKnown(individual)) {
+                if (direct)
+                    result.add(current);
+                else 
+                    result.addAll(current.getAncestorNodes());
+            } else {
                 for (HierarchyNode<AtomicConcept> parent : parents)
                     if (!toProcess.contains(parent)) 
                         toProcess.add(parent);
+            }
         }
         return result;
     }

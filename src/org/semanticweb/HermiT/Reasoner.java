@@ -157,7 +157,7 @@ public class Reasoner implements OWLReasoner {
     protected Map<Role,Set<HierarchyNode<AtomicConcept>>> m_directObjectRoleDomains;
     protected Map<Role,Set<HierarchyNode<AtomicConcept>>> m_directObjectRoleRanges;
     protected Map<AtomicRole,Set<HierarchyNode<AtomicConcept>>> m_directDataRoleDomains;
-    protected Map<HierarchyNode<AtomicConcept>,Set<HierarchyNode<AtomicConcept>>> m_disjointClasses;
+    protected Map<HierarchyNode<AtomicConcept>,Set<HierarchyNode<AtomicConcept>>> m_directDisjointClasses;
     protected InstanceManager m_instanceManager;
     
     /**
@@ -203,7 +203,7 @@ public class Reasoner implements OWLReasoner {
         else
             m_descriptionGraphs=descriptionGraphs;
         m_interruptFlag=new InterruptFlag(configuration.individualTaskTimeout);
-        m_disjointClasses=new HashMap<HierarchyNode<AtomicConcept>, Set<HierarchyNode<AtomicConcept>>>();
+        m_directDisjointClasses=new HashMap<HierarchyNode<AtomicConcept>, Set<HierarchyNode<AtomicConcept>>>();
         loadOntology();
     }
 
@@ -240,7 +240,7 @@ public class Reasoner implements OWLReasoner {
         m_directObjectRoleDomains=new HashMap<Role,Set<HierarchyNode<AtomicConcept>>>();
         m_directObjectRoleRanges=new HashMap<Role,Set<HierarchyNode<AtomicConcept>>>();
         m_directDataRoleDomains=new HashMap<AtomicRole,Set<HierarchyNode<AtomicConcept>>>();
-        m_disjointClasses=new HashMap<HierarchyNode<AtomicConcept>,Set<HierarchyNode<AtomicConcept>>>();
+        m_directDisjointClasses=new HashMap<HierarchyNode<AtomicConcept>,Set<HierarchyNode<AtomicConcept>>>();
         m_instanceManager=null;
     }
     public void interrupt() {
@@ -387,7 +387,7 @@ public class Reasoner implements OWLReasoner {
         case DIFFERENT_INDIVIDUALS:
             return false;
         case DISJOINT_CLASSES:
-            return m_atomicConceptHierarchy!=null && m_disjointClasses.keySet().size()==m_atomicConceptHierarchy.getAllElements().size()-2;
+            return m_atomicConceptHierarchy!=null && m_directDisjointClasses.keySet().size()==m_atomicConceptHierarchy.getAllElements().size()-2;
         default:
             break;
         }
@@ -449,47 +449,26 @@ public class Reasoner implements OWLReasoner {
                 int steps=stepsAdditionalAxioms+(chunks*stepsRewritingAdditionalAxioms)+(chunks*stepsTableauExpansion)+stepsInitialiseKnownPossible;
                 int startIndividualIndex=0;
                 int completedSteps=0;
-                long t_additionalAxioms=0;
-                long t_tableauGeneration=0;
-                long t_tableauExpansion=0;
-                long t_readingOff=0;
-                long t=System.currentTimeMillis();
                 OWLAxiom[] additionalAxioms=m_instanceManager.getAxiomsForReadingOffCompexProperties(getDataFactory(), m_configuration.reasonerProgressMonitor, completedSteps, steps);
-                t_additionalAxioms+=(System.currentTimeMillis()-t);
-                //System.out.println("additional axioms: "+t_additionalAxioms);
-                t=System.currentTimeMillis();
                 completedSteps+=stepsAdditionalAxioms/chunks;
                 boolean moreWork=true;
                 int loops=0;
                 while (moreWork) {
                     Tableau tableau=getTableau(additionalAxioms);
-                    t_tableauGeneration+=(System.currentTimeMillis()-t);
-                    //System.out.println("tableau generation: "+t_tableauGeneration);
-                    t=System.currentTimeMillis();
                     completedSteps+=stepsRewritingAdditionalAxioms;
                     if (m_configuration.reasonerProgressMonitor!=null)
                         m_configuration.reasonerProgressMonitor.reasonerTaskProgressChanged(completedSteps,steps);
                     isConsistent=tableau.isSatisfiable(true,true,null,null,null,null,m_instanceManager.getNodesForIndividuals(),new ReasoningTaskDescription(false,"Initial consistency check plus reading-off known and possible class and property instances (individual "+startIndividualIndex+" to "+m_instanceManager.getCurrentIndividualIndex()+")."));
-                    t_tableauExpansion+=(System.currentTimeMillis()-t);
-                    //System.out.println("tableau expansion: "+t_tableauExpansion);
-                    t=System.currentTimeMillis();
                     completedSteps+=stepsTableauExpansion;
                     if (m_configuration.reasonerProgressMonitor!=null)
                         m_configuration.reasonerProgressMonitor.reasonerTaskProgressChanged(completedSteps,steps);
                     if (!isConsistent) {
                         m_instanceManager.setInconsistent();
                         break;
-                    } else {
+                    } else
                         completedSteps=m_instanceManager.initializeKnowAndPossiblePropertyInstances(tableau,m_configuration.reasonerProgressMonitor,startIndividualIndex,completedSteps,steps);
-                        t_readingOff+=(System.currentTimeMillis()-t);
-                        //System.out.println("reading off: "+t_readingOff);
-                        t=System.currentTimeMillis();
-                    }
                     startIndividualIndex=m_instanceManager.getCurrentIndividualIndex();
                     additionalAxioms=m_instanceManager.getAxiomsForReadingOffCompexProperties(getDataFactory(), m_configuration.reasonerProgressMonitor,completedSteps,steps);
-                    t_additionalAxioms+=(System.currentTimeMillis()-t);
-                    //System.out.println("additional axioms: "+t_additionalAxioms);
-                    t=System.currentTimeMillis();
                     completedSteps+=stepsAdditionalAxioms/chunks;
                     moreWork=additionalAxioms.length>0;
                     loops++;
@@ -517,29 +496,15 @@ public class Reasoner implements OWLReasoner {
                 int stepsInitialiseKnownPossible=noIndividuals;
                 int steps=stepsTableauExpansion+stepsInitialiseKnownPossible;
                 int completedSteps=0;
-                //long t_tableauGeneration=0;
-//                long t_tableauExpansion=0;
-//                long t_readingOff=0;
-//                long t;//=System.currentTimeMillis();
-                //t=System.currentTimeMillis();
                 Tableau tableau=getTableau();
-                //t_tableauGeneration+=(System.currentTimeMillis()-t);
-                //System.out.println("tableau generation: "+t_tableauGeneration);
-//                t=System.currentTimeMillis();
                 isConsistent=tableau.isSatisfiable(true,true,null,null,null,null,m_instanceManager.getNodesForIndividuals(),new ReasoningTaskDescription(false,"Initial tableau for reading-off known and possible class instances."));
-//                t_tableauExpansion+=(System.currentTimeMillis()-t);
-//                System.out.println("tableau expansion: "+t_tableauExpansion);
-//                t=System.currentTimeMillis();
                 completedSteps+=stepsTableauExpansion;
                 if (m_configuration.reasonerProgressMonitor!=null)
                     m_configuration.reasonerProgressMonitor.reasonerTaskProgressChanged(completedSteps,steps);
-                if (!isConsistent) {
+                if (!isConsistent)
                     m_instanceManager.setInconsistent();
-                } else {
+                else
                     m_instanceManager.initializeKnowAndPossibleClassInstances(tableau,m_configuration.reasonerProgressMonitor,completedSteps,steps);
-//                    t_readingOff+=(System.currentTimeMillis()-t);
-//                    System.out.println("all reading off: "+t_readingOff);
-                }
                 if (m_isConsistent==null) m_isConsistent=isConsistent;
             }
             if (m_configuration.reasonerProgressMonitor!=null)
@@ -695,15 +660,28 @@ public class Reasoner implements OWLReasoner {
     }
     public NodeSet<OWLClass> getDisjointClasses(OWLClassExpression classExpression) {
         checkPreConditions(classExpression);
+        classifyClasses();
         if (classExpression.isOWLNothing() || !m_isConsistent) {
-            HierarchyNode<AtomicConcept> node=getHierarchyNode(classExpression);
+            HierarchyNode<AtomicConcept> node=m_atomicConceptHierarchy.getBottomNode();
             return atomicConceptHierarchyNodesToNodeSet(node.getAncestorNodes());
         } else if (classExpression.isOWLThing()) {
-            return new OWLClassNodeSet(getDataFactory().getOWLNothing());
+            HierarchyNode<AtomicConcept> node=m_atomicConceptHierarchy.getBottomNode();
+            return atomicConceptHierarchyNodesToNodeSet(Collections.singleton(node));
         } else if (classExpression instanceof OWLClass) {
             HierarchyNode<AtomicConcept> node=getHierarchyNode(classExpression);
-            Set<HierarchyNode<AtomicConcept>> disjoints=getDisjointConceptNodes(node);
-            return atomicConceptHierarchyNodesToNodeSet(disjoints);
+            if (node==null || node==m_atomicConceptHierarchy.getTopNode()) {
+                // fresh concept
+                return new OWLClassNodeSet(getDataFactory().getOWLNothing());
+            } else if (node==m_atomicConceptHierarchy.getBottomNode()) {
+                return atomicConceptHierarchyNodesToNodeSet(node.getAncestorNodes());
+            } else {
+                Set<HierarchyNode<AtomicConcept>> directDisjoints=getDisjointConceptNodes(node);
+                Set<HierarchyNode<AtomicConcept>> result=new HashSet<HierarchyNode<AtomicConcept>>();
+                for (HierarchyNode<AtomicConcept> directDisjoint : directDisjoints) {
+                    result.addAll(directDisjoint.getDescendantNodes());
+                }
+                return atomicConceptHierarchyNodesToNodeSet(result);
+            }
         } else {
             Node<OWLClass> equivalentToComplement=getEquivalentClasses(classExpression.getObjectComplementOf());
             NodeSet<OWLClass> subsDisjoint=getSubClasses(classExpression.getObjectComplementOf(),false);
@@ -713,17 +691,37 @@ public class Reasoner implements OWLReasoner {
             return new OWLClassNodeSet(result);
         }
     }
+    protected Set<HierarchyNode<AtomicConcept>> getDisjointConceptNodes(HierarchyNode<AtomicConcept> node) {
+        if (m_directDisjointClasses.containsKey(node))
+            return m_directDisjointClasses.get(node);
+        else {
+            Set<HierarchyNode<AtomicConcept>> result=new HashSet<HierarchyNode<AtomicConcept>>();
+            OWLDataFactory factory=getDataFactory();
+            OWLClassExpression negated=factory.getOWLObjectComplementOf(factory.getOWLClass(IRI.create(node.getRepresentative().getIRI())));
+            HierarchyNode<AtomicConcept> equivalentToComplement=getHierarchyNode(negated);
+            for (AtomicConcept equiv : equivalentToComplement.getEquivalentElements()) {
+                if (!Prefixes.isInternalIRI(equiv.getIRI())) {
+                    HierarchyNode<AtomicConcept> rootDisjoint=m_atomicConceptHierarchy.getNodeForElement(equiv);
+                    result=Collections.singleton(rootDisjoint);
+                    m_directDisjointClasses.put(node, result);
+                    return result;
+                }
+            }
+            result=equivalentToComplement.getChildNodes();
+            m_directDisjointClasses.put(node, result);
+            return result;
+        }
+    }
     protected void precomputeDisjointClasses() {
-        if (m_atomicConceptHierarchy==null || m_disjointClasses.keySet().size()<m_atomicConceptHierarchy.getAllNodes().size()-2) {
-            m_disjointClasses=new HashMap<HierarchyNode<AtomicConcept>, Set<HierarchyNode<AtomicConcept>>>();
-            checkPreConditions();
+        checkPreConditions();
+        if (!m_isConsistent) 
+            return;
+        if (m_atomicConceptHierarchy==null || m_directDisjointClasses.keySet().size()<m_atomicConceptHierarchy.getAllNodes().size()-2) {
             classifyClasses();
-            if (!m_isConsistent) 
-                return;
             Set<HierarchyNode<AtomicConcept>> nodes=new HashSet<HierarchyNode<AtomicConcept>>(m_atomicConceptHierarchy.getAllNodes());
             nodes.remove(m_atomicConceptHierarchy.getTopNode());
             nodes.remove(m_atomicConceptHierarchy.getBottomNode());
-            nodes.removeAll(m_disjointClasses.keySet());
+            nodes.removeAll(m_directDisjointClasses.keySet());
             int steps=nodes.size();
             int step=0;
             if (m_configuration.reasonerProgressMonitor!=null)
@@ -737,18 +735,120 @@ public class Reasoner implements OWLReasoner {
                 m_configuration.reasonerProgressMonitor.reasonerTaskStopped();
         }
     }
-    protected Set<HierarchyNode<AtomicConcept>> getDisjointConceptNodes(HierarchyNode<AtomicConcept> node) {
-        if (m_disjointClasses.containsKey(node))
-            return m_disjointClasses.get(node);
-        else {
-            OWLDataFactory factory=getDataFactory();
-            OWLClassExpression negated=factory.getOWLObjectComplementOf(factory.getOWLClass(IRI.create(node.getRepresentative().getIRI())));
-            HierarchyNode<AtomicConcept> equivalentToComplement=getHierarchyNode(negated);
-            Set<HierarchyNode<AtomicConcept>> disjoints=equivalentToComplement.getDescendantNodes();
-            m_disjointClasses.put(node, disjoints);
-            return disjoints;
-        }
-    }
+//    public NodeSet<OWLClass> getDisjointClasses(OWLClassExpression classExpression) {
+//        checkPreConditions(classExpression);
+//        if (!m_isConsistent) {
+//            HierarchyNode<AtomicConcept> node=m_atomicConceptHierarchy.getBottomNode();
+//            return atomicConceptHierarchyNodesToNodeSet(node.getAncestorNodes());
+//        } else if (classExpression instanceof OWLClass) {
+//            precomputeDisjointClasses();
+//            HierarchyNode<AtomicConcept> node=getHierarchyNode(classExpression);
+//            if (node==null || node==m_atomicConceptHierarchy.getTopNode()) {
+//                // fresh concept
+//                return new OWLClassNodeSet(getDataFactory().getOWLNothing());
+//            } else if (node==m_atomicConceptHierarchy.getBottomNode()) {
+//                return atomicConceptHierarchyNodesToNodeSet(node.getAncestorNodes());
+//            } else {
+//                Set<HierarchyNode<AtomicConcept>> directDisjoints=m_directDisjointClasses.get(node);
+//                Set<HierarchyNode<AtomicConcept>> result=new HashSet<HierarchyNode<AtomicConcept>>();
+//                for (HierarchyNode<AtomicConcept> directDisjoint : directDisjoints) {
+//                    result.addAll(directDisjoint.getDescendantNodes());
+//                }
+//                return atomicConceptHierarchyNodesToNodeSet(result);
+//            }
+//        } else {
+//            Node<OWLClass> equivalentToComplement=getEquivalentClasses(classExpression.getObjectComplementOf());
+//            NodeSet<OWLClass> subsDisjoint=getSubClasses(classExpression.getObjectComplementOf(),false);
+//            Set<Node<OWLClass>> result=new HashSet<Node<OWLClass>>();
+//            if (equivalentToComplement.getSize() > 0) result.add(equivalentToComplement);
+//            result.addAll(subsDisjoint.getNodes());
+//            return new OWLClassNodeSet(result);
+//        }
+//    }
+//    protected void precomputeDisjointClasses() {
+//        if (m_atomicConceptHierarchy==null || m_directDisjointClasses.keySet().size()<m_atomicConceptHierarchy.getAllNodes().size()-2) {
+//            checkPreConditions();
+//            classifyClasses();
+//            if (!m_isConsistent) 
+//                return;
+//            
+//            Set<AtomicConcept> relevantNegatedConcepts=new HashSet<AtomicConcept>();
+//            Set<AtomicConcept> relevantConcepts=new HashSet<AtomicConcept>();
+//            List<OWLAxiom> additionalAxioms=new ArrayList<OWLAxiom>();
+//            for (HierarchyNode<AtomicConcept> node : m_atomicConceptHierarchy.getAllNodes()) {
+//                AtomicConcept concept=node.getRepresentative();
+//                relevantConcepts.add(concept);
+//                if (concept!=AtomicConcept.THING && concept!=AtomicConcept.NOTHING) {
+//                    OWLDataFactory factory=getDataFactory();
+//                    OWLClassExpression negated=factory.getOWLObjectComplementOf(factory.getOWLClass(IRI.create(concept.getIRI())));
+//                    String name="internal:not#"+concept.getIRI();
+//                    OWLClass nameForNegated=factory.getOWLClass(IRI.create(name));
+//                    relevantNegatedConcepts.add(AtomicConcept.create(name));
+//                    OWLAxiom axiom=factory.getOWLEquivalentClassesAxiom(nameForNegated,negated);
+//                    additionalAxioms.add(axiom);
+//                }
+//            }
+//            Set<AtomicConcept> elements=new HashSet<AtomicConcept>(relevantConcepts);
+//            elements.addAll(relevantNegatedConcepts);
+//            OWLAxiom[] additionalAxiomsArray=new OWLAxiom[additionalAxioms.size()];
+//            additionalAxioms.toArray(additionalAxiomsArray);
+//            Tableau tableau=getTableau(additionalAxiomsArray);
+//            try {
+//                final int numberOfConcepts=elements.size();
+//                if (m_configuration.reasonerProgressMonitor!=null)
+//                    m_configuration.reasonerProgressMonitor.reasonerTaskStarted("Computing disjoint classes");
+//                ClassificationProgressMonitor progressMonitor=new ClassificationProgressMonitor() {
+//                    protected int m_processedConcepts=0;
+//                    public void elementClassified(AtomicConcept element) {
+//                        m_processedConcepts++;
+//                        if (m_configuration.reasonerProgressMonitor!=null)
+//                            m_configuration.reasonerProgressMonitor.reasonerTaskProgressChanged(m_processedConcepts,numberOfConcepts);
+//                    }
+//                };
+//                Hierarchy<AtomicConcept> atomicConceptHierarchy=classifyAtomicConcepts(tableau,progressMonitor,AtomicConcept.THING,AtomicConcept.NOTHING,elements,m_configuration.forceQuasiOrderClassification);
+//                for (AtomicConcept concept : relevantConcepts) {
+//                    if (concept!=AtomicConcept.THING && concept!=AtomicConcept.NOTHING) {
+//                        HierarchyNode<AtomicConcept> node=atomicConceptHierarchy.getNodeForElement(concept);
+//                        String name="internal:not#"+concept.getIRI();
+//                        AtomicConcept negated=AtomicConcept.create(name);
+//                        HierarchyNode<AtomicConcept> nodeNegated=atomicConceptHierarchy.getNodeForElement(negated);
+//                        boolean hasEquivalentAtomic=false;
+//                        for (AtomicConcept equiv : nodeNegated.getEquivalentElements()) {
+//                            if (!relevantNegatedConcepts.contains(equiv)) {
+//                                HierarchyNode<AtomicConcept> rootDisjoint=m_atomicConceptHierarchy.getNodeForElement(equiv);
+//                                m_directDisjointClasses.put(node, Collections.singleton(rootDisjoint));
+//                                hasEquivalentAtomic=true;
+//                                break;
+//                            }
+//                        }
+//                        if (!hasEquivalentAtomic) {
+//                            Set<HierarchyNode<AtomicConcept>> result=new HashSet<HierarchyNode<AtomicConcept>>();
+//                            findNextNonComplementHierarchyNodes(relevantNegatedConcepts,nodeNegated,result);
+//                            m_directDisjointClasses.put(node, result);
+//                        }
+//                    }
+//                }
+//            }
+//            finally {
+//                if (m_configuration.reasonerProgressMonitor!=null)
+//                    m_configuration.reasonerProgressMonitor.reasonerTaskStopped();
+//            }
+//        }
+//    }
+//    protected void findNextNonComplementHierarchyNodes(Set<AtomicConcept> atomicNegationConcepts, HierarchyNode<AtomicConcept> current, Set<HierarchyNode<AtomicConcept>> result) {
+//        for (HierarchyNode<AtomicConcept> successor : current.getChildNodes()) {
+//            boolean hasEquivalentAtomic=false;
+//            for (AtomicConcept concept : successor.getEquivalentElements()) {
+//                if (!atomicNegationConcepts.contains(concept)) {
+//                    result.add(m_atomicConceptHierarchy.getNodeForElement(concept));
+//                    hasEquivalentAtomic=true;
+//                    break;
+//                }
+//            }
+//            if (!hasEquivalentAtomic)
+//                findNextNonComplementHierarchyNodes(atomicNegationConcepts, successor, result);
+//        }
+//    }
     protected HierarchyNode<AtomicConcept> getHierarchyNode(OWLClassExpression classExpression) {
         checkPreConditions(classExpression);
         classifyClasses();

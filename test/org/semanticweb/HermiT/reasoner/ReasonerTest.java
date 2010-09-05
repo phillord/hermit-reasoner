@@ -52,6 +52,73 @@ public class ReasonerTest extends AbstractReasonerTest {
 //        m_reasoner.printHierarchies(new PrintWriter(System.out, true), true, false, false);
 //        assertTrue(true);
 //    }
+    public void testPrecomputeDisjointClasses() throws Exception {
+        loadOntologyWithAxioms(
+            "Declaration( Class( :A ) )"+
+            "Declaration( Class( :B ) )"+
+            "Declaration( Class( :C ) )"+
+            "Declaration( Class( :D ) )"+
+            "Declaration( Class( :E ) )"+
+            "Declaration( Class( :F ) )"+
+            "SubClassOf( :A :B )"+
+            "SubClassOf( :A :C )"+
+            "SubClassOf( :C :E )"+
+            "SubClassOf( :B :E )"+
+            "SubClassOf( :B :D )"+
+            "SubClassOf( :F owl:Thing )"+
+            "SubClassOf( :E ObjectComplementOf(:F) )"+
+            "SubClassOf( :B ObjectComplementOf(:C) )");
+        createReasoner();
+        m_reasoner.precomputeInferences(InferenceType.DISJOINT_CLASSES);
+        OWLClass a=NS_C("A");
+        OWLClass b=NS_C("B");
+        OWLClass c=NS_C("C");
+        OWLClass d=NS_C("D");
+        OWLClass e=NS_C("E");
+        OWLClass f=NS_C("F");
+        OWLClass bot=m_dataFactory.getOWLNothing();
+        OWLClass top=m_dataFactory.getOWLThing();
+        NodeSet<OWLClass> disjoints=m_reasoner.getDisjointClasses(a);
+        assertTrue(disjoints.containsEntity(a));
+        assertTrue(disjoints.containsEntity(b));
+        assertTrue(disjoints.containsEntity(c));
+        assertTrue(disjoints.containsEntity(d));
+        assertTrue(disjoints.containsEntity(e));
+        assertTrue(disjoints.containsEntity(f));
+        assertTrue(disjoints.containsEntity(bot));
+        assertTrue(disjoints.containsEntity(top));
+        assertTrue(disjoints.getFlattened().size()==8);
+        assertTrue(disjoints.getNodes().size()==7);
+        disjoints=m_reasoner.getDisjointClasses(b);
+        assertTrue(disjoints.containsEntity(f));
+        assertTrue(disjoints.containsEntity(a));
+        assertTrue(disjoints.containsEntity(c));
+        assertTrue(disjoints.containsEntity(bot));
+        assertTrue(disjoints.getFlattened().size()==4);
+        disjoints=m_reasoner.getDisjointClasses(c);
+        assertTrue(disjoints.containsEntity(b));
+        assertTrue(disjoints.containsEntity(f));
+        assertTrue(disjoints.containsEntity(a));
+        assertTrue(disjoints.containsEntity(bot));
+        assertTrue(disjoints.getFlattened().size()==4);
+        disjoints=m_reasoner.getDisjointClasses(d);
+        assertTrue(disjoints.containsEntity(a));
+        assertTrue(disjoints.containsEntity(bot));
+        assertTrue(disjoints.getFlattened().size()==2);
+        disjoints=m_reasoner.getDisjointClasses(e);
+        assertTrue(disjoints.containsEntity(f));
+        assertTrue(disjoints.containsEntity(a));
+        assertTrue(disjoints.containsEntity(bot));
+        assertTrue(disjoints.getFlattened().size()==3);
+        disjoints=m_reasoner.getDisjointClasses(f);
+        assertTrue(disjoints.containsEntity(e));
+        assertTrue(disjoints.containsEntity(b));
+        assertTrue(disjoints.containsEntity(c));
+        assertTrue(disjoints.containsEntity(a));
+        assertTrue(disjoints.containsEntity(bot));
+        assertTrue(disjoints.getNodes().size()==4);
+        assertTrue(disjoints.getFlattened().size()==5);
+    }
     public void testKeys3() throws Exception {
         loadOntologyWithAxioms(
                 "Declaration( Class( :GriffinFamilyMember ) )"+

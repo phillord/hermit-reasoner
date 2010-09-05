@@ -101,6 +101,7 @@ public class HierarchyPrinterFSS {
     public void endPrinting() {
         m_out.println();
         m_out.println(")");
+        m_out.flush();
     }
 
     protected class AtomicConceptPrinter implements Hierarchy.HierarchyNodeVisitor<AtomicConcept> {

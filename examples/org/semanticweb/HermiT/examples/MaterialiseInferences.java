@@ -63,7 +63,7 @@ public class MaterialiseInferences {
         // The following call causes HermiT to compute the class, object, 
         // and data property hierarchies as well as the class instances. 
         // Hermit does not yet support precomputation of property instances. 
-        reasoner.precomputeInferences(InferenceType.CLASS_HIERARCHY, InferenceType.OBJECT_PROPERTY_HIERARCHY, InferenceType.DATA_PROPERTY_HIERARCHY, InferenceType.CLASS_ASSERTIONS);
+        reasoner.precomputeInferences(InferenceType.CLASS_HIERARCHY, InferenceType.CLASS_ASSERTIONS, InferenceType.OBJECT_PROPERTY_HIERARCHY, InferenceType.DATA_PROPERTY_HIERARCHY, InferenceType.OBJECT_PROPERTY_ASSERTIONS);
         // We now have to decide which kinds of inferences we want to compute. For different types 
         // there are different InferredAxiomGenerator implementations available in the OWL API and 
         // we use the InferredSubClassAxiomGenerator and the InferredClassAssertionAxiomGenerator 
