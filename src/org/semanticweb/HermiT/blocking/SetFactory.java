@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -28,7 +28,7 @@ import java.util.Set;
  * This class is used to create sets of various types. It ensures that each distinct set exists only once,
  * thus allowing sets to be compared with ==. Instances of this class are used to create various labels in blocking.
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({ "unchecked", "rawtypes"})
 public class SetFactory<E> implements Serializable {
     private static final long serialVersionUID=7071071962187693657L;
 
@@ -166,7 +166,7 @@ public class SetFactory<E> implements Serializable {
     protected static int getIndexFor(int hashCode,int tableLength) {
         return hashCode & (tableLength-1);
     }
-    
+
     protected static class Entry<T> implements Serializable,Set<T> {
         private static final long serialVersionUID=-3850593656120645350L;
 
@@ -245,7 +245,7 @@ public class SetFactory<E> implements Serializable {
         public boolean equals(Object that) {
             return this==that;
         }
-        
+
         protected class EntryIterator implements Iterator<T> {
             protected int m_currentIndex;
 
@@ -263,7 +263,7 @@ public class SetFactory<E> implements Serializable {
             public void remove() {
                 throw new UnsupportedOperationException();
             }
-            
+
         }
     }
 }
