@@ -6,11 +6,11 @@
     <!-- Note that on each released build, the ${updatefile} on the web site
          should be replaced, and the new version of the plugin should be
          posted at the (auto-generated) URL in that file. -->
-    <property name="version" value="1.2.5"/>
+    <property name="version" value="1.3.0"/>
 
     <!-- general info -->
     <property name="homepage" value="http://hermit-reasoner.com/"/>
-    <property name="updatefile" value="${homepage}update.properties"/>
+    <property name="updatefile" value="${homepage}protege-4-1-beta-update/update.properties"/>
 	<property environment="env"/>
 	<property name = "protege.home"      location="${env.PROTEGE_HOME}"/>
 	<property file = "${protege.home}/build.properties"/>
@@ -320,7 +320,7 @@
         <scp file="${builddir}/${ant.project.name}-${version}.zip" localTofile="${ant.project.name}.zip" todir="${username}:${password}@edison.comlab.ox.ac.uk:/data/hermit/download/${version}/" trust="yes"/>
     	<scp file="${releasedir}/org.semanticweb.${ant.project.name}.jar" todir="${username}:${password}@edison.comlab.ox.ac.uk:/data/hermit/download/${version}/" trust="yes"/>
     	<scp file="${releasedir}/readme.txt" todir="${username}:${password}@edison.comlab.ox.ac.uk:/data/hermit/download/${version}/" trust="yes"/>
-        <scp file="${builddir}/${updatefile}" todir="${username}:${password}@edison.comlab.ox.ac.uk:/data/hermit/" trust="yes"/>
+        <scp file="${builddir}/update.properties" todir="${username}:${password}@edison.comlab.ox.ac.uk:/data/hermit/protege-4-1-beta-update/" trust="yes"/>
         <sshexec host="edison.comlab.ox.ac.uk" username="${username}" password="${password}" command="rm /data/hermit/download/current/HermiT.zip" trust="yes"/>
         <sshexec host="edison.comlab.ox.ac.uk" username="${username}" password="${password}" command="ln -s  /data/hermit/download/${version}/HermiT.zip /data/hermit/download/current/HermiT.zip" trust="yes"/>
     </target>
