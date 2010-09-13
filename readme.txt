@@ -93,4 +93,5 @@ HermiT 1.2.5
 - improved instance handling (class and object property instances, sameAs), new OWL 
   API 3.1, never officially release, but shipped with Protege's beta test version
   for the new OWL API 
-  
+HermiT 1.3.0
+- as the inofficial 1.2.5, fixed a null pointer exception in the instance manager
