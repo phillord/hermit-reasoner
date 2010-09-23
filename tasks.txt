@@ -1,9 +1,3 @@
-- analyse and fix memory leaks
-task assigned to: Birte, Boris
-
--Modularise  classification code and integrate Rob's classification 
-task assigned to: Giorgos, Boris
-
 - Optimise the rule set/rule application so that HermiT can deal with
   large ontologies such as SNOMED. Move existential into universial: 
   rule engine should not loop over all assignemnts for y if y does not occur 
@@ -16,7 +10,11 @@ task assigned to:
 - We need to check acyclicity of datatype definitions.
 task assigned to:  Birte
 
-
 - incremental classification (axioms addition/removal)
 
 - optimise number restrictions (e.g., better clause representation)
+
+- check what HermiT does on Robert's family ontology
+
+- check why HermiT is so slow in expanding the tableau once we have a lot of choice points
+
