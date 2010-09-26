@@ -538,8 +538,8 @@ public class Reasoner implements OWLReasoner {
 
     /**
      * @deprecated  As of release 1.3, replaced by  
-     * {@link #precomputeInferences(InferenceType.CLASS_HIERARCHY))} from the 
-     * {@link #org.semanticweb.owlapi.reasoner.OWLReasoner))} interface
+     * {@link #precomputeInferences(InferenceType... inferenceTypes)} 
+     * with inference type CLASS_HIERARCHY
      */
     @Deprecated
     public void classify() {

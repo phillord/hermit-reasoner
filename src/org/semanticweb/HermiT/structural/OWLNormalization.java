@@ -810,6 +810,9 @@ public class OWLNormalization {
                 return object;
         }
         public OWLClassExpression visit(OWLObjectOneOf object) {
+            for (OWLIndividual ind : object.getIndividuals()) 
+                if (ind.isAnonymous()) 
+                    throw new IllegalArgumentException("Error: The class expression "+object+" contains anonymous individuals, which is not allowed in OWL 2 (erratum in first OWL 2 spec, to be fixed with next publication of minor corrections). ");
             return object;
         }
         public OWLClassExpression visit(OWLObjectSomeValuesFrom object) {
