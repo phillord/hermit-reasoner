@@ -23,16 +23,23 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
+import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.Reasoner.ReasonerFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLDisjointClassesAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.reasoner.ConsoleProgressMonitor;
 import org.semanticweb.owlapi.reasoner.InferenceType;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.util.InferredAxiomGenerator;
 import org.semanticweb.owlapi.util.InferredClassAssertionAxiomGenerator;
+import org.semanticweb.owlapi.util.InferredDisjointClassesAxiomGenerator;
 import org.semanticweb.owlapi.util.InferredOntologyGenerator;
 import org.semanticweb.owlapi.util.InferredSubClassAxiomGenerator;
 
@@ -59,11 +66,13 @@ public class MaterialiseInferences {
         // as an OWLReasoner. This is done via a ReasonerFactory object. 
         ReasonerFactory factory = new ReasonerFactory();
         // The factory can now be used to obtain an instance of HermiT as an OWLReasoner. 
-        OWLReasoner reasoner=factory.createReasoner(ontology);
+        Configuration c=new Configuration();
+        c.reasonerProgressMonitor=new ConsoleProgressMonitor();
+        OWLReasoner reasoner=factory.createReasoner(ontology, c);
         // The following call causes HermiT to compute the class, object, 
         // and data property hierarchies as well as the class instances. 
         // Hermit does not yet support precomputation of property instances. 
-        reasoner.precomputeInferences(InferenceType.CLASS_HIERARCHY, InferenceType.CLASS_ASSERTIONS, InferenceType.OBJECT_PROPERTY_HIERARCHY, InferenceType.DATA_PROPERTY_HIERARCHY, InferenceType.OBJECT_PROPERTY_ASSERTIONS);
+        //reasoner.precomputeInferences(InferenceType.CLASS_HIERARCHY, InferenceType.CLASS_ASSERTIONS, InferenceType.OBJECT_PROPERTY_HIERARCHY, InferenceType.DATA_PROPERTY_HIERARCHY, InferenceType.OBJECT_PROPERTY_ASSERTIONS);
         // We now have to decide which kinds of inferences we want to compute. For different types 
         // there are different InferredAxiomGenerator implementations available in the OWL API and 
         // we use the InferredSubClassAxiomGenerator and the InferredClassAssertionAxiomGenerator 
@@ -72,6 +81,22 @@ public class MaterialiseInferences {
         List<InferredAxiomGenerator<? extends OWLAxiom>> generators=new ArrayList<InferredAxiomGenerator<? extends OWLAxiom>>();
         generators.add(new InferredSubClassAxiomGenerator());
         generators.add(new InferredClassAssertionAxiomGenerator());
+        // We dynamically overwrite the default disjoint classes generator since it tries to 
+        // encode the reasoning problem itself instead of using the appropriate methods in the 
+        // reasoner. That bypasses all our optimisations and means there is not progress report :-( 
+        // We don't want that!
+        generators.add(new InferredDisjointClassesAxiomGenerator() {
+            boolean precomputed=false;
+            protected void addAxioms(OWLClass entity, OWLReasoner reasoner, OWLDataFactory dataFactory, Set<OWLDisjointClassesAxiom> result) {
+                if (!precomputed) {
+                    reasoner.precomputeInferences(InferenceType.DISJOINT_CLASSES);
+                    precomputed=true;
+                }
+                for (OWLClass cls : reasoner.getDisjointClasses(entity).getFlattened()) {
+                    result.add(dataFactory.getOWLDisjointClassesAxiom(entity, cls));
+                }
+            }
+        });
         // We can now create an instance of InferredOntologyGenerator. 
         InferredOntologyGenerator iog=new InferredOntologyGenerator(reasoner,generators);
         // Before we actually generate the axioms into an ontology, we first have to create that ontology. 
