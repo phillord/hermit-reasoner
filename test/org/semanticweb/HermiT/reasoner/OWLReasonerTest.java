@@ -28,13 +28,13 @@ public class OWLReasonerTest extends AbstractReasonerTest {
         Node<OWLObjectPropertyExpression> r_inverses=m_reasoner.getInverseObjectProperties(OP(IRI("r")));
         Node<OWLObjectPropertyExpression> invr_inverses=m_reasoner.getInverseObjectProperties(m_dataFactory.getOWLObjectInverseOf(OP(IRI("r"))));
         Set<OWLObjectPropertyExpression> r_inverses_expected=new HashSet<OWLObjectPropertyExpression>();
-        r_inverses_expected.add(OP(IRI("r")));
-        r_inverses_expected.add(m_dataFactory.getOWLObjectInverseOf(OP(IRI("s"))));
-        r_inverses_expected.add(OP(IRI("t")));
+        r_inverses_expected.add(m_dataFactory.getOWLObjectInverseOf(OP(IRI("r"))));
+        r_inverses_expected.add(OP(IRI("s")));
+        r_inverses_expected.add(m_dataFactory.getOWLObjectInverseOf(OP(IRI("t"))));
         Set<OWLObjectPropertyExpression> invr_inverses_expected=new HashSet<OWLObjectPropertyExpression>();
-        invr_inverses_expected.add(m_dataFactory.getOWLObjectInverseOf(OP(IRI("r"))));
-        invr_inverses_expected.add(m_dataFactory.getOWLObjectInverseOf(OP(IRI("t"))));
-        invr_inverses_expected.add(OP(IRI("s")));
+        invr_inverses_expected.add(m_dataFactory.getOWLObjectInverseOf(OP(IRI("s"))));
+        invr_inverses_expected.add(OP(IRI("r")));
+        invr_inverses_expected.add(OP(IRI("t")));
         assertEquals(r_inverses.getEntities(), r_inverses_expected);
         assertEquals(invr_inverses.getEntities(), invr_inverses_expected);
     }

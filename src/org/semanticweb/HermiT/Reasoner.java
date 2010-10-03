@@ -988,7 +988,7 @@ public class Reasoner implements OWLReasoner {
         return atomicConceptHierarchyNodesToNodeSet(nodes);
     }
     public Node<OWLObjectPropertyExpression> getInverseObjectProperties(OWLObjectPropertyExpression propertyExpression) {
-        return getEquivalentObjectProperties(propertyExpression.getSimplified());
+        return getEquivalentObjectProperties(propertyExpression.getSimplified().getInverseProperty());
     }
     public NodeSet<OWLObjectPropertyExpression> getDisjointObjectProperties(OWLObjectPropertyExpression propertyExpression) {
         checkPreConditions(propertyExpression);
