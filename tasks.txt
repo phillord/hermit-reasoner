@@ -18,3 +18,4 @@ task assigned to:  Birte
 
 - check why HermiT is so slow in expanding the tableau once we have a lot of choice points
 
+- reengineer the initialisation code for the classification to minimise memory consumption  
