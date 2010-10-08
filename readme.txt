@@ -95,3 +95,10 @@ HermiT 1.2.5
   for the new OWL API 
 HermiT 1.3.0
 - as the inofficial 1.2.5, fixed a null pointer exception in the instance manager
+HermiT 1.3.1
+- fixed a bug that caused HermiT to return equivalent properties instead of inverse 
+  properties in the method getInverseObjectProperties, automata for complex roles 
+  are no longer determinised to safe time, extended explanation example to cover
+  inconsistency explanation, improved disjoint classes code in the materialisation 
+  example, anonymous individuals are no longer allowed in OneOf constructs (OWL 2 
+  DL conformance)

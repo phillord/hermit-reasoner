@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.Set;
 
 import org.semanticweb.HermiT.Configuration;
+import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.HermiT.Reasoner.ReasonerFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
@@ -51,6 +52,7 @@ public class Explanations {
         OWLReasoner reasoner=factory.createReasoner(ontology, configuration);
         // Let us confirm that icecream is indeed unsatisfiable:
         System.out.println("Is icecream satisfiable? "+reasoner.isSatisfiable(icecream)); 
+        System.out.println("Computing explanations...");
         // Now we instantiate the explanation classes
         BlackBoxExplanation exp=new BlackBoxExplanation(ontology, factory, reasoner);
         HSTExplanationGenerator multExplanator=new HSTExplanationGenerator(exp);
@@ -61,6 +63,41 @@ public class Explanations {
         for (Set<OWLAxiom> explanation : explanations) {
             System.out.println("------------------");
             System.out.println("Axioms causing the unsatisfiability: ");
+            for (OWLAxiom causingAxiom : explanation) {
+                System.out.println(causingAxiom);
+            }
+            System.out.println("------------------");
+        }
+        // Let us make the ontology inconsistent to also get explanations for an 
+        // inconsistency, which is slightly more involved since we dynamically 
+        // have to change the factory constructor; otherwise, we can't suppress 
+        // the inconsistent ontology exceptions that the OWL API requires a 
+        // reasoner to throw.  
+        // Let's start by adding a dummy individual to the unsatisfiable Icecream class. 
+        // This will cause an inconsistency. 
+        OWLAxiom ax=dataFactory.getOWLClassAssertionAxiom(icecream, dataFactory.getOWLNamedIndividual(IRI.create("http://www.co-ode.org/ontologies/pizza/pizza.owl#dummyIndividual")));
+        manager.addAxiom(ontology, ax);
+        // Let us confirm that the ontology is inconsistent
+        reasoner=factory.createReasoner(ontology, configuration);
+        System.out.println("Is the changed ontology consistent? "+reasoner.isConsistent());
+        // Ok, here we go. Let's see why the ontology is inconsistent. 
+        System.out.println("Computing explanations for the inconsistency...");
+        factory=new Reasoner.ReasonerFactory() {
+            protected OWLReasoner createHermiTOWLReasoner(org.semanticweb.HermiT.Configuration configuration,OWLOntology ontology) {
+                // don't throw an exception since otherwise we cannot compte explanations 
+                configuration.throwInconsistentOntologyException=false;
+                return new Reasoner(configuration,ontology);
+            }  
+        };
+        exp=new BlackBoxExplanation(ontology, factory, reasoner);
+        multExplanator=new HSTExplanationGenerator(exp);
+        // Now we can get explanations for the inconsistency 
+        explanations=multExplanator.getExplanations(dataFactory.getOWLThing());
+        // Let us print them. Each explanation is one possible set of axioms that cause the 
+        // unsatisfiability. 
+        for (Set<OWLAxiom> explanation : explanations) {
+            System.out.println("------------------");
+            System.out.println("Axioms causing the inconsistency: ");
             for (OWLAxiom causingAxiom : explanation) {
                 System.out.println(causingAxiom);
             }
