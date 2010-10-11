@@ -480,6 +480,9 @@ public class ObjectPropertyInclusionManager {
     }
     protected Automaton minimizeAndNormalizeAutomaton(Automaton automaton) {
         Reducer minimizerDeterminizer=new Reducer();
+        //if the automaton has more than 350-400 transitions it seems that the determiniser is very slow. In general this code does help to reduce the number of clauses produced. 
+        if( automaton.delta().size() > 300 )
+        	return automaton;
         Normalizer normalizer=new Normalizer();
         Automaton tempMinimizedAuto=minimizerDeterminizer.transform(automaton);
         if (tempMinimizedAuto.delta().size()>=automaton.delta().size())
