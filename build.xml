@@ -325,4 +325,7 @@
         <sshexec host="edison.comlab.ox.ac.uk" username="${username}" password="${password}" command="ln -s  /data/hermit/download/${version}/HermiT.zip /data/hermit/download/current/HermiT.zip" trust="yes"/>
     </target>
 
+	<!-- additionally -->
+	<!-- tag the SVN with the current build version -->
+	<!-- update Protege binaries SVN with the Protege plugin and readme -->
 </project>
