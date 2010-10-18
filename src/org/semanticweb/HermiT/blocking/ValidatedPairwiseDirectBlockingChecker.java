@@ -26,6 +26,7 @@ import org.semanticweb.HermiT.blocking.ValidatedSingleDirectBlockingChecker.Vali
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
+import org.semanticweb.HermiT.model.DataRange;
 import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.NodeType;
@@ -109,6 +110,12 @@ public class ValidatedPairwiseDirectBlockingChecker implements DirectBlockingChe
     public Node assertionRemoved(Concept concept, Node node, boolean isCore) {
         ((ValidatedPairwiseBlockingObject) node.getBlockingObject()).removeConcept(concept, isCore);
         return (concept instanceof AtomicConcept && isCore)?node:null;
+    }
+    public Node assertionAdded(DataRange range,Node node,boolean isCore) {
+        return null;
+    }
+    public Node assertionRemoved(DataRange range,Node node,boolean isCore) {
+        return null;
     }
     public Node assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
         return null;

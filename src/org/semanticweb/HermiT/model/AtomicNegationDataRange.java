@@ -23,17 +23,17 @@ import org.semanticweb.HermiT.Prefixes;
  * Represents a negation of a data range.
  */
 @SuppressWarnings("serial")
-public class NegationDataRange extends DataRange {
+public class AtomicNegationDataRange extends LiteralDataRange {
 
-    protected final DataRange m_negatedDataRange;
+    protected final AtomicDataRange m_negatedDataRange;
     
-    protected NegationDataRange(DataRange negatedDataRange) {
+    protected AtomicNegationDataRange(AtomicDataRange negatedDataRange) {
         m_negatedDataRange=negatedDataRange;
     }
-    public DataRange getNegatedDataRange() {
+    public AtomicDataRange getNegatedDataRange() {
         return m_negatedDataRange;
     }
-    public LiteralConcept getNegation() {
+    public LiteralDataRange getNegation() {
         return m_negatedDataRange;
     }
     public boolean isAlwaysTrue() {
@@ -42,6 +42,9 @@ public class NegationDataRange extends DataRange {
     public boolean isAlwaysFalse() {
         return m_negatedDataRange.isAlwaysTrue();
     }
+    public boolean isNegatedInternalDatatype() {
+        return m_negatedDataRange.isInternalDatatype();
+    }
     public String toString(Prefixes prefixes) {
         return "not("+m_negatedDataRange.toString(prefixes)+")";
     }
@@ -49,16 +52,16 @@ public class NegationDataRange extends DataRange {
         return s_interningManager.intern(this);
     }
 
-    protected static InterningManager<NegationDataRange> s_interningManager=new InterningManager<NegationDataRange>() {
-        protected boolean equal(NegationDataRange object1,NegationDataRange object2) {
+    protected static InterningManager<AtomicNegationDataRange> s_interningManager=new InterningManager<AtomicNegationDataRange>() {
+        protected boolean equal(AtomicNegationDataRange object1,AtomicNegationDataRange object2) {
             return object1.m_negatedDataRange==object2.m_negatedDataRange;
         }
-        protected int getHashCode(NegationDataRange object) {
+        protected int getHashCode(AtomicNegationDataRange object) {
             return -object.m_negatedDataRange.hashCode();
         }
     };
     
-    public static NegationDataRange create(DataRange negatedDataRange) {
-        return s_interningManager.intern(new NegationDataRange(negatedDataRange));
+    public static AtomicNegationDataRange create(AtomicDataRange negatedDataRange) {
+        return s_interningManager.intern(new AtomicNegationDataRange(negatedDataRange));
     }
 }

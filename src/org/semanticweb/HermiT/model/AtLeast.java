@@ -17,12 +17,31 @@
 */
 package org.semanticweb.HermiT.model;
 
-import org.semanticweb.HermiT.Prefixes;
+
 
 /**
- * Represents a DL predicate.
+ * Represents at-least concepts, either for data ranges or concepts.
  */
-public interface DLPredicate {
-    int getArity();
-    String toString(Prefixes prefixes);
+public abstract class AtLeast extends ExistentialConcept implements DLPredicate {
+    private static final long serialVersionUID = -5450065396132818872L;
+    
+    protected final int m_number;
+    protected final Role m_onRole;
+    
+    protected AtLeast(int number,Role onRole) {
+        m_number=number;
+        m_onRole=onRole;
+    }
+    public int getNumber() {
+        return m_number;
+    }
+    public Role getOnRole() {
+        return m_onRole;
+    }
+    public int getArity() {
+        return 1;
+    }
+    public boolean isAlwaysTrue() {
+        return false;
+    }
 }

@@ -33,14 +33,13 @@ import org.semanticweb.HermiT.datatypes.DatatypeRegistry;
 import org.semanticweb.HermiT.datatypes.UnsupportedDatatypeException;
 import org.semanticweb.HermiT.model.AnnotatedEquality;
 import org.semanticweb.HermiT.model.AtLeastConcept;
+import org.semanticweb.HermiT.model.AtLeastDataRange;
 import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
-import org.semanticweb.HermiT.model.AtomicNegationConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Constant;
 import org.semanticweb.HermiT.model.ConstantEnumeration;
 import org.semanticweb.HermiT.model.DLClause;
-import org.semanticweb.HermiT.model.DLClause.ClauseType;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.model.DatatypeRestriction;
@@ -50,11 +49,13 @@ import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.model.Inequality;
 import org.semanticweb.HermiT.model.InternalDatatype;
 import org.semanticweb.HermiT.model.LiteralConcept;
+import org.semanticweb.HermiT.model.LiteralDataRange;
 import org.semanticweb.HermiT.model.NodeIDLessEqualThan;
 import org.semanticweb.HermiT.model.NodeIDsAscendingOrEqual;
 import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.model.Term;
 import org.semanticweb.HermiT.model.Variable;
+import org.semanticweb.HermiT.model.DLClause.ClauseType;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
@@ -672,28 +673,28 @@ public class OWLClausification {
         public void visit(OWLDataSomeValuesFrom object) {
             if (!object.getProperty().isOWLBottomDataProperty()) {
                 AtomicRole atomicRole=getAtomicRole(object.getProperty());
-                LiteralConcept literalConcept=m_dataRangeConverter.convertDataRange(object.getFiller());
-                AtLeastConcept atLeastConcept=AtLeastConcept.create(1,atomicRole,literalConcept);
-                if (!atLeastConcept.isAlwaysFalse())
-                    m_headAtoms.add(Atom.create(atLeastConcept,X));
+                LiteralDataRange literalRange=m_dataRangeConverter.convertDataRange(object.getFiller());
+                AtLeastDataRange atLeastDataRange=AtLeastDataRange.create(1,atomicRole,literalRange);
+                if (!atLeastDataRange.isAlwaysFalse())
+                    m_headAtoms.add(Atom.create(atLeastDataRange,X));
             }
         }
         public void visit(OWLDataAllValuesFrom object) {
-            LiteralConcept literalConcept=m_dataRangeConverter.convertDataRange(object.getFiller());
+            LiteralDataRange literalRange=m_dataRangeConverter.convertDataRange(object.getFiller());
             if (object.getProperty().isOWLTopDataProperty()) {
-                if (literalConcept.isAlwaysFalse())
+                if (literalRange.isAlwaysFalse())
                     return; // bottom
             }
             Variable y=nextY();
             m_bodyAtoms.add(getRoleAtom(object.getProperty(),X,y));
-            if (literalConcept instanceof AtomicNegationConcept) {
-                AtomicConcept negatedConcept=((AtomicNegationConcept)literalConcept).getNegatedAtomicConcept();
-                if (!negatedConcept.isAlwaysTrue())
-                    m_bodyAtoms.add(Atom.create(negatedConcept,y));
+            if (literalRange.isNegatedInternalDatatype()) {
+                InternalDatatype negatedRange=(InternalDatatype)literalRange.getNegation();
+                if (!negatedRange.isAlwaysTrue())
+                    m_bodyAtoms.add(Atom.create(negatedRange,y));
             }
             else {
-                if (!literalConcept.isAlwaysFalse())
-                    m_headAtoms.add(Atom.create((DLPredicate)literalConcept,y));
+                if (!literalRange.isAlwaysFalse())
+                    m_headAtoms.add(Atom.create((DLPredicate)literalRange,y));
             }
         }
         public void visit(OWLDataHasValue object) {
@@ -716,24 +717,24 @@ public class OWLClausification {
                         return;
                 }
                 AtomicRole atomicRole=getAtomicRole(object.getProperty());
-                LiteralConcept literalConcept=m_dataRangeConverter.convertDataRange(object.getFiller());
-                AtLeastConcept atLeastConcept=AtLeastConcept.create(object.getCardinality(),atomicRole,literalConcept);
-                if (!atLeastConcept.isAlwaysFalse())
-                    m_headAtoms.add(Atom.create(atLeastConcept,X));
+                LiteralDataRange literalRange=m_dataRangeConverter.convertDataRange(object.getFiller());
+                AtLeastDataRange atLeast=AtLeastDataRange.create(object.getCardinality(),atomicRole,literalRange);
+                if (!atLeast.isAlwaysFalse())
+                    m_headAtoms.add(Atom.create(atLeast,X));
             }
         }
         public void visit(OWLDataMaxCardinality object) {
             int number=object.getCardinality();
-            LiteralConcept negatedDataRange=m_dataRangeConverter.convertDataRange(object.getFiller()).getNegation();
+            LiteralDataRange negatedDataRange=m_dataRangeConverter.convertDataRange(object.getFiller()).getNegation();
             ensureYNotZero();
             Variable[] yVars=new Variable[number+1];
             for (int i=0;i<yVars.length;i++) {
                 yVars[i]=nextY();
                 m_bodyAtoms.add(getRoleAtom(object.getProperty(),X,yVars[i]));
-                if (negatedDataRange instanceof AtomicNegationConcept) {
-                    AtomicConcept negatedConcept=((AtomicNegationConcept)negatedDataRange).getNegatedAtomicConcept();
-                    if (!negatedConcept.isAlwaysTrue())
-                        m_bodyAtoms.add(Atom.create(negatedConcept,yVars[i]));
+                if (negatedDataRange.isNegatedInternalDatatype()) {
+                    InternalDatatype negated=(InternalDatatype)negatedDataRange.getNegation();
+                    if (!negated.isAlwaysTrue())
+                        m_bodyAtoms.add(Atom.create(negated,yVars[i]));
                 }
                 else {
                     if (!negatedDataRange.isAlwaysFalse())
@@ -792,9 +793,9 @@ public class OWLClausification {
         // Various types of descriptions
 
         public void visit(OWLDatatype dt) {
-            LiteralConcept literalConcept=m_dataRangeConverter.convertDataRange(dt);
-            if (!literalConcept.isAlwaysFalse())
-                m_headAtoms.add(Atom.create((DLPredicate)literalConcept,X));
+            LiteralDataRange literalRange=m_dataRangeConverter.convertDataRange(dt);
+//            if (!literalConcept.isAlwaysFalse())
+            m_headAtoms.add(Atom.create((DLPredicate)literalRange,X));
         }
         public void visit(OWLDataIntersectionOf dr) {
             throw new IllegalStateException("Internal error: invalid normal form.");
@@ -805,47 +806,47 @@ public class OWLClausification {
         public void visit(OWLDataComplementOf dr) {
             OWLDataRange description=dr.getDataRange();
             if (description.isDatatype() && (Prefixes.isInternalIRI(description.asOWLDatatype().getIRI().toString()) || m_definedDatatypeIRIs.contains(description.asOWLDatatype()))) {
-                m_bodyAtoms.add(Atom.create(AtomicConcept.create(description.asOWLDatatype().getIRI().toString()),X));
+                m_bodyAtoms.add(Atom.create(InternalDatatype.create(description.asOWLDatatype().getIRI().toString()),X));
             }
             else {
-                LiteralConcept literalConcept=m_dataRangeConverter.convertDataRange(dr);
-                if (literalConcept instanceof AtomicNegationConcept) {
-                    AtomicConcept negatedConcept=((AtomicNegationConcept)literalConcept).getNegatedAtomicConcept();
-                    if (!negatedConcept.isAlwaysTrue())
-                        m_bodyAtoms.add(Atom.create(negatedConcept,X));
+                LiteralDataRange literalRange=m_dataRangeConverter.convertDataRange(dr);
+                if (literalRange.isNegatedInternalDatatype()) {
+                    InternalDatatype negatedDatatype=(InternalDatatype)literalRange.getNegation();
+                    if (!negatedDatatype.isAlwaysTrue())
+                        m_bodyAtoms.add(Atom.create(negatedDatatype,X));
                 }
                 else {
-                    if (!literalConcept.isAlwaysFalse())
-                        m_headAtoms.add(Atom.create((DLPredicate)literalConcept,X));
+                    if (!literalRange.isAlwaysFalse())
+                        m_headAtoms.add(Atom.create((DLPredicate)literalRange,X));
                 }
             }
         }
         public void visit(OWLDataOneOf object) {
-            LiteralConcept literalConcept=m_dataRangeConverter.convertDataRange(object);
-            if (literalConcept instanceof AtomicNegationConcept) {
-                AtomicConcept negatedConcept=((AtomicNegationConcept)literalConcept).getNegatedAtomicConcept();
-                if (!negatedConcept.isAlwaysTrue())
-                    m_bodyAtoms.add(Atom.create(negatedConcept,X));
-            }
-            else {
-                if (!literalConcept.isAlwaysFalse())
-                    m_headAtoms.add(Atom.create((DLPredicate)literalConcept,X));
-            }
+            LiteralDataRange literalRange=m_dataRangeConverter.convertDataRange(object);
+//            if (literalConcept instanceof AtomicNegationConcept) {
+//                AtomicConcept negatedConcept=((AtomicNegationConcept)literalConcept).getNegatedAtomicConcept();
+//                if (!negatedConcept.isAlwaysTrue())
+//                    m_bodyAtoms.add(Atom.create(negatedConcept,X));
+//            }
+//            else {
+//                if (!literalConcept.isAlwaysFalse())
+              m_headAtoms.add(Atom.create((DLPredicate)literalRange,X));
+//            }
         }
         public void visit(OWLFacetRestriction node) {
             throw new IllegalStateException("Internal error: Invalid normal form. ");
         }
         public void visit(OWLDatatypeRestriction node) {
-            LiteralConcept literalConcept=m_dataRangeConverter.convertDataRange(node);
-            if (literalConcept instanceof AtomicNegationConcept) {
-                AtomicConcept negatedConcept=((AtomicNegationConcept)literalConcept).getNegatedAtomicConcept();
-                if (!negatedConcept.isAlwaysTrue())
-                    m_bodyAtoms.add(Atom.create(negatedConcept,X));
-            }
-            else {
-                if (!literalConcept.isAlwaysFalse())
-                    m_headAtoms.add(Atom.create((DLPredicate)literalConcept,X));
-            }
+            LiteralDataRange literalRange=m_dataRangeConverter.convertDataRange(node);
+//            if (literalConcept instanceof AtomicNegationConcept) {
+//                AtomicConcept negatedConcept=((AtomicNegationConcept)literalConcept).getNegatedAtomicConcept();
+//                if (!negatedConcept.isAlwaysTrue())
+//                    m_bodyAtoms.add(Atom.create(negatedConcept,X));
+//            }
+//            else {
+//                if (!literalConcept.isAlwaysFalse())
+                    m_headAtoms.add(Atom.create((DLPredicate)literalRange,X));
+//            }
         }
         public void visit(OWLLiteral node) {
             throw new IllegalStateException("Internal error: Invalid normal form. ");
@@ -864,8 +865,8 @@ public class OWLClausification {
             m_ignoreUnsupportedDatatypes=ignoreUnsupportedDatatypes;
             m_allUnknownDatatypeRestrictions=allUnknownDatatypeRestrictions;
         }
-        public LiteralConcept convertDataRange(OWLDataRange dataRange) {
-            return (LiteralConcept)dataRange.accept(this);
+        public LiteralDataRange convertDataRange(OWLDataRange dataRange) {
+            return (LiteralDataRange)dataRange.accept(this);
         }
         public Object visit(OWLDatatype object) {
             String datatypeURI=object.getIRI().toString();
@@ -1144,9 +1145,10 @@ public class OWLClausification {
             if (!(atom.getPredicate() instanceof OWLDatatype)) {
                 throw new IllegalStateException("Internal error: SWRL rule data range atoms should be normalized to contain only datatypes, but this atom has a (complex) data range: "+atom.getPredicate());
             }
-            OWLDatatype dt=atom.getPredicate().asOWLDatatype();
-            atom.getArgument().accept(this);
-            m_lastAtom=Atom.create(AtomicConcept.create(dt.getIRI().toString()),m_lastVariable);
+            LiteralDataRange literalRange=m_dataRangeConverter.convertDataRange(atom.getPredicate().asOWLDatatype());
+//            OWLDatatype dt=atom.getPredicate().asOWLDatatype();
+            atom.getArgument().accept(this); 
+            m_lastAtom=Atom.create((DLPredicate)literalRange,m_lastVariable);
         }
         public void visit(SWRLObjectPropertyAtom atom) {
             if (atom.getPredicate().isAnonymous()) {

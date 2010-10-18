@@ -25,6 +25,7 @@ import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Inequality;
 import org.semanticweb.HermiT.model.InternalDatatype;
 import org.semanticweb.HermiT.model.LiteralConcept;
+import org.semanticweb.HermiT.model.LiteralDataRange;
 import org.semanticweb.HermiT.model.NegatedAtomicRole;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
 
@@ -39,7 +40,7 @@ public final class ClashManager implements Serializable {
 
     private static final long serialVersionUID = 3533809151139695892L;
 
-    protected static final LiteralConcept NOT_RDFS_LITERAL=InternalDatatype.RDFS_LITERAL.getNegation();
+    protected static final LiteralDataRange NOT_RDFS_LITERAL=InternalDatatype.RDFS_LITERAL.getNegation();
 
     protected final ExtensionManager m_extensionManager;
     protected final ExtensionTable.Retrieval m_ternaryExtensionTableSearch01Bound;
@@ -77,7 +78,7 @@ public final class ClashManager implements Serializable {
                 m_tableauMonitor.clashDetectionFinished(tuple);
         }
         else if ((dlPredicateObject instanceof InternalDatatype) || (dlPredicateObject instanceof AtomicConcept && node0.m_numberOfNegatedAtomicConcepts>0) || (dlPredicateObject instanceof AtomicNegationConcept && node0.m_numberOfPositiveAtomicConcepts>0)) {
-            m_binaryAuxiliaryTuple[0]=((LiteralConcept)dlPredicateObject).getNegation();
+            m_binaryAuxiliaryTuple[0]= dlPredicateObject instanceof InternalDatatype ? ((InternalDatatype)dlPredicateObject).getNegation() : ((LiteralConcept)dlPredicateObject).getNegation();
             m_binaryAuxiliaryTuple[1]=node0;
             if (extensionTable.containsTuple(m_binaryAuxiliaryTuple)) {
                 m_binaryUnionDependencySet.m_dependencySets[0]=dependencySet;

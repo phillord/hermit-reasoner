@@ -20,6 +20,36 @@ public class RulesTest extends AbstractReasonerTest {
 //    protected Configuration getConfiguration() {
 //        Configuration c=new Configuration();
 //        return c;
+////    }
+//    public void testRulesChain() throws Exception {
+//        String axioms = "Declaration(NamedIndividual(:x1))"+LB
+//            + "Declaration(NamedIndividual(:x2))"+LB
+//            + "Declaration(NamedIndividual(:x3))"+LB
+//            + "Declaration(ObjectProperty(:p1))"+LB
+//            + "Declaration(ObjectProperty(:p2))"+LB
+//            + "Declaration(ObjectProperty(:r))"+LB
+//            + "Declaration(ObjectProperty(:q))"+LB
+//            + "SubObjectPropertyOf(:p1 :q)"+LB
+//            + "SubObjectPropertyOf(ObjectPropertyChain(:p1 :p2) :q)"+LB
+//            + "ObjectPropertyAssertion(:p1 :x1 :x2)"+LB
+//            + "ObjectPropertyAssertion(:p2 :x2 :x3)"+LB
+//            // A(x) -> B(x)
+//            + "DLSafeRule("+LB
+//            + "  Body(ObjectPropertyAtom(:q Variable(:x) Variable(:y)))"+LB
+//            + "  Head(ObjectPropertyAtom(:r Variable(:x) Variable(:y)))"+LB
+//            + ")";
+//        loadOntologyWithAxioms(axioms);
+//        createReasoner();
+//        
+//        OWLNamedIndividual x1=m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "x1"));
+//        OWLNamedIndividual x2=m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "x2"));
+//        OWLNamedIndividual x3=m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "x3"));
+//        OWLObjectProperty r=m_dataFactory.getOWLObjectProperty(IRI.create(AbstractReasonerTest.NS + "r"));
+//        OWLObjectProperty q=m_dataFactory.getOWLObjectProperty(IRI.create(AbstractReasonerTest.NS + "q"));
+//        assertEntails(m_dataFactory.getOWLObjectPropertyAssertionAxiom(q, x1, x2),true);
+//        assertEntails(m_dataFactory.getOWLObjectPropertyAssertionAxiom(q, x1, x3),true);
+//        assertEntails(m_dataFactory.getOWLObjectPropertyAssertionAxiom(r, x1, x2),true);
+//        assertEntails(m_dataFactory.getOWLObjectPropertyAssertionAxiom(r, x1, x3),true);
 //    }
     public void testRuleNotAxiom() throws Exception {
         String axioms = "Declaration(NamedIndividual(:a))"+LB
@@ -158,7 +188,7 @@ public class RulesTest extends AbstractReasonerTest {
         OWLClass C = m_dataFactory.getOWLClass(IRI.create(AbstractReasonerTest.NS + "C"));
         createReasoner();
         assertTrue(m_reasoner.getInstances(C, false).containsEntity(a));
-        assertTrue(!m_reasoner.getInstances(C, false).containsEntity(b));
+        assertFalse(m_reasoner.getInstances(C, false).containsEntity(b));
     }
     
     

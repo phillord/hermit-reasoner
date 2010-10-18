@@ -25,7 +25,9 @@ import java.util.Set;
 
 import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.blocking.BlockingStrategy;
+import org.semanticweb.HermiT.model.AtLeast;
 import org.semanticweb.HermiT.model.AtLeastConcept;
+import org.semanticweb.HermiT.model.AtLeastDataRange;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.tableau.BranchingPoint;
 import org.semanticweb.HermiT.tableau.DependencySet;
@@ -112,13 +114,18 @@ public class IndividualReuseStrategy extends AbstractExpansionStrategy implement
     public Set<AtomicConcept> getDontReuseConceptsEver() {
         return m_dontReuseConceptsEver;
     }
-    protected void expandExistential(AtLeastConcept atLeastConcept,Node forNode) {
+    protected void expandExistential(AtLeast atLeast,Node forNode) {
         // Mark existential as processed BEFORE branching takes place!
-        m_existentialExpansionManager.markExistentialProcessed(atLeastConcept,forNode);
-        if (!m_existentialExpansionManager.tryFunctionalExpansion(atLeastConcept,forNode))
-            if (!tryParentReuse(atLeastConcept,forNode))
-                if (!expandWithModelReuse(atLeastConcept,forNode))
-                    m_existentialExpansionManager.doNormalExpansion(atLeastConcept,forNode);
+        m_existentialExpansionManager.markExistentialProcessed(atLeast,forNode);
+        if (!m_existentialExpansionManager.tryFunctionalExpansion(atLeast,forNode)) 
+            if (atLeast instanceof AtLeastDataRange)
+                m_existentialExpansionManager.doNormalExpansion((AtLeastDataRange)atLeast,forNode);
+            else {
+                AtLeastConcept atLeastConcept=(AtLeastConcept)atLeast;
+                if (!tryParentReuse(atLeastConcept,forNode))
+                    if (!expandWithModelReuse(atLeastConcept,forNode))
+                        m_existentialExpansionManager.doNormalExpansion(atLeastConcept,forNode);
+            }
     }
     protected boolean tryParentReuse(AtLeastConcept atLeastConcept,Node node) {
         if (atLeastConcept.getNumber()==1) {

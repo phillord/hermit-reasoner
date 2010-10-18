@@ -37,21 +37,20 @@ public class ReasonerTest extends AbstractReasonerTest {
     public ReasonerTest(String name) {
         super(name);
     }
-//    public void testUniversalRoleSubsumption() throws Exception {
-//        loadOntologyWithAxioms(
-//                "Declaration( Class( :C ) )"+
-//                "Declaration( Class( :D ) )"+
-//                "Declaration( Class( :E ) )"+
-//                "Declaration( Class( :Ax2 ) )"+
-//                "Declaration( Class( :Ax3 ) )"+
-//                "SubClassOf( :C :D )"+
-//                "EquivalentClasses( :Ax2 ObjectAllValuesFrom( owl:topObjectProperty ObjectUnionOf( ObjectComplementOf( :D ) :E ) ) )"+
-//                "EquivalentClasses( :Ax3 ObjectAllValuesFrom( owl:topObjectProperty ObjectUnionOf( ObjectComplementOf( :C ) :E ) ) )"
-//                );
-//        createReasoner();
-//        m_reasoner.printHierarchies(new PrintWriter(System.out, true), true, false, false);
-//        assertTrue(true);
-//    }
+    public void testUniversalRoleSubsumption() throws Exception {
+        loadOntologyWithAxioms(
+                "Declaration( Class( :C ) )"+
+                "Declaration( Class( :D ) )"+
+                "Declaration( Class( :E ) )"+
+                "Declaration( Class( :Ax2 ) )"+
+                "Declaration( Class( :Ax3 ) )"+
+                "SubClassOf( :C :D )"+
+                "EquivalentClasses( :Ax2 ObjectAllValuesFrom( owl:topObjectProperty ObjectUnionOf( ObjectComplementOf( :D ) :E ) ) )"+
+                "EquivalentClasses( :Ax3 ObjectAllValuesFrom( owl:topObjectProperty ObjectUnionOf( ObjectComplementOf( :C ) :E ) ) )"
+                );
+        createReasoner();
+        assertSubsumedBy(NS_C(":Ax2"), NS_C(":Ax3"), false);
+    }
     public void testPrecomputeDisjointClasses() throws Exception {
         loadOntologyWithAxioms(
             "Declaration( Class( :A ) )"+

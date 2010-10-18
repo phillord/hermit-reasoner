@@ -23,7 +23,7 @@ import org.semanticweb.HermiT.Prefixes;
  * A data range consisting of a datatype URI and a number of facet restrictions.
  * NOTE: RDFS_LITERAL is treated as InternalDatatype due to implemetnation side-effects.
  */
-public class DatatypeRestriction extends DataRange {
+public class DatatypeRestriction extends AtomicDataRange {
     private static final long serialVersionUID=524235536504588458L;
     public static final String[] NO_FACET_URIs=new String[0];
     public static final Constant[] NO_FACET_VALUES=new Constant[0];
@@ -49,8 +49,8 @@ public class DatatypeRestriction extends DataRange {
     public Constant getFacetValue(int index) {
         return m_facetValues[index];
     }
-    public LiteralConcept getNegation() {
-        return NegationDataRange.create(this);
+    public LiteralDataRange getNegation() {
+        return AtomicNegationDataRange.create(this);
     }
     public boolean isAlwaysTrue() {
         return false;

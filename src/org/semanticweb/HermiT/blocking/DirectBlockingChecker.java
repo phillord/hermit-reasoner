@@ -19,6 +19,7 @@ package org.semanticweb.HermiT.blocking;
 
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
+import org.semanticweb.HermiT.model.DataRange;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.Tableau;
 
@@ -41,6 +42,8 @@ public interface DirectBlockingChecker {
     void nodeDestroyed(Node node);
     Node assertionAdded(Concept concept,Node node,boolean isCore);
     Node assertionRemoved(Concept concept,Node node,boolean isCore);
+    Node assertionAdded(DataRange range,Node node,boolean isCore);
+    Node assertionRemoved(DataRange range,Node node,boolean isCore);
     Node assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore);
     Node assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore);
     Node nodesMerged(Node mergeFrom,Node mergeInto);

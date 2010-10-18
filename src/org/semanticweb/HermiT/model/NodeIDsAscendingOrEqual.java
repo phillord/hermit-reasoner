@@ -41,10 +41,6 @@ public class NodeIDsAscendingOrEqual implements DLPredicate,Serializable {
     public String toString(Prefixes prefixes) {
         return "NodeIDsAscendingOrEqual";
     }
-    public String toOrderedString(Prefixes prefixes) {
-        return toString(prefixes);
-    }
-
     protected static InterningManager<NodeIDsAscendingOrEqual> s_interningManager=new InterningManager<NodeIDsAscendingOrEqual>() {
         protected boolean equal(NodeIDsAscendingOrEqual object1,NodeIDsAscendingOrEqual object2) {
             return object1.m_arity==object2.m_arity;

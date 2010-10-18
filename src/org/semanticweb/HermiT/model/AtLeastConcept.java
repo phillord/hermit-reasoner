@@ -22,32 +22,17 @@ import org.semanticweb.HermiT.Prefixes;
 /**
  * Represents at-least concept.
  */
-public class AtLeastConcept extends ExistentialConcept implements DLPredicate {
+public class AtLeastConcept extends AtLeast {
     private static final long serialVersionUID=4326267535193393030L;
 
-    protected final int m_number;
-    protected final Role m_onRole;
     protected final LiteralConcept m_toConcept;
     
     protected AtLeastConcept(int number,Role onRole,LiteralConcept toConcept) {
-        m_number=number;
-        m_onRole=onRole;
+        super(number,onRole);
         m_toConcept=toConcept;
-    }
-    public int getNumber() {
-        return m_number;
-    }
-    public Role getOnRole() {
-        return m_onRole;
     }
     public LiteralConcept getToConcept() {
         return m_toConcept;
-    }
-    public int getArity() {
-        return 1;
-    }
-    public boolean isAlwaysTrue() {
-        return false;
     }
     public boolean isAlwaysFalse() {
         return m_toConcept.isAlwaysFalse();

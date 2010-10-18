@@ -28,13 +28,15 @@ import java.util.Set;
 import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.datatypes.DatatypeRegistry;
 import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
+import org.semanticweb.HermiT.model.AtomicDataRange;
+import org.semanticweb.HermiT.model.AtomicNegationDataRange;
 import org.semanticweb.HermiT.model.ConstantEnumeration;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DataRange;
 import org.semanticweb.HermiT.model.DatatypeRestriction;
 import org.semanticweb.HermiT.model.Inequality;
 import org.semanticweb.HermiT.model.InternalDatatype;
-import org.semanticweb.HermiT.model.NegationDataRange;
+import org.semanticweb.HermiT.model.LiteralDataRange;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
 
 public final class DatatypeManager implements Serializable {
@@ -105,10 +107,10 @@ public final class DatatypeManager implements Serializable {
             if (dataRangeObject instanceof DatatypeRestriction) {
                 DatatypeRestriction datatypeRestriction=(DatatypeRestriction)dataRangeObject;
                 if (m_unknownDatatypeRestrictionsPermanent.contains(datatypeRestriction) || (m_unknownDatatypeRestrictionsAdditional!=null && m_unknownDatatypeRestrictionsAdditional.contains(datatypeRestriction)))
-                    generateInequalitiesFor(datatypeRestriction,(Node)tupleBuffer[1],m_assertionsDeltaOldRetrieval.getDependencySet(),NegationDataRange.create(datatypeRestriction));
+                    generateInequalitiesFor(datatypeRestriction,(Node)tupleBuffer[1],m_assertionsDeltaOldRetrieval.getDependencySet(),AtomicNegationDataRange.create(datatypeRestriction));
             }
-            else if (dataRangeObject instanceof NegationDataRange) {
-                NegationDataRange negationDataRange=(NegationDataRange)dataRangeObject;
+            else if (dataRangeObject instanceof AtomicNegationDataRange) {
+                AtomicNegationDataRange negationDataRange=(AtomicNegationDataRange)dataRangeObject;
                 DataRange negatedDataRange=negationDataRange.getNegatedDataRange();
                 if (negatedDataRange instanceof DatatypeRestriction) {
                     DatatypeRestriction datatypeRestriction=(DatatypeRestriction)negatedDataRange;
@@ -282,8 +284,8 @@ public final class DatatypeManager implements Serializable {
         }
         else if (dataRange instanceof ConstantEnumeration)
             variable.m_positiveConstantEnumerations.add((ConstantEnumeration)dataRange);
-        else if (dataRange instanceof NegationDataRange) {
-            DataRange negatedDataRange=((NegationDataRange)dataRange).getNegatedDataRange();
+        else if (dataRange instanceof AtomicNegationDataRange) {
+            DataRange negatedDataRange=((AtomicNegationDataRange)dataRange).getNegatedDataRange();
             if (negatedDataRange instanceof InternalDatatype) {
                 // Skip for the same reasons as above.
             }
@@ -514,22 +516,22 @@ public final class DatatypeManager implements Serializable {
     protected void loadAssertionDependencySets(DVariable variable) {
         Node node=variable.m_node;
         for (int index=variable.m_positiveDatatypeRestrictions.size()-1;index>=0;--index) {
-            DataRange dataRange=variable.m_positiveDatatypeRestrictions.get(index);
+            AtomicDataRange dataRange=variable.m_positiveDatatypeRestrictions.get(index);
             DependencySet dependencySet=m_extensionManager.getAssertionDependencySet(dataRange,node);
             m_unionDependencySet.addConstituent(dependencySet);
         }
         for (int index=variable.m_negativeDatatypeRestrictions.size()-1;index>=0;--index) {
-            DataRange dataRange=(DataRange)variable.m_negativeDatatypeRestrictions.get(index).getNegation();
+            LiteralDataRange dataRange=variable.m_negativeDatatypeRestrictions.get(index).getNegation();
             DependencySet dependencySet=m_extensionManager.getAssertionDependencySet(dataRange,node);
             m_unionDependencySet.addConstituent(dependencySet);
         }
         for (int index=variable.m_positiveConstantEnumerations.size()-1;index>=0;--index) {
-            DataRange dataRange=variable.m_positiveConstantEnumerations.get(index);
+            AtomicDataRange dataRange=variable.m_positiveConstantEnumerations.get(index);
             DependencySet dependencySet=m_extensionManager.getAssertionDependencySet(dataRange,node);
             m_unionDependencySet.addConstituent(dependencySet);
         }
         for (int index=variable.m_negativeConstantEnumerations.size()-1;index>=0;--index) {
-            DataRange dataRange=(DataRange)variable.m_negativeConstantEnumerations.get(index).getNegation();
+            LiteralDataRange dataRange=variable.m_negativeConstantEnumerations.get(index).getNegation();
             DependencySet dependencySet=m_extensionManager.getAssertionDependencySet(dataRange,node);
             m_unionDependencySet.addConstituent(dependencySet);
         }

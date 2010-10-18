@@ -25,6 +25,7 @@ import java.util.Set;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
+import org.semanticweb.HermiT.model.DataRange;
 import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.NodeType;
@@ -95,6 +96,12 @@ public class SingleDirectBlockingChecker implements DirectBlockingChecker,Serial
         }
         else
             return null;
+    }
+    public Node assertionAdded(DataRange range,Node node,boolean isCore) {
+        return null;
+    }
+    public Node assertionRemoved(DataRange range,Node node,boolean isCore) {
+        return null;
     }
     public Node assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
         return null;

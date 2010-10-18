@@ -1,11 +1,7 @@
 package org.semanticweb.HermiT.reasoner;
 
-import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLDataProperty;
-
-
-
 
 public class DatatypesTest extends AbstractReasonerTest {
 
@@ -18,10 +14,6 @@ public class DatatypesTest extends AbstractReasonerTest {
             + "DataPropertyRange(:dp DataComplementOf(:newDT))"
             + "DataPropertyAssertion(:dp :a \"16\"^^xsd:integer)";
         loadReasonerWithAxioms(axioms);
-        for (DLClause clause : m_reasoner.getDLOntology().getDLClauses())
-            System.out.println(clause);
-        System.out.println(m_reasoner.getDLOntology().getPositiveFacts());
-        System.out.println(m_reasoner.getDLOntology().getNegativeFacts());
         assertABoxSatisfiable(false);
     }
     public void testNominalsAndDatatypesFromAlan() throws Exception {
@@ -119,7 +111,8 @@ public class DatatypesTest extends AbstractReasonerTest {
     }
 
     public void testDatatypesUnsat2() throws Exception {
-        String axioms = "Declaration(NamedIndividual(:a)) Declaration(Class(:Eighteen)) Declaration(DataProperty(:hasAge)) SubClassOf(DataHasValue(:hasAge \"18\"^^xsd:integer) :Eighteen) "
+        String axioms = "Declaration(NamedIndividual(:a)) Declaration(Class(:Eighteen)) Declaration(DataProperty(:hasAge)) "
+                + "SubClassOf(DataHasValue(:hasAge \"18\"^^xsd:integer) :Eighteen) "
                 + "ClassAssertion(DataHasValue(:hasAge \"18\"^^xsd:integer) :a) " 
                 + "ClassAssertion(ObjectComplementOf(:Eighteen) :a)";
         loadReasonerWithAxioms(axioms);

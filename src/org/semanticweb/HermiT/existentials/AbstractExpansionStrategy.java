@@ -22,16 +22,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.semanticweb.HermiT.blocking.BlockingStrategy;
+import org.semanticweb.HermiT.model.AtLeast;
 import org.semanticweb.HermiT.model.AtLeastConcept;
+import org.semanticweb.HermiT.model.AtLeastDataRange;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
+import org.semanticweb.HermiT.model.DataRange;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.model.ExistsDescriptionGraph;
 import org.semanticweb.HermiT.model.Inequality;
 import org.semanticweb.HermiT.model.InverseRole;
 import org.semanticweb.HermiT.model.LiteralConcept;
+import org.semanticweb.HermiT.model.LiteralDataRange;
 import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.model.Variable;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
@@ -105,22 +109,22 @@ public abstract class AbstractExpansionStrategy implements ExistentialExpansionS
                 m_processedExistentials.addAll(node.getUnprocessedExistentials());
                 for (int index=m_processedExistentials.size()-1;index>=0;index--) {
                     ExistentialConcept existentialConcept=m_processedExistentials.get(index);
-                    if (existentialConcept instanceof AtLeastConcept) {
-                        AtLeastConcept atLeastConcept=(AtLeastConcept)existentialConcept;
-                        switch (isSatisfied(atLeastConcept,node)) {
+                    if (existentialConcept instanceof AtLeast) {
+                        AtLeast atLeast=(AtLeast)existentialConcept;
+                        switch (isSatisfied(atLeast,node)) {
                         case NOT_SATISFIED:
-                            expandExistential(atLeastConcept,node);
+                            expandExistential(atLeast,node);
                             extensionsChanged=true;
                             break;
                         case PERMANENTLY_SATISFIED: // not satisfied by a nominal so that the NN/NI rule can break the existential
                             m_existentialExpansionManager.markExistentialProcessed(existentialConcept,node);
                             if (monitor!=null)
-                                monitor.existentialSatisfied(atLeastConcept,node);
+                                monitor.existentialSatisfied(existentialConcept,node);
                             break;
                         case CURRENTLY_SATISFIED: // satisfied until the NN/NI rule is applied and after which the existential might no longer be satisfied
                             // do nothing
                             if (monitor!=null)
-                                monitor.existentialSatisfied(atLeastConcept,node);
+                                monitor.existentialSatisfied(existentialConcept,node);
                             break;
                         }
                     }
@@ -154,6 +158,15 @@ public abstract class AbstractExpansionStrategy implements ExistentialExpansionS
     }
     public void assertionRemoved(Concept concept,Node node,boolean isCore) {
         m_blockingStrategy.assertionRemoved(concept,node,isCore);
+    }
+    public void assertionAdded(DataRange range,Node node,boolean isCore) {
+        m_blockingStrategy.assertionAdded(range,node,isCore);
+    }
+    public void assertionCoreSet(DataRange range,Node node) {
+        m_blockingStrategy.assertionCoreSet(range,node);
+    }
+    public void assertionRemoved(DataRange range,Node node,boolean isCore) {
+        m_blockingStrategy.assertionRemoved(range,node,isCore);
     }
     public void assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
         m_blockingStrategy.assertionAdded(atomicRole,nodeFrom,nodeTo,isCore);
@@ -192,12 +205,11 @@ public abstract class AbstractExpansionStrategy implements ExistentialExpansionS
     public void dlClauseBodyCompiled(List<DLClauseEvaluator.Worker> workers,DLClause dlClause,List<Variable> variables,Object[] valuesBuffer,boolean[] coreVariables) {
         m_blockingStrategy.dlClauseBodyCompiled(workers,dlClause,variables,valuesBuffer,coreVariables);
     }
-    protected SatType isSatisfied(AtLeastConcept atLeastConcept,Node forNode) {
-        int cardinality=atLeastConcept.getNumber();
+    protected SatType isSatisfied(AtLeast atLeast,Node forNode) {
+        int cardinality=atLeast.getNumber();
         if (cardinality<=0)
             return SatType.PERMANENTLY_SATISFIED;
-        Role onRole=atLeastConcept.getOnRole();
-        LiteralConcept toConcept=atLeastConcept.getToConcept();
+        Role onRole=atLeast.getOnRole();
         ExtensionTable.Retrieval retrieval;
         int toNodeIndex;
         if (onRole instanceof AtomicRole) {
@@ -217,11 +229,22 @@ public abstract class AbstractExpansionStrategy implements ExistentialExpansionS
             Object[] tupleBuffer=retrieval.getTupleBuffer();
             while (!retrieval.afterLast()) {
                 Node toNode=(Node)tupleBuffer[toNodeIndex];
-                if ((!toNode.isBlocked() || forNode.isParentOf(toNode)) && m_extensionManager.containsConceptAssertion(toConcept,toNode)) {
-                    if (isPermanentSatisfier(forNode,toNode) && m_blockingStrategy.isPermanentAssertion(toConcept,toNode))
-                        return SatType.PERMANENTLY_SATISFIED;
-                    else
-                        return SatType.CURRENTLY_SATISFIED;
+                if (atLeast instanceof AtLeastDataRange) {
+                    LiteralDataRange toDataRange=((AtLeastDataRange)atLeast).getToDataRange();
+                    if (m_extensionManager.containsDataRangeAssertion(toDataRange,toNode)) {
+                        if (isPermanentSatisfier(forNode,toNode) && m_blockingStrategy.isPermanentAssertion(toDataRange,toNode))
+                            return SatType.PERMANENTLY_SATISFIED;
+                        else
+                            return SatType.CURRENTLY_SATISFIED;
+                    }
+                } else {
+                    LiteralConcept toConcept=((AtLeastConcept)atLeast).getToConcept();
+                    if ((!toNode.isBlocked() || forNode.isParentOf(toNode)) && m_extensionManager.containsConceptAssertion(toConcept,toNode)) {
+                        if (isPermanentSatisfier(forNode,toNode) && m_blockingStrategy.isPermanentAssertion(toConcept,toNode))
+                            return SatType.PERMANENTLY_SATISFIED;
+                        else
+                            return SatType.CURRENTLY_SATISFIED;
+                    }
                 }
                 retrieval.next();
             }
@@ -234,10 +257,20 @@ public abstract class AbstractExpansionStrategy implements ExistentialExpansionS
             boolean allSatisfiersArePermanent=true;
             while (!retrieval.afterLast()) {
                 Node toNode=(Node)tupleBuffer[toNodeIndex];
-                if ((!toNode.isBlocked() || forNode.isParentOf(toNode)) && m_extensionManager.containsConceptAssertion(toConcept,toNode)) {
-                    if (!isPermanentSatisfier(forNode,toNode) || !m_blockingStrategy.isPermanentAssertion(toConcept,toNode))
-                        allSatisfiersArePermanent=false;
-                    m_auxiliaryNodes1.add(toNode);
+                if (atLeast instanceof AtLeastDataRange) {
+                    LiteralDataRange toDataRange=((AtLeastDataRange)atLeast).getToDataRange();
+                    if (m_extensionManager.containsDataRangeAssertion(toDataRange,toNode)) {
+                        if (!isPermanentSatisfier(forNode,toNode) || !m_blockingStrategy.isPermanentAssertion(toDataRange,toNode))
+                            allSatisfiersArePermanent=false;
+                        m_auxiliaryNodes1.add(toNode);
+                    }
+                } else {
+                    LiteralConcept toConcept=((AtLeastConcept)atLeast).getToConcept();
+                    if ((!toNode.isBlocked() || forNode.isParentOf(toNode)) && m_extensionManager.containsConceptAssertion(toConcept,toNode)) {
+                        if (!isPermanentSatisfier(forNode,toNode) || !m_blockingStrategy.isPermanentAssertion(toConcept,toNode))
+                            allSatisfiersArePermanent=false;
+                        m_auxiliaryNodes1.add(toNode);
+                    }
                 }
                 retrieval.next();
             }
@@ -274,5 +307,5 @@ public abstract class AbstractExpansionStrategy implements ExistentialExpansionS
     /**
      * This method performs the actual expansion.
      */
-    protected abstract void expandExistential(AtLeastConcept atLeastConcept,Node forNode);
+    protected abstract void expandExistential(AtLeast atLeast,Node forNode);
 }

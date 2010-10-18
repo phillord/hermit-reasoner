@@ -26,10 +26,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.semanticweb.HermiT.graph.Graph;
+import org.semanticweb.HermiT.model.AtLeast;
 import org.semanticweb.HermiT.model.AtLeastConcept;
+import org.semanticweb.HermiT.model.AtLeastDataRange;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.DLClause;
-import org.semanticweb.HermiT.model.DataRange;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.model.Inequality;
 import org.semanticweb.HermiT.model.InverseRole;
@@ -157,28 +158,31 @@ public final class ExistentialExpansionManager implements Serializable {
      *
      * @return true if the at least cardinality is 1 (causes an expansion) or it is greater than one but the role is functional (causes a clash) and false otherwise.
      */
-    public boolean tryFunctionalExpansion(AtLeastConcept atLeastConcept,Node forNode) {
-        if (atLeastConcept.getNumber()==1) {
-            if (getFunctionalExpansionNode(atLeastConcept.getOnRole(),forNode,m_auxiliaryTuple)) {
+    public boolean tryFunctionalExpansion(AtLeast atLeast,Node forNode) {
+        if (atLeast.getNumber()==1) {
+            if (getFunctionalExpansionNode(atLeast.getOnRole(),forNode,m_auxiliaryTuple)) {
                 if (m_tableau.m_tableauMonitor!=null)
-                    m_tableau.m_tableauMonitor.existentialExpansionStarted(atLeastConcept,forNode);
+                    m_tableau.m_tableauMonitor.existentialExpansionStarted(atLeast,forNode);
                 Node functionalityNode=(Node)m_auxiliaryTuple[0];
-                m_binaryUnionDependencySet.m_dependencySets[0]=m_extensionManager.getConceptAssertionDependencySet(atLeastConcept,forNode);
+                m_binaryUnionDependencySet.m_dependencySets[0]=m_extensionManager.getConceptAssertionDependencySet(atLeast,forNode);
                 m_binaryUnionDependencySet.m_dependencySets[1]=(DependencySet)m_auxiliaryTuple[1];
-                m_extensionManager.addRoleAssertion(atLeastConcept.getOnRole(),forNode,functionalityNode,m_binaryUnionDependencySet,true);
-                m_extensionManager.addConceptAssertion(atLeastConcept.getToConcept(),functionalityNode,m_binaryUnionDependencySet,true);
+                m_extensionManager.addRoleAssertion(atLeast.getOnRole(),forNode,functionalityNode,m_binaryUnionDependencySet,true);
+                if (atLeast instanceof AtLeastConcept)
+                    m_extensionManager.addConceptAssertion(((AtLeastConcept)atLeast).getToConcept(),functionalityNode,m_binaryUnionDependencySet,true);
+                else
+                    m_extensionManager.addDataRangeAssertion(((AtLeastDataRange)atLeast).getToDataRange(),functionalityNode,m_binaryUnionDependencySet,true);
                 if (m_tableau.m_tableauMonitor!=null)
-                    m_tableau.m_tableauMonitor.existentialExpansionFinished(atLeastConcept,forNode);
+                    m_tableau.m_tableauMonitor.existentialExpansionFinished(atLeast,forNode);
                 return true;
             }
         }
-        else if (atLeastConcept.getNumber()>1 && m_functionalRoles.containsKey(atLeastConcept.getOnRole())) {
+        else if (atLeast.getNumber()>1 && m_functionalRoles.containsKey(atLeast.getOnRole())) {
             if (m_tableau.m_tableauMonitor!=null)
-                m_tableau.m_tableauMonitor.existentialExpansionStarted(atLeastConcept,forNode);
-            DependencySet existentialDependencySet=m_extensionManager.getConceptAssertionDependencySet(atLeastConcept,forNode);
+                m_tableau.m_tableauMonitor.existentialExpansionStarted(atLeast,forNode);
+            DependencySet existentialDependencySet=m_extensionManager.getConceptAssertionDependencySet(atLeast,forNode);
             m_extensionManager.setClash(existentialDependencySet);
             if (m_tableau.m_tableauMonitor!=null)
-                m_tableau.m_tableauMonitor.existentialExpansionFinished(atLeastConcept,forNode);
+                m_tableau.m_tableauMonitor.existentialExpansionFinished(atLeast,forNode);
             return true;
         }
         return false;
@@ -217,22 +221,14 @@ public final class ExistentialExpansionManager implements Serializable {
         DependencySet existentialDependencySet=m_extensionManager.getConceptAssertionDependencySet(atLeastConcept,forNode);
         int cardinality=atLeastConcept.getNumber();
         if (cardinality==1) {
-            Node newNode;
-            if (atLeastConcept.getToConcept() instanceof DataRange)
-                newNode=m_tableau.createNewConcreteNode(existentialDependencySet,forNode);
-            else
-                newNode=m_tableau.createNewTreeNode(existentialDependencySet,forNode);
+            Node newNode=m_tableau.createNewTreeNode(existentialDependencySet,forNode);
             m_extensionManager.addRoleAssertion(atLeastConcept.getOnRole(),forNode,newNode,existentialDependencySet,true);
             m_extensionManager.addConceptAssertion(atLeastConcept.getToConcept(),newNode,existentialDependencySet,true);
         }
         else {
             m_auxiliaryNodes.clear();
             for (int index=0;index<cardinality;index++) {
-                Node newNode;
-                if (atLeastConcept.getToConcept() instanceof DataRange)
-                    newNode=m_tableau.createNewConcreteNode(existentialDependencySet,forNode);
-                else
-                    newNode=m_tableau.createNewTreeNode(existentialDependencySet,forNode);
+                Node newNode=m_tableau.createNewTreeNode(existentialDependencySet,forNode);
                 m_extensionManager.addRoleAssertion(atLeastConcept.getOnRole(),forNode,newNode,existentialDependencySet,true);
                 m_extensionManager.addConceptAssertion(atLeastConcept.getToConcept(),newNode,existentialDependencySet,true);
                 m_auxiliaryNodes.add(newNode);
@@ -247,8 +243,39 @@ public final class ExistentialExpansionManager implements Serializable {
         if (m_tableau.m_tableauMonitor!=null)
             m_tableau.m_tableauMonitor.existentialExpansionFinished(atLeastConcept,forNode);
     }
-    public void expand(AtLeastConcept atLeastConcept,Node forNode) {
-        if (!tryFunctionalExpansion(atLeastConcept,forNode))
-            doNormalExpansion(atLeastConcept,forNode);
+    public void doNormalExpansion(AtLeastDataRange atLeastDataRange,Node forNode) {
+        if (m_tableau.m_tableauMonitor!=null)
+            m_tableau.m_tableauMonitor.existentialExpansionStarted(atLeastDataRange,forNode);
+        DependencySet existentialDependencySet=m_extensionManager.getConceptAssertionDependencySet(atLeastDataRange,forNode);
+        int cardinality=atLeastDataRange.getNumber();
+        if (cardinality==1) {
+            Node newNode=m_tableau.createNewConcreteNode(existentialDependencySet,forNode);
+            m_extensionManager.addRoleAssertion(atLeastDataRange.getOnRole(),forNode,newNode,existentialDependencySet,true);
+            m_extensionManager.addDataRangeAssertion(atLeastDataRange.getToDataRange(),newNode,existentialDependencySet,true);
+        }
+        else {
+            m_auxiliaryNodes.clear();
+            for (int index=0;index<cardinality;index++) {
+                Node newNode=m_tableau.createNewConcreteNode(existentialDependencySet,forNode);
+                m_extensionManager.addRoleAssertion(atLeastDataRange.getOnRole(),forNode,newNode,existentialDependencySet,true);
+                m_extensionManager.addDataRangeAssertion(atLeastDataRange.getToDataRange(),newNode,existentialDependencySet,true);
+                m_auxiliaryNodes.add(newNode);
+            }
+            for (int outerIndex=0;outerIndex<cardinality;outerIndex++) {
+                Node outerNode=m_auxiliaryNodes.get(outerIndex);
+                for (int innerIndex=outerIndex+1;innerIndex<cardinality;innerIndex++)
+                    m_extensionManager.addAssertion(Inequality.INSTANCE,outerNode,m_auxiliaryNodes.get(innerIndex),existentialDependencySet,true);
+            }
+            m_auxiliaryNodes.clear();
+        }
+        if (m_tableau.m_tableauMonitor!=null)
+            m_tableau.m_tableauMonitor.existentialExpansionFinished(atLeastDataRange,forNode);
+    }
+    public void expand(AtLeast atLeast,Node forNode) {
+        if (!tryFunctionalExpansion(atLeast,forNode)) 
+            if (atLeast instanceof AtLeastConcept)
+                doNormalExpansion((AtLeastConcept)atLeast,forNode);
+            else 
+                doNormalExpansion((AtLeastDataRange)atLeast,forNode);
     }
 }

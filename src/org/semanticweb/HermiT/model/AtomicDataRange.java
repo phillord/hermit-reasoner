@@ -17,12 +17,11 @@
 */
 package org.semanticweb.HermiT.model;
 
-import org.semanticweb.HermiT.Prefixes;
-
 /**
- * Represents a DL predicate.
+ * Represents an atomic data range-- that is, an datatype, a datatype restriction, an internal datatype, or an enumeration of constants (oneOf)
  */
-public interface DLPredicate {
-    int getArity();
-    String toString(Prefixes prefixes);
+public abstract class AtomicDataRange extends LiteralDataRange {
+    private static final long serialVersionUID = 8843660377807760406L;
+
+    public abstract LiteralDataRange getNegation();
 }

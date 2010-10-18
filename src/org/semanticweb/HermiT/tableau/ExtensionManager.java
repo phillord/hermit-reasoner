@@ -27,8 +27,10 @@ import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.DLPredicate;
+import org.semanticweb.HermiT.model.DataRange;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.Equality;
+import org.semanticweb.HermiT.model.InternalDatatype;
 import org.semanticweb.HermiT.model.InverseRole;
 import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
@@ -187,10 +189,19 @@ public final class ExtensionManager implements Serializable {
         return m_clashDependencySet!=null;
     }
     public boolean containsConceptAssertion(Concept concept,Node node) {
-        if (AtomicConcept.THING.equals(concept))
+        if (node.getNodeType().isAbstract() && AtomicConcept.THING.equals(concept))
             return true;
         else {
             m_binaryAuxiliaryTupleContains[0]=concept;
+            m_binaryAuxiliaryTupleContains[1]=node;
+            return m_binaryExtensionTable.containsTuple(m_binaryAuxiliaryTupleContains);
+        }
+    }
+    public boolean containsDataRangeAssertion(DataRange range,Node node) {
+        if (!node.getNodeType().isAbstract() && InternalDatatype.RDFS_LITERAL.equals(range))
+            return true;
+        else {
+            m_binaryAuxiliaryTupleContains[0]=range;
             m_binaryAuxiliaryTupleContains[1]=node;
             return m_binaryExtensionTable.containsTuple(m_binaryAuxiliaryTupleContains);
         }
@@ -258,6 +269,15 @@ public final class ExtensionManager implements Serializable {
             return m_binaryExtensionTable.getDependencySet(m_binaryAuxiliaryTupleContains);
         }
     }
+    public DependencySet getDataRangeAssertionDependencySet(DataRange range,Node node) {
+        if (InternalDatatype.RDFS_LITERAL.equals(range))
+            return m_dependencySetFactory.emptySet();
+        else {
+            m_binaryAuxiliaryTupleContains[0]=range;
+            m_binaryAuxiliaryTupleContains[1]=node;
+            return m_binaryExtensionTable.getDependencySet(m_binaryAuxiliaryTupleContains);
+        }
+    }
     public DependencySet getRoleAssertionDependencySet(Role role,Node nodeFrom,Node nodeTo) {
         if (role instanceof AtomicRole) {
             m_ternaryAuxiliaryTupleContains[0]=role;
@@ -311,6 +331,19 @@ public final class ExtensionManager implements Serializable {
         m_addActive=true;
         try {
             m_binaryAuxiliaryTupleAdd[0]=concept;
+            m_binaryAuxiliaryTupleAdd[1]=node;
+            return m_binaryExtensionTable.addTuple(m_binaryAuxiliaryTupleAdd,dependencySet,isCore);
+        }
+        finally {
+            m_addActive=false;
+        }
+    }
+    public boolean addDataRangeAssertion(DataRange dataRange,Node node,DependencySet dependencySet,boolean isCore) {
+        if (m_addActive)
+            throw new IllegalStateException("ExtensionManager is not reentrant.");
+        m_addActive=true;
+        try {
+            m_binaryAuxiliaryTupleAdd[0]=dataRange;
             m_binaryAuxiliaryTupleAdd[1]=node;
             return m_binaryExtensionTable.addTuple(m_binaryAuxiliaryTupleAdd,dependencySet,isCore);
         }

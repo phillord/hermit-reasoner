@@ -20,7 +20,7 @@ package org.semanticweb.HermiT.existentials;
 import java.io.Serializable;
 
 import org.semanticweb.HermiT.blocking.BlockingStrategy;
-import org.semanticweb.HermiT.model.AtLeastConcept;
+import org.semanticweb.HermiT.model.AtLeast;
 import org.semanticweb.HermiT.tableau.Node;
 
 /**
@@ -38,8 +38,8 @@ public class CreationOrderStrategy extends AbstractExpansionStrategy implements 
     public boolean isDeterministic() {
         return true;
     }
-    protected void expandExistential(AtLeastConcept atLeastConcept,Node forNode) {
-        m_existentialExpansionManager.expand(atLeastConcept,forNode);
-        m_existentialExpansionManager.markExistentialProcessed(atLeastConcept,forNode);
+    protected void expandExistential(AtLeast atLeast,Node forNode) {
+        m_existentialExpansionManager.expand(atLeast,forNode);
+        m_existentialExpansionManager.markExistentialProcessed(atLeast,forNode);
     }
 }

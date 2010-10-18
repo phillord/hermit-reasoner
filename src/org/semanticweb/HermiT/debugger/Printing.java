@@ -29,6 +29,7 @@ import java.util.TreeSet;
 import org.semanticweb.HermiT.model.AtLeastConcept;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicNegationConcept;
+import org.semanticweb.HermiT.model.AtomicNegationDataRange;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.Constant;
@@ -38,8 +39,8 @@ import org.semanticweb.HermiT.model.DatatypeRestriction;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.model.ExistsDescriptionGraph;
+import org.semanticweb.HermiT.model.InternalDatatype;
 import org.semanticweb.HermiT.model.InverseRole;
-import org.semanticweb.HermiT.model.NegationDataRange;
 import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.Node;
@@ -138,7 +139,7 @@ public class Printing {
         TreeSet<AtomicConcept> atomicConceptsNoncore=new TreeSet<AtomicConcept>(ConceptComparator.INSTANCE);
         TreeSet<ExistentialConcept> existentialConcepts=new TreeSet<ExistentialConcept>(ConceptComparator.INSTANCE);
         TreeSet<AtomicNegationConcept> negativeConcepts=new TreeSet<AtomicNegationConcept>(ConceptComparator.INSTANCE);
-        TreeSet<DataRange> dataRanges=new TreeSet<DataRange>(ConceptComparator.INSTANCE);
+        TreeSet<DataRange> dataRanges=new TreeSet<DataRange>(DataRangeComparator.INSTANCE);
         ExtensionTable.Retrieval retrieval=debugger.getTableau().getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
         retrieval.getBindingsBuffer()[1]=node;
         retrieval.open();
@@ -282,14 +283,14 @@ public class Printing {
         public static final ConceptComparator INSTANCE=new ConceptComparator();
 
         public int compare(Concept c1,Concept c2) {
-            int type1=getConceptType(c1);
-            int type2=getConceptType(c2);
+            ConceptType type1=getConceptType(c1);
+            ConceptType type2=getConceptType(c2);
             if (type1!=type2)
-                return type1-type2;
+                return type1.getTypeIndex()-type2.getTypeIndex();
             switch (type1) {
-            case 0:
+            case AtomicConcept:
                 return ((AtomicConcept)c1).getIRI().compareTo(((AtomicConcept)c2).getIRI());
-            case 1:
+            case AtLeastConcept:
                 {
                     AtLeastConcept l1=(AtLeastConcept)c1;
                     AtLeastConcept l2=(AtLeastConcept)c2;
@@ -298,43 +299,94 @@ public class Printing {
                         return comparison;
                     return compare(l1.getToConcept(),l2.getToConcept());
                 }
-            case 2:
+            case ExistsDescriptionGraph:
                 {
                     ExistsDescriptionGraph g1=(ExistsDescriptionGraph)c1;
                     ExistsDescriptionGraph g2=(ExistsDescriptionGraph)c2;
                     return g1.getDescriptionGraph().getName().compareTo(g2.getDescriptionGraph().getName());
                 }
-            case 3:
+            case AtomicNegationConcept:
                 return ((AtomicNegationConcept)c1).getNegatedAtomicConcept().getIRI().compareTo(((AtomicNegationConcept)c2).getNegatedAtomicConcept().getIRI());
-            case 4:
-                return compareDatatypeRestrictions((DatatypeRestriction)c1,(DatatypeRestriction)c2);
-            case 5:
-                return compareConstantEnumerations((ConstantEnumeration)c1,(ConstantEnumeration)c2);
-            case 6:
-                {
-                    NegationDataRange ndr1=(NegationDataRange)c1;
-                    NegationDataRange ndr2=(NegationDataRange)c2;
-                    return compare(ndr1.getNegatedDataRange(),ndr2.getNegatedDataRange());
-                }
             default:
                 throw new IllegalArgumentException();
             }
         }
-        protected int getConceptType(Concept c) {
+        protected static enum ConceptType {
+            AtomicConcept(0),
+            AtLeastConcept(1),
+            ExistsDescriptionGraph(2), 
+            AtomicNegationConcept(3);
+
+            private final int m_typeIndex;
+            ConceptType(int typeIndex) {
+                m_typeIndex=typeIndex;
+            }
+            final int getTypeIndex() {
+                return m_typeIndex;
+            }
+        }
+        protected ConceptType getConceptType(Concept c) {
             if (c instanceof AtomicConcept)
-                return 0;
+                return ConceptType.AtomicConcept;
             else if (c instanceof AtLeastConcept)
-                return 1;
+                return ConceptType.AtLeastConcept;
             else if (c instanceof ExistsDescriptionGraph)
-                return 2;
+                return ConceptType.ExistsDescriptionGraph;
             else if (c instanceof AtomicNegationConcept)
-                return 3;
-            else if (c instanceof DatatypeRestriction)
-                return 4;
-            else if (c instanceof ConstantEnumeration)
-                return 5;
-            else if (c instanceof NegationDataRange)
-                return 6;
+                return ConceptType.AtomicNegationConcept;
+            else
+                throw new IllegalArgumentException();
+        }
+    }
+    
+    public static class DataRangeComparator implements Comparator<DataRange> {
+        public static final DataRangeComparator INSTANCE=new DataRangeComparator();
+
+        public int compare(DataRange c1,DataRange c2) {
+            DataRangeType type1=getDataRangeType(c1);
+            DataRangeType type2=getDataRangeType(c2);
+            if (type1!=type2)
+                return type1.getTypeIndex()-type2.getTypeIndex();
+            switch (type1) {
+            case DatatypeRestriction:
+                return compareDatatypeRestrictions((DatatypeRestriction)c1,(DatatypeRestriction)c2);
+            case ConstantEnumeration:
+                return compareConstantEnumerations((ConstantEnumeration)c1,(ConstantEnumeration)c2);
+            case AtomicNegationDataRange:
+                {
+                    AtomicNegationDataRange ndr1=(AtomicNegationDataRange)c1;
+                    AtomicNegationDataRange ndr2=(AtomicNegationDataRange)c2;
+                    return compare(ndr1.getNegatedDataRange(),ndr2.getNegatedDataRange());
+                }
+            case InternalDatatype:
+                return ((InternalDatatype)c1).getIRI().compareTo(((InternalDatatype)c2).getIRI());
+            default:
+                throw new IllegalArgumentException();
+            }
+        }
+        protected static enum DataRangeType {
+            DatatypeRestriction(0),
+            ConstantEnumeration(1),
+            AtomicNegationDataRange(2), 
+            InternalDatatype(3);
+
+            private final int m_typeIndex;
+            DataRangeType(int typeIndex) {
+                m_typeIndex=typeIndex;
+            }
+            final int getTypeIndex() {
+                return m_typeIndex;
+            }
+        }
+        protected DataRangeType getDataRangeType(DataRange dr) {
+            if (dr instanceof DatatypeRestriction)
+                return DataRangeType.DatatypeRestriction;
+            else if (dr instanceof InternalDatatype)
+                return DataRangeType.InternalDatatype; 
+            else if (dr instanceof ConstantEnumeration)
+                return DataRangeType.ConstantEnumeration;
+            else if (dr instanceof AtomicNegationDataRange)
+                return DataRangeType.AtomicNegationDataRange;
             else
                 throw new IllegalArgumentException();
         }
@@ -374,7 +426,6 @@ public class Printing {
             return c1.getLexicalForm().compareTo(c2.getLexicalForm());
         }
     }
-
     protected static class RoleComparator implements Comparator<Role> {
         public static final RoleComparator INSTANCE=new RoleComparator();
 

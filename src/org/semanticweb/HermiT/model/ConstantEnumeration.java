@@ -22,7 +22,7 @@ import org.semanticweb.HermiT.Prefixes;
 /**
  * A data range that consists of a given set of constants.
  */
-public class ConstantEnumeration extends DataRange {
+public class ConstantEnumeration extends AtomicDataRange {
     private static final long serialVersionUID=4663162424764302912L;
 
     protected final Constant[] m_constants;
@@ -36,8 +36,8 @@ public class ConstantEnumeration extends DataRange {
     public Constant getConstant(int index) {
         return m_constants[index];
     }
-    public LiteralConcept getNegation() {
-        return NegationDataRange.create(this);
+    public LiteralDataRange getNegation() {
+        return AtomicNegationDataRange.create(this);
     }
     public boolean isAlwaysTrue() {
         return false;

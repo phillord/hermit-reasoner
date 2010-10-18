@@ -25,6 +25,7 @@ import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
+import org.semanticweb.HermiT.model.DataRange;
 import org.semanticweb.HermiT.model.Variable;
 import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
 import org.semanticweb.HermiT.tableau.Node;
@@ -92,6 +93,9 @@ public class AncestorBlocking implements BlockingStrategy,Serializable {
     public boolean isPermanentAssertion(Concept concept,Node node) {
         return true;
     }
+    public boolean isPermanentAssertion(DataRange range,Node node) {
+        return true;
+    }
     public void assertionAdded(Concept concept,Node node,boolean isCore) {
         m_directBlockingChecker.assertionAdded(concept,node,isCore);
     }
@@ -99,6 +103,14 @@ public class AncestorBlocking implements BlockingStrategy,Serializable {
     }
     public void assertionRemoved(Concept concept,Node node,boolean isCore) {
         m_directBlockingChecker.assertionRemoved(concept,node,isCore);
+    }
+    public void assertionAdded(DataRange range,Node node,boolean isCore) {
+        m_directBlockingChecker.assertionAdded(range,node,isCore);
+    }
+    public void assertionCoreSet(DataRange range,Node node) {
+    }
+    public void assertionRemoved(DataRange range,Node node,boolean isCore) {
+        m_directBlockingChecker.assertionRemoved(range,node,isCore);
     }
     public void assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
         m_directBlockingChecker.assertionAdded(atomicRole,nodeFrom,nodeTo,isCore);

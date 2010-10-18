@@ -26,6 +26,7 @@ import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
+import org.semanticweb.HermiT.model.DataRange;
 import org.semanticweb.HermiT.model.Variable;
 import org.semanticweb.HermiT.model.DLClause.ClauseType;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
@@ -228,6 +229,9 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
     public boolean isPermanentAssertion(Concept concept,Node node) {
         return true;
     }
+    public boolean isPermanentAssertion(DataRange range,Node node) {
+        return true;
+    }
     protected void validationInfoChanged(Node node) {
         if (node!=null) {
             if (m_lastValidatedUnchangedNode!=null && node.getNodeID()<m_lastValidatedUnchangedNode.getNodeID())
@@ -247,6 +251,21 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
     }
     public void assertionRemoved(Concept concept,Node node,boolean isCore) {
         updateNodeChange(m_directBlockingChecker.assertionRemoved(concept,node,isCore));
+        validationInfoChanged(node);
+        validationInfoChanged(node.getParent());
+    }
+    public void assertionAdded(DataRange range,Node node,boolean isCore) {
+        updateNodeChange(m_directBlockingChecker.assertionAdded(range,node,isCore));
+        validationInfoChanged(node);
+        validationInfoChanged(node.getParent());
+    }
+    public void assertionCoreSet(DataRange range,Node node) {
+        updateNodeChange(m_directBlockingChecker.assertionAdded(range,node,true));
+        validationInfoChanged(node);
+        validationInfoChanged(node.getParent());
+    }
+    public void assertionRemoved(DataRange range,Node node,boolean isCore) {
+        updateNodeChange(m_directBlockingChecker.assertionRemoved(range,node,isCore));
         validationInfoChanged(node);
         validationInfoChanged(node.getParent());
     }

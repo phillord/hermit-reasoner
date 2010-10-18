@@ -22,7 +22,7 @@ import org.semanticweb.HermiT.Prefixes;
 /**
  * Represents an internal datatype. Such objects are used in DL-clauses (e.g., in structural transformation of complex data ranges), but are ignored by the datatype manager.
  */
-public class InternalDatatype extends DataRange implements DLPredicate {
+public class InternalDatatype extends AtomicDataRange implements DLPredicate {
     private static final long serialVersionUID=-1078274072706143620L;
 
     protected final String m_iri;
@@ -36,14 +36,17 @@ public class InternalDatatype extends DataRange implements DLPredicate {
     public int getArity() {
         return 1;
     }
-    public LiteralConcept getNegation() {
-        return NegationDataRange.create(this);
+    public LiteralDataRange getNegation() {
+        return AtomicNegationDataRange.create(this);
     }
     public boolean isAlwaysTrue() {
         return this==RDFS_LITERAL;
     }
     public boolean isAlwaysFalse() {
         return false;
+    }
+    public boolean isInternalDatatype() {
+        return true;
     }
     public String toString(Prefixes prefixes) {
         return prefixes.abbreviateIRI(m_iri);
