@@ -221,11 +221,11 @@ public class OWLClausification {
             DLClause dlClause=clausifier.getDLClause();
             dlClauses.add(dlClause.getSafeVersion());
         }
-        NormalizedDataRangeAxiomClausifier normalizedDataTangeAxiomClausifier=new NormalizedDataRangeAxiomClausifier(dataRangeConverter,factory,axioms.m_definedDatatypesIRIs);
+        NormalizedDataRangeAxiomClausifier normalizedDataRangeAxiomClausifier=new NormalizedDataRangeAxiomClausifier(dataRangeConverter,factory,axioms.m_definedDatatypesIRIs);
         for (OWLDataRange[] inclusion : axioms.m_dataRangeInclusions) {
             for (OWLDataRange description : inclusion)
-                description.accept(normalizedDataTangeAxiomClausifier);
-            DLClause dlClause=normalizedDataTangeAxiomClausifier.getDLClause();
+                description.accept(normalizedDataRangeAxiomClausifier);
+            DLClause dlClause=normalizedDataRangeAxiomClausifier.getDLClause();
             dlClauses.add(dlClause.getSafeVersion());
         }
         for (OWLHasKeyAxiom hasKey : axioms.m_hasKeys)

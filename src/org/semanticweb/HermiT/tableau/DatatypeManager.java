@@ -247,54 +247,56 @@ public final class DatatypeManager implements Serializable {
         return variable;
     }
     protected void addDataRange(DVariable variable,DataRange dataRange) {
-        if (dataRange instanceof DatatypeRestriction) {
-            DatatypeRestriction datatypeRestriction=(DatatypeRestriction)dataRange;
-            if (!m_unknownDatatypeRestrictionsPermanent.contains(datatypeRestriction) && (m_unknownDatatypeRestrictionsAdditional==null || !m_unknownDatatypeRestrictionsAdditional.contains(datatypeRestriction))) {
-                variable.m_positiveDatatypeRestrictions.add(datatypeRestriction);
-                if (variable.m_mostSpecificRestriction==null)
-                    variable.m_mostSpecificRestriction=datatypeRestriction;
-                else if (DatatypeRegistry.isDisjointWith(variable.m_mostSpecificRestriction.getDatatypeURI(),datatypeRestriction.getDatatypeURI())) {
-                    m_unionDependencySet.clearConstituents();
-                    m_unionDependencySet.addConstituent(m_extensionManager.getAssertionDependencySet(variable.m_mostSpecificRestriction,variable.m_node));
-                    m_unionDependencySet.addConstituent(m_extensionManager.getAssertionDependencySet(datatypeRestriction,variable.m_node));
-                    Object[] tuple1;
-                    Object[] tuple2;
-                    if (m_tableauMonitor!=null) {
-                        tuple1=new Object[] { variable.m_mostSpecificRestriction,variable.m_node };
-                        tuple2=new Object[] { datatypeRestriction,variable.m_node };
-                        m_tableauMonitor.clashDetectionStarted(tuple1,tuple2);
+        if (!DatatypeRestriction.RDFS_LITERAL.equals(dataRange)) {
+            if (dataRange instanceof DatatypeRestriction) {
+                DatatypeRestriction datatypeRestriction=(DatatypeRestriction)dataRange;
+                if (!m_unknownDatatypeRestrictionsPermanent.contains(datatypeRestriction) && (m_unknownDatatypeRestrictionsAdditional==null || !m_unknownDatatypeRestrictionsAdditional.contains(datatypeRestriction))) {
+                    variable.m_positiveDatatypeRestrictions.add(datatypeRestriction);
+                    if (variable.m_mostSpecificRestriction==null)
+                        variable.m_mostSpecificRestriction=datatypeRestriction;
+                    else if (DatatypeRegistry.isDisjointWith(variable.m_mostSpecificRestriction.getDatatypeURI(),datatypeRestriction.getDatatypeURI())) {
+                        m_unionDependencySet.clearConstituents();
+                        m_unionDependencySet.addConstituent(m_extensionManager.getAssertionDependencySet(variable.m_mostSpecificRestriction,variable.m_node));
+                        m_unionDependencySet.addConstituent(m_extensionManager.getAssertionDependencySet(datatypeRestriction,variable.m_node));
+                        Object[] tuple1;
+                        Object[] tuple2;
+                        if (m_tableauMonitor!=null) {
+                            tuple1=new Object[] { variable.m_mostSpecificRestriction,variable.m_node };
+                            tuple2=new Object[] { datatypeRestriction,variable.m_node };
+                            m_tableauMonitor.clashDetectionStarted(tuple1,tuple2);
+                        }
+                        m_extensionManager.setClash(m_unionDependencySet);
+                        if (m_tableauMonitor!=null) {
+                            tuple1=new Object[] { variable.m_mostSpecificRestriction,variable.m_node };
+                            tuple2=new Object[] { datatypeRestriction,variable.m_node };
+                            m_tableauMonitor.clashDetectionFinished(tuple1,tuple2);
+                        }
                     }
-                    m_extensionManager.setClash(m_unionDependencySet);
-                    if (m_tableauMonitor!=null) {
-                        tuple1=new Object[] { variable.m_mostSpecificRestriction,variable.m_node };
-                        tuple2=new Object[] { datatypeRestriction,variable.m_node };
-                        m_tableauMonitor.clashDetectionFinished(tuple1,tuple2);
-                    }
+                    else if (DatatypeRegistry.isSubsetOf(datatypeRestriction.getDatatypeURI(),variable.m_mostSpecificRestriction.getDatatypeURI()))
+                        variable.m_mostSpecificRestriction=datatypeRestriction;
                 }
-                else if (DatatypeRegistry.isSubsetOf(datatypeRestriction.getDatatypeURI(),variable.m_mostSpecificRestriction.getDatatypeURI()))
-                    variable.m_mostSpecificRestriction=datatypeRestriction;
             }
-        }
-        else if (dataRange instanceof ConstantEnumeration)
-            variable.m_positiveConstantEnumerations.add((ConstantEnumeration)dataRange);
-        else if (dataRange instanceof NegationDataRange) {
-            DataRange negatedDataRange=((NegationDataRange)dataRange).getNegatedDataRange();
-            if (negatedDataRange instanceof DatatypeRestriction) {
-                DatatypeRestriction datatypeRestriction=(DatatypeRestriction)negatedDataRange;
-                if (!m_unknownDatatypeRestrictionsPermanent.contains(datatypeRestriction) && (m_unknownDatatypeRestrictionsAdditional==null || !m_unknownDatatypeRestrictionsAdditional.contains(datatypeRestriction)))
-                    variable.m_negativeDatatypeRestrictions.add(datatypeRestriction);
-            }
-            else if (negatedDataRange instanceof ConstantEnumeration) {
-                ConstantEnumeration negatedConstantEnumeration=(ConstantEnumeration)negatedDataRange;
-                variable.m_negativeConstantEnumerations.add(negatedConstantEnumeration);
-                for (int index=negatedConstantEnumeration.getNumberOfConstants()-1;index>=0;--index)
-                    variable.addForbiddenDataValue(negatedConstantEnumeration.getConstant(index).getDataValue());
+            else if (dataRange instanceof ConstantEnumeration)
+                variable.m_positiveConstantEnumerations.add((ConstantEnumeration)dataRange);
+            else if (dataRange instanceof NegationDataRange) {
+                DataRange negatedDataRange=((NegationDataRange)dataRange).getNegatedDataRange();
+                if (negatedDataRange instanceof DatatypeRestriction) {
+                    DatatypeRestriction datatypeRestriction=(DatatypeRestriction)negatedDataRange;
+                    if (!m_unknownDatatypeRestrictionsPermanent.contains(datatypeRestriction) && (m_unknownDatatypeRestrictionsAdditional==null || !m_unknownDatatypeRestrictionsAdditional.contains(datatypeRestriction)))
+                        variable.m_negativeDatatypeRestrictions.add(datatypeRestriction);
+                }
+                else if (negatedDataRange instanceof ConstantEnumeration) {
+                    ConstantEnumeration negatedConstantEnumeration=(ConstantEnumeration)negatedDataRange;
+                    variable.m_negativeConstantEnumerations.add(negatedConstantEnumeration);
+                    for (int index=negatedConstantEnumeration.getNumberOfConstants()-1;index>=0;--index)
+                        variable.addForbiddenDataValue(negatedConstantEnumeration.getConstant(index).getDataValue());
+                }
+                else
+                    throw new IllegalStateException("Internal error: invalid data range.");
             }
             else
                 throw new IllegalStateException("Internal error: invalid data range.");
         }
-        else
-            throw new IllegalStateException("Internal error: invalid data range.");
     }
     protected void checkConjunctionSatisfiability() {
         if (!m_extensionManager.containsClash() && !m_conjunction.m_activeVariables.isEmpty()) {

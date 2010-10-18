@@ -49,7 +49,7 @@ public class ExtensionTableWithTupleIndexes extends ExtensionTable {
     public boolean addTuple(Object[] tuple,DependencySet dependencySet,boolean isCore) {
         if (m_tableauMonitor!=null)
             m_tableauMonitor.addFactStarted(tuple,isCore);
-        if (isTupleActive(tuple) && (m_tableau.m_needsThingExtension || !AtomicConcept.THING.equals(tuple[0])) && !DatatypeRestriction.RDFS_LITERAL.equals(tuple[0])) {
+        if (isTupleActive(tuple) && (m_tableau.m_needsThingExtension || !AtomicConcept.THING.equals(tuple[0])) && (m_tableau.m_needsRDFSLiteralExtension || !DatatypeRestriction.RDFS_LITERAL.equals(tuple[0]))) {
             int firstFreeTupleIndex=m_tupleTable.getFirstFreeTupleIndex();
             int addTupleIndex=m_tupleIndexes[0].addTuple(tuple,firstFreeTupleIndex);
             if (addTupleIndex==firstFreeTupleIndex) {

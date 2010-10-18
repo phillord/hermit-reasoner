@@ -33,6 +33,7 @@ import org.semanticweb.HermiT.model.ConstantEnumeration;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DLPredicate;
+import org.semanticweb.HermiT.model.DatatypeRestriction;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.Equality;
 import org.semanticweb.HermiT.model.ExistentialConcept;
@@ -80,6 +81,7 @@ public final class Tableau implements Serializable {
     protected boolean m_isCurrentModelDeterministic;
     protected boolean m_needsThingExtension;
     protected boolean m_needsNamedExtension;
+    protected boolean m_needsRDFSLiteralExtension;
     protected boolean m_checkDatatypes;
     protected boolean m_checkUnknownDatatypeRestrictions;
     protected int m_allocatedNodes;
@@ -242,11 +244,13 @@ public final class Tableau implements Serializable {
     protected void updateFlagsDependentOnAdditionalOntology() {
         m_needsThingExtension=m_permanentHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.THING);
         m_needsNamedExtension=m_permanentHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.INTERNAL_NAMED);
+        m_needsRDFSLiteralExtension=m_permanentHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(DatatypeRestriction.RDFS_LITERAL);
         m_checkDatatypes=m_permanentDLOntology.hasDatatypes();
         m_checkUnknownDatatypeRestrictions=m_permanentDLOntology.hasUnknownDatatypeRestrictions();
         if (m_additionalHyperresolutionManager!=null) {
             m_needsThingExtension|=m_additionalHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.THING);
             m_needsNamedExtension|=m_additionalHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.INTERNAL_NAMED);
+            m_needsRDFSLiteralExtension|=m_additionalHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(DatatypeRestriction.RDFS_LITERAL);
         }
         if (m_additionalDLOntology!=null) {
             m_checkDatatypes|=m_additionalDLOntology.hasDatatypes();
@@ -655,12 +659,13 @@ public final class Tableau implements Serializable {
         m_numberOfNodeCreations++;
         if (m_tableauMonitor!=null)
             m_tableauMonitor.nodeCreated(node);
-        if (nodeType!=NodeType.CONCRETE_NODE && nodeType!=NodeType.ROOT_CONSTANT_NODE) {
+        if (nodeType.m_isAbstract) {
             m_extensionManager.addConceptAssertion(AtomicConcept.THING,node,dependencySet,true);
             if (nodeType==NodeType.NAMED_NODE && m_needsNamedExtension)
                 m_extensionManager.addConceptAssertion(AtomicConcept.INTERNAL_NAMED,node,dependencySet,true);
-        } //else if (nodeType==NodeType.ROOT_CONSTANT_NODE)
-//            m_extensionManager.addConceptAssertion(DatatypeRestriction.RDFS_LITERAL,node,dependencySet,true);
+        }
+        else
+            m_extensionManager.addConceptAssertion(DatatypeRestriction.RDFS_LITERAL,node,dependencySet,true);
         return node;
     }
     /**
