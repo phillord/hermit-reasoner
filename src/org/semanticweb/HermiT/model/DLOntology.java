@@ -399,7 +399,7 @@ public class DLOntology implements Serializable {
             Atom atom=dlClause.getBodyAtom(atomIndex);
             atom.getVariables(variables);
             DLPredicate dlPredicate=atom.getDLPredicate();
-            if (!(dlPredicate instanceof AtomicRole) && !(dlPredicate instanceof AtomicConcept) && !dlPredicate.equals(DatatypeRestriction.RDFS_LITERAL) && !dlPredicate.equals(NodeIDLessEqualThan.INSTANCE) && !(dlPredicate instanceof NodeIDsAscendingOrEqual))
+            if (!(dlPredicate instanceof AtomicRole) && !(dlPredicate instanceof AtomicConcept) && !(dlPredicate instanceof InternalDatatype) && !dlPredicate.equals(NodeIDLessEqualThan.INSTANCE) && !(dlPredicate instanceof NodeIDsAscendingOrEqual))
                 return false;
         }
         for (int atomIndex=0;atomIndex<dlClause.getHeadLength();atomIndex++) {

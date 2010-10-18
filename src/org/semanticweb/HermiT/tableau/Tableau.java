@@ -33,12 +33,12 @@ import org.semanticweb.HermiT.model.ConstantEnumeration;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DLPredicate;
-import org.semanticweb.HermiT.model.DatatypeRestriction;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.Equality;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.model.Inequality;
+import org.semanticweb.HermiT.model.InternalDatatype;
 import org.semanticweb.HermiT.model.LiteralConcept;
 import org.semanticweb.HermiT.model.NegatedAtomicRole;
 import org.semanticweb.HermiT.model.Term;
@@ -244,13 +244,13 @@ public final class Tableau implements Serializable {
     protected void updateFlagsDependentOnAdditionalOntology() {
         m_needsThingExtension=m_permanentHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.THING);
         m_needsNamedExtension=m_permanentHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.INTERNAL_NAMED);
-        m_needsRDFSLiteralExtension=m_permanentHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(DatatypeRestriction.RDFS_LITERAL);
+        m_needsRDFSLiteralExtension=m_permanentHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(InternalDatatype.RDFS_LITERAL);
         m_checkDatatypes=m_permanentDLOntology.hasDatatypes();
         m_checkUnknownDatatypeRestrictions=m_permanentDLOntology.hasUnknownDatatypeRestrictions();
         if (m_additionalHyperresolutionManager!=null) {
             m_needsThingExtension|=m_additionalHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.THING);
             m_needsNamedExtension|=m_additionalHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(AtomicConcept.INTERNAL_NAMED);
-            m_needsRDFSLiteralExtension|=m_additionalHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(DatatypeRestriction.RDFS_LITERAL);
+            m_needsRDFSLiteralExtension|=m_additionalHyperresolutionManager.m_tupleConsumersByDeltaPredicate.containsKey(InternalDatatype.RDFS_LITERAL);
         }
         if (m_additionalDLOntology!=null) {
             m_checkDatatypes|=m_additionalDLOntology.hasDatatypes();
@@ -262,6 +262,15 @@ public final class Tableau implements Serializable {
         return isSatisfiable(loadPermanentABox,loadAdditionalABox,perTestPositiveFactsNoDependency,perTestNegativeFactsNoDependency,perTestPositiveFactsDummyDependency,perTestNegativeFactsDummyDependency,nodesForIndividuals,reasoningTaskDescription);
     }
     public boolean isSatisfiable(boolean loadPermanentABox,boolean loadAdditionalABox,Set<Atom> perTestPositiveFactsNoDependency,Set<Atom> perTestNegativeFactsNoDependency,Set<Atom> perTestPositiveFactsDummyDependency,Set<Atom> perTestNegativeFactsDummyDependency,Map<Individual,Node> nodesForIndividuals,ReasoningTaskDescription reasoningTaskDescription) {
+
+        System.out.println("Permanent ============================");
+        System.out.println(m_permanentDLOntology.toString());
+        if (m_additionalDLOntology!=null) {
+            System.out.println("Additional ============================");
+            System.out.println(m_additionalDLOntology.toString());
+        }
+        System.out.println("======================================");
+
         if (m_tableauMonitor!=null)
             m_tableauMonitor.isSatisfiableStarted(reasoningTaskDescription);
         clear();
@@ -665,7 +674,7 @@ public final class Tableau implements Serializable {
                 m_extensionManager.addConceptAssertion(AtomicConcept.INTERNAL_NAMED,node,dependencySet,true);
         }
         else
-            m_extensionManager.addConceptAssertion(DatatypeRestriction.RDFS_LITERAL,node,dependencySet,true);
+            m_extensionManager.addConceptAssertion(InternalDatatype.RDFS_LITERAL,node,dependencySet,true);
         return node;
     }
     /**

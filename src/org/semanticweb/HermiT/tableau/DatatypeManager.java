@@ -33,6 +33,7 @@ import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DataRange;
 import org.semanticweb.HermiT.model.DatatypeRestriction;
 import org.semanticweb.HermiT.model.Inequality;
+import org.semanticweb.HermiT.model.InternalDatatype;
 import org.semanticweb.HermiT.model.NegationDataRange;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
 
@@ -247,8 +248,9 @@ public final class DatatypeManager implements Serializable {
         return variable;
     }
     protected void addDataRange(DVariable variable,DataRange dataRange) {
-        if (DatatypeRestriction.RDFS_LITERAL.equals(dataRange)) {
-            // Data ranges are skipped, as they do not contribute to datatype checking.
+        if (dataRange instanceof InternalDatatype) {
+            // Internal datatypes are skipped, as they do not contribute to datatype checking.
+            // These are used to encode rdfs:Literal and datatype definitions, and to rename complex data ranges.
         }
         else if (dataRange instanceof DatatypeRestriction) {
             DatatypeRestriction datatypeRestriction=(DatatypeRestriction)dataRange;
@@ -282,7 +284,10 @@ public final class DatatypeManager implements Serializable {
             variable.m_positiveConstantEnumerations.add((ConstantEnumeration)dataRange);
         else if (dataRange instanceof NegationDataRange) {
             DataRange negatedDataRange=((NegationDataRange)dataRange).getNegatedDataRange();
-            if (negatedDataRange instanceof DatatypeRestriction) {
+            if (negatedDataRange instanceof InternalDatatype) {
+                // Skip for the same reasons as above.
+            }
+            else if (negatedDataRange instanceof DatatypeRestriction) {
                 DatatypeRestriction datatypeRestriction=(DatatypeRestriction)negatedDataRange;
                 if (!m_unknownDatatypeRestrictionsPermanent.contains(datatypeRestriction) && (m_unknownDatatypeRestrictionsAdditional==null || !m_unknownDatatypeRestrictionsAdditional.contains(datatypeRestriction)))
                     variable.m_negativeDatatypeRestrictions.add(datatypeRestriction);

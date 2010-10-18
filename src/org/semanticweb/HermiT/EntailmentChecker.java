@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.semanticweb.HermiT.model.AtomicRole;
-import org.semanticweb.HermiT.model.DatatypeRestriction;
+import org.semanticweb.HermiT.model.InternalDatatype;
 import org.semanticweb.HermiT.tableau.ReasoningTaskDescription;
 import org.semanticweb.HermiT.tableau.Tableau;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -314,8 +314,8 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
     public Boolean visit(OWLDisjointObjectPropertiesAxiom axiom) {
         int n=axiom.getProperties().size();
         OWLObjectPropertyExpression[] props=axiom.getProperties().toArray(new OWLObjectPropertyExpression[n]);
-        for (int i=0;i<n-1;i++) 
-            for (int j=i+1;j<n;j++) 
+        for (int i=0;i<n-1;i++)
+            for (int j=i+1;j<n;j++)
                 if (!reasoner.isDisjointObjectProperty(props[i],props[j])) return Boolean.FALSE;
         return Boolean.TRUE;
     }
@@ -356,8 +356,8 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
         OWLDataPropertyExpression[] props=axiom.getProperties().toArray(new OWLDataPropertyExpression[n]);
         for (int i=0;i<n-1;i++) {
             for (int j=i+1;j<n;j++) {
-                OWLDataSomeValuesFrom some_i=factory.getOWLDataSomeValuesFrom(props[i],factory.getOWLDatatype(IRI.create(DatatypeRestriction.RDFS_LITERAL.getDatatypeURI())));
-                OWLDataSomeValuesFrom some_j=factory.getOWLDataSomeValuesFrom(props[j],factory.getOWLDatatype(IRI.create(DatatypeRestriction.RDFS_LITERAL.getDatatypeURI())));
+                OWLDataSomeValuesFrom some_i=factory.getOWLDataSomeValuesFrom(props[i],factory.getOWLDatatype(IRI.create(InternalDatatype.RDFS_LITERAL.getIRI())));
+                OWLDataSomeValuesFrom some_j=factory.getOWLDataSomeValuesFrom(props[j],factory.getOWLDatatype(IRI.create(InternalDatatype.RDFS_LITERAL.getIRI())));
                 OWLDataMaxCardinality max1=factory.getOWLDataMaxCardinality(1,factory.getOWLDataProperty(IRI.create(AtomicRole.TOP_DATA_ROLE.getIRI())));
                 OWLClassExpression desc=factory.getOWLObjectIntersectionOf(some_i,some_j,max1);
                 if (reasoner.isSatisfiable(desc))
@@ -382,7 +382,7 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
             OWLClassExpression first=i.next();
             while (i.hasNext()&&isEntailed) {
                 OWLClassExpression next=i.next();
-                isEntailed=reasoner.isSubClassOf(first,next) && reasoner.isSubClassOf(next,first); 
+                isEntailed=reasoner.isSubClassOf(first,next) && reasoner.isSubClassOf(next,first);
             }
         }
         return isEntailed;

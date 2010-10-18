@@ -40,6 +40,7 @@ import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Constant;
 import org.semanticweb.HermiT.model.ConstantEnumeration;
 import org.semanticweb.HermiT.model.DLClause;
+import org.semanticweb.HermiT.model.DLClause.ClauseType;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.model.DatatypeRestriction;
@@ -47,13 +48,13 @@ import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.Equality;
 import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.model.Inequality;
+import org.semanticweb.HermiT.model.InternalDatatype;
 import org.semanticweb.HermiT.model.LiteralConcept;
 import org.semanticweb.HermiT.model.NodeIDLessEqualThan;
 import org.semanticweb.HermiT.model.NodeIDsAscendingOrEqual;
 import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.model.Term;
 import org.semanticweb.HermiT.model.Variable;
-import org.semanticweb.HermiT.model.DLClause.ClauseType;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
@@ -868,10 +869,10 @@ public class OWLClausification {
         }
         public Object visit(OWLDatatype object) {
             String datatypeURI=object.getIRI().toString();
-            if (DatatypeRestriction.RDFS_LITERAL.getDatatypeURI().equals(datatypeURI))
-                return DatatypeRestriction.RDFS_LITERAL;
+            if (InternalDatatype.RDFS_LITERAL.getIRI().equals(datatypeURI))
+                return InternalDatatype.RDFS_LITERAL;
             if (datatypeURI.startsWith("internal:defdata#") || m_definedDatatypeIRIs.contains(object.getIRI().toString()))
-                return AtomicConcept.create(datatypeURI);
+                return InternalDatatype.create(datatypeURI);
             DatatypeRestriction datatype=DatatypeRestriction.create(datatypeURI,DatatypeRestriction.NO_FACET_URIs,DatatypeRestriction.NO_FACET_VALUES);
             if (datatypeURI.startsWith("internal:unknown-datatype#"))
                 m_allUnknownDatatypeRestrictions.add(datatype);
@@ -906,10 +907,10 @@ public class OWLClausification {
             if (!(object.getDatatype().isOWLDatatype()))
                 throw new IllegalArgumentException("Datatype restrictions are supported only on OWL datatypes.");
             String datatypeURI=object.getDatatype().getIRI().toString();
-            if (DatatypeRestriction.RDFS_LITERAL.getDatatypeURI().equals(datatypeURI)) {
+            if (InternalDatatype.RDFS_LITERAL.getIRI().equals(datatypeURI)) {
                 if (!object.getFacetRestrictions().isEmpty())
                     throw new IllegalArgumentException("rdfs:Literal does not support any facets.");
-                return DatatypeRestriction.RDFS_LITERAL;
+                return InternalDatatype.RDFS_LITERAL;
             }
             String[] facetURIs=new String[object.getFacetRestrictions().size()];
             Constant[] facetValues=new Constant[object.getFacetRestrictions().size()];
