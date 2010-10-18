@@ -104,8 +104,13 @@ public class DLClause implements Serializable {
             Atom[] newBodyAtoms=new Atom[m_bodyAtoms.length+variables.size()];
             System.arraycopy(m_bodyAtoms,0,newBodyAtoms,0,m_bodyAtoms.length);
             int index=m_bodyAtoms.length;
-            for (Variable variable : variables)
-                newBodyAtoms[index++]=Atom.create(AtomicConcept.THING,variable);
+//            if (m_clauseType==ClauseType.DATA_RANGE_INCLUSION) {
+//                for (Variable variable : variables)
+//                    newBodyAtoms[index++]=Atom.create(DatatypeRestriction.RDFS_LITERAL,variable);
+//            } else {
+                for (Variable variable : variables)
+                    newBodyAtoms[index++]=Atom.create(AtomicConcept.THING,variable);
+//            }
             return DLClause.createEx(m_isKnownToBeAdmissible,m_headAtoms,newBodyAtoms,m_clauseType);
         }
     }

@@ -655,11 +655,12 @@ public final class Tableau implements Serializable {
         m_numberOfNodeCreations++;
         if (m_tableauMonitor!=null)
             m_tableauMonitor.nodeCreated(node);
-        if (nodeType!=NodeType.CONCRETE_NODE) {
+        if (nodeType!=NodeType.CONCRETE_NODE && nodeType!=NodeType.ROOT_CONSTANT_NODE) {
             m_extensionManager.addConceptAssertion(AtomicConcept.THING,node,dependencySet,true);
             if (nodeType==NodeType.NAMED_NODE && m_needsNamedExtension)
                 m_extensionManager.addConceptAssertion(AtomicConcept.INTERNAL_NAMED,node,dependencySet,true);
-        }
+        } //else if (nodeType==NodeType.ROOT_CONSTANT_NODE)
+//            m_extensionManager.addConceptAssertion(DatatypeRestriction.RDFS_LITERAL,node,dependencySet,true);
         return node;
     }
     /**

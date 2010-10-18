@@ -1,12 +1,39 @@
 package org.semanticweb.HermiT.reasoner;
 
+import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLDataProperty;
+
+
+
 
 public class DatatypesTest extends AbstractReasonerTest {
 
     public DatatypesTest(String name) {
         super(name);
+    }
+    public void testDatatypeDef5() throws Exception {
+        String axioms = "Declaration(Datatype(:newDT))" 
+            + "DatatypeDefinition(:newDT DatatypeRestriction(xsd:integer xsd:minInclusive \"15\"^^xsd:integer))"
+            + "DataPropertyRange(:dp DataComplementOf(:newDT))"
+            + "DataPropertyAssertion(:dp :a \"16\"^^xsd:integer)";
+        loadReasonerWithAxioms(axioms);
+        for (DLClause clause : m_reasoner.getDLOntology().getDLClauses())
+            System.out.println(clause);
+        System.out.println(m_reasoner.getDLOntology().getPositiveFacts());
+        System.out.println(m_reasoner.getDLOntology().getNegativeFacts());
+        assertABoxSatisfiable(false);
+    }
+    public void testNominalsAndDatatypesFromAlan() throws Exception {
+        String axioms = "Declaration(DataProperty(:dp))"+LB
+            + "Declaration(NamedIndividual(:a))"+LB
+            + "Declaration(NamedIndividual(:b))"+LB
+            + "EquivalentClasses(owl:Thing ObjectOneOf(:b :a))"+LB
+            + "DataPropertyAssertion(:dp :b \"42\"^^xsd:integer)"+LB
+            + "DataPropertyAssertion(:dp :b \"44\"^^xsd:integer)"+LB
+            + "DataPropertyAssertion(:dp :b \"43\"^^xsd:integer)";
+        loadReasonerWithAxioms(axioms);
+        assertTrue(m_reasoner.isConsistent());
     }
     public void testDifferentLexicalForms() throws Exception {
         String axioms = "Declaration(DataProperty(:dp)) Declaration(NamedIndividual(:a))"
@@ -423,16 +450,6 @@ public class DatatypesTest extends AbstractReasonerTest {
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(true);
     }
-    
-    public void testDatatypeDef5() throws Exception {
-        String axioms = "Declaration(Datatype(:newDT))" 
-            + "DatatypeDefinition(:newDT DatatypeRestriction(xsd:integer xsd:minInclusive \"15\"^^xsd:integer))"
-            + "DataPropertyRange(:dp DataComplementOf(:newDT))"
-            + "DataPropertyAssertion(:dp :a \"16\"^^xsd:integer)";
-        loadReasonerWithAxioms(axioms);
-        assertABoxSatisfiable(false);
-    }
-    
     public void testDatatypeDef6() throws Exception {
         String axioms = "Declaration(Datatype(:newDT))" 
             + "DatatypeDefinition(:newDT DataComplementOf(DatatypeRestriction(xsd:integer xsd:minInclusive \"15\"^^xsd:integer)))"
