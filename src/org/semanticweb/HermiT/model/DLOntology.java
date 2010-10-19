@@ -414,7 +414,6 @@ public class DLOntology implements Serializable {
                     return false;
             }
         }
-        // TODO: We might need the data ranges here too
         Variable X=Variable.create("X");
         if (variables.contains(X) && isTreeWithCenterVariable(dlClause,X,bodyOnlyAtomicConcepts))
             return true;

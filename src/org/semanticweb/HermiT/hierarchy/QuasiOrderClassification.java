@@ -140,7 +140,7 @@ public class QuasiOrderClassification {
         Set<AtomicConcept> processedConcepts=new HashSet<AtomicConcept>();
         Set<HierarchyNode<AtomicConcept>> unsatHierarchyNodes=new HashSet<HierarchyNode<AtomicConcept>>();
         while( !toProcess.empty() ){
-        	HierarchyNode<AtomicConcept> currentHierarchyElement = toProcess.pop();
+        	HierarchyNode<AtomicConcept> currentHierarchyElement=toProcess.pop();
             AtomicConcept currentHierarchyConcept=currentHierarchyElement.getRepresentative();
             increaseProgressMonitor(processedConcepts,currentHierarchyConcept);
             if (!m_possibleSubsumptions.getSuccessors(currentHierarchyConcept).isEmpty() || isUnsatisfiable(currentHierarchyConcept))
@@ -153,8 +153,10 @@ public class QuasiOrderClassification {
                 toProcess.addAll(currentHierarchyElement.getParentNodes());
                 setNewDescendantsUnsat(currentHierarchyElement,unsatHierarchyNodes,toProcess);
             }
-            else{
-            	 // TODO: Why does a change to .getCanonicalNode() below give incorrect results with ind. reuse? 
+            else {
+                // We cannot do rootNodeOfModel.getCanonicalNode() here. This is done
+                // in readKnownSubsumersFromRootNode(), but only if rootNodeOfModel
+                // has not been merged into another node, or if the merge was deterministic.
                 readKnownSubsumersFromRootNode(currentHierarchyConcept,rootNodeOfModel);
                 updatePossibleSubsumers();
             }

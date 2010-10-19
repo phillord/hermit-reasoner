@@ -1,25 +1,18 @@
 package org.semanticweb.HermiT.reasoner;
 
 public class RIARegularityTest extends AbstractReasonerTest {
-	
+
 	 public RIARegularityTest(String name) {
 	        super(name);
 	 }
-    
-	 // TODO This hierarchy is actually irregular because the first axiom means that 
-	 // loves -> topObjectProperty must hold with -> the simple/composite relations, but 
-     // the chain requires topObjectProperty < loves, which cannot be achieved when
-	 // loves -> topObjectProperty is required. At the moment HermiT deletes 
-	 // SubObjectPropertyOf(anyProperty topObjectProperty) and 
-	 // SubObjectPropertyOf(bottomObjectProperty anyProperty) axioms, so we miss the 
-	 // loves -> topObjectProperty constraint. Should we change that? Protege introduces
-	 // tons of SubObjectPropertyOf(anyProperty topObjectProperty) axioms without telling 
-	 // the user....
-//    public void testRIARegularity0() throws Exception{
-//         String axioms = "SubObjectPropertyOf(:loves owl:topObjectProperty) " +
-//                         "SubObjectPropertyOf(ObjectPropertyChain(:pHuman owl:topObjectProperty :pCat) :loves) ";
-//         assertRegular(axioms,false);
-//     }
+
+    public void testRIARegularity0() throws Exception{
+        // This is not really regular according to the OWL 2 specification due to the first axiom;
+        // however, we simply don't care about it!
+        String axioms = "SubObjectPropertyOf(:loves owl:topObjectProperty) " +
+                        "SubObjectPropertyOf(ObjectPropertyChain(:pHuman owl:topObjectProperty :pCat) :loves) ";
+        assertRegular(axioms,true);
+     }
 	 public void testRIARegularity1() throws Exception{
 		 String axioms = "SubObjectPropertyOf(:A :B) " +
 		 				 "SubObjectPropertyOf(:B :C) " +
@@ -32,8 +25,8 @@ public class RIARegularityTest extends AbstractReasonerTest {
 		 				 "InverseObjectProperties(:P :Q) ";
 	     assertRegular(axioms,false);
 	 }
-//	 The following is in disagreement with FaCT++
 	 public void testRIARegularity3() throws Exception{
+	     // The following is in disagreement with FaCT++
 		 String axioms = "SubObjectPropertyOf(ObjectPropertyChain(:R ObjectInverseOf(:Q)) :P) " +
 		 				 "InverseObjectProperties(:P :Q) ";
 	     assertRegular(axioms,false);

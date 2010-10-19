@@ -262,13 +262,6 @@ public final class Tableau implements Serializable {
         return isSatisfiable(loadPermanentABox,loadAdditionalABox,perTestPositiveFactsNoDependency,perTestNegativeFactsNoDependency,perTestPositiveFactsDummyDependency,perTestNegativeFactsDummyDependency,nodesForIndividuals,reasoningTaskDescription);
     }
     public boolean isSatisfiable(boolean loadPermanentABox,boolean loadAdditionalABox,Set<Atom> perTestPositiveFactsNoDependency,Set<Atom> perTestNegativeFactsNoDependency,Set<Atom> perTestPositiveFactsDummyDependency,Set<Atom> perTestNegativeFactsDummyDependency,Map<Individual,Node> nodesForIndividuals,ReasoningTaskDescription reasoningTaskDescription) {
-//        System.out.println("Permanent ============================");
-//        System.out.println(m_permanentDLOntology.toString());
-//        if (m_additionalDLOntology!=null) {
-//            System.out.println("Additional ============================");
-//            System.out.println(m_additionalDLOntology.toString());
-//        }
-//        System.out.println("======================================");
         if (m_tableauMonitor!=null)
             m_tableauMonitor.isSatisfiableStarted(reasoningTaskDescription);
         clear();
