@@ -857,8 +857,8 @@ public class InstanceManager {
     public Set<HierarchyNode<AtomicConcept>> getTypes(Individual individual,boolean direct) {
         if (m_isInconsistent) 
             return Collections.singleton(m_currentConceptHierarchy.m_bottomNode);
-        assert !direct || m_usesClassifiedConceptHierarchy;
         Set<HierarchyNode<AtomicConcept>> result=new HashSet<HierarchyNode<AtomicConcept>>();
+        assert !direct || m_usesClassifiedConceptHierarchy;
         Queue<HierarchyNode<AtomicConcept>> toProcess=new LinkedList<HierarchyNode<AtomicConcept>>();
         toProcess.add(m_currentConceptHierarchy.m_bottomNode);
         while (!toProcess.isEmpty()) {
@@ -896,6 +896,8 @@ public class InstanceManager {
     }
     public boolean hasType(Individual individual,AtomicConcept atomicConcept,boolean direct) {
         HierarchyNode<AtomicConcept> node=m_currentConceptHierarchy.getNodeForElement(atomicConcept);
+        if (node==null) 
+            return false;
         return hasType(individual, node, direct);
     }
     public boolean hasType(Individual individual,HierarchyNode<AtomicConcept> node,boolean direct) {
@@ -1008,6 +1010,8 @@ public class InstanceManager {
     public boolean hasObjectRoleRelationship(AtomicRole role, Individual individual1, Individual individual2) {
         RoleElement element=m_roleElementManager.getRoleElement(role);
         HierarchyNode<RoleElement> currentNode=m_currentRoleHierarchy.getNodeForElement(element);
+        if (currentNode==null)
+            return false;
         return hasObjectRoleRelationship(currentNode, individual1, individual2);
     }
     public boolean hasObjectRoleRelationship(HierarchyNode<RoleElement> node,Individual individual1,Individual individual2) {
@@ -1033,6 +1037,8 @@ public class InstanceManager {
     public Map<Individual,Set<Individual>> getObjectPropertyInstances(AtomicRole role) {
         Map<Individual,Set<Individual>> result=new HashMap<Individual, Set<Individual>>();
         HierarchyNode<RoleElement> node=m_currentRoleHierarchy.getNodeForElement(m_roleElementManager.getRoleElement(role));
+        if (node==null)
+            return result;
         getObjectPropertyInstances(node,result);
         return result;
     }

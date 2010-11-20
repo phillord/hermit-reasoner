@@ -1398,10 +1398,17 @@ public class Reasoner implements OWLReasoner {
     }
     public NodeSet<OWLClass> getTypes(OWLNamedIndividual namedIndividual,boolean direct) {
         checkPreConditions(namedIndividual);
-        if (direct)
+        Set<HierarchyNode<AtomicConcept>> result;
+        if (!isDefined(namedIndividual)) {
             classifyClasses();
-        initialiseClassInstanceManager();
-        Set<HierarchyNode<AtomicConcept>> result=m_instanceManager.getTypes(H(namedIndividual),direct);
+            result=new HashSet<HierarchyNode<AtomicConcept>>();
+            result.add(m_atomicConceptHierarchy.getTopNode());
+        } else {
+            if (direct)
+                classifyClasses();
+            initialiseClassInstanceManager();
+            result=m_instanceManager.getTypes(H(namedIndividual),direct);
+        }
         return atomicConceptHierarchyNodesToNodeSet(result);
     }
     public boolean hasType(OWLNamedIndividual namedIndividual,OWLClassExpression type,boolean direct) {

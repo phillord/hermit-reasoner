@@ -21,6 +21,29 @@ public class RulesTest extends AbstractReasonerTest {
 //        Configuration c=new Configuration();
 //        return c;
 //    }
+    public void testRuleNonSimple() throws Exception {
+        String axioms = "Declaration(NamedIndividual(:a))"+LB
+            + "Declaration(NamedIndividual(:b))"+LB
+            + "Declaration(ObjectProperty(:t))"+LB
+            + "Declaration(ObjectProperty(:s))"+LB
+            + "TransitiveObjectProperty(:t)" +LB
+            + "ClassAssertion(ObjectSomeValuesFrom(:t ObjectSomeValuesFrom(:t ObjectOneOf(:b))) :a)"+LB
+            // t(x, y) -> s(x, y)
+            + "DLSafeRule("+LB
+            + "  Body(ObjectPropertyAtom(:t Variable(:x) Variable(:y)))"+LB
+            + "  Head(ObjectPropertyAtom(:s Variable(:x) Variable(:y)))"+LB
+            + ")";
+        loadOntologyWithAxioms(axioms);
+        createReasoner();
+        
+        OWLNamedIndividual a=m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "a"));
+        OWLNamedIndividual b=m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "b"));
+        OWLObjectProperty t=m_dataFactory.getOWLObjectProperty(IRI.create(AbstractReasonerTest.NS + "t"));
+        //OWLObjectProperty s=m_dataFactory.getOWLObjectProperty(IRI.create(AbstractReasonerTest.NS + "s"));
+        assertTrue(m_reasoner.hasObjectPropertyRelationship(a, t, b));
+        // fails
+        // assertTrue(m_reasoner.hasObjectPropertyRelationship(a, s, b));
+    }
     public void testRuleNotAxiom() throws Exception {
         String axioms = "Declaration(NamedIndividual(:a))"+LB
             + "Declaration(NamedIndividual(:b))"+LB

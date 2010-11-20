@@ -37,6 +37,33 @@ public class ReasonerTest extends AbstractReasonerTest {
     public ReasonerTest(String name) {
         super(name);
     }
+    public void testFreshEntityEntailment() throws Exception {
+        loadOntologyWithAxioms(
+                "Declaration( Class( :A ) )"+
+                "Declaration( Class( :B ) )"+
+                "Declaration( ObjectProperty( :r ) )"+
+                "Declaration( ObjectProperty( :s ) )"+
+                "SubClassOf( :A :B )"+
+                "SubClassOf( owl:Thing :B )"+
+                "SubObjectPropertyOf( :r :s )");
+        createReasoner();
+        OWLClass c=NS_C("C");
+        OWLNamedIndividual a=NS_NI("a");
+        OWLObjectProperty t=NS_OP("t");
+        OWLNamedIndividual b=NS_NI("b");
+        OWLAxiom ax=m_dataFactory.getOWLClassAssertionAxiom(c, a);
+        assertFalse(m_reasoner.isEntailed(ax));
+        OWLAxiom ax2=m_dataFactory.getOWLObjectPropertyAssertionAxiom(t, a, b);
+        assertFalse(m_reasoner.isEntailed(ax2));
+        NodeSet<OWLClass> types=m_reasoner.getTypes(a, false);
+        assertTrue(types.containsEntity(m_dataFactory.getOWLThing()));
+        OWLClass B=NS_C("B");
+        assertTrue(types.containsEntity(B));
+        NodeSet<OWLNamedIndividual> instances=m_reasoner.getInstances(c, false);
+        assertTrue(instances.isEmpty());
+        Map<OWLNamedIndividual,Set<OWLNamedIndividual>> opinstances=m_reasoner.getObjectPropertyInstances(t);
+        assertTrue(opinstances.isEmpty());
+    }
     public void testUniversalRoleSubsumption() throws Exception {
         loadOntologyWithAxioms(
                 "Declaration( Class( :C ) )"+
