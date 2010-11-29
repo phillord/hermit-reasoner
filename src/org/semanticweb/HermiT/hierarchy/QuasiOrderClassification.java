@@ -78,9 +78,10 @@ public class QuasiOrderClassification {
         return buildHierarchy(relation);
     }
     protected Hierarchy<AtomicConcept> buildHierarchy(Relation<AtomicConcept> hierarchyRelation) {
+    	double totalNumberOfTasks=m_elements.size();
         initializeKnownSubsumptions();
         updateKnownSubsumptionsUsingToldSubsumers();
-        Set<AtomicConcept> processedConcepts=updateSubsumptionsUsingLeafNodeStrategy();
+        double tasksPerformed=updateSubsumptionsUsingLeafNodeStrategy( totalNumberOfTasks );
         // Unlike Rob's paper our set of possible subsumptions P would only keep unknown possible subsumptions and not known subsumptions as well.
         Set<AtomicConcept> unclassifiedElements=new HashSet<AtomicConcept>();
         for (AtomicConcept element : m_elements) {
@@ -91,7 +92,6 @@ public class QuasiOrderClassification {
                     continue;
                 }
             }
-            increaseProgressMonitor(processedConcepts,element);
         }
         Set<AtomicConcept> classifiedElements=new HashSet<AtomicConcept>();
         while (!unclassifiedElements.isEmpty()) {
@@ -103,7 +103,10 @@ public class QuasiOrderClassification {
                     break;
                 }
                 classifiedElements.add(element);
-                increaseProgressMonitor(processedConcepts,element);
+                while (unclassifiedElements.size()<(totalNumberOfTasks-tasksPerformed)) {
+                	m_progressMonitor.elementClassified(element);
+                	tasksPerformed++;
+                }
             }
             unclassifiedElements.removeAll(classifiedElements);
             if (unclassifiedElements.isEmpty())
@@ -117,10 +120,6 @@ public class QuasiOrderClassification {
         }
         return buildTransitivelyReducedHierarchy(m_knownSubsumptions);
     }
-    private void increaseProgressMonitor(Set<AtomicConcept> processedConcepts,AtomicConcept element) {
-    	if (processedConcepts.add(element))
-            m_progressMonitor.elementClassified(element);
-	}
 	protected Hierarchy<AtomicConcept> buildHierarchyOfUnknownPossible(Set<AtomicConcept> unknownSubsumers) {
         Graph<AtomicConcept> smallKnownSubsumptions=new Graph<AtomicConcept>();
         for (AtomicConcept unknownSubsumer0 : unknownSubsumers) {
@@ -133,17 +132,20 @@ public class QuasiOrderClassification {
         }
         return buildTransitivelyReducedHierarchy(smallKnownSubsumptions);
     }
-    protected Set<AtomicConcept> updateSubsumptionsUsingLeafNodeStrategy() {
+    protected double updateSubsumptionsUsingLeafNodeStrategy(double totalNumberOfTasks) {
+    	double conceptsProcessed = 0;
         Hierarchy<AtomicConcept> hierarchy=buildTransitivelyReducedHierarchy(m_knownSubsumptions);
         Stack<HierarchyNode<AtomicConcept>> toProcess=new Stack<HierarchyNode<AtomicConcept>>();
         toProcess.addAll( hierarchy.getBottomNode().getParentNodes() );
-        Set<AtomicConcept> processedConcepts=new HashSet<AtomicConcept>();
         Set<HierarchyNode<AtomicConcept>> unsatHierarchyNodes=new HashSet<HierarchyNode<AtomicConcept>>();
         while( !toProcess.empty() ){
         	HierarchyNode<AtomicConcept> currentHierarchyElement=toProcess.pop();
             AtomicConcept currentHierarchyConcept=currentHierarchyElement.getRepresentative();
-            increaseProgressMonitor(processedConcepts,currentHierarchyConcept);
-            if (!m_possibleSubsumptions.getSuccessors(currentHierarchyConcept).isEmpty() || isUnsatisfiable(currentHierarchyConcept))
+            if( conceptsProcessed < java.lang.Math.ceil( totalNumberOfTasks*0.85 ) ){
+	            m_progressMonitor.elementClassified(currentHierarchyConcept);
+	            conceptsProcessed++;
+            }
+            if (conceptHasBeenProcessedAlready(currentHierarchyConcept))
                 continue;
             Node rootNodeOfModel=buildModelForConcept(currentHierarchyConcept);
             // If the leaf was unsatisfable we go up to explore its parents, until a satisfiable parent is discovered. Each time a node is unsat this information is propagated downwards.
@@ -151,7 +153,20 @@ public class QuasiOrderClassification {
             	makeConceptUnsatisfiable(currentHierarchyConcept);
             	unsatHierarchyNodes.add(currentHierarchyElement);
                 toProcess.addAll(currentHierarchyElement.getParentNodes());
-                setNewDescendantsUnsat(currentHierarchyElement,unsatHierarchyNodes,toProcess);
+                Set<HierarchyNode<AtomicConcept>> visited=new HashSet<HierarchyNode<AtomicConcept>>();
+                Queue<HierarchyNode<AtomicConcept>> toVisit=new LinkedList<HierarchyNode<AtomicConcept>>(currentHierarchyElement.getChildNodes());
+                while (!toVisit.isEmpty()) {
+                    HierarchyNode<AtomicConcept> current=toVisit.poll();
+                    if (visited.add(current) && !unsatHierarchyNodes.contains(current)){
+                        toVisit.addAll(current.getChildNodes());
+                        unsatHierarchyNodes.add(current);
+                        makeConceptUnsatisfiable(current.getRepresentative());
+                        toProcess.remove(current);
+                        for (HierarchyNode<AtomicConcept> parentOfRemovedConcept : current.getParentNodes())
+                     	   if (!conceptHasBeenProcessedAlready(parentOfRemovedConcept.getRepresentative()))
+                     		   toProcess.add(parentOfRemovedConcept);
+                    }
+                }
             }
             else {
                 // We cannot do rootNodeOfModel.getCanonicalNode() here. This is done
@@ -161,20 +176,10 @@ public class QuasiOrderClassification {
                 updatePossibleSubsumers();
             }
         }
-        return processedConcepts;
+        return conceptsProcessed;
     }
-    private void setNewDescendantsUnsat(HierarchyNode<AtomicConcept> currentElement,Set<HierarchyNode<AtomicConcept>> unsatHierarchyNodes, Stack<HierarchyNode<AtomicConcept>> toProcess) {
-        Set<HierarchyNode<AtomicConcept>> visited=new HashSet<HierarchyNode<AtomicConcept>>();
-        Queue<HierarchyNode<AtomicConcept>> toVisit=new LinkedList<HierarchyNode<AtomicConcept>>(currentElement.getChildNodes());
-        while (!toVisit.isEmpty()) {
-            HierarchyNode<AtomicConcept> current=toVisit.poll();
-            if (visited.add(current) && !unsatHierarchyNodes.contains(current)){
-                toVisit.addAll(current.getChildNodes());
-                unsatHierarchyNodes.add(current);
-                makeConceptUnsatisfiable(current.getRepresentative());
-                toProcess.remove(current);
-            }
-        }
+    private boolean conceptHasBeenProcessedAlready(AtomicConcept atConcept) {
+		return !m_possibleSubsumptions.getSuccessors(atConcept).isEmpty() || isUnsatisfiable(atConcept);
 	}
 	protected Node buildModelForConcept(AtomicConcept concept) {
         Individual freshIndividual=Individual.createAnonymous("fresh-individual");
