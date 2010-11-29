@@ -58,6 +58,26 @@ public class Hierarchy<E> {
     public Set<E> getAllElements() {
         return Collections.unmodifiableSet(m_nodesByElements.keySet());
     }
+    public int getDepth() {
+        HierarchyDepthFinder<E> depthFinder=new HierarchyDepthFinder<E>(m_bottomNode);
+        traverseDepthFirst(depthFinder);
+        return depthFinder.depth;
+    }
+    protected final class HierarchyDepthFinder<T> implements Hierarchy.HierarchyNodeVisitor<T> {
+        protected final HierarchyNode<T> m_bottomNode;
+        protected int depth=0;
+        
+        public HierarchyDepthFinder(HierarchyNode<T> bottomNode) {
+            m_bottomNode=bottomNode;
+        }
+        public boolean redirect(HierarchyNode<T>[] nodes) {
+            return true;
+        }
+        public void visit(int level,HierarchyNode<T> node,HierarchyNode<T> parentNode,boolean firstVisit) {
+            if (node.equals(m_bottomNode)&&level>depth)
+                depth=level;
+        }
+    }
     public <T> Hierarchy<T> transform(Transformer<? super E,T> transformer,Comparator<T> comparator) {
         HierarchyNodeComparator<T> newNodeComparator=new HierarchyNodeComparator<T>(comparator);
         Map<HierarchyNode<E>,HierarchyNode<T>> oldToNew=new HashMap<HierarchyNode<E>,HierarchyNode<T>>();

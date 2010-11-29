@@ -2096,7 +2096,59 @@ public class Reasoner implements OWLReasoner {
             result.add(dataPropertyHierarchyNodeToNode(hierarchyNode));
         return new OWLDataPropertyNodeSet(result);
     }
-
+    
+    // methods for cost-based query axiom ordering
+    
+    public int[] getNumberOfSameIndividuals(OWLIndividual individual) {
+        initialiseClassInstanceManager(); // that will also initialize sameAs equivalence classes
+        Individual ind=H(individual);
+        return m_instanceManager.getNumberOfSameAs(ind);
+    }
+    public int[] getNumberOfInstances(OWLClass owlClass) {
+        initialiseClassInstanceManager();
+        AtomicConcept concept=H(owlClass);
+        return m_instanceManager.getNumberOfInstances(concept);
+    }
+    public int[] getNumberOfInstances(OWLObjectProperty property) {
+        initialisePropertiesInstanceManager();
+        AtomicRole role=H(property);
+        return m_instanceManager.getNumberOfInstances(role);
+    }
+    public int[] getNumberOfSuccessors(OWLObjectProperty property, OWLIndividual individual) {
+        initialisePropertiesInstanceManager();
+        AtomicRole role=H(property);
+        Individual ind=H(individual);
+        return m_instanceManager.getNumberOfSuccessors(role, ind);
+    }
+    public int[] getNumberOfPredecessors(OWLObjectProperty property, OWLIndividual individual) {
+        initialisePropertiesInstanceManager();
+        AtomicRole role=H(property);
+        Individual ind=H(individual);
+        return m_instanceManager.getNumberOfPredecessors(role, ind);
+    }
+    public double[] getAverageNumberOfSuccessors(OWLObjectProperty property) {
+        initialisePropertiesInstanceManager();
+        AtomicRole role=H(property);
+        return m_instanceManager.getAverageNumberOfSuccessors(role);
+    }
+    public int getClassHierarchyDepth() {
+        classifyClasses();
+        return m_atomicConceptHierarchy.getDepth();
+    }
+    public int getObjectPropertyHierarchyDepth() {
+        classifyObjectProperties();
+        return m_objectRoleHierarchy.getDepth();
+    }
+    public int getDataPropertyHierarchyDepth() {
+        classifyDataProperties();
+        return m_dataRoleHierarchy.getDepth();
+    }
+    public int[] getNumberOfTypes(OWLIndividual individual) {
+        classifyClasses();
+        initialiseClassInstanceManager();
+        Individual ind=H(individual);
+        return m_instanceManager.getNumberOfTypes(ind);
+    }
     // The factory for OWL API reasoners
 
     public static class ReasonerFactory implements OWLReasonerFactory {

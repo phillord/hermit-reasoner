@@ -682,6 +682,46 @@ public class ReasonerTest extends AbstractReasonerTest {
         NodeSet<OWLNamedIndividual> result=m_reasoner.getObjectPropertyValues(c, r);
         assertTrue(result.containsEntity(d));
     }
+    public void testIndividualRetrieval() throws Exception {
+        StringBuffer buffer=new StringBuffer();
+        buffer.append("Declaration(Class(:C))"+LB);
+        buffer.append("Declaration(Class(:D))"+LB);
+        buffer.append("Declaration(Class(:E))"+LB);
+        buffer.append("Declaration(Class(:F))"+LB);
+        buffer.append("Declaration(NamedIndividual(:a))"+LB);
+        buffer.append("Declaration(NamedIndividual(:b))"+LB);
+        buffer.append("Declaration(NamedIndividual(:c))"+LB);
+        buffer.append("Declaration(NamedIndividual(:d))"+LB);
+        buffer.append("Declaration(NamedIndividual(:e))"+LB);
+        buffer.append("Declaration(ObjectProperty(:f))"+LB);
+        buffer.append("FunctionalObjectProperty(:f)"+LB);
+        buffer.append("SameIndividual(:a :b)"+LB);
+        buffer.append("ObjectPropertyAssertion(:f :a :c)"+LB);
+        buffer.append("ObjectPropertyAssertion(:f :a :d)"+LB);
+        buffer.append("SubClassOf(:D :C)"+LB);
+        buffer.append("SubClassOf(:E :C)"+LB);
+        buffer.append("ClassAssertion(:E :b)"+LB);
+        buffer.append("ClassAssertion(:C :c)"+LB);
+        buffer.append("ClassAssertion(ObjectUnionOf(:F :D) :e)"+LB);
+        loadOntologyWithAxioms(buffer.toString());
+        createReasoner();
+        OWLNamedIndividual a=NS_NI("a");
+        OWLNamedIndividual b=NS_NI("b");
+        OWLNamedIndividual c=NS_NI("c");
+        OWLNamedIndividual d=NS_NI("d");
+        OWLObjectProperty f=NS_OP("f");
+        Map<OWLNamedIndividual,Set<OWLNamedIndividual>> result=m_reasoner.getObjectPropertyInstances(f);
+        assertTrue(result.containsKey(a));
+        assertTrue(result.containsKey(b));
+        assertTrue(result.get(a).contains(c));
+        assertTrue(result.get(a).contains(d));
+        assertTrue(result.get(b).contains(c));
+        assertTrue(result.get(b).contains(d));
+        assertTrue(result.get(a).contains(c));
+        assertTrue(result.keySet().size()==2);
+        assertTrue(result.get(a).size()==2);
+        assertTrue(result.get(b).size()==2);
+    }
 
     // actually this test should cause a parsing error since xsd:minInclusive for restricting byte is supposed to use
     // only values from the value space of byte, which \"4.5\"^^xsd:decimal isn't
