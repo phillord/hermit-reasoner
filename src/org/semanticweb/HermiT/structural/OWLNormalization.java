@@ -500,7 +500,7 @@ public class OWLNormalization {
             OWLClassExpression[] inclusionArray=new OWLClassExpression[axiom.getClassExpressions().size()+1];
             inclusion.toArray(inclusionArray);
             m_inclusionsAsDisjunctions.add(inclusionArray);
-            // 2. add CEi implies CEn implies C, which is { not CEi or C }
+            // 2. add CEi implies C, which is { not CEi or C }
             for (OWLClassExpression description : axiom.getClassExpressions())
                 m_inclusionsAsDisjunctions.add(new OWLClassExpression[] { negative(description),axiom.getOWLClass() });
             // 3. add CEi and CEj implies bottom (not CEi or not CEj) for 1 <= i < j <= n

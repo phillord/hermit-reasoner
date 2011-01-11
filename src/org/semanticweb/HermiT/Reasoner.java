@@ -2126,10 +2126,16 @@ public class Reasoner implements OWLReasoner {
         Individual ind=H(individual);
         return m_instanceManager.getNumberOfPredecessors(role, ind);
     }
-    public double[] getAverageNumberOfSuccessors(OWLObjectProperty property) {
+    /**
+     * @param property
+     * @return 0: number of known instances
+     *         1: number of possible instances
+     *         2: number of individuals with at least one known or possible successor
+     */
+    public int[] getNumberOfPropertyInstances(OWLObjectProperty property) {
         initialisePropertiesInstanceManager();
         AtomicRole role=H(property);
-        return m_instanceManager.getAverageNumberOfSuccessors(role);
+        return m_instanceManager.getNumberOfPropertyInstances(role);
     }
     public int getClassHierarchyDepth() {
         classifyClasses();

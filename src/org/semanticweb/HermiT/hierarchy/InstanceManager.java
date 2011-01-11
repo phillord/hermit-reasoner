@@ -487,7 +487,6 @@ public class InstanceManager {
             if (!hasType) {
                 AtomicConceptElement topElement=m_conceptToElement.get(m_topConcept);
                 if (topElement==null) {
-                    System.out.println("Ups, the top element was null");
                     topElement=new AtomicConceptElement(null, null);
                     m_conceptToElement.put(m_topConcept, topElement);
                 }
@@ -1332,7 +1331,7 @@ public class InstanceManager {
             if (child!=m_currentRoleHierarchy.m_bottomNode) 
                 getNumberOfRoleInstances(child,result);
         return result;
-    }    
+    }
     public int[] getNumberOfSuccessors(AtomicRole role, Individual individual) {
         int[] result=new int[2];
         HierarchyNode<RoleElement> node=m_currentRoleHierarchy.getNodeForElement(m_roleElementManager.getRoleElement(role));
@@ -1360,6 +1359,34 @@ public class InstanceManager {
             if (child!=m_currentRoleHierarchy.m_bottomNode) 
                 getNumberOfRoleSuccessors(child,individual,result);
         return result;
+    } 
+    public boolean[] hasSuccessor(AtomicRole role, Individual individual1, Individual individual2) {
+        boolean[] result=new boolean[2];
+        HierarchyNode<RoleElement> node=m_currentRoleHierarchy.getNodeForElement(m_roleElementManager.getRoleElement(role));
+        if (node==null) 
+            return result; // unknown role
+        RoleElement representative=node.getRepresentative();
+        if (representative.equals(m_topRoleElement))
+            return new boolean[] { true, false };
+        if (representative.equals(m_bottomRoleElement))
+            return result;
+        return hasRoleSuccessor(node,individual1,individual2);
+    }
+    protected boolean[] hasRoleSuccessor(HierarchyNode<RoleElement> node, Individual individual1, Individual individual2) {
+        RoleElement representative=node.getRepresentative();
+        Map<Individual,Set<Individual>> known=representative.getKnownRelations();
+        Map<Individual,Set<Individual>> possible=representative.getPossibleRelations();
+        if (known!=null && known.containsKey(individual1) && known.get(individual1).contains(individual2))
+            return new boolean[] { true, false };
+        if (possible!=null && possible.containsKey(individual1) && possible.get(individual1).contains(individual2))
+            return new boolean[] { false, true };
+        for (HierarchyNode<RoleElement> child : node.getChildNodes())
+            if (child!=m_currentRoleHierarchy.m_bottomNode) {
+                boolean[] result=hasRoleSuccessor(child,individual1,individual2);
+                if (result[0] || result[1])
+                    return result;
+            }
+        return new boolean[] { false, false };
     } 
     public int[] getNumberOfPredecessors(AtomicRole role, Individual individual) {
         int[] result=new int[2];
@@ -1403,8 +1430,14 @@ public class InstanceManager {
         }
         return result;
     } 
-    public double[] getAverageNumberOfSuccessors(AtomicRole role) {
-        double[] result=new double[2];
+    /**
+     * @param role
+     * @return 0: number of known instances
+     *         1: number of possible instances
+     *         2: number of individuals with at least one known or possible successor
+     */
+    public int[] getNumberOfPropertyInstances(AtomicRole role) {
+        int[] result=new int[3];
         HierarchyNode<RoleElement> node=m_currentRoleHierarchy.getNodeForElement(m_roleElementManager.getRoleElement(role));
         if (node==null) 
             return result; // unknown role
@@ -1412,19 +1445,24 @@ public class InstanceManager {
         if (representative.equals(m_bottomRoleElement))
             return result;
         AverageRoleSuccessorStatistics statistics=new AverageRoleSuccessorStatistics(m_currentRoleHierarchy.m_bottomNode);
-        m_currentRoleHierarchy.traverseDepthFirst(statistics);
-        double inds=(double)m_individuals.length;
-        if (statistics.successors>0) result[0]=inds/((double)statistics.successors);
-        if (statistics.possibleSuccessors>0) result[1]=inds/((double)statistics.possibleSuccessors);
+        @SuppressWarnings("unchecked")
+        HierarchyNode<RoleElement>[] redirectBuffer=new HierarchyNode[2];
+        Set<HierarchyNode<RoleElement>> visited=new HashSet<HierarchyNode<RoleElement>>();
+        m_currentRoleHierarchy.traverseDepthFirst(statistics,0,node,null,visited,redirectBuffer);
+        result[0]=statistics.successors;
+        result[1]=statistics.possibleSuccessors;
+        result[2]=statistics.inds.size();
         return result;
     }
     final class AverageRoleSuccessorStatistics implements Hierarchy.HierarchyNodeVisitor<RoleElement> {
         protected final HierarchyNode<RoleElement> m_bottomNode;
+        protected final Set<Individual> inds;
         protected int successors=0;
         protected int possibleSuccessors=0;
         
         public AverageRoleSuccessorStatistics(HierarchyNode<RoleElement> bottomNode) {
             m_bottomNode=bottomNode;
+            inds=new HashSet<Individual>();
         }
         public boolean redirect(HierarchyNode<RoleElement>[] nodes) {
             return true;
@@ -1433,11 +1471,15 @@ public class InstanceManager {
             if (firstVisit && !node.equals(m_bottomNode)) {
                 RoleElement representative=node.getRepresentative();
                 Map<Individual,Set<Individual>> map=representative.getKnownRelations();
-                for (Individual individual : map.keySet()) 
+                for (Individual individual : map.keySet()) {
+                    inds.add(individual);
                     successors+=map.get(individual).size();
+                }
                 map=representative.getPossibleRelations();
-                for (Individual individual : map.keySet()) 
+                for (Individual individual : map.keySet()) {
+                    inds.add(individual);
                     possibleSuccessors+=map.get(individual).size();
+                }
             }
         }
     }
