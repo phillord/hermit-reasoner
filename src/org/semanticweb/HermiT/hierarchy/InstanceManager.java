@@ -1164,14 +1164,21 @@ public class InstanceManager {
             while (!possiblySameEquivalenceClasses.isEmpty()) {
                 Set<Individual> possiblyEquivalentClass=possiblySameEquivalenceClasses.iterator().next();
                 possiblySameEquivalenceClasses.remove(possiblyEquivalentClass);
-                if (isSameIndividual(equivalenceClass.iterator().next(), possiblyEquivalentClass.iterator().next())) {
-                    if (m_individualToPossibleEquivalenceClass.containsKey(possiblyEquivalentClass)) {
-                        possiblySameEquivalenceClasses.addAll(m_individualToPossibleEquivalenceClass.get(possiblyEquivalentClass));
-                        m_individualToPossibleEquivalenceClass.remove(possiblyEquivalentClass);
-                        for (Individual nowKnownEquivalent : possiblyEquivalentClass)
-                            m_individualToEquivalenceClass.put(nowKnownEquivalent, equivalenceClass);
-                        equivalenceClass.addAll(possiblyEquivalentClass);
-                    }
+                if (possiblySameEquivalenceClasses.isEmpty())
+                    m_individualToPossibleEquivalenceClass.remove(equivalenceClass);
+                Individual possiblyEquivalentIndividual=possiblyEquivalentClass.iterator().next();
+                if (isSameIndividual(equivalenceClass.iterator().next(), possiblyEquivalentIndividual)) {
+                    equivalenceClass.addAll(possiblyEquivalentClass);
+                    equivalenceClass.addAll(m_individualToEquivalenceClass.get(possiblyEquivalentIndividual));
+                    for (Individual nowKnownEquivalent : possiblyEquivalentClass)
+                        m_individualToEquivalenceClass.put(nowKnownEquivalent, equivalenceClass);
+//                    if (m_individualToPossibleEquivalenceClass.containsKey(possiblyEquivalentClass)) {
+//                        possiblySameEquivalenceClasses.addAll(m_individualToPossibleEquivalenceClass.get(possiblyEquivalentClass));
+//                        m_individualToPossibleEquivalenceClass.remove(possiblyEquivalentClass);
+//                        for (Individual nowKnownEquivalent : possiblyEquivalentClass)
+//                            m_individualToEquivalenceClass.put(nowKnownEquivalent, equivalenceClass);
+//                        equivalenceClass.addAll(possiblyEquivalentClass);
+//                    }
                 } else {
                     Set<Set<Individual>> possiblyEquivalentToNowKnownInequivalent=m_individualToPossibleEquivalenceClass.get(possiblyEquivalentClass);
                     if (possiblyEquivalentToNowKnownInequivalent!=null && possiblyEquivalentToNowKnownInequivalent.contains(equivalenceClass)) {

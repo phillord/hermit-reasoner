@@ -106,7 +106,7 @@ HermiT 1.3.2
 - fixed a bug in the classification (in the case of several unsatisfiable classes, 
   HermiT skipped satisfiability tests for some of them and wrongly considered them 
   satisfiable), fixed a bug in object property instance retrieval that left out 
-  related individual if merging has occurred due to number restrictions, made 
+  related individuals if merging has occurred due to number restrictions, made 
   instance manager work also with unknown individuals (fresh entities), complex 
   data ranges are no longer simulated via concepts, but have their own 
   representations to fix a bug with rdfs:Literal
