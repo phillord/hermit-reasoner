@@ -422,8 +422,10 @@ public class Reasoner implements OWLReasoner {
         if (requiredInferences.contains(InferenceType.SAME_INDIVIDUAL))
             if (doAll || m_configuration.prepareReasonerInferences.sameAs)
                 precomputeSameAsEquivalenceClasses();
-        if (requiredInferences.contains(InferenceType.DIFFERENT_INDIVIDUALS))
-                throw new UnsupportedOperationException("Error: HermiT cannot precompute different individuals. "+System.getProperty("line.separator")+"That is a very expensive task because all pairs of individuals have to be tested despite the fact that such a test will most likely fail. ");
+        // the tasks is not being supported by HermiT because it would be very slow 
+        // we silently ignore the request as the documentation of the method recommends
+        //if (requiredInferences.contains(InferenceType.DIFFERENT_INDIVIDUALS))
+            //throw new UnsupportedOperationException("Error: HermiT cannot precompute different individuals. "+System.getProperty("line.separator")+"That is a very expensive task because all pairs of individuals have to be tested despite the fact that such a test will most likely fail. ");
         if (requiredInferences.contains(InferenceType.DISJOINT_CLASSES))
             precomputeDisjointClasses();
     }
