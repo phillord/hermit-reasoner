@@ -239,7 +239,7 @@ public class InstanceManager {
     public void setToClassifiedConceptHierarchy(Hierarchy<AtomicConcept> atomicConceptHierarchy) {
         m_currentConceptHierarchy=atomicConceptHierarchy;
         if (m_classesInitialised && m_individuals.length>0) {
-            for (HierarchyNode<AtomicConcept> node : m_currentConceptHierarchy.getAllNodes()) {
+            for (HierarchyNode<AtomicConcept> node : m_currentConceptHierarchy.getAllNodesSet()) {
                 if (node.m_representative!=m_bottomConcept) {
                     AtomicConcept representativeConcept=node.getRepresentative();
                     Set<Individual> known=new HashSet<Individual>();

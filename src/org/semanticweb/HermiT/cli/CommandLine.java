@@ -136,7 +136,7 @@ public class CommandLine {
                     }
                     output=new PrintWriter(f);
                 }
-                hermit.printHierarchies(output,true,false,false);
+                hermit.dumpHierarchies(output,true,false,false);
                 output.flush();
             }
         }
@@ -266,7 +266,7 @@ public class CommandLine {
         }
 
         public void run(Reasoner hermit,Prefixes prefixes,StatusOutput status,PrintWriter output) {
-            hermit.printHierarchies(output,true,false,false);
+            hermit.dumpHierarchies(output,true,false,false);
             output.flush();
         }
     }
@@ -301,7 +301,7 @@ public class CommandLine {
         "Example: hermit -ds owl:Thing http://hermit-reasoner.org/2008/test.owl",
         "    (prints direct subclasses of owl:Thing within the test ontology)",
         "Example: hermit --premise http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:GetOntology/New-Feature-DisjointObjectProperties-002?m=p --conclusion http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:GetOntology/New-Feature-DisjointObjectProperties-002?m=c --checkEntailment",
-        "    (prints direct subclasses of owl:Thing within the test ontology)",
+        "    (checks whether the conclusion ontology is entailed by the premise ontology)",
         "",
         "Both relative and absolute ontology IRIs can be used. Relative IRIs",
         "are resolved with respect to the current directory (i.e. local file",

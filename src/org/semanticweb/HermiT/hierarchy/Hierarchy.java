@@ -55,6 +55,9 @@ public class Hierarchy<E> {
     public Collection<HierarchyNode<E>> getAllNodes() {
         return Collections.unmodifiableCollection(m_nodesByElements.values());
     }
+    public Set<HierarchyNode<E>> getAllNodesSet() {
+        return Collections.unmodifiableSet(new HashSet<HierarchyNode<E>>(m_nodesByElements.values()));
+    }
     public Set<E> getAllElements() {
         return Collections.unmodifiableSet(m_nodesByElements.keySet());
     }

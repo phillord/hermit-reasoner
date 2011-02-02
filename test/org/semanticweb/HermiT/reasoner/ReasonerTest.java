@@ -37,6 +37,51 @@ public class ReasonerTest extends AbstractReasonerTest {
     public ReasonerTest(String name) {
         super(name);
     }
+//    public void testBackTracking() throws Exception {
+//        loadOntologyWithAxioms(
+//                "Declaration( Class( :A ) )"+LB+
+//                "Declaration( Class( :B ) )"+LB+
+//                "Declaration( Class( :C ) )"+LB+
+//                "Declaration( Class( :D ) )"+LB+
+//                "Declaration( Class( :E ) )"+LB+
+//                "Declaration( Class( :A0 ) )"+LB+
+//                "Declaration( Class( :oneBsucc ) )"+LB+
+//                "Declaration( Class( :oneDsucc ) )"+LB+
+//                "Declaration( Class( :AorB ) )"+LB+
+//                "Declaration( Class( :BorC ) )"+LB+
+//                "Declaration( Class( :CorD ) )"+LB+
+//                "Declaration( Class( :EorD ) )"+LB+
+//                "Declaration( ObjectProperty( :r ) )"+LB+
+//                "ClassAssertion(:A0 :a)"+LB+
+//                "SubClassOf(:A0 ObjectSomeValuesFrom(:r :oneBsucc))"+LB+
+//                "SubClassOf(:A0 ObjectSomeValuesFrom(:r :oneDsucc))"+LB+
+//                "SubClassOf(:oneBsucc ObjectMaxCardinality(1 :r :B))"+LB+
+//                "SubClassOf(:oneDsucc ObjectMaxCardinality(1 :r :D))"+LB+
+//                "SubClassOf(:oneBsucc ObjectSomeValuesFrom(:r :AorB))"+LB+
+//                "SubClassOf(:oneBsucc ObjectSomeValuesFrom(:r :BorC))"+LB+
+//                "SubClassOf(:oneDsucc ObjectSomeValuesFrom(:r :CorD))"+LB+
+//                "SubClassOf(:oneDsucc ObjectSomeValuesFrom(:r :EorD))"+LB+
+//                "SubClassOf(:AorB ObjectUnionOf(:A :B))"+LB+
+//                "SubClassOf(:BorC ObjectUnionOf(:B :C))"+LB+
+//                "SubClassOf(:CorD ObjectUnionOf(:C :D))"+LB+
+//                "SubClassOf(:EorD ObjectUnionOf(:E :D))"+LB+
+//                "SubClassOf(:A ObjectSomeValuesFrom(:r ObjectOneOf(:oA)))"+LB+
+//                "SubClassOf(:C ObjectSomeValuesFrom(:r ObjectOneOf(:oC)))"+LB+
+//                "SubClassOf(ObjectOneOf(:oA) ObjectAllValuesFrom(ObjectInverseOf(:r) ObjectComplementOf(:A)))"+LB+
+//                "SubClassOf(ObjectOneOf(:oC) ObjectAllValuesFrom(ObjectInverseOf(:r) ObjectComplementOf(:C)))"+LB+
+//                "DisjointClasses(:B :C)"+LB+
+//                "SubClassOf(:E ObjectAllValuesFrom(ObjectInverseOf(:r) owl:Nothing))"+LB);
+//        createReasoner();
+//        m_reasoner.getPrefixes().declarePrefix("", NS);
+//        for (DLClause clause : m_reasoner.getDLOntology().getDLClauses()) {
+//            System.out.println(clause.toString(m_reasoner.getPrefixes()));
+//        } 
+//        for (Atom atom : m_reasoner.getDLOntology().getPositiveFacts()) {
+//            System.out.println(atom.toString(m_reasoner.getPrefixes()));
+//        }
+//        m_reasoner.isConsistent();
+//        System.out.println("done");
+//    }
     public void testFreshEntityEntailment() throws Exception {
         loadOntologyWithAxioms(
                 "Declaration( Class( :A ) )"+

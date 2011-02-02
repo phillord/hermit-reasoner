@@ -50,6 +50,7 @@ import org.semanticweb.HermiT.existentials.IndividualReuseStrategy;
 import org.semanticweb.HermiT.hierarchy.ClassificationProgressMonitor;
 import org.semanticweb.HermiT.hierarchy.DeterministicClassification;
 import org.semanticweb.HermiT.hierarchy.Hierarchy;
+import org.semanticweb.HermiT.hierarchy.HierarchyDumperFSS;
 import org.semanticweb.HermiT.hierarchy.HierarchyNode;
 import org.semanticweb.HermiT.hierarchy.HierarchyPrinterFSS;
 import org.semanticweb.HermiT.hierarchy.HierarchySearch;
@@ -363,9 +364,9 @@ public class Reasoner implements OWLReasoner {
         supportedInferenceTypes.add(InferenceType.DATA_PROPERTY_HIERARCHY);
         supportedInferenceTypes.add(InferenceType.CLASS_ASSERTIONS);
         supportedInferenceTypes.add(InferenceType.OBJECT_PROPERTY_ASSERTIONS);
-        supportedInferenceTypes.add(InferenceType.DATA_PROPERTY_ASSERTIONS);
+//        supportedInferenceTypes.add(InferenceType.DATA_PROPERTY_ASSERTIONS);
         supportedInferenceTypes.add(InferenceType.SAME_INDIVIDUAL);
-        supportedInferenceTypes.add(InferenceType.DISJOINT_CLASSES);
+//        supportedInferenceTypes.add(InferenceType.DISJOINT_CLASSES);
         return supportedInferenceTypes;
     }
     public boolean isPrecomputed(InferenceType inferenceType) {
@@ -380,14 +381,14 @@ public class Reasoner implements OWLReasoner {
             return m_instanceManager!=null && m_instanceManager.realizationCompleted();
         case OBJECT_PROPERTY_ASSERTIONS:
             return m_instanceManager!=null && m_instanceManager.objectPropertyRealizationCompleted();
-        case DATA_PROPERTY_ASSERTIONS:
-            return m_dataRoleHierarchy!=null; // used to find sub-propeties
+//        case DATA_PROPERTY_ASSERTIONS:
+//            return m_dataRoleHierarchy!=null; // used to find sub-propeties
         case SAME_INDIVIDUAL:
             return m_instanceManager!=null && m_instanceManager.sameAsIndividualsComputed();
-        case DIFFERENT_INDIVIDUALS:
-            return false;
-        case DISJOINT_CLASSES:
-            return m_atomicConceptHierarchy!=null && m_directDisjointClasses.keySet().size()==m_atomicConceptHierarchy.getAllElements().size()-2;
+//        case DIFFERENT_INDIVIDUALS:
+//            return false;
+//        case DISJOINT_CLASSES:
+//            return m_atomicConceptHierarchy!=null && m_directDisjointClasses.keySet().size()==m_atomicConceptHierarchy.getAllElements().size()-2;
         default:
             break;
         }
@@ -416,9 +417,9 @@ public class Reasoner implements OWLReasoner {
         if (requiredInferences.contains(InferenceType.OBJECT_PROPERTY_ASSERTIONS))
             if (doAll || m_configuration.prepareReasonerInferences.objectPropertyRealisationRequired)
                 realiseObjectProperties();
-        if (requiredInferences.contains(InferenceType.DATA_PROPERTY_ASSERTIONS))
-            if (doAll || m_configuration.prepareReasonerInferences.dataPropertyRealisationRequired)
-                classifyDataProperties(); // used to enriched stated instances
+//        if (requiredInferences.contains(InferenceType.DATA_PROPERTY_ASSERTIONS))
+//            if (doAll || m_configuration.prepareReasonerInferences.dataPropertyRealisationRequired)
+//                classifyDataProperties(); // used to enriched stated instances
         if (requiredInferences.contains(InferenceType.SAME_INDIVIDUAL))
             if (doAll || m_configuration.prepareReasonerInferences.sameAs)
                 precomputeSameAsEquivalenceClasses();
@@ -426,8 +427,8 @@ public class Reasoner implements OWLReasoner {
         // we silently ignore the request as the documentation of the method recommends
         //if (requiredInferences.contains(InferenceType.DIFFERENT_INDIVIDUALS))
             //throw new UnsupportedOperationException("Error: HermiT cannot precompute different individuals. "+System.getProperty("line.separator")+"That is a very expensive task because all pairs of individuals have to be tested despite the fact that such a test will most likely fail. ");
-        if (requiredInferences.contains(InferenceType.DISJOINT_CLASSES))
-            precomputeDisjointClasses();
+//        if (requiredInferences.contains(InferenceType.DISJOINT_CLASSES))
+//            precomputeDisjointClasses();
     }
     protected void initialisePropertiesInstanceManager() {
         if (m_instanceManager==null || !m_instanceManager.arePropertiesInitialised()) {
@@ -723,7 +724,7 @@ public class Reasoner implements OWLReasoner {
         checkPreConditions();
         if (!m_isConsistent) 
             return;
-        if (m_atomicConceptHierarchy==null || m_directDisjointClasses.keySet().size()<m_atomicConceptHierarchy.getAllNodes().size()-2) {
+        if (m_atomicConceptHierarchy==null || m_directDisjointClasses.keySet().size()<m_atomicConceptHierarchy.getAllNodesSet().size()-2) {
             classifyClasses();
             Set<HierarchyNode<AtomicConcept>> nodes=new HashSet<HierarchyNode<AtomicConcept>>(m_atomicConceptHierarchy.getAllNodes());
             nodes.remove(m_atomicConceptHierarchy.getTopNode());
@@ -1908,7 +1909,35 @@ public class Reasoner implements OWLReasoner {
     // Hierarchy printing
 
     /**
-     * Prints the hierarchies into a functional style syntax ontology.
+     * Writes out the hierarchies quickly
+     *
+     * @param out
+     *            - the printwriter that is used to output the hierarchies
+     * @param classes
+     *            - if true, the class hierarchy is printed
+     * @param objectProperties
+     *            - if true, the object property hierarchy is printed
+     * @param dataProperties
+     *            - if true, the data property hierarchy is printed
+     */
+    public void dumpHierarchies(PrintWriter out,boolean classes,boolean objectProperties,boolean dataProperties) {
+        HierarchyDumperFSS printer=new HierarchyDumperFSS(out);
+        if (classes) {
+            classifyClasses();
+            printer.printAtomicConceptHierarchy(m_atomicConceptHierarchy);
+        }
+        if (objectProperties) {
+            classifyObjectProperties();
+            printer.printObjectPropertyHierarchy(m_objectRoleHierarchy);
+        }
+        if (dataProperties) {
+            classifyDataProperties();
+            printer.printDataPropertyHierarchy(m_dataRoleHierarchy);
+        }
+    }
+    
+    /**
+     * Prints the hierarchies into a functional style syntax ontology all nicely sorted alphabetically.
      *
      * @param out
      *            - the printwriter that is used to output the hierarchies
