@@ -160,7 +160,7 @@ public class Reasoner implements OWLReasoner {
     protected Map<AtomicRole,Set<HierarchyNode<AtomicConcept>>> m_directDataRoleDomains;
     protected Map<HierarchyNode<AtomicConcept>,Set<HierarchyNode<AtomicConcept>>> m_directDisjointClasses;
     protected InstanceManager m_instanceManager;
-    
+
     /**
      * Creates a new reasoner object with standard parameters for blocking, expansion strategy etc. Then the given manager is used to find all required imports for the given ontology and the ontology with the imports is loaded into the reasoner and the data factory of the manager is used to create fresh concepts during the preprocessing phase if necessary.
      *
@@ -400,13 +400,13 @@ public class Reasoner implements OWLReasoner {
         // doAll is only false when used via Protege, in that case the Protege preferences apply
         Set<InferenceType> requiredInferences=new HashSet<InferenceType>(Arrays.asList(inferenceTypes));
         if (requiredInferences.contains(InferenceType.CLASS_HIERARCHY))
-            if (doAll || m_configuration.prepareReasonerInferences.classClassificationRequired) 
+            if (doAll || m_configuration.prepareReasonerInferences.classClassificationRequired)
                 classifyClasses();
         if (requiredInferences.contains(InferenceType.OBJECT_PROPERTY_HIERARCHY))
-            if (doAll || m_configuration.prepareReasonerInferences.objectPropertyClassificationRequired) 
+            if (doAll || m_configuration.prepareReasonerInferences.objectPropertyClassificationRequired)
                 classifyObjectProperties();
         if (requiredInferences.contains(InferenceType.DATA_PROPERTY_HIERARCHY))
-            if (doAll || m_configuration.prepareReasonerInferences.dataPropertyClassificationRequired) 
+            if (doAll || m_configuration.prepareReasonerInferences.dataPropertyClassificationRequired)
                 classifyDataProperties();
         if (requiredInferences.contains(InferenceType.CLASS_ASSERTIONS))
             if (doAll || m_configuration.prepareReasonerInferences.realisationRequired) {
@@ -423,7 +423,7 @@ public class Reasoner implements OWLReasoner {
         if (requiredInferences.contains(InferenceType.SAME_INDIVIDUAL))
             if (doAll || m_configuration.prepareReasonerInferences.sameAs)
                 precomputeSameAsEquivalenceClasses();
-        // the tasks is not being supported by HermiT because it would be very slow 
+        // the tasks is not being supported by HermiT because it would be very slow
         // we silently ignore the request as the documentation of the method recommends
         //if (requiredInferences.contains(InferenceType.DIFFERENT_INDIVIDUALS))
             //throw new UnsupportedOperationException("Error: HermiT cannot precompute different individuals. "+System.getProperty("line.separator")+"That is a very expensive task because all pairs of individuals have to be tested despite the fact that such a test will most likely fail. ");
@@ -434,10 +434,10 @@ public class Reasoner implements OWLReasoner {
         if (m_instanceManager==null || !m_instanceManager.arePropertiesInitialised()) {
             if (m_configuration.reasonerProgressMonitor!=null)
                 m_configuration.reasonerProgressMonitor.reasonerTaskStarted("Initializing property instance data structures");
-            if (m_instanceManager==null) 
+            if (m_instanceManager==null)
                 m_instanceManager=new InstanceManager(m_interruptFlag,this, m_tableau, m_atomicConceptHierarchy, m_objectRoleHierarchy);
             boolean isConsistent=true;
-            if (m_isConsistent!=null && !m_isConsistent) 
+            if (m_isConsistent!=null && !m_isConsistent)
                 m_instanceManager.setInconsistent();
             else {
                 int noAxioms=m_dlOntology.getDLClauses().size();
@@ -476,7 +476,7 @@ public class Reasoner implements OWLReasoner {
                     moreWork=additionalAxioms.length>0;
                     loops++;
                 }
-                if (m_isConsistent==null) 
+                if (m_isConsistent==null)
                     m_isConsistent=isConsistent;
             }
             if (m_configuration.reasonerProgressMonitor!=null)
@@ -487,10 +487,10 @@ public class Reasoner implements OWLReasoner {
         if (m_instanceManager==null || !m_instanceManager.areClassesInitialised()) {
             if (m_configuration.reasonerProgressMonitor!=null)
                 m_configuration.reasonerProgressMonitor.reasonerTaskStarted("Initializing class instance data structures");
-            if (m_instanceManager==null) 
+            if (m_instanceManager==null)
                 m_instanceManager=new InstanceManager(m_interruptFlag,this, m_tableau, m_atomicConceptHierarchy, m_objectRoleHierarchy);
             boolean isConsistent=true;
-            if (m_isConsistent!=null && !m_isConsistent) 
+            if (m_isConsistent!=null && !m_isConsistent)
                 m_instanceManager.setInconsistent();
             else {
                 int noAxioms=m_dlOntology.getDLClauses().size();
@@ -540,15 +540,15 @@ public class Reasoner implements OWLReasoner {
     // Concept inferences
 
     /**
-     * @deprecated  As of release 1.3, replaced by  
-     * {@link #precomputeInferences(InferenceType... inferenceTypes)} 
+     * @deprecated  As of release 1.3, replaced by
+     * {@link #precomputeInferences(InferenceType... inferenceTypes)}
      * with inference type CLASS_HIERARCHY
      */
     @Deprecated
     public void classify() {
         classifyClasses();
     }
-    protected void classifyClasses() {
+    public void classifyClasses() {
         checkPreConditions();
         if (m_atomicConceptHierarchy==null) {
             Set<AtomicConcept> relevantAtomicConcepts=new HashSet<AtomicConcept>();
@@ -722,7 +722,7 @@ public class Reasoner implements OWLReasoner {
     }
     protected void precomputeDisjointClasses() {
         checkPreConditions();
-        if (!m_isConsistent) 
+        if (!m_isConsistent)
             return;
         if (m_atomicConceptHierarchy==null || m_directDisjointClasses.keySet().size()<m_atomicConceptHierarchy.getAllNodesSet().size()-2) {
             classifyClasses();
@@ -772,7 +772,7 @@ public class Reasoner implements OWLReasoner {
 
     // Object property inferences
 
-    protected void classifyObjectProperties() {
+    public void classifyObjectProperties() {
         checkPreConditions();
         if (m_objectRoleHierarchy==null) {
             Set<Role> relevantObjectRoles=new HashSet<Role>();
@@ -918,7 +918,7 @@ public class Reasoner implements OWLReasoner {
         HierarchyNode<Role> node=getHierarchyNode(propertyExpression);
         Set<HierarchyNode<Role>> result=new HashSet<HierarchyNode<Role>>();
         if (direct)
-            for (HierarchyNode<Role> n : node.getChildNodes()) 
+            for (HierarchyNode<Role> n : node.getChildNodes())
                 result.add(n);
         else {
             result=node.getDescendantNodes();
@@ -1152,7 +1152,7 @@ public class Reasoner implements OWLReasoner {
 
     // Data property inferences
 
-    protected void classifyDataProperties() {
+    public void classifyDataProperties() {
         checkPreConditions();
         if (m_dataRoleHierarchy==null) {
             Set<AtomicRole> relevantDataRoles=new HashSet<AtomicRole>();
@@ -1389,12 +1389,12 @@ public class Reasoner implements OWLReasoner {
         initialiseClassInstanceManager();
         m_instanceManager.realize(m_configuration.reasonerProgressMonitor);
     }
-    protected void realiseObjectProperties() {
+    public void realiseObjectProperties() {
         checkPreConditions();
         initialisePropertiesInstanceManager();
         m_instanceManager.realizeObjectRoles(m_configuration.reasonerProgressMonitor);
     }
-    protected void precomputeSameAsEquivalenceClasses() {
+    public void precomputeSameAsEquivalenceClasses() {
         checkPreConditions();
         initialiseClassInstanceManager();
         m_instanceManager.computeSameAsEquivalenceClasses(m_configuration.reasonerProgressMonitor);
@@ -1506,7 +1506,7 @@ public class Reasoner implements OWLReasoner {
         }
         initialisePropertiesInstanceManager();
         Role role=H(propertyExpression.getNamedProperty());
-        if (propertyExpression.getSimplified().isAnonymous()) 
+        if (propertyExpression.getSimplified().isAnonymous())
             role=InverseRole.create((AtomicRole)role);
         Individual individual=H(namedIndividual);
         Set<Individual> successors=m_instanceManager.getObjectPropertyValues(role,individual);
@@ -1528,7 +1528,7 @@ public class Reasoner implements OWLReasoner {
         for (Individual individual : relations.keySet()) {
             Set<OWLNamedIndividual> successors=new HashSet<OWLNamedIndividual>();
             result.put(factory.getOWLNamedIndividual(IRI.create(individual.getIRI())), successors);
-            for (Individual successorIndividual : relations.get(individual)) 
+            for (Individual successorIndividual : relations.get(individual))
                 successors.add(factory.getOWLNamedIndividual(IRI.create(successorIndividual.getIRI())));
         }
         return result;
@@ -1619,7 +1619,7 @@ public class Reasoner implements OWLReasoner {
                 Set<Individual> sameIndividuals=m_instanceManager.getSameAsIndividuals(individual);
                 Set<OWLNamedIndividual> sameNamedIndividuals=new HashSet<OWLNamedIndividual>();
 //                sameNamedIndividuals.add(factory.getOWLNamedIndividual(IRI.create(individual.getIRI())));
-                for (Individual sameIndividual : sameIndividuals) 
+                for (Individual sameIndividual : sameIndividuals)
                     sameNamedIndividuals.add(factory.getOWLNamedIndividual(IRI.create(sameIndividual.getIRI())));
                 individuals.removeAll(sameIndividuals);
                 result.add(new OWLNamedIndividualNode(sameNamedIndividuals));
@@ -1935,7 +1935,7 @@ public class Reasoner implements OWLReasoner {
             printer.printDataPropertyHierarchy(m_dataRoleHierarchy);
         }
     }
-    
+
     /**
      * Prints the hierarchies into a functional style syntax ontology all nicely sorted alphabetically.
      *
@@ -2127,9 +2127,9 @@ public class Reasoner implements OWLReasoner {
             result.add(dataPropertyHierarchyNodeToNode(hierarchyNode));
         return new OWLDataPropertyNodeSet(result);
     }
-    
+
     // methods for cost-based query axiom ordering
-    
+
     public int[] getNumberOfSameIndividuals(OWLIndividual individual) {
         initialiseClassInstanceManager(); // that will also initialize sameAs equivalence classes
         Individual ind=H(individual);
@@ -2233,15 +2233,15 @@ public class Reasoner implements OWLReasoner {
     // The reasoner that tracks changes
 
     public static class ProtegeReasonerFactory extends AbstractProtegeOWLReasonerInfo {
-        protected final ReasonerFactory factory=new ReasonerFactory(); 
-        
+        protected final ReasonerFactory factory=new ReasonerFactory();
+
         public BufferingMode getRecommendedBuffering() {
             return BufferingMode.BUFFERING;
         }
         public OWLReasonerFactory getReasonerFactory() {
             return factory;
         }
-            
+
         public OWLReasonerConfiguration getConfiguration(ReasonerProgressMonitor monitor) {
             Configuration configuration=factory.getProtegeConfiguration(null);
             configuration.reasonerProgressMonitor=monitor;
@@ -2251,7 +2251,7 @@ public class Reasoner implements OWLReasoner {
                 // if we are not thrown into the catch block, we can initialise the reasoner preferences
                 ReasonerPreferences preferences=this.getOWLModelManager().getReasonerPreferences();
                 PrepareReasonerInferences prepareReasonerInferences=new PrepareReasonerInferences();
-                
+
                 // class classification
                 prepareReasonerInferences.classClassificationRequired=
                     preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_CLASS_UNSATISFIABILITY) ||
@@ -2268,7 +2268,7 @@ public class Reasoner implements OWLReasoner {
                     preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_INVERSE_PROPERTIES) ||
                     preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_SUPER_OBJECT_PROPERTIES) ||
                     preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_OBJECT_PROPERTY_UNSATISFIABILITY);
-                
+
                 // data property classification
                 prepareReasonerInferences.dataPropertyClassificationRequired=
                     preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_EQUIVALENT_DATATYPE_PROPERTIES) ||
@@ -2284,12 +2284,12 @@ public class Reasoner implements OWLReasoner {
                 prepareReasonerInferences.objectPropertyRealisationRequired=preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_OBJECT_PROPERTY_ASSERTIONS);
 
                 // data property realisation
-                prepareReasonerInferences.dataPropertyRealisationRequired=preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_DATA_PROPERTY_ASSERTIONS); // cannot be switched off, but is usually fast since we only compute obvious assertions by syntactic analysis 
-                
+                prepareReasonerInferences.dataPropertyRealisationRequired=preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_DATA_PROPERTY_ASSERTIONS); // cannot be switched off, but is usually fast since we only compute obvious assertions by syntactic analysis
+
                 // object property domain & range
                 prepareReasonerInferences.objectPropertyDomainsRequired=preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_OBJECT_PROPERTY_DOMAINS);
                 prepareReasonerInferences.objectPropertyRangesRequired=preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_OBJECT_PROPERTY_RANGES);
-                
+
                 // sameAs
                 prepareReasonerInferences.sameAs=preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_DATA_PROPERTY_ASSERTIONS); // we also substitute same individuals now
 
