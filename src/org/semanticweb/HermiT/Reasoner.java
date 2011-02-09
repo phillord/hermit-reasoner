@@ -720,7 +720,7 @@ public class Reasoner implements OWLReasoner {
             return result;
         }
     }
-    protected void precomputeDisjointClasses() {
+    public void precomputeDisjointClasses() {
         checkPreConditions();
         if (!m_isConsistent)
             return;

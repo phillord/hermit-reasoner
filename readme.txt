@@ -111,13 +111,18 @@ HermiT 1.3.2
   data ranges are no longer simulated via concepts, but have their own 
   representations to fix a bug with rdfs:Literal
 HermiT 1.3.3
-- added method to just write out axioms for the transitively reduced 
-  (class/object property/dataproperty) hierarchy, much faster than pretty printing
-  but no longer a complete ontology (missing header and declarations) and not nicely
-  ordered and indented. Only equivalent classes (properties) are ordered in the 
-  according axiom.Command line is using this new method to write out taxonomies. 
+- New bug-fix release of the OWL API is used (3.2.1). Added a method to just write 
+  out axioms for the transitively reduced (class/object property/dataproperty) 
+  hierarchy, much faster than pretty printing but no longer a complete ontology 
+  (missing header and declarations) and not nicely ordered and indented. Only 
+  equivalent classes (properties) are ordered in the according axiom. The 
+  command line by default now just writes out the axioms, but pretty printing can 
+  be enforced with the --prettyPrint argument. Command line interface has been 
+  slightly tidied up and extended.  
   precomputeInferences() now silently ignores unsupported tasks and disjointClasses 
-  and data property assertions are no longer precomputable (disj. classes too slow, 
-  data property assertions are anyway only using the data property hierarchy and 
-  sameAs individuals). Fixed a bug that sometimes made sameAs computation hang.
-     
+  and data property assertions are no longer precomputable via the OWLReasoner 
+  interface (disj. classes too slow, data property assertions are anyway only using 
+  the data property hierarchy and sameAs individuals). Disj. classes can still be 
+  precomputed when using HermiT's native interface (Reasoner).    
+  Fixed a bug that sometimes made sameAs computation hang.
+  

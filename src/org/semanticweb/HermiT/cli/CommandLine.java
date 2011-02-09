@@ -20,12 +20,19 @@ package org.semanticweb.HermiT.cli;
 import gnu.getopt.Getopt;
 import gnu.getopt.LongOpt;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.text.BreakIterator;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Set;
 
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.EntailmentChecker;
@@ -33,14 +40,20 @@ import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.HermiT.monitor.Timer;
 import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyFormat;
+import org.semanticweb.owlapi.model.OWLOntologyIRIMapper;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.InferenceType;
 import org.semanticweb.owlapi.reasoner.Node;
 import org.semanticweb.owlapi.reasoner.NodeSet;
+import org.semanticweb.owlapi.util.AutoIRIMapper;
+import org.semanticweb.owlapi.util.SimpleRenderer;
+import org.semanticweb.owlapi.vocab.PrefixOWLOntologyFormat;
 
 public class CommandLine {
 
@@ -111,32 +124,38 @@ public class CommandLine {
     }
 
     static protected class ClassifyAction implements Action {
-        final String file;
-        public ClassifyAction(String fileName) {
-            file=fileName;
+        final boolean classifyClasses;
+        final boolean classifyOPs; 
+        final boolean classifyDPs;
+        final boolean prettyPrint;
+        final String outputLocation;
+        
+        public ClassifyAction(boolean classifyClasses, boolean classifyOPs, boolean classifyDPs, boolean prettyPrint, String outputLocation) {
+            this.classifyClasses=classifyClasses;
+            this.classifyOPs=classifyOPs;
+            this.classifyDPs=classifyDPs;
+            this.prettyPrint=prettyPrint;
+            this.outputLocation=outputLocation;
         }
-        public void run(Reasoner hermit,Prefixes prefixes,StatusOutput status,PrintWriter output) {
-            status.log(2,"classifying...");
-            hermit.precomputeInferences(InferenceType.CLASS_HIERARCHY);
-            if (file!=null) {
-                status.log(2,"writing taxonomy to "+file);
-                if (file.equals("-")) {
-                    output=new PrintWriter(System.out);
-                }
-                else {
-                    java.io.FileOutputStream f;
-                    try {
-                        f=new java.io.FileOutputStream(file);
-                    }
-                    catch (java.io.FileNotFoundException e) {
-                        throw new IllegalArgumentException("unable to open "+file+" for writing");
-                    }
-                    catch (SecurityException e) {
-                        throw new IllegalArgumentException("unable to write to "+file);
-                    }
-                    output=new PrintWriter(f);
-                }
-                hermit.dumpHierarchies(output,true,false,false);
+        public void run(Reasoner hermit,Prefixes prefixes, StatusOutput status, PrintWriter output) {
+            Set<InferenceType> inferences=new HashSet<InferenceType>();
+            if (classifyClasses)
+                inferences.add(InferenceType.CLASS_HIERARCHY);
+            if (classifyOPs)
+                inferences.add(InferenceType.OBJECT_PROPERTY_HIERARCHY);
+            if (classifyDPs)
+                inferences.add(InferenceType.DATA_PROPERTY_HIERARCHY);
+            status.log(2,"Classifying...");
+            hermit.precomputeInferences(inferences.toArray(new InferenceType[0]));
+            if (output!=null) {
+                if (outputLocation!=null)
+                    status.log(2,"Writing results to "+outputLocation);
+                else 
+                    status.log(2,"Writing results...");
+                if (prettyPrint)
+                    hermit.printHierarchies(output, classifyClasses, classifyOPs, classifyDPs);
+                else 
+                    hermit.dumpHierarchies(output, classifyClasses, classifyOPs, classifyDPs);
                 output.flush();
             }
         }
@@ -260,17 +279,6 @@ public class CommandLine {
         }
     }
 
-    static protected class TaxonomyAction implements Action {
-
-        public TaxonomyAction() {
-        }
-
-        public void run(Reasoner hermit,Prefixes prefixes,StatusOutput status,PrintWriter output) {
-            hermit.dumpHierarchies(output,true,false,false);
-            output.flush();
-        }
-    }
-
     protected static final int
         kTime=1000,
         kDumpClauses=1001,
@@ -343,7 +351,10 @@ public class CommandLine {
 
         // actions:
         new Option('l',"load",kActions,"parse and preprocess ontologies (default action)"),
-        new Option('c',"classify",kActions,false,"FILE","classify ontology, optionally writing taxonomy to FILE (use - for standard out)"),
+        new Option('c',"classify",kActions,"classify the classes of the ontology, optionally writing taxonomy to a file if -o (--output) is used"),
+        new Option('O',"classifyOPs",kActions,"classify the object properties of the ontology, optionally writing taxonomy to a file if -o (--output) is used"),
+        new Option('D',"classifyDPs",kActions,"classify the data properties of the ontology, optionally writing taxonomy to a file if -o (--output) is used"),
+        new Option('P',"prettyPrint",kActions,"when writing the classified hierarchy to a file, create a proper ontology and nicely indent the axioms according to their leven in the hierarchy"),
         new Option('k',"consistency",kActions,false,"CLASS","check satisfiability of CLASS (default owl:Thing)"),
         new Option('d',"direct",kActions,"restrict next subs/supers call to only direct sub/superclasses"),
         new Option('s',"subs",kActions,true,"CLASS","output classes subsumed by CLASS (or only direct subs if following --direct)"),
@@ -358,12 +369,14 @@ public class CommandLine {
         new Option(kDefaultPrefix,"prefix",kPrefixes,true,"IRI","use IRI as the default identifier prefix"),
 
         // algorithm tweaks:
-        new Option(kDirectBlock,"block-match",kAlgorithm,true,"TYPE","identify blocked nodes with TYPE blocking; supported values are 'single', 'pairwise', 'pairwise-reflexive', and 'optimal' (default 'optimal')"),
+        new Option(kDirectBlock,"block-match",kAlgorithm,true,"TYPE","identify blocked nodes with TYPE blocking; supported values are 'single', 'pairwise', and 'optimal' (default 'optimal')"),
+        new Option(kBlockStrategy,"block-strategy",kAlgorithm,true,"TYPE","use TYPE as blocking strategy; supported values are 'ancestor', 'anywhere', 'core', and 'optimal' (default 'optimal')"),
+        new Option(kBlockCache,"blockersCache",kAlgorithm,"cache blocking nodes for use in later tests; not possible with nominals or core blocking"),
         new Option(kIgnoreUnsupportedDatatypes,"ignoreUnsupportedDatatypes",kAlgorithm,"ignore unsupported datatypes"),
-
+        new Option(kExpansion,"expansion-strategy",kAlgorithm,true,"TYPE","use TYPE as existential expansion strategy; supported values are 'el', 'creation', 'reuse', and 'optimal' (default 'optimal')"),
+        
         // internals:
-        new Option(kDumpClauses,"dump-clauses",kInternals,false,"FILE","output DL-clauses to FILE (default stdout)"),
-        new Option(kTaxonomy,"taxonomy",kInternals,"output the taxonomy")
+        new Option(kDumpClauses,"dump-clauses",kInternals,false,"FILE","output DL-clauses to FILE (default stdout)")
     };
 
     public static void main(String[] argv) {
@@ -372,6 +385,11 @@ public class CommandLine {
             boolean ignoreOntologyPrefixes=false;
             Prefixes prefixes=new Prefixes();
             PrintWriter output=new PrintWriter(System.out);
+            String resultsFileLocation=null;
+            boolean classifyClasses=false;
+            boolean classifyOPs=false;
+            boolean classifyDPs=false;
+            boolean prettyPrint=false;
             Collection<Action> actions=new LinkedList<Action>();
             URI base;
             IRI conclusionIRI=null;
@@ -435,7 +453,7 @@ public class CommandLine {
                                 verbosity-=Integer.parseInt(arg,10);
                             }
                             catch (NumberFormatException e) {
-                                throw new UsageException("argument to --verbose must be a number");
+                                throw new UsageException("argument to --quiet must be a number");
                             }
                     }
                         break;
@@ -446,17 +464,23 @@ public class CommandLine {
                         if (arg.equals("-"))
                             output=new PrintWriter(System.out);
                         else {
-                            java.io.FileOutputStream f;
                             try {
-                                f=new java.io.FileOutputStream(arg);
+                                File file=new File(arg);
+                                if (!file.exists())
+                                    file.createNewFile();
+                                file=file.getAbsoluteFile();
+                                BufferedOutputStream stream=new BufferedOutputStream(new FileOutputStream(file));
+                                output=new PrintWriter(stream,true);
+                                resultsFileLocation=file.getAbsolutePath();
                             }
-                            catch (java.io.FileNotFoundException e) {
+                            catch (FileNotFoundException e) {
                                 throw new IllegalArgumentException("unable to open "+arg+" for writing");
                             }
                             catch (SecurityException e) {
                                 throw new IllegalArgumentException("unable to write to "+arg);
+                            } catch (IOException e) {
+                                throw new IllegalArgumentException("unable to write to "+arg+": "+e.getMessage());
                             }
-                            output=new PrintWriter(f);
                         }
                     }
                         break;
@@ -484,7 +508,19 @@ public class CommandLine {
                     }
                         break;
                     case 'c': {
-                        actions.add(new ClassifyAction(g.getOptarg()));
+                        classifyClasses=true;
+                    }
+                        break;
+                    case 'O': {
+                        classifyOPs=true;
+                    }
+                        break;
+                    case 'D': {
+                        classifyDPs=true;
+                    }
+                        break;
+                    case 'P': {
+                        prettyPrint=true;
                     }
                         break;
                     case 'k': {
@@ -581,20 +617,18 @@ public class CommandLine {
                         else if (arg.toLowerCase().equals("ancestor")) {
                             config.blockingStrategyType=Configuration.BlockingStrategyType.ANCESTOR;
                         }
+                        else if (arg.toLowerCase().equals("core")) {
+                            config.blockingStrategyType=Configuration.BlockingStrategyType.SIMPLE_CORE;
+                        }
+                        else if (arg.toLowerCase().equals("optimal")) {
+                            config.blockingStrategyType=Configuration.BlockingStrategyType.OPTIMAL;
+                        }
                         else
                             throw new UsageException("unknown blocking strategy type '"+arg+"'; supported values are 'ancestor' and 'anywhere'");
                     }
                         break;
                     case kBlockCache: {
-                        String arg=g.getOptarg();
-                        if (arg.toLowerCase().equals("on")) {
-                            config.blockingSignatureCacheType=Configuration.BlockingSignatureCacheType.CACHED;
-                        }
-                        else if (arg.toLowerCase().equals("off")) {
-                            config.blockingSignatureCacheType=Configuration.BlockingSignatureCacheType.NOT_CACHED;
-                        }
-                        else
-                            throw new UsageException("unknown blocking cache type '"+arg+"'; supported values are 'on' and 'off'");
+                        config.blockingSignatureCacheType=Configuration.BlockingSignatureCacheType.CACHED;
                     }
                         break;
                     case kExpansion: {
@@ -608,6 +642,9 @@ public class CommandLine {
                         else if (arg.toLowerCase().equals("reuse")) {
                             config.existentialStrategyType=Configuration.ExistentialStrategyType.INDIVIDUAL_REUSE;
                         }
+                        else if (arg.toLowerCase().equals("optimal")) {
+                            config.existentialStrategyType=Configuration.ExistentialStrategyType.OPTIMAL;
+                        }
                         else
                             throw new UsageException("unknown existential strategy type '"+arg+"'; supported values are 'creation', 'el', and 'reuse'");
                     }
@@ -618,10 +655,6 @@ public class CommandLine {
                         break;
                     case kDumpClauses: {
                         actions.add(new DumpClausesAction(g.getOptarg()));
-                    }
-                        break;
-                    case kTaxonomy: {
-                        actions.add(new TaxonomyAction());
                     }
                         break;
                     default: {
@@ -644,6 +677,8 @@ public class CommandLine {
             StatusOutput status=new StatusOutput(verbosity);
             if (verbosity>3)
                 config.monitor=new Timer(new PrintWriter(System.err));
+            if (classifyClasses || classifyOPs || classifyDPs)
+                actions.add(new ClassifyAction(classifyClasses, classifyOPs, classifyDPs, prettyPrint, resultsFileLocation));
             for (IRI ont : ontologies) {
                 didSomething=true;
                 status.log(2,"Processing "+ont.toString());
@@ -651,15 +686,42 @@ public class CommandLine {
                 try {
                     long startTime=System.currentTimeMillis();
                     OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
+                    if (ont.isAbsolute()) {
+                        File file=new File(URI.create(ont.getStart()));
+                        if (file.isDirectory()) {
+                            OWLOntologyIRIMapper mapper=new AutoIRIMapper(file, false);
+                            ontologyManager.addIRIMapper(mapper);
+                        }
+                    }
                     OWLOntology ontology=ontologyManager.loadOntology(ont);
+                    if (!ignoreOntologyPrefixes) {
+                        SimpleRenderer renderer=new SimpleRenderer();
+                        renderer.setPrefixesFromOntologyFormat(ontology, ontologyManager, true);
+                        ToStringRenderer.getInstance().setRenderer(renderer);
+                    }
                     long parseTime=System.currentTimeMillis()-startTime;
                     status.log(2,"Ontology parsed in "+String.valueOf(parseTime)+" msec.");
                     startTime=System.currentTimeMillis();
                     Reasoner hermit=new Reasoner(config,ontology);
+                    if (!ignoreOntologyPrefixes) {
+                        OWLOntologyFormat format=ontologyManager.getOntologyFormat(ontology);
+                        if (format instanceof PrefixOWLOntologyFormat) {
+                            PrefixOWLOntologyFormat prefixFormat = (PrefixOWLOntologyFormat)format;
+                            Prefixes hermitPrefixes=hermit.getPrefixes();
+                            for (String prefixName : prefixFormat.getPrefixName2PrefixMap().keySet()) {
+                                String prefix=prefixFormat.getPrefixName2PrefixMap().get(prefixName);
+                                if (hermitPrefixes.getPrefixName(prefix)==null)
+                                    try {
+                                        hermitPrefixes.declarePrefix(prefixName, prefix);
+                                    } catch (IllegalArgumentException e) {
+                                        // ignore
+                                    }
+                            }
+                            prefixes.addPrefixes(hermitPrefixes);
+                        }
+                    }
                     long loadTime=System.currentTimeMillis()-startTime;
                     status.log(2,"Reasoner created in "+String.valueOf(loadTime)+" msec.");
-                    if (!ignoreOntologyPrefixes)
-                        prefixes.addPrefixes(hermit.getPrefixes());
                     for (Action action : actions) {
                         status.log(2,"Doing action...");
                         startTime=System.currentTimeMillis();

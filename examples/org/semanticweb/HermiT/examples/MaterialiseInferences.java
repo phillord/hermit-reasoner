@@ -110,6 +110,8 @@ public class MaterialiseInferences {
         // relative path to an absolute one in an OS independent form. We do this by (virtually) creating a 
         // file with a relative path from which we get the absolute file.  
         File inferredOntologyFile=new File("examples/ontologies/pizza-inferred.owl");
+        if (!inferredOntologyFile.exists())
+            inferredOntologyFile.createNewFile();
         inferredOntologyFile=inferredOntologyFile.getAbsoluteFile();
         // Now we create a stream since the ontology manager can then write to that stream. 
         OutputStream outputStream=new FileOutputStream(inferredOntologyFile);
