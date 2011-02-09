@@ -340,9 +340,9 @@ public class CommandLine {
     protected static final String usageString="Usage: hermit [OPTION]... IRI...";
     protected static final String[] helpHeader={
         "Perform reasoning on each OWL ontology IRI.",
-        "Example: java -jar Hermit.jar -dsowl:Thing http://hermit-reasoner.org/2008/test.owl",
-        "    (prints direct subclasses of owl:Thing within the test ontology)",
-        "Example: hermit --premise http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:GetOntology/New-Feature-DisjointObjectProperties-002?m=p --conclusion http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:GetOntology/New-Feature-DisjointObjectProperties-002?m=c --checkEntailment",
+        "Example: java -jar Hermit.jar -dsowl:Thing http://www.co-ode.org/ontologies/pizza/2005/05/16/pizza.owl",
+        "    (prints direct subclasses of owl:Thing within the pizza ontology)",
+        "Example: java -jar Hermit.jar --premise=http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:GetOntology/New-Feature-DisjointObjectProperties-002?m=p --conclusion=http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:GetOntology/New-Feature-DisjointObjectProperties-002?m=c --checkEntailment",
         "    (checks whether the conclusion ontology is entailed by the premise ontology)",
         "",
         "Both relative and absolute ontology IRIs can be used. Relative IRIs",
