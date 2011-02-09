@@ -141,6 +141,25 @@ public class Prefixes implements Serializable {
                 throw new IllegalArgumentException("The abbreviation '"+abbreviation+"' is not valid (it does not start with a colon).");
         }
     }
+    /**
+     * Checks whether the given IRI can be expanded
+     */
+    public boolean canBeExpanded(String iri) {
+        if (iri.length()>0 && iri.charAt(0)=='<')
+            return false;
+        else {
+            int pos=iri.indexOf(':');
+            if (pos!=-1) {
+                String prefix=iri.substring(0,pos);
+                String ns=m_prefixIRIsByPrefixName.get(prefix);
+                if (ns==null)
+                    return false;
+                return true;
+            }
+            else
+                return false;
+        }
+    }
     public boolean declarePrefix(String prefixName,String prefixIRI) {
         boolean containsPrefix=declarePrefixRaw(prefixName,prefixIRI);
         buildPrefixIRIMatchingPattern();
@@ -171,7 +190,7 @@ public class Prefixes implements Serializable {
      * @param individualIRIs    the collection of IRIs used in individuals (used for registering nominal prefix names)
      * @return                  'true' if this object already contained one of the internal prefix names
      */
-    public boolean declareInternalPrefixes(Collection<String> individualIRIs) {
+    public boolean declareInternalPrefixes(Collection<String> individualIRIs, Collection<String> anonIndividualIRIs) {
         boolean containsPrefix=false;
         if (declarePrefixRaw("def","internal:def#"))
             containsPrefix=true;
@@ -192,7 +211,7 @@ public class Prefixes implements Serializable {
             individualIRIsIndex++;
         }
         int anonymousIndividualIRIsIndex=1;
-        for (String iri : individualIRIs) {
+        for (String iri : anonIndividualIRIs) {
             if (declarePrefixRaw("anon"+(anonymousIndividualIRIsIndex==1 ? "" : String.valueOf(anonymousIndividualIRIsIndex)),"internal:anon#"+iri))
                 containsPrefix=true;
             anonymousIndividualIRIsIndex++;

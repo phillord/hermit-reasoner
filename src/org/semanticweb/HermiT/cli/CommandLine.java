@@ -29,6 +29,7 @@ import java.io.PrintWriter;
 import java.net.URI;
 import java.text.BreakIterator;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
@@ -40,20 +41,16 @@ import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.HermiT.monitor.Timer;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyFormat;
 import org.semanticweb.owlapi.model.OWLOntologyIRIMapper;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.InferenceType;
 import org.semanticweb.owlapi.reasoner.Node;
 import org.semanticweb.owlapi.reasoner.NodeSet;
 import org.semanticweb.owlapi.util.AutoIRIMapper;
-import org.semanticweb.owlapi.util.SimpleRenderer;
-import org.semanticweb.owlapi.vocab.PrefixOWLOntologyFormat;
 
 public class CommandLine {
 
@@ -81,13 +78,13 @@ public class CommandLine {
     }
 
     protected interface Action {
-        void run(Reasoner hermit,Prefixes prefixes,StatusOutput status,PrintWriter output);
+        void run(Reasoner hermit,StatusOutput status,PrintWriter output,boolean ignoreOntologyPrefixes);
     }
 
     static protected class DumpPrefixesAction implements Action {
-        public void run(Reasoner hermit,Prefixes prefixes,StatusOutput status,PrintWriter output) {
+        public void run(Reasoner hermit,StatusOutput status,PrintWriter output,boolean ignoreOntologyPrefixes) {
             output.println("Prefixes:");
-            for (Map.Entry<String,String> e : prefixes.getPrefixIRIsByPrefixName().entrySet()) {
+            for (Map.Entry<String,String> e : hermit.getPrefixes().getPrefixIRIsByPrefixName().entrySet()) {
                 output.println("\t"+e.getKey()+"\t"+e.getValue());
             }
             output.flush();
@@ -96,10 +93,11 @@ public class CommandLine {
 
     static protected class DumpClausesAction implements Action {
         final String file;
+        
         public DumpClausesAction(String fileName) {
             file=fileName;
         }
-        public void run(Reasoner hermit,Prefixes prefixes,StatusOutput status,PrintWriter output) {
+        public void run(Reasoner hermit,StatusOutput status,PrintWriter output,boolean ignoreOntologyPrefixes) {
             if (file!=null) {
                 if (file.equals("-")) {
                     output=new PrintWriter(System.out);
@@ -118,7 +116,10 @@ public class CommandLine {
                     output=new PrintWriter(f);
                 }
             }
-            output.println(hermit.getDLOntology().toString(prefixes));
+            if (ignoreOntologyPrefixes)
+                output.println(hermit.getDLOntology().toString(new Prefixes()));
+            else
+                output.println(hermit.getDLOntology().toString(hermit.getPrefixes()));
             output.flush();
         }
     }
@@ -137,7 +138,7 @@ public class CommandLine {
             this.prettyPrint=prettyPrint;
             this.outputLocation=outputLocation;
         }
-        public void run(Reasoner hermit,Prefixes prefixes, StatusOutput status, PrintWriter output) {
+        public void run(Reasoner hermit, StatusOutput status, PrintWriter output,boolean ignoreOntologyPrefixes) {
             Set<InferenceType> inferences=new HashSet<InferenceType>();
             if (classifyClasses)
                 inferences.add(InferenceType.CLASS_HIERARCHY);
@@ -166,9 +167,10 @@ public class CommandLine {
         public SatisfiabilityAction(String c) {
             conceptName=c;
         }
-        public void run(Reasoner hermit,Prefixes prefixes,StatusOutput status,PrintWriter output) {
+        public void run(Reasoner hermit,StatusOutput status,PrintWriter output,boolean ignoreOntologyPrefixes) {
             status.log(2,"Checking satisfiability of '"+conceptName+"'");
-            String conceptUri=prefixes.expandAbbreviatedIRI(conceptName);
+            Prefixes prefixes=hermit.getPrefixes();
+            String conceptUri=prefixes.canBeExpanded(conceptName) ? prefixes.expandAbbreviatedIRI(conceptName) : conceptName;
             OWLClass owlClass=OWLManager.createOWLOntologyManager().getOWLDataFactory().getOWLClass(IRI.create(conceptUri));
             if (!hermit.isDefined(owlClass)) {
                 status.log(0,"Warning: class '"+conceptUri+"' was not declared in the ontology.");
@@ -181,14 +183,16 @@ public class CommandLine {
 
     static protected class SupersAction implements Action {
         final String conceptName;
-        boolean all;
+        final boolean all;
+        
         public SupersAction(String name,boolean getAll) {
             conceptName=name;
             all=getAll;
         }
-        public void run(Reasoner hermit,Prefixes prefixes,StatusOutput status,PrintWriter output) {
+        public void run(Reasoner hermit,StatusOutput status,PrintWriter output,boolean ignoreOntologyPrefixes) {
             status.log(2,"Finding supers of '"+conceptName+"'");
-            String conceptUri=prefixes.expandAbbreviatedIRI(conceptName);
+            Prefixes prefixes=hermit.getPrefixes();
+            String conceptUri=prefixes.canBeExpanded(conceptName) ? prefixes.expandAbbreviatedIRI(conceptName) :conceptName;
             OWLClass owlClass=OWLManager.createOWLOntologyManager().getOWLDataFactory().getOWLClass(IRI.create(conceptUri));
             if (!hermit.isDefined(owlClass)) {
                 status.log(0,"Warning: class '"+conceptUri+"' was not declared in the ontology.");
@@ -204,21 +208,30 @@ public class CommandLine {
             }
             for (Node<OWLClass> set : classes)
                 for (OWLClass classInSet : set)
-                    output.println("\t"+prefixes.abbreviateIRI(classInSet.getIRI().toString()));
+                    if (ignoreOntologyPrefixes) {
+                        String iri=classInSet.getIRI().toString();
+                        if (prefixes.canBeExpanded(iri))
+                            output.println("\t"+prefixes.expandAbbreviatedIRI(iri));
+                        else
+                            output.println("\t"+iri);
+                    } else 
+                        output.println("\t"+prefixes.abbreviateIRI(classInSet.getIRI().toString()));
             output.flush();
         }
     }
 
     static protected class SubsAction implements Action {
         final String conceptName;
-        boolean all;
+        final boolean all;
+        
         public SubsAction(String name,boolean getAll) {
             conceptName=name;
             all=getAll;
         }
-        public void run(Reasoner hermit,Prefixes prefixes,StatusOutput status,PrintWriter output) {
+        public void run(Reasoner hermit,StatusOutput status,PrintWriter output,boolean ignoreOntologyPrefixes) {
             status.log(2,"Finding subs of '"+conceptName+"'");
-            String conceptUri=prefixes.expandAbbreviatedIRI(conceptName);
+            Prefixes prefixes=hermit.getPrefixes();
+            String conceptUri=prefixes.canBeExpanded(conceptName) ? prefixes.expandAbbreviatedIRI(conceptName) : conceptName;
             OWLClass owlClass=OWLManager.createOWLOntologyManager().getOWLDataFactory().getOWLClass(IRI.create(conceptUri));
             if (!hermit.isDefined(owlClass)) {
                 status.log(0,"Warning: class '"+conceptUri+"' was not declared in the ontology.");
@@ -234,37 +247,58 @@ public class CommandLine {
             }
             for (Node<OWLClass> set : classes)
                 for (OWLClass classInSet : set)
-                    output.println("\t"+prefixes.abbreviateIRI(classInSet.getIRI().toString()));
+                    if (ignoreOntologyPrefixes) {
+                        String iri=classInSet.getIRI().toString();
+                        if (prefixes.canBeExpanded(iri))
+                            output.println("\t"+prefixes.expandAbbreviatedIRI(iri));
+                        else
+                            output.println("\t"+iri);
+                    } else 
+                        output.println("\t"+prefixes.abbreviateIRI(classInSet.getIRI().toString()));
             output.flush();
         }
     }
 
     static protected class EquivalentsAction implements Action {
         final String conceptName;
+        
         public EquivalentsAction(String name) {
             conceptName=name;
         }
-        public void run(Reasoner hermit,Prefixes prefixes,StatusOutput status,PrintWriter output) {
+        public void run(Reasoner hermit,StatusOutput status,PrintWriter output,boolean ignoreOntologyPrefixes) {
             status.log(2,"Finding equivalents of '"+conceptName+"'");
-            String conceptUri=prefixes.expandAbbreviatedIRI(conceptName);
+            Prefixes prefixes=hermit.getPrefixes();
+            String conceptUri=prefixes.canBeExpanded(conceptName) ? prefixes.expandAbbreviatedIRI(conceptName) : conceptName;
             OWLClass owlClass=OWLManager.createOWLOntologyManager().getOWLDataFactory().getOWLClass(IRI.create(conceptUri));
             if (!hermit.isDefined(owlClass)) {
-                status.log(0,"Warning: class '"+conceptUri+"' was not declared in the ontology.");
+                status.log(0,"Warning: class '"+conceptName+"' was not declared in the ontology.");
             }
             Node<OWLClass> classes=hermit.getEquivalentClasses(owlClass);
-            output.println("Classes equivalent to '"+conceptName+"':");
+            if (ignoreOntologyPrefixes)
+                output.println("Classes equivalent to '"+conceptName+"':");
+            else 
+                output.println("Classes equivalent to '"+prefixes.abbreviateIRI(conceptName)+"':");
             for (OWLClass classInSet : classes)
-                output.println("\t"+Prefixes.STANDARD_PREFIXES.abbreviateIRI(classInSet.getIRI().toString()));
+                if (ignoreOntologyPrefixes) {
+                    String iri=classInSet.getIRI().toString();
+                    if (prefixes.canBeExpanded(iri))
+                        output.println("\t"+prefixes.expandAbbreviatedIRI(iri));
+                    else
+                        output.println("\t"+iri);
+                } else 
+                    output.println("\t"+prefixes.abbreviateIRI(classInSet.getIRI().toString()));
             output.flush();
         }
     }
 
     static protected class EntailsAction implements Action {
+        
         final IRI conclusionIRI;
+        
         public EntailsAction(Configuration config,IRI conclusionIRI) {
             this.conclusionIRI=conclusionIRI;
         }
-        public void run(Reasoner hermit,Prefixes prefixes,StatusOutput status,PrintWriter output) {
+        public void run(Reasoner hermit,StatusOutput status,PrintWriter output,boolean ignoreOntologyPrefixes) {
             status.log(2,"Checking whether the loaded ontology entails the conclusion ontology");
             OWLOntologyManager m=OWLManager.createOWLOntologyManager();
             try {
@@ -306,7 +340,7 @@ public class CommandLine {
     protected static final String usageString="Usage: hermit [OPTION]... IRI...";
     protected static final String[] helpHeader={
         "Perform reasoning on each OWL ontology IRI.",
-        "Example: hermit -ds owl:Thing http://hermit-reasoner.org/2008/test.owl",
+        "Example: java -jar Hermit.jar -dsowl:Thing http://hermit-reasoner.org/2008/test.owl",
         "    (prints direct subclasses of owl:Thing within the test ontology)",
         "Example: hermit --premise http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:GetOntology/New-Feature-DisjointObjectProperties-002?m=p --conclusion http://km.aifb.uni-karlsruhe.de/projects/owltests/index.php/Special:GetOntology/New-Feature-DisjointObjectProperties-002?m=c --checkEntailment",
         "    (checks whether the conclusion ontology is entailed by the premise ontology)",
@@ -383,8 +417,9 @@ public class CommandLine {
         try {
             int verbosity=1;
             boolean ignoreOntologyPrefixes=false;
-            Prefixes prefixes=new Prefixes();
             PrintWriter output=new PrintWriter(System.out);
+            String defaultPrefix=null;
+            Map<String,String> prefixMappings=new HashMap<String,String>();
             String resultsFileLocation=null;
             boolean classifyClasses=false;
             boolean classifyOPs=false;
@@ -404,7 +439,7 @@ public class CommandLine {
             Collection<IRI> ontologies=new LinkedList<IRI>();
             boolean didSomething=false;
             {
-                Getopt g=new Getopt("hermit",argv,Option.formatOptionsString(options),Option.createLongOpts(options));
+                Getopt g=new Getopt("java-jar Hermit.jar",argv,Option.formatOptionsString(options),Option.createLongOpts(options));
                 g.setOpterr(false);
                 int opt;
                 while ((opt=g.getopt())!=-1) {
@@ -575,12 +610,12 @@ public class CommandLine {
                         if (eqIndex==-1) {
                             throw new IllegalArgumentException("the prefix declaration '"+arg+"' is not of the form PN=IRI.");
                         }
-                        prefixes.declarePrefix(arg.substring(0,eqIndex),arg.substring(eqIndex+1));
+                        prefixMappings.put(arg.substring(0,eqIndex),arg.substring(eqIndex+1));
                     }
                         break;
                     case kDefaultPrefix: {
                         String arg=g.getOptarg();
-                        prefixes.declareDefaultPrefix(arg);
+                        defaultPrefix=arg;
                     }
                         break;
                     case kBase: {
@@ -687,37 +722,39 @@ public class CommandLine {
                     long startTime=System.currentTimeMillis();
                     OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
                     if (ont.isAbsolute()) {
-                        File file=new File(URI.create(ont.getStart()));
-                        if (file.isDirectory()) {
-                            OWLOntologyIRIMapper mapper=new AutoIRIMapper(file, false);
-                            ontologyManager.addIRIMapper(mapper);
+                        URI uri=URI.create(ont.getStart());
+                        String scheme = uri.getScheme();
+                        if (scheme!=null && scheme.equalsIgnoreCase("file")) {
+                            File file=new File(URI.create(ont.getStart()));
+                            if (file.isDirectory()) {
+                                OWLOntologyIRIMapper mapper=new AutoIRIMapper(file, false);
+                                ontologyManager.addIRIMapper(mapper);
+                            }
                         }
                     }
                     OWLOntology ontology=ontologyManager.loadOntology(ont);
-                    if (!ignoreOntologyPrefixes) {
-                        SimpleRenderer renderer=new SimpleRenderer();
-                        renderer.setPrefixesFromOntologyFormat(ontology, ontologyManager, true);
-                        ToStringRenderer.getInstance().setRenderer(renderer);
-                    }
+//                    if (!ignoreOntologyPrefixes) {
+//                        SimpleRenderer renderer=new SimpleRenderer();
+//                        renderer.setPrefixesFromOntologyFormat(ontology, ontologyManager, true);
+//                        ToStringRenderer.getInstance().setRenderer(renderer);
+//                    }
                     long parseTime=System.currentTimeMillis()-startTime;
                     status.log(2,"Ontology parsed in "+String.valueOf(parseTime)+" msec.");
                     startTime=System.currentTimeMillis();
                     Reasoner hermit=new Reasoner(config,ontology);
-                    if (!ignoreOntologyPrefixes) {
-                        OWLOntologyFormat format=ontologyManager.getOntologyFormat(ontology);
-                        if (format instanceof PrefixOWLOntologyFormat) {
-                            PrefixOWLOntologyFormat prefixFormat = (PrefixOWLOntologyFormat)format;
-                            Prefixes hermitPrefixes=hermit.getPrefixes();
-                            for (String prefixName : prefixFormat.getPrefixName2PrefixMap().keySet()) {
-                                String prefix=prefixFormat.getPrefixName2PrefixMap().get(prefixName);
-                                if (hermitPrefixes.getPrefixName(prefix)==null)
-                                    try {
-                                        hermitPrefixes.declarePrefix(prefixName, prefix);
-                                    } catch (IllegalArgumentException e) {
-                                        // ignore
-                                    }
-                            }
-                            prefixes.addPrefixes(hermitPrefixes);
+                    Prefixes prefixes=hermit.getPrefixes();
+                    if (defaultPrefix!=null) {
+                        try {
+                            prefixes.declareDefaultPrefix(defaultPrefix);
+                        } catch (IllegalArgumentException e) {
+                            status.log(2,"Default prefix "+defaultPrefix+" could not be registered because there is already a registered default prefix. ");
+                        }
+                    }
+                    for (String prefixName : prefixMappings.keySet()) {
+                        try {
+                            prefixes.declarePrefix(prefixName, prefixMappings.get(prefixName));
+                        } catch (IllegalArgumentException e) {
+                            status.log(2,"Prefixname "+prefixName+" could not be set to "+prefixMappings.get(prefixName)+" because there is already a registered prefix name for the IRI. ");
                         }
                     }
                     long loadTime=System.currentTimeMillis()-startTime;
@@ -725,13 +762,14 @@ public class CommandLine {
                     for (Action action : actions) {
                         status.log(2,"Doing action...");
                         startTime=System.currentTimeMillis();
-                        action.run(hermit,prefixes,status,output);
+                        action.run(hermit,status,output,ignoreOntologyPrefixes);
                         long actionTime=System.currentTimeMillis()-startTime;
                         status.log(2,"...action completed in "+String.valueOf(actionTime)+" msec.");
                     }
                 }
                 catch (org.semanticweb.owlapi.model.OWLException e) {
                     System.err.println("It all went pear-shaped: "+e.getMessage());
+                    e.printStackTrace(System.err);
                 }
             }
             if (!didSomething)

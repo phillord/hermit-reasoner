@@ -108,6 +108,7 @@ import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyChangeListener;
+import org.semanticweb.owlapi.model.OWLOntologyFormat;
 import org.semanticweb.owlapi.model.OWLSubObjectPropertyOfAxiom;
 import org.semanticweb.owlapi.model.OWLSubPropertyChainOfAxiom;
 import org.semanticweb.owlapi.model.OWLTransitiveObjectPropertyAxiom;
@@ -136,6 +137,7 @@ import org.semanticweb.owlapi.reasoner.impl.OWLNamedIndividualNodeSet;
 import org.semanticweb.owlapi.reasoner.impl.OWLObjectPropertyNode;
 import org.semanticweb.owlapi.reasoner.impl.OWLObjectPropertyNodeSet;
 import org.semanticweb.owlapi.util.Version;
+import org.semanticweb.owlapi.vocab.PrefixOWLOntologyFormat;
 
 /**
  * Answers queries about the logical implications of a particular knowledge base. A Reasoner is associated with a single knowledge base, which is "loaded" when the reasoner is constructed. By default a full classification of all atomic terms in the knowledge base is also performed at this time (which can take quite a while for large or complex ontologies), but this behavior can be disabled as a part of the Reasoner configuration. Internal details of the loading and reasoning algorithms can be configured in the Reasoner constructor and do not change over the lifetime of the Reasoner object---internal data structures and caches are optimized for a particular configuration. By default, HermiT will use the set of options which provide optimal performance.
@@ -218,8 +220,44 @@ public class Reasoner implements OWLReasoner {
         m_objectPropertyInclusionManager=(ObjectPropertyInclusionManager)result[0];
         m_dlOntology=(DLOntology)result[1];
         // Load the DLOntology
-        m_prefixes=createPrefixes(m_dlOntology);
+        createPrefixes();
         m_tableau=createTableau(m_interruptFlag,m_configuration,m_dlOntology,null,m_prefixes);
+    }
+    protected void createPrefixes() {
+        m_prefixes=new Prefixes();
+        m_prefixes.declareSemanticWebPrefixes();
+        Set<String> individualIRIs=new HashSet<String>();
+        Set<String> anonIndividualIRIs=new HashSet<String>();
+        for (Individual individual : m_dlOntology.getAllIndividuals())
+            if (individual.isAnonymous())
+                addIRI(individual.getIRI(),anonIndividualIRIs);
+            else 
+                addIRI(individual.getIRI(),individualIRIs);
+        m_prefixes.declareInternalPrefixes(individualIRIs, anonIndividualIRIs);
+        m_prefixes.declareDefaultPrefix(m_dlOntology.getOntologyIRI()+"#");
+        // declare prefixes as used in the ontology if possible
+        OWLOntologyFormat format=m_rootOntology.getOWLOntologyManager().getOntologyFormat(m_rootOntology);
+        if (format instanceof PrefixOWLOntologyFormat) {
+            PrefixOWLOntologyFormat prefixFormat=(PrefixOWLOntologyFormat)format;
+            for (String prefixName : prefixFormat.getPrefixName2PrefixMap().keySet()) {
+                String prefix=prefixFormat.getPrefixName2PrefixMap().get(prefixName);
+                if (m_prefixes.getPrefixName(prefix)==null)
+                    try {
+                        m_prefixes.declarePrefix(prefixName, prefix);
+                    } catch (IllegalArgumentException e) {
+                        // ignore
+                    }
+            }
+        }
+    }
+    protected void addIRI(String uri,Set<String> prefixIRIs) {
+        if (!Prefixes.isInternalIRI(uri)) {
+            int lastHash=uri.lastIndexOf('#');
+            if (lastHash!=-1) {
+                String prefixIRI=uri.substring(0,lastHash+1);
+                prefixIRIs.add(prefixIRI);
+            }
+        }
     }
     protected void finalize() {
         dispose();
@@ -1861,49 +1899,6 @@ public class Reasoner implements OWLReasoner {
             axiom instanceof OWLSubPropertyChainOfAxiom ||
             axiom instanceof OWLFunctionalObjectPropertyAxiom ||
             axiom instanceof OWLInverseFunctionalObjectPropertyAxiom;
-    }
-    protected static Prefixes createPrefixes(DLOntology dlOntology) {
-        Set<String> prefixIRIs=new HashSet<String>();
-        for (AtomicConcept concept : dlOntology.getAllAtomicConcepts())
-            addIRI(concept.getIRI(),prefixIRIs);
-        for (AtomicRole atomicRole : dlOntology.getAllAtomicDataRoles())
-            addIRI(atomicRole.getIRI(),prefixIRIs);
-        for (AtomicRole atomicRole : dlOntology.getAllAtomicObjectRoles())
-            addIRI(atomicRole.getIRI(),prefixIRIs);
-        for (Individual individual : dlOntology.getAllIndividuals())
-            addIRI(individual.getIRI(),prefixIRIs);
-        Prefixes prefixes=new Prefixes();
-        prefixes.declareSemanticWebPrefixes();
-        prefixes.declareInternalPrefixes(prefixIRIs);
-        prefixes.declareDefaultPrefix(dlOntology.getOntologyIRI()+"#");
-        int prefixIndex=0;
-        for (String prefixIRI : prefixIRIs)
-            if (prefixes.getPrefixName(prefixIRI)==null) {
-                String prefix=getPrefixForIndex(prefixIndex);
-                while (prefixes.getPrefixIRI(prefix)!=null)
-                    prefix=getPrefixForIndex(++prefixIndex);
-                prefixes.declarePrefix(prefix,prefixIRI);
-                ++prefixIndex;
-            }
-        return prefixes;
-    }
-    protected static String getPrefixForIndex(int prefixIndex) {
-        StringBuffer buffer=new StringBuffer();
-        while (prefixIndex>=26) {
-            buffer.insert(0,(char)(('a')+(prefixIndex%26)));
-            prefixIndex/=26;
-        }
-        buffer.insert(0,(char)(('a')+prefixIndex));
-        return buffer.toString();
-    }
-    protected static void addIRI(String uri,Set<String> prefixIRIs) {
-        if (!Prefixes.isInternalIRI(uri)) {
-            int lastHash=uri.lastIndexOf('#');
-            if (lastHash!=-1) {
-                String prefixIRI=uri.substring(0,lastHash+1);
-                prefixIRIs.add(prefixIRI);
-            }
-        }
     }
 
     // Hierarchy printing

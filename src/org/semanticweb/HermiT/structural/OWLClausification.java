@@ -365,16 +365,6 @@ public class OWLClausification {
         DLClause clause=DLClause.createEx(true,hAtoms,bAtoms,ClauseType.HAS_KEY);
         return clause;
     }
-    protected static AtomicConcept getNominalConcept(OWLIndividual individual) {
-        AtomicConcept result;
-        if (individual.isAnonymous()) {
-            result=AtomicConcept.create("internal:anon#"+individual.asOWLAnonymousIndividual().getID().toString());
-        }
-        else {
-            result=AtomicConcept.create("internal:nom#"+individual.asOWLNamedIndividual().getIRI().toString());
-        }
-        return result;
-    }
     protected static LiteralConcept getLiteralConcept(OWLClassExpression description) {
         if (description instanceof OWLClass) {
             return AtomicConcept.create(((OWLClass)description).getIRI().toString());

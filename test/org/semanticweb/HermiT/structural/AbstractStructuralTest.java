@@ -3,6 +3,7 @@ package org.semanticweb.HermiT.structural;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -14,6 +15,7 @@ import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DescriptionGraph;
+import org.semanticweb.HermiT.model.Individual;
 
 public abstract class AbstractStructuralTest extends AbstractOntologyTest {
 
@@ -88,7 +90,14 @@ public abstract class AbstractStructuralTest extends AbstractOntologyTest {
         List<String> actualStrings=new ArrayList<String>();
         Prefixes prefixes=new Prefixes();
         prefixes.declareSemanticWebPrefixes();
-        prefixes.declareInternalPrefixes(Collections.singleton(ontologyIRI+"#"));
+        Set<String> individualIRIs=new HashSet<String>();
+        Set<String> anonIndividualIRIs=new HashSet<String>();
+        for (Individual individual : dlOntology.getAllIndividuals())
+            if (individual.isAnonymous())
+                addIRI(individual.getIRI(),anonIndividualIRIs);
+            else 
+                addIRI(individual.getIRI(),individualIRIs);
+        prefixes.declareInternalPrefixes(individualIRIs, anonIndividualIRIs);
         prefixes.declareDefaultPrefix(ontologyIRI+"#");
         for (DLClause dlClause : dlOntology.getDLClauses())
             actualStrings.add(dlClause.toOrderedString(prefixes));
@@ -97,5 +106,14 @@ public abstract class AbstractStructuralTest extends AbstractOntologyTest {
         for (org.semanticweb.HermiT.model.Atom atom : dlOntology.getNegativeFacts())
             actualStrings.add("not "+atom.toString(prefixes));
         return actualStrings;
+    }
+    protected void addIRI(String uri,Set<String> prefixIRIs) {
+        if (!Prefixes.isInternalIRI(uri)) {
+            int lastHash=uri.lastIndexOf('#');
+            if (lastHash!=-1) {
+                String prefixIRI=uri.substring(0,lastHash+1);
+                prefixIRIs.add(prefixIRI);
+            }
+        }
     }
 }
