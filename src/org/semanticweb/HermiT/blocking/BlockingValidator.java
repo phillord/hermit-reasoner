@@ -31,18 +31,18 @@ import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.DLClause;
+import org.semanticweb.HermiT.model.DLClause.ClauseType;
 import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.model.Equality;
 import org.semanticweb.HermiT.model.InverseRole;
 import org.semanticweb.HermiT.model.LiteralConcept;
 import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.model.Variable;
-import org.semanticweb.HermiT.model.DLClause.ClauseType;
 import org.semanticweb.HermiT.tableau.ExtensionManager;
 import org.semanticweb.HermiT.tableau.ExtensionTable;
+import org.semanticweb.HermiT.tableau.ExtensionTable.Retrieval;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.Tableau;
-import org.semanticweb.HermiT.tableau.ExtensionTable.Retrieval;
 
 /**
  * Checks whether the rules from some set are applicable given the current state of the extensions.
@@ -258,7 +258,7 @@ public class BlockingValidator {
     }
     protected boolean satisfiesDLClauseForBlockedXAndAnyZ(DLClauseInfo dlClauseInfo,Node blockedX,int parentOfBlockedXIndex,int toMatchIndex) {
         if (toMatchIndex==dlClauseInfo.m_zNodes.length)
-            return satisfiesDLClauseForBlockedXAnyZAndAnyY(dlClauseInfo,blockedX,parentOfBlockedXIndex,0);
+            return satisfiesDLClauseForBlockedXAnyZAndAnyY(dlClauseInfo,blockedX,parentOfBlockedXIndex,0,0);
         else {
             AtomicConcept[] zConcepts=dlClauseInfo.m_zConcepts[toMatchIndex];
             ExtensionTable.Retrieval retrieval=dlClauseInfo.m_zRetrievals[toMatchIndex];
@@ -285,38 +285,46 @@ public class BlockingValidator {
             return true;
         }
     }
-    protected boolean satisfiesDLClauseForBlockedXAnyZAndAnyY(DLClauseInfo dlClauseInfo,Node blockedX,int parentOfBlockedXIndex,int toMatchIndex) {
-        if (toMatchIndex==parentOfBlockedXIndex)
-            return satisfiesDLClauseForBlockedXAnyZAndAnyY(dlClauseInfo,blockedX,parentOfBlockedXIndex,toMatchIndex+1); // assignment already fixed, skip
-        else if (toMatchIndex==dlClauseInfo.m_yConstraints.length)
+    protected boolean satisfiesDLClauseForBlockedXAnyZAndAnyY(DLClauseInfo dlClauseInfo,Node blockedX,int parentOfBlockedXIndex,int toMatchIndexXToY,int toMatchIndexYToX) {
+        if ((toMatchIndexXToY+toMatchIndexYToX)==parentOfBlockedXIndex) {
+            // assignment already fixed, skip
+            if (dlClauseInfo.m_yConstraints[parentOfBlockedXIndex].m_x2yRoles.length!=0)
+                return satisfiesDLClauseForBlockedXAnyZAndAnyY(dlClauseInfo,blockedX,parentOfBlockedXIndex,toMatchIndexXToY+1,toMatchIndexYToX); 
+            else 
+                return satisfiesDLClauseForBlockedXAnyZAndAnyY(dlClauseInfo,blockedX,parentOfBlockedXIndex,toMatchIndexXToY,toMatchIndexYToX+1);
+        } else if ((toMatchIndexXToY+toMatchIndexYToX)==dlClauseInfo.m_yConstraints.length)
             return satisfiesDLClauseForBlockedXAndMatchedNodes(dlClauseInfo,blockedX,parentOfBlockedXIndex);
         else {
+            int xToYIncrement=0;
+            int yToXIncrement=0;
             Node blocker=blockedX.getBlocker();
             Node blockerParent=blocker.getParent();
-            YConstraint yConstraint=dlClauseInfo.m_yConstraints[toMatchIndex];
+            YConstraint yConstraint=dlClauseInfo.m_yConstraints[toMatchIndexXToY+toMatchIndexYToX];
             assert yConstraint.m_x2yRoles.length!=0 || yConstraint.m_y2xRoles.length!=0;
             int yNodeIndex;
             ExtensionTable.Retrieval retrieval;
             if (yConstraint.m_x2yRoles.length!=0) {
-                retrieval=dlClauseInfo.m_x2yRetrievals[toMatchIndex];
-                retrieval.getBindingsBuffer()[0]=dlClauseInfo.m_x2yRoles[toMatchIndex];
+                retrieval=dlClauseInfo.m_x2yRetrievals[toMatchIndexXToY];
+                retrieval.getBindingsBuffer()[0]=dlClauseInfo.m_x2yRoles[toMatchIndexXToY];
                 retrieval.getBindingsBuffer()[1]=blocker;
                 yNodeIndex=2;
+                xToYIncrement=1;
             }
             else {
-                retrieval=dlClauseInfo.m_y2xRetrievals[toMatchIndex];
-                retrieval.getBindingsBuffer()[0]=dlClauseInfo.m_y2xRoles[toMatchIndex];
+                retrieval=dlClauseInfo.m_y2xRetrievals[toMatchIndexYToX];
+                retrieval.getBindingsBuffer()[0]=dlClauseInfo.m_y2xRoles[toMatchIndexYToX];
                 retrieval.getBindingsBuffer()[2]=blocker;
                 yNodeIndex=1;
+                yToXIncrement=1;
             }
             retrieval.open();
             Object[] tupleBuffer=retrieval.getTupleBuffer();
             while (!retrieval.afterLast()) {
                 Node nodeY=(Node)tupleBuffer[yNodeIndex];
                 if (nodeY!=blockerParent && yConstraint.isSatisfiedExplicitly(m_extensionManager,blocker,nodeY)) {
-                    dlClauseInfo.m_yNodes[toMatchIndex]=nodeY;
-                    boolean result=satisfiesDLClauseForBlockedXAnyZAndAnyY(dlClauseInfo,blockedX,parentOfBlockedXIndex,toMatchIndex+1);
-                    dlClauseInfo.m_yNodes[toMatchIndex]=null; // checking done, reset assignment
+                    dlClauseInfo.m_yNodes[toMatchIndexXToY+toMatchIndexYToX]=nodeY;
+                    boolean result=satisfiesDLClauseForBlockedXAnyZAndAnyY(dlClauseInfo,blockedX,parentOfBlockedXIndex,toMatchIndexXToY+xToYIncrement,toMatchIndexYToX+yToXIncrement);
+                    dlClauseInfo.m_yNodes[toMatchIndexXToY+toMatchIndexYToX]=null; // checking done, reset assignment
                     if (!result)
                         return false;
                 }
@@ -408,7 +416,7 @@ public class BlockingValidator {
     }
     protected void checkDLClauseForNonblockedXAndAnyZ(DLClauseInfo dlClauseInfo,Node nonblockedX,int toMatchIndex) {
         if (toMatchIndex==dlClauseInfo.m_zNodes.length)
-            checkDLClauseForNonblockedXAnyZAndAnyY(dlClauseInfo,nonblockedX,0);
+            checkDLClauseForNonblockedXAnyZAndAnyY(dlClauseInfo,nonblockedX,0,0);
         else {
             AtomicConcept[] zConcepts=dlClauseInfo.m_zConcepts[toMatchIndex];
             ExtensionTable.Retrieval retrieval=dlClauseInfo.m_zRetrievals[toMatchIndex];
@@ -434,22 +442,26 @@ public class BlockingValidator {
             return;  // no z could be found that satisfies the constrains (clause is trivially satisfied)
         }
     }
-    protected void checkDLClauseForNonblockedXAnyZAndAnyY(DLClauseInfo dlClauseInfo,Node nonblockedX,int toMatchIndex) {
-        if (toMatchIndex==dlClauseInfo.m_yConstraints.length)
+    protected void checkDLClauseForNonblockedXAnyZAndAnyY(DLClauseInfo dlClauseInfo,Node nonblockedX,int toMatchIndexXtoY,int toMatchIndexYtoX) {
+        if ((toMatchIndexXtoY+toMatchIndexYtoX)==dlClauseInfo.m_yConstraints.length)
             checkDLClauseForNonblockedXAndMatchedNodes(dlClauseInfo,nonblockedX);
         else {
-            YConstraint yConstraint=dlClauseInfo.m_yConstraints[toMatchIndex];
+            YConstraint yConstraint=dlClauseInfo.m_yConstraints[toMatchIndexXtoY+toMatchIndexYtoX];
             assert yConstraint.m_x2yRoles.length!=0 || yConstraint.m_y2xRoles.length!=0;
+            int xToYIncrement=0;
+            int yToXIncrement=0;
             int yNodeIndex;
             ExtensionTable.Retrieval retrieval;
             if (yConstraint.m_x2yRoles.length!=0) {
-                retrieval=dlClauseInfo.m_x2yRetrievals[toMatchIndex];
-                retrieval.getBindingsBuffer()[0]=dlClauseInfo.m_x2yRoles[toMatchIndex];
+                xToYIncrement=1;
+                retrieval=dlClauseInfo.m_x2yRetrievals[toMatchIndexXtoY];
+                retrieval.getBindingsBuffer()[0]=dlClauseInfo.m_x2yRoles[toMatchIndexXtoY];
                 retrieval.getBindingsBuffer()[1]=nonblockedX;
                 yNodeIndex=2;
             } else {
-                retrieval=dlClauseInfo.m_y2xRetrievals[toMatchIndex];
-                retrieval.getBindingsBuffer()[0]=dlClauseInfo.m_y2xRoles[toMatchIndex];
+                yToXIncrement=1;
+                retrieval=dlClauseInfo.m_y2xRetrievals[toMatchIndexYtoX];
+                retrieval.getBindingsBuffer()[0]=dlClauseInfo.m_y2xRoles[toMatchIndexYtoX];
                 retrieval.getBindingsBuffer()[2]=nonblockedX;
                 yNodeIndex=1;
             }
@@ -458,9 +470,9 @@ public class BlockingValidator {
             while (!retrieval.afterLast()) {
                 Node nodeY=(Node)tupleBuffer[yNodeIndex];
                 if (yConstraint.isSatisfiedViaMirroringY(m_extensionManager,nonblockedX,nodeY)) {
-                    dlClauseInfo.m_yNodes[toMatchIndex]=nodeY;
-                    checkDLClauseForNonblockedXAnyZAndAnyY(dlClauseInfo,nonblockedX,toMatchIndex+1);
-                    dlClauseInfo.m_yNodes[toMatchIndex]=null; // checking done, reset assignments
+                    dlClauseInfo.m_yNodes[toMatchIndexXtoY+toMatchIndexYtoX]=nodeY;
+                    checkDLClauseForNonblockedXAnyZAndAnyY(dlClauseInfo,nonblockedX,toMatchIndexXtoY+xToYIncrement, toMatchIndexYtoX+yToXIncrement);
+                    dlClauseInfo.m_yNodes[toMatchIndexXtoY+toMatchIndexYtoX]=null; // checking done, reset assignments
                 }
                 retrieval.next();
             }
