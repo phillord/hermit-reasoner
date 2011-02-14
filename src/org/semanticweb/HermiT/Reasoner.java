@@ -1595,23 +1595,25 @@ public class Reasoner implements OWLReasoner {
             relevantDataProperties.add(property);
             Set<OWLNamedIndividual> relevantIndividuals=getSameIndividuals(namedIndividual).getEntities();
             for (OWLDataProperty dataProperty : relevantDataProperties) {
-                AtomicRole atomicRole=H(dataProperty);
-                Map<Individual,Set<Constant>> dataPropertyAssertions=m_dlOntology.getDataPropertyAssertions().get(atomicRole);
-                if (dataPropertyAssertions!=null) {
-                    for (OWLNamedIndividual ind : relevantIndividuals) {
-                        Individual individual=H(ind);
-                        if (dataPropertyAssertions.containsKey(individual)) {
-                            for (Constant constant : dataPropertyAssertions.get(individual)) {
-                                String lexicalForm=constant.getLexicalForm();
-                                String datatypeURI=constant.getDatatypeURI();
-                                OWLLiteral literal;
-                                if ((Prefixes.s_semanticWebPrefixes.get("rdf")+"PlainLiteral").equals(datatypeURI)) {
-                                    int atPosition=lexicalForm.lastIndexOf('@');
-                                    literal=factory.getOWLLiteral(lexicalForm.substring(0,atPosition),lexicalForm.substring(atPosition+1));
-                                } else {
-                                    literal=factory.getOWLLiteral(lexicalForm, factory.getOWLDatatype(IRI.create(datatypeURI)));
+                if (!dataProperty.isBottomEntity()) {
+                    AtomicRole atomicRole=H(dataProperty);
+                    Map<Individual,Set<Constant>> dataPropertyAssertions=m_dlOntology.getDataPropertyAssertions().get(atomicRole);
+                    if (dataPropertyAssertions!=null) {
+                        for (OWLNamedIndividual ind : relevantIndividuals) {
+                            Individual individual=H(ind);
+                            if (dataPropertyAssertions.containsKey(individual)) {
+                                for (Constant constant : dataPropertyAssertions.get(individual)) {
+                                    String lexicalForm=constant.getLexicalForm();
+                                    String datatypeURI=constant.getDatatypeURI();
+                                    OWLLiteral literal;
+                                    if ((Prefixes.s_semanticWebPrefixes.get("rdf")+"PlainLiteral").equals(datatypeURI)) {
+                                        int atPosition=lexicalForm.lastIndexOf('@');
+                                        literal=factory.getOWLLiteral(lexicalForm.substring(0,atPosition),lexicalForm.substring(atPosition+1));
+                                    } else {
+                                        literal=factory.getOWLLiteral(lexicalForm, factory.getOWLDatatype(IRI.create(datatypeURI)));
+                                    }
+                                    result.add(literal);
                                 }
-                                result.add(literal);
                             }
                         }
                     }
