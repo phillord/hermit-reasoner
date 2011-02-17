@@ -19,9 +19,7 @@ import com.clarkparsia.owlapi.explanation.BlackBoxExplanation;
 import com.clarkparsia.owlapi.explanation.HSTExplanationGenerator;
 
 public class Explanations {
-    // *****************************************
-    // Note that the example is not working at the moment due to a bug in the OWL API. 
-    // *****************************************
+
     public static void main(String[] args) throws Exception {
         // First, we create an OWLOntologyManager object. The manager will load and 
         // save ontologies. 
