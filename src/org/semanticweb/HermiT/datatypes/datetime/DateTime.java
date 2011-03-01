@@ -240,6 +240,8 @@ public class DateTime {
     public boolean equals(Object that) {
         if (this==that)
             return true;
+        if (!(that instanceof DateTime) || that==null)
+            return false;
         DateTime thatObject=(DateTime)that;
         return m_timeOnTimeline==thatObject.m_timeOnTimeline && m_lastDayInstant==thatObject.m_lastDayInstant && m_timeZoneOffset==thatObject.m_timeZoneOffset;
     }
