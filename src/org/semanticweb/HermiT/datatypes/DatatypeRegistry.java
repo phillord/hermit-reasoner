@@ -82,7 +82,19 @@ public class DatatypeRegistry {
         return getDatatypeHandlerFor(datatypeRestriction.getDatatypeURI());
     }
     public static Object parseLiteral(String lexicalForm,String datatypeURI) throws MalformedLiteralException,UnsupportedDatatypeException {
-        return getDatatypeHandlerFor(datatypeURI).parseLiteral(lexicalForm,datatypeURI);
+        DatatypeHandler handler;
+        try {
+            handler=getDatatypeHandlerFor(datatypeURI);
+        } catch (UnsupportedDatatypeException e) {
+            String CRLF=System.getProperty("line.separator");
+            String message=
+                "Literals can only use the datatypes from the OWL 2 datatype map, see "+CRLF+
+                "http://www.w3.org/TR/owl2-syntax/#Datatype_Maps. "+CRLF+
+                "The datatype '"+datatypeURI+"' is not part of the OWL 2 datatype map and "+CRLF+
+                "HermiT cannot parse this literal.";
+            throw new UnsupportedDatatypeException(message);
+        }
+        return handler.parseLiteral(lexicalForm,datatypeURI);
     }
     public static void validateDatatypeRestriction(DatatypeRestriction datatypeRestriction) throws UnsupportedDatatypeException,UnsupportedFacetException {
         getDatatypeHandlerFor(datatypeRestriction).validateDatatypeRestriction(datatypeRestriction);
