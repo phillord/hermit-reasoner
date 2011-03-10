@@ -237,58 +237,60 @@ public class InstanceManager {
         return DeterministicClassification.buildHierarchy(m_topConcept,m_bottomConcept,allSubsumers);
     }
     public void setToClassifiedConceptHierarchy(Hierarchy<AtomicConcept> atomicConceptHierarchy) {
-        m_currentConceptHierarchy=atomicConceptHierarchy;
-        if (m_classesInitialised && m_individuals.length>0) {
-            for (HierarchyNode<AtomicConcept> node : m_currentConceptHierarchy.getAllNodesSet()) {
-                if (node.m_representative!=m_bottomConcept) {
-                    AtomicConcept representativeConcept=node.getRepresentative();
-                    Set<Individual> known=new HashSet<Individual>();
-                    Set<Individual> possible=null;
-                    for (AtomicConcept concept : node.getEquivalentElements()) {
-                        if (m_conceptToElement.containsKey(concept)) {
-                            AtomicConceptElement element=m_conceptToElement.get(concept);
-                            known.addAll(element.m_knownInstances);
-                            if (possible==null) {
-                                possible=new HashSet<Individual>(element.m_possibleInstances);
-                            } else {
-                                possible.retainAll(element.m_possibleInstances);
+        if (atomicConceptHierarchy!=m_currentConceptHierarchy) {
+            m_currentConceptHierarchy=atomicConceptHierarchy;
+            if (m_classesInitialised && m_individuals.length>0) {
+                for (HierarchyNode<AtomicConcept> node : m_currentConceptHierarchy.getAllNodesSet()) {
+                    if (node.m_representative!=m_bottomConcept) {
+                        AtomicConcept representativeConcept=node.getRepresentative();
+                        Set<Individual> known=new HashSet<Individual>();
+                        Set<Individual> possible=null;
+                        for (AtomicConcept concept : node.getEquivalentElements()) {
+                            if (m_conceptToElement.containsKey(concept)) {
+                                AtomicConceptElement element=m_conceptToElement.get(concept);
+                                known.addAll(element.m_knownInstances);
+                                if (possible==null) {
+                                    possible=new HashSet<Individual>(element.m_possibleInstances);
+                                } else {
+                                    possible.retainAll(element.m_possibleInstances);
+                                }
+                                m_conceptToElement.remove(concept);
                             }
-                            m_conceptToElement.remove(concept);
                         }
+                        if (possible!=null)
+                            possible.removeAll(known);
+                        if (!known.isEmpty()||possible!=null||representativeConcept==m_topConcept) 
+                            m_conceptToElement.put(representativeConcept, new AtomicConceptElement(known, possible));
                     }
-                    if (possible!=null)
-                        possible.removeAll(known);
-                    if (!known.isEmpty()||possible!=null||representativeConcept==m_topConcept) 
-                        m_conceptToElement.put(representativeConcept, new AtomicConceptElement(known, possible));
+                }
+                // clean up known and possibles
+                Queue<HierarchyNode<AtomicConcept>> toProcess=new LinkedList<HierarchyNode<AtomicConcept>>();
+                toProcess.addAll(m_currentConceptHierarchy.m_bottomNode.m_parentNodes);
+                while (!toProcess.isEmpty()) {
+                    HierarchyNode<AtomicConcept> current=toProcess.remove();
+                    AtomicConcept currentConcept=current.getRepresentative();
+                    AtomicConceptElement currentElement=m_conceptToElement.get(currentConcept);
+                    if (currentElement!=null) {
+                        Set<HierarchyNode<AtomicConcept>> ancestors=current.getAncestorNodes();
+                        ancestors.remove(current);
+                        for (HierarchyNode<AtomicConcept> ancestor : ancestors) {
+                            AtomicConcept ancestorConcept=ancestor.getRepresentative();
+                            AtomicConceptElement ancestorElement=m_conceptToElement.get(ancestorConcept);
+                            if (ancestorElement!=null) {
+                                ancestorElement.m_knownInstances.removeAll(currentElement.m_knownInstances);
+                                ancestorElement.m_possibleInstances.removeAll(currentElement.m_knownInstances);
+                                ancestorElement.m_possibleInstances.removeAll(currentElement.m_possibleInstances);
+                            }
+                        }
+                        for (HierarchyNode<AtomicConcept> parent : current.getParentNodes())
+                            if (!toProcess.contains(parent)) 
+                                toProcess.add(parent);
+                    }
+                    m_interruptFlag.checkInterrupt();
                 }
             }
-            // clean up known and possibles
-            Queue<HierarchyNode<AtomicConcept>> toProcess=new LinkedList<HierarchyNode<AtomicConcept>>();
-            toProcess.addAll(m_currentConceptHierarchy.m_bottomNode.m_parentNodes);
-            while (!toProcess.isEmpty()) {
-                HierarchyNode<AtomicConcept> current=toProcess.remove();
-                AtomicConcept currentConcept=current.getRepresentative();
-                AtomicConceptElement currentElement=m_conceptToElement.get(currentConcept);
-                if (currentElement!=null) {
-                    Set<HierarchyNode<AtomicConcept>> ancestors=current.getAncestorNodes();
-                    ancestors.remove(current);
-                    for (HierarchyNode<AtomicConcept> ancestor : ancestors) {
-                        AtomicConcept ancestorConcept=ancestor.getRepresentative();
-                        AtomicConceptElement ancestorElement=m_conceptToElement.get(ancestorConcept);
-                        if (ancestorElement!=null) {
-                            ancestorElement.m_knownInstances.removeAll(currentElement.m_knownInstances);
-                            ancestorElement.m_possibleInstances.removeAll(currentElement.m_knownInstances);
-                            ancestorElement.m_possibleInstances.removeAll(currentElement.m_possibleInstances);
-                        }
-                    }
-                    for (HierarchyNode<AtomicConcept> parent : current.getParentNodes())
-                        if (!toProcess.contains(parent)) 
-                            toProcess.add(parent);
-                }
-                m_interruptFlag.checkInterrupt();
-            }
+            m_usesClassifiedConceptHierarchy=true;
         }
-        m_usesClassifiedConceptHierarchy=true;
     }
     protected Hierarchy<RoleElement> buildTransitivelyReducedRoleHierarchy(Graph<Role> knownSubsumptions) {
         final Map<Role,GraphNode<Role>> allSubsumers=new HashMap<Role,GraphNode<Role>>();

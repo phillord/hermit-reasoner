@@ -1423,19 +1423,26 @@ public class Reasoner implements OWLReasoner {
 
     protected void realise() {
         checkPreConditions();
-        classifyClasses();
-        initialiseClassInstanceManager();
-        m_instanceManager.realize(m_configuration.reasonerProgressMonitor);
+        if (m_dlOntology.getAllIndividuals().size()>0) {
+            classifyClasses();
+            initialiseClassInstanceManager();
+            m_instanceManager.realize(m_configuration.reasonerProgressMonitor);
+        }
     }
     public void realiseObjectProperties() {
         checkPreConditions();
-        initialisePropertiesInstanceManager();
-        m_instanceManager.realizeObjectRoles(m_configuration.reasonerProgressMonitor);
+        if (m_dlOntology.getAllIndividuals().size()>0) {
+            classifyObjectProperties();
+            initialisePropertiesInstanceManager();
+            m_instanceManager.realizeObjectRoles(m_configuration.reasonerProgressMonitor);
+        }
     }
     public void precomputeSameAsEquivalenceClasses() {
         checkPreConditions();
-        initialiseClassInstanceManager();
-        m_instanceManager.computeSameAsEquivalenceClasses(m_configuration.reasonerProgressMonitor);
+        if (m_dlOntology.getAllIndividuals().size()>0) { 
+            initialiseClassInstanceManager();
+            m_instanceManager.computeSameAsEquivalenceClasses(m_configuration.reasonerProgressMonitor);
+        }
     }
     public NodeSet<OWLClass> getTypes(OWLNamedIndividual namedIndividual,boolean direct) {
         checkPreConditions(namedIndividual);
@@ -1445,81 +1452,101 @@ public class Reasoner implements OWLReasoner {
             result=new HashSet<HierarchyNode<AtomicConcept>>();
             result.add(m_atomicConceptHierarchy.getTopNode());
         } else {
-            if (direct)
+            if (direct) 
                 classifyClasses();
             initialiseClassInstanceManager();
+            if (direct) 
+                m_instanceManager.setToClassifiedConceptHierarchy(m_atomicConceptHierarchy);
             result=m_instanceManager.getTypes(H(namedIndividual),direct);
         }
         return atomicConceptHierarchyNodesToNodeSet(result);
     }
     public boolean hasType(OWLNamedIndividual namedIndividual,OWLClassExpression type,boolean direct) {
         checkPreConditions(namedIndividual,type);
-        if (!m_isConsistent) return true;
-        if (direct)
-            classifyClasses();
-        initialiseClassInstanceManager();
-        if (type instanceof OWLClass)
-            return m_instanceManager.hasType(H(namedIndividual),H((OWLClass)type),direct);
-        else {
-            OWLDataFactory factory=getDataFactory();
-            OWLAxiom negatedAssertionAxiom=factory.getOWLClassAssertionAxiom(type.getObjectComplementOf(),namedIndividual);
-            Tableau tableau=getTableau(negatedAssertionAxiom);
-            return !tableau.isSatisfiable(true,true,null,null,null,null,null,ReasoningTaskDescription.isInstanceOf(namedIndividual,type));
+        if (!m_isConsistent) 
+            return true;
+        if (!isDefined(namedIndividual)) {
+            return getEquivalentClasses(type).contains(m_rootOntology.getOWLOntologyManager().getOWLDataFactory().getOWLThing());
+        } else {
+            if (type instanceof OWLClass) {
+                if (direct)
+                    classifyClasses();
+                initialiseClassInstanceManager();
+                if (direct) 
+                    m_instanceManager.setToClassifiedConceptHierarchy(m_atomicConceptHierarchy);
+                return m_instanceManager.hasType(H(namedIndividual),H((OWLClass)type),direct);
+            } else {
+                OWLDataFactory factory=getDataFactory();
+                OWLAxiom negatedAssertionAxiom=factory.getOWLClassAssertionAxiom(type.getObjectComplementOf(),namedIndividual);
+                Tableau tableau=getTableau(negatedAssertionAxiom);
+                return !tableau.isSatisfiable(true,true,null,null,null,null,null,ReasoningTaskDescription.isInstanceOf(namedIndividual,type));
+            }
         }
     }
     public NodeSet<OWLNamedIndividual> getInstances(OWLClassExpression classExpression,boolean direct) {
-        checkPreConditions(classExpression);
-        if (!m_isConsistent) {
-            Node<OWLNamedIndividual> node=new OWLNamedIndividualNode(getAllNamedIndividuals());
-            return new OWLNamedIndividualNodeSet(Collections.singleton(node));
-        }
-        if (direct || !(classExpression instanceof OWLClass))
-            classifyClasses();
-        initialiseClassInstanceManager();
-        Set<Individual> result=new HashSet<Individual>();
-        if (classExpression instanceof OWLClass)
-            result=m_instanceManager.getInstances(H((OWLClass)classExpression),direct);
-        else {
-            HierarchyNode<AtomicConcept> hierarchyNode=getHierarchyNode(classExpression);
-            result=m_instanceManager.getInstances(hierarchyNode,direct);
-            OWLDataFactory factory=getDataFactory();
-            OWLClass queryClass=factory.getOWLClass(IRI.create("internal:query-concept"));
-            OWLAxiom queryClassDefinition=factory.getOWLSubClassOfAxiom(queryClass,classExpression.getObjectComplementOf());
-            Tableau tableau=getTableau(queryClassDefinition);
-            AtomicConcept queryConcept=AtomicConcept.create("internal:query-concept");
-            Set<HierarchyNode<AtomicConcept>> visitedNodes=new HashSet<HierarchyNode<AtomicConcept>>(hierarchyNode.getChildNodes());
-            List<HierarchyNode<AtomicConcept>> toVisit=new ArrayList<HierarchyNode<AtomicConcept>>(hierarchyNode.getParentNodes());
-            while (!toVisit.isEmpty()) {
-                HierarchyNode<AtomicConcept> node=toVisit.remove(toVisit.size()-1);
-                if (visitedNodes.add(node)) {
-                    Set<Individual> realizationForNodeConcept=m_instanceManager.getInstances(node,true);
-                    if (realizationForNodeConcept!=null)
-                        for (Individual individual : realizationForNodeConcept)
-                            if (isResultRelevantIndividual(individual))
-                                if (!tableau.isSatisfiable(true,true,Collections.singleton(Atom.create(queryConcept,individual)),null,null,null,null,ReasoningTaskDescription.isInstanceOf(individual,classExpression)))
-                                    result.add(individual);
-                    toVisit.addAll(node.getChildNodes());
+        if (m_dlOntology.getAllIndividuals().size()>0) {
+            checkPreConditions(classExpression);
+            if (!m_isConsistent) {
+                Node<OWLNamedIndividual> node=new OWLNamedIndividualNode(getAllNamedIndividuals());
+                return new OWLNamedIndividualNodeSet(Collections.singleton(node));
+            }
+            if (direct || !(classExpression instanceof OWLClass))
+                classifyClasses();
+            initialiseClassInstanceManager();
+            Set<Individual> result=new HashSet<Individual>();
+            if (classExpression instanceof OWLClass)
+                result=m_instanceManager.getInstances(H((OWLClass)classExpression),direct);
+            else {
+                HierarchyNode<AtomicConcept> hierarchyNode=getHierarchyNode(classExpression);
+                result=m_instanceManager.getInstances(hierarchyNode,direct);
+                OWLDataFactory factory=getDataFactory();
+                OWLClass queryClass=factory.getOWLClass(IRI.create("internal:query-concept"));
+                OWLAxiom queryClassDefinition=factory.getOWLSubClassOfAxiom(queryClass,classExpression.getObjectComplementOf());
+                Tableau tableau=getTableau(queryClassDefinition);
+                AtomicConcept queryConcept=AtomicConcept.create("internal:query-concept");
+                Set<HierarchyNode<AtomicConcept>> visitedNodes=new HashSet<HierarchyNode<AtomicConcept>>(hierarchyNode.getChildNodes());
+                List<HierarchyNode<AtomicConcept>> toVisit=new ArrayList<HierarchyNode<AtomicConcept>>(hierarchyNode.getParentNodes());
+                while (!toVisit.isEmpty()) {
+                    HierarchyNode<AtomicConcept> node=toVisit.remove(toVisit.size()-1);
+                    if (visitedNodes.add(node)) {
+                        Set<Individual> realizationForNodeConcept=m_instanceManager.getInstances(node,true);
+                        if (realizationForNodeConcept!=null)
+                            for (Individual individual : realizationForNodeConcept)
+                                if (isResultRelevantIndividual(individual))
+                                    if (!tableau.isSatisfiable(true,true,Collections.singleton(Atom.create(queryConcept,individual)),null,null,null,null,ReasoningTaskDescription.isInstanceOf(individual,classExpression)))
+                                        result.add(individual);
+                        toVisit.addAll(node.getChildNodes());
+                    }
                 }
             }
-        }
-        return sortBySameAsIfNecessary(result);
+            return sortBySameAsIfNecessary(result);
+        } else
+            return new OWLNamedIndividualNodeSet(new HashSet<Node<OWLNamedIndividual>>());
     }
     public boolean isSameIndividual(OWLNamedIndividual namedIndividual1, OWLNamedIndividual namedIndividual2) {
         checkPreConditions(namedIndividual1,namedIndividual2);
         if (!m_isConsistent) return true;
-        initialiseClassInstanceManager();
-        return m_instanceManager.isSameIndividual(H(namedIndividual1),H(namedIndividual2));
+        if (m_dlOntology.getAllIndividuals().size()==0) 
+            return false;
+        else {
+            initialiseClassInstanceManager();
+            return m_instanceManager.isSameIndividual(H(namedIndividual1),H(namedIndividual2));
+        }
     }
     public Node<OWLNamedIndividual> getSameIndividuals(OWLNamedIndividual namedIndividual) {
         checkPreConditions(namedIndividual);
         if (!m_isConsistent) return new OWLNamedIndividualNode(getAllNamedIndividuals());
-        initialiseClassInstanceManager();
-        Set<Individual> sameIndividuals=m_instanceManager.getSameAsIndividuals(H(namedIndividual));
-        OWLDataFactory factory=getDataFactory();
-        Set<OWLNamedIndividual> result=new HashSet<OWLNamedIndividual>();
-        for (Individual individual : sameIndividuals)
-            result.add(factory.getOWLNamedIndividual(IRI.create(individual.getIRI())));
-        return new OWLNamedIndividualNode(result);
+        if (m_dlOntology.getAllIndividuals().size()==0) 
+            return new OWLNamedIndividualNode();
+        else {
+            initialiseClassInstanceManager();
+            Set<Individual> sameIndividuals=m_instanceManager.getSameAsIndividuals(H(namedIndividual));
+            OWLDataFactory factory=getDataFactory();
+            Set<OWLNamedIndividual> result=new HashSet<OWLNamedIndividual>();
+            for (Individual individual : sameIndividuals)
+                result.add(factory.getOWLNamedIndividual(IRI.create(individual.getIRI())));
+            return new OWLNamedIndividualNode(result);
+        }
     }
     public NodeSet<OWLNamedIndividual> getDifferentIndividuals(OWLNamedIndividual namedIndividual) {
         checkPreConditions(namedIndividual);
@@ -2128,31 +2155,51 @@ public class Reasoner implements OWLReasoner {
     // methods for cost-based query axiom ordering
 
     public int[] getNumberOfSameIndividuals(OWLIndividual individual) {
-        initialiseClassInstanceManager(); // that will also initialize sameAs equivalence classes
-        Individual ind=H(individual);
-        return m_instanceManager.getNumberOfSameAs(ind);
+        if (m_dlOntology.getAllIndividuals().size()>0) 
+            return new int[] { 0, 0 };
+        else {
+            initialiseClassInstanceManager(); // that will also initialize sameAs equivalence classes
+            Individual ind=H(individual);
+            return m_instanceManager.getNumberOfSameAs(ind);
+        }
     }
     public int[] getNumberOfInstances(OWLClass owlClass) {
-        initialiseClassInstanceManager();
-        AtomicConcept concept=H(owlClass);
-        return m_instanceManager.getNumberOfInstances(concept);
+        if (m_dlOntology.getAllIndividuals().size()>0) 
+            return new int[] { 0, 0 };
+        else {
+            initialiseClassInstanceManager();
+            AtomicConcept concept=H(owlClass);
+            return m_instanceManager.getNumberOfInstances(concept);
+        }
     }
     public int[] getNumberOfInstances(OWLObjectProperty property) {
-        initialisePropertiesInstanceManager();
-        AtomicRole role=H(property);
-        return m_instanceManager.getNumberOfInstances(role);
+        if (m_dlOntology.getAllIndividuals().size()>0) 
+            return new int[] { 0, 0 };
+        else {
+            initialisePropertiesInstanceManager();
+            AtomicRole role=H(property);
+            return m_instanceManager.getNumberOfInstances(role);
+        }
     }
     public int[] getNumberOfSuccessors(OWLObjectProperty property, OWLIndividual individual) {
-        initialisePropertiesInstanceManager();
-        AtomicRole role=H(property);
-        Individual ind=H(individual);
-        return m_instanceManager.getNumberOfSuccessors(role, ind);
+        if (m_dlOntology.getAllIndividuals().size()>0) 
+            return new int[] { 0, 0 };
+        else {
+            initialisePropertiesInstanceManager();
+            AtomicRole role=H(property);
+            Individual ind=H(individual);
+            return m_instanceManager.getNumberOfSuccessors(role, ind);
+        }
     }
     public int[] getNumberOfPredecessors(OWLObjectProperty property, OWLIndividual individual) {
-        initialisePropertiesInstanceManager();
-        AtomicRole role=H(property);
-        Individual ind=H(individual);
-        return m_instanceManager.getNumberOfPredecessors(role, ind);
+        if (m_dlOntology.getAllIndividuals().size()>0) 
+            return new int[] { 0, 0 };
+        else {
+            initialisePropertiesInstanceManager();
+            AtomicRole role=H(property);
+            Individual ind=H(individual);
+            return m_instanceManager.getNumberOfPredecessors(role, ind);
+        }
     }
     /**
      * @param property
@@ -2161,9 +2208,13 @@ public class Reasoner implements OWLReasoner {
      *         2: number of individuals with at least one known or possible successor
      */
     public int[] getNumberOfPropertyInstances(OWLObjectProperty property) {
-        initialisePropertiesInstanceManager();
-        AtomicRole role=H(property);
-        return m_instanceManager.getNumberOfPropertyInstances(role);
+        if (m_dlOntology.getAllIndividuals().size()>0) 
+            return new int[] { 0, 0, 0 };
+        else {
+            initialisePropertiesInstanceManager();
+            AtomicRole role=H(property);
+            return m_instanceManager.getNumberOfPropertyInstances(role);
+        }
     }
     public int getClassHierarchyDepth() {
         classifyClasses();
@@ -2179,9 +2230,13 @@ public class Reasoner implements OWLReasoner {
     }
     public int[] getNumberOfTypes(OWLIndividual individual) {
         classifyClasses();
-        initialiseClassInstanceManager();
-        Individual ind=H(individual);
-        return m_instanceManager.getNumberOfTypes(ind);
+        if (m_dlOntology.getAllIndividuals().size()>0) 
+            return new int[] { m_atomicConceptHierarchy.getTopNode().getEquivalentElements().size(), 0 };
+        else {
+            initialiseClassInstanceManager();
+            Individual ind=H(individual);
+            return m_instanceManager.getNumberOfTypes(ind);
+        }
     }
     // The factory for OWL API reasoners
 
