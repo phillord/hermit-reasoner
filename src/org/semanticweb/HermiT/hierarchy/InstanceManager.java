@@ -126,7 +126,7 @@ public class InstanceManager {
             Graph<AtomicConcept> knownConceptSubsumptions=null;
             Set<AtomicConcept> atomicConcepts=null;
             if (atomicConceptHierarchy!=null) {
-                m_currentConceptHierarchy=atomicConceptHierarchy;
+                setToClassifiedConceptHierarchy(atomicConceptHierarchy);
             } else {
                 knownConceptSubsumptions=new Graph<AtomicConcept>();
                 atomicConcepts=new HashSet<AtomicConcept>();
