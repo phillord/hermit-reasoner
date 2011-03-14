@@ -35,6 +35,7 @@ import org.semanticweb.owlapi.model.OWLNegativeObjectPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLObjectAllValuesFrom;
 import org.semanticweb.owlapi.model.OWLObjectCardinalityRestriction;
 import org.semanticweb.owlapi.model.OWLObjectComplementOf;
+import org.semanticweb.owlapi.model.OWLObjectHasSelf;
 import org.semanticweb.owlapi.model.OWLObjectInverseOf;
 import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 
@@ -103,10 +104,15 @@ public class ObjectPropertyInclusionManager {
             for (int index=0;index<inclusion.length;index++) {
                 OWLClassExpression classExpression=inclusion[index];
                 if (classExpression instanceof OWLObjectCardinalityRestriction) {
-                    OWLObjectCardinalityRestriction objectCardinalityRestriction=(OWLObjectCardinalityRestriction)inclusion[index];
+                    OWLObjectCardinalityRestriction objectCardinalityRestriction=(OWLObjectCardinalityRestriction)classExpression;
                     OWLObjectPropertyExpression objectPropertyExpression=objectCardinalityRestriction.getProperty();
                     if (axioms.m_complexObjectPropertyExpressions.contains(objectPropertyExpression))
-                        throw new IllegalArgumentException("Non-simple property '"+objectPropertyExpression+"' or its inverse appears in a number restriction '"+objectCardinalityRestriction+"'.");
+                        throw new IllegalArgumentException("Non-simple property '"+objectPropertyExpression+"' or its inverse appears in the cardinality restriction '"+objectCardinalityRestriction+"'.");
+                }
+                else if (classExpression instanceof OWLObjectHasSelf) {
+                	OWLObjectHasSelf objectSelfRestriction=(OWLObjectHasSelf)classExpression;
+                	if (axioms.m_complexObjectPropertyExpressions.contains(objectSelfRestriction.getProperty()))
+                        throw new IllegalArgumentException("Non-simple property '"+objectSelfRestriction.getProperty()+"' or its inverse appears in the Self restriction '"+objectSelfRestriction+"'.");
                 }
                 if (classExpression instanceof OWLObjectAllValuesFrom) {
                     OWLObjectAllValuesFrom objectAll=(OWLObjectAllValuesFrom)classExpression;
