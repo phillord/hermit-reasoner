@@ -39,6 +39,7 @@ public class ShowSubtreeCommand extends AbstractCommand {
         writer.println("usage: showSubtree nodeID");
         writer.println("    Shows the subtree of the model rooted at the given node.");
         writer.println("    black: root node");
+        writer.println("    darkgrey: named node");
         writer.println("    green: blockable node (not blocked)");
         writer.println("    light gray: inactive node");
         writer.println("    cyan: blocked node");

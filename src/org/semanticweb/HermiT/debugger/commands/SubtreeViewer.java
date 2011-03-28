@@ -68,8 +68,8 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
 import org.semanticweb.HermiT.debugger.Debugger;
-import org.semanticweb.HermiT.debugger.Printing;
 import org.semanticweb.HermiT.debugger.Debugger.NodeCreationInfo;
+import org.semanticweb.HermiT.debugger.Printing;
 import org.semanticweb.HermiT.model.AtLeastConcept;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.tableau.Node;
@@ -254,6 +254,7 @@ public class SubtreeViewer extends JFrame {
         protected static final Icon BLOCKED_ICON=new DotIcon(Color.CYAN);
         protected static final Icon WITH_EXISTENTIALS_ICON=new DotIcon(Color.RED);
         protected static final Icon NI_NODE_ICON=new DotIcon(Color.BLACK);
+        protected static final Icon NAMED_NODE_ICON=new DotIcon(Color.DARK_GRAY);
         protected static final Icon TREE_NODE_ICON=new DotIcon(Color.GREEN);
         protected static final Icon GRAPH_NODE_ICON=new DotIcon(Color.MAGENTA);
         protected static final Icon CONCRETE_NODE_ICON=new DotIcon(Color.BLUE);
@@ -292,6 +293,9 @@ public class SubtreeViewer extends JFrame {
                 setIcon(WITH_EXISTENTIALS_ICON);
             else {
                 switch (node.getNodeType()) {
+                case NAMED_NODE:
+                    setIcon(NAMED_NODE_ICON);
+                    break;
                 case TREE_NODE:
                     setIcon(TREE_NODE_ICON);
                     break;
