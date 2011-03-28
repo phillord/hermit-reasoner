@@ -36,7 +36,7 @@ public class CountingMonitor extends TableauMonitorAdapter {
 
     protected long m_problemStartTime;
     protected long m_validationStartTime;
-    
+    protected int m_testNo=0;
     // current test
     protected long m_time;
     protected int m_numberOfBacktrackings;
@@ -66,8 +66,38 @@ public class CountingMonitor extends TableauMonitorAdapter {
     protected int m_overallNoValidations=0;
     protected long m_overallValidationTime=0;
     
+
+    public void reset() {
+        m_problemStartTime=0;
+        m_validationStartTime=0;
+        m_time=0;
+        m_numberOfBacktrackings=0;
+        m_numberOfNodes=0;
+        m_numberOfBlockedNodes=0;
+        m_reasoningTaskDescription=null;
+        m_testResult=false;
+        m_initialModelSize=0;
+        m_initiallyBlocked=0;
+        m_initiallyInvalid=0;
+        m_noValidations=0;
+        m_validationTime=0;
+        m_testRecords.clear();
+        m_overallTime=0;
+        m_overallNumberOfBacktrackings=0;
+        m_overallNumberOfNodes=0;
+        m_overallNumberOfBlockedNodes=0;
+        m_overallNumberOfTests=0;
+        m_overallNumberOfClashes=0;
+        m_overallInitialModelSize=0;
+        m_overallInitiallyBlocked=0;
+        m_overallInitiallyInvalid=0;
+        m_overallNoValidations=0;
+        m_overallValidationTime=0;
+    }
+    
     public void isSatisfiableStarted(ReasoningTaskDescription reasoningTaskDescription) {
-        super.isSatisfiableFinished(reasoningTaskDescription, m_testResult);
+        super.isSatisfiableStarted(reasoningTaskDescription);
+        m_testNo++;
         m_reasoningTaskDescription=reasoningTaskDescription;
         m_overallNumberOfTests++;
         m_problemStartTime=System.currentTimeMillis();
@@ -232,6 +262,68 @@ public class CountingMonitor extends TableauMonitorAdapter {
     public long getOverallValidationTime() {
         return m_overallValidationTime;
     }
+    
+    // getters for average measurements
+    public long getAverageTime() {
+        if (m_testNo==0)
+            return m_testNo;
+        return m_overallTime/m_testNo;
+    }
+    public double getAverageNumberOfBacktrackings() {
+        if (m_testNo==0)
+            return m_testNo;
+        return getRounded(m_overallNumberOfBacktrackings, m_testNo);
+    }
+    protected double getRounded(long nominator, long denominator) {
+        return getRounded(nominator, denominator, 2);
+    }
+    protected double getRounded(long nominator, long denominator, int noDecimalPlaces) {
+        double number=(double)(nominator)/(double)denominator;
+        int tmp=(int)((number*Math.pow(10,noDecimalPlaces)));
+        return (((double)tmp)/Math.pow(10,noDecimalPlaces));
+    }
+    public double getAverageNumberOfNodes() {
+        if (m_testNo==0)
+            return m_testNo;
+        return getRounded(m_overallNumberOfNodes, m_testNo);
+    }
+    public double getAverageNumberOfBlockedNodes() {
+        if (m_testNo==0)
+            return m_testNo;
+        return getRounded(m_overallNumberOfBlockedNodes, m_testNo);
+    }
+    public double getAverageNumberOfClashes() {
+        if (m_testNo==0)
+            return m_testNo;
+        return getRounded(m_overallNumberOfClashes, m_testNo);
+    }
+    // getters for average blocking validation measurements
+    public double getAverageInitialModelSize() {
+        if (m_testNo==0)
+            return m_testNo;
+        return getRounded(m_overallInitialModelSize, m_testNo);
+    }
+    public double getAverageInitiallyBlocked() {
+        if (m_testNo==0)
+            return m_testNo;
+        return getRounded(m_overallInitiallyBlocked, m_testNo);
+    }
+    public double getAverageInitiallyInvalid() {
+        if (m_testNo==0)
+            return m_testNo;
+        return getRounded(m_overallInitiallyInvalid, m_testNo);
+    }
+    public double getAverageNoValidations() {
+        if (m_testNo==0)
+            return m_testNo;
+        return getRounded(m_overallNoValidations, m_testNo);
+    }
+    public long getAverageValidationTime() {
+        if (m_testNo==0)
+            return m_testNo;
+        return m_overallValidationTime/m_testNo;
+    }
+    
     public static String millisToHoursMinutesSecondsString(long millis) {
         long time=millis/1000;
         long ms=time%1000;
