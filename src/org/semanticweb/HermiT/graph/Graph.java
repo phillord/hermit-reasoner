@@ -108,20 +108,20 @@ public class Graph<T> implements Serializable {
 		}
 	}
     public boolean isReachableSuccessor(T fromNode,T toNode) {
-    	if( fromNode.equals( toNode ))
-    		return true;
-        Set<T> result = new HashSet<T>();
-        Queue<T> toVisit=new LinkedList<T>();
-        toVisit.add(fromNode);
-        while (!toVisit.isEmpty()) {
-        	T current=toVisit.poll();
-        	Set<T> successors = getSuccessors( current );
-            if( successors.contains( toNode ))
-            	return true;
-            if( result.add(current) )
-                toVisit.addAll( successors );
-        }
-        return false;
+		if (fromNode.equals(toNode))
+			return true;
+		Set<T> result=new HashSet<T>();
+		Queue<T> toVisit=new LinkedList<T>();
+		toVisit.add(fromNode);
+		while (!toVisit.isEmpty()) {
+			T current=toVisit.poll();
+			Set<T> successors = getSuccessors(current);
+			if (successors.contains(toNode))
+				return true;
+			if (result.add(current))
+				toVisit.addAll(successors);
+		}
+		return false;
     }
     public Set<T> getReachableSuccessors(T fromNode) {
         Set<T> result = new HashSet<T>();
@@ -129,8 +129,8 @@ public class Graph<T> implements Serializable {
         toVisit.add(fromNode);
         while (!toVisit.isEmpty()) {
             T current=toVisit.poll();
-            if( result.add(current))
-                toVisit.addAll( getSuccessors( current ) );
+            if (result.add(current))
+                toVisit.addAll(getSuccessors(current));
         }
         return result;
     }

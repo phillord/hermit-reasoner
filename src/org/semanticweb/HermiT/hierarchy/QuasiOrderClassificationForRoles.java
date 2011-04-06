@@ -39,7 +39,7 @@ public class QuasiOrderClassificationForRoles extends QuasiOrderClassification {
         m_conceptsForRoles=conceptsForRoles;
         m_rolesForConcepts=rolesForConcepts;
     }
-    protected void updateKnownSubsumptionsUsingToldSubsumers(Set<DLClause> dlClauses) {
+    protected void initialiseKnownSubsumptionsUsingToldSubsumers(Set<DLClause> dlClauses) {
         for (DLClause dlClause : dlClauses) {
             if (dlClause.getHeadLength()==1 && dlClause.getBodyLength()==1) {
                 DLPredicate headPredicate=dlClause.getHeadAtom(0).getDLPredicate();
