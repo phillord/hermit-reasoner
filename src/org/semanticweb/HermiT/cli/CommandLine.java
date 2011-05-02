@@ -303,8 +303,10 @@ public class CommandLine {
             OWLOntologyManager m=OWLManager.createOWLOntologyManager();
             try {
                 OWLOntology conclusions = m.loadOntology(conclusionIRI);
+                status.log(2,"Conclusion ontology loaded.");
                 EntailmentChecker checker=new EntailmentChecker(hermit, m.getOWLDataFactory());
                 boolean isEntailed=checker.entails(conclusions.getLogicalAxioms());
+                status.log(2,"Conclusion ontology is "+(isEntailed?"":"not ")+"entailed.");
                 output.println(isEntailed);
             } catch (OWLOntologyCreationException e) {
                 e.printStackTrace();
