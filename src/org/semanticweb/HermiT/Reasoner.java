@@ -79,6 +79,7 @@ import org.semanticweb.HermiT.structural.OWLAxiomsExpressivity;
 import org.semanticweb.HermiT.structural.OWLClausification;
 import org.semanticweb.HermiT.structural.OWLNormalization;
 import org.semanticweb.HermiT.structural.ObjectPropertyInclusionManager;
+import org.semanticweb.HermiT.structural.ReducedABoxOnlyClausification;
 import org.semanticweb.HermiT.tableau.InterruptFlag;
 import org.semanticweb.HermiT.tableau.ReasoningTaskDescription;
 import org.semanticweb.HermiT.tableau.Tableau;
@@ -93,30 +94,23 @@ import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDataProperty;
-import org.semanticweb.owlapi.model.OWLDataPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLDataPropertyExpression;
 import org.semanticweb.owlapi.model.OWLDatatype;
-import org.semanticweb.owlapi.model.OWLDifferentIndividualsAxiom;
 import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLFunctionalObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLIndividual;
+import org.semanticweb.owlapi.model.OWLIndividualAxiom;
 import org.semanticweb.owlapi.model.OWLInverseFunctionalObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
-import org.semanticweb.owlapi.model.OWLNegativeDataPropertyAssertionAxiom;
-import org.semanticweb.owlapi.model.OWLNegativeObjectPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLObject;
-import org.semanticweb.owlapi.model.OWLObjectComplementOf;
-import org.semanticweb.owlapi.model.OWLObjectHasSelf;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
-import org.semanticweb.owlapi.model.OWLObjectPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyChangeListener;
 import org.semanticweb.owlapi.model.OWLOntologyFormat;
-import org.semanticweb.owlapi.model.OWLSameIndividualAxiom;
 import org.semanticweb.owlapi.model.OWLSubObjectPropertyOfAxiom;
 import org.semanticweb.owlapi.model.OWLSubPropertyChainOfAxiom;
 import org.semanticweb.owlapi.model.OWLTransitiveObjectPropertyAxiom;
@@ -230,36 +224,6 @@ public class Reasoner implements OWLReasoner {
         // Load the DLOntology
         createPrefixes();
         m_tableau=createTableau(m_interruptFlag,m_configuration,m_dlOntology,null,m_prefixes);
-    }
-    protected void loadNewABox(Set<OWLAxiom> addedAssertions, Set<OWLAxiom> removedAssertions) {
-        // Convert OWLOntology into DLOntology
-        DLOntology addedFactsDLOntology=createDeltaDLOntology(m_configuration,m_dlOntology,addedAssertions.toArray(new OWLAxiom[0]));
-        DLOntology removedFactsDLOntology=createDeltaDLOntology(m_configuration,m_dlOntology,removedAssertions.toArray(new OWLAxiom[0]));
-        if (!m_tableau.supportsAdditionalDLOntology(addedFactsDLOntology)
-                || !m_dlOntology.getAllAtomicConcepts().containsAll(addedFactsDLOntology.getAllAtomicConcepts())
-                || !m_dlOntology.getAllAtomicObjectRoles().containsAll(addedFactsDLOntology.getAllAtomicObjectRoles())
-                || !m_dlOntology.getAllAtomicDataRoles().containsAll(addedFactsDLOntology.getAllAtomicDataRoles())
-                || !m_dlOntology.getAllComplexObjectRoles().containsAll(addedFactsDLOntology.getAllComplexObjectRoles())) {
-            // just loading the ABox is not possible, new terms have been introduced
-            loadOntology();
-//            System.out.println("Full reload required");
-            return;
-        } 
-//        System.out.println("Ony ABox reload required");
-        Set<Atom> positiveFacts=m_dlOntology.getPositiveFacts();
-        Set<Atom> negativeFacts=m_dlOntology.getNegativeFacts();
-        Set<Individual> allIndividuals=m_dlOntology.getAllIndividuals();
-        positiveFacts.removeAll(removedFactsDLOntology.getPositiveFacts());
-        negativeFacts.removeAll(removedFactsDLOntology.getNegativeFacts());
-        allIndividuals.removeAll(removedFactsDLOntology.getAllIndividuals());
-        positiveFacts.addAll(addedFactsDLOntology.getPositiveFacts());
-        negativeFacts.addAll(addedFactsDLOntology.getNegativeFacts());
-        allIndividuals.addAll(addedFactsDLOntology.getAllIndividuals());
-        m_dlOntology=new DLOntology(m_dlOntology.getOntologyIRI(), m_dlOntology.getDLClauses(), positiveFacts, negativeFacts, m_dlOntology.getAllAtomicConcepts(), m_dlOntology.getAllAtomicObjectRoles(), m_dlOntology.getAllComplexObjectRoles(), m_dlOntology.getAllAtomicDataRoles(), m_dlOntology.getAllUnknownDatatypeRestrictions(), m_dlOntology.getDefinedDatatypeIRIs(), m_dlOntology.getAllIndividuals(), m_dlOntology.hasInverseRoles(), m_dlOntology.hasAtMostRestrictions(), m_dlOntology.hasNominals(), m_dlOntology.hasDatatypes());
-        m_tableau=new Tableau(m_interruptFlag,m_tableau.getTableauMonitor(),m_tableau.getExistentialsExpansionStrategy(),
-                m_configuration.useDisjunctionLearning,m_dlOntology,null,m_configuration.parameters);
-        m_instanceManager=new InstanceManager(m_interruptFlag,this, m_tableau, m_atomicConceptHierarchy, m_objectRoleHierarchy);
-        m_isConsistent=null;
     }
     protected void createPrefixes() {
         m_prefixes=new Prefixes();
@@ -408,52 +372,45 @@ public class Reasoner implements OWLReasoner {
     public void flush() {
         if (!m_pendingChanges.isEmpty()) {
             // check if we can only reload the ABox
-            Set<OWLAxiom> addedAssertions=new HashSet<OWLAxiom>();
-            Set<OWLAxiom> removedAssertions=new HashSet<OWLAxiom>();
-            boolean isFact;
             boolean fullReloadRequired=false || m_dlOntology.hasNominals() || !m_dlOntology.getAllDescriptionGraphs().isEmpty();
-            if (!fullReloadRequired) {
-                for (OWLOntologyChange change : m_pendingChanges) {
-                    isFact=false;
-                    OWLAxiom ax=change.getAxiom();
-                    boolean isAdd=change instanceof AddAxiom;
-                    if (change.isAxiomChange() && ax.isLogicalAxiom()) { 
-                        if (ax instanceof OWLClassAssertionAxiom) {
-                            OWLClassAssertionAxiom classAssertion=(OWLClassAssertionAxiom)ax;
-                            OWLClassExpression ce=classAssertion.getClassExpression().getNNF();
-                            if (!ce.isAnonymous() 
-                                    || ce instanceof OWLObjectComplementOf && !((OWLObjectComplementOf)ce).getOperand().isAnonymous() 
-                                    || ce instanceof OWLObjectHasSelf
-                                    || ce instanceof OWLObjectComplementOf && ((OWLObjectComplementOf)ce).getOperand() instanceof OWLObjectHasSelf)
-                                isFact=true;
-                        } else if (ax instanceof OWLNegativeObjectPropertyAssertionAxiom) {
-                            OWLNegativeObjectPropertyAssertionAxiom negativeOPAssertion=(OWLNegativeObjectPropertyAssertionAxiom)ax;
-                            AtomicRole role=H(negativeOPAssertion.getProperty().getNamedProperty());
-                            if (!m_dlOntology.getAllComplexObjectRoles().contains(role))
-                                isFact=true;
-                        } else if (ax instanceof OWLObjectPropertyAssertionAxiom 
-                                || ax instanceof OWLDataPropertyAssertionAxiom
-                                || ax instanceof OWLNegativeDataPropertyAssertionAxiom
-                                || ax instanceof OWLSameIndividualAxiom
-                                || ax instanceof OWLDifferentIndividualsAxiom) { 
-                            isFact=true;
-                        } 
-                    } 
-                    if (isFact) {
-                        if (isAdd) 
-                            addedAssertions.add(ax);
-                        else 
-                            removedAssertions.add(ax);
-                    } else if (!change.isAxiomChange() || ax.isLogicalAxiom()) {
-                        fullReloadRequired=true;
-                        break;
-                    }
-                }
-            }
             if (fullReloadRequired) {
                 loadOntology();
             } else {
-                loadNewABox(addedAssertions, removedAssertions);
+                Set<Atom> positiveFacts=m_dlOntology.getPositiveFacts();
+                Set<Atom> negativeFacts=m_dlOntology.getNegativeFacts();
+                Set<Individual> allIndividuals=new HashSet<Individual>();
+                Set<AtomicConcept> allAtomicConcepts=m_dlOntology.getAllAtomicConcepts();
+                Set<AtomicRole> allAtomicObjectRoles=m_dlOntology.getAllAtomicObjectRoles();
+                Set<AtomicRole> allAtomicDataRoles=m_dlOntology.getAllAtomicDataRoles();
+                ReducedABoxOnlyClausification aboxFactClausifier=new ReducedABoxOnlyClausification(m_configuration, getDataFactory(), allAtomicConcepts, allAtomicObjectRoles, allAtomicDataRoles);
+                try {
+                    for (OWLOntologyChange change : m_pendingChanges) {
+                        OWLAxiom ax=change.getAxiom();
+                        if (change.isAxiomChange() && ax instanceof OWLIndividualAxiom) {
+                            aboxFactClausifier.clausify((OWLIndividualAxiom)ax);
+                            if (change instanceof AddAxiom) {
+                                positiveFacts.addAll(aboxFactClausifier.getPositiveFacts());
+                                negativeFacts.addAll(aboxFactClausifier.getNegativeFacts());
+                            } else {
+                                positiveFacts.removeAll(aboxFactClausifier.getPositiveFacts());
+                                negativeFacts.removeAll(aboxFactClausifier.getNegativeFacts());
+                            }
+                        } else if (!change.isAxiomChange() || ax.isLogicalAxiom())
+                            throw new IllegalArgumentException("Internal error: Found an ABox axiom that cannot be handled in incremental fashion. ");
+                    }
+                    for (Atom atom : positiveFacts)
+                        atom.getIndividuals(allIndividuals);
+                    for (Atom atom : negativeFacts)
+                        atom.getIndividuals(allIndividuals);
+                    m_dlOntology=new DLOntology(m_dlOntology.getOntologyIRI(), m_dlOntology.getDLClauses(), positiveFacts, negativeFacts, allAtomicConcepts, allAtomicObjectRoles, m_dlOntology.getAllComplexObjectRoles(), allAtomicDataRoles, m_dlOntology.getAllUnknownDatatypeRestrictions(), m_dlOntology.getDefinedDatatypeIRIs(), allIndividuals, m_dlOntology.hasInverseRoles(), m_dlOntology.hasAtMostRestrictions(), m_dlOntology.hasNominals(), m_dlOntology.hasDatatypes());
+                    m_tableau=new Tableau(m_interruptFlag,m_tableau.getTableauMonitor(),m_tableau.getExistentialsExpansionStrategy(),
+                            m_configuration.useDisjunctionLearning,m_dlOntology,null,m_configuration.parameters);
+                    m_instanceManager=new InstanceManager(m_interruptFlag,this, m_tableau, m_atomicConceptHierarchy, m_objectRoleHierarchy);
+                    m_isConsistent=null;
+                } catch (IllegalArgumentException e){
+                    // just loading the ABox is not possible, new terms have been introduced
+                    loadOntology();
+                }
             }
             m_pendingChanges.clear();
         }

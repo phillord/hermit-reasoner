@@ -69,6 +69,13 @@ public class Atom implements Serializable {
                 variables.add((Variable)argument);
         }
     }
+    public void getIndividuals(Set<Individual> individuals) {
+        for (int argumentIndex=m_arguments.length-1;argumentIndex>=0;--argumentIndex) {
+            Term argument=m_arguments[argumentIndex];
+            if (argument instanceof Individual)
+                individuals.add((Individual)argument);
+        }
+    }
     public boolean containsVariable(Variable variable) {
         for (int argumentIndex=m_arguments.length-1;argumentIndex>=0;--argumentIndex)
             if (m_arguments[argumentIndex].equals(variable))
