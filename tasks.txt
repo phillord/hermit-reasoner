@@ -17,8 +17,3 @@ task assigned to:  Birte
 - check what HermiT does on Robert's family ontology
 
 - check why HermiT is so slow in expanding the tableau once we have a lot of choice points
-
-- reengineer the initialisation code for the classification to minimise memory consumption 
-
-- there seems to be room for memory improvements in the classification method. Especially in the case of ontologies with many classes there seems to be much time and 
-memory spend iterating through all classes of the ontology. 
