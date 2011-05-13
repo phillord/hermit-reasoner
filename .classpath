@@ -13,6 +13,6 @@
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="lib" path="lib/org.protege.editor.core.application-4.1.jar" sourcepath="lib/org.protege.editor.core.application-4.1-src.jar"/>
 	<classpathentry kind="lib" path="lib/org.protege.editor.owl-4.1.jar" sourcepath="lib/org.protege.editor.owl-4.1-src.jar"/>
-	<classpathentry kind="lib" path="lib/owlapi-3.2.1.jar" sourcepath="lib/owlapi-3.2.1-src.jar"/>
+	<classpathentry kind="lib" path="lib/owlapi-3.2.2.jar" sourcepath="lib/owlapi-3.2.2-src.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
