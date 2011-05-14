@@ -48,11 +48,11 @@ public class QuasiOrderClassification {
     protected final Graph<AtomicConcept> m_knownSubsumptions;
     protected final Graph<AtomicConcept> m_possibleSubsumptions;
 
-    public QuasiOrderClassification(Tableau tableau,ClassificationProgressMonitor progressMonitor,Set<AtomicConcept> elements) {
+    public QuasiOrderClassification(Tableau tableau,ClassificationProgressMonitor progressMonitor,AtomicConcept topElement,AtomicConcept bottomElement,Set<AtomicConcept> elements) {
         m_tableau=tableau;
         m_progressMonitor=progressMonitor;
-        m_topElement=AtomicConcept.THING;
-        m_bottomElement=AtomicConcept.NOTHING;
+        m_topElement=topElement;
+        m_bottomElement=bottomElement;
         m_elements=elements;
         m_knownSubsumptions=new Graph<AtomicConcept>();
         m_possibleSubsumptions=new Graph<AtomicConcept>();

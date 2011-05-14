@@ -42,11 +42,11 @@ public class DeterministicClassification {
     protected final AtomicConcept m_bottomElement;
     protected final Set<AtomicConcept> m_elements;
 
-    public DeterministicClassification(Tableau tableau,ClassificationProgressMonitor progressMonitor,Set<AtomicConcept> elements) {
+    public DeterministicClassification(Tableau tableau,ClassificationProgressMonitor progressMonitor,AtomicConcept topElement,AtomicConcept bottomElement,Set<AtomicConcept> elements) {
         m_tableau=tableau;
         m_progressMonitor=progressMonitor;
-        m_topElement=AtomicConcept.THING;
-        m_bottomElement=AtomicConcept.NOTHING;
+        m_topElement=topElement;
+        m_bottomElement=bottomElement;
         m_elements=elements;
     }
     public Hierarchy<AtomicConcept> classify() {

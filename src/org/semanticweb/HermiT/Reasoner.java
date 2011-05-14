@@ -653,7 +653,7 @@ public class Reasoner implements OWLReasoner {
                                 m_configuration.reasonerProgressMonitor.reasonerTaskProgressChanged(m_processedConcepts,numRelevantConcepts);
                         }
                     };
-                    m_atomicConceptHierarchy=classifyAtomicConcepts(getTableau(),progressMonitor,relevantAtomicConcepts,m_configuration.forceQuasiOrderClassification);
+                    m_atomicConceptHierarchy=classifyAtomicConcepts(getTableau(),progressMonitor,AtomicConcept.THING,AtomicConcept.NOTHING,relevantAtomicConcepts,m_configuration.forceQuasiOrderClassification);
                     if (m_instanceManager!=null) m_instanceManager.setToClassifiedConceptHierarchy(m_atomicConceptHierarchy);
                 }
                 finally {
@@ -876,13 +876,7 @@ public class Reasoner implements OWLReasoner {
                 for (Role objectRole : relevantObjectRoles) {
                     AtomicConcept conceptForRole;
                     OWLObjectPropertyExpression objectPropertyExpression;
-                    if (AtomicRole.TOP_OBJECT_ROLE.equals(objectRole)) {
-                        conceptForRole=AtomicConcept.THING;
-                        objectPropertyExpression=factory.getOWLTopObjectProperty();
-                    } else if (AtomicRole.BOTTOM_OBJECT_ROLE.equals(objectRole)) {
-                        conceptForRole=AtomicConcept.NOTHING;
-                        objectPropertyExpression=factory.getOWLBottomObjectProperty();
-                    } else if (objectRole instanceof AtomicRole) {
+                    if (objectRole instanceof AtomicRole) {
                         conceptForRole=AtomicConcept.create("internal:prop#"+((AtomicRole)objectRole).getIRI());
                         objectPropertyExpression=factory.getOWLObjectProperty(IRI.create(((AtomicRole)objectRole).getIRI()));
                     } else {
@@ -911,15 +905,10 @@ public class Reasoner implements OWLReasoner {
                                 m_configuration.reasonerProgressMonitor.reasonerTaskProgressChanged(m_processedRoles,numberOfRoles);
                         }
                     };
-                    Hierarchy<AtomicConcept> atomicConceptHierarchyForRoles=classifyAtomicConceptsForRoles(tableau,progressMonitor,rolesForConcepts.keySet(),m_dlOntology.hasInverseRoles(),conceptsForRoles,rolesForConcepts,m_configuration.forceQuasiOrderClassification);
+                    Hierarchy<AtomicConcept> atomicConceptHierarchyForRoles=classifyAtomicConceptsForRoles(tableau,progressMonitor,conceptsForRoles.get(AtomicRole.TOP_OBJECT_ROLE),conceptsForRoles.get(AtomicRole.BOTTOM_OBJECT_ROLE),rolesForConcepts.keySet(),m_dlOntology.hasInverseRoles(),conceptsForRoles,rolesForConcepts,m_configuration.forceQuasiOrderClassification);
                     Hierarchy.Transformer<AtomicConcept,Role> transformer=new Hierarchy.Transformer<AtomicConcept,Role>() {
                         public Role transform(AtomicConcept atomicConcept) {
-                            if (atomicConcept.isAlwaysTrue())
-                                return AtomicRole.TOP_OBJECT_ROLE;
-                            if (atomicConcept.isAlwaysFalse())
-                                return AtomicRole.BOTTOM_OBJECT_ROLE;
-                            else 
-                                return rolesForConcepts.get(atomicConcept);
+                            return rolesForConcepts.get(atomicConcept);
                         }
                         public Role determineRepresentative(AtomicConcept oldRepresentative,Set<Role> newEquivalentElements) {
                             return transform(oldRepresentative);
@@ -1291,15 +1280,10 @@ public class Reasoner implements OWLReasoner {
                                 m_configuration.reasonerProgressMonitor.reasonerTaskProgressChanged(m_processedRoles,numberOfRoles);
                         }
                     };
-                    Hierarchy<AtomicConcept> atomicConceptHierarchyForRoles=classifyAtomicConcepts(tableau,progressMonitor,rolesForConcepts.keySet(),m_configuration.forceQuasiOrderClassification);
+                    Hierarchy<AtomicConcept> atomicConceptHierarchyForRoles=classifyAtomicConcepts(tableau,progressMonitor,conceptsForRoles.get(AtomicRole.TOP_DATA_ROLE),conceptsForRoles.get(AtomicRole.BOTTOM_DATA_ROLE),rolesForConcepts.keySet(),m_configuration.forceQuasiOrderClassification);
                     Hierarchy.Transformer<AtomicConcept,AtomicRole> transformer=new Hierarchy.Transformer<AtomicConcept,AtomicRole>() {
                         public AtomicRole transform(AtomicConcept atomicConcept) {
-                            if (atomicConcept.isAlwaysTrue())
-                                return AtomicRole.TOP_DATA_ROLE;
-                            if (atomicConcept.isAlwaysFalse())
-                                return AtomicRole.BOTTOM_DATA_ROLE;
-                            else 
-                                return rolesForConcepts.get(atomicConcept);
+                            return rolesForConcepts.get(atomicConcept);
                         }
                         public AtomicRole determineRepresentative(AtomicConcept oldRepresentative,Set<AtomicRole> newEquivalentElements) {
                             return transform(oldRepresentative);
@@ -1940,17 +1924,17 @@ public class Reasoner implements OWLReasoner {
 
         return new Tableau(interruptFlag,tableauMonitor,existentialsExpansionStrategy,config.useDisjunctionLearning,permanentDLOntology,additionalDLOntology,config.parameters);
     }
-    protected static Hierarchy<AtomicConcept> classifyAtomicConcepts(Tableau tableau,ClassificationProgressMonitor progressMonitor,Set<AtomicConcept> elements,boolean forceQuasiOrder) {
+    protected static Hierarchy<AtomicConcept> classifyAtomicConcepts(Tableau tableau,ClassificationProgressMonitor progressMonitor,AtomicConcept topElement,AtomicConcept bottomElement,Set<AtomicConcept> elements,boolean forceQuasiOrder) {
         if (tableau.isDeterministic()&&!forceQuasiOrder)
-            return new DeterministicClassification(tableau,progressMonitor,elements).classify();
+            return new DeterministicClassification(tableau,progressMonitor,topElement,bottomElement,elements).classify();
         else
-            return new QuasiOrderClassification(tableau,progressMonitor,elements).classify();
+            return new QuasiOrderClassification(tableau,progressMonitor,topElement,bottomElement,elements).classify();
     }
-    protected static Hierarchy<AtomicConcept> classifyAtomicConceptsForRoles(Tableau tableau,ClassificationProgressMonitor progressMonitor,Set<AtomicConcept> elements,boolean hasInverses,Map<Role,AtomicConcept> conceptsForRoles,Map<AtomicConcept,Role> rolesForConcepts,boolean forceQuasiOrder) {
+    protected static Hierarchy<AtomicConcept> classifyAtomicConceptsForRoles(Tableau tableau,ClassificationProgressMonitor progressMonitor,AtomicConcept topElement,AtomicConcept bottomElement,Set<AtomicConcept> elements,boolean hasInverses,Map<Role,AtomicConcept> conceptsForRoles,Map<AtomicConcept,Role> rolesForConcepts,boolean forceQuasiOrder) {
         if (tableau.isDeterministic()&&!forceQuasiOrder)
-            return new DeterministicClassification(tableau,progressMonitor,elements).classify();
+            return new DeterministicClassification(tableau,progressMonitor,topElement,bottomElement,elements).classify();
         else
-            return new QuasiOrderClassificationForRoles(tableau,progressMonitor,elements,hasInverses,conceptsForRoles,rolesForConcepts).classify();
+            return new QuasiOrderClassificationForRoles(tableau,progressMonitor,topElement,bottomElement,elements,hasInverses,conceptsForRoles,rolesForConcepts).classify();
     }
 
     protected DLOntology createDeltaDLOntology(Configuration configuration,DLOntology originalDLOntology,OWLAxiom... additionalAxioms) throws IllegalArgumentException {

@@ -33,8 +33,8 @@ public class QuasiOrderClassificationForRoles extends QuasiOrderClassification {
     protected final Map<Role,AtomicConcept> m_conceptsForRoles;
     protected final Map<AtomicConcept,Role> m_rolesForConcepts;
 
-    public QuasiOrderClassificationForRoles(Tableau tableau,ClassificationProgressMonitor progressMonitor,Set<AtomicConcept> elements,boolean hasInverses,Map<Role,AtomicConcept> conceptsForRoles,Map<AtomicConcept,Role> rolesForConcepts) {
-        super(tableau,progressMonitor,elements);
+    public QuasiOrderClassificationForRoles(Tableau tableau,ClassificationProgressMonitor progressMonitor,AtomicConcept topElement,AtomicConcept bottomElement,Set<AtomicConcept> elements,boolean hasInverses,Map<Role,AtomicConcept> conceptsForRoles,Map<AtomicConcept,Role> rolesForConcepts) {
+        super(tableau,progressMonitor,topElement,bottomElement,elements);
         m_hasInverses=hasInverses;
         m_conceptsForRoles=conceptsForRoles;
         m_rolesForConcepts=rolesForConcepts;
