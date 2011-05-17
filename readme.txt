@@ -125,4 +125,11 @@ HermiT 1.3.3
   the data property hierarchy and sameAs individuals). Disj. classes can still be 
   precomputed when using HermiT's native interface (Reasoner).    
   Fixed a bug that sometimes made sameAs computation hang.
+HermiT 1.3.4
+- New OWL API is used (3.2.2). Incremental loading and unloading of simple ABoxes
+  (only assertions without complex classes). Fixed an error in the equals method 
+  of DateTime (no more unsafe casts), and an error for retrieving direct types of 
+  individuals. 
+  
+  
   
