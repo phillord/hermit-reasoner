@@ -166,7 +166,7 @@ public class OWLNormalization {
             axiom.accept(axiomVisitor);
         // now all axioms are in NNF and converted into disjunctions wherever possible
         // exact cardinalities are rewritten into at least and at most cardinalities etc
-        // Rules with multiple head atoms are rewritten into several rules (Lloyed-Topor transformation)
+        // Rules with multiple head atoms are rewritten into several rules (Lloyd-Topor transformation)
 
         // normalize rules, this might add new concept and data range inclusions
         // in case a rule atom uses a complex concept or data range
