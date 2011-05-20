@@ -8,6 +8,16 @@ public class DatatypesTest extends AbstractReasonerTest {
     public DatatypesTest(String name) {
         super(name);
     }
+    
+    public void testdateTimeTimezones() throws Exception {
+        String axioms = "Declaration(DataProperty(:birthDate))"+LB
+            +"Declaration(NamedIndividual(:Peter))"+LB
+            +"FunctionalDataProperty(:birthDate)"+LB
+            +"DataPropertyAssertion(:birthDate :Peter \"1956-06-25T04:00:00-05:00\"^^xsd:dateTime)"+LB
+            +"DataPropertyAssertion(:birthDate :Peter \"1956-06-25T10:00:00+01:00\"^^xsd:dateTime)";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+    }
     public void testDatatypeDef5() throws Exception {
         String axioms = "Declaration(Datatype(:newDT))" 
             + "DatatypeDefinition(:newDT DatatypeRestriction(xsd:integer xsd:minInclusive \"15\"^^xsd:integer))"
