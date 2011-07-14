@@ -37,6 +37,29 @@ public class ReasonerTest extends AbstractReasonerTest {
     public ReasonerTest(String name) {
         super(name);
     }
+    public void testReflexiveAndSameAs() throws Exception {
+        loadOntologyWithAxioms(
+        "Declaration( NamedIndividual( :a ) )"+LB+
+        "Declaration( NamedIndividual( :b ) )"+LB+
+        "Declaration( ObjectProperty( :r ) )"+LB+
+        "ReflexiveObjectProperty( :r )"+LB+
+        "ObjectPropertyAssertion( :r :a :b )"+LB+
+        "SameIndividual( :a :b )"+LB);
+        createReasoner();
+        
+        OWLNamedIndividual a=NS_NI("a");
+        OWLNamedIndividual b=NS_NI("b");
+        OWLObjectProperty r=NS_OP("r");
+        Map<OWLNamedIndividual, Set<OWLNamedIndividual>> instances=m_reasoner.getObjectPropertyInstances(r);
+        assertTrue(instances.containsKey(a));
+        assertTrue(instances.containsKey(b));
+        assertTrue(instances.get(a).size()==2);
+        assertTrue(instances.get(b).size()==2);
+        assertTrue(instances.get(a).contains(a));
+        assertTrue(instances.get(a).contains(b));
+        assertTrue(instances.get(b).contains(a));
+        assertTrue(instances.get(b).contains(b));
+    }
 //    public void testBackTracking() throws Exception {
 //        loadOntologyWithAxioms(
 //                "Declaration( Class( :A ) )"+LB+
