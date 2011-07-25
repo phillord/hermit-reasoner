@@ -155,8 +155,6 @@ public class DatatypeRegistry {
     }
 
     public static class AnonymousConstantValue {
-        private static final long serialVersionUID=-6507581477324043034L;
-
         protected final String m_name;
 
         public AnonymousConstantValue(String name) {

@@ -536,7 +536,6 @@ public class Reasoner implements OWLReasoner {
                 OWLAxiom[] additionalAxioms=m_instanceManager.getAxiomsForReadingOffCompexProperties(getDataFactory(), m_configuration.reasonerProgressMonitor, completedSteps, steps);
                 completedSteps+=stepsAdditionalAxioms/chunks;
                 boolean moreWork=true;
-                int loops=0;
                 while (moreWork) {
                     Tableau tableau=getTableau(additionalAxioms);
                     completedSteps+=stepsRewritingAdditionalAxioms;
@@ -555,7 +554,6 @@ public class Reasoner implements OWLReasoner {
                     additionalAxioms=m_instanceManager.getAxiomsForReadingOffCompexProperties(getDataFactory(), m_configuration.reasonerProgressMonitor,completedSteps,steps);
                     completedSteps+=stepsAdditionalAxioms/chunks;
                     moreWork=additionalAxioms.length>0;
-                    loops++;
                 }
                 if (m_isConsistent==null)
                     m_isConsistent=isConsistent;

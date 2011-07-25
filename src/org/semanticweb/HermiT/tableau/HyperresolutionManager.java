@@ -252,8 +252,6 @@ public final class HyperresolutionManager implements Serializable {
     }
 
     protected static final class CompiledDLClauseInfo {
-        private static final long serialVersionUID=2873489982404000730L;
-
         protected final DLClauseEvaluator m_evaluator;
         protected final CompiledDLClauseInfo m_next;
         protected final int m_indexInList;

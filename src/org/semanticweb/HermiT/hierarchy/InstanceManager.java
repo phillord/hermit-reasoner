@@ -773,7 +773,6 @@ public class InstanceManager {
             Queue<HierarchyNode<AtomicConcept>> toProcess=new LinkedList<HierarchyNode<AtomicConcept>>();
             Set<HierarchyNode<AtomicConcept>> visited=new HashSet<HierarchyNode<AtomicConcept>>();
             toProcess.addAll(m_currentConceptHierarchy.m_bottomNode.m_parentNodes);
-            int possibles=0;
             while (!toProcess.isEmpty()) {
                 if (monitor!=null)
                     monitor.reasonerTaskProgressChanged(currentHierarchyNode,numHierarchyNodes);
@@ -789,7 +788,6 @@ public class InstanceManager {
                             toProcess.add(parent);
                     }
                     if (atomicConceptElement.hasPossibles()) {
-                        possibles+=atomicConceptElement.m_possibleInstances.size();
                         Set<Individual> nonInstances=new HashSet<Individual>();
                         for (Individual individual : atomicConceptElement.getPossibleInstances()) {
                             if (isInstance(individual, atomicConcept)) 
