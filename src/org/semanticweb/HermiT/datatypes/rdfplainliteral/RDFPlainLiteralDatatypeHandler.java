@@ -62,7 +62,7 @@ public class RDFPlainLiteralDatatypeHandler implements DatatypeHandler {
             { XSD_NS+"token",            RDF_NS+"PlainLiteral", XSD_NS+"string", XSD_NS+"normalizedString", XSD_NS+"token" },
             { XSD_NS+"Name",             RDF_NS+"PlainLiteral", XSD_NS+"string", XSD_NS+"normalizedString", XSD_NS+"token", XSD_NS+"Name" },
             { XSD_NS+"NCName",           RDF_NS+"PlainLiteral", XSD_NS+"string", XSD_NS+"normalizedString", XSD_NS+"token", XSD_NS+"Name",   XSD_NS+"NCName"},
-            { XSD_NS+"MKTOKEN",          RDF_NS+"PlainLiteral", XSD_NS+"string", XSD_NS+"normalizedString", XSD_NS+"token", XSD_NS+"NMTOKEN"},
+            { XSD_NS+"NMTOKEN",          RDF_NS+"PlainLiteral", XSD_NS+"string", XSD_NS+"normalizedString", XSD_NS+"token", XSD_NS+"NMTOKEN"},
             { XSD_NS+"language",         RDF_NS+"PlainLiteral", XSD_NS+"string", XSD_NS+"normalizedString", XSD_NS+"token", XSD_NS+"language" },
         };
         for (int datatype1Index=0;datatype1Index<initializer.length;datatype1Index++) {
