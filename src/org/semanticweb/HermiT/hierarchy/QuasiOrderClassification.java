@@ -208,7 +208,6 @@ public class QuasiOrderClassification {
     protected void readKnownSubsumersFromRootNode(AtomicConcept subconcept,Node checkedNode) {
         if (checkedNode.getCanonicalNodeDependencySet().isEmpty()) {
             checkedNode=checkedNode.getCanonicalNode();
-            addKnownSubsumption(subconcept,m_topElement);
             ExtensionTable.Retrieval retrieval=m_tableau.getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
             retrieval.getBindingsBuffer()[1]=checkedNode;
             retrieval.open();

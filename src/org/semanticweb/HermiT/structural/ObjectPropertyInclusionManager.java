@@ -195,6 +195,19 @@ public class ObjectPropertyInclusionManager {
         complexObjectPropertyExpressions.addAll(inverseOfComplexProperties);
         
         connectAllAutomata(automataByProperty,propertyDependencyGraph,inversePropertiesMap,individualAutomata,simpleObjectPropertyInclusions,symmetricObjectProperties,transitiveProperties);
+        Map<OWLObjectPropertyExpression,Automaton> individualAutomataForEquivRoles=new HashMap<OWLObjectPropertyExpression,Automaton>();
+        for (OWLObjectPropertyExpression propExprWithAutomaton : automataByProperty.keySet())
+        	if (equivalentPropertiesMap.get(propExprWithAutomaton)!=null) {
+        		Automaton autoOfPropExpr = automataByProperty.get(propExprWithAutomaton);
+	        	for (OWLObjectPropertyExpression equivProp : equivalentPropertiesMap.get(propExprWithAutomaton))
+	        		if (!equivProp.equals(propExprWithAutomaton) && !automataByProperty.containsKey(equivProp)) {
+	        			Automaton automatonOfEquivalent=(Automaton)autoOfPropExpr.clone();
+						individualAutomataForEquivRoles.put(equivProp, automatonOfEquivalent);
+						simpleProperties.remove(equivProp);
+				        complexObjectPropertyExpressions.add(equivProp);
+	        		}
+        	}
+        automataByProperty.putAll(individualAutomataForEquivRoles);
     }
     private Set<OWLObjectPropertyExpression> findSymmetricProperties(Collection<OWLObjectPropertyExpression[]> simpleObjectPropertyInclusions) {
     	Set<OWLObjectPropertyExpression> symmetricProperties = new HashSet<OWLObjectPropertyExpression>();
