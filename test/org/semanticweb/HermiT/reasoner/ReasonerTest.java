@@ -3101,7 +3101,6 @@ public class ReasonerTest extends AbstractReasonerTest {
         				"TransitiveObjectProperty(:R2) " +
         				"TransitiveObjectProperty(:dumm) " +
         				"SubObjectPropertyOf(ObjectPropertyChain(:dumm :R3) ObjectInverseOf(:R)) ";
-
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
     }
@@ -3119,7 +3118,6 @@ public class ReasonerTest extends AbstractReasonerTest {
         				"ClassAssertion(ObjectAllValuesFrom(:R :C) :f) " +
         				"SubObjectPropertyOf(ObjectPropertyChain(:S1 :S2 :S3) :S) " +
         				"SubObjectPropertyOf(ObjectPropertyChain(:R1 :S- :R2) ObjectInverseOf(:R)) ";
-
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
     }
@@ -3133,7 +3131,6 @@ public class ReasonerTest extends AbstractReasonerTest {
         				"ClassAssertion(ObjectAllValuesFrom(:R :C) :c) " +
         				"SubObjectPropertyOf(ObjectPropertyChain(:R1 :R2) :R-) " +
         				"SubObjectPropertyOf(ObjectPropertyChain(:R3 :R4) :R)";
-
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
     }
@@ -3154,7 +3151,6 @@ public class ReasonerTest extends AbstractReasonerTest {
         				"ClassAssertion(ObjectComplementOf(:C) :a) " +
         				"ClassAssertion(ObjectAllValuesFrom(ObjectInverseOf(:R) :C) :c) " +
         				"SubObjectPropertyOf(ObjectPropertyChain(:R1 :R2) :R) ";
-
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
    }
@@ -3164,7 +3160,6 @@ public class ReasonerTest extends AbstractReasonerTest {
 	    				"ClassAssertion(ObjectComplementOf(:C) :a) " +
 	    				"ClassAssertion(ObjectAllValuesFrom(:R :C) :c) " +
 	    				"SubObjectPropertyOf(ObjectPropertyChain(:R1 :R2) ObjectInverseOf(:R)) ";
-
 	    loadReasonerWithAxioms(axioms);
 	    assertABoxSatisfiable(false);
     }
@@ -3174,7 +3169,6 @@ public class ReasonerTest extends AbstractReasonerTest {
         				"ClassAssertion(ObjectComplementOf(:C) :a) " +
         				"ClassAssertion(ObjectAllValuesFrom(:R :C) :c) " +
         				"SubObjectPropertyOf(ObjectPropertyChain(ObjectInverseOf(:R2) ObjectInverseOf(:R1)) :R) ";
-
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
    }
@@ -3189,7 +3183,6 @@ public class ReasonerTest extends AbstractReasonerTest {
         				"ClassAssertion(ObjectAllValuesFrom(:R :C) :f) " +
         				"SubObjectPropertyOf(ObjectPropertyChain(ObjectInverseOf(:S2) ObjectInverseOf(:S1)) :S) " +
         				"SubObjectPropertyOf(ObjectPropertyChain(:S ObjectInverseOf(:R1)) :R) ";
-
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
    }
@@ -3199,7 +3192,6 @@ public class ReasonerTest extends AbstractReasonerTest {
         				"SymmetricObjectProperty(:R)" +
         				"ClassAssertion(ObjectComplementOf(:C) :a) " +
         				"ClassAssertion(ObjectAllValuesFrom(:R :C) :a) ";
-
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
    }
@@ -3213,7 +3205,6 @@ public class ReasonerTest extends AbstractReasonerTest {
         				"ClassAssertion(ObjectComplementOf(:C) :e) " +
         				"ClassAssertion(ObjectAllValuesFrom(:R :C) :a) " +
         				"SubObjectPropertyOf(ObjectPropertyChain(:R1 :R2) ObjectInverseOf(:R)) ";
-
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
    }
@@ -3227,7 +3218,6 @@ public class ReasonerTest extends AbstractReasonerTest {
         				"ClassAssertion(ObjectComplementOf(:C) :e) " +
         				"ClassAssertion(ObjectAllValuesFrom(ObjectInverseOf(:R) :C) :a) " +
         				"SubObjectPropertyOf(ObjectPropertyChain(:R1 :R2) :R) ";
-
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
    }
@@ -3241,7 +3231,6 @@ public class ReasonerTest extends AbstractReasonerTest {
         				"ClassAssertion(ObjectComplementOf(:C) :a) " +
         				"ClassAssertion(ObjectAllValuesFrom(:R :C) :e) " +
         				"SubObjectPropertyOf(ObjectPropertyChain(:R1 :R2) :R) ";
-
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
    }
@@ -3254,7 +3243,6 @@ public class ReasonerTest extends AbstractReasonerTest {
         				"ClassAssertion(ObjectComplementOf(:C) :e) " +
         				"ClassAssertion(ObjectAllValuesFrom(ObjectInverseOf(:R) :C) :a) " +
         				"SubObjectPropertyOf(ObjectPropertyChain(:R1 :R2) ObjectInverseOf(:R)) ";
-
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
    }
@@ -3268,8 +3256,16 @@ public class ReasonerTest extends AbstractReasonerTest {
         				"SubObjectPropertyOf(ObjectPropertyChain(:P1 :P2) :S) " +
         				"SubObjectPropertyOf(ObjectPropertyChain(:dumm :dumm) :R1) " +
         				"SubObjectPropertyOf(ObjectPropertyChain(:R1 :R2) :R) ";
-
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
    }
+	public void testSatisfiabilityWithRIAs14() throws Exception {
+        String axioms = "Declaration( Class( :CT ) )" + 
+        				"EquivalentObjectProperties( :P owl:topObjectProperty )" +
+						"EquivalentClasses( :CP ObjectSomeValuesFrom( :P :Cf ) )" +
+        				"ClassAssertion(:Cf :a) ";
+        loadReasonerWithAxioms(axioms);
+        assertSubsumedBy("CT", "CP", true);
+   }
+
 }
