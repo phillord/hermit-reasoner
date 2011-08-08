@@ -615,25 +615,29 @@ public class InstanceManager {
             if (roleObject instanceof AtomicRole) {
                 AtomicRole atomicrole=(AtomicRole)roleObject;
                 if (!atomicrole.equals(AtomicRole.TOP_OBJECT_ROLE)) {
-                    Node node2=(Node)tupleBuffer[2];
-                    if (node2.isActive() && node2.getNodeType()==NodeType.NAMED_NODE && m_individualsForNodes.containsKey(node2)) {
-                        Individual successor=m_individualsForNodes.get(node2);
-                        RoleElement representative=m_currentRoleHierarchy.getNodeForElement(m_roleElementManager.getRoleElement(atomicrole)).getRepresentative();
-                        Set<Individual> equivalents=m_individualToEquivalenceClass.get(successor);
-                        if (m_ternaryRetrieval1Bound.getDependencySet().isEmpty())
-                            for (Individual equivToSuccessor : equivalents)
-                                addKnownRoleInstance(representative, ind, equivToSuccessor);
-                        else {
-                            m_readingOffFoundPossiblePropertyInstance=true;
-                            for (Individual equivToSuccessor : equivalents)
-                                addPossibleRoleInstance(representative, ind, equivToSuccessor);
-                        }
-                        Set<Set<Individual>> possiblyEquivalents=m_individualToPossibleEquivalenceClass.get(equivalents);
-                        if (possiblyEquivalents!=null) {
-                            m_readingOffFoundPossiblePropertyInstance=true;
-                            for (Set<Individual> possibleSuccessors : possiblyEquivalents)
-                                for (Individual possibleSuccessor : possibleSuccessors)
-                                    addPossibleRoleInstance(representative, ind, possibleSuccessor);
+                    RoleElement representative=m_currentRoleHierarchy.getNodeForElement(m_roleElementManager.getRoleElement(atomicrole)).getRepresentative();
+                    Node node2=((Node)tupleBuffer[2]).getCanonicalNode();
+                    for (Node possiblyMergedSuccessor : m_individualsForNodes.keySet()) {
+                        if (possiblyMergedSuccessor.isActive() 
+                                && possiblyMergedSuccessor.getNodeType()==NodeType.NAMED_NODE 
+                                && possiblyMergedSuccessor.getCanonicalNode()==node2) {
+                            Individual successor=m_individualsForNodes.get(possiblyMergedSuccessor);
+                            Set<Individual> equivalents=m_individualToEquivalenceClass.get(successor);
+                            if (m_ternaryRetrieval1Bound.getDependencySet().isEmpty() && possiblyMergedSuccessor.getCanonicalNodeDependencySet()==null)
+                                for (Individual equivToSuccessor : equivalents)
+                                    addKnownRoleInstance(representative, ind, equivToSuccessor);
+                            else {
+                                m_readingOffFoundPossiblePropertyInstance=true;
+                                for (Individual equivToSuccessor : equivalents)
+                                    addPossibleRoleInstance(representative, ind, equivToSuccessor);
+                            }
+                            Set<Set<Individual>> possiblyEquivalents=m_individualToPossibleEquivalenceClass.get(equivalents);
+                            if (possiblyEquivalents!=null) {
+                                m_readingOffFoundPossiblePropertyInstance=true;
+                                for (Set<Individual> possibleSuccessors : possiblyEquivalents)
+                                    for (Individual possibleSuccessor : possibleSuccessors)
+                                        addPossibleRoleInstance(representative, ind, possibleSuccessor);
+                            }
                         }
                     }
                 }
@@ -1207,17 +1211,19 @@ public class InstanceManager {
         return (!m_tableau.isSatisfiable(true,true,Collections.singleton(Atom.create(Inequality.INSTANCE,individual1,individual2)),null,null,null,null,new ReasoningTaskDescription(true,"is {0} same as {1}",individual1,individual2)));
     }
     public void computeSameAsEquivalenceClasses(ReasonerProgressMonitor progressMonitor) {
-        int steps=m_individualToPossibleEquivalenceClass.keySet().size();
-        if (steps>0 && progressMonitor!=null)
-            progressMonitor.reasonerTaskStarted("Precompute same individuals");
-        while (!m_individualToPossibleEquivalenceClass.isEmpty()) {
-            Set<Individual> equivalenceClass=m_individualToPossibleEquivalenceClass.keySet().iterator().next();
-            getSameAsIndividuals(equivalenceClass.iterator().next());
+        if (!m_individualToPossibleEquivalenceClass.isEmpty()) {
+            int steps=m_individualToPossibleEquivalenceClass.keySet().size();
+            if (steps>0 && progressMonitor!=null)
+                progressMonitor.reasonerTaskStarted("Precompute same individuals");
+            while (!m_individualToPossibleEquivalenceClass.isEmpty()) {
+                Set<Individual> equivalenceClass=m_individualToPossibleEquivalenceClass.keySet().iterator().next();
+                getSameAsIndividuals(equivalenceClass.iterator().next());
+                if (progressMonitor!=null)
+                    progressMonitor.reasonerTaskProgressChanged(steps-m_individualToPossibleEquivalenceClass.keySet().size(), steps);
+            }
             if (progressMonitor!=null)
-                progressMonitor.reasonerTaskProgressChanged(steps-m_individualToPossibleEquivalenceClass.keySet().size(), steps);
+                progressMonitor.reasonerTaskStopped();
         }
-        if (progressMonitor!=null)
-            progressMonitor.reasonerTaskStopped();
     }
     protected boolean isInstance(Individual individual,AtomicConcept atomicConcept) {
         return !m_tableau.isSatisfiable(true,true,null,Collections.singleton(Atom.create(atomicConcept,individual)),null,null,null,ReasoningTaskDescription.isInstanceOf(atomicConcept,individual));
