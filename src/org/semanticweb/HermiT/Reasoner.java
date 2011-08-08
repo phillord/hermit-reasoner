@@ -1570,6 +1570,7 @@ public class Reasoner implements OWLReasoner {
             return false;
         else {
             initialiseClassInstanceManager();
+            m_instanceManager.computeSameAsEquivalenceClasses(m_configuration.reasonerProgressMonitor);
             return m_instanceManager.isSameIndividual(H(namedIndividual1),H(namedIndividual2));
         }
     }
