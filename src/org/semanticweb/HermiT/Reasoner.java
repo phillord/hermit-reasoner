@@ -882,11 +882,20 @@ public class Reasoner implements OWLReasoner {
                         objectPropertyExpression=factory.getOWLObjectInverseOf(factory.getOWLObjectProperty(IRI.create(((InverseRole)objectRole).getInverseOf().getIRI())));
                     }
                     OWLClass classForRole=factory.getOWLClass(IRI.create(conceptForRole.getIRI()));
-                    OWLAxiom axiom=factory.getOWLEquivalentClassesAxiom(classForRole,factory.getOWLObjectSomeValuesFrom(objectPropertyExpression,freshConcept));
+                    OWLAxiom axiom;
+                    if (objectRole==AtomicRole.TOP_OBJECT_ROLE)
+                    	axiom=factory.getOWLEquivalentClassesAxiom(classForRole,factory.getOWLThing());
+                    else if (objectRole==AtomicRole.BOTTOM_OBJECT_ROLE)
+                    	axiom=factory.getOWLEquivalentClassesAxiom(classForRole,factory.getOWLNothing());
+                    else
+                    	axiom=factory.getOWLEquivalentClassesAxiom(classForRole,factory.getOWLObjectSomeValuesFrom(objectPropertyExpression,freshConcept));
                     additionalAxioms.add(axiom);
                     conceptsForRoles.put(objectRole,conceptForRole);
                     rolesForConcepts.put(conceptForRole,objectRole);
                 }
+                OWLIndividual freshIndividual=factory.getOWLAnonymousIndividual();
+                OWLAxiom axiom=factory.getOWLClassAssertionAxiom(freshConcept,freshIndividual);
+                additionalAxioms.add(axiom);
                 OWLAxiom[] additionalAxiomsArray=new OWLAxiom[additionalAxioms.size()];
                 additionalAxioms.toArray(additionalAxiomsArray);
                 // Run the actual classification task
