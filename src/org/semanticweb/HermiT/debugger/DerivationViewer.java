@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -142,7 +142,7 @@ public class DerivationViewer extends JFrame {
         protected final Color m_foreground;
         protected final String m_text;
         protected final Font m_font;
-        
+
         public TextIcon(Color background,Color foreground,String text,Font font) {
             m_background=background;
             m_foreground=foreground;
@@ -177,7 +177,7 @@ public class DerivationViewer extends JFrame {
     protected static final Icon DISJUNCT_APPLICATION_ICON=new TextIcon(Color.CYAN,Color.BLACK,"D",s_font);
     protected static final Icon MERGING_ICON=new TextIcon(Color.BLUE,Color.WHITE,"M",s_font);
     protected static final Icon GRAPH_CHECKING_ICON=new TextIcon(Color.DARK_GRAY,Color.WHITE,"G",s_font);
-    protected static final Icon CLASH_DETECTION_ICON=new TextIcon(Color.BLACK,Color.WHITE,"G",s_font);
+    protected static final Icon CLASH_DETECTION_ICON=new TextIcon(Color.BLACK,Color.WHITE,"C",s_font);
     protected static final Icon EXISTENTIAL_EXPANSION_ICON=new TextIcon(Color.RED,Color.WHITE,"E",s_font);
     protected static final Icon BASE_FACT_ICON=new TextIcon(Color.MAGENTA,Color.WHITE,"B",s_font);
 

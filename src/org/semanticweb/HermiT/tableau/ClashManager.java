@@ -21,6 +21,7 @@ import java.io.Serializable;
 
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicNegationConcept;
+import org.semanticweb.HermiT.model.AtomicNegationDataRange;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Inequality;
 import org.semanticweb.HermiT.model.InternalDatatype;
@@ -77,8 +78,8 @@ public final class ClashManager implements Serializable {
             if (m_tableauMonitor!=null)
                 m_tableauMonitor.clashDetectionFinished(tuple);
         }
-        else if ((dlPredicateObject instanceof InternalDatatype) || (dlPredicateObject instanceof AtomicConcept && node0.m_numberOfNegatedAtomicConcepts>0) || (dlPredicateObject instanceof AtomicNegationConcept && node0.m_numberOfPositiveAtomicConcepts>0)) {
-            m_binaryAuxiliaryTuple[0]= dlPredicateObject instanceof InternalDatatype ? ((InternalDatatype)dlPredicateObject).getNegation() : ((LiteralConcept)dlPredicateObject).getNegation();
+        else if ((dlPredicateObject instanceof InternalDatatype) || (dlPredicateObject instanceof AtomicNegationDataRange && ((AtomicNegationDataRange)dlPredicateObject).getNegatedDataRange() instanceof InternalDatatype) || (dlPredicateObject instanceof AtomicConcept && node0.m_numberOfNegatedAtomicConcepts>0) || (dlPredicateObject instanceof AtomicNegationConcept && node0.m_numberOfPositiveAtomicConcepts>0)) {
+            m_binaryAuxiliaryTuple[0]=dlPredicateObject instanceof LiteralDataRange ? ((LiteralDataRange)dlPredicateObject).getNegation() : ((LiteralConcept)dlPredicateObject).getNegation();
             m_binaryAuxiliaryTuple[1]=node0;
             if (extensionTable.containsTuple(m_binaryAuxiliaryTuple)) {
                 m_binaryUnionDependencySet.m_dependencySets[0]=dependencySet;
