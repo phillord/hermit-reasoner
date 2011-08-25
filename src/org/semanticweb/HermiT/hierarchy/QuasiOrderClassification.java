@@ -76,7 +76,6 @@ public class QuasiOrderClassification {
                     prunePossibleSubsumers();
                 readKnownSubsumersFromRootNode(child, checkedNode.get(freshIndividual));
                 m_possibleSubsumptions.getSuccessors(child).removeAll(getAllKnownSubsumers(child));
-                
                 return isSubsumedBy;
             }
         };
