@@ -233,7 +233,7 @@ public class Reasoner implements OWLReasoner {
         for (Individual individual : m_dlOntology.getAllIndividuals())
             if (individual.isAnonymous())
                 addIRI(individual.getIRI(),anonIndividualIRIs);
-            else 
+            else
                 addIRI(individual.getIRI(),individualIRIs);
         m_prefixes.declareInternalPrefixes(individualIRIs, anonIndividualIRIs);
         m_prefixes.declareDefaultPrefix(m_dlOntology.getOntologyIRI()+"#");
@@ -341,16 +341,16 @@ public class Reasoner implements OWLReasoner {
 
     // Ontology change management methods
 
-    public BufferingMode getBufferingMode() {
-        return m_configuration.bufferChanges ? BufferingMode.BUFFERING : BufferingMode.NON_BUFFERING;
-    }
     protected class OntologyChangeListener implements OWLOntologyChangeListener {
         public void ontologiesChanged(List<? extends OWLOntologyChange> changes) throws OWLException {
             for (OWLOntologyChange change : changes)
-                if (!(change instanceof RemoveOntologyAnnotation || change instanceof AddOntologyAnnotation)) {
+                if (!(change instanceof RemoveOntologyAnnotation || change instanceof AddOntologyAnnotation))
                     m_pendingChanges.add(change);
-                }
         }
+    }
+
+    public BufferingMode getBufferingMode() {
+        return m_configuration.bufferChanges ? BufferingMode.BUFFERING : BufferingMode.NON_BUFFERING;
     }
     public Set<OWLAxiom> getPendingAxiomAdditions() {
         Set<OWLAxiom> added=new HashSet<OWLAxiom>();
@@ -372,17 +372,17 @@ public class Reasoner implements OWLReasoner {
     public void flush() {
         if (!m_pendingChanges.isEmpty()) {
             // check if we can only reload the ABox
-            boolean fullReloadRequired=false || m_dlOntology.hasNominals() || !m_dlOntology.getAllDescriptionGraphs().isEmpty();
-            if (fullReloadRequired) {
+            boolean fullReloadRequired=m_dlOntology.hasNominals() || !m_dlOntology.getAllDescriptionGraphs().isEmpty();
+            if (fullReloadRequired)
                 loadOntology();
-            } else {
+            else {
                 Set<Atom> positiveFacts=m_dlOntology.getPositiveFacts();
                 Set<Atom> negativeFacts=m_dlOntology.getNegativeFacts();
                 Set<Individual> allIndividuals=new HashSet<Individual>();
                 Set<AtomicConcept> allAtomicConcepts=m_dlOntology.getAllAtomicConcepts();
                 Set<AtomicRole> allAtomicObjectRoles=m_dlOntology.getAllAtomicObjectRoles();
                 Set<AtomicRole> allAtomicDataRoles=m_dlOntology.getAllAtomicDataRoles();
-                ReducedABoxOnlyClausification aboxFactClausifier=new ReducedABoxOnlyClausification(m_configuration, getDataFactory(), allAtomicConcepts, allAtomicObjectRoles, allAtomicDataRoles);
+                ReducedABoxOnlyClausification aboxFactClausifier=new ReducedABoxOnlyClausification(m_configuration,getDataFactory(),allAtomicConcepts,allAtomicObjectRoles,allAtomicDataRoles);
                 try {
                     for (OWLOntologyChange change : m_pendingChanges) {
                         OWLAxiom ax=change.getAxiom();
@@ -391,23 +391,25 @@ public class Reasoner implements OWLReasoner {
                             if (change instanceof AddAxiom) {
                                 positiveFacts.addAll(aboxFactClausifier.getPositiveFacts());
                                 negativeFacts.addAll(aboxFactClausifier.getNegativeFacts());
-                            } else {
+                            }
+                            else {
                                 positiveFacts.removeAll(aboxFactClausifier.getPositiveFacts());
                                 negativeFacts.removeAll(aboxFactClausifier.getNegativeFacts());
                             }
-                        } else if (!change.isAxiomChange() || ax.isLogicalAxiom())
+                        }
+                        else if (!change.isAxiomChange() || ax.isLogicalAxiom())
                             throw new IllegalArgumentException("Internal error: Found an ABox axiom that cannot be handled in incremental fashion. ");
                     }
                     for (Atom atom : positiveFacts)
                         atom.getIndividuals(allIndividuals);
                     for (Atom atom : negativeFacts)
                         atom.getIndividuals(allIndividuals);
-                    m_dlOntology=new DLOntology(m_dlOntology.getOntologyIRI(), m_dlOntology.getDLClauses(), positiveFacts, negativeFacts, allAtomicConcepts, allAtomicObjectRoles, m_dlOntology.getAllComplexObjectRoles(), allAtomicDataRoles, m_dlOntology.getAllUnknownDatatypeRestrictions(), m_dlOntology.getDefinedDatatypeIRIs(), allIndividuals, m_dlOntology.hasInverseRoles(), m_dlOntology.hasAtMostRestrictions(), m_dlOntology.hasNominals(), m_dlOntology.hasDatatypes());
-                    m_tableau=new Tableau(m_interruptFlag,m_tableau.getTableauMonitor(),m_tableau.getExistentialsExpansionStrategy(),
-                            m_configuration.useDisjunctionLearning,m_dlOntology,null,m_configuration.parameters);
+                    m_dlOntology=new DLOntology(m_dlOntology.getOntologyIRI(),m_dlOntology.getDLClauses(),positiveFacts,negativeFacts,allAtomicConcepts,allAtomicObjectRoles,m_dlOntology.getAllComplexObjectRoles(),allAtomicDataRoles,m_dlOntology.getAllUnknownDatatypeRestrictions(),m_dlOntology.getDefinedDatatypeIRIs(),allIndividuals,m_dlOntology.hasInverseRoles(),m_dlOntology.hasAtMostRestrictions(),m_dlOntology.hasNominals(),m_dlOntology.hasDatatypes());
+                    m_tableau=new Tableau(m_interruptFlag,m_tableau.getTableauMonitor(),m_tableau.getExistentialsExpansionStrategy(),m_configuration.useDisjunctionLearning,m_dlOntology,null,m_configuration.parameters);
                     m_instanceManager=new InstanceManager(m_interruptFlag,this, m_tableau, m_atomicConceptHierarchy, m_objectRoleHierarchy);
                     m_isConsistent=null;
-                } catch (IllegalArgumentException e){
+                }
+                catch (IllegalArgumentException e) {
                     // just loading the ABox is not possible, new terms have been introduced
                     loadOntology();
                 }
@@ -1488,7 +1490,7 @@ public class Reasoner implements OWLReasoner {
     }
     public void precomputeSameAsEquivalenceClasses() {
         checkPreConditions();
-        if (m_dlOntology.getAllIndividuals().size()>0) { 
+        if (m_dlOntology.getAllIndividuals().size()>0) {
             initialiseClassInstanceManager();
             m_instanceManager.computeSameAsEquivalenceClasses(m_configuration.reasonerProgressMonitor);
         }
@@ -1501,10 +1503,10 @@ public class Reasoner implements OWLReasoner {
             result=new HashSet<HierarchyNode<AtomicConcept>>();
             result.add(m_atomicConceptHierarchy.getTopNode());
         } else {
-            if (direct) 
+            if (direct)
                 classifyClasses();
             initialiseClassInstanceManager();
-            if (direct) 
+            if (direct)
                 m_instanceManager.setToClassifiedConceptHierarchy(m_atomicConceptHierarchy);
             result=m_instanceManager.getTypes(H(namedIndividual),direct);
         }
@@ -1512,7 +1514,7 @@ public class Reasoner implements OWLReasoner {
     }
     public boolean hasType(OWLNamedIndividual namedIndividual,OWLClassExpression type,boolean direct) {
         checkPreConditions(namedIndividual,type);
-        if (!m_isConsistent) 
+        if (!m_isConsistent)
             return true;
         if (!isDefined(namedIndividual)) {
             return getEquivalentClasses(type).contains(m_rootOntology.getOWLOntologyManager().getOWLDataFactory().getOWLThing());
@@ -1521,7 +1523,7 @@ public class Reasoner implements OWLReasoner {
                 if (direct)
                     classifyClasses();
                 initialiseClassInstanceManager();
-                if (direct) 
+                if (direct)
                     m_instanceManager.setToClassifiedConceptHierarchy(m_atomicConceptHierarchy);
                 return m_instanceManager.hasType(H(namedIndividual),H((OWLClass)type),direct);
             } else {
@@ -1575,7 +1577,7 @@ public class Reasoner implements OWLReasoner {
     public boolean isSameIndividual(OWLNamedIndividual namedIndividual1, OWLNamedIndividual namedIndividual2) {
         checkPreConditions(namedIndividual1,namedIndividual2);
         if (!m_isConsistent) return true;
-        if (m_dlOntology.getAllIndividuals().size()==0) 
+        if (m_dlOntology.getAllIndividuals().size()==0)
             return false;
         else {
             initialiseClassInstanceManager();
@@ -1586,7 +1588,7 @@ public class Reasoner implements OWLReasoner {
     public Node<OWLNamedIndividual> getSameIndividuals(OWLNamedIndividual namedIndividual) {
         checkPreConditions(namedIndividual);
         if (!m_isConsistent) return new OWLNamedIndividualNode(getAllNamedIndividuals());
-        if (m_dlOntology.getAllIndividuals().size()==0) 
+        if (m_dlOntology.getAllIndividuals().size()==0)
             return new OWLNamedIndividualNode();
         else {
             initialiseClassInstanceManager();
@@ -2205,7 +2207,7 @@ public class Reasoner implements OWLReasoner {
     // methods for cost-based query axiom ordering
 
     public int[] getNumberOfSameIndividuals(OWLIndividual individual) {
-        if (m_dlOntology.getAllIndividuals().size()>0) 
+        if (m_dlOntology.getAllIndividuals().size()>0)
             return new int[] { 0, 0 };
         else {
             initialiseClassInstanceManager(); // that will also initialize sameAs equivalence classes
@@ -2214,7 +2216,7 @@ public class Reasoner implements OWLReasoner {
         }
     }
     public int[] getNumberOfInstances(OWLClass owlClass) {
-        if (m_dlOntology.getAllIndividuals().size()>0) 
+        if (m_dlOntology.getAllIndividuals().size()>0)
             return new int[] { 0, 0 };
         else {
             initialiseClassInstanceManager();
@@ -2223,7 +2225,7 @@ public class Reasoner implements OWLReasoner {
         }
     }
     public int[] getNumberOfInstances(OWLObjectProperty property) {
-        if (m_dlOntology.getAllIndividuals().size()>0) 
+        if (m_dlOntology.getAllIndividuals().size()>0)
             return new int[] { 0, 0 };
         else {
             initialisePropertiesInstanceManager();
@@ -2232,7 +2234,7 @@ public class Reasoner implements OWLReasoner {
         }
     }
     public int[] getNumberOfSuccessors(OWLObjectProperty property, OWLIndividual individual) {
-        if (m_dlOntology.getAllIndividuals().size()>0) 
+        if (m_dlOntology.getAllIndividuals().size()>0)
             return new int[] { 0, 0 };
         else {
             initialisePropertiesInstanceManager();
@@ -2242,7 +2244,7 @@ public class Reasoner implements OWLReasoner {
         }
     }
     public int[] getNumberOfPredecessors(OWLObjectProperty property, OWLIndividual individual) {
-        if (m_dlOntology.getAllIndividuals().size()>0) 
+        if (m_dlOntology.getAllIndividuals().size()>0)
             return new int[] { 0, 0 };
         else {
             initialisePropertiesInstanceManager();
@@ -2258,7 +2260,7 @@ public class Reasoner implements OWLReasoner {
      *         2: number of individuals with at least one known or possible successor
      */
     public int[] getNumberOfPropertyInstances(OWLObjectProperty property) {
-        if (m_dlOntology.getAllIndividuals().size()>0) 
+        if (m_dlOntology.getAllIndividuals().size()>0)
             return new int[] { 0, 0, 0 };
         else {
             initialisePropertiesInstanceManager();
@@ -2280,7 +2282,7 @@ public class Reasoner implements OWLReasoner {
     }
     public int[] getNumberOfTypes(OWLIndividual individual) {
         classifyClasses();
-        if (m_dlOntology.getAllIndividuals().size()>0) 
+        if (m_dlOntology.getAllIndividuals().size()>0)
             return new int[] { m_atomicConceptHierarchy.getTopNode().getEquivalentElements().size(), 0 };
         else {
             initialiseClassInstanceManager();

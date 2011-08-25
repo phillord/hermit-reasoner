@@ -163,12 +163,12 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
          * For EL ontologies this existential strategy can be set to use a deterministic version of individual
          * reuse that behaves similar to EL-style algorithms.
          */
-        EL, 
+        EL,
         /**
-         * The optimal strategy is determined as follows: if the ontology contains nominals, then individual reuse 
-         * will be employed. If the ontology does not have nominals, then the creation order strategy will be used 
-         * because in that case a blockers cache can be used, which is very good for the classification performance, 
-         * but not compatible with individual reuse.   
+         * The optimal strategy is determined as follows: if the ontology contains nominals, then individual reuse
+         * will be employed. If the ontology does not have nominals, then the creation order strategy will be used
+         * because in that case a blockers cache can be used, which is very good for the classification performance,
+         * but not compatible with individual reuse.
          */
         OPTIMAL
     }
@@ -221,26 +221,26 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
      */
     public boolean useDisjunctionLearning;
     /**
-     * If set to true axioms that are to be added or removed are buffered and the addition and removal is only performed when 
-     * the flush() method of the reasoner is called.
+     * If set to true, then axioms that are to be added or removed are buffered and the addition and removal is only performed
+     * when the flush() method of the reasoner is called.
      */
     public boolean bufferChanges;
     /**
      * The default value is true and HermiT will throw an exception if it finds the ontology to be inconsistent.
-     * 
-     * If set to false, HermiT will not throw an exception for inconsistent ontologies. The only exception is when asked for data property values for an 
-     * individual and a data property because any of the infinitely many data values would be an answer. Restricting answers to just the data values in the 
-     * signature does not make much sense. If the parameter is set to false and the ontology is inconsistent, all classes occurring in the ontology are, for 
-     * example, returned as subclasses of owl:nothing. Some answers might be unexpected or unintuitive, e.g., a property will be both reflexive and irreflexive 
-     * etc. Use with care, e.g., only when trying to get explanations of inconsistencies, where throwing an error might not be helpful.   
+     *
+     * If set to false, HermiT will not throw an exception for inconsistent ontologies. The only exception is when asked for data property values for an
+     * individual and a data property because any of the infinitely many data values would be an answer. Restricting answers to just the data values in the
+     * signature does not make much sense. If the parameter is set to false and the ontology is inconsistent, all classes occurring in the ontology are, for
+     * example, returned as subclasses of owl:nothing. Some answers might be unexpected or unintuitive, e.g., a property will be both reflexive and irreflexive
+     * etc. Use with care, e.g., only when trying to get explanations of inconsistencies, where throwing an error might not be helpful.
      */
     public boolean throwInconsistentOntologyException;
-    
+
     public PrepareReasonerInferences prepareReasonerInferences;
-    
+
     /**
      * The default value is false and HermiT will use a specialiased classification strategy for deterministic ontologies, which often is faster, but not always.
-     * If the value is set to true, then HermiT will use the Quasi Ordering Classification method even for deterministic ontologies. 
+     * If the value is set to true, then HermiT will use the Quasi Ordering Classification method even for deterministic ontologies.
      */
     public boolean forceQuasiOrderClassification;
 
