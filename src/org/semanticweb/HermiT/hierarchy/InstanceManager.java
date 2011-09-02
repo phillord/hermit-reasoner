@@ -614,7 +614,8 @@ public class InstanceManager {
             Object roleObject=tupleBuffer[0];
             if (roleObject instanceof AtomicRole) {
                 AtomicRole atomicrole=(AtomicRole)roleObject;
-                if (!atomicrole.equals(AtomicRole.TOP_OBJECT_ROLE)) {
+                if (!atomicrole.equals(AtomicRole.TOP_OBJECT_ROLE) && m_roleElementManager.m_roleToElement.containsKey(atomicrole)) {
+                    // the latter condition ensures that we do not accidentally try and read of something for data properties
                     RoleElement representative=m_currentRoleHierarchy.getNodeForElement(m_roleElementManager.getRoleElement(atomicrole)).getRepresentative();
                     Node node2=((Node)tupleBuffer[2]).getCanonicalNode();
                     for (Node possiblyMergedSuccessor : m_individualsForNodes.keySet()) {
