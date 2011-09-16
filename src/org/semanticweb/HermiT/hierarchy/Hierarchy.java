@@ -148,7 +148,15 @@ public class Hierarchy<E> {
         topBottomNode.m_equivalentElements.addAll(elements);
         return new Hierarchy<T>(topBottomNode,topBottomNode);
     }
-
+    public static <T> Hierarchy<T> trivialHierarchy(T topElement,T bottomElement) {
+        HierarchyNode<T> topNode=new HierarchyNode<T>(topElement);
+        topNode.m_equivalentElements.add(topElement);
+        HierarchyNode<T> bottomNode=new HierarchyNode<T>(bottomElement);
+        bottomNode.m_equivalentElements.add(bottomElement);
+        topNode.m_childNodes.add(bottomNode);
+        bottomNode.m_parentNodes.add(topNode);
+        return new Hierarchy<T>(topNode,bottomNode);
+    }
     protected static interface HierarchyNodeVisitor<E> {
         boolean redirect(HierarchyNode<E>[] nodes);
         void visit(int level,HierarchyNode<E> node,HierarchyNode<E> parentNode,boolean firstVisit);

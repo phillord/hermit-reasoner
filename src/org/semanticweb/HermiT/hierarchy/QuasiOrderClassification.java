@@ -58,9 +58,9 @@ public class QuasiOrderClassification {
         m_possibleSubsumptions=new Graph<AtomicConcept>();
     }
     public Hierarchy<AtomicConcept> classify() {
-        Individual freshIndividual=Individual.createAnonymous("fresh-individual");
-        if (!m_tableau.isSatisfiable(false,Collections.singleton(Atom.create(m_topElement,freshIndividual)),null,null,Collections.singleton(Atom.create(m_bottomElement,freshIndividual)),null,getSubsumptionTestDescription(m_topElement,m_bottomElement)))
-            return Hierarchy.emptyHierarchy(m_elements,m_topElement,m_bottomElement);
+//        Individual freshIndividual=Individual.createAnonymous("fresh-individual");
+//        if (!m_tableau.isSatisfiable(false,Collections.singleton(Atom.create(m_topElement,freshIndividual)),null,null,Collections.singleton(Atom.create(m_bottomElement,freshIndividual)),null,getSubsumptionTestDescription(m_topElement,m_bottomElement)))
+//            return Hierarchy.emptyHierarchy(m_elements,m_topElement,m_bottomElement);
         Relation<AtomicConcept> relation=new Relation<AtomicConcept>() {
             public boolean doesSubsume(AtomicConcept parent,AtomicConcept child) {
                 Set<AtomicConcept> allKnownSubsumers=getAllKnownSubsumers(child);

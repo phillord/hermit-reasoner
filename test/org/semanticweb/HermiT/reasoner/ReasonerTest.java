@@ -37,6 +37,27 @@ public class ReasonerTest extends AbstractReasonerTest {
     public ReasonerTest(String name) {
         super(name);
     }
+
+//    protected Configuration getConfiguration() {
+//        Configuration c=new Configuration();
+//        c.throwInconsistentOntologyException=false;
+//        c.tableauMonitorType=TableauMonitorType.TIMING;
+//        c.forceQuasiOrderClassification=true;
+//        return c;
+//    }
+
+    public void testTopOPEquivalence() throws Exception {
+        loadOntologyWithAxioms(
+        "Declaration( NamedIndividual( :a ) )"+LB+
+        "Declaration( ObjectProperty( :op ) )"+LB+
+        "SubClassOf( owl:Thing ObjectOneOf( :a ) )"+LB+
+        "SubClassOf( ObjectOneOf(:a) ObjectSomeValuesFrom( :op owl:Thing ) )"+LB);
+        createReasoner();
+        
+        OWLObjectProperty op=NS_OP("op");
+        assertTrue(m_reasoner.getEquivalentObjectProperties(op).contains(m_dataFactory.getOWLTopObjectProperty()));
+    }
+    
     public void testReflexiveAndSameAs() throws Exception {
         loadOntologyWithAxioms(
         "Declaration( NamedIndividual( :a ) )"+LB+

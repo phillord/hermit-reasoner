@@ -197,7 +197,7 @@
         </jar>
     </target>
     
-    <target name="HermiT-standalone" depends="clean,setRevisionNumberProperty,compile,unpack-libraries,unpack-owlapi">
+    <target name="HermiT-standalone" depends="clean,setRevisionNumberProperty,compile,unpack-libraries,unpack-owlapi,javadoc">
         <mkdir dir="${releasedir}"/>
         <copy file="${projectroot}/readme.txt" tofile="${releasedir}/readme.txt">
             <filterset>
