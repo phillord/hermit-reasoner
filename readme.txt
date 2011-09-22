@@ -19,7 +19,7 @@ lgpl-3.0.txt, respectively. An online version is available at
 
 More information about HermiT and additional licensing information is
 available at <http://hermit-reasoner.com>, or by contacting Boris Motik or 
-Ian Horrocks at the Oxford University Computing Laboratory.
+Ian Horrocks at the Department of Computer Science in the University of Oxford.
 
 HermiT uses the following libraries in unmodified form:
 
@@ -130,6 +130,9 @@ HermiT 1.3.4
   (only assertions without complex classes). Fixed an error in the equals method 
   of DateTime (no more unsafe casts), and an error for retrieving direct types of 
   individuals. 
+HermiT 1.3.5
+- Improved object property classification. Fixed a bug in the detection of clashes 
+  involving InternalDatatype objects, and a bug in the instance manager.
   
   
   
