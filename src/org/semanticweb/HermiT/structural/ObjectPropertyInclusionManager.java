@@ -498,19 +498,24 @@ public class ObjectPropertyInclusionManager {
         }
     }
     protected Automaton minimizeAndNormalizeAutomaton(Automaton automaton) {
-        Reducer minimizerDeterminizer=new Reducer();
-        //if the automaton has more than 350-400 transitions it seems that the determiniser is very slow. In general this code does help to reduce the number of clauses produced. 
-        if( automaton.delta().size() > 300 )
-        	return automaton;
-        Normalizer normalizer=new Normalizer();
-        Automaton tempMinimizedAuto=minimizerDeterminizer.transform(automaton);
-        if (tempMinimizedAuto.delta().size()>=automaton.delta().size())
+    	//This part of the code seemed to have a bug in an ontology given by Birte. The ontology created very large automata and was
+    	//extremely difficult to see where the bug was exactly. Either the ToDFA class has a bug or due to state renaming that ToDFA does 
+    	//state names got mixed up later (a similar thing has happened before) however I could not detect something like that happening now.
+    	//Without this code the automata are about double in size than with the code which can cause performance issues in ontologies with 
+    	//large and complex RIAs, which fortunately does not happen. 
+//        Reducer minimizerDeterminizer=new Reducer();
+//        //if the automaton has more than 350-400 transitions it seems that the determiniser is very slow. In general this code does help to reduce the number of clauses produced. 
+//        if( automaton.delta().size() > 300 )
+//        	return automaton;
+//        Normalizer normalizer=new Normalizer();
+//        Automaton tempMinimizedAuto=minimizerDeterminizer.transform(automaton);
+//        if (tempMinimizedAuto.delta().size()>=automaton.delta().size())
+//            return automaton;
+//        if (tempMinimizedAuto.initials().size()!=1 || tempMinimizedAuto.terminals().size()!=1)
+//            tempMinimizedAuto=normalizer.transform(tempMinimizedAuto);
+//        if (tempMinimizedAuto.delta().size()>automaton.delta().size())
             return automaton;
-        if (tempMinimizedAuto.initials().size()!=1 || tempMinimizedAuto.terminals().size()!=1)
-            tempMinimizedAuto=normalizer.transform(tempMinimizedAuto);
-        if (tempMinimizedAuto.delta().size()>automaton.delta().size())
-            return automaton;
-        return tempMinimizedAuto;
+//        return tempMinimizedAuto;
     }
     protected void useStandardAutomataConnector(Automaton biggerPropertyAutomaton,Automaton smallerPropertyAutomaton,Transition transition) {
         Map<State,State> stateMapper=getDisjointUnion(biggerPropertyAutomaton,smallerPropertyAutomaton);
