@@ -171,6 +171,8 @@ public class CommandLine {
             status.log(2,"Checking satisfiability of '"+conceptName+"'");
             Prefixes prefixes=hermit.getPrefixes();
             String conceptUri=prefixes.canBeExpanded(conceptName) ? prefixes.expandAbbreviatedIRI(conceptName) : conceptName;
+            if (conceptUri.startsWith("<") && conceptUri.endsWith(">"))
+                conceptUri=conceptUri.substring(1,conceptUri.length()-1);
             OWLClass owlClass=OWLManager.createOWLOntologyManager().getOWLDataFactory().getOWLClass(IRI.create(conceptUri));
             if (!hermit.isDefined(owlClass)) {
                 status.log(0,"Warning: class '"+conceptUri+"' was not declared in the ontology.");
@@ -193,6 +195,8 @@ public class CommandLine {
             status.log(2,"Finding supers of '"+conceptName+"'");
             Prefixes prefixes=hermit.getPrefixes();
             String conceptUri=prefixes.canBeExpanded(conceptName) ? prefixes.expandAbbreviatedIRI(conceptName) :conceptName;
+            if (conceptUri.startsWith("<") && conceptUri.endsWith(">"))
+                conceptUri=conceptUri.substring(1,conceptUri.length()-1);
             OWLClass owlClass=OWLManager.createOWLOntologyManager().getOWLDataFactory().getOWLClass(IRI.create(conceptUri));
             if (!hermit.isDefined(owlClass)) {
                 status.log(0,"Warning: class '"+conceptUri+"' was not declared in the ontology.");
@@ -232,6 +236,8 @@ public class CommandLine {
             status.log(2,"Finding subs of '"+conceptName+"'");
             Prefixes prefixes=hermit.getPrefixes();
             String conceptUri=prefixes.canBeExpanded(conceptName) ? prefixes.expandAbbreviatedIRI(conceptName) : conceptName;
+            if (conceptUri.startsWith("<") && conceptUri.endsWith(">"))
+                conceptUri=conceptUri.substring(1,conceptUri.length()-1);
             OWLClass owlClass=OWLManager.createOWLOntologyManager().getOWLDataFactory().getOWLClass(IRI.create(conceptUri));
             if (!hermit.isDefined(owlClass)) {
                 status.log(0,"Warning: class '"+conceptUri+"' was not declared in the ontology.");
@@ -269,6 +275,8 @@ public class CommandLine {
             status.log(2,"Finding equivalents of '"+conceptName+"'");
             Prefixes prefixes=hermit.getPrefixes();
             String conceptUri=prefixes.canBeExpanded(conceptName) ? prefixes.expandAbbreviatedIRI(conceptName) : conceptName;
+            if (conceptUri.startsWith("<") && conceptUri.endsWith(">"))
+                conceptUri=conceptUri.substring(1,conceptUri.length()-1);
             OWLClass owlClass=OWLManager.createOWLOntologyManager().getOWLDataFactory().getOWLClass(IRI.create(conceptUri));
             if (!hermit.isDefined(owlClass)) {
                 status.log(0,"Warning: class '"+conceptName+"' was not declared in the ontology.");
@@ -563,7 +571,7 @@ public class CommandLine {
                     case 'k': {
                         String arg=g.getOptarg();
                         if (arg==null) {
-                            arg="<http://www.w3.org/2002/07/owl#Thing>";
+                            arg="http://www.w3.org/2002/07/owl#Thing";
                         }
                         actions.add(new SatisfiabilityAction(arg));
                     }
@@ -590,7 +598,7 @@ public class CommandLine {
                     }
                         break;
                     case 'U': {
-                        actions.add(new EquivalentsAction("<http://www.w3.org/2002/07/owl#Nothing>"));
+                        actions.add(new EquivalentsAction("http://www.w3.org/2002/07/owl#Nothing"));
                     }
                         break;
                     case 'E': {
