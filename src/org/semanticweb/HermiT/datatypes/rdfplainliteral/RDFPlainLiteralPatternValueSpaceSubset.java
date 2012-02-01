@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -41,7 +41,7 @@ public class RDFPlainLiteralPatternValueSpaceSubset implements ValueSpaceSubset 
     protected static final Automaton s_nonemptyLangTag;
     protected static final Automaton s_anyLangTag;
     protected static final Automaton s_xsdString;
-    protected static final Map<String,Automaton> s_anyDatatype=new HashMap<String,Automaton>();
+    protected static final Map<String,Automaton> s_anyDatatype;
     protected static final Automaton s_anyString;
     protected static final Automaton s_anyChar;
     protected static final Automaton s_anyStringWithNonemptyLangTag;
@@ -54,6 +54,7 @@ public class RDFPlainLiteralPatternValueSpaceSubset implements ValueSpaceSubset 
         s_nonemptyLangTag=s_separator.concatenate(s_languageTag);
         s_anyLangTag=s_separator.concatenate(s_languageTagOrEmpty);
         s_xsdString=Datatypes.get("string");
+        s_anyDatatype=new HashMap<String,Automaton>();
         s_anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"string",s_xsdString.concatenate(s_emptyLangTag));
         s_anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"normalizedString",normalizedStringAutomaton().concatenate(s_emptyLangTag));
         s_anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"token",tokenAutomaton().concatenate(s_emptyLangTag));
@@ -62,8 +63,8 @@ public class RDFPlainLiteralPatternValueSpaceSubset implements ValueSpaceSubset 
         s_anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"NMTOKEN",Datatypes.get("Nmtoken2").concatenate(s_emptyLangTag));
         s_anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"language",Datatypes.get("language").concatenate(s_emptyLangTag));
         s_anyDatatype.put(RDFPlainLiteralDatatypeHandler.RDF_NS+"PlainLiteral",s_xsdString.concatenate(s_anyLangTag));
-        s_anyChar=BasicAutomata.makeAnyChar();
-        s_anyString=BasicAutomata.makeAnyString();
+        s_anyChar=xmlChar();
+        s_anyString=s_anyChar.repeat();
         s_anyStringWithNonemptyLangTag=s_anyString.concatenate(s_nonemptyLangTag);
     }
     protected static Automaton languageTagAutomaton() {
@@ -84,6 +85,9 @@ public class RDFPlainLiteralPatternValueSpaceSubset implements ValueSpaceSubset 
             "(-x(-[a-zA-Z0-9]{1,8})+)?"                     // privateuse
         ).toAutomaton();
     }
+    protected static Automaton xmlChar() {
+        return new RegExp("[\u0009\n\u0020-\u007F\u00A0-\uD7FF\uE000-\uFFFD]").toAutomaton();
+    }
     protected static Automaton normalizedStringAutomaton() {
         return new RegExp("([\u0020-\u007F\u00A0-\uD7FF\uE000-\uFFFD])*").toAutomaton();
     }
@@ -91,7 +95,7 @@ public class RDFPlainLiteralPatternValueSpaceSubset implements ValueSpaceSubset 
         return new RegExp("([\u0021-\uD7FF\uE000-\uFFFD]+(\u0020[\u0021-\uD7FF\uE000-\uFFFD]+)*)?").toAutomaton();
     }
     protected final Automaton m_automaton;
-    
+
     public RDFPlainLiteralPatternValueSpaceSubset(Automaton automaton) {
         m_automaton=automaton;
     }

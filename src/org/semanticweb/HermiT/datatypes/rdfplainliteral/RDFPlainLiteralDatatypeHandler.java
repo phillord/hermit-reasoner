@@ -56,7 +56,7 @@ public class RDFPlainLiteralDatatypeHandler implements DatatypeHandler {
     protected static final Map<String,Set<String>> s_datatypeSupersets=new HashMap<String,Set<String>>();
     static {
         String[][] initializer=new String[][] {
-            { RDF_NS+"PlainLiteral",             RDF_NS+"PlainLiteral" },
+            { RDF_NS+"PlainLiteral",     RDF_NS+"PlainLiteral" },
             { XSD_NS+"string",           RDF_NS+"PlainLiteral", XSD_NS+"string" },
             { XSD_NS+"normalizedString", RDF_NS+"PlainLiteral", XSD_NS+"string", XSD_NS+"normalizedString" },
             { XSD_NS+"token",            RDF_NS+"PlainLiteral", XSD_NS+"string", XSD_NS+"normalizedString", XSD_NS+"token" },
