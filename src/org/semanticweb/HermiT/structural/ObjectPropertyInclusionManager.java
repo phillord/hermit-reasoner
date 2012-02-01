@@ -43,8 +43,6 @@ import rationals.Automaton;
 import rationals.NoSuchStateException;
 import rationals.State;
 import rationals.Transition;
-import rationals.transformations.Normalizer;
-import rationals.transformations.Reducer;
 
 public class ObjectPropertyInclusionManager {
     protected final Map<OWLObjectPropertyExpression,Automaton> m_automataByProperty;
@@ -55,9 +53,9 @@ public class ObjectPropertyInclusionManager {
     }
     public int rewriteNegativeObjectPropertyAssertions(OWLDataFactory factory,OWLAxioms axioms,int replacementIndex) {
         // now object property inclusion manager added all non-simple properties to axioms.m_complexObjectPropertyExpressions
-        // now that we know which roles are non-simple, we can decide which negative object property assertions have to be 
-        // expressed as concept assertions so that transitivity rewriting applies properly. All new concepts for the concept 
-        // assertions must be normalised, because we are done with the normal normalisation phase.  
+        // now that we know which roles are non-simple, we can decide which negative object property assertions have to be
+        // expressed as concept assertions so that transitivity rewriting applies properly. All new concepts for the concept
+        // assertions must be normalised, because we are done with the normal normalisation phase.
         Set<OWLIndividualAxiom> redundantFacts=new HashSet<OWLIndividualAxiom>();
         Set<OWLIndividualAxiom> additionalFacts=new HashSet<OWLIndividualAxiom>();
         for (OWLIndividualAxiom axiom : axioms.m_facts) {
@@ -65,7 +63,7 @@ public class ObjectPropertyInclusionManager {
                 OWLNegativeObjectPropertyAssertionAxiom negAssertion=(OWLNegativeObjectPropertyAssertionAxiom)axiom;
                 OWLObjectPropertyExpression prop=negAssertion.getProperty().getSimplified();
                 if (axioms.m_complexObjectPropertyExpressions.contains(prop)) {
-                    // turn not op(a b) into 
+                    // turn not op(a b) into
                     // C(a) and not C or forall op not{b}
                     OWLIndividual individual=negAssertion.getObject();
                     // neg. op assertions cannot contain anonymous individuals
@@ -175,7 +173,7 @@ public class ObjectPropertyInclusionManager {
     protected void createAutomata(Map<OWLObjectPropertyExpression,Automaton> automataByProperty,Set<OWLObjectPropertyExpression> complexObjectPropertyExpressions,Collection<OWLObjectPropertyExpression[]> simpleObjectPropertyInclusions,Collection<ComplexObjectPropertyInclusion> complexObjectPropertyInclusions) {
         Map<OWLObjectPropertyExpression,Set<OWLObjectPropertyExpression>> equivalentPropertiesMap=findEquivalentProperties(simpleObjectPropertyInclusions);
         Set<OWLObjectPropertyExpression> symmetricObjectProperties=findSymmetricProperties(simpleObjectPropertyInclusions);
-        
+
         Map<OWLObjectPropertyExpression,Set<OWLObjectPropertyExpression>> inversePropertiesMap=buildInversePropertiesMap(simpleObjectPropertyInclusions);
         Graph<OWLObjectPropertyExpression> propertyDependencyGraph=buildPropertyOrdering(simpleObjectPropertyInclusions,complexObjectPropertyInclusions,equivalentPropertiesMap);
         checkForRegularity(propertyDependencyGraph,equivalentPropertiesMap);
@@ -186,14 +184,14 @@ public class ObjectPropertyInclusionManager {
         Set<OWLObjectPropertyExpression> simpleProperties=findSimpleProperties(complexPropertiesDependencyGraph,individualAutomata);
 
         propertyDependencyGraph.removeElements(simpleProperties);
-        
+
         complexPropertiesDependencyGraph.removeElements(simpleProperties);
         complexObjectPropertyExpressions.addAll(complexPropertiesDependencyGraph.getElements());
         Set<OWLObjectPropertyExpression> inverseOfComplexProperties = new HashSet<OWLObjectPropertyExpression>();
         for( OWLObjectPropertyExpression complexProp : complexObjectPropertyExpressions )
         	inverseOfComplexProperties.add( complexProp.getInverseProperty().getSimplified() );
         complexObjectPropertyExpressions.addAll(inverseOfComplexProperties);
-        
+
         connectAllAutomata(automataByProperty,propertyDependencyGraph,inversePropertiesMap,individualAutomata,simpleObjectPropertyInclusions,symmetricObjectProperties,transitiveProperties);
         Map<OWLObjectPropertyExpression,Automaton> individualAutomataForEquivRoles=new HashMap<OWLObjectPropertyExpression,Automaton>();
         for (OWLObjectPropertyExpression propExprWithAutomaton : automataByProperty.keySet())
@@ -212,7 +210,7 @@ public class ObjectPropertyInclusionManager {
     private Set<OWLObjectPropertyExpression> findSymmetricProperties(Collection<OWLObjectPropertyExpression[]> simpleObjectPropertyInclusions) {
     	Set<OWLObjectPropertyExpression> symmetricProperties = new HashSet<OWLObjectPropertyExpression>();
     	for (OWLObjectPropertyExpression[] inclusion : simpleObjectPropertyInclusions)
-    		if (inclusion[1].getInverseProperty().getSimplified().equals(inclusion[0]) || inclusion[1].equals(inclusion[0].getInverseProperty().getSimplified())){ 
+    		if (inclusion[1].getInverseProperty().getSimplified().equals(inclusion[0]) || inclusion[1].equals(inclusion[0].getInverseProperty().getSimplified())){
     			symmetricProperties.add( inclusion[0] );
     			symmetricProperties.add( inclusion[0].getInverseProperty().getSimplified() );
     		}
@@ -472,7 +470,7 @@ public class ObjectPropertyInclusionManager {
         catch (NoSuchStateException e) {
             throw new IllegalArgumentException("Could not create automaton for symmetric property: "+propertyToBuildAutomatonFor);
         }
-    	
+
     	if( symmetricObjectProperties.contains( propertyToBuildAutomatonFor )){
 	        Transition basicTransition=new Transition((State)biggerPropertyAutomaton.initials().iterator().next(),propertyToBuildAutomatonFor.getInverseProperty().getSimplified(),(State)biggerPropertyAutomaton.terminals().iterator().next());
 	        automataConnector(biggerPropertyAutomaton,getMirroredCopy(biggerPropertyAutomaton),basicTransition);
@@ -499,12 +497,12 @@ public class ObjectPropertyInclusionManager {
     }
     protected Automaton minimizeAndNormalizeAutomaton(Automaton automaton) {
     	//This part of the code seemed to have a bug in an ontology given by Birte. The ontology created very large automata and was
-    	//extremely difficult to see where the bug was exactly. Either the ToDFA class has a bug or due to state renaming that ToDFA does 
+    	//extremely difficult to see where the bug was exactly. Either the ToDFA class has a bug or due to state renaming that ToDFA does
     	//state names got mixed up later (a similar thing has happened before) however I could not detect something like that happening now.
-    	//Without this code the automata are about double in size than with the code which can cause performance issues in ontologies with 
-    	//large and complex RIAs, which fortunately does not happen. 
+    	//Without this code the automata are about double in size than with the code which can cause performance issues in ontologies with
+    	//large and complex RIAs, which fortunately does not happen.
 //        Reducer minimizerDeterminizer=new Reducer();
-//        //if the automaton has more than 350-400 transitions it seems that the determiniser is very slow. In general this code does help to reduce the number of clauses produced. 
+//        //if the automaton has more than 350-400 transitions it seems that the determiniser is very slow. In general this code does help to reduce the number of clauses produced.
 //        if( automaton.delta().size() > 300 )
 //        	return automaton;
 //        Normalizer normalizer=new Normalizer();
@@ -519,13 +517,13 @@ public class ObjectPropertyInclusionManager {
     }
     protected void useStandardAutomataConnector(Automaton biggerPropertyAutomaton,Automaton smallerPropertyAutomaton,Transition transition) {
         Map<State,State> stateMapper=getDisjointUnion(biggerPropertyAutomaton,smallerPropertyAutomaton);
-        
+
         State initialState=transition.start();
 	    State finalState=transition.end();
-	
+
 	    State oldStartOfSmaller=stateMapper.get(smallerPropertyAutomaton.initials().iterator().next());
 	    State oldFinalOfSmaller=stateMapper.get(smallerPropertyAutomaton.terminals().iterator().next());
-	
+
 	    try {
 	    	biggerPropertyAutomaton.addTransition(new Transition(initialState,null,oldStartOfSmaller));
 	        biggerPropertyAutomaton.addTransition(new Transition(oldFinalOfSmaller,null,finalState));
