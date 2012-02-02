@@ -207,7 +207,8 @@ public class BlockingValidator {
             retrieval.getBindingsBuffer()[0]=r;
             retrieval.getBindingsBuffer()[1]=blocker;
             position=2;
-        } else {
+        }
+        else {
             retrieval=m_ternaryRetrieval02Bound;
             retrieval.getBindingsBuffer()[0]=((InverseRole)r).getInverseOf();
             retrieval.getBindingsBuffer()[2]=blocker;
@@ -289,10 +290,11 @@ public class BlockingValidator {
         if ((toMatchIndexXToY+toMatchIndexYToX)==parentOfBlockedXIndex) {
             // assignment already fixed, skip
             if (dlClauseInfo.m_yConstraints[parentOfBlockedXIndex].m_x2yRoles.length!=0)
-                return satisfiesDLClauseForBlockedXAnyZAndAnyY(dlClauseInfo,blockedX,parentOfBlockedXIndex,toMatchIndexXToY+1,toMatchIndexYToX); 
-            else 
+                return satisfiesDLClauseForBlockedXAnyZAndAnyY(dlClauseInfo,blockedX,parentOfBlockedXIndex,toMatchIndexXToY+1,toMatchIndexYToX);
+            else
                 return satisfiesDLClauseForBlockedXAnyZAndAnyY(dlClauseInfo,blockedX,parentOfBlockedXIndex,toMatchIndexXToY,toMatchIndexYToX+1);
-        } else if ((toMatchIndexXToY+toMatchIndexYToX)==dlClauseInfo.m_yConstraints.length)
+        }
+        else if ((toMatchIndexXToY+toMatchIndexYToX)==dlClauseInfo.m_yConstraints.length)
             return satisfiesDLClauseForBlockedXAndMatchedNodes(dlClauseInfo,blockedX,parentOfBlockedXIndex);
         else {
             int xToYIncrement=0;
@@ -371,7 +373,8 @@ public class BlockingValidator {
             retrieval.getBindingsBuffer()[0]=r;
             retrieval.getBindingsBuffer()[1]=nonblocked;
             position=2;
-        } else {
+        }
+        else {
             retrieval=m_ternaryRetrieval02Bound;
             retrieval.getBindingsBuffer()[0]=((InverseRole)r).getInverseOf();
             retrieval.getBindingsBuffer()[2]=nonblocked;
@@ -387,7 +390,8 @@ public class BlockingValidator {
                     suitableSuccessors++;
                 else
                     possiblyInvalidlyBlocked.add(rSuccessor);
-            } else if (m_extensionManager.containsConceptAssertion(c,rSuccessor))
+            }
+            else if (m_extensionManager.containsConceptAssertion(c,rSuccessor))
                 suitableSuccessors++;
             retrieval.next();
         }
@@ -458,7 +462,8 @@ public class BlockingValidator {
                 retrieval.getBindingsBuffer()[0]=dlClauseInfo.m_x2yRoles[toMatchIndexXtoY];
                 retrieval.getBindingsBuffer()[1]=nonblockedX;
                 yNodeIndex=2;
-            } else {
+            }
+            else {
                 yToXIncrement=1;
                 retrieval=dlClauseInfo.m_y2xRetrievals[toMatchIndexYtoX];
                 retrieval.getBindingsBuffer()[0]=dlClauseInfo.m_y2xRoles[toMatchIndexYtoX];
@@ -544,7 +549,7 @@ public class BlockingValidator {
 
         public DLClauseInfo(DLClause dlClause,ExtensionManager extensionManager) {
             m_dlClause=dlClause;
-            // TODO: We'll sort our the variables by names. This introduces a dependency
+            // TODO: We'll sort our variables by names. This introduces a dependency
             // to clausification. That's ugly and should be fixed later.
             Variable X=Variable.create("X");
             Set<AtomicConcept> xConcepts=new HashSet<AtomicConcept>();
@@ -562,60 +567,65 @@ public class BlockingValidator {
                 if (predicate instanceof AtomicConcept) {
                     if (var1==X) {
                         xConcepts.add((AtomicConcept)predicate);
-                    } else if (var1.getName().startsWith("Y")) {
+                    }
+                    else if (var1.getName().startsWith("Y")) {
                         ys.add(var1);
-                        if (y2concepts.containsKey(var1)) {
+                        if (y2concepts.containsKey(var1))
                             y2concepts.get(var1).add((AtomicConcept)predicate);
-                        } else {
+                        else {
                             Set<AtomicConcept> concepts=new HashSet<AtomicConcept>();
                             concepts.add((AtomicConcept)predicate);
                             y2concepts.put(var1, concepts);
                         }
-                    } else if (var1.getName().startsWith("Z")) {
+                    }
+                    else if (var1.getName().startsWith("Z")) {
                         if (z2concepts.containsKey(var1)) {
                             Set<AtomicConcept> concepts=z2concepts.get(var1);
                             concepts.add((AtomicConcept)predicate);
-                        } else {
+                        }
+                        else {
                             Set<AtomicConcept> concepts=new HashSet<AtomicConcept>();
                             concepts.add((AtomicConcept)predicate);
                             z2concepts.put(var1, concepts);
                         }
-                    } else {
-                        throw new IllegalStateException("Internal error: Clause premise contained variables other than X, Yi, and Zi in a concept atom. ");
                     }
-                } else if (predicate instanceof AtomicRole) {
+                    else
+                        throw new IllegalStateException("Internal error: Clause premise contained variables other than X, Yi, and Zi in a concept atom. ");
+                }
+                else if (predicate instanceof AtomicRole) {
                     Variable var2=atom.getArgumentVariable(1);
                     if (var1==X) {
-                        if (var2==X) {
+                        if (var2==X)
                             x2xRoles.add((AtomicRole)atom.getDLPredicate());
-                        } else if (var2.getName().startsWith("Y")) {
+                        else if (var2.getName().startsWith("Y")) {
                             ys.add(var2);
-                            if (x2yRoles.containsKey(var2)) {
+                            if (x2yRoles.containsKey(var2))
                                 x2yRoles.get(var2).add((AtomicRole)predicate);
-                            } else {
+                            else {
                                 Set<AtomicRole> roles=new HashSet<AtomicRole>();
                                 roles.add((AtomicRole)predicate);
                                 x2yRoles.put(var2,roles);
                             }
-                        } else {
-                            throw new IllegalStateException("Internal error: Clause premise contains a role atom with virales other than X and Yi. ");
                         }
-                    } else if (var2==X) {
+                        else
+                            throw new IllegalStateException("Internal error: Clause premise contains a role atom with virales other than X and Yi. ");
+                    }
+                    else if (var2==X) {
                         if (var1.getName().startsWith("Y")) {
                             ys.add(var1);
-                            if (y2xRoles.containsKey(var1)) {
+                            if (y2xRoles.containsKey(var1))
                                 y2xRoles.get(var1).add((AtomicRole)predicate);
-                            } else {
+                            else {
                                 Set<AtomicRole> roles=new HashSet<AtomicRole>();
                                 roles.add((AtomicRole)predicate);
                                 y2xRoles.put(var1,roles);
                             }
-                        } else {
-                            throw new IllegalStateException("Internal error: Clause premise contains a role atom with virales other than X and Yi. ");
                         }
-                    } else {
-                        throw new IllegalStateException("Internal error: Clause premise contained variables other than X and Yi in a role atom. ");
+                        else
+                            throw new IllegalStateException("Internal error: Clause premise contains a role atom with virales other than X and Yi. ");
                     }
+                    else
+                        throw new IllegalStateException("Internal error: Clause premise contained variables other than X and Yi in a role atom. ");
                 }
             }
             AtomicConcept[] noConcepts=new AtomicConcept[0];
@@ -693,17 +703,18 @@ public class BlockingValidator {
                         argType=ArgumentType.XVAR;
                     }
                     m_consequencesForBlockedX[i]=new SimpleConsequenceAtom(predicate,new ArgumentType[] { argType },new int[] { argIndex });
-                    if (argType==ArgumentType.XVAR) {
+                    if (argType==ArgumentType.XVAR)
                         m_consequencesForNonblockedX[i]=m_consequencesForBlockedX[i];
-                    } else {
+                    else
                         m_consequencesForNonblockedX[i]=new MirroredYConsequenceAtom((AtomicConcept)predicate,argIndex);
-                    }
-                } else if (predicate instanceof AtLeastConcept) {
+                }
+                else if (predicate instanceof AtLeastConcept) {
                     // >= h S.B(x)
                     assert var1==X;
                     m_consequencesForBlockedX[i]=new SimpleConsequenceAtom(predicate,new ArgumentType[] { ArgumentType.XVAR },new int[] { 0 });
                     m_consequencesForNonblockedX[i]=m_consequencesForBlockedX[i];
-                } else if (predicate==Equality.INSTANCE) {
+                }
+                else if (predicate==Equality.INSTANCE) {
                     // x==zi or y==zi or yi===yj for datatype assertions
                     if (var1==X || var2==X) {
                         // x==zi
@@ -717,7 +728,8 @@ public class BlockingValidator {
                         assert var1==X && var2Index!=-1;
                         m_consequencesForBlockedX[i]=new SimpleConsequenceAtom(predicate,new ArgumentType[] { ArgumentType.XVAR,ArgumentType.ZVAR },new int[] { 0,var2Index });
                         m_consequencesForNonblockedX[i]=m_consequencesForBlockedX[i];
-                    } else if (var1.getName().startsWith("Z") || var2.getName().startsWith("Z")) {
+                    }
+                    else if (var1.getName().startsWith("Z") || var2.getName().startsWith("Z")) {
                         // y==zi
                         if (var2.getName().startsWith("Y")) {
                             Variable tmp=var1;
@@ -730,17 +742,19 @@ public class BlockingValidator {
                         assert var1Index>-1 && var2Index>-1;
                         m_consequencesForBlockedX[i]=new SimpleConsequenceAtom(predicate,new ArgumentType[] { ArgumentType.YVAR,ArgumentType.ZVAR },new int[] { var1Index,var2Index });
                         m_consequencesForNonblockedX[i]=m_consequencesForBlockedX[i];
-                    } else if (var1.getName().startsWith("Y") && var2.getName().startsWith("Y")) {
+                    }
+                    else if (var1.getName().startsWith("Y") && var2.getName().startsWith("Y")) {
                         // yi==yj
                         int var1Index=getIndexFor(m_yVariables, var1);
                         int var2Index=getIndexFor(m_yVariables, var2);
                         assert var1Index>-1 && var2Index>-1;
                         m_consequencesForBlockedX[i]=new SimpleConsequenceAtom(predicate,new ArgumentType[] { ArgumentType.YVAR,ArgumentType.YVAR },new int[] { var1Index,var2Index });
                         m_consequencesForNonblockedX[i]=m_consequencesForBlockedX[i];
-                    } else {
-                        throw new IllegalArgumentException("Internal error: The clause "+dlClause+" is not an HT clause. ");
                     }
-                } else if (predicate instanceof AnnotatedEquality) {
+                    else
+                        throw new IllegalArgumentException("Internal error: The clause "+dlClause+" is not an HT clause. ");
+                }
+                else if (predicate instanceof AnnotatedEquality) {
                     // (yi==yj)@^x_{<=h S.B})(X)
                     // arity 3
                     var1=atom.getArgumentVariable(0);
@@ -750,14 +764,16 @@ public class BlockingValidator {
                     assert var1Index!=-1 && var2Index!=-1;
                     m_consequencesForBlockedX[i]=new SimpleConsequenceAtom(predicate,new ArgumentType[] { ArgumentType.YVAR,ArgumentType.YVAR,ArgumentType.XVAR },new int[] { var1Index,var2Index,0 });
                     m_consequencesForNonblockedX[i]=m_consequencesForBlockedX[i];
-                } else if (predicate instanceof AtomicRole) {
+                }
+                else if (predicate instanceof AtomicRole) {
                     // R(x, x), R(x,yi), R(yi,x), R(x,zj), R(zj,x)
                     assert predicate instanceof AtomicRole;
                     AtomicRole role=(AtomicRole)predicate;
                     if (X==var1 && X==var2) {
                         m_consequencesForBlockedX[i]=new SimpleConsequenceAtom(predicate,new ArgumentType[] { ArgumentType.XVAR,ArgumentType.XVAR },new int[] { 0,0 });
                         m_consequencesForNonblockedX[i]=m_consequencesForBlockedX[i];
-                    } else {
+                    }
+                    else {
                         assert var1==X || var2==X;
                         int argIndex=-1;
                         if (var1==X) {
@@ -767,18 +783,21 @@ public class BlockingValidator {
                                 assert argIndex>-1;
                                 m_consequencesForBlockedX[i]=new SimpleConsequenceAtom(predicate,new ArgumentType[] { ArgumentType.XVAR,ArgumentType.ZVAR },new int[] { 0,argIndex });
                                 m_consequencesForNonblockedX[i]=m_consequencesForBlockedX[i];
-                            } else {
+                            }
+                            else {
                                 m_consequencesForBlockedX[i]=new X2YOrY2XConsequenceAtom(role,argIndex,true);
                                 m_consequencesForNonblockedX[i]=new SimpleConsequenceAtom(predicate,new ArgumentType[] { ArgumentType.XVAR,ArgumentType.YVAR },new int[] { 0,argIndex });
                             }
-                        } else {
+                        }
+                        else {
                             argIndex=getIndexFor(m_yVariables, var1);
                             if (argIndex==-1) {
                                 argIndex=getIndexFor(m_zVariables, var1);
                                 assert argIndex>-1;
                                 m_consequencesForBlockedX[i]=new SimpleConsequenceAtom(predicate,new ArgumentType[] { ArgumentType.ZVAR,ArgumentType.XVAR },new int[] { argIndex,0 });
                                 m_consequencesForNonblockedX[i]=m_consequencesForBlockedX[i];
-                            } else {
+                            }
+                            else {
                                 m_consequencesForBlockedX[i]=new X2YOrY2XConsequenceAtom(role,argIndex,false);
                                 m_consequencesForNonblockedX[i]=new SimpleConsequenceAtom(predicate,new ArgumentType[] { ArgumentType.YVAR,ArgumentType.XVAR },new int[] { argIndex,0 });
                             }
@@ -883,11 +902,10 @@ public class BlockingValidator {
                     break;
                 }
             }
-            if (m_assertionBuffer[0] instanceof AnnotatedEquality) {
+            if (m_assertionBuffer[0] instanceof AnnotatedEquality)
                 return m_assertionBuffer[1]==m_assertionBuffer[2];
-            } else {
+            else
                 return extensionManager.containsTuple(m_assertionBuffer);
-            }
         }
         public String toString() {
             String result="";

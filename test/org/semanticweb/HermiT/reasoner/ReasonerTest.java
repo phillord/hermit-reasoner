@@ -38,36 +38,37 @@ public class ReasonerTest extends AbstractReasonerTest {
         super(name);
     }
 
-//    protected Configuration getConfiguration() {
-//        Configuration c=new Configuration();
-//        c.throwInconsistentOntologyException=false;
-//        c.tableauMonitorType=TableauMonitorType.TIMING;
-//        c.forceQuasiOrderClassification=true;
-//        return c;
-//    }
+    public void testInstanteManagerError() throws Exception {
+        loadOntologyFromResource("res/pets-error.owl");
+        createReasoner();
+        m_reasoner.precomputeInferences(InferenceType.CLASS_ASSERTIONS, InferenceType.OBJECT_PROPERTY_ASSERTIONS);
+        assertFalse(m_reasoner.hasType(NI("http://owl.cs.manchester.ac.uk/2011/07/sssw/pets#Max"),C("http://owl.cs.manchester.ac.uk/2011/07/sssw/pets#PetOwner1"),false));
+    }
 
     public void testTopOPEquivalence() throws Exception {
         loadOntologyWithAxioms(
-        "Declaration( NamedIndividual( :a ) )"+LB+
-        "Declaration( ObjectProperty( :op ) )"+LB+
-        "SubClassOf( owl:Thing ObjectOneOf( :a ) )"+LB+
-        "SubClassOf( ObjectOneOf(:a) ObjectSomeValuesFrom( :op owl:Thing ) )"+LB);
+            "Declaration( NamedIndividual( :a ) )"+LB+
+            "Declaration( ObjectProperty( :op ) )"+LB+
+            "SubClassOf( owl:Thing ObjectOneOf( :a ) )"+LB+
+            "SubClassOf( ObjectOneOf(:a) ObjectSomeValuesFrom( :op owl:Thing ) )"+LB
+        );
         createReasoner();
-        
+
         OWLObjectProperty op=NS_OP("op");
         assertTrue(m_reasoner.getEquivalentObjectProperties(op).contains(m_dataFactory.getOWLTopObjectProperty()));
     }
-    
+
     public void testReflexiveAndSameAs() throws Exception {
         loadOntologyWithAxioms(
-        "Declaration( NamedIndividual( :a ) )"+LB+
-        "Declaration( NamedIndividual( :b ) )"+LB+
-        "Declaration( ObjectProperty( :r ) )"+LB+
-        "ReflexiveObjectProperty( :r )"+LB+
-        "ObjectPropertyAssertion( :r :a :b )"+LB+
-        "SameIndividual( :a :b )"+LB);
+            "Declaration( NamedIndividual( :a ) )"+LB+
+            "Declaration( NamedIndividual( :b ) )"+LB+
+            "Declaration( ObjectProperty( :r ) )"+LB+
+            "ReflexiveObjectProperty( :r )"+LB+
+            "ObjectPropertyAssertion( :r :a :b )"+LB+
+            "SameIndividual( :a :b )"+LB
+        );
         createReasoner();
-        
+
         OWLNamedIndividual a=NS_NI("a");
         OWLNamedIndividual b=NS_NI("b");
         OWLObjectProperty r=NS_OP("r");
@@ -119,7 +120,7 @@ public class ReasonerTest extends AbstractReasonerTest {
 //        m_reasoner.getPrefixes().declarePrefix("", NS);
 //        for (DLClause clause : m_reasoner.getDLOntology().getDLClauses()) {
 //            System.out.println(clause.toString(m_reasoner.getPrefixes()));
-//        } 
+//        }
 //        for (Atom atom : m_reasoner.getDLOntology().getPositiveFacts()) {
 //            System.out.println(atom.toString(m_reasoner.getPrefixes()));
 //        }
@@ -128,13 +129,14 @@ public class ReasonerTest extends AbstractReasonerTest {
 //    }
     public void testFreshEntityEntailment() throws Exception {
         loadOntologyWithAxioms(
-                "Declaration( Class( :A ) )"+
-                "Declaration( Class( :B ) )"+
-                "Declaration( ObjectProperty( :r ) )"+
-                "Declaration( ObjectProperty( :s ) )"+
-                "SubClassOf( :A :B )"+
-                "SubClassOf( owl:Thing :B )"+
-                "SubObjectPropertyOf( :r :s )");
+            "Declaration( Class( :A ) )"+
+            "Declaration( Class( :B ) )"+
+            "Declaration( ObjectProperty( :r ) )"+
+            "Declaration( ObjectProperty( :s ) )"+
+            "SubClassOf( :A :B )"+
+            "SubClassOf( owl:Thing :B )"+
+            "SubObjectPropertyOf( :r :s )"
+        );
         createReasoner();
         OWLClass c=NS_C("C");
         OWLNamedIndividual a=NS_NI("a");
@@ -275,7 +277,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         createReasoner();
         assertDirectSuperObjectProperties("op1", EQ("op2"));
     }
-    
+
     @SuppressWarnings("unchecked")
     public void testObjectPropertySubsumptionsNominals() throws Exception {
         loadOntologyWithAxioms(
@@ -380,7 +382,7 @@ public class ReasonerTest extends AbstractReasonerTest {
                 "SubClassOf(:Corolla :DomainEntity) "+LB+
                 "SubClassOf(:c1 ObjectIntersectionOf(:Corolla ObjectExactCardinality(4 :hasPart :Petal))) "+LB+
                 "SubClassOf(:ps3 :PetalShape) "+LB+
-                "SubClassOf(:c2 ObjectIntersectionOf(:Corolla "+LB+ 
+                "SubClassOf(:c2 ObjectIntersectionOf(:Corolla "+LB+
                 "ObjectAllValuesFrom(:hasPart ObjectUnionOf(ObjectComplementOf(:Petal) ObjectAllValuesFrom(:hasShape ObjectUnionOf(:ps1 :ps2)))) "+LB+
                 "ObjectExactCardinality(1 :hasPart ObjectIntersectionOf(:Petal ObjectSomeValuesFrom(:hasShape :ps1))) "+LB+
                 "ObjectExactCardinality(3 :hasPart ObjectIntersectionOf(:Petal ObjectSomeValuesFrom(:hasShape :ps2))))) "+LB+
@@ -465,7 +467,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         assertDirectSubObjectProperties("t2", EQInv("s3"), EQInv("s4"));
         assertDirectSubObjectProperties("u", EQInv("t1"), EQInv("t2"));
         assertDirectSubObjectProperties("http://www.w3.org/2002/07/owl#topObjectProperty", EQInv("u"), EQ("u"));
-        
+
         assertDirectSubObjectPropertiesOfInverse("http://www.w3.org/2002/07/owl#bottomObjectProperty");
         assertDirectSubObjectPropertiesOfInverse("r1", EQ("http://www.w3.org/2002/07/owl#bottomObjectProperty"));
         assertDirectSubObjectPropertiesOfInverse("r2", EQ("http://www.w3.org/2002/07/owl#bottomObjectProperty"));
@@ -478,7 +480,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         assertDirectSubObjectPropertiesOfInverse("t2", EQ("s3"), EQ("s4"));
         assertDirectSubObjectPropertiesOfInverse("u", EQ("t1"), EQ("t2"));
         assertDirectSubObjectPropertiesOfInverse("http://www.w3.org/2002/07/owl#topObjectProperty", EQ("u"), EQInv("u"));
-        
+
         assertDirectSuperObjectProperties("http://www.w3.org/2002/07/owl#bottomObjectProperty", EQInv("r1"), EQInv("r2"), EQInv("r3"), EQ("r1"), EQ("r2"), EQ("r3"));
         assertDirectSuperObjectProperties("r1", EQInv("s1"), EQInv("s3"));
         assertDirectSuperObjectProperties("r2", EQInv("s2"));
@@ -491,7 +493,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         assertDirectSuperObjectProperties("t2", EQInv("u"));
         assertDirectSuperObjectProperties("u", EQ("http://www.w3.org/2002/07/owl#topObjectProperty"));
         assertDirectSuperObjectProperties("http://www.w3.org/2002/07/owl#topObjectProperty");
-        
+
         assertDirectSuperObjectPropertiesOfInverse("http://www.w3.org/2002/07/owl#bottomObjectProperty", EQInv("r1"), EQInv("r2"), EQInv("r3"), EQ("r1"), EQ("r2"), EQ("r3"));
         assertDirectSuperObjectPropertiesOfInverse("r1", EQ("s1"), EQ("s3"));
         assertDirectSuperObjectPropertiesOfInverse("r2", EQ("s2"));
@@ -608,10 +610,10 @@ public class ReasonerTest extends AbstractReasonerTest {
 
         assertTrue(m_reasoner.isEntailed(m_dataFactory.getOWLFunctionalObjectPropertyAxiom(op)));
         assertFalse(m_reasoner.isEntailed(m_dataFactory.getOWLInverseFunctionalObjectPropertyAxiom(op)));
-        
+
         assertTrue(m_reasoner.isEntailed(m_dataFactory.getOWLFunctionalObjectPropertyAxiom(sop)));
         assertFalse(m_reasoner.isEntailed(m_dataFactory.getOWLInverseFunctionalObjectPropertyAxiom(sop)));
-        
+
         assertFalse(m_reasoner.isEntailed(m_dataFactory.getOWLFunctionalObjectPropertyAxiom(anop)));
         assertFalse(m_reasoner.isEntailed(m_dataFactory.getOWLInverseFunctionalObjectPropertyAxiom(anop)));
     }
@@ -3281,7 +3283,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         assertABoxSatisfiable(false);
    }
 	public void testSatisfiabilityWithRIAs14() throws Exception {
-        String axioms = "Declaration( Class( :CT ) )" + 
+        String axioms = "Declaration( Class( :CT ) )" +
         				"EquivalentObjectProperties( :P owl:topObjectProperty )" +
 						"EquivalentClasses( :CP ObjectSomeValuesFrom( :P :Cf ) )" +
         				"ClassAssertion(:Cf :a) ";

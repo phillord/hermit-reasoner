@@ -241,7 +241,7 @@ public class OWLNormalization {
             OWLDataRange dr=someValuesFrom.getFiller();
             if (dr instanceof OWLDataOneOf) {
                 OWLDataOneOf oneOf=(OWLDataOneOf)dr;
-                if (oneOf.getValues().size()==1) 
+                if (oneOf.getValues().size()==1)
                     return m_factory.getOWLDataPropertyAssertionAxiom(someValuesFrom.getProperty(), axiom.getIndividual(), oneOf.getValues().iterator().next());
             }
         }
@@ -251,9 +251,8 @@ public class OWLNormalization {
         // normalize rules, this might add new concept and data range inclusions
         // in case a rule atom uses a complex concept or data range
         RuleNormalizer ruleNormalizer=new RuleNormalizer(inclusions,dataRangeInclusions);
-        for (SWRLRule rule : rules) {
+        for (SWRLRule rule : rules)
             ruleNormalizer.visit(rule);
-        }
         m_axioms.m_rules.addAll(ruleNormalizer.m_normalizedRules);
     }
     protected void normalizeInclusions(List<OWLClassExpression[]> inclusions,List<OWLDataRange[]> dataRangeInclusions) {
@@ -763,14 +762,12 @@ public class OWLNormalization {
             if (rule.getBody().isEmpty()) {
                 // facts
                 Rule2FactConverter r2fConverter=new Rule2FactConverter(m_inclusionsAsDisjunctions);
-                for (SWRLAtom at : rule.getHead()) {
+                for (SWRLAtom at : rule.getHead())
                     at.accept(r2fConverter);
-                }
             }
             // do Lloyd-Topor transformation
-            for (SWRLAtom headAtom : rule.getHead()) {
+            for (SWRLAtom headAtom : rule.getHead())
                 m_rules.add(m_factory.getSWRLRule(rule.getBody(),Collections.singleton(headAtom)));
-            }
         }
     }
 
@@ -810,8 +807,8 @@ public class OWLNormalization {
                 return object;
         }
         public OWLClassExpression visit(OWLObjectOneOf object) {
-            for (OWLIndividual ind : object.getIndividuals()) 
-                if (ind.isAnonymous()) 
+            for (OWLIndividual ind : object.getIndividuals())
+                if (ind.isAnonymous())
                     throw new IllegalArgumentException("Error: The class expression "+object+" contains anonymous individuals, which is not allowed in OWL 2 (erratum in first OWL 2 spec, to be fixed with next publication of minor corrections). ");
             return object;
         }
@@ -895,9 +892,8 @@ public class OWLNormalization {
             OWLDataPropertyExpression prop=object.getProperty();
             if (prop.isOWLTopDataProperty())
                 throwInvalidTopDPUseError(object);
-            if (isLiteral(filler)) {
+            if (isLiteral(filler))
                 return m_factory.getOWLDataAllValuesFrom(prop,filler);
-            }
             else {
                 OWLDatatype definition=getDefinitionFor(filler,m_alreadyExists);
                 if (!m_alreadyExists[0])
@@ -1007,9 +1003,8 @@ public class OWLNormalization {
         public void visit(SWRLRule rule) {
         }
         public void visit(SWRLClassAtom atom) {
-            if (!(atom.getArgument() instanceof SWRLIndividualArgument)) {
+            if (!(atom.getArgument() instanceof SWRLIndividualArgument))
                 throw new IllegalArgumentException("A SWRL rule contains a head atom "+atom+" with a variable that does not occur in the body. ");
-            }
             OWLIndividual ind=((SWRLIndividualArgument)atom.getArgument()).getIndividual();
             if (ind.isAnonymous())
                 throwAnonIndError(atom);
@@ -1116,7 +1111,7 @@ public class OWLNormalization {
         protected final Set<SWRLAtom> normalizedBodyAtoms=new HashSet<SWRLAtom>();
         protected final Set<SWRLAtom> normalizedHeadAtoms=new HashSet<SWRLAtom>();
         protected final Map<SWRLVariable,OWLDataRange> dataRangeAtoms=new HashMap<SWRLVariable,OWLDataRange>();
-        protected final Map<OWLLiteral,SWRLVariable> litToVar=new HashMap<OWLLiteral,SWRLVariable>();
+        protected final Map<OWLLiteral,SWRLVariable> literalsToVariables=new HashMap<OWLLiteral,SWRLVariable>();
         protected final Map<OWLNamedIndividual,SWRLVariable> indToVar=new HashMap<OWLNamedIndividual,SWRLVariable>();
         protected final Set<SWRLVariable> literalVarsInDPBodyAtoms=new HashSet<SWRLVariable>();
         protected int newVarIndex=0;
@@ -1128,13 +1123,16 @@ public class OWLNormalization {
         }
         protected void initialize() {
             dataRangeAtoms.clear();
-            litToVar.clear();
+            literalsToVariables.clear();
             indToVar.clear();
             bodyAtoms.clear();
             headAtoms.clear();
             normalizedBodyAtoms.clear();
             normalizedHeadAtoms.clear();
             literalVarsInDPBodyAtoms.clear();
+        }
+        protected void normalizeSameAsInBody() {
+
         }
         public void visit(SWRLRule rule) {
             initialize();
@@ -1144,20 +1142,17 @@ public class OWLNormalization {
             // first go through the head because that might introduce new unnormalized body atoms
             // e.g., ... -> op(a, b) is first rewritten into ... /\ {a}(freshVar) -> (\exists op.{b})(freshVar)
             positive=true;
-            while (!headAtoms.isEmpty()) {
+            while (!headAtoms.isEmpty())
                 headAtoms.get(0).accept(this);
-            }
             positive=false;
             // after this, we have a list of data range atoms that go to the head
             // dp(x, y) /\ DR1(y) /\ DR2(y) -> A(x) gives dp(x, y) -> A(x) \/ (not(DR1 and DR2))(y)
             // dp(x, "18"^^xsd:int) /\ DR1("18"^^xsd:int) -> A(x) gives dp(x, y) -> A(x) \/ (not({"18"^^xsd:int} and DR1))(y)
             // but the complex data ranges are stored in a map and normalized afterwards
-            while (!bodyAtoms.isEmpty()) {
+            while (!bodyAtoms.isEmpty())
                 bodyAtoms.get(0).accept(this);
-            }
-            if (!(literalVarsInDPBodyAtoms.containsAll(dataRangeAtoms.keySet()))) {
+            if (!(literalVarsInDPBodyAtoms.containsAll(dataRangeAtoms.keySet())))
                 throw new IllegalArgumentException("The rule "+rule+" violaes safety restrictions because it contains literal variables in data range atoms that do not occur in data property atoms. ");
-            }
             // normalize data range heads atoms (not(DR1 and DR2))(y) to freshDatatype(y) and a datatype def D(x) -> (not(DR1 and DR2))(x)
             for (SWRLVariable var : dataRangeAtoms.keySet()) {
                 OWLDataRange negatedDR=m_expressionManager.getNNF(m_expressionManager.getSimplified(dataRangeAtoms.get(var)));
@@ -1170,13 +1165,12 @@ public class OWLNormalization {
         }
         public void visit(SWRLClassAtom at) {
             OWLClassExpression c=m_expressionManager.getSimplified(m_expressionManager.getNNF(at.getPredicate()));
-            SWRLVariable var=indToVar(at.getArgument());
+            SWRLVariable var=individualToVariable(at.getArgument());
             if (positive) {
                 // head
                 headAtoms.remove(at);
-                if (c instanceof OWLClass) {
+                if (c instanceof OWLClass)
                     normalizedHeadAtoms.add(m_factory.getSWRLClassAtom(c,var));
-                }
                 else {
                     OWLClass definition=getClassFor(at.getPredicate(),m_alreadyExists);
                     if (!m_alreadyExists[0]) {
@@ -1189,9 +1183,8 @@ public class OWLNormalization {
             else {
                 // body
                 bodyAtoms.remove(at);
-                if (c instanceof OWLClass) {
+                if (c instanceof OWLClass)
                     normalizedBodyAtoms.add(m_factory.getSWRLClassAtom(c,var));
-                }
                 else {
                     OWLClass definition=getClassFor(at.getPredicate(),m_alreadyExists);
                     if (!m_alreadyExists[0]) {
@@ -1215,9 +1208,8 @@ public class OWLNormalization {
                         OWLDataRange range=dataRangeAtoms.get(var);
                         range=m_factory.getOWLDataUnionOf(range,dr);
                     }
-                    else {
+                    else
                         dataRangeAtoms.put(var,dr);
-                    }
                 }
                 else {
                     // e.g., ... -> DR("abc")
@@ -1240,29 +1232,26 @@ public class OWLNormalization {
                 // dp(x, y) /\ DR1(y) /\ DR2(y) -> A(x) gives dp(x, y) -> A(x) and (y, DR1 and DR2) in the list
                 // dp(x, "18"^^xsd:int) /\ DR1("18"^^xsd:int) -> A(x) gives dp(x, y) -> A(x) and (y, ({"18"^^xsd:int} and DR1)) in the list
                 // they will go to the head in negated form
-                if (arg instanceof SWRLVariable) {
+                if (arg instanceof SWRLVariable)
                     var=(SWRLVariable)arg;
-                }
                 else {
                     // get fresh var for the literal
                     OWLLiteral lit=((SWRLLiteralArgument)arg).getLiteral();
-                    if (!litToVar.containsKey(lit)) {
+                    if (!literalsToVariables.containsKey(lit)) {
                         var=m_factory.getSWRLVariable(IRI.create("internal:swrl#"+newVarIndex));
                         newVarIndex++;
-                        litToVar.put(lit,var);
+                        literalsToVariables.put(lit,var);
                     }
-                    else {
-                        var=litToVar.get(lit);
-                    }
+                    else
+                        var=literalsToVariables.get(lit);
                 }
                 // put into the list
                 if (dataRangeAtoms.containsKey(var)) {
                     OWLDataRange range=dataRangeAtoms.get(var);
                     range=m_factory.getOWLDataUnionOf(range,m_factory.getOWLDataComplementOf(dr));
                 }
-                else {
+                else
                     dataRangeAtoms.put(var,m_factory.getOWLDataComplementOf(dr));
-                }
             }
         }
         public void visit(SWRLObjectPropertyAtom at) {
@@ -1282,20 +1271,18 @@ public class OWLNormalization {
                 if (arg1 instanceof SWRLIndividualArgument) {
                     if (arg2 instanceof SWRLIndividualArgument) {
                         // ... -> op(a, b) becomes ... /\ ({a})(x) -> (\exists op.{b})(x) for x a fresh variable or one that has been introduced for a before
-                        SWRLVariable var=indToVar(arg1);
+                        SWRLVariable var=individualToVariable(arg1);
                         OWLIndividual ind2=((SWRLIndividualArgument)arg2).getIndividual();
-                        if (ind2.isAnonymous()) {
+                        if (ind2.isAnonymous())
                             throw new IllegalArgumentException("Internal error: Rules with anonymous individuals are not supported. ");
-                        }
                         OWLClassExpression ce=m_factory.getOWLObjectSomeValuesFrom(op,m_factory.getOWLObjectOneOf(ind2));
                         headAtoms.add(m_factory.getSWRLClassAtom(ce,var));
                     }
                     else {
                         // op(a, x) becomes (\exists op-.{a})(x)
                         OWLIndividual ind=((SWRLIndividualArgument)arg1).getIndividual();
-                        if (ind.isAnonymous()) {
+                        if (ind.isAnonymous())
                             throw new IllegalArgumentException("Internal error: Rules with anonymous individuals are not supported. ");
-                        }
                         SWRLVariable var=(SWRLVariable)arg2;
                         OWLClassExpression ce=m_factory.getOWLObjectSomeValuesFrom(op.getInverseProperty().getSimplified(),m_factory.getOWLObjectOneOf(ind.asOWLNamedIndividual()));
                         headAtoms.add(m_factory.getSWRLClassAtom(ce,var));
@@ -1306,15 +1293,13 @@ public class OWLNormalization {
                         // op(x, a) becomes (\exists op.{a})(x)
                         SWRLVariable var=(SWRLVariable)arg1;
                         OWLIndividual ind=((SWRLIndividualArgument)arg2).getIndividual();
-                        if (ind.isAnonymous()) {
+                        if (ind.isAnonymous())
                             throw new IllegalArgumentException("Internal error: Rules with anonymous individuals are not supported. ");
-                        }
                         OWLClassExpression ce=m_factory.getOWLObjectSomeValuesFrom(op,m_factory.getOWLObjectOneOf(ind.asOWLNamedIndividual()));
                         headAtoms.add(m_factory.getSWRLClassAtom(ce,var));
                     }
-                    else {
+                    else
                         normalizedHeadAtoms.add(at);
-                    }
                 }
             }
             else {
@@ -1323,40 +1308,34 @@ public class OWLNormalization {
                 if (arg1 instanceof SWRLIndividualArgument) {
                     if (arg2 instanceof SWRLIndividualArgument) {
                         // op(a, b) becomes ({a})(x) /\ (\exists op.{b})(x) for x a fresh variable or one that has been introduced for a before
-                        SWRLVariable var=indToVar(arg1);
+                        SWRLVariable var=individualToVariable(arg1);
                         OWLIndividual ind2=((SWRLIndividualArgument)arg2).getIndividual();
-                        if (ind2.isAnonymous()) {
+                        if (ind2.isAnonymous())
                             throw new IllegalArgumentException("Internal error: Rules with anonymous individuals are not supported. ");
-                        }
                         OWLClassExpression ce=m_factory.getOWLObjectSomeValuesFrom(op,m_factory.getOWLObjectOneOf(ind2));
                         bodyAtoms.add(m_factory.getSWRLClassAtom(ce,var));
                     }
                     else {
                         // op(a, x) becomes (\exists op-.{a})(x)
                         OWLIndividual ind=((SWRLIndividualArgument)arg1).getIndividual();
-                        if (ind.isAnonymous()) {
+                        if (ind.isAnonymous())
                             throw new IllegalArgumentException("Internal error: Rules with anonymous individuals are not supported. ");
-                        }
                         SWRLVariable var=(SWRLVariable)arg2;
                         OWLClassExpression ce=m_factory.getOWLObjectSomeValuesFrom(op.getInverseProperty().getSimplified(),m_factory.getOWLObjectOneOf(ind.asOWLNamedIndividual()));
                         bodyAtoms.add(m_factory.getSWRLClassAtom(ce,var));
                     }
                 }
-                else {
-                    if (arg2 instanceof SWRLIndividualArgument) {
-                        // op(x, a) becomes (\exists op.{a})(x)
-                        SWRLVariable var=(SWRLVariable)arg1;
-                        OWLIndividual ind=((SWRLIndividualArgument)arg2).getIndividual();
-                        if (ind.isAnonymous()) {
-                            throw new IllegalArgumentException("Internal error: Rules with anonymous individuals are not supported. ");
-                        }
-                        OWLClassExpression ce=m_factory.getOWLObjectSomeValuesFrom(op,m_factory.getOWLObjectOneOf(ind.asOWLNamedIndividual()));
-                        bodyAtoms.add(m_factory.getSWRLClassAtom(ce,var));
-                    }
-                    else {
-                        normalizedBodyAtoms.add(at);
-                    }
+                else if (arg2 instanceof SWRLIndividualArgument) {
+                    // op(x, a) becomes (\exists op.{a})(x)
+                    SWRLVariable var=(SWRLVariable)arg1;
+                    OWLIndividual ind=((SWRLIndividualArgument)arg2).getIndividual();
+                    if (ind.isAnonymous())
+                        throw new IllegalArgumentException("Internal error: Rules with anonymous individuals are not supported. ");
+                    OWLClassExpression ce=m_factory.getOWLObjectSomeValuesFrom(op,m_factory.getOWLObjectOneOf(ind.asOWLNamedIndividual()));
+                    bodyAtoms.add(m_factory.getSWRLClassAtom(ce,var));
                 }
+                else
+                    normalizedBodyAtoms.add(at);
             }
         }
         public void visit(SWRLDataPropertyAtom at) {
@@ -1390,9 +1369,8 @@ public class OWLNormalization {
                             indToVar.put(ind.asOWLNamedIndividual(),var1);
                             bodyAtoms.add(m_factory.getSWRLClassAtom(m_factory.getOWLObjectOneOf(ind),var1));
                         }
-                        else {
+                        else
                             var1=indToVar.get(ind.asOWLNamedIndividual());
-                        }
                         normalizedHeadAtoms.add(m_factory.getSWRLDataPropertyAtom(dp,var1,arg2));
                     }
                     else {
@@ -1403,9 +1381,8 @@ public class OWLNormalization {
                             indToVar.put(ind.asOWLNamedIndividual(),var1);
                             bodyAtoms.add(m_factory.getSWRLClassAtom(m_factory.getOWLObjectOneOf(ind),var1));
                         }
-                        else {
+                        else
                             var1=indToVar.get(ind.asOWLNamedIndividual());
-                        }
                         OWLLiteral lit=((SWRLLiteralArgument)arg2).getLiteral();
                         OWLClassExpression ce=m_factory.getOWLDataSomeValuesFrom(dp,m_factory.getOWLDataOneOf(lit));
                         headAtoms.add(m_factory.getSWRLClassAtom(ce,var1));
@@ -1419,25 +1396,22 @@ public class OWLNormalization {
                     // dp(_, "abc") -> ... becomes dp(_, freshx) -> not({"abc"})(freshx) \/ ...
                     // first we store not({"abc"}) in a map in case there are more atoms for "abc"/freshx
                     OWLLiteral lit=((SWRLLiteralArgument)arg2).getLiteral();
-                    if (!litToVar.containsKey(lit)) {
+                    if (!literalsToVariables.containsKey(lit)) {
                         var2=m_factory.getSWRLVariable(IRI.create("internal:swrl#"+newVarIndex));
                         newVarIndex++;
-                        litToVar.put(lit,var2);
+                        literalsToVariables.put(lit,var2);
                     }
-                    else {
-                        var2=litToVar.get(lit);
-                    }
+                    else
+                        var2=literalsToVariables.get(lit);
                     if (dataRangeAtoms.containsKey(var2)) {
                         OWLDataRange range=dataRangeAtoms.get(var2);
                         range=m_factory.getOWLDataUnionOf(range,m_factory.getOWLDataComplementOf(m_factory.getOWLDataOneOf(lit)));
                     }
-                    else {
+                    else
                         dataRangeAtoms.put(var2,m_factory.getOWLDataComplementOf(m_factory.getOWLDataOneOf(lit)));
-                    }
                 }
-                else {
+                else
                     var2=(SWRLVariable)arg2;
-                }
                 literalVarsInDPBodyAtoms.add(var2);
                 if (arg1 instanceof SWRLIndividualArgument) {
                     // dp(a, x) -> ... becomes dp(freshx, x) /\ ({a})(freshx) -> ...
@@ -1451,13 +1425,11 @@ public class OWLNormalization {
                         indToVar.put(ind.asOWLNamedIndividual(),var1);
                         bodyAtoms.add(m_factory.getSWRLClassAtom(m_factory.getOWLObjectOneOf(ind),var1));
                     }
-                    else {
+                    else
                         var1=indToVar.get(ind.asOWLNamedIndividual());
-                    }
                 }
-                else {
+                else
                     var1=(SWRLVariable)arg1;
-                }
                 normalizedBodyAtoms.add(m_factory.getSWRLDataPropertyAtom(dp,var1,var2));
             }
         }
@@ -1468,25 +1440,25 @@ public class OWLNormalization {
             if (positive) {
                 // head
                 headAtoms.remove(at);
-                normalizedHeadAtoms.add(m_factory.getSWRLSameIndividualAtom(indToVar(at.getFirstArgument()),indToVar(at.getSecondArgument())));
+                normalizedHeadAtoms.add(m_factory.getSWRLSameIndividualAtom(individualToVariable(at.getFirstArgument()),individualToVariable(at.getSecondArgument())));
             }
             else {
                 // body
                 bodyAtoms.remove(at);
-                normalizedBodyAtoms.add(m_factory.getSWRLSameIndividualAtom(indToVar(at.getFirstArgument()),indToVar(at.getSecondArgument())));
+                normalizedBodyAtoms.add(m_factory.getSWRLSameIndividualAtom(individualToVariable(at.getFirstArgument()),individualToVariable(at.getSecondArgument())));
             }
         }
         public void visit(SWRLDifferentIndividualsAtom at) {
             if (positive) {
                 // head
                 headAtoms.remove(at);
-                normalizedHeadAtoms.add(m_factory.getSWRLDifferentIndividualsAtom(indToVar(at.getFirstArgument()),indToVar(at.getSecondArgument())));
+                normalizedHeadAtoms.add(m_factory.getSWRLDifferentIndividualsAtom(individualToVariable(at.getFirstArgument()),individualToVariable(at.getSecondArgument())));
             }
             else {
                 // body
                 bodyAtoms.remove(at);
                 // add to head as disjunctive equality
-                normalizedHeadAtoms.add(m_factory.getSWRLSameIndividualAtom(indToVar(at.getFirstArgument()),indToVar(at.getSecondArgument())));
+                normalizedHeadAtoms.add(m_factory.getSWRLSameIndividualAtom(individualToVariable(at.getFirstArgument()),individualToVariable(at.getSecondArgument())));
             }
         }
         public void visit(SWRLVariable variable) {
@@ -1498,13 +1470,12 @@ public class OWLNormalization {
         public void visit(SWRLLiteralArgument argument) {
             // nothing to do
         }
-        protected SWRLVariable indToVar(SWRLIArgument arg) {
+        protected SWRLVariable individualToVariable(SWRLIArgument arg) {
             SWRLVariable var;
             if (arg instanceof SWRLIndividualArgument) {
                 OWLIndividual ind=((SWRLIndividualArgument)arg).getIndividual();
-                if (ind.isAnonymous()) {
+                if (ind.isAnonymous())
                     throw new IllegalArgumentException("Internal error: Rules with anonymous individuals are not supported. ");
-                }
                 if (!indToVar.containsKey(ind.asOWLNamedIndividual())) {
                     var=m_factory.getSWRLVariable(IRI.create("internal:swrl#"+newVarIndex));
                     newVarIndex++;

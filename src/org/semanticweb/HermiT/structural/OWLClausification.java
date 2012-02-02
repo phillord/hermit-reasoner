@@ -40,6 +40,7 @@ import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Constant;
 import org.semanticweb.HermiT.model.ConstantEnumeration;
 import org.semanticweb.HermiT.model.DLClause;
+import org.semanticweb.HermiT.model.DLClause.ClauseType;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.model.DatatypeRestriction;
@@ -55,7 +56,6 @@ import org.semanticweb.HermiT.model.NodeIDsAscendingOrEqual;
 import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.model.Term;
 import org.semanticweb.HermiT.model.Variable;
-import org.semanticweb.HermiT.model.DLClause.ClauseType;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
@@ -1123,27 +1123,24 @@ public class OWLClausification {
         }
 
         public void visit(SWRLClassAtom atom) {
-            if (atom.getPredicate().isAnonymous()) {
+            if (atom.getPredicate().isAnonymous())
                 throw new IllegalStateException("Internal error: SWRL rule class atoms should be normalized to contain only named classes, but this class atom has a complex concept: "+atom.getPredicate());
-            }
             atom.getArgument().accept(this);
             Variable var=m_lastVariable;
             m_DLSafeVars.add(var);
             m_lastAtom=Atom.create(AtomicConcept.create(atom.getPredicate().asOWLClass().getIRI().toString()),m_lastVariable);
         }
         public void visit(SWRLDataRangeAtom atom) {
-            if (!(atom.getPredicate() instanceof OWLDatatype)) {
+            if (!(atom.getPredicate() instanceof OWLDatatype))
                 throw new IllegalStateException("Internal error: SWRL rule data range atoms should be normalized to contain only datatypes, but this atom has a (complex) data range: "+atom.getPredicate());
-            }
             LiteralDataRange literalRange=m_dataRangeConverter.convertDataRange(atom.getPredicate().asOWLDatatype());
 //            OWLDatatype dt=atom.getPredicate().asOWLDatatype();
-            atom.getArgument().accept(this); 
+            atom.getArgument().accept(this);
             m_lastAtom=Atom.create((DLPredicate)literalRange,m_lastVariable);
         }
         public void visit(SWRLObjectPropertyAtom atom) {
-            if (atom.getPredicate().isAnonymous()) {
+            if (atom.getPredicate().isAnonymous())
                 throw new IllegalStateException("Internal error: object properties in SWRL rule object property atoms should be normalized to contain only named properties, but this atom has an (anonymous) object property expression: "+atom.getPredicate());
-            }
             atom.getFirstArgument().accept(this);
             Variable var1=m_lastVariable;
             m_DLSafeVars.add(var1);

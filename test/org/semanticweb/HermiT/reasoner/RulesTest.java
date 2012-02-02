@@ -8,19 +8,32 @@ import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.reasoner.NodeSet;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 
-
 public class RulesTest extends AbstractReasonerTest {
+    protected static String LB=System.getProperty("line.separator");
 
-    public static String LB=System.getProperty("line.separator");
-    
     public RulesTest(String name) {
         super(name);
     }
 
-//    protected Configuration getConfiguration() {
-//        Configuration c=new Configuration();
-//        return c;
-//    }
+    public void testIndividualsInRules() throws Exception {
+        String axioms =
+              "Declaration(NamedIndividual(:a))"+LB
+            + "Declaration(NamedIndividual(:b))"+LB
+            + "Declaration(Class(:c))"+LB
+            + "Declaration(Class(:d))"+LB
+            + "ClassAssertion(:c :a)"+LB
+            + "ClassAssertion(ObjectComplementOf(:d) :b)"+LB
+            // c(a) -> d(b)
+            + "DLSafeRule("+LB
+            + "  Body(ClassAtom(:c :a))"+LB
+            + "  Head(ClassAtom(:d :b))"+LB
+            + ")";
+        loadOntologyWithAxioms(axioms);
+        createReasoner();
+
+        assertABoxSatisfiable(false);
+    }
+
     public void testRuleNonSimple() throws Exception {
         String axioms = "Declaration(NamedIndividual(:a))"+LB
             + "Declaration(NamedIndividual(:b))"+LB
@@ -35,15 +48,16 @@ public class RulesTest extends AbstractReasonerTest {
             + ")";
         loadOntologyWithAxioms(axioms);
         createReasoner();
-        
+
         OWLNamedIndividual a=m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "a"));
         OWLNamedIndividual b=m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "b"));
         OWLObjectProperty t=m_dataFactory.getOWLObjectProperty(IRI.create(AbstractReasonerTest.NS + "t"));
         //OWLObjectProperty s=m_dataFactory.getOWLObjectProperty(IRI.create(AbstractReasonerTest.NS + "s"));
         assertTrue(m_reasoner.hasObjectPropertyRelationship(a, t, b));
-        // fails
-        // assertTrue(m_reasoner.hasObjectPropertyRelationship(a, s, b));
+        //The following fails because transitive properties in rules do not work correctly
+        //assertTrue(m_reasoner.hasObjectPropertyRelationship(a, s, b));
     }
+
     public void testRuleNotAxiom() throws Exception {
         String axioms = "Declaration(NamedIndividual(:a))"+LB
             + "Declaration(NamedIndividual(:b))"+LB
@@ -58,7 +72,7 @@ public class RulesTest extends AbstractReasonerTest {
             + ")";
         loadOntologyWithAxioms(axioms);
         createReasoner();
-        
+
         OWLNamedIndividual a=m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "a"));
         OWLNamedIndividual b=m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "b"));
         OWLClass A=m_dataFactory.getOWLClass(IRI.create(AbstractReasonerTest.NS + "A"));
@@ -70,6 +84,7 @@ public class RulesTest extends AbstractReasonerTest {
         assertTrue(m_reasoner.getInstances(B, false).containsEntity(b));
         assertTrue(m_reasoner.getInstances(A, false).containsEntity(a));
     }
+
     public void testSimpleRule2() throws Exception {
         String axioms = "Declaration(NamedIndividual(:sensor))"
         	+ "Declaration(NamedIndividual(:kitchen))"
@@ -85,18 +100,18 @@ public class RulesTest extends AbstractReasonerTest {
             + "ObjectPropertyAssertion(:detects :sensor :pda)"+LB
             + "ObjectPropertyAssertion(:hasLocation :sensor :kitchen)"+LB
             // BluetoothDevice(vbd) /\ BluetoothSensor(vbs) /\ Location(vl) /\ detects(vbs, vl) /\ hasLocation(vbs, vl) -> hasLocation(vbd, vl)
-            + "DLSafeRule(" 
-            + "  Body(" 
-            + "    ClassAtom(:BluetoothDevice Variable(:vbd)) " 
-            + "    ClassAtom(:BluetoothSensor Variable(:vbs)) " 
+            + "DLSafeRule("
+            + "  Body("
+            + "    ClassAtom(:BluetoothDevice Variable(:vbd)) "
+            + "    ClassAtom(:BluetoothSensor Variable(:vbs)) "
             + "    ClassAtom(:Location Variable(:vl)) "
-            + "    ObjectPropertyAtom(:detects Variable(:vbs) Variable(:vbd)) " 
+            + "    ObjectPropertyAtom(:detects Variable(:vbs) Variable(:vbd)) "
             + "    ObjectPropertyAtom(:hasLocation Variable(:vbs) Variable(:vl))"
             + "  )"
             + "  Head(ObjectPropertyAtom(:hasLocation Variable(:vbd) Variable(:vl)))"
             + ")";
         loadOntologyWithAxioms(axioms);
-        
+
         OWLNamedIndividual pda = m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "pda"));
         OWLNamedIndividual k = m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "kitchen"));
         OWLObjectProperty hasLocation = m_dataFactory.getOWLObjectProperty(IRI.create(AbstractReasonerTest.NS + "hasLocation"));
@@ -112,7 +127,7 @@ public class RulesTest extends AbstractReasonerTest {
             // B(x) -> C(x)
             + "DLSafeRule(Body(ClassAtom(:B Variable(:x))) Head(ClassAtom(:C Variable(:x))))";
         loadOntologyWithAxioms(axioms);
-        
+
         OWLNamedIndividual a = m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "a"));
         OWLNamedIndividual b = m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "b"));
         OWLClass C = m_dataFactory.getOWLClass(IRI.create(AbstractReasonerTest.NS + "C"));
@@ -121,7 +136,7 @@ public class RulesTest extends AbstractReasonerTest {
         assertTrue(m_reasoner.getInstances(C, false).containsEntity(a));
         assertTrue(!m_reasoner.getInstances(C, false).containsEntity(b));
     }
-    
+
     public void testRuleWithConstants() throws Exception {
         String axioms = "SubClassOf(:A :B)"
             + "ClassAssertion(:A :a)"
@@ -129,7 +144,7 @@ public class RulesTest extends AbstractReasonerTest {
             // B(x) -> C(a)
             + "DLSafeRule(Body(ClassAtom(:B Variable(:x))) Head(ClassAtom(:C :a)))";
         loadOntologyWithAxioms(axioms);
-        
+
         OWLNamedIndividual a = m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "a"));
         OWLNamedIndividual b = m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "b"));
         OWLClass C = m_dataFactory.getOWLClass(IRI.create(AbstractReasonerTest.NS + "C"));
@@ -137,7 +152,7 @@ public class RulesTest extends AbstractReasonerTest {
         assertTrue(m_reasoner.getInstances(C, false).containsEntity(a));
         assertTrue(!m_reasoner.getInstances(C, false).containsEntity(b));
     }
-    
+
     public void testRuleWithConstants2() throws Exception {
         String axioms = "ClassAssertion(ObjectSomeValuesFrom(:r owl:Thing) :a)"
             + "ObjectPropertyAssertion(:r :a :b)"
@@ -169,7 +184,7 @@ public class RulesTest extends AbstractReasonerTest {
         result=m_reasoner.getObjectPropertyValues(a, q);
         assertTrue(result.isSingleton()&&result.containsEntity(b));
     }
-    
+
     public void testRuleWithDatatypes() throws Exception {
         String axioms = "DataPropertyAssertion(:dp :a \"18\"^^xsd:short)"
             + "DataPropertyAssertion(:dp :b \"17\"^^xsd:short)"
@@ -183,8 +198,8 @@ public class RulesTest extends AbstractReasonerTest {
         assertTrue(m_reasoner.getInstances(C, false).containsEntity(a));
         assertFalse(m_reasoner.getInstances(C, false).containsEntity(b));
     }
-    
-    
+
+
     public void testRuleWithDatatypes2() throws Exception {
         String axioms = "ClassAssertion(DataSomeValuesFrom(:dp DatatypeRestriction(xsd:integer xsd:minInclusive \"10\"^^xsd:integer)) :a)"
             + "DataPropertyAssertion(:dp :b \"10\"^^xsd:short)"
@@ -200,7 +215,7 @@ public class RulesTest extends AbstractReasonerTest {
         OWLNamedIndividual c = m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "c"));
         OWLClass C = m_dataFactory.getOWLClass(IRI.create(AbstractReasonerTest.NS + "C"));
         OWLClass D = m_dataFactory.getOWLClass(IRI.create(AbstractReasonerTest.NS + "D"));
-        
+
         createReasoner();
         assertTrue(m_reasoner.getInstances(C, false).containsEntity(c));
         assertTrue(!m_reasoner.getInstances(C, false).containsEntity(a));
@@ -209,7 +224,7 @@ public class RulesTest extends AbstractReasonerTest {
         assertTrue(m_reasoner.getInstances(D, false).containsEntity(a));
         assertTrue(!m_reasoner.getInstances(D, false).containsEntity(c));
     }
-    
+
     public void testRuleWithFreshIndividuals() throws Exception {
         String axioms = "ClassAssertion(:A :a)"
             // A(x) -> B(b)
@@ -227,7 +242,7 @@ public class RulesTest extends AbstractReasonerTest {
         assertTrue(!m_reasoner.getInstances(C, false).containsEntity(a));
         assertTrue(!m_reasoner.getInstances(B, false).containsEntity(a));
     }
-    
+
     public void testAddingFactsByRules() throws Exception {
         String axioms = "ClassAssertion(:A :a)"
             // -> B(a)
@@ -265,7 +280,7 @@ public class RulesTest extends AbstractReasonerTest {
         assertTrue(!m_reasoner.getInstances(E, false).containsEntity(b));
         assertTrue(m_reasoner.getInstances(E, false).containsEntity(e));
     }
-    
+
     public void testLloydTopor() throws Exception {
         String axioms = "ClassAssertion(:A :a)"
             + "ClassAssertion(:B :b)"
@@ -277,7 +292,7 @@ public class RulesTest extends AbstractReasonerTest {
         OWLClass A = m_dataFactory.getOWLClass(IRI.create(AbstractReasonerTest.NS + "A"));
         OWLClass B = m_dataFactory.getOWLClass(IRI.create(AbstractReasonerTest.NS + "B"));
         OWLClass C = m_dataFactory.getOWLClass(IRI.create(AbstractReasonerTest.NS + "C"));
-        
+
         createReasoner();
         assertTrue(m_reasoner.getInstances(A, false).containsEntity(a));
         assertTrue(m_reasoner.getInstances(B, false).containsEntity(a));
@@ -286,16 +301,16 @@ public class RulesTest extends AbstractReasonerTest {
         assertTrue(m_reasoner.getInstances(B, false).containsEntity(b));
         assertTrue(!m_reasoner.getInstances(C, false).containsEntity(b));
     }
-    
+
     public void testDRInHead() throws Exception {
         String axioms = "ClassAssertion(:A :a)"
             // -> xsd:short("15"^^xsd:int)
             + "DLSafeRule(Body() Head(DataRangeAtom(xsd:short \"15\"^^xsd:int)))";
-        loadOntologyWithAxioms(axioms);        
+        loadOntologyWithAxioms(axioms);
         createReasoner();
         assertTrue(m_reasoner.isConsistent());
     }
-    
+
     public void testDRInHead2() throws Exception {
         // -> xsd:short("15"^^xsd:int)
         String axioms = "DLSafeRule(Body() Head(DataRangeAtom(xsd:short \"15\"^^xsd:int)))";
@@ -303,7 +318,7 @@ public class RulesTest extends AbstractReasonerTest {
         createReasoner();
         assertTrue(m_reasoner.isConsistent());
     }
-    
+
     public void testDRInHead3() throws Exception {
         // -> xsd:byte("10000"^^xsd:integer)
         String axioms = "DLSafeRule(Body() Head(DataRangeAtom(xsd:byte \"10000\"^^xsd:integer)))";
@@ -311,7 +326,7 @@ public class RulesTest extends AbstractReasonerTest {
         createReasoner();
         assertTrue(!m_reasoner.isConsistent());
     }
-    
+
     public void testDRSafety() throws Exception {
         String axioms = "ClassAssertion(:A :a)"
             // A(x) /\ xsd:integer(y) -> dp(x, y)
@@ -325,10 +340,10 @@ public class RulesTest extends AbstractReasonerTest {
         }
         assertTrue(caught);
     }
-    
+
     public void testNormalSafety() throws Exception {
         String axioms = "ClassAssertion(:A :a)"
-            // A(x) -> r(x, y)            
+            // A(x) -> r(x, y)
             + "DLSafeRule(Body(ClassAtom(:A Variable(:x))) Head(ObjectPropertyAtom(:r Variable(:x) Variable(:y))))";
         loadOntologyWithAxioms(axioms);
         boolean caught=false;
@@ -339,7 +354,7 @@ public class RulesTest extends AbstractReasonerTest {
         }
         assertTrue(caught);
     }
-    
+
     public void testSeveralVars() throws Exception {
         String axioms = "ClassAssertion(:A :a) ClassAssertion(:B :b) ClassAssertion(:C :c) ClassAssertion(:D :d) ClassAssertion(:E :e)"
             +"ObjectPropertyAssertion(:rab :a :b) ObjectPropertyAssertion(:rac :a :c) ObjectPropertyAssertion(:rcd :c :d)"
@@ -392,7 +407,7 @@ public class RulesTest extends AbstractReasonerTest {
         assertTrue(result.containsEntity(e));
         assertTrue(result.isSingleton());
     }
-    
+
     public void testPositiveBodyDataRange() throws Exception {
         String axioms = "ClassAssertion(:A :a) SubClassOf(:A DataSomeValuesFrom(:dp DatatypeRestriction(xsd:integer xsd:minInclusive \"6\"^^xsd:integer xsd:maxInclusive \"9\"^^xsd:integer)))"
             // dp(x, y) /\ ((xsd:integer >= 5) and (xsd:decimal <= 10))(y) /\ (xsd:int <= 9)(y) -> B(x)
@@ -406,7 +421,7 @@ public class RulesTest extends AbstractReasonerTest {
         createReasoner();
         assertTrue(m_reasoner.getInstances(B, false).containsEntity(a));
     }
-    
+
     public void testNegativeBodyDataRange() throws Exception {
         String axioms = "ClassAssertion(:A :a) ClassAssertion(:B :b)"
             + "SubClassOf(:A DataSomeValuesFrom(:dp DatatypeRestriction(xsd:integer xsd:minInclusive \"6\"^^xsd:integer xsd:maxInclusive \"9\"^^xsd:integer)))"
@@ -439,11 +454,11 @@ public class RulesTest extends AbstractReasonerTest {
         createReasoner();
         assertTrue(!m_reasoner.isConsistent());
     }
-    
+
     public void testSameAs() throws Exception {
-        String axioms = "ClassAssertion(:A :a) " 
-		+ "ClassAssertion(:B :b) " 
-		+ "DisjointClasses(:A :B) " 
+        String axioms = "ClassAssertion(:A :a) "
+		+ "ClassAssertion(:B :b) "
+		+ "DisjointClasses(:A :B) "
 		+ "ObjectPropertyAssertion(:r :a :b)"
 		// r(x, y) -> SameAs(x, y)
 		+ "DLSafeRule(Body(ObjectPropertyAtom(:r Variable(:x) Variable(:y))) Head(SameIndividualAtom(Variable(:x) Variable(:y))))";
@@ -451,10 +466,10 @@ public class RulesTest extends AbstractReasonerTest {
         createReasoner();
         assertTrue(!m_reasoner.isConsistent());
     }
-    
+
     public void testDifferentFrom() throws Exception {
         String axioms = "ObjectPropertyAssertion(:f :a :b)"
-            + "ObjectPropertyAssertion(:f :a :c)" 
+            + "ObjectPropertyAssertion(:f :a :c)"
             + "FunctionalObjectProperty(:f)"
             // f(x, y) /\ f(x, z) -> DifferentFrom(y, z)
             + "DLSafeRule(Body(ObjectPropertyAtom(:f Variable(:x) Variable(:y)) ObjectPropertyAtom(:f Variable(:x) Variable(:z))) Head(DifferentIndividualsAtom(Variable(:y) Variable(:z))))";
@@ -462,7 +477,7 @@ public class RulesTest extends AbstractReasonerTest {
         createReasoner();
         assertTrue(!m_reasoner.isConsistent());
     }
-    
+
     public void testDiffrentFrom2() throws Exception {
         String axioms = "ClassAssertion(:A :a) ClassAssertion(:B :b) DisjointClasses(:A :B) ObjectPropertyAssertion(:r :a :b)"
             // r(x, y) /\ DifferentFrom(x, y)-> C(x)
@@ -474,7 +489,7 @@ public class RulesTest extends AbstractReasonerTest {
         OWLClass C = m_dataFactory.getOWLClass(IRI.create(AbstractReasonerTest.NS + "C"));
         OWLNamedIndividual a = m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "a"));
         OWLNamedIndividual b = m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractReasonerTest.NS + "b"));
-        
+
         createReasoner();
         assertTrue(m_reasoner.getInstances(C, false).containsEntity(a));
         assertTrue(!m_reasoner.getInstances(C, false).containsEntity(b));
