@@ -237,7 +237,8 @@ public abstract class AbstractExpansionStrategy implements ExistentialExpansionS
                         else
                             return SatType.CURRENTLY_SATISFIED;
                     }
-                } else {
+                }
+                else {
                     LiteralConcept toConcept=((AtLeastConcept)atLeast).getToConcept();
                     if ((!toNode.isBlocked() || forNode.isParentOf(toNode)) && m_extensionManager.containsConceptAssertion(toConcept,toNode)) {
                         if (isPermanentSatisfier(forNode,toNode) && m_blockingStrategy.isPermanentAssertion(toConcept,toNode))
@@ -264,7 +265,8 @@ public abstract class AbstractExpansionStrategy implements ExistentialExpansionS
                             allSatisfiersArePermanent=false;
                         m_auxiliaryNodes1.add(toNode);
                     }
-                } else {
+                }
+                else {
                     LiteralConcept toConcept=((AtLeastConcept)atLeast).getToConcept();
                     if ((!toNode.isBlocked() || forNode.isParentOf(toNode)) && m_extensionManager.containsConceptAssertion(toConcept,toNode)) {
                         if (!isPermanentSatisfier(forNode,toNode) || !m_blockingStrategy.isPermanentAssertion(toConcept,toNode))

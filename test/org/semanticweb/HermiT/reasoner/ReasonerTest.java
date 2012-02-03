@@ -828,46 +828,42 @@ public class ReasonerTest extends AbstractReasonerTest {
 
     public void testAnonymousIndividualConstraints() throws Exception {
         String axioms = "SameIndividual(:a _:anon1)";
-        boolean exceptionThrown=false;
         try {
             loadReasonerWithAxioms(axioms);
-        } catch (Exception e) {
-            exceptionThrown=true;
+            fail();
         }
-        assertTrue(exceptionThrown);
+        catch (Exception e) {
+        }
     }
 
     public void testAnonymousIndividualConstraints2() throws Exception {
         String axioms = "DifferentIndividuals(:a _:anon1)";
-        boolean exceptionThrown=false;
         try {
             loadReasonerWithAxioms(axioms);
-        } catch (Exception e) {
-            exceptionThrown=true;
+            fail();
         }
-        assertTrue(exceptionThrown);
+        catch (Exception e) {
+        }
     }
 
     public void testAnonymousIndividualConstraints3() throws Exception {
         String axioms = "NegativeObjectPropertyAssertion(:r :a _:anon1)";
-        boolean exceptionThrown=false;
         try {
             loadReasonerWithAxioms(axioms);
-        } catch (Exception e) {
-            exceptionThrown=true;
+            fail();
         }
-        assertTrue(exceptionThrown);
+        catch (Exception e) {
+        }
     }
 
     public void testAnonymousIndividualConstraints4() throws Exception {
         String axioms = "NegativeDataPropertyAssertion(:r _:anon1 \"test\")";
-        boolean exceptionThrown=false;
         try {
             loadReasonerWithAxioms(axioms);
-        } catch (Exception e) {
-            exceptionThrown=true;
+            fail();
         }
-        assertTrue(exceptionThrown);
+        catch (Exception e) {
+        }
     }
 
     public void testTransitivity() throws Exception {

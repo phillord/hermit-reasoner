@@ -173,7 +173,7 @@ public class GraphTest extends AbstractReasonerTest {
             + "SubClassOf(ObjectSomeValuesFrom(:T :D) :B)"
             //P(v), R(x,v), LP(x), S(x,y), RP(y), R(y,w), P(w) -> conn(v,w)
             + "DLSafeRule(Body("
-                        + "ClassAtom(:P Variable(:v)) "
+                    + "ClassAtom(:P Variable(:v)) "
             		+ "ObjectPropertyAtom(:R Variable(:x) Variable(:v))"
             		+ "ClassAtom(:LP Variable(:x)) "
             		+ "ObjectPropertyAtom(:S Variable(:x) Variable(:y))"
@@ -191,24 +191,21 @@ public class GraphTest extends AbstractReasonerTest {
         assertTrue(!t.isSatisfiable(false,Collections.singleton(Atom.create(AtomicConcept.create(GraphTest.NS+"A"),freshNode)),null,null,Collections.singleton(Atom.create(AtomicConcept.create(GraphTest.NS+"B"),freshNode)),null,ReasoningTaskDescription.isABoxSatisfiable()));
     }
 
-    protected static void add(Graph<Integer> graph, int from, int... successors) {
+    protected static void add(Graph<Integer> graph,int from,int... successors) {
         for (int successor : successors)
-            graph.addEdge(from, successor);
+            graph.addEdge(from,successor);
     }
-    protected static DescriptionGraph G(String[] vertexAtomicConcepts,
-            DescriptionGraph.Edge[] edges, String[] startAtomicConcepts) {
+    protected static DescriptionGraph G(String[] vertexAtomicConcepts,DescriptionGraph.Edge[] edges,String[] startAtomicConcepts) {
         AtomicConcept[] atomicConceptsByVertices = new AtomicConcept[vertexAtomicConcepts.length];
-        for (int index = 0; index < vertexAtomicConcepts.length; index++)
-            atomicConceptsByVertices[index] = AtomicConcept
-                    .create(vertexAtomicConcepts[index]);
-        Set<AtomicConcept> startConcepts = new HashSet<AtomicConcept>();
+        for (int index=0;index<vertexAtomicConcepts.length;index++)
+            atomicConceptsByVertices[index]=AtomicConcept.create(vertexAtomicConcepts[index]);
+        Set<AtomicConcept> startConcepts=new HashSet<AtomicConcept>();
         for (String atomicConcept : startAtomicConcepts)
             startConcepts.add(AtomicConcept.create(atomicConcept));
-        return new DescriptionGraph("G", atomicConceptsByVertices, edges,
-                startConcepts);
+        return new DescriptionGraph("G",atomicConceptsByVertices,edges,startConcepts);
     }
-    protected static DescriptionGraph.Edge E(String atomicRoleName, int from, int to) {
-        AtomicRole atomicRole = AtomicRole.create(atomicRoleName);
-        return new DescriptionGraph.Edge(atomicRole, from, to);
+    protected static DescriptionGraph.Edge E(String atomicRoleName,int from,int to) {
+        AtomicRole atomicRole=AtomicRole.create(atomicRoleName);
+        return new DescriptionGraph.Edge(atomicRole,from,to);
     }
 }

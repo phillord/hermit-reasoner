@@ -190,11 +190,6 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
     public BlockingSignatureCacheType blockingSignatureCacheType;
     public ExistentialStrategyType existentialStrategyType;
     /**
-     * HermiT checks whether all clauses are safe. Non-safe clauses might cause problems in HermiT (non-termination), but
-     * sometimes one might want to play with non-safe rules or such like.
-     */
-    public boolean checkClauses;
-    /**
      * If HermiT encounters a non-OWL2 datatype, it normally throws an error. If set to true, axioms containing unsupported
      * datatypes will be ignored.
      */
@@ -252,7 +247,6 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
         blockingStrategyType=Configuration.BlockingStrategyType.OPTIMAL;
         blockingSignatureCacheType=Configuration.BlockingSignatureCacheType.CACHED;
         existentialStrategyType=Configuration.ExistentialStrategyType.OPTIMAL;
-        checkClauses=true;
         ignoreUnsupportedDatatypes=false;
         monitor=null;
         parameters=new HashMap<String,Object>();

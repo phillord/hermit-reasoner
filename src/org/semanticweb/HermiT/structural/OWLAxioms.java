@@ -35,12 +35,12 @@ import org.semanticweb.owlapi.model.OWLIndividualAxiom;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
-import org.semanticweb.owlapi.model.SWRLRule;
+import org.semanticweb.owlapi.model.SWRLAtom;
 
 public class OWLAxioms {
     public final Set<OWLClass> m_classes;
     public final Set<OWLObjectProperty> m_objectProperties;
-    public final Set<OWLObjectProperty> m_objectPropertiesUsedInAxioms; // for checking strong separation in the presence of description graphs & rules
+    public final Set<OWLObjectProperty> m_objectPropertiesOccurringInOWLAxioms;
     public final Set<OWLObjectPropertyExpression> m_complexObjectPropertyExpressions;
     public final Set<OWLDataProperty> m_dataProperties;
     public final Set<OWLNamedIndividual> m_namedIndividuals;
@@ -58,13 +58,12 @@ public class OWLAxioms {
     public final Set<OWLHasKeyAxiom> m_hasKeys;
     public final Set<String> m_definedDatatypesIRIs; // contains custom datatypes from DatatypeDefinition axioms
     public final Map<OWLDataProperty,OWLDatatype> m_dps2ranges;
-    public final Collection<SWRLRule> m_rules;
-
+    public final Collection<DisjunctiveRule> m_rules;
 
     public OWLAxioms() {
         m_classes=new HashSet<OWLClass>();
         m_objectProperties=new HashSet<OWLObjectProperty>();
-        m_objectPropertiesUsedInAxioms=new HashSet<OWLObjectProperty>();
+        m_objectPropertiesOccurringInOWLAxioms=new HashSet<OWLObjectProperty>();
         m_complexObjectPropertyExpressions=new HashSet<OWLObjectPropertyExpression>();
         m_dataProperties=new HashSet<OWLDataProperty>();
         m_namedIndividuals=new HashSet<OWLNamedIndividual>();
@@ -82,7 +81,7 @@ public class OWLAxioms {
         m_hasKeys=new HashSet<OWLHasKeyAxiom>();
         m_definedDatatypesIRIs=new HashSet<String>();
         m_dps2ranges=new HashMap<OWLDataProperty, OWLDatatype>();
-        m_rules=new HashSet<SWRLRule>();
+        m_rules=new HashSet<DisjunctiveRule>();
     }
 
     public static class ComplexObjectPropertyInclusion {
@@ -96,6 +95,37 @@ public class OWLAxioms {
         public ComplexObjectPropertyInclusion(OWLObjectPropertyExpression transitiveObjectProperty) {
             m_subObjectProperties=new OWLObjectPropertyExpression[] { transitiveObjectProperty,transitiveObjectProperty };
             m_superObjectProperty=transitiveObjectProperty;
+        }
+    }
+
+    public static class DisjunctiveRule {
+        public final SWRLAtom[] m_body;
+        public final SWRLAtom[] m_head;
+
+        public DisjunctiveRule(SWRLAtom[] body,SWRLAtom[] head) {
+            m_body=body;
+            m_head=head;
+        }
+        public String toString() {
+            StringBuffer buffer=new StringBuffer();
+            boolean first=true;
+            for (SWRLAtom atom : m_body) {
+                if (first)
+                    first=false;
+                else
+                    buffer.append(" /\\ ");
+                buffer.append(atom.toString());
+            }
+            buffer.append(" -: ");
+            first=true;
+            for (SWRLAtom atom : m_head) {
+                if (first)
+                    first=false;
+                else
+                    buffer.append(" \\/ ");
+                buffer.append(atom.toString());
+            }
+            return buffer.toString();
         }
     }
 }

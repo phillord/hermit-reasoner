@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -179,7 +179,7 @@ public class ValidatedPairwiseDirectBlockingChecker implements DirectBlockingChe
         protected int m_blockingRelevantHashCode;
         public boolean m_blockViolatesParentConstraints=false;
         public boolean m_hasAlreadyBeenChecked=false;
-        
+
         public ValidatedPairwiseBlockingObject(Node node) {
             m_node=node;
         }
@@ -295,7 +295,7 @@ public class ValidatedPairwiseDirectBlockingChecker implements DirectBlockingChe
             return m_blockViolatesParentConstraints;
         }
     }
-    
+
     protected static class ValidatedBlockingSignature extends BlockingSignature {
         protected final Set<AtomicConcept> m_blockingRelevantConceptsLabel;
         protected final Set<AtomicConcept> m_fullAtomicConceptsLabel;
@@ -303,7 +303,7 @@ public class ValidatedPairwiseDirectBlockingChecker implements DirectBlockingChe
         protected final Set<AtomicRole> m_fromParentLabel;
         protected final Set<AtomicRole> m_toParentLabel;
         protected final int m_hashCode;
-      
+
         public ValidatedBlockingSignature(ValidatedPairwiseDirectBlockingChecker checker,Node node) {
             ValidatedPairwiseBlockingObject nodeBlockingObject=(ValidatedPairwiseBlockingObject)node.getBlockingObject();
             m_blockingRelevantConceptsLabel=nodeBlockingObject.getAtomicConceptsLabel();
@@ -341,7 +341,8 @@ public class ValidatedPairwiseDirectBlockingChecker implements DirectBlockingChe
                     m_parentFullAtomicConceptsLabel==parentBlockingObject.m_fullAtomicConceptsLabel &&
                     m_fromParentLabel==nodeBlockingObject.m_fullFromParentLabel &&
                     m_toParentLabel==nodeBlockingObject.m_fullToParentLabel;
-            } else {
+            }
+            else {
                 ValidatedBlockingSignature thatSignature=(ValidatedBlockingSignature)that;
                 return
                     m_blockingRelevantConceptsLabel==thatSignature.m_blockingRelevantConceptsLabel &&

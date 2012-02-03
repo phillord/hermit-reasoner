@@ -85,7 +85,8 @@ public class DatatypeRegistry {
         DatatypeHandler handler;
         try {
             handler=getDatatypeHandlerFor(datatypeURI);
-        } catch (UnsupportedDatatypeException e) {
+        }
+        catch (UnsupportedDatatypeException e) {
             String CRLF=System.getProperty("line.separator");
             String message=
                 "Literals can only use the datatypes from the OWL 2 datatype map, see "+CRLF+

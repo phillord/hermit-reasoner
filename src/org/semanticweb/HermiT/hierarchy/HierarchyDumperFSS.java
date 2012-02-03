@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -29,7 +29,7 @@ import org.semanticweb.HermiT.model.Role;
 
 public class HierarchyDumperFSS {
     protected final PrintWriter m_out;
-    
+
     public HierarchyDumperFSS(PrintWriter out) {
         m_out=out;
     }
@@ -46,7 +46,8 @@ public class HierarchyDumperFSS {
                         m_out.print(representative.getIRI());
                         m_out.print(">");
                         first=false;
-                    } else {
+                    }
+                    else {
                         m_out.print(" <");
                         m_out.print(equiv.getIRI());
                         m_out.print(">");
@@ -83,7 +84,8 @@ public class HierarchyDumperFSS {
                         m_out.print("EquivalentObjectProperties( ");
                         print(representative);
                         first=false;
-                    } else {
+                    }
+                    else {
                         m_out.print(" ");
                         print(equiv);
                     }
@@ -120,7 +122,8 @@ public class HierarchyDumperFSS {
                         m_out.print(representative.getIRI());
                         m_out.print(">");
                         first=false;
-                    } else {
+                    }
+                    else {
                         m_out.print(" >");
                         m_out.print(equiv.getIRI());
                         m_out.print(">");
@@ -159,10 +162,10 @@ public class HierarchyDumperFSS {
         m_out.print(atomicRole.getIRI());
         m_out.print(">");
     }
-    
+
     protected static class AtomicConceptComparator implements Comparator<AtomicConcept> {
         public static final AtomicConceptComparator INSTANCE=new AtomicConceptComparator();
-    
+
         public int compare(AtomicConcept atomicConcept1,AtomicConcept atomicConcept2) {
             int comparison=getAtomicConceptClass(atomicConcept1)-getAtomicConceptClass(atomicConcept2);
             if (comparison!=0)
@@ -178,7 +181,7 @@ public class HierarchyDumperFSS {
                 return 2;
         }
     }
-    
+
     protected static class ObjectRoleComparator implements Comparator<Role> {
         public static final ObjectRoleComparator INSTANCE=new ObjectRoleComparator();
 
@@ -209,7 +212,7 @@ public class HierarchyDumperFSS {
             return role instanceof AtomicRole ? 0 : 1;
         }
     }
-    
+
     protected static class DataRoleComparator implements Comparator<AtomicRole> {
         public static final DataRoleComparator INSTANCE=new DataRoleComparator();
 

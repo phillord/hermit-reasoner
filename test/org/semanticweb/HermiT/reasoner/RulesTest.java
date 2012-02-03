@@ -15,6 +15,61 @@ public class RulesTest extends AbstractReasonerTest {
         super(name);
     }
 
+    public void testSameAsInBody1() throws Exception {
+        String axioms =
+              "Declaration(ObjectProperty(:r))"+LB
+            + "Declaration(ObjectProperty(:s))"+LB
+            + "Declaration(ObjectProperty(:t))"+LB
+            + "Declaration(Class(:u))"+LB
+            + "ObjectPropertyAssertion(:r :a :b)"+LB
+            + "ObjectPropertyAssertion(:s :a :c)"+LB
+            + "ObjectPropertyAssertion(:t :a :d)"+LB
+            + "ClassAssertion(ObjectComplementOf(:u) :a)"+LB
+            // r(x1, y1) /\ s(x2, y2) /\ t(x3, y3) x1 = x2 /\ x1 = x3 -> u(x3)
+            + "DLSafeRule("+LB
+            + "  Body("+LB
+            + "     ObjectPropertyAtom(:r Variable(:x1) Variable(:y1))"+LB
+            + "     ObjectPropertyAtom(:s Variable(:x2) Variable(:y2))"+LB
+            + "     ObjectPropertyAtom(:t Variable(:x3) Variable(:y3))"+LB
+            + "     SameIndividualAtom(Variable(:x1) Variable(:x2))"+LB
+            + "     SameIndividualAtom(Variable(:x1) Variable(:x3))"+LB
+            + "  )"+LB
+            + "  Head(ClassAtom(:u Variable(:x3)))"+LB
+            + ")";
+        loadOntologyWithAxioms(axioms);
+        createReasoner();
+//        System.out.println(m_reasoner.getDLOntology());
+
+        assertABoxSatisfiable(false);
+    }
+
+    public void testSameAsInBody2() throws Exception {
+        String axioms =
+              "Declaration(ObjectProperty(:r))"+LB
+            + "Declaration(ObjectProperty(:s))"+LB
+            + "Declaration(ObjectProperty(:t))"+LB
+            + "Declaration(Class(:u))"+LB
+            + "ObjectPropertyAssertion(:r :a1 :b)"+LB
+            + "ObjectPropertyAssertion(:s :a2 :c)"+LB
+            + "ObjectPropertyAssertion(:t :a3 :d)"+LB
+            + "ClassAssertion(ObjectComplementOf(:u) :a1)"+LB
+            // r(x1, y1) /\ s(x2, y2) /\ t(x3, y3) x1 = x2 /\ x1 = x3 -> u(x3)
+            + "DLSafeRule("+LB
+            + "  Body("+LB
+            + "     ObjectPropertyAtom(:r Variable(:x1) Variable(:y1))"+LB
+            + "     ObjectPropertyAtom(:s Variable(:x2) Variable(:y2))"+LB
+            + "     ObjectPropertyAtom(:t Variable(:x3) Variable(:y3))"+LB
+            + "     SameIndividualAtom(Variable(:x1) Variable(:x2))"+LB
+            + "     SameIndividualAtom(Variable(:x1) Variable(:x3))"+LB
+            + "  )"+LB
+            + "  Head(ClassAtom(:u Variable(:x3)))"+LB
+            + ")";
+        loadOntologyWithAxioms(axioms);
+        createReasoner();
+
+        assertABoxSatisfiable(true);
+    }
+
     public void testIndividualsInRules() throws Exception {
         String axioms =
               "Declaration(NamedIndividual(:a))"+LB
@@ -302,57 +357,17 @@ public class RulesTest extends AbstractReasonerTest {
         assertTrue(!m_reasoner.getInstances(C, false).containsEntity(b));
     }
 
-    public void testDRInHead() throws Exception {
-        String axioms = "ClassAssertion(:A :a)"
-            // -> xsd:short("15"^^xsd:int)
-            + "DLSafeRule(Body() Head(DataRangeAtom(xsd:short \"15\"^^xsd:int)))";
-        loadOntologyWithAxioms(axioms);
-        createReasoner();
-        assertTrue(m_reasoner.isConsistent());
-    }
-
-    public void testDRInHead2() throws Exception {
-        // -> xsd:short("15"^^xsd:int)
-        String axioms = "DLSafeRule(Body() Head(DataRangeAtom(xsd:short \"15\"^^xsd:int)))";
-        loadOntologyWithAxioms(axioms);
-        createReasoner();
-        assertTrue(m_reasoner.isConsistent());
-    }
-
-    public void testDRInHead3() throws Exception {
-        // -> xsd:byte("10000"^^xsd:integer)
-        String axioms = "DLSafeRule(Body() Head(DataRangeAtom(xsd:byte \"10000\"^^xsd:integer)))";
-        loadOntologyWithAxioms(axioms);
-        createReasoner();
-        assertTrue(!m_reasoner.isConsistent());
-    }
-
-    public void testDRSafety() throws Exception {
+    public void testDataRangeSafety() throws Exception {
         String axioms = "ClassAssertion(:A :a)"
             // A(x) /\ xsd:integer(y) -> dp(x, y)
             + "DLSafeRule(Body(ClassAtom(:A Variable(:x)) DataRangeAtom(xsd:integer Variable(:y))) Head(DataPropertyAtom(:dp Variable(:x) Variable(:y))))";
         loadOntologyWithAxioms(axioms);
-        boolean caught=false;
         try {
             createReasoner();
-        } catch (IllegalArgumentException e) {
-            caught=true;
+            fail();
         }
-        assertTrue(caught);
-    }
-
-    public void testNormalSafety() throws Exception {
-        String axioms = "ClassAssertion(:A :a)"
-            // A(x) -> r(x, y)
-            + "DLSafeRule(Body(ClassAtom(:A Variable(:x))) Head(ObjectPropertyAtom(:r Variable(:x) Variable(:y))))";
-        loadOntologyWithAxioms(axioms);
-        boolean caught=false;
-        try {
-            createReasoner();
-        } catch (IllegalArgumentException e) {
-            caught=true;
+        catch (IllegalArgumentException e) {
         }
-        assertTrue(caught);
     }
 
     public void testSeveralVars() throws Exception {

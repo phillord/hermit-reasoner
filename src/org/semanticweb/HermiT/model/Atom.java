@@ -140,7 +140,6 @@ public class Atom implements Serializable {
                     return false;
             return true;
         }
-
         protected int getHashCode(Atom object) {
             int hashCode=object.m_dlPredicate.hashCode();
             for (int index=object.m_arguments.length-1;index>=0;--index)

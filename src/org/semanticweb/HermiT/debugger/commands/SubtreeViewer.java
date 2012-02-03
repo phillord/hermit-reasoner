@@ -1,34 +1,34 @@
 /* Copyright 2009 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -212,25 +212,21 @@ public class SubtreeViewer extends JFrame {
         }
         public int getChildCount(Object parent) {
             NodeCreationInfo nodeCreationInfo = null;
-            if (parent instanceof Node) {
+            if (parent instanceof Node)
                 nodeCreationInfo = m_debugger.getNodeCreationInfo((Node) parent);
-            }
-            if (nodeCreationInfo==null) {
+            if (nodeCreationInfo==null)
                 return 0;
-            } else {
+            else
                 return nodeCreationInfo.m_children.size();
-            }
         }
         public int getIndexOfChild(Object parent,Object child) {
-            NodeCreationInfo nodeCreationInfo = null; 
-            if (parent instanceof Node) {
+            NodeCreationInfo nodeCreationInfo = null;
+            if (parent instanceof Node)
                 nodeCreationInfo = m_debugger.getNodeCreationInfo((Node) parent);
-            }
-            if (nodeCreationInfo==null) {
+            if (nodeCreationInfo==null)
                 return -1;
-            } else {
+            else
                 return nodeCreationInfo.m_children.indexOf(child);
-            }
         }
         public Object getRoot() {
             return m_root;
@@ -260,7 +256,7 @@ public class SubtreeViewer extends JFrame {
         protected static final Icon CONCRETE_NODE_ICON=new DotIcon(Color.BLUE);
 
         protected final Debugger m_debugger;
-        
+
         public NodeCellRenderer(Debugger debugger) {
             m_debugger=debugger;
         }
@@ -318,7 +314,7 @@ public class SubtreeViewer extends JFrame {
 
     protected static class DotIcon implements Icon {
         protected final Color m_color;
-        
+
         public DotIcon(Color color) {
             m_color=color;
         }
@@ -335,7 +331,7 @@ public class SubtreeViewer extends JFrame {
             g.setColor(oldColor);
         }
     }
-    
+
     protected static class MyTreePath extends TreePath {
         public MyTreePath(Object object) {
             super(object);

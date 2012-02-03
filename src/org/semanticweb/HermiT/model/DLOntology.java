@@ -28,7 +28,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -43,12 +42,7 @@ import org.semanticweb.HermiT.Prefixes;
  */
 public class DLOntology implements Serializable {
     private static final long serialVersionUID=3189937959595369812L;
-
     protected static final String CRLF=System.getProperty("line.separator");
-    protected static final int CONTAINS_NO_ROLES=0;
-    protected static final int CONTAINS_ONLY_GRAPH_ROLES=1;
-    protected static final int CONTAINS_ONLY_TREE_ROLES=2;
-    protected static final int CONTAINS_GRAPH_AND_TREE_ROLES=3;
 
     protected final String m_ontologyIRI;
     protected final Set<DLClause> m_dlClauses;
@@ -261,33 +255,6 @@ public class DLOntology implements Serializable {
     public Set<String> getDefinedDatatypeIRIs() {
         return m_definedDatatypeIRIs;
     }
-    public Collection<DLClause> getNonadmissibleDLClauses() {
-        Set<AtomicConcept> bodyOnlyAtomicConcepts=getBodyOnlyAtomicConcepts();
-        Collection<DLClause> nonadmissibleDLClauses=new HashSet<DLClause>();
-        Set<AtomicRole> graphAtomicRoles=computeGraphAtomicRoles();
-        for (DLClause dlClause : m_dlClauses) {
-            // key clauses (from HasKey axioms) are not admissible according to
-            // the standard HT admissibility rules
-            if (!dlClause.isKnownToBeAdmissible()) {
-                int usedRoleTypes=getUsedRoleTypes(dlClause,graphAtomicRoles);
-                switch (usedRoleTypes) {
-                case CONTAINS_NO_ROLES:
-                case CONTAINS_ONLY_TREE_ROLES:
-                    if (!isTreeDLClause(dlClause,graphAtomicRoles,bodyOnlyAtomicConcepts))
-                        nonadmissibleDLClauses.add(dlClause);
-                    break;
-                case CONTAINS_ONLY_GRAPH_ROLES:
-                    if (!isGraphDLClause(dlClause))
-                        nonadmissibleDLClauses.add(dlClause);
-                    break;
-                case CONTAINS_GRAPH_AND_TREE_ROLES:
-                    nonadmissibleDLClauses.add(dlClause);
-                    break;
-                }
-            }
-        }
-        return nonadmissibleDLClauses;
-    }
     protected Set<AtomicConcept> getBodyOnlyAtomicConcepts() {
         Set<AtomicConcept> bodyOnlyAtomicConcepts=new HashSet<AtomicConcept>(m_allAtomicConcepts);
         for (DLClause dlClause : m_dlClauses)
@@ -344,139 +311,6 @@ public class DLOntology implements Serializable {
                     change=true;
         }
         return change;
-    }
-    /**
-     * Takes the set of roles that are for use in Description Graphs and detects whether clause contains no roles,
-     * only roles from the given set, only roles not from the given set or both types of roles.
-     */
-    protected int getUsedRoleTypes(DLClause dlClause,Set<AtomicRole> graphAtomicRoles) {
-        int usedRoleTypes=CONTAINS_NO_ROLES;
-        for (int atomIndex=0;atomIndex<dlClause.getBodyLength();atomIndex++) {
-            DLPredicate dlPredicate=dlClause.getBodyAtom(atomIndex).getDLPredicate();
-            if (dlPredicate instanceof AtomicRole) {
-                if (usedRoleTypes==CONTAINS_NO_ROLES)
-                    usedRoleTypes=(graphAtomicRoles.contains(dlPredicate) ? CONTAINS_ONLY_GRAPH_ROLES : CONTAINS_ONLY_TREE_ROLES);
-                else {
-                    if (usedRoleTypes==CONTAINS_ONLY_GRAPH_ROLES) {
-                        if (!graphAtomicRoles.contains(dlPredicate))
-                            return CONTAINS_GRAPH_AND_TREE_ROLES;
-                    }
-                    else {
-                        if (graphAtomicRoles.contains(dlPredicate))
-                            return CONTAINS_GRAPH_AND_TREE_ROLES;
-                    }
-                }
-            }
-        }
-        for (int atomIndex=0;atomIndex<dlClause.getHeadLength();atomIndex++) {
-            DLPredicate dlPredicate=dlClause.getHeadAtom(atomIndex).getDLPredicate();
-            if (dlPredicate instanceof AtomicRole) {
-                if (usedRoleTypes==CONTAINS_NO_ROLES)
-                    usedRoleTypes=(graphAtomicRoles.contains(dlPredicate) ? CONTAINS_ONLY_GRAPH_ROLES : CONTAINS_ONLY_TREE_ROLES);
-                else {
-                    if (usedRoleTypes==CONTAINS_ONLY_GRAPH_ROLES) {
-                        if (!graphAtomicRoles.contains(dlPredicate))
-                            return CONTAINS_GRAPH_AND_TREE_ROLES;
-                    }
-                    else {
-                        if (graphAtomicRoles.contains(dlPredicate))
-                            return CONTAINS_GRAPH_AND_TREE_ROLES;
-                    }
-                }
-            }
-        }
-        return usedRoleTypes;
-    }
-    /**
-     * Tests whether the clause conforms to the properties of HT clauses, i.e., the variables can be split into a center variable x,
-     * a set of branch variables y_i, and a set of nominal variables z_j such that certain conditions hold.
-     */
-    protected boolean isTreeDLClause(DLClause dlClause,Set<AtomicRole> graphAtomicRoles,Set<AtomicConcept> bodyOnlyAtomicConcepts) {
-        if (dlClause.getHeadLength()==0 && dlClause.getBodyLength()==0)
-            return true;
-        Set<Variable> variables=new HashSet<Variable>();
-        for (int atomIndex=0;atomIndex<dlClause.getBodyLength();atomIndex++) {
-            Atom atom=dlClause.getBodyAtom(atomIndex);
-            atom.getVariables(variables);
-            DLPredicate dlPredicate=atom.getDLPredicate();
-            if (!(dlPredicate instanceof AtomicRole) && !(dlPredicate instanceof AtomicConcept) && !(dlPredicate instanceof InternalDatatype) && !dlPredicate.equals(NodeIDLessEqualThan.INSTANCE) && !(dlPredicate instanceof NodeIDsAscendingOrEqual))
-                return false;
-        }
-        for (int atomIndex=0;atomIndex<dlClause.getHeadLength();atomIndex++) {
-            Atom atom=dlClause.getHeadAtom(atomIndex);
-            atom.getVariables(variables);
-            DLPredicate dlPredicate=atom.getDLPredicate();
-            if (!(dlPredicate instanceof AtomicRole) && !(dlPredicate instanceof AtomicConcept) && !(dlPredicate instanceof DataRange) && !(dlPredicate instanceof ExistentialConcept) && !Equality.INSTANCE.equals(dlPredicate) && !Inequality.INSTANCE.equals(dlPredicate) && !(dlPredicate instanceof AnnotatedEquality))
-                return false;
-            else if (dlPredicate instanceof AtLeastConcept) {
-                AtLeastConcept atLeastConcept=(AtLeastConcept)dlPredicate;
-                if (graphAtomicRoles.contains(atLeastConcept.getOnRole()))
-                    return false;
-            }
-        }
-        Variable X=Variable.create("X");
-        if (variables.contains(X) && isTreeWithCenterVariable(dlClause,X,bodyOnlyAtomicConcepts))
-            return true;
-        for (Variable centerVariable : variables)
-            if (isTreeWithCenterVariable(dlClause,centerVariable,bodyOnlyAtomicConcepts))
-                return true;
-        return false;
-    }
-    /**
-     * Tests whether the given center variable is suitable.
-     */
-    protected boolean isTreeWithCenterVariable(DLClause dlClause,Variable centerVariable,Set<AtomicConcept> bodyOnlyAtomicConcepts) {
-        for (int atomIndex=0;atomIndex<dlClause.getBodyLength();atomIndex++) {
-            Atom atom=dlClause.getBodyAtom(atomIndex);
-            if (atom.getDLPredicate() instanceof AtomicRole && !atom.containsVariable(centerVariable))
-                return false;
-        }
-        for (int atomIndex=0;atomIndex<dlClause.getHeadLength();atomIndex++) {
-            Atom atom=dlClause.getHeadAtom(atomIndex);
-            if (atom.getDLPredicate() instanceof AtomicRole && !atom.containsVariable(centerVariable))
-                return false;
-            if (Equality.INSTANCE.equals(atom.getDLPredicate()) || (atom.getDLPredicate() instanceof AnnotatedEquality)) {
-                if ((atom.getDLPredicate() instanceof AnnotatedEquality) && !centerVariable.equals(atom.getArgumentVariable(2)))
-                    return false;
-                Variable otherVariable=null;
-                if (centerVariable.equals(atom.getArgument(0))) {
-                    otherVariable=atom.getArgumentVariable(1);
-                    if (otherVariable==null)
-                        return false;
-                }
-                else if (centerVariable.equals(atom.getArgument(1))) {
-                    otherVariable=atom.getArgumentVariable(0);
-                    if (otherVariable==null)
-                        return false;
-                }
-                if (otherVariable!=null) {
-                    boolean found=false;
-                    for (int bodyAtomIndex=0;bodyAtomIndex<dlClause.getBodyLength();bodyAtomIndex++) {
-                        Atom bodyAtom=dlClause.getBodyAtom(bodyAtomIndex);
-                        if (bodyAtom.getArity()==1 && bodyAtom.getArgument(0).equals(otherVariable) && bodyOnlyAtomicConcepts.contains(bodyAtom.getDLPredicate())) {
-                            found=true;
-                            break;
-                        }
-                    }
-                    if (!found)
-                        return false;
-                }
-            }
-        }
-        return true;
-    }
-    protected boolean isGraphDLClause(DLClause dlClause) {
-        for (int atomIndex=0;atomIndex<dlClause.getBodyLength();atomIndex++) {
-            DLPredicate dlPredicate=dlClause.getBodyAtom(atomIndex).getDLPredicate();
-            if (!(dlPredicate instanceof AtomicRole) && !(dlPredicate instanceof AtomicConcept))
-                return false;
-        }
-        for (int atomIndex=0;atomIndex<dlClause.getHeadLength();atomIndex++) {
-            DLPredicate dlPredicate=dlClause.getHeadAtom(atomIndex).getDLPredicate();
-            if (!(dlPredicate instanceof AtomicRole) && !(dlPredicate instanceof AtomicConcept) && !Equality.INSTANCE.equals(dlPredicate))
-                return false;
-        }
-        return true;
     }
     public String toString(Prefixes prefixes) {
         StringBuffer stringBuffer=new StringBuffer();

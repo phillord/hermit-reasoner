@@ -93,7 +93,7 @@ public class CommandLine {
 
     static protected class DumpClausesAction implements Action {
         final String file;
-        
+
         public DumpClausesAction(String fileName) {
             file=fileName;
         }
@@ -126,11 +126,11 @@ public class CommandLine {
 
     static protected class ClassifyAction implements Action {
         final boolean classifyClasses;
-        final boolean classifyOPs; 
+        final boolean classifyOPs;
         final boolean classifyDPs;
         final boolean prettyPrint;
         final String outputLocation;
-        
+
         public ClassifyAction(boolean classifyClasses, boolean classifyOPs, boolean classifyDPs, boolean prettyPrint, String outputLocation) {
             this.classifyClasses=classifyClasses;
             this.classifyOPs=classifyOPs;
@@ -151,11 +151,11 @@ public class CommandLine {
             if (output!=null) {
                 if (outputLocation!=null)
                     status.log(2,"Writing results to "+outputLocation);
-                else 
+                else
                     status.log(2,"Writing results...");
                 if (prettyPrint)
                     hermit.printHierarchies(output, classifyClasses, classifyOPs, classifyDPs);
-                else 
+                else
                     hermit.dumpHierarchies(output, classifyClasses, classifyOPs, classifyDPs);
                 output.flush();
             }
@@ -186,7 +186,7 @@ public class CommandLine {
     static protected class SupersAction implements Action {
         final String conceptName;
         final boolean all;
-        
+
         public SupersAction(String name,boolean getAll) {
             conceptName=name;
             all=getAll;
@@ -218,7 +218,8 @@ public class CommandLine {
                             output.println("\t"+prefixes.expandAbbreviatedIRI(iri));
                         else
                             output.println("\t"+iri);
-                    } else 
+                    }
+                    else
                         output.println("\t"+prefixes.abbreviateIRI(classInSet.getIRI().toString()));
             output.flush();
         }
@@ -227,7 +228,7 @@ public class CommandLine {
     static protected class SubsAction implements Action {
         final String conceptName;
         final boolean all;
-        
+
         public SubsAction(String name,boolean getAll) {
             conceptName=name;
             all=getAll;
@@ -259,7 +260,8 @@ public class CommandLine {
                             output.println("\t"+prefixes.expandAbbreviatedIRI(iri));
                         else
                             output.println("\t"+iri);
-                    } else 
+                    }
+                    else
                         output.println("\t"+prefixes.abbreviateIRI(classInSet.getIRI().toString()));
             output.flush();
         }
@@ -267,7 +269,7 @@ public class CommandLine {
 
     static protected class EquivalentsAction implements Action {
         final String conceptName;
-        
+
         public EquivalentsAction(String name) {
             conceptName=name;
         }
@@ -284,7 +286,7 @@ public class CommandLine {
             Node<OWLClass> classes=hermit.getEquivalentClasses(owlClass);
             if (ignoreOntologyPrefixes)
                 output.println("Classes equivalent to '"+conceptName+"':");
-            else 
+            else
                 output.println("Classes equivalent to '"+prefixes.abbreviateIRI(conceptName)+"':");
             for (OWLClass classInSet : classes)
                 if (ignoreOntologyPrefixes) {
@@ -293,16 +295,17 @@ public class CommandLine {
                         output.println("\t"+prefixes.expandAbbreviatedIRI(iri));
                     else
                         output.println("\t"+iri);
-                } else 
+                }
+                else
                     output.println("\t"+prefixes.abbreviateIRI(classInSet.getIRI().toString()));
             output.flush();
         }
     }
 
     static protected class EntailsAction implements Action {
-        
+
         final IRI conclusionIRI;
-        
+
         public EntailsAction(Configuration config,IRI conclusionIRI) {
             this.conclusionIRI=conclusionIRI;
         }
@@ -316,7 +319,8 @@ public class CommandLine {
                 boolean isEntailed=checker.entails(conclusions.getLogicalAxioms());
                 status.log(2,"Conclusion ontology is "+(isEntailed?"":"not ")+"entailed.");
                 output.println(isEntailed);
-            } catch (OWLOntologyCreationException e) {
+            }
+            catch (OWLOntologyCreationException e) {
                 e.printStackTrace();
             }
             output.flush();
@@ -418,7 +422,7 @@ public class CommandLine {
         new Option(kBlockCache,"blockersCache",kAlgorithm,"cache blocking nodes for use in later tests; not possible with nominals or core blocking"),
         new Option(kIgnoreUnsupportedDatatypes,"ignoreUnsupportedDatatypes",kAlgorithm,"ignore unsupported datatypes"),
         new Option(kExpansion,"expansion-strategy",kAlgorithm,true,"TYPE","use TYPE as existential expansion strategy; supported values are 'el', 'creation', 'reuse', and 'optimal' (default 'optimal')"),
-        
+
         // internals:
         new Option(kDumpClauses,"dump-clauses",kInternals,false,"FILE","output DL-clauses to FILE (default stdout)")
     };
@@ -523,7 +527,8 @@ public class CommandLine {
                             }
                             catch (SecurityException e) {
                                 throw new IllegalArgumentException("unable to write to "+arg);
-                            } catch (IOException e) {
+                            }
+                            catch (IOException e) {
                                 throw new IllegalArgumentException("unable to write to "+arg+": "+e.getMessage());
                             }
                         }
@@ -756,14 +761,16 @@ public class CommandLine {
                     if (defaultPrefix!=null) {
                         try {
                             prefixes.declareDefaultPrefix(defaultPrefix);
-                        } catch (IllegalArgumentException e) {
+                        }
+                        catch (IllegalArgumentException e) {
                             status.log(2,"Default prefix "+defaultPrefix+" could not be registered because there is already a registered default prefix. ");
                         }
                     }
                     for (String prefixName : prefixMappings.keySet()) {
                         try {
                             prefixes.declarePrefix(prefixName, prefixMappings.get(prefixName));
-                        } catch (IllegalArgumentException e) {
+                        }
+                        catch (IllegalArgumentException e) {
                             status.log(2,"Prefixname "+prefixName+" could not be set to "+prefixMappings.get(prefixName)+" because there is already a registered prefix name for the IRI. ");
                         }
                     }

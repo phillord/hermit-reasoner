@@ -3,15 +3,19 @@ package org.semanticweb.HermiT.structural;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import junit.framework.AssertionFailedError;
 
 import org.semanticweb.HermiT.AbstractOntologyTest;
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.Prefixes;
+import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DescriptionGraph;
@@ -95,17 +99,44 @@ public abstract class AbstractStructuralTest extends AbstractOntologyTest {
         for (Individual individual : dlOntology.getAllIndividuals())
             if (individual.isAnonymous())
                 addIRI(individual.getIRI(),anonIndividualIRIs);
-            else 
+            else
                 addIRI(individual.getIRI(),individualIRIs);
         prefixes.declareInternalPrefixes(individualIRIs, anonIndividualIRIs);
         prefixes.declareDefaultPrefix(ontologyIRI+"#");
         for (DLClause dlClause : dlOntology.getDLClauses())
-            actualStrings.add(dlClause.toOrderedString(prefixes));
+            actualStrings.add(toOrderedString(dlClause,prefixes));
         for (org.semanticweb.HermiT.model.Atom atom : dlOntology.getPositiveFacts())
             actualStrings.add(atom.toString(prefixes));
         for (org.semanticweb.HermiT.model.Atom atom : dlOntology.getNegativeFacts())
             actualStrings.add("not "+atom.toString(prefixes));
         return actualStrings;
+    }
+    protected static String toOrderedString(DLClause dlClause,Prefixes prefixes) {
+        StringBuffer buffer=new StringBuffer();
+        SortedSet<Atom> headAtoms=new TreeSet<Atom>(AtomLexicalComparator.INSTANCE);
+        for (int atomIndex=0;atomIndex<dlClause.getHeadLength();atomIndex++)
+            headAtoms.add(dlClause.getHeadAtom(atomIndex));
+        boolean isFirstAtom=true;
+        for (Atom atom : headAtoms) {
+            if (isFirstAtom)
+                isFirstAtom=false;
+            else
+                buffer.append(" v ");
+            buffer.append(atom.toString(prefixes));
+        }
+        buffer.append(" :- ");
+        SortedSet<Atom> bodyAtoms=new TreeSet<Atom>(AtomLexicalComparator.INSTANCE);
+        for (int atomIndex=0;atomIndex<dlClause.getBodyLength();atomIndex++)
+            bodyAtoms.add(dlClause.getBodyAtom(atomIndex));
+        isFirstAtom=true;
+        for (Atom atom : bodyAtoms) {
+            if (isFirstAtom)
+                isFirstAtom=false;
+            else
+                buffer.append(", ");
+            buffer.append(atom.toString(prefixes));
+        }
+        return buffer.toString();
     }
     protected void addIRI(String uri,Set<String> prefixIRIs) {
         if (!Prefixes.isInternalIRI(uri)) {
@@ -116,4 +147,26 @@ public abstract class AbstractStructuralTest extends AbstractOntologyTest {
             }
         }
     }
+
+    protected static class AtomLexicalComparator implements Comparator<Atom> {
+        public static final Comparator<Atom> INSTANCE=new AtomLexicalComparator();
+
+        public int compare(Atom a1,Atom a2) {
+            if (a1==a2)
+                return 0;
+            int comparison=a1.getDLPredicate().toString().compareTo(a2.getDLPredicate().toString());
+            if (comparison!=0)
+                return comparison;
+            comparison=a1.getArity()-a2.getArity();
+            if (comparison!=0)
+                return comparison;
+            for (int i=0;i<a1.getArity();i++) {
+                comparison=a1.getArgument(i).toString().compareTo(a2.getArgument(i).toString());
+                if (comparison!=0)
+                    return comparison;
+            }
+            return 0;
+        }
+    }
+
 }

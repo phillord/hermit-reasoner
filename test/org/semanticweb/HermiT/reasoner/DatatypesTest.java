@@ -61,13 +61,12 @@ public class DatatypesTest extends AbstractReasonerTest {
             + "Declaration(DataProperty(:dp))"
             + "DatatypeDefinition(:MyDatatype DataOneOf(\"1\"^^xsd:string \"1\"^^xsd:integer))"
             + "DataPropertyAssertion(:dp :a \"1\"^^:MyDatatype)";
-        boolean exceptionThrown = false;
         try {
             loadReasonerWithAxioms(axioms);
-        } catch (RuntimeException e) {
-            exceptionThrown = true;
+            fail();
         }
-        assertTrue(exceptionThrown);
+        catch (RuntimeException e) {
+        }
     }
     public void testINF() throws Exception {
         String axioms = "Declaration(NamedIndividual(:a)) Declaration(Class(:A)) Declaration(DataProperty(:dp)) "
@@ -95,13 +94,12 @@ public class DatatypesTest extends AbstractReasonerTest {
                 + "SubClassOf(:A DataAllValuesFrom(:dp DataOneOf(\"2\"^^xsd:short \"3\"^^xsd:integer)))"
                 + "ClassAssertion(:A :a)"
                 + "ClassAssertion(DataSomeValuesFrom(:dp DataComplementOf(DataOneOf(\"3\"^^xsd:integer))) :a)";
-        boolean exceptionThrown = false;
         try {
             loadReasonerWithAxioms(axioms);
-        } catch (RuntimeException e) {
-            exceptionThrown = true;
+            fail();
         }
-        assertTrue(exceptionThrown);
+        catch (RuntimeException e) {
+        }
     }
 
     public void testStringAbbreviation() throws Exception {

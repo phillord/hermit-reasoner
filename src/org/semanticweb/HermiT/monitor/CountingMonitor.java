@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -50,7 +50,7 @@ public class CountingMonitor extends TableauMonitorAdapter {
     protected int m_initiallyInvalid;
     protected int m_noValidations;
     protected long m_validationTime;
-    
+
     // overall numbers
     protected final Map<String,List<TestRecord>> m_testRecords=new HashMap<String, List<TestRecord>>();
     protected long m_overallTime=0;
@@ -65,7 +65,7 @@ public class CountingMonitor extends TableauMonitorAdapter {
     protected int m_overallInitiallyInvalid=0;
     protected int m_overallNoValidations=0;
     protected long m_overallValidationTime=0;
-    
+
 
     public void reset() {
         m_problemStartTime=0;
@@ -94,7 +94,7 @@ public class CountingMonitor extends TableauMonitorAdapter {
         m_overallNoValidations=0;
         m_overallValidationTime=0;
     }
-    
+
     public void isSatisfiableStarted(ReasoningTaskDescription reasoningTaskDescription) {
         super.isSatisfiableStarted(reasoningTaskDescription);
         m_testNo++;
@@ -163,7 +163,7 @@ public class CountingMonitor extends TableauMonitorAdapter {
     }
     public void blockingValidationFinished(int noInvalidlyBlocked) {
     	m_validationTime+=(System.currentTimeMillis()-m_validationStartTime);
-    	if (m_noValidations==1) 
+    	if (m_noValidations==1)
     	    m_initiallyInvalid=noInvalidlyBlocked;
     }
     // getters for test records
@@ -174,21 +174,21 @@ public class CountingMonitor extends TableauMonitorAdapter {
         return getTimeSortedTestRecords(limit,(String)null);
     }
     public List<TestRecord> getTimeSortedTestRecords(int limit, StandardTestType standardTestType) {
-        return getTimeSortedTestRecords(limit, standardTestType.messagePattern); 
+        return getTimeSortedTestRecords(limit, standardTestType.messagePattern);
     }
     public List<TestRecord> getTimeSortedTestRecords(int limit, String messagePattern) {
         List<TestRecord> filteredRecords=new ArrayList<TestRecord>();;
         if (messagePattern==null) {
             for (List<TestRecord> records : m_testRecords.values())
                 filteredRecords.addAll(records);
-        } else {
-            filteredRecords=m_testRecords.get(messagePattern); 
         }
+        else
+            filteredRecords=m_testRecords.get(messagePattern);
         Collections.sort(filteredRecords);
         if (limit>filteredRecords.size()) limit=filteredRecords.size();
         return filteredRecords.subList(0, limit);
     }
-    // getters for current test measurements    
+    // getters for current test measurements
     public long getTime() {
         return m_time;
     }
@@ -223,7 +223,7 @@ public class CountingMonitor extends TableauMonitorAdapter {
 	public long getValidationTime() {
 		return m_validationTime;
 	}
-	
+
 	// getters for overall measurements
 	public long getOverallTime() {
 		return m_overallTime;
@@ -262,7 +262,7 @@ public class CountingMonitor extends TableauMonitorAdapter {
     public long getOverallValidationTime() {
         return m_overallValidationTime;
     }
-    
+
     // getters for average measurements
     public long getAverageTime() {
         if (m_testNo==0)
@@ -280,7 +280,7 @@ public class CountingMonitor extends TableauMonitorAdapter {
     protected double getRounded(long nominator, long denominator, int noDecimalPlaces) {
         double number=(double)(nominator)/(double)denominator;
         int tmp=(int)((number*Math.pow(10,noDecimalPlaces)));
-        return (((double)tmp)/Math.pow(10,noDecimalPlaces));
+        return (tmp/Math.pow(10,noDecimalPlaces));
     }
     public double getAverageNumberOfNodes() {
         if (m_testNo==0)
@@ -323,7 +323,7 @@ public class CountingMonitor extends TableauMonitorAdapter {
             return m_testNo;
         return m_overallValidationTime/m_testNo;
     }
-    
+
     public static String millisToHoursMinutesSecondsString(long millis) {
         long time=millis/1000;
         long ms=time%1000;
@@ -333,17 +333,17 @@ public class CountingMonitor extends TableauMonitorAdapter {
         if (secs>0) timeStr=String.format(format, secs)+"s"+timeStr;
         long mins=(time%3600)/60;
         if (mins>0) timeStr=String.format(format, mins)+"m"+timeStr;
-        long hours=time/3600;  
+        long hours=time/3600;
         if (hours>0) timeStr=String.format(format, hours)+"h"+timeStr;
-        return timeStr;  
+        return timeStr;
     }
-    
+
 	public static class TestRecord implements Comparable<TestRecord>, Serializable {
         private static final long serialVersionUID = -3815493500625020183L;
 	    protected final long m_testTime;
 	    protected final String m_testDescription;
 	    protected final boolean m_testResult;
-	    
+
 	    public TestRecord(long testTime, String testDescription, boolean result) {
 	        m_testTime=testTime;
 	        m_testDescription=testDescription;

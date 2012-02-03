@@ -194,7 +194,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
         Set<Set<String>> actual=nodeSetOfOPEsToStrings(m_reasoner.getSuperObjectProperties(ope,true));
         assertContainsAll(actual,control);
     }
-    
+
     /**
      * Checks the superproperties of some object property.
      */
@@ -263,7 +263,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
         Set<Set<String>> actual=nodeSetOfOPEsToStrings(m_reasoner.getSubObjectProperties(ope,false));
         assertContainsAll(actual,control);
     }
-    
+
     /**
      * Checks the equivalents of some object property.
      */
@@ -285,7 +285,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
         Set<Set<String>> actual=nodeSetOfDPsToStrings(m_reasoner.getSuperDataProperties(dp,false));
         assertContainsAll(actual,control);
     }
-    
+
     /**
      * Checks the direct superproperties of some data property.
      */
@@ -307,7 +307,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
         Set<Set<String>> actual=nodeSetOfDPsToStrings(m_reasoner.getSubDataProperties(dp,false));
         assertContainsAll(actual,control);
     }
-    
+
     /**
      * Checks the direct subproperties of some data property.
      */
@@ -352,7 +352,8 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
             if (ope.getSimplified().isAnonymous()) {
                 // inverse
                 translatedSet.add("InverseOf("+ope.getNamedProperty().getIRI().toString()+")");
-            } else 
+            }
+            else
                 translatedSet.add(ope.asOWLObjectProperty().getIRI().toString());
         }
         return translatedSet;
@@ -470,7 +471,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
         }
         return result;
     }
-    
+
     protected static Set<String> EQInv(String... args) {
         Set<String> result=new HashSet<String>();
         for (String arg : args) {
@@ -480,7 +481,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
         }
         return result;
     }
-    
+
     protected static String[] IRIs(String... args) {
         for (int index=0;index<args.length;index++)
             args[index]=IRI(args[index]);

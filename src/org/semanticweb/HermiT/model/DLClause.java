@@ -18,12 +18,8 @@
 package org.semanticweb.HermiT.model;
 
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 import org.semanticweb.HermiT.Prefixes;
 
@@ -39,21 +35,14 @@ public class DLClause implements Serializable {
 
     private static final long serialVersionUID=-4513910129515151732L;
 
-    public static final Atom[][] EMPTY_HEAD=new Atom[0][];
-
-    protected final boolean m_isKnownToBeAdmissible;
     protected final Atom[] m_headAtoms;
     protected final Atom[] m_bodyAtoms;
     protected final ClauseType m_clauseType;
 
-    protected DLClause(boolean isKnownToBeAdmissible,Atom[] headAtoms,Atom[] bodyAtoms,ClauseType clauseType) {
-        m_isKnownToBeAdmissible=isKnownToBeAdmissible;
+    protected DLClause(Atom[] headAtoms,Atom[] bodyAtoms,ClauseType clauseType) {
         m_headAtoms=headAtoms;
         m_bodyAtoms=bodyAtoms;
         m_clauseType=clauseType;
-    }
-    public boolean isKnownToBeAdmissible() {
-        return m_isKnownToBeAdmissible;
     }
     public int getHeadLength() {
         return m_headAtoms.length;
@@ -107,7 +96,7 @@ public class DLClause implements Serializable {
             DLPredicate thingConcept=(m_clauseType==ClauseType.DATA_RANGE_INCLUSION ? InternalDatatype.RDFS_LITERAL : AtomicConcept.THING);
             for (Variable variable : variables)
                 newBodyAtoms[index++]=Atom.create(thingConcept,variable);
-            return DLClause.createEx(m_isKnownToBeAdmissible,m_headAtoms,newBodyAtoms,m_clauseType);
+            return DLClause.create(m_headAtoms,newBodyAtoms,m_clauseType);
         }
     }
     public DLClause getChangedDLClause(Atom[] headAtoms,Atom[] bodyAtoms) {
@@ -115,7 +104,7 @@ public class DLClause implements Serializable {
             headAtoms=m_headAtoms;
         if (bodyAtoms==null)
             bodyAtoms=m_bodyAtoms;
-        return DLClause.createEx(m_isKnownToBeAdmissible,headAtoms,bodyAtoms,m_clauseType);
+        return DLClause.create(headAtoms,bodyAtoms,m_clauseType);
     }
     public boolean isFunctionalityAxiom() {
         if (getBodyLength()==2 && getHeadLength()==1) {
@@ -173,52 +162,33 @@ public class DLClause implements Serializable {
         }
         return buffer.toString();
     }
-    public String toOrderedString(Prefixes prefixes) {
-        StringBuffer buffer=new StringBuffer();
-        SortedSet<Atom> headAtoms = new TreeSet<Atom>(AtomLexicalComparator.INSTANCE);
-        headAtoms.addAll(Arrays.asList(m_headAtoms));
-        boolean isFirstAtom = true;
-        for (Atom a : headAtoms) {
-            if (isFirstAtom) isFirstAtom = false;
-            else buffer.append(" v ");
-            buffer.append(a.toString(prefixes));
-        }
-        buffer.append(" :- ");
-        SortedSet<Atom> bodyAtoms = new TreeSet<Atom>(AtomLexicalComparator.INSTANCE);
-        bodyAtoms.addAll(Arrays.asList(m_bodyAtoms));
-        isFirstAtom = true;
-        for (Atom a : bodyAtoms) {
-            if (isFirstAtom) isFirstAtom = false;
-            else buffer.append(", ");
-            buffer.append(a.toString(prefixes));
-        }
-        return buffer.toString();
-    }
     public String toString() {
         return toString(Prefixes.STANDARD_PREFIXES);
     }
 
-    public static DLClause create(Atom[] headAtoms,Atom[] bodyAtoms,ClauseType clauseType) {
-        return createEx(false,headAtoms,bodyAtoms,clauseType);
-    }
-    public static DLClause createEx(boolean isKnownToBeAdmissible,Atom[] headAtoms,Atom[] bodyAtoms, ClauseType clauseType) {
-        return new DLClause(isKnownToBeAdmissible,headAtoms,bodyAtoms,clauseType);
-    }
-}
-class AtomLexicalComparator implements Serializable, Comparator<Atom> {
-    private static final long serialVersionUID = 1734767518260417510L;
-    public static final Comparator<Atom> INSTANCE = new AtomLexicalComparator();
-
-    public int compare(Atom a1, Atom a2) {
-        if (a1 == a2) return 0;
-        int diff = a1.getDLPredicate().toString().compareTo(a2.getDLPredicate().toString());
-        if (diff != 0) return diff;
-        diff = a1.getArity() - a2.getArity();
-        if (diff != 0) return diff;
-        for (int i=0;i<a1.getArity();i++) {
-            diff = a1.getArgument(i).toString().compareTo(a2.getArgument(i).toString());
-            if (diff != 0) return diff;
+    protected static InterningManager<DLClause> s_interningManager=new InterningManager<DLClause>() {
+        protected boolean equal(DLClause object1,DLClause object2) {
+            if (object1.m_clauseType!=object2.m_clauseType || object1.m_headAtoms.length!=object2.m_headAtoms.length || object1.m_bodyAtoms.length!=object2.m_bodyAtoms.length)
+                return false;
+            for (int index=object1.m_headAtoms.length-1;index>=0;--index)
+                if (object1.m_headAtoms[index]!=object2.m_headAtoms[index])
+                    return false;
+            for (int index=object1.m_bodyAtoms.length-1;index>=0;--index)
+                if (object1.m_bodyAtoms[index]!=object2.m_bodyAtoms[index])
+                    return false;
+            return true;
         }
-        return 0;
+        protected int getHashCode(DLClause object) {
+            int hashCode=object.m_clauseType.hashCode();
+            for (int index=object.m_bodyAtoms.length-1;index>=0;--index)
+                hashCode+=object.m_bodyAtoms[index].hashCode();
+            for (int index=object.m_headAtoms.length-1;index>=0;--index)
+                hashCode+=object.m_headAtoms[index].hashCode();
+            return hashCode;
+        }
+    };
+
+    public static DLClause create(Atom[] headAtoms,Atom[] bodyAtoms,ClauseType clauseType) {
+        return s_interningManager.intern(new DLClause(headAtoms,bodyAtoms,clauseType));
     }
 }

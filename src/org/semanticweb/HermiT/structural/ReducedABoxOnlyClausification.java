@@ -56,14 +56,14 @@ public class ReducedABoxOnlyClausification extends OWLAxiomVisitorAdapter {
 
     protected final Configuration.WarningMonitor m_warningMonitor;
     protected final boolean m_ignoreUnsupportedDatatypes;
-    protected final OWLDataFactory m_factory;  
+    protected final OWLDataFactory m_factory;
     protected final Set<AtomicConcept> m_allAtomicConcepts;
     protected final Set<AtomicRole> m_allAtomicObjectRoles;
     protected final Set<AtomicRole> m_allAtomicDataRoles;
     protected final Set<Atom> m_positiveFacts;
     protected final Set<Atom> m_negativeFacts;
     protected final Set<Individual> m_allIndividuals;
-    
+
     public ReducedABoxOnlyClausification(Configuration configuration, OWLDataFactory factory, Set<AtomicConcept> allAtomicConcepts, Set<AtomicRole> allAtomicObjectRoles, Set<AtomicRole> allAtomicDataRoles) {
         m_warningMonitor=configuration.warningMonitor;
         m_ignoreUnsupportedDatatypes=configuration.ignoreUnsupportedDatatypes;
@@ -106,22 +106,23 @@ public class ReducedABoxOnlyClausification extends OWLAxiomVisitorAdapter {
             Term tmp=first;
             first=second;
             second=tmp;
-        } else
+        }
+        else
             atomicRole=AtomicRole.create(objectProperty.asOWLObjectProperty().getIRI().toString());
         if (m_allAtomicObjectRoles.contains(atomicRole))
             return Atom.create(atomicRole,first,second);
-        else 
+        else
             throw new IllegalArgumentException("Internal error: fresh properties in property assertions are not compatible with incremental ABox loading!");
     }
     protected Atom getRoleAtom(OWLDataPropertyExpression dataProperty,Term first,Term second) {
         AtomicRole atomicRole;
-        if (dataProperty instanceof OWLDataProperty) {
-            atomicRole=AtomicRole.create(((OWLDataProperty)dataProperty).getIRI().toString());  
-        } else
+        if (dataProperty instanceof OWLDataProperty)
+            atomicRole=AtomicRole.create(((OWLDataProperty)dataProperty).getIRI().toString());
+        else
             throw new IllegalStateException("Internal error: unsupported type of data property!");
         if (m_allAtomicDataRoles.contains(atomicRole))
             return Atom.create(atomicRole,first,second);
-        else 
+        else
             throw new IllegalArgumentException("Internal error: fresh properties in property assertions are not compatible with incremental ABox loading!");
     }
     protected Individual getIndividual(OWLIndividual individual) {
@@ -155,7 +156,7 @@ public class ReducedABoxOnlyClausification extends OWLAxiomVisitorAdapter {
             m_negativeFacts.add(getConceptAtom(((OWLClass)((OWLObjectComplementOf)description).getOperand()),getIndividual(object.getIndividual())));
         else if (description instanceof OWLObjectHasSelf)
             m_positiveFacts.add(getRoleAtom(((OWLObjectHasSelf)description).getProperty(),getIndividual(object.getIndividual()),getIndividual(object.getIndividual())));
-        else if (description instanceof OWLObjectComplementOf && ((OWLObjectComplementOf)description).getOperand() instanceof OWLObjectHasSelf) 
+        else if (description instanceof OWLObjectComplementOf && ((OWLObjectComplementOf)description).getOperand() instanceof OWLObjectHasSelf)
             m_negativeFacts.add(getRoleAtom(((OWLObjectHasSelf)(((OWLObjectComplementOf)description).getOperand())).getProperty(),getIndividual(object.getIndividual()),getIndividual(object.getIndividual())));
         else
             throw new IllegalArgumentException("Internal error: invalid normal form for ABox updates.");
@@ -177,14 +178,13 @@ public class ReducedABoxOnlyClausification extends OWLAxiomVisitorAdapter {
     protected Constant getConstant(OWLLiteral lit) {
         try {
             if (lit.isRDFPlainLiteral()) {
-                if (lit.hasLang()) {
+                if (lit.hasLang())
                     return Constant.create(lit.getLiteral()+"@"+lit.getLang(),Prefixes.s_semanticWebPrefixes.get("rdf")+"PlainLiteral");
-                } else {
+                else
                     return Constant.create(lit.getLiteral()+"@",Prefixes.s_semanticWebPrefixes.get("rdf")+"PlainLiteral");
-                }
-            } else {
-                return Constant.create(lit.getLiteral(),lit.getDatatype().getIRI().toString());
             }
+            else
+                return Constant.create(lit.getLiteral(),lit.getDatatype().getIRI().toString());
         }
         catch (UnsupportedDatatypeException e) {
             if (m_ignoreUnsupportedDatatypes) {
@@ -195,5 +195,5 @@ public class ReducedABoxOnlyClausification extends OWLAxiomVisitorAdapter {
             else
                 throw e;
         }
-    } 
+    }
 }

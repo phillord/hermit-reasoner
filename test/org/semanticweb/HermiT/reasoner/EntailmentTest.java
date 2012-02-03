@@ -12,7 +12,7 @@ public class EntailmentTest extends AbstractReasonerTest {
         super(name);
     }
     public void testHasKey() throws Exception {
-        String axioms = "Declaration(DataProperty(:dp))" 
+        String axioms = "Declaration(DataProperty(:dp))"
             + "ClassAssertion(owl:Thing :a)"
             + "SubClassOf(owl:Thing ObjectIntersectionOf(DataAllValuesFrom(:dp xsd:string) DataAllValuesFrom(:dp xsd:integer)))";
         loadReasonerWithAxioms(axioms);
@@ -21,7 +21,7 @@ public class EntailmentTest extends AbstractReasonerTest {
         assertEntails(conlusions.getLogicalAxioms(), true);
     }
     public void testBlankNodes1() throws Exception {
-        String axioms = "Declaration(ObjectProperty(:p))" 
+        String axioms = "Declaration(ObjectProperty(:p))"
             + "ClassAssertion(owl:Thing :a )"
             + "ObjectPropertyAssertion(:p :a _:anon)";
         loadReasonerWithAxioms(axioms);
@@ -31,7 +31,7 @@ public class EntailmentTest extends AbstractReasonerTest {
         assertEntails(conlusions.getLogicalAxioms(), true);
     }
     public void testInvalidBlankNodes() throws Exception {
-        String axioms = "ClassAssertion(ObjectSomeValuesFrom(:p ObjectSomeValuesFrom(:s owl:Thing)) :a)" 
+        String axioms = "ClassAssertion(ObjectSomeValuesFrom(:p ObjectSomeValuesFrom(:s owl:Thing)) :a)"
             + "SubObjectPropertyOf( :s :r- )"
             + "InverseObjectProperties( :r- :r ) ";
         loadReasonerWithAxioms(axioms);
@@ -40,17 +40,16 @@ public class EntailmentTest extends AbstractReasonerTest {
             + "ObjectPropertyAssertion(:s _:anon1 _:anon2)"
             + "ObjectPropertyAssertion(:r _:anon2 _:anon1)";
         OWLOntology conlusions=getOntologyWithAxioms(axioms);
-        boolean catchedException=false;
         try {
             new EntailmentChecker(m_reasoner, m_dataFactory).entails(conlusions.getLogicalAxioms());
-        } catch (Exception e) {
-            // blank nodes in the conclusion ontology should not contain cycles
-            catchedException=true;
+            fail();
         }
-        assertTrue(catchedException);
+        catch (Exception e) {
+            // blank nodes in the conclusion ontology should not contain cycles
+        }
     }
     public void testValidBlankNodesWithNominals() throws Exception {
-        String axioms = "ClassAssertion(ObjectSomeValuesFrom(:p ObjectSomeValuesFrom(:s ObjectOneOf(:b))) :a)" 
+        String axioms = "ClassAssertion(ObjectSomeValuesFrom(:p ObjectSomeValuesFrom(:s ObjectOneOf(:b))) :a)"
             + "SubObjectPropertyOf( :s :r )";
         loadReasonerWithAxioms(axioms);
         m_ontologyManager.removeOntology(m_ontology);
