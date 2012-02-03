@@ -768,30 +768,14 @@ public class OWLClausification {
         }
         public void visit(OWLDataOneOf object) {
             LiteralDataRange literalRange=m_dataRangeConverter.convertDataRange(object);
-//            if (literalConcept instanceof AtomicNegationConcept) {
-//                AtomicConcept negatedConcept=((AtomicNegationConcept)literalConcept).getNegatedAtomicConcept();
-//                if (!negatedConcept.isAlwaysTrue())
-//                    m_bodyAtoms.add(Atom.create(negatedConcept,X));
-//            }
-//            else {
-//                if (!literalConcept.isAlwaysFalse())
-              m_headAtoms.add(Atom.create((DLPredicate)literalRange,X));
-//            }
+            m_headAtoms.add(Atom.create((DLPredicate)literalRange,X));
         }
         public void visit(OWLFacetRestriction node) {
             throw new IllegalStateException("Internal error: Invalid normal form. ");
         }
         public void visit(OWLDatatypeRestriction node) {
             LiteralDataRange literalRange=m_dataRangeConverter.convertDataRange(node);
-//            if (literalConcept instanceof AtomicNegationConcept) {
-//                AtomicConcept negatedConcept=((AtomicNegationConcept)literalConcept).getNegatedAtomicConcept();
-//                if (!negatedConcept.isAlwaysTrue())
-//                    m_bodyAtoms.add(Atom.create(negatedConcept,X));
-//            }
-//            else {
-//                if (!literalConcept.isAlwaysFalse())
-                    m_headAtoms.add(Atom.create((DLPredicate)literalRange,X));
-//            }
+            m_headAtoms.add(Atom.create((DLPredicate)literalRange,X));
         }
         public void visit(OWLLiteral node) {
             throw new IllegalStateException("Internal error: Invalid normal form. ");
