@@ -41,7 +41,6 @@ import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Constant;
 import org.semanticweb.HermiT.model.ConstantEnumeration;
 import org.semanticweb.HermiT.model.DLClause;
-import org.semanticweb.HermiT.model.DLClause.ClauseType;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.model.DatatypeRestriction;
@@ -163,51 +162,45 @@ public class OWLClausification {
         Set<Atom> negativeFacts=new HashSet<Atom>();
         Set<DatatypeRestriction> allUnknownDatatypeRestrictions=new HashSet<DatatypeRestriction>();
         for (OWLObjectPropertyExpression[] inclusion : axioms.m_simpleObjectPropertyInclusions) {
-            OWLObjectPropertyExpression sub=inclusion[0];
-            OWLObjectPropertyExpression sup=inclusion[1];
-            ClauseType clauseType;
-            if (sub.isAnonymous()!=sup.isAnonymous())
-                clauseType=ClauseType.INVERSE_OBJECT_PROPERTY_INCLUSION;
-            else
-                clauseType=ClauseType.OBJECT_PROPERTY_INCLUSION;
             Atom subRoleAtom=getRoleAtom(inclusion[0],X,Y);
             Atom superRoleAtom=getRoleAtom(inclusion[1],X,Y);
-            DLClause dlClause=DLClause.create(new Atom[] { superRoleAtom },new Atom[] { subRoleAtom },clauseType);
+            DLClause dlClause=DLClause.create(new Atom[] { superRoleAtom },new Atom[] { subRoleAtom });
             dlClauses.add(dlClause);
         }
         for (OWLDataPropertyExpression[] inclusion : axioms.m_dataPropertyInclusions) {
             Atom subProp=getRoleAtom(inclusion[0],X,Y);
             Atom superProp=getRoleAtom(inclusion[1],X,Y);
-            DLClause dlClause=DLClause.create(new Atom[] { superProp },new Atom[] { subProp },ClauseType.DATA_PROPERTY_INCLUSION);
+            DLClause dlClause=DLClause.create(new Atom[] { superProp },new Atom[] { subProp });
             dlClauses.add(dlClause);
         }
         for (OWLObjectPropertyExpression objectPropertyExpression : axioms.m_asymmetricObjectProperties) {
             Atom roleAtom=getRoleAtom(objectPropertyExpression,X,Y);
             Atom inverseRoleAtom=getRoleAtom(objectPropertyExpression,Y,X);
-            DLClause dlClause=DLClause.create(new Atom[] {},new Atom[] { roleAtom,inverseRoleAtom },ClauseType.ASYMMETRY);
-            dlClauses.add(dlClause.getSafeVersion());
+            DLClause dlClause=DLClause.create(new Atom[] {},new Atom[] { roleAtom,inverseRoleAtom });
+            dlClauses.add(dlClause);
         }
         for (OWLObjectPropertyExpression objectPropertyExpression : axioms.m_reflexiveObjectProperties) {
             Atom roleAtom=getRoleAtom(objectPropertyExpression,X,X);
-            DLClause dlClause=DLClause.create(new Atom[] { roleAtom },new Atom[] {},ClauseType.REFLEXIVITY);
-            dlClauses.add(dlClause.getSafeVersion());
+            Atom bodyAtom=Atom.create(AtomicConcept.THING,X);
+            DLClause dlClause=DLClause.create(new Atom[] { roleAtom },new Atom[] { bodyAtom });
+            dlClauses.add(dlClause);
         }
         for (OWLObjectPropertyExpression objectPropertyExpression : axioms.m_irreflexiveObjectProperties) {
             Atom roleAtom=getRoleAtom(objectPropertyExpression,X,X);
-            DLClause dlClause=DLClause.create(new Atom[] {},new Atom[] { roleAtom },ClauseType.IRREFLEXIVITY);
-            dlClauses.add(dlClause.getSafeVersion());
+            DLClause dlClause=DLClause.create(new Atom[] {},new Atom[] { roleAtom });
+            dlClauses.add(dlClause);
         }
         for (OWLObjectPropertyExpression[] properties : axioms.m_disjointObjectProperties)
             for (int i=0;i<properties.length;i++)
                 for (int j=i+1;j<properties.length;j++) {
                     Atom atom_i=getRoleAtom(properties[i],X,Y);
                     Atom atom_j=getRoleAtom(properties[j],X,Y);
-                    DLClause dlClause=DLClause.create(new Atom[] {},new Atom[] { atom_i,atom_j },ClauseType.DISJOINT_OBJECT_PROPERTIES);
-                    dlClauses.add(dlClause.getSafeVersion());
+                    DLClause dlClause=DLClause.create(new Atom[] {},new Atom[] { atom_i,atom_j });
+                    dlClauses.add(dlClause);
                 }
         if (axioms.m_dataPropertyInclusions.contains(factory.getOWLDataProperty(IRI.create(AtomicRole.BOTTOM_DATA_ROLE.getIRI())))) {
             Atom bodyAtom=Atom.create(AtomicRole.BOTTOM_DATA_ROLE,X,Y);
-            dlClauses.add(DLClause.create(new Atom[] {},new Atom[] { bodyAtom },ClauseType.OTHER).getSafeVersion());
+            dlClauses.add(DLClause.create(new Atom[] {},new Atom[] { bodyAtom }));
         }
         for (OWLDataPropertyExpression[] properties : axioms.m_disjointDataProperties)
             for (int i=0;i<properties.length;i++)
@@ -215,8 +208,8 @@ public class OWLClausification {
                     Atom atom_i=getRoleAtom(properties[i],X,Y);
                     Atom atom_j=getRoleAtom(properties[j],X,Z);
                     Atom atom_ij=Atom.create(Inequality.create(),Y,Z);
-                    DLClause dlClause=DLClause.create(new Atom[] { atom_ij },new Atom[] { atom_i,atom_j },ClauseType.DISJOINT_DATA_PROPERTIES);
-                    dlClauses.add(dlClause.getSafeVersion());
+                    DLClause dlClause=DLClause.create(new Atom[] { atom_ij },new Atom[] { atom_i,atom_j });
+                    dlClauses.add(dlClause);
                 }
         DataRangeConverter dataRangeConverter=new DataRangeConverter(m_configuration.warningMonitor,axioms.m_definedDatatypesIRIs,allUnknownDatatypeRestrictions,m_configuration.ignoreUnsupportedDatatypes);
         NormalizedAxiomClausifier clausifier=new NormalizedAxiomClausifier(dataRangeConverter,positiveFacts,factory,axioms.m_dps2ranges);
@@ -224,17 +217,17 @@ public class OWLClausification {
             for (OWLClassExpression description : inclusion)
                 description.accept(clausifier);
             DLClause dlClause=clausifier.getDLClause();
-            dlClauses.add(dlClause.getSafeVersion());
+            dlClauses.add(dlClause.getSafeVersion(AtomicConcept.THING));
         }
         NormalizedDataRangeAxiomClausifier normalizedDataRangeAxiomClausifier=new NormalizedDataRangeAxiomClausifier(dataRangeConverter,factory,axioms.m_definedDatatypesIRIs);
         for (OWLDataRange[] inclusion : axioms.m_dataRangeInclusions) {
             for (OWLDataRange description : inclusion)
                 description.accept(normalizedDataRangeAxiomClausifier);
             DLClause dlClause=normalizedDataRangeAxiomClausifier.getDLClause();
-            dlClauses.add(dlClause.getSafeVersion());
+            dlClauses.add(dlClause.getSafeVersion(InternalDatatype.RDFS_LITERAL));
         }
         for (OWLHasKeyAxiom hasKey : axioms.m_hasKeys)
-            dlClauses.add(clausifyKey(hasKey).getSafeVersion());
+            dlClauses.add(clausifyKey(hasKey));
         FactClausifier factClausifier=new FactClausifier(dataRangeConverter,positiveFacts,negativeFacts);
         for (OWLIndividualAxiom fact : axioms.m_facts)
             fact.accept(factClausifier);
@@ -328,7 +321,7 @@ public class OWLClausification {
         headAtoms.toArray(hAtoms);
         Atom[] bAtoms=new Atom[bodyAtoms.size()];
         bodyAtoms.toArray(bAtoms);
-        DLClause clause=DLClause.create(hAtoms,bAtoms,ClauseType.HAS_KEY);
+        DLClause clause=DLClause.create(hAtoms,bAtoms);
         return clause;
     }
     protected static LiteralConcept getLiteralConcept(OWLClassExpression description) {
@@ -429,7 +422,7 @@ public class OWLClausification {
             m_headAtoms.toArray(headAtoms);
             Atom[] bodyAtoms=new Atom[m_bodyAtoms.size()];
             m_bodyAtoms.toArray(bodyAtoms);
-            DLClause dlClause=DLClause.create(headAtoms,bodyAtoms,ClauseType.CONCEPT_INCLUSION);
+            DLClause dlClause=DLClause.create(headAtoms,bodyAtoms);
             m_headAtoms.clear();
             m_bodyAtoms.clear();
             m_yIndex=0;
@@ -726,7 +719,7 @@ public class OWLClausification {
             m_headAtoms.toArray(headAtoms);
             Atom[] bodyAtoms=new Atom[m_bodyAtoms.size()];
             m_bodyAtoms.toArray(bodyAtoms);
-            DLClause dlClause=DLClause.create(headAtoms,bodyAtoms,ClauseType.DATA_RANGE_INCLUSION);
+            DLClause dlClause=DLClause.create(headAtoms,bodyAtoms);
             m_headAtoms.clear();
             m_bodyAtoms.clear();
             m_yIndex=0;
@@ -980,6 +973,7 @@ public class OWLClausification {
         protected final List<Atom> m_bodyAtoms;
         protected final Set<Variable> m_abstractVariables;
         protected final Set<OWLObjectProperty> m_graphObjectProperties=new HashSet<OWLObjectProperty>();
+        protected boolean m_containsObjectProperties;
         protected boolean m_containsGraphObjectProperties;
         protected boolean m_containsNonGraphObjectProperties;
         protected boolean m_containsUndeterminedObjectProperties;
@@ -999,7 +993,6 @@ public class OWLClausification {
                 if (objectPropertiesOccurringInOWLAxioms.contains(objectProperty))
                     throw new IllegalArgumentException("Mixing graph and non-graph object properties is not supported.");
         }
-
         public void processRules(Collection<OWLAxioms.DisjunctiveRule> rules) {
             List<OWLAxioms.DisjunctiveRule> unprocessedRules=new ArrayList<OWLAxioms.DisjunctiveRule>(rules);
             boolean changed=true;
@@ -1014,20 +1007,22 @@ public class OWLClausification {
                     determineUndeterminedObjectProperties(rule);
                     if (!m_containsUndeterminedObjectProperties) {
                         iterator.remove();
-                        clausify(rule,m_containsGraphObjectProperties);
+                        clausify(rule,m_containsNonGraphObjectProperties || !m_containsObjectProperties);
                         changed=true;
                     }
                 }
             }
+            m_containsObjectProperties=false;
             m_containsGraphObjectProperties=false;
             m_containsNonGraphObjectProperties=true;
             m_containsUndeterminedObjectProperties=false;
             for (OWLAxioms.DisjunctiveRule rule : unprocessedRules) {
                 determineUndeterminedObjectProperties(rule);
-                clausify(rule,false);
+                clausify(rule,true);
             }
         }
         protected void determineRuleType(OWLAxioms.DisjunctiveRule rule) {
+            m_containsObjectProperties=false;
             m_containsGraphObjectProperties=false;
             m_containsNonGraphObjectProperties=false;
             m_containsUndeterminedObjectProperties=false;
@@ -1038,6 +1033,7 @@ public class OWLClausification {
         }
         protected void checkRuleAtom(SWRLAtom atom) {
             if (atom instanceof SWRLObjectPropertyAtom) {
+                m_containsObjectProperties=true;
                 OWLObjectProperty objectProperty=((SWRLObjectPropertyAtom)atom).getPredicate().getNamedProperty();
                 boolean isGraphObjectProperty=m_graphObjectProperties.contains(objectProperty);
                 boolean isNonGraphObjectProperty=m_objectPropertiesOccurringInOWLAxioms.contains(objectProperty);
@@ -1079,7 +1075,7 @@ public class OWLClausification {
                 m_objectPropertiesOccurringInOWLAxioms.add(objectProperty);
             }
         }
-        protected void clausify(OWLAxioms.DisjunctiveRule rule,boolean isGraphRule) {
+        protected void clausify(OWLAxioms.DisjunctiveRule rule,boolean restrictToNamed) {
             m_headAtoms.clear();
             m_bodyAtoms.clear();
             m_abstractVariables.clear();
@@ -1087,11 +1083,11 @@ public class OWLClausification {
                 m_bodyAtoms.add(atom.accept(this));
             for (SWRLAtom atom : rule.m_head)
                 m_headAtoms.add(atom.accept(this));
-            if (!isGraphRule) {
+            if (restrictToNamed) {
                 for (Variable variable : m_abstractVariables)
                     m_bodyAtoms.add(Atom.create(AtomicConcept.INTERNAL_NAMED,variable));
             }
-            DLClause dlClause=DLClause.create(m_headAtoms.toArray(new Atom[m_headAtoms.size()]),m_bodyAtoms.toArray(new Atom[m_bodyAtoms.size()]),isGraphRule ? ClauseType.GRAPH_RULE : ClauseType.SWRL_RULE);
+            DLClause dlClause=DLClause.create(m_headAtoms.toArray(new Atom[m_headAtoms.size()]),m_bodyAtoms.toArray(new Atom[m_bodyAtoms.size()]));
             m_dlClauses.add(dlClause);
             m_headAtoms.clear();
             m_bodyAtoms.clear();

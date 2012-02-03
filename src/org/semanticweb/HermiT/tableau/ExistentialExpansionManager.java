@@ -35,7 +35,6 @@ import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.model.Inequality;
 import org.semanticweb.HermiT.model.InverseRole;
 import org.semanticweb.HermiT.model.Role;
-import org.semanticweb.HermiT.model.DLClause.ClauseType;
 
 /**
  * Manages the expansion of at least restrictions in a tableau.
@@ -93,13 +92,13 @@ public final class ExistentialExpansionManager implements Serializable {
     }
     protected void loadDLClausesIntoGraph(Set<DLClause> dlClauses,Graph<Role> superRoleGraph,Set<Role> functionalRoles) {
         for (DLClause dlClause : dlClauses) {
-            if (dlClause.getClauseType()==ClauseType.OBJECT_PROPERTY_INCLUSION || dlClause.getClauseType()==ClauseType.DATA_PROPERTY_INCLUSION) {
+            if (dlClause.isAtomicRoleInclusion()) {
                 AtomicRole subrole=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
                 AtomicRole superrole=(AtomicRole)dlClause.getHeadAtom(0).getDLPredicate();
                 superRoleGraph.addEdge(subrole,superrole);
                 superRoleGraph.addEdge(subrole.getInverse(),superrole.getInverse());
             }
-            else if (dlClause.getClauseType()==ClauseType.INVERSE_OBJECT_PROPERTY_INCLUSION) {
+            else if (dlClause.isAtomicRoleInverseInclusion()) {
                 AtomicRole subrole=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
                 AtomicRole superrole=(AtomicRole)dlClause.getHeadAtom(0).getDLPredicate();
                 superRoleGraph.addEdge(subrole,superrole.getInverse());
@@ -272,10 +271,10 @@ public final class ExistentialExpansionManager implements Serializable {
             m_tableau.m_tableauMonitor.existentialExpansionFinished(atLeastDataRange,forNode);
     }
     public void expand(AtLeast atLeast,Node forNode) {
-        if (!tryFunctionalExpansion(atLeast,forNode)) 
+        if (!tryFunctionalExpansion(atLeast,forNode))
             if (atLeast instanceof AtLeastConcept)
                 doNormalExpansion((AtLeastConcept)atLeast,forNode);
-            else 
+            else
                 doNormalExpansion((AtLeastDataRange)atLeast,forNode);
     }
 }

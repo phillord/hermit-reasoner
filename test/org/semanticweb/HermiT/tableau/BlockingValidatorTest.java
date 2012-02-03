@@ -21,7 +21,6 @@ import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.InverseRole;
 import org.semanticweb.HermiT.model.Variable;
-import org.semanticweb.HermiT.model.DLClause.ClauseType;
 
 public class BlockingValidatorTest extends AbstractReasonerInternalsTest {
     protected final AtomicConcept A=AtomicConcept.create("A");
@@ -58,22 +57,22 @@ public class BlockingValidatorTest extends AbstractReasonerInternalsTest {
     }
     public void testOneInvalidBlock() {
         Set<DLClause> dlClauses=new HashSet<DLClause>();
-        DLClause cl=DLClause.create(new Atom[] { Atom.create(ATLEAST2RA,X) }, new Atom[] { Atom.create(B,X) },ClauseType.CONCEPT_INCLUSION);
+        DLClause cl=DLClause.create(new Atom[] { Atom.create(ATLEAST2RA,X) }, new Atom[] { Atom.create(B,X) });
         dlClauses.add(cl);
-        cl=DLClause.create(new Atom[] { Atom.create(ATLEAST2INVRB,X) }, new Atom[] { Atom.create(A,X) },ClauseType.CONCEPT_INCLUSION);
+        cl=DLClause.create(new Atom[] { Atom.create(ATLEAST2INVRB,X) }, new Atom[] { Atom.create(A,X) });
         dlClauses.add(cl);
-        cl=DLClause.create(new Atom[] { Atom.create(ATLEAST1SA,X) }, new Atom[] { Atom.create(C,X) },ClauseType.CONCEPT_INCLUSION);
+        cl=DLClause.create(new Atom[] { Atom.create(ATLEAST1SA,X) }, new Atom[] { Atom.create(C,X) });
         dlClauses.add(cl);
-        cl=DLClause.create(new Atom[] { Atom.create(ATLEAST2RA,X) }, new Atom[] { Atom.create(C,X) },ClauseType.CONCEPT_INCLUSION);
+        cl=DLClause.create(new Atom[] { Atom.create(ATLEAST2RA,X) }, new Atom[] { Atom.create(C,X) });
         dlClauses.add(cl);
-        cl=DLClause.create(new Atom[] { Atom.create(ATLEAST1INVRE,X) }, new Atom[] { Atom.create(D,X) },ClauseType.CONCEPT_INCLUSION);
+        cl=DLClause.create(new Atom[] { Atom.create(ATLEAST1INVRE,X) }, new Atom[] { Atom.create(D,X) });
         dlClauses.add(cl);
-        cl=DLClause.create(new Atom[] { Atom.create(B,X) }, new Atom[] { Atom.create(E,X) },ClauseType.CONCEPT_INCLUSION);
+        cl=DLClause.create(new Atom[] { Atom.create(B,X) }, new Atom[] { Atom.create(E,X) });
         dlClauses.add(cl);
-        cl=DLClause.create(new Atom[] { Atom.create(D,X) }, new Atom[] { Atom.create(R,Y,X), Atom.create(B,Y) },ClauseType.CONCEPT_INCLUSION);
+        cl=DLClause.create(new Atom[] { Atom.create(D,X) }, new Atom[] { Atom.create(R,Y,X), Atom.create(B,Y) });
         dlClauses.add(cl);
         //  [Y1 == Y2]@atMost(1 <r> <D>)(X) :- <r>(X,Y1), <D>(Y1), <r>(X,Y2), <D>(Y2), <C>(X)
-        cl=DLClause.create(new Atom[] { Atom.create(AnnotatedEquality.create(1, R, D),Y1,Y2,X) }, new Atom[] { Atom.create(C,X),Atom.create(R,X,Y1),Atom.create(D,Y1),Atom.create(R,X,Y2),Atom.create(D,Y2) },ClauseType.CONCEPT_INCLUSION);
+        cl=DLClause.create(new Atom[] { Atom.create(AnnotatedEquality.create(1, R, D),Y1,Y2,X) }, new Atom[] { Atom.create(C,X),Atom.create(R,X,Y1),Atom.create(D,Y1),Atom.create(R,X,Y2),Atom.create(D,Y2) });
         dlClauses.add(cl);
         TEST_DL_ONTOLOGY=getTestDLOntology(dlClauses);
 
@@ -171,21 +170,21 @@ public class BlockingValidatorTest extends AbstractReasonerInternalsTest {
     }
     public void testInvalidBlockWithAnnotatedEqualities() {
         Set<DLClause> dlClauses=new HashSet<DLClause>();
-        DLClause cl=DLClause.create(new Atom[] { Atom.create(ATLEAST1SB,X) }, new Atom[] { Atom.create(A,X) },ClauseType.CONCEPT_INCLUSION);
+        DLClause cl=DLClause.create(new Atom[] { Atom.create(ATLEAST1SB,X) }, new Atom[] { Atom.create(A,X) });
         dlClauses.add(cl);
-        cl=DLClause.create(new Atom[] { Atom.create(ATLEAST1INVRB,X) }, new Atom[] { Atom.create(A,X) },ClauseType.CONCEPT_INCLUSION);
+        cl=DLClause.create(new Atom[] { Atom.create(ATLEAST1INVRB,X) }, new Atom[] { Atom.create(A,X) });
         dlClauses.add(cl);
-        cl=DLClause.create(new Atom[] { Atom.create(ATLEAST1RC,X) }, new Atom[] { Atom.create(S,Y,X), Atom.create(A,Y) },ClauseType.CONCEPT_INCLUSION);
+        cl=DLClause.create(new Atom[] { Atom.create(ATLEAST1RC,X) }, new Atom[] { Atom.create(S,Y,X), Atom.create(A,Y) });
         dlClauses.add(cl);
-        cl=DLClause.create(new Atom[] { Atom.create(ATLEAST1TD,X) }, new Atom[] { Atom.create(B,X) },ClauseType.CONCEPT_INCLUSION);
+        cl=DLClause.create(new Atom[] { Atom.create(ATLEAST1TD,X) }, new Atom[] { Atom.create(B,X) });
         dlClauses.add(cl);
-        cl=DLClause.create(new Atom[] { Atom.create(ATLEAST1INVRB,X) }, new Atom[] { Atom.create(E,X) },ClauseType.CONCEPT_INCLUSION);
+        cl=DLClause.create(new Atom[] { Atom.create(ATLEAST1INVRB,X) }, new Atom[] { Atom.create(E,X) });
         dlClauses.add(cl);
-        cl=DLClause.create(new Atom[] { Atom.create(C,X) }, new Atom[] { Atom.create(E,X) },ClauseType.CONCEPT_INCLUSION);
+        cl=DLClause.create(new Atom[] { Atom.create(C,X) }, new Atom[] { Atom.create(E,X) });
         dlClauses.add(cl);
         // B -> <= 1 r.C
         //  [Y1 == Y2]@atMost(1 <r> <C>)(X) :- <r>(X,Y1), <C>(Y1), <r>(X,Y2), <C>(Y2), <B>(X)
-        cl=DLClause.create(new Atom[] { Atom.create(AnnotatedEquality.create(1, R, C),Y1,Y2,X) }, new Atom[] { Atom.create(B,X),Atom.create(R,X,Y1),Atom.create(C,Y1),Atom.create(R,X,Y2),Atom.create(C,Y2) },ClauseType.CONCEPT_INCLUSION);
+        cl=DLClause.create(new Atom[] { Atom.create(AnnotatedEquality.create(1, R, C),Y1,Y2,X) }, new Atom[] { Atom.create(B,X),Atom.create(R,X,Y1),Atom.create(C,Y1),Atom.create(R,X,Y2),Atom.create(C,Y2) });
         dlClauses.add(cl);
         TEST_DL_ONTOLOGY=getTestDLOntology(dlClauses);
 

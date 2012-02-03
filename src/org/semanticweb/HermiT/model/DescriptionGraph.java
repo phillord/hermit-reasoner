@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -21,7 +21,6 @@ import java.io.Serializable;
 import java.util.Set;
 
 import org.semanticweb.HermiT.Prefixes;
-import org.semanticweb.HermiT.model.DLClause.ClauseType;
 
 public class DescriptionGraph implements DLPredicate,Serializable {
     private static final long serialVersionUID=-6098910060520673164L;
@@ -30,7 +29,7 @@ public class DescriptionGraph implements DLPredicate,Serializable {
     protected final AtomicConcept[] m_atomicConceptsByVertices;
     protected final Edge[] m_edges;
     protected final Set<AtomicConcept> m_startConcepts;
-    
+
     public DescriptionGraph(String name,AtomicConcept[] atomicConceptsByVertices,Edge[] edges,Set<AtomicConcept> startConcepts) {
         m_name=name;
         m_atomicConceptsByVertices=atomicConceptsByVertices;
@@ -71,7 +70,7 @@ public class DescriptionGraph implements DLPredicate,Serializable {
             for (int vertex=0;vertex<m_atomicConceptsByVertices.length;vertex++)
                 if (m_atomicConceptsByVertices[vertex].equals(startAtomicConcept))
                     consequent[index++]=Atom.create(ExistsDescriptionGraph.create(this,vertex),X);
-            resultingDLClauses.add(DLClause.create(consequent,antecedent,ClauseType.GRAPH_START_CLAUSE));
+            resultingDLClauses.add(DLClause.create(consequent,antecedent));
         }
     }
     public String toString(Prefixes ns) {
@@ -111,7 +110,7 @@ public class DescriptionGraph implements DLPredicate,Serializable {
         buffer.append(']');
         return buffer.toString();
     }
-    
+
     public static class Edge implements Serializable {
         private static final long serialVersionUID=-2407275128459101707L;
 

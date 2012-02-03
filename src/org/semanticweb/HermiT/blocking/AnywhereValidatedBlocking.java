@@ -28,7 +28,6 @@ import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DataRange;
 import org.semanticweb.HermiT.model.Variable;
-import org.semanticweb.HermiT.model.DLClause.ClauseType;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
 import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
 import org.semanticweb.HermiT.tableau.ExtensionManager;
@@ -138,7 +137,7 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
         boolean debuggingMode=false;
         int checkedBlocks=0;
         int invalidBlocks=0;
-        
+
         TableauMonitor monitor=m_tableau.getTableauMonitor();
         if (monitor!=null)
             monitor.blockingValidationStarted();
@@ -364,7 +363,7 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
                 for (int i=0;i<coreVariables.length;i++) {
                     coreVariables[i]=false;
                 }
-                if (dlClause.getClauseType()==ClauseType.CONCEPT_INCLUSION && variables.size()>1) {
+                if (dlClause.isAtomicConceptInclusion() && variables.size()>1) {
                     workers.add(new ComputeCoreVariables(dlClause,variables,valuesBuffer,coreVariables));
                 }
             }

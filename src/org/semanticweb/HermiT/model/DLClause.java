@@ -27,22 +27,14 @@ import org.semanticweb.HermiT.Prefixes;
  * Represents a DL clause. The body is a conjunction of atoms and the head is a disjunction of atoms.
  */
 public class DLClause implements Serializable {
-    public static enum ClauseType {
-        CONCEPT_INCLUSION, DATA_RANGE_INCLUSION, INVERSE_OBJECT_PROPERTY_INCLUSION, OBJECT_PROPERTY_INCLUSION, DATA_PROPERTY_INCLUSION,
-        ASYMMETRY, REFLEXIVITY, IRREFLEXIVITY, DISJOINT_OBJECT_PROPERTIES, DISJOINT_DATA_PROPERTIES,
-        HAS_KEY, SWRL_RULE, GRAPH_RULE, GRAPH_START_CLAUSE, OTHER
-    }
-
     private static final long serialVersionUID=-4513910129515151732L;
 
     protected final Atom[] m_headAtoms;
     protected final Atom[] m_bodyAtoms;
-    protected final ClauseType m_clauseType;
 
-    protected DLClause(Atom[] headAtoms,Atom[] bodyAtoms,ClauseType clauseType) {
+    protected DLClause(Atom[] headAtoms,Atom[] bodyAtoms) {
         m_headAtoms=headAtoms;
         m_bodyAtoms=bodyAtoms;
-        m_clauseType=clauseType;
     }
     public int getHeadLength() {
         return m_headAtoms.length;
@@ -62,7 +54,7 @@ public class DLClause implements Serializable {
     public Atom[] getBodyAtoms() {
         return m_bodyAtoms.clone();
     }
-    public DLClause getSafeVersion() {
+    public DLClause getSafeVersion(DLPredicate safeMakingPredicate) {
         Set<Variable> variables=new HashSet<Variable>();
         // collect all the variables that occur in the head into the set variables
         for (int headIndex=0;headIndex<m_headAtoms.length;headIndex++) {
@@ -93,10 +85,9 @@ public class DLClause implements Serializable {
             Atom[] newBodyAtoms=new Atom[m_bodyAtoms.length+variables.size()];
             System.arraycopy(m_bodyAtoms,0,newBodyAtoms,0,m_bodyAtoms.length);
             int index=m_bodyAtoms.length;
-            DLPredicate thingConcept=(m_clauseType==ClauseType.DATA_RANGE_INCLUSION ? InternalDatatype.RDFS_LITERAL : AtomicConcept.THING);
             for (Variable variable : variables)
-                newBodyAtoms[index++]=Atom.create(thingConcept,variable);
-            return DLClause.create(m_headAtoms,newBodyAtoms,m_clauseType);
+                newBodyAtoms[index++]=Atom.create(safeMakingPredicate,variable);
+            return DLClause.create(m_headAtoms,newBodyAtoms);
         }
     }
     public DLClause getChangedDLClause(Atom[] headAtoms,Atom[] bodyAtoms) {
@@ -104,10 +95,45 @@ public class DLClause implements Serializable {
             headAtoms=m_headAtoms;
         if (bodyAtoms==null)
             bodyAtoms=m_bodyAtoms;
-        return DLClause.create(headAtoms,bodyAtoms,m_clauseType);
+        return DLClause.create(headAtoms,bodyAtoms);
+    }
+    public boolean isAtomicConceptInclusion() {
+        if (m_bodyAtoms.length==1 && m_headAtoms.length==1) {
+            Atom bodyAtom=m_bodyAtoms[0];
+            Atom headAtom=m_headAtoms[0];
+            if (bodyAtom.getArity()==1 && headAtom.getArity()==1 && bodyAtom.getDLPredicate() instanceof AtomicConcept && headAtom.getDLPredicate() instanceof AtomicConcept) {
+                Term argument=bodyAtom.getArgument(0);
+                return argument instanceof Variable && argument.equals(headAtom.getArgument(0));
+            }
+        }
+        return false;
+    }
+    public boolean isAtomicRoleInclusion() {
+        if (m_bodyAtoms.length==1 && m_headAtoms.length==1) {
+            Atom bodyAtom=m_bodyAtoms[0];
+            Atom headAtom=m_headAtoms[0];
+            if (bodyAtom.getArity()==2 && headAtom.getArity()==2 && bodyAtom.getDLPredicate() instanceof AtomicRole && headAtom.getDLPredicate() instanceof AtomicRole) {
+                Term argument0=bodyAtom.getArgument(0);
+                Term argument1=bodyAtom.getArgument(1);
+                return argument0 instanceof Variable && argument1 instanceof Variable && !argument0.equals(argument1) && argument0.equals(headAtom.getArgument(0))  && argument1.equals(headAtom.getArgument(1));
+            }
+        }
+        return false;
+    }
+    public boolean isAtomicRoleInverseInclusion() {
+        if (m_bodyAtoms.length==1 && m_headAtoms.length==1) {
+            Atom bodyAtom=m_bodyAtoms[0];
+            Atom headAtom=m_headAtoms[0];
+            if (bodyAtom.getArity()==2 && headAtom.getArity()==2 && bodyAtom.getDLPredicate() instanceof AtomicRole && headAtom.getDLPredicate() instanceof AtomicRole) {
+                Term argument0=bodyAtom.getArgument(0);
+                Term argument1=bodyAtom.getArgument(1);
+                return argument0 instanceof Variable && argument1 instanceof Variable && !argument0.equals(argument1) && argument0.equals(headAtom.getArgument(1))  && argument1.equals(headAtom.getArgument(0));
+            }
+        }
+        return false;
     }
     public boolean isFunctionalityAxiom() {
-        if (getBodyLength()==2 && getHeadLength()==1) {
+        if (m_bodyAtoms.length==2 && m_headAtoms.length==1) {
             DLPredicate atomicRole=getBodyAtom(0).getDLPredicate();
             if (atomicRole instanceof AtomicRole) {
                 if (getBodyAtom(1).getDLPredicate().equals(atomicRole) && (getHeadAtom(0).getDLPredicate() instanceof AnnotatedEquality)) {
@@ -144,9 +170,6 @@ public class DLClause implements Serializable {
         }
         return false;
     }
-    public ClauseType getClauseType() {
-        return m_clauseType;
-    }
     public String toString(Prefixes prefixes) {
         StringBuffer buffer=new StringBuffer();
         for (int headIndex=0;headIndex<m_headAtoms.length;headIndex++) {
@@ -168,7 +191,7 @@ public class DLClause implements Serializable {
 
     protected static InterningManager<DLClause> s_interningManager=new InterningManager<DLClause>() {
         protected boolean equal(DLClause object1,DLClause object2) {
-            if (object1.m_clauseType!=object2.m_clauseType || object1.m_headAtoms.length!=object2.m_headAtoms.length || object1.m_bodyAtoms.length!=object2.m_bodyAtoms.length)
+            if (object1.m_headAtoms.length!=object2.m_headAtoms.length || object1.m_bodyAtoms.length!=object2.m_bodyAtoms.length)
                 return false;
             for (int index=object1.m_headAtoms.length-1;index>=0;--index)
                 if (object1.m_headAtoms[index]!=object2.m_headAtoms[index])
@@ -179,7 +202,7 @@ public class DLClause implements Serializable {
             return true;
         }
         protected int getHashCode(DLClause object) {
-            int hashCode=object.m_clauseType.hashCode();
+            int hashCode=0;
             for (int index=object.m_bodyAtoms.length-1;index>=0;--index)
                 hashCode+=object.m_bodyAtoms[index].hashCode();
             for (int index=object.m_headAtoms.length-1;index>=0;--index)
@@ -188,7 +211,7 @@ public class DLClause implements Serializable {
         }
     };
 
-    public static DLClause create(Atom[] headAtoms,Atom[] bodyAtoms,ClauseType clauseType) {
-        return s_interningManager.intern(new DLClause(headAtoms,bodyAtoms,clauseType));
+    public static DLClause create(Atom[] headAtoms,Atom[] bodyAtoms) {
+        return s_interningManager.intern(new DLClause(headAtoms,bodyAtoms));
     }
 }

@@ -31,7 +31,6 @@ import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.DLClause;
-import org.semanticweb.HermiT.model.DLClause.ClauseType;
 import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.model.Equality;
 import org.semanticweb.HermiT.model.InverseRole;
@@ -73,7 +72,7 @@ public class BlockingValidator {
         m_ternaryRetrieval2Bound=m_extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { false,false,true }, ExtensionTable.View.TOTAL);
         m_dlClauseInfos=new ArrayList<DLClauseInfo>();
         for (DLClause dlClause : dlClauses) {
-            if (dlClause.getClauseType()==ClauseType.CONCEPT_INCLUSION) {
+            if (dlClause.isAtomicConceptInclusion()) {
                 DLClauseInfo clauseInfo=new DLClauseInfo(dlClause,m_extensionManager);
                 if (clauseInfo.m_yNodes.length>0 || clauseInfo.m_zConcepts.length>0)
                     m_dlClauseInfos.add(clauseInfo);

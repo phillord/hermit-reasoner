@@ -218,11 +218,9 @@ public final class Tableau implements Serializable {
         boolean hasBottomObjectProperty=(permanentHasBottomObjectProperty || (m_additionalDLOntology!=null && m_additionalDLOntology.containsObjectRole(AtomicRole.BOTTOM_OBJECT_ROLE)));
         if (!additionalDLOntology.getAllDescriptionGraphs().isEmpty() || (additionalDLOntology.hasInverseRoles() && !hasInverseRoles) || (additionalDLOntology.hasNominals() && !hasNominals) || (!additionalDLOntology.isHorn() && isHorn) || (hasBottomObjectProperty && !permanentHasBottomObjectProperty))
             return false;
-        for (DLClause dlClause : additionalDLOntology.getDLClauses()) {
-            DLClause.ClauseType clauseType=dlClause.getClauseType();
-            if (clauseType==DLClause.ClauseType.OBJECT_PROPERTY_INCLUSION || clauseType==DLClause.ClauseType.INVERSE_OBJECT_PROPERTY_INCLUSION || dlClause.isFunctionalityAxiom() || dlClause.isInverseFunctionalityAxiom())
+        for (DLClause dlClause : additionalDLOntology.getDLClauses())
+            if (dlClause.isAtomicRoleInclusion() || dlClause.isAtomicRoleInverseInclusion() || dlClause.isFunctionalityAxiom() || dlClause.isInverseFunctionalityAxiom())
                 return false;
-        }
         return true;
     }
     public void setAdditionalDLOntology(DLOntology additionalDLOntology) {
