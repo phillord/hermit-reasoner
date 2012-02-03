@@ -175,22 +175,22 @@ public class ReducedABoxOnlyClausification extends OWLAxiomVisitorAdapter {
         Constant targetValue=getConstant(object.getObject());
         m_negativeFacts.add(getRoleAtom(object.getProperty(),getIndividual(object.getSubject()),targetValue));
     }
-    protected Constant getConstant(OWLLiteral lit) {
+    protected Constant getConstant(OWLLiteral literal) {
         try {
-            if (lit.isRDFPlainLiteral()) {
-                if (lit.hasLang())
-                    return Constant.create(lit.getLiteral()+"@"+lit.getLang(),Prefixes.s_semanticWebPrefixes.get("rdf")+"PlainLiteral");
+            if (literal.isRDFPlainLiteral()) {
+                if (literal.hasLang())
+                    return Constant.create(literal.getLiteral()+"@"+literal.getLang(),Prefixes.s_semanticWebPrefixes.get("rdf")+"PlainLiteral");
                 else
-                    return Constant.create(lit.getLiteral()+"@",Prefixes.s_semanticWebPrefixes.get("rdf")+"PlainLiteral");
+                    return Constant.create(literal.getLiteral()+"@",Prefixes.s_semanticWebPrefixes.get("rdf")+"PlainLiteral");
             }
             else
-                return Constant.create(lit.getLiteral(),lit.getDatatype().getIRI().toString());
+                return Constant.create(literal.getLiteral(),literal.getDatatype().getIRI().toString());
         }
         catch (UnsupportedDatatypeException e) {
             if (m_ignoreUnsupportedDatatypes) {
                 if (m_warningMonitor!=null)
-                    m_warningMonitor.warning("Ignoring unsupported datatype '"+lit.toString()+"'.");
-                return Constant.createAnonymous(lit.getLiteral());
+                    m_warningMonitor.warning("Ignoring unsupported datatype '"+literal.toString()+"'.");
+                return Constant.createAnonymous(literal.getLiteral());
             }
             else
                 throw e;
