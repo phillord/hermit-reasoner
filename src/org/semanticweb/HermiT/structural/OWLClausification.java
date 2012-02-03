@@ -293,12 +293,12 @@ public class OWLClausification {
         }
         else
             throw new IllegalStateException("Internal error: invalid normal form.");
-        int y_ind=1;
+        int yIndex=1;
         // object properties always go to the body
         for (OWLObjectPropertyExpression p : object.getObjectPropertyExpressions()) {
             Variable y;
-            y=Variable.create("Y"+y_ind);
-            y_ind++;
+            y=Variable.create("Y"+yIndex);
+            yIndex++;
             bodyAtoms.add(getRoleAtom(p,X1,y));
             bodyAtoms.add(getRoleAtom(p,X2,y));
             // also the key criteria are named in case of object properties
@@ -308,12 +308,12 @@ public class OWLClausification {
         // the head gets an atom asserting inequality between that data values
         for (OWLDataPropertyExpression d : object.getDataPropertyExpressions()) {
             Variable y;
-            y=Variable.create("Y"+y_ind);
-            y_ind++;
+            y=Variable.create("Y"+yIndex);
+            yIndex++;
             bodyAtoms.add(getRoleAtom(d,X1,y));
             Variable y2;
-            y2=Variable.create("Y"+y_ind);
-            y_ind++;
+            y2=Variable.create("Y"+yIndex);
+            yIndex++;
             bodyAtoms.add(getRoleAtom(d,X2,y2));
             headAtoms.add(Atom.create(Inequality.INSTANCE,y,y2));
         }
