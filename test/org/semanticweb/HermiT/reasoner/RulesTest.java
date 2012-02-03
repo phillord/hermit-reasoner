@@ -38,7 +38,6 @@ public class RulesTest extends AbstractReasonerTest {
             + ")";
         loadOntologyWithAxioms(axioms);
         createReasoner();
-//        System.out.println(m_reasoner.getDLOntology());
 
         assertABoxSatisfiable(false);
     }
@@ -68,6 +67,51 @@ public class RulesTest extends AbstractReasonerTest {
         createReasoner();
 
         assertABoxSatisfiable(true);
+    }
+
+    public void testSameAsInBodyWithDataProperties() throws Exception {
+        String axioms =
+              "Declaration(DataProperty(:r))"+LB
+            + "Declaration(DataProperty(:s))"+LB
+            + "Declaration(Class(:u))"+LB
+            + "DataPropertyAssertion(:r :a \"2\"^^xsd:integer)"+LB
+            + "ClassAssertion(DataSomeValuesFrom(:s DatatypeRestriction(xsd:integer xsd:minInclusive \"2\"^^xsd:integer xsd:maxInclusive \"2\"^^xsd:integer)) :a)"+LB
+            + "ClassAssertion(ObjectComplementOf(:u) :a)"+LB
+            // r(x,y1) /\ s(x,y2) /\ y1==y2 -> u(x)
+            + "DLSafeRule("+LB
+            + "  Body("+LB
+            + "     DataPropertyAtom(:r Variable(:x) Variable(:y1))"+LB
+            + "     DataPropertyAtom(:s Variable(:x) Variable(:y2))"+LB
+            + "     SameIndividualAtom(Variable(:y1) Variable(:y2))"+LB
+            + "  )"+LB
+            + "  Head(ClassAtom(:u Variable(:x)))"+LB
+            + ")";
+        loadOntologyWithAxioms(axioms);
+        createReasoner();
+
+        assertABoxSatisfiable(false);
+    }
+
+    public void testDataPropertiesInBody() throws Exception {
+        String axioms =
+              "Declaration(DataProperty(:r))"+LB
+            + "Declaration(DataProperty(:s))"+LB
+            + "Declaration(Class(:u))"+LB
+            + "DataPropertyAssertion(:r :a \"2\"^^xsd:integer)"+LB
+            + "ClassAssertion(DataSomeValuesFrom(:s DatatypeRestriction(xsd:integer xsd:minInclusive \"2\"^^xsd:integer xsd:maxInclusive \"2\"^^xsd:integer)) :a)"+LB
+            + "ClassAssertion(ObjectComplementOf(:u) :a)"+LB
+            // r(x,y) /\ s(x,y) -> u(x)
+            + "DLSafeRule("+LB
+            + "  Body("+LB
+            + "     DataPropertyAtom(:r Variable(:x) Variable(:y))"+LB
+            + "     DataPropertyAtom(:s Variable(:x) Variable(:y))"+LB
+            + "  )"+LB
+            + "  Head(ClassAtom(:u Variable(:x)))"+LB
+            + ")";
+        loadOntologyWithAxioms(axioms);
+        createReasoner();
+
+        assertABoxSatisfiable(false);
     }
 
     public void testIndividualsInRules() throws Exception {
