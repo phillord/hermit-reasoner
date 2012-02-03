@@ -19,9 +19,7 @@ package org.semanticweb.HermiT.structural;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import org.semanticweb.owlapi.model.OWLClass;
@@ -29,7 +27,6 @@ import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLDataPropertyExpression;
 import org.semanticweb.owlapi.model.OWLDataRange;
-import org.semanticweb.owlapi.model.OWLDatatype;
 import org.semanticweb.owlapi.model.OWLHasKeyAxiom;
 import org.semanticweb.owlapi.model.OWLIndividualAxiom;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
@@ -57,7 +54,6 @@ public class OWLAxioms {
     public final Collection<OWLIndividualAxiom> m_facts;
     public final Set<OWLHasKeyAxiom> m_hasKeys;
     public final Set<String> m_definedDatatypesIRIs; // contains custom datatypes from DatatypeDefinition axioms
-    public final Map<OWLDataProperty,OWLDatatype> m_dps2ranges;
     public final Collection<DisjunctiveRule> m_rules;
 
     public OWLAxioms() {
@@ -80,7 +76,6 @@ public class OWLAxioms {
         m_facts=new HashSet<OWLIndividualAxiom>();
         m_hasKeys=new HashSet<OWLHasKeyAxiom>();
         m_definedDatatypesIRIs=new HashSet<String>();
-        m_dps2ranges=new HashMap<OWLDataProperty, OWLDatatype>();
         m_rules=new HashSet<DisjunctiveRule>();
     }
 

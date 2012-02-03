@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -74,20 +74,19 @@ public class OWLAxiomsExpressivity extends OWLAxiomVisitorAdapter implements OWL
             visitProperty(property);
         for (OWLObjectPropertyExpression property : axioms.m_asymmetricObjectProperties)
             visitProperty(property);
-        if (!axioms.m_dataProperties.isEmpty() 
-        		|| !axioms.m_disjointDataProperties.isEmpty() 
+        if (!axioms.m_dataProperties.isEmpty()
+        		|| !axioms.m_disjointDataProperties.isEmpty()
         		|| !axioms.m_dataPropertyInclusions.isEmpty()
         		|| !axioms.m_dataRangeInclusions.isEmpty()
-        		|| !axioms.m_definedDatatypesIRIs.isEmpty()
-        		|| !axioms.m_dps2ranges.isEmpty())
+        		|| !axioms.m_definedDatatypesIRIs.isEmpty())
             m_hasDatatypes=true;
         for (OWLIndividualAxiom fact : axioms.m_facts)
             fact.accept(this);
         m_hasSWRLRules=!axioms.m_rules.isEmpty();
     }
-    
+
     protected void visitProperty(OWLObjectPropertyExpression object) {
-        if (object.getSimplified().isAnonymous()) 
+        if (object.getSimplified().isAnonymous())
             m_hasInverseRoles=true;
     }
 

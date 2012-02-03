@@ -20,12 +20,10 @@ package org.semanticweb.HermiT.structural;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.semanticweb.HermiT.Configuration;
@@ -212,7 +210,7 @@ public class OWLClausification {
                     dlClauses.add(dlClause);
                 }
         DataRangeConverter dataRangeConverter=new DataRangeConverter(m_configuration.warningMonitor,axioms.m_definedDatatypesIRIs,allUnknownDatatypeRestrictions,m_configuration.ignoreUnsupportedDatatypes);
-        NormalizedAxiomClausifier clausifier=new NormalizedAxiomClausifier(dataRangeConverter,positiveFacts,factory,axioms.m_dps2ranges);
+        NormalizedAxiomClausifier clausifier=new NormalizedAxiomClausifier(dataRangeConverter,positiveFacts,factory);
         for (OWLClassExpression[] inclusion : axioms.m_conceptInclusions) {
             for (OWLClassExpression description : inclusion)
                 description.accept(clausifier);
@@ -383,38 +381,19 @@ public class OWLClausification {
     }
 
     protected static class NormalizedAxiomClausifier implements OWLClassExpressionVisitor {
-        public static Map<String,Long> dt2maxRangeCardinality;
         protected final DataRangeConverter m_dataRangeConverter;
         protected final List<Atom> m_headAtoms;
         protected final List<Atom> m_bodyAtoms;
         protected final Set<Atom> m_positiveFacts;
         protected final OWLDataFactory m_factory;
-        protected final Map<OWLDataProperty,OWLDatatype> m_dps2ranges;
         protected int m_yIndex;
         protected int m_zIndex;
-        static {
-            dt2maxRangeCardinality=new HashMap<String,Long>();
-            dt2maxRangeCardinality.put(Prefixes.s_semanticWebPrefixes.get("xsd")+"int",((long)(Integer.MAX_VALUE)+(long)(Integer.MAX_VALUE)+1l));
-            dt2maxRangeCardinality.put(Prefixes.s_semanticWebPrefixes.get("xsd")+"short",((long)(Short.MAX_VALUE)+(long)(Short.MAX_VALUE)+1l));
-            dt2maxRangeCardinality.put(Prefixes.s_semanticWebPrefixes.get("xsd")+"byte",((long)(Byte.MAX_VALUE)+(long)(Byte.MAX_VALUE)+2l));
-            dt2maxRangeCardinality.put(Prefixes.s_semanticWebPrefixes.get("xsd")+"unsignedInt",new Long("4294967296"));
-            dt2maxRangeCardinality.put(Prefixes.s_semanticWebPrefixes.get("xsd")+"unsignedShort",new Long("65536"));
-            dt2maxRangeCardinality.put(Prefixes.s_semanticWebPrefixes.get("xsd")+"unsignedByte",new Long("256"));
-            // long >= Long.MIN_VALUE - <= Long.MAX_VALUE
-            // int >= Integer.MIN_VALUE - <= Integer.MAX_VALUE
-            // short >= Short.MIN_VALUE - <= Short.MAX_VALUE
-            // byte >= Byte.MIN_VALUE - <= Byte.MAX_VALUE
-            // unsignedLong >= 0 - <= new BigInteger("18446744073709551615")
-            // unsignedInt >= 0 - <= 4294967295L
-            // unsignedShort >= 0 - <= 65535
-            // unsignedByte >= 0 - <= 255
-        }
-        public NormalizedAxiomClausifier(DataRangeConverter dataRangeConverter,Set<Atom> positiveFacts,OWLDataFactory factory,Map<OWLDataProperty,OWLDatatype> dps2ranges) {
+
+        public NormalizedAxiomClausifier(DataRangeConverter dataRangeConverter,Set<Atom> positiveFacts,OWLDataFactory factory) {
             m_dataRangeConverter=dataRangeConverter;
             m_headAtoms=new ArrayList<Atom>();
             m_bodyAtoms=new ArrayList<Atom>();
             m_positiveFacts=positiveFacts;
-            m_dps2ranges=dps2ranges;
             m_factory=factory;
         }
         protected DLClause getDLClause() {
@@ -648,20 +627,6 @@ public class OWLClausification {
         }
         public void visit(OWLDataMinCardinality object) {
             if (!object.getProperty().isOWLBottomDataProperty() || object.getCardinality()==0) {
-                OWLDataProperty dp=object.getProperty().asOWLDataProperty();
-                OWLDataRange dr=object.getFiller();
-                int n=object.getCardinality();
-
-                if (m_dps2ranges.containsKey(dp)) {
-                    String dt=m_dps2ranges.get(dp).getIRI().toString();
-                    if (dt2maxRangeCardinality.containsKey(dt) && n>dt2maxRangeCardinality.get(dt))
-                        return;
-                }
-                if (dr.isDatatype()) {
-                    String dt=dr.asOWLDatatype().getIRI().toString();
-                    if (dt2maxRangeCardinality.containsKey(dt) && n>dt2maxRangeCardinality.get(dt))
-                        return;
-                }
                 AtomicRole atomicRole=getAtomicRole(object.getProperty());
                 LiteralDataRange literalRange=m_dataRangeConverter.convertDataRange(object.getFiller());
                 AtLeastDataRange atLeast=AtLeastDataRange.create(object.getCardinality(),atomicRole,literalRange);

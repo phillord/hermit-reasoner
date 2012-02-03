@@ -630,10 +630,6 @@ public class OWLNormalization {
             checkTopDataPropertyUse(dataProperty,axiom);
             OWLDataAllValuesFrom allPropertyRange=m_factory.getOWLDataAllValuesFrom(dataProperty,positive(axiom.getRange()));
             m_classExpressionInclusionsAsDisjunctions.add(new OWLClassExpression[] { allPropertyRange });
-            if (axiom.getRange().isDatatype()) {
-                // used to syntactically check range cardinalities to optimize some cases of large numbers in number restrictions
-                m_axioms.m_dps2ranges.put(dataProperty.asOWLDataProperty(),axiom.getRange().asOWLDatatype());
-            }
         }
         public void visit(OWLFunctionalDataPropertyAxiom axiom) {
             OWLDataPropertyExpression dataProperty=axiom.getProperty();
