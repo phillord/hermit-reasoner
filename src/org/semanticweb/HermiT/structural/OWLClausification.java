@@ -481,9 +481,6 @@ public class OWLClausification {
                 Atom roleAtom=getRoleAtom(objectProperty,X,X);
                 m_bodyAtoms.add(roleAtom);
             }
-            /**
-             * gstoil modification. This situation is now possible with automata. Since the translation says that for each final state f add inclusion f -> C. If C is a nominal and comes from a concept with negative polarity then subsumption is actually f-> \neg {o} which was not a valid HermiT normal form.
-             */
             else if (description instanceof OWLObjectOneOf && ((OWLObjectOneOf)description).getIndividuals().size()==1) {
                 OWLIndividual individual=((OWLObjectOneOf)description).getIndividuals().iterator().next();
                 m_bodyAtoms.add(Atom.create(getConceptForNominal(individual),X));
