@@ -79,6 +79,8 @@ public class InstanceManager {
     protected final boolean m_usesInverseRoles;
     protected final Map<Individual, Node> m_nodesForIndividuals;
     protected final Map<Node,Individual> m_individualsForNodes;
+    protected final Map<Node,Set<Node>> m_canonicalNodeToDetMergedNodes;
+    protected final Map<Node,Set<Node>> m_canonicalNodeToNonDetMergedNodes;
     protected boolean m_isInconsistent;
     protected boolean m_realizationCompleted;
     protected boolean m_roleRealizationCompleted;
@@ -117,6 +119,8 @@ public class InstanceManager {
                 m_interruptFlag.checkInterrupt();
             }
             m_individualsForNodes=new HashMap<Node,Individual>();
+            m_canonicalNodeToDetMergedNodes=new HashMap<Node,Set<Node>>();
+            m_canonicalNodeToNonDetMergedNodes=new HashMap<Node,Set<Node>>();
             m_individualToPossibleEquivalenceClass=null;
 
             m_topConcept=AtomicConcept.THING;
@@ -508,10 +512,9 @@ public class InstanceManager {
             m_interruptFlag.startTask();
             try {
                 initializeIndividualsForNodes();
-                if (!m_classesInitialised) {
+                if (!m_classesInitialised)
                     // nothing has been read-off yet
                     initializeSameAs();
-                }
                 completedSteps=readOffPropertyInstancesByIndividual(tableau,m_individualsForNodes, monitor, completedSteps, steps, startIndividualIndex);
                 if (m_currentIndividualIndex>=m_individuals.length-1) {
                     // we are done now with everything
@@ -533,8 +536,10 @@ public class InstanceManager {
             Individual ind=m_individuals[index];
             Node nodeForIndividual=m_nodesForIndividuals.get(ind);
             if (startIndividualIndex==0) {
-                // read of concept instances and normal role instances only once, we don't slice that
-                readOffPropertyInstances(ind,nodeForIndividual);
+                // read of normal role instances only once, we don't slice that
+                // if the node was merged, we don't read off anything, this is handled, when we process the canonical node for the merged one
+                if (!nodeForIndividual.isMerged())
+                    readOffPropertyInstances(nodeForIndividual);
                 completedSteps++;
                 if (monitor!=null)
                     monitor.reasonerTaskProgressChanged(completedSteps,steps);
@@ -550,6 +555,26 @@ public class InstanceManager {
         for (Individual ind : m_individuals) {
             Node node=m_nodesForIndividuals.get(ind);
             m_individualsForNodes.put(node, ind);
+            if (node.isMerged()) {
+                Node canonicalNode=node.getCanonicalNode();
+                if (node.getCanonicalNodeDependencySet()==null) {
+                    // deterministically merged
+                    Set<Node> merged=m_canonicalNodeToDetMergedNodes.get(canonicalNode);
+                    if (merged==null) {
+                        merged=new HashSet<Node>();
+                        m_canonicalNodeToDetMergedNodes.put(canonicalNode,merged);
+                    }
+                    merged.add(node);
+                } else {
+                    // nondeterministically merged
+                    Set<Node> merged=m_canonicalNodeToNonDetMergedNodes.get(canonicalNode);
+                    if (merged==null) {
+                        merged=new HashSet<Node>();
+                        m_canonicalNodeToNonDetMergedNodes.put(canonicalNode,merged);
+                    }
+                    merged.add(node);
+                }
+            }
             m_interruptFlag.checkInterrupt();
         }
     }
@@ -609,39 +634,61 @@ public class InstanceManager {
         }
         return hasBeenAdded;
     }
-    protected void readOffPropertyInstances(Individual ind, Node nodeForIndividual) {
-        m_ternaryRetrieval1Bound.getBindingsBuffer()[1]=nodeForIndividual.getCanonicalNode();
+    protected void readOffPropertyInstances(Node nodeForIndividual) {
+        // nodeForIndividual is always a canonical node
+        m_ternaryRetrieval1Bound.getBindingsBuffer()[1]=nodeForIndividual;
         m_ternaryRetrieval1Bound.open();
         Object[] tupleBuffer=m_ternaryRetrieval1Bound.getTupleBuffer();
         while (!m_ternaryRetrieval1Bound.afterLast()) {
             Object roleObject=tupleBuffer[0];
-            if (roleObject instanceof AtomicRole) {
+            Node successorNode=((Node)tupleBuffer[2]);
+            if (roleObject instanceof AtomicRole && !successorNode.isMerged() && successorNode.getNodeType()==NodeType.NAMED_NODE && m_individualsForNodes.containsKey(successorNode) && successorNode.isActive()) {
                 AtomicRole atomicrole=(AtomicRole)roleObject;
                 if (!atomicrole.equals(AtomicRole.TOP_OBJECT_ROLE) && m_roleElementManager.m_roleToElement.containsKey(atomicrole)) {
                     // the latter condition ensures that we do not accidentally try and read of something for data properties
                     RoleElement representative=m_currentRoleHierarchy.getNodeForElement(m_roleElementManager.getRoleElement(atomicrole)).getRepresentative();
-                    Node node2=((Node)tupleBuffer[2]).getCanonicalNode();
-                    for (Node possiblyMergedSuccessor : m_individualsForNodes.keySet()) {
-                        if (possiblyMergedSuccessor.isActive()
-                                && possiblyMergedSuccessor.getNodeType()==NodeType.NAMED_NODE
-                                && possiblyMergedSuccessor.getCanonicalNode()==node2) {
-                            Individual successor=m_individualsForNodes.get(possiblyMergedSuccessor);
-                            Set<Individual> equivalents=m_individualToEquivalenceClass.get(successor);
-                            if (m_ternaryRetrieval1Bound.getDependencySet().isEmpty() && possiblyMergedSuccessor.getCanonicalNodeDependencySet()==null)
-                                for (Individual equivToSuccessor : equivalents)
-                                    addKnownRoleInstance(representative, ind, equivToSuccessor);
-                            else {
+                    // determine equivalent and possibly equivalent named nodes for the node
+                    Set<Node> equivalentToNode=m_canonicalNodeToDetMergedNodes.get(nodeForIndividual);
+                    if (equivalentToNode==null)
+                        equivalentToNode=new HashSet<Node>();
+                    equivalentToNode.add(nodeForIndividual);
+                    Set<Node> possiblyEquivalentToNode=m_canonicalNodeToNonDetMergedNodes.get(nodeForIndividual);
+                    if (possiblyEquivalentToNode==null)
+                        possiblyEquivalentToNode=new HashSet<Node>();
+                    // determine equivalent and possibly equivalent named nodes for the successor node
+                    Set<Node> equivalentToSuccessor=m_canonicalNodeToDetMergedNodes.get(successorNode);
+                    if (equivalentToSuccessor==null)
+                        equivalentToSuccessor=new HashSet<Node>();
+                    equivalentToSuccessor.add(successorNode);
+                    Set<Node> possiblyEquivalentToSuccessor=m_canonicalNodeToNonDetMergedNodes.get(successorNode);
+                    if (possiblyEquivalentToSuccessor==null)
+                        possiblyEquivalentToSuccessor=new HashSet<Node>();
+                    
+                    for (Node sourceNode : equivalentToNode) {
+                        Individual sourceIndividual=m_individualsForNodes.get(sourceNode);
+                        for (Node targetNode : equivalentToSuccessor) {
+                            Individual targetIndividual=m_individualsForNodes.get(targetNode);
+                            if (m_ternaryRetrieval1Bound.getDependencySet().isEmpty()) {
+                                addKnownRoleInstance(representative, sourceIndividual, targetIndividual);
+                            } else {
                                 m_readingOffFoundPossiblePropertyInstance=true;
-                                for (Individual equivToSuccessor : equivalents)
-                                    addPossibleRoleInstance(representative, ind, equivToSuccessor);
+                                addPossibleRoleInstance(representative, sourceIndividual, targetIndividual);
                             }
-                            Set<Set<Individual>> possiblyEquivalents=m_individualToPossibleEquivalenceClass.get(equivalents);
-                            if (possiblyEquivalents!=null) {
-                                m_readingOffFoundPossiblePropertyInstance=true;
-                                for (Set<Individual> possibleSuccessors : possiblyEquivalents)
-                                    for (Individual possibleSuccessor : possibleSuccessors)
-                                        addPossibleRoleInstance(representative, ind, possibleSuccessor);
-                            }
+                        }
+                        for (Node targetNode : possiblyEquivalentToSuccessor) {
+                            Individual targetIndividual=m_individualsForNodes.get(targetNode);
+                            m_readingOffFoundPossiblePropertyInstance=true;
+                            addPossibleRoleInstance(representative, sourceIndividual, targetIndividual);
+                        }
+                    }
+
+                    for (Node sourceNode : possiblyEquivalentToNode) {
+                        Individual sourceIndividual=m_individualsForNodes.get(sourceNode);
+                        possiblyEquivalentToSuccessor.addAll(equivalentToSuccessor);
+                        for (Node targetNode : possiblyEquivalentToSuccessor) {
+                            Individual targetIndividual=m_individualsForNodes.get(targetNode);
+                            m_readingOffFoundPossiblePropertyInstance=true;
+                            addPossibleRoleInstance(representative, sourceIndividual, targetIndividual);
                         }
                     }
                 }
@@ -661,13 +708,29 @@ public class InstanceManager {
             while (!m_binaryRetrieval0Bound.afterLast()) {
                 Node node=(Node)tupleBuffer[1];
                 if (node.isActive() && node.getNodeType()==NodeType.NAMED_NODE && m_individualsForNodes.containsKey(node)) {
-                    Individual successor=m_individualsForNodes.get(node.getCanonicalNode());
                     RoleElement representative=m_currentRoleHierarchy.getNodeForElement(m_roleElementManager.getRoleElement(atomicRole)).getRepresentative();
-                    if (m_binaryRetrieval0Bound.getDependencySet().isEmpty())
-                        addKnownRoleInstance(representative, ind, successor);
-                    else {
-                        addPossibleRoleInstance(representative, ind, successor);
+                    //Individual successor=m_individualsForNodes.get(node.getCanonicalNode());
+                    // determine equivalent and possibly equivalent named nodes for the successor node
+                    Set<Node> equivalentToSuccessor=m_canonicalNodeToDetMergedNodes.get(node);
+                    if (equivalentToSuccessor==null)
+                        equivalentToSuccessor=new HashSet<Node>();
+                    equivalentToSuccessor.add(node);
+                    Set<Node> possiblyEquivalentToSuccessor=m_canonicalNodeToNonDetMergedNodes.get(node);
+                    if (possiblyEquivalentToSuccessor==null)
+                        possiblyEquivalentToSuccessor=new HashSet<Node>();
+                    for (Node targetNode : equivalentToSuccessor) {
+                        Individual targetIndividual=m_individualsForNodes.get(targetNode);
+                        if (m_binaryRetrieval0Bound.getDependencySet().isEmpty()) {
+                            addKnownRoleInstance(representative, ind, targetIndividual);
+                        } else {
+                            m_readingOffFoundPossiblePropertyInstance=true;
+                            addPossibleRoleInstance(representative, ind, targetIndividual);
+                        }
+                    }
+                    for (Node targetNode : possiblyEquivalentToSuccessor) {
+                        Individual targetIndividual=m_individualsForNodes.get(targetNode);
                         m_readingOffFoundPossiblePropertyInstance=true;
+                        addPossibleRoleInstance(representative, ind, targetIndividual);
                     }
                 }
                 m_interruptFlag.checkInterrupt();
