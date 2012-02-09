@@ -482,6 +482,8 @@ public class InstanceManager {
                     m_realizationCompleted=true;
                 m_classesInitialised=true;
                 m_individualsForNodes.clear();
+                m_canonicalNodeToDetMergedNodes.clear();
+                m_canonicalNodeToNonDetMergedNodes.clear();
             } finally {
                 m_interruptFlag.endTask();
             }
