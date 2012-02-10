@@ -692,9 +692,6 @@ public class CommandLine {
                         else if (arg.toLowerCase().equals("reuse")) {
                             config.existentialStrategyType=Configuration.ExistentialStrategyType.INDIVIDUAL_REUSE;
                         }
-                        else if (arg.toLowerCase().equals("optimal")) {
-                            config.existentialStrategyType=Configuration.ExistentialStrategyType.OPTIMAL;
-                        }
                         else
                             throw new UsageException("unknown existential strategy type '"+arg+"'; supported values are 'creation', 'el', and 'reuse'");
                     }

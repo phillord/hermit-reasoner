@@ -163,14 +163,7 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
          * For EL ontologies this existential strategy can be set to use a deterministic version of individual
          * reuse that behaves similar to EL-style algorithms.
          */
-        EL,
-        /**
-         * The optimal strategy is determined as follows: if the ontology contains nominals, then individual reuse
-         * will be employed. If the ontology does not have nominals, then the creation order strategy will be used
-         * because in that case a blockers cache can be used, which is very good for the classification performance,
-         * but not compatible with individual reuse.
-         */
-        OPTIMAL
+        EL
     }
 
     /**
@@ -246,7 +239,7 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
         directBlockingType=Configuration.DirectBlockingType.OPTIMAL;
         blockingStrategyType=Configuration.BlockingStrategyType.OPTIMAL;
         blockingSignatureCacheType=Configuration.BlockingSignatureCacheType.CACHED;
-        existentialStrategyType=Configuration.ExistentialStrategyType.OPTIMAL;
+        existentialStrategyType=Configuration.ExistentialStrategyType.CREATION_ORDER;
         ignoreUnsupportedDatatypes=false;
         monitor=null;
         parameters=new HashMap<String,Object>();

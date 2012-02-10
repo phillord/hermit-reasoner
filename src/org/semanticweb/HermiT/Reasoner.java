@@ -1895,9 +1895,8 @@ public class Reasoner implements OWLReasoner {
         DirectBlockingChecker directBlockingChecker=null;
         switch (configuration.directBlockingType) {
         case OPTIMAL:
-            if ((configuration.blockingStrategyType==BlockingStrategyType.OPTIMAL && hasNominals) || configuration.blockingStrategyType==BlockingStrategyType.SIMPLE_CORE || configuration.blockingStrategyType==BlockingStrategyType.COMPLEX_CORE) {
+            if ((configuration.blockingStrategyType==BlockingStrategyType.OPTIMAL && hasNominals) || configuration.blockingStrategyType==BlockingStrategyType.SIMPLE_CORE || configuration.blockingStrategyType==BlockingStrategyType.COMPLEX_CORE)
                 directBlockingChecker=new ValidatedSingleDirectBlockingChecker(hasInverseRoles);
-            }
             else if (hasInverseRoles)
                 directBlockingChecker=new PairWiseDirectBlockingChecker();
             else
@@ -1959,7 +1958,6 @@ public class Reasoner implements OWLReasoner {
 
         ExistentialExpansionStrategy existentialsExpansionStrategy=null;
         switch (configuration.existentialStrategyType) {
-        case OPTIMAL:
         case CREATION_ORDER:
             existentialsExpansionStrategy=new CreationOrderStrategy(blockingStrategy);
             break;
