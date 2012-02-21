@@ -1973,13 +1973,13 @@ public class Reasoner implements OWLReasoner {
 
         return new Tableau(interruptFlag,tableauMonitor,existentialsExpansionStrategy,configuration.useDisjunctionLearning,permanentDLOntology,additionalDLOntology,configuration.parameters);
     }
-    protected static Hierarchy<AtomicConcept> classifyAtomicConcepts(Tableau tableau,ClassificationProgressMonitor progressMonitor,AtomicConcept topElement,AtomicConcept bottomElement,Set<AtomicConcept> elements,boolean forceQuasiOrder) {
+    protected Hierarchy<AtomicConcept> classifyAtomicConcepts(Tableau tableau,ClassificationProgressMonitor progressMonitor,AtomicConcept topElement,AtomicConcept bottomElement,Set<AtomicConcept> elements,boolean forceQuasiOrder) {
         if (tableau.isDeterministic() && !forceQuasiOrder)
             return new DeterministicClassification(tableau,progressMonitor,topElement,bottomElement,elements).classify();
         else
             return new QuasiOrderClassification(tableau,progressMonitor,topElement,bottomElement,elements).classify();
     }
-    protected static Hierarchy<AtomicConcept> classifyAtomicConceptsForRoles(Tableau tableau,ClassificationProgressMonitor progressMonitor,AtomicConcept topElement,AtomicConcept bottomElement,Set<AtomicConcept> elements,boolean hasInverses,Map<Role,AtomicConcept> conceptsForRoles,Map<AtomicConcept,Role> rolesForConcepts,boolean forceQuasiOrder) {
+    protected Hierarchy<AtomicConcept> classifyAtomicConceptsForRoles(Tableau tableau,ClassificationProgressMonitor progressMonitor,AtomicConcept topElement,AtomicConcept bottomElement,Set<AtomicConcept> elements,boolean hasInverses,Map<Role,AtomicConcept> conceptsForRoles,Map<AtomicConcept,Role> rolesForConcepts,boolean forceQuasiOrder) {
         if (tableau.isDeterministic() && !forceQuasiOrder)
             return new DeterministicClassification(tableau,progressMonitor,topElement,bottomElement,elements).classify();
         else
