@@ -133,6 +133,14 @@ HermiT 1.3.4
 HermiT 1.3.5
 - Improved object property classification. Fixed a bug in the detection of clashes 
   involving InternalDatatype objects, and a bug in the instance manager.
-  
+HermiT 1.3.6
+- Improved performance of the instance manager for reading off property instances 
+  by avoiding double loops. Refactored the clausification of SWRL rules. Fixed a bug 
+  in instance manager to properly flush the additional ontology. Fixed a bug in the 
+  implementation of the rdf:PlainLiteral datatype. Fixed a bug in the flush() method 
+  to check whether the changes were relevant to the import closure of the root ontology. 
+  Fixed a problem with absolute IRIs that had <> around the string as officially required, 
+  which, however, causes problems in OWL API. Fixed a bug with property chain encoding.
+
   
   

@@ -6,7 +6,7 @@
     <!-- Note that on each released build, the ${updatefile} on the web site
          should be replaced, and the new version of the plugin should be
          posted at the (auto-generated) URL in that file. -->
-    <property name="version" value="1.3.5"/>
+    <property name="version" value="1.3.6"/>
 
     <!-- general info -->
     <property name="homepage" value="http://hermit-reasoner.com/"/>
@@ -314,15 +314,15 @@
 
     <target name="publish" depends="combined">
         <echo message="Publishing a new version of HermiT"/>
-        <input message="Enter a user name for edison:" addproperty="username" defaultvalue="${user.name}"/>
-        <input message="Enter ${username}'s password on edison: " addproperty="password"/>
-        <sshexec host="edison.comlab.ox.ac.uk" username="${username}" password="${password}" command="mkdir /data/hermit/download/${version}/" trust="yes"/>
-        <scp file="${builddir}/${ant.project.name}-${version}.zip" localTofile="${ant.project.name}.zip" todir="${username}:${password}@edison.comlab.ox.ac.uk:/data/hermit/download/${version}/" trust="yes"/>
-    	<scp file="${releasedir}/org.semanticweb.${ant.project.name}.jar" todir="${username}:${password}@edison.comlab.ox.ac.uk:/data/hermit/download/${version}/" trust="yes"/>
-    	<scp file="${releasedir}/readme.txt" todir="${username}:${password}@edison.comlab.ox.ac.uk:/data/hermit/download/${version}/" trust="yes"/>
-        <scp file="${builddir}/update.properties" todir="${username}:${password}@edison.comlab.ox.ac.uk:/data/hermit/protege-4-1-beta-update/" trust="yes"/>
-        <sshexec host="edison.comlab.ox.ac.uk" username="${username}" password="${password}" command="rm /data/hermit/download/current/HermiT.zip" trust="yes"/>
-        <sshexec host="edison.comlab.ox.ac.uk" username="${username}" password="${password}" command="ln -s  /data/hermit/download/${version}/HermiT.zip /data/hermit/download/current/HermiT.zip" trust="yes"/>
+        <input message="Enter a user name for linux:" addproperty="username" defaultvalue="${user.name}"/>
+        <input message="Enter ${username}'s password on linux: " addproperty="password"/>
+        <sshexec host="linux.cs.ox.ac.uk" username="${username}" password="${password}" command="mkdir /fs/website/research/themes/isg/tools/HermiT/download/${version}/" trust="yes"/>
+        <scp file="${builddir}/${ant.project.name}-${version}.zip" localTofile="${ant.project.name}.zip" todir="${username}:${password}@linux.cs.ox.ac.uk:/fs/website/research/themes/isg/tools/HermiT/download/${version}/" trust="yes"/>
+    	<scp file="${releasedir}/org.semanticweb.${ant.project.name}.jar" todir="${username}:${password}@linux.cs.ox.ac.uk:/fs/website/research/themes/isg/tools/HermiT/download/${version}/" trust="yes"/>
+    	<scp file="${releasedir}/readme.txt" todir="${username}:${password}@linux.cs.ox.ac.uk:/fs/website/research/themes/isg/tools/HermiT/download/${version}/" trust="yes"/>
+        <scp file="${builddir}/update.properties" todir="${username}:${password}@linux.cs.ox.ac.uk:/fs/website/research/themes/isg/tools/HermiT/protege-4-1-beta-update/" trust="yes"/>
+        <sshexec host="linux.cs.ox.ac.uk" username="${username}" password="${password}" command="rm /fs/website/research/themes/isg/tools/HermiT/download/current/HermiT.zip" trust="yes"/>
+        <sshexec host="linux.cs.ox.ac.uk" username="${username}" password="${password}" command="ln -s  /fs/website/research/themes/isg/tools/HermiT/download/${version}/HermiT.zip /fs/website/research/themes/isg/tools/HermiT/download/current/HermiT.zip" trust="yes"/>
     </target>
 
 	<!-- additionally -->
