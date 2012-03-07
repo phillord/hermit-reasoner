@@ -59,6 +59,9 @@ public class CountingMonitor extends TableauMonitorAdapter {
     protected int m_overallNumberOfBlockedNodes=0;
     protected int m_overallNumberOfTests=0;
     protected int m_overallNumberOfClashes=0;
+    protected int m_possibleInstancesTested=0;
+    protected int m_possibleInstancesInstances=0;
+    
     // validated blocking
     protected int m_overallInitialModelSize=0;
     protected int m_overallInitiallyBlocked=0;
@@ -88,6 +91,8 @@ public class CountingMonitor extends TableauMonitorAdapter {
         m_overallNumberOfBlockedNodes=0;
         m_overallNumberOfTests=0;
         m_overallNumberOfClashes=0;
+        m_possibleInstancesTested=0;
+        m_possibleInstancesInstances=0;
         m_overallInitialModelSize=0;
         m_overallInitiallyBlocked=0;
         m_overallInitiallyInvalid=0;
@@ -143,6 +148,13 @@ public class CountingMonitor extends TableauMonitorAdapter {
     }
     public void backtrackToFinished(BranchingPoint newCurrentBrancingPoint) {
         m_numberOfBacktrackings++;
+    }
+    public void possibleInstanceIsInstance() {
+        m_possibleInstancesTested++;
+        m_possibleInstancesInstances++;
+    }
+    public void possibleInstanceIsNotInstance() {
+        m_possibleInstancesTested++;
     }
     public void blockingValidationStarted() {
     	m_noValidations++;
@@ -246,6 +258,12 @@ public class CountingMonitor extends TableauMonitorAdapter {
 	public int getOverallNumberOfClashes() {
 		return m_overallNumberOfClashes;
 	}
+	public int getNumberOfPossibleInstancesTested() {
+        return m_possibleInstancesTested;
+    }
+	public int getNumberOfPossibleInstancesInstances() {
+        return m_possibleInstancesInstances;
+    }
 	// getters for overall blocking validation measurements
     public int getOverallInitialModelSize() {
         return m_overallInitialModelSize;
@@ -296,6 +314,11 @@ public class CountingMonitor extends TableauMonitorAdapter {
         if (m_testNo==0)
             return m_testNo;
         return getRounded(m_overallNumberOfClashes, m_testNo);
+    }
+    public double getPossiblesToInstances() {
+        if (m_possibleInstancesTested==0)
+            return 0;
+        return getRounded(m_possibleInstancesInstances,m_possibleInstancesTested);
     }
     // getters for average blocking validation measurements
     public double getAverageInitialModelSize() {

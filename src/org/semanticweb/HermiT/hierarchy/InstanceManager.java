@@ -44,6 +44,7 @@ import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.model.Inequality;
 import org.semanticweb.HermiT.model.InverseRole;
 import org.semanticweb.HermiT.model.Role;
+import org.semanticweb.HermiT.monitor.TableauMonitor;
 import org.semanticweb.HermiT.tableau.ExtensionManager;
 import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.InterruptFlag;
@@ -66,6 +67,7 @@ public class InstanceManager {
     protected final InterruptFlag m_interruptFlag;
     protected final Reasoner m_reasoner;
     protected final Tableau m_tableau;
+    protected final TableauMonitor m_tableauMonitor;
     protected final Individual[] m_individuals;
     protected final HashSet<AtomicRole> m_complexRoles;
     protected final Map<AtomicConcept,AtomicConceptElement> m_conceptToElement;
@@ -106,6 +108,7 @@ public class InstanceManager {
         try {
             m_reasoner=reasoner;
             m_tableau=tableau;
+            m_tableauMonitor=tableau.getTableauMonitor();
             DLOntology dlo=m_reasoner.getDLOntology();
             m_individuals=new ArrayList<Individual>(dlo.getAllIndividuals()).toArray(new Individual[0]);
             m_complexRoles=new HashSet<AtomicRole>();
@@ -1300,7 +1303,14 @@ public class InstanceManager {
     }
     protected boolean isInstance(Individual individual,AtomicConcept atomicConcept) {
         m_tableau.clearAdditionalDLOntology();
-        return !m_tableau.isSatisfiable(true,false,null,Collections.singleton(Atom.create(atomicConcept,individual)),null,null,null,ReasoningTaskDescription.isInstanceOf(atomicConcept,individual));
+        boolean result = !m_tableau.isSatisfiable(true,false,null,Collections.singleton(Atom.create(atomicConcept,individual)),null,null,null,ReasoningTaskDescription.isInstanceOf(atomicConcept,individual));
+        if (m_tableauMonitor!=null) {
+            if (result)
+                m_tableauMonitor.possibleInstanceIsInstance();
+            else 
+                m_tableauMonitor.possibleInstanceIsNotInstance();
+        }
+        return result;
     }
     protected boolean isRoleInstance(Role role, Individual individual1, Individual individual2) {
         OWLDataFactory factory=m_reasoner.getDataFactory();
@@ -1321,7 +1331,14 @@ public class InstanceManager {
         OWLAxiom allNotPseudoNominalAssertion=factory.getOWLClassAssertionAxiom(allNotPseudoNominal,namedIndividual1);
         OWLAxiom pseudoNominalAssertion=factory.getOWLClassAssertionAxiom(pseudoNominal,namedIndividual2);
         Tableau tableau=m_reasoner.getTableau(allNotPseudoNominalAssertion,pseudoNominalAssertion);
-        return !tableau.isSatisfiable(true,true,null,null,null,null,null,new ReasoningTaskDescription(true,"is {0} connected to {1} via {2}",individual1,individual2,atomicRole));
+        boolean result=!tableau.isSatisfiable(true,true,null,null,null,null,null,new ReasoningTaskDescription(true,"is {0} connected to {1} via {2}",individual1,individual2,atomicRole));
+        if (m_tableauMonitor!=null) {
+            if (result)
+                m_tableauMonitor.possibleInstanceIsInstance();
+            else 
+                m_tableauMonitor.possibleInstanceIsNotInstance();
+        }
+        return result;
     }
     protected static boolean isResultRelevantIndividual(Individual individual) {
         return !individual.isAnonymous() && !Prefixes.isInternalIRI(individual.getIRI());
@@ -1366,6 +1383,12 @@ public class InstanceManager {
         return m_currentRoleHierarchy.getBottomNode();
     }
 
+    public boolean hadPossibleConceptInstances() { 
+        return m_readingOffFoundPossibleConceptInstance;
+    }
+    public boolean hadPossibleRoleInstances() { 
+        return m_readingOffFoundPossiblePropertyInstance;
+    }
     public int[] getNumberOfInstances(AtomicConcept concept) {
         int[] result=new int[2];
         HierarchyNode<AtomicConcept> node=m_currentConceptHierarchy.getNodeForElement(concept);

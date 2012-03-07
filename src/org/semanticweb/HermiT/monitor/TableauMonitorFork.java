@@ -240,4 +240,12 @@ public class TableauMonitorFork implements TableauMonitor,Serializable  {
         m_first.blockingValidationFinished(noInvalidlyBlocked);
         m_second.blockingValidationFinished(noInvalidlyBlocked);
     }
+    public void possibleInstanceIsInstance() {
+        m_first.possibleInstanceIsInstance();
+        m_second.possibleInstanceIsInstance();
+    }
+    public void possibleInstanceIsNotInstance() {
+        m_first.possibleInstanceIsNotInstance();
+        m_second.possibleInstanceIsNotInstance();
+    }
 }

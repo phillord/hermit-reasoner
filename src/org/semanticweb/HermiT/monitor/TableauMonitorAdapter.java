@@ -138,4 +138,8 @@ public class TableauMonitorAdapter implements TableauMonitor,Serializable  {
     }
     public void blockingValidationFinished(int noInvalidlyBlocked) {
     }
+    public void possibleInstanceIsInstance() {
+    }
+    public void possibleInstanceIsNotInstance() {
+    }
 }

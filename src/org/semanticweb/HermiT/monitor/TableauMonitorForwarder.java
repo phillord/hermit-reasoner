@@ -244,4 +244,12 @@ public class TableauMonitorForwarder implements TableauMonitor,Serializable {
         if (m_forwardingOn)
             m_forwardingTargetMonitor.blockingValidationFinished(noInvalidlyBlocked);
     }
+    public void possibleInstanceIsInstance() {
+        if (m_forwardingOn)
+            m_forwardingTargetMonitor.possibleInstanceIsInstance();
+    }
+    public void possibleInstanceIsNotInstance() {
+        if (m_forwardingOn)
+            m_forwardingTargetMonitor.possibleInstanceIsNotInstance();
+    }
 }
