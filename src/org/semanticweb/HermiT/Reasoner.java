@@ -55,6 +55,7 @@ import org.semanticweb.HermiT.hierarchy.HierarchyNode;
 import org.semanticweb.HermiT.hierarchy.HierarchyPrinterFSS;
 import org.semanticweb.HermiT.hierarchy.HierarchySearch;
 import org.semanticweb.HermiT.hierarchy.InstanceManager;
+import org.semanticweb.HermiT.hierarchy.InstanceStatistics;
 import org.semanticweb.HermiT.hierarchy.QuasiOrderClassification;
 import org.semanticweb.HermiT.hierarchy.QuasiOrderClassificationForRoles;
 import org.semanticweb.HermiT.model.Atom;
@@ -425,12 +426,6 @@ public class Reasoner implements OWLReasoner {
                 OWLAxiom axiom=change.getAxiom();
                 if (axiom.isLogicalAxiom()) {
                     if (axiom instanceof OWLClassAssertionAxiom) {
-//                        OWLClassExpression classExpression=((OWLClassAssertionAxiom)axiom).getClassExpression();
-//                        if (!(classExpression instanceof OWLClass) &&
-//                            !(classExpression instanceof OWLObjectComplementOf && ((OWLObjectComplementOf)classExpression).getOperand() instanceof OWLClass) &&
-//                            !(classExpression instanceof OWLObjectHasSelf) &&
-//                            !(classExpression instanceof OWLObjectComplementOf && ((OWLObjectComplementOf)classExpression).getOperand() instanceof OWLObjectHasSelf))
-//                            return false;
                         OWLClassExpression classExpression=((OWLClassAssertionAxiom)axiom).getClassExpression();
                         if (classExpression instanceof OWLClass) {
                             if (!isDefined((OWLClass)classExpression) && !Prefixes.isInternalIRI(((OWLClass)classExpression).getIRI().toString())) {
@@ -2261,89 +2256,15 @@ public class Reasoner implements OWLReasoner {
         return new OWLDataPropertyNodeSet(result);
     }
 
-    // methods for cost-based query axiom ordering
+    // statistics for cost-based query axiom ordering
 
-    public int[] getNumberOfSameIndividuals(OWLIndividual individual) {
-        if (m_dlOntology.getAllIndividuals().size()>0)
-            return new int[] { 0,0 };
-        else {
-            initialiseClassInstanceManager(); // that will also initialize sameAs equivalence classes
-            Individual ind=H(individual);
-            return m_instanceManager.getNumberOfSameAs(ind);
-        }
-    }
-    public int[] getNumberOfInstances(OWLClass owlClass) {
-        if (m_dlOntology.getAllIndividuals().size()>0)
-            return new int[] { 0,0 };
-        else {
-            initialiseClassInstanceManager();
-            AtomicConcept concept=H(owlClass);
-            return m_instanceManager.getNumberOfInstances(concept);
-        }
-    }
-    public int[] getNumberOfInstances(OWLObjectProperty property) {
-        if (m_dlOntology.getAllIndividuals().size()>0)
-            return new int[] { 0,0 };
-        else {
-            initialisePropertiesInstanceManager();
-            AtomicRole role=H(property);
-            return m_instanceManager.getNumberOfInstances(role);
-        }
-    }
-    public int[] getNumberOfSuccessors(OWLObjectProperty property,OWLIndividual individual) {
-        if (m_dlOntology.getAllIndividuals().size()>0)
-            return new int[] { 0,0 };
-        else {
-            initialisePropertiesInstanceManager();
-            AtomicRole role=H(property);
-            Individual ind=H(individual);
-            return m_instanceManager.getNumberOfSuccessors(role,ind);
-        }
-    }
-    public int[] getNumberOfPredecessors(OWLObjectProperty property,OWLIndividual individual) {
-        if (m_dlOntology.getAllIndividuals().size()>0)
-            return new int[] { 0,0 };
-        else {
-            initialisePropertiesInstanceManager();
-            AtomicRole role=H(property);
-            Individual ind=H(individual);
-            return m_instanceManager.getNumberOfPredecessors(role,ind);
-        }
-    }
-    /**
-     * @param property
-     * @return 0: number of known instances 1: number of possible instances 2: number of individuals with at least one known or possible successor
-     */
-    public int[] getNumberOfPropertyInstances(OWLObjectProperty property) {
-        if (m_dlOntology.getAllIndividuals().size()>0)
-            return new int[] { 0,0,0 };
-        else {
-            initialisePropertiesInstanceManager();
-            AtomicRole role=H(property);
-            return m_instanceManager.getNumberOfPropertyInstances(role);
-        }
-    }
-    public int getClassHierarchyDepth() {
-        classifyClasses();
-        return m_atomicConceptHierarchy.getDepth();
-    }
-    public int getObjectPropertyHierarchyDepth() {
-        classifyObjectProperties();
-        return m_objectRoleHierarchy.getDepth();
-    }
-    public int getDataPropertyHierarchyDepth() {
-        classifyDataProperties();
-        return m_dataRoleHierarchy.getDepth();
-    }
-    public int[] getNumberOfTypes(OWLIndividual individual) {
-        classifyClasses();
-        if (m_dlOntology.getAllIndividuals().size()>0)
-            return new int[] { m_atomicConceptHierarchy.getTopNode().getEquivalentElements().size(),0 };
-        else {
-            initialiseClassInstanceManager();
-            Individual ind=H(individual);
-            return m_instanceManager.getNumberOfTypes(ind);
-        }
+    public InstanceStatistics getInstanceStatistics() {
+        initialiseClassInstanceManager(); 
+        initialisePropertiesInstanceManager();
+        assert m_instanceManager!=null;
+        assert m_instanceManager.areClassesInitialised();
+        assert m_instanceManager.arePropertiesInitialised();
+        return new InstanceStatistics(m_instanceManager, this);
     }
 
     // The factory for OWL API reasoners
