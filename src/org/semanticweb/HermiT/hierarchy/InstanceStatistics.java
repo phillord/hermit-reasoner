@@ -184,49 +184,6 @@ public class InstanceStatistics {
     // methods for property instance statistics
     // ****************************************
     
-    
-    /**
-     * @param property
-     * @return 0: number of known instances 1: number of possible instances 2: number of individuals with at least one known or possible successor
-     */
-    /*
-    public int[] getNumberOfInstances(OWLObjectProperty property) {
-        if (m_instanceManager.m_individuals.length==0)
-            return new int[] { 0,0 };
-        else {
-            AtomicRole role=H(property);
-            return getNumberOfRoleInstances(role);
-        }
-    }
-    protected int[] getNumberOfRoleInstances(AtomicRole role) {
-        int[] result=new int[2];
-        HierarchyNode<RoleElement> node=m_instanceManager.m_currentRoleHierarchy.getNodeForElement(m_instanceManager.m_roleElementManager.getRoleElement(role));
-        if (node==null)
-            return result; // unknown concept
-        RoleElement representative=node.getRepresentative();
-        if (representative.equals(m_topRoleElement)) {
-            int inds=m_instanceManager.m_individuals.length;
-            result[0]=inds*inds;
-            return result;
-        }
-        if (representative.equals(m_bottomRoleElement)) {
-            return result;
-        }
-        return getNumberOfRoleInstances(node,result);
-    }
-    protected int[] getNumberOfRoleInstances(HierarchyNode<RoleElement> node,int[] result) {
-        RoleElement representative=node.getRepresentative();
-        Map<Individual,Set<Individual>> map=representative.getKnownRelations();
-        for (Individual individual : map.keySet())
-              result[0]+=map.get(individual).size();
-        map=representative.getPossibleRelations();
-        for (Individual individual : map.keySet())
-              result[1]+=map.get(individual).size();
-        for (HierarchyNode<RoleElement> child : node.getChildNodes())
-            if (child!=m_instanceManager.m_currentRoleHierarchy.m_bottomNode)
-                getNumberOfRoleInstances(child,result);
-        return result;
-    }*/
     public RoleInstanceStatistics getRoleInstanceStatistics(OWLObjectProperty op) {
         if (m_instanceManager.m_individuals.length==0)
             return new RoleInstanceStatistics(0,0,0,0,0,0);
@@ -253,7 +210,7 @@ public class InstanceStatistics {
         m_instanceManager.m_currentRoleHierarchy.traverseDepthFirst(statisticsVisitor,0,node,null,visited,redirectBuffer);
         return statisticsVisitor.getRoleInstanceStatistics();
     }
-    final class RoleInstanceStatisticsVisitor implements Hierarchy.HierarchyNodeVisitor<RoleElement> {
+    public final class RoleInstanceStatisticsVisitor implements Hierarchy.HierarchyNodeVisitor<RoleElement> {
         protected final HierarchyNode<RoleElement> m_bottomNode;
         protected final Set<Individual> m_distinctKnownPredecessors; // no duplicates
         protected final Set<Individual> m_distinctKnownSuccessors; // no duplicates
@@ -293,7 +250,7 @@ public class InstanceStatistics {
             return new RoleInstanceStatistics(m_distinctKnownPredecessors.size(), m_distinctKnownSuccessors.size(), m_distinctPossiblePredecessors.size(), m_distinctPossibleSuccessors.size(), m_numberOfKnownSuccessors, m_numberOfPossibleSuccessors);
         }
     }
-    final class RoleInstanceStatistics {
+    public final class RoleInstanceStatistics {
         protected final int m_numberOfDistinctKnownPredecessors; // no duplicates
         protected final int m_numberOfDistinctKnownSuccessors; // no duplicates
         protected final int m_numberOfDistinctPossiblePredecessors; // no duplicates
@@ -309,21 +266,47 @@ public class InstanceStatistics {
             m_numberOfKnownSuccessors=numberOfKnownSuccessors;
             m_numberOfPossibleSuccessors=numberOfPossibleSuccessors;
         }
-        public int getNumberOfKnownSuccessors() {
+        /**
+         * Returns the number of known instances for the role. In the paper it is called K[R]
+         */
+        public int getNumberOfKnownInstances() {
             return m_numberOfKnownSuccessors;
         }
-        public int getNumberOfPossibleSuccessors() {
+        /**
+         * Returns the number of possible instances for the role. In the paper it is called P[R]
+         */
+        public int getNumberOfPossibleInstances() {
             return m_numberOfPossibleSuccessors;
         }
+        /**
+         * Returns the number of distinct/unique individuals that have at least one known 
+         * predecessor for the role. This is the same as the number of distinct known 
+         * successors for the role. In the paper it is called preK[R]
+         */
         public int getNumberOfDistinctKnownSuccessors() {
             return m_numberOfDistinctKnownSuccessors;
         }
+        /**
+         * Returns the number of distinct/unique individuals that have at least one known 
+         * successor for the role. This is the same as the number of distinct known 
+         * predecessors for the role. In the paper it is called sucK[R]
+         */
         public int getNumberOfDistinctKnownPredecessors() {
             return m_numberOfDistinctKnownPredecessors;
         }
+        /**
+         * Returns the number of distinct/unique individuals that have at least one possible 
+         * predecessor for the role. This is the same as the number of distinct possible 
+         * successors for the role. In the paper it is called preP[R]
+         */
         public int getNumberOfDistinctPossibleSuccessors() {
             return m_numberOfDistinctPossibleSuccessors;
         }
+        /**
+         * Returns the number of distinct/unique individuals that have at least one possible
+         * successor for the role. This is the same as the number of distinct possible
+         * predecessors for the role. In the paper it is called sucK[R]
+         */
         public int getNumberOfDistinctPossiblePredecessors() {
             return m_numberOfDistinctPossiblePredecessors;
         }
