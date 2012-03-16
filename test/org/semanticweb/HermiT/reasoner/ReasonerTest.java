@@ -38,6 +38,32 @@ public class ReasonerTest extends AbstractReasonerTest {
         super(name);
     }
 
+    public void testIncrementalWithFreshNames() throws Exception {
+        String axioms = "Declaration( Class( :A ) )"+LB+
+                "Declaration( Class( :B ) )"+LB+
+                "Declaration( Class( :C ) )"+LB+
+                "SubClassOf( :A :B )"+LB+
+                "Declaration( NamedIndividual( :a ) )"+LB+
+                "Declaration( NamedIndividual( :c ) )"+LB+
+                "ClassAssertion(:A :a)"+LB+
+                "ClassAssertion(:C :c)";
+        loadOntologyWithAxioms(axioms);
+        createReasoner();
+        m_reasoner.precomputeInferences(InferenceType.CLASS_HIERARCHY, InferenceType.CLASS_ASSERTIONS);
+        assertTrue(m_reasoner.hasType(NS_NI("a"), NS_C("A"), false));
+        assertTrue(m_reasoner.hasType(NS_NI("a"), NS_C("B"), false));
+        Set<OWLAxiom> assertions=new HashSet<OWLAxiom>();
+        assertions.add(m_dataFactory.getOWLDeclarationAxiom(NS_C("D")));
+        assertions.add(m_dataFactory.getOWLClassAssertionAxiom(NS_C("D"), NS_NI("c")));
+        m_ontologyManager.addAxioms(m_ontology, assertions);
+        m_reasoner.flush();
+        assertTrue(m_reasoner.hasType(NS_NI("a"), NS_C("A"), false));
+        assertTrue(m_reasoner.hasType(NS_NI("a"), NS_C("B"), false));
+        assertTrue(m_reasoner.hasType(NS_NI("c"), NS_C("D"), false));
+        assertFalse(m_reasoner.hasType(NS_NI("c"), NS_C("A"), false));
+        assertFalse(m_reasoner.hasType(NS_NI("c"), NS_C("B"), false));
+    }
+    
     public void testInstanteManagerError() throws Exception {
         loadOntologyFromResource("res/pets-error.owl");
         createReasoner();

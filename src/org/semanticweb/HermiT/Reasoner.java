@@ -425,15 +425,32 @@ public class Reasoner implements OWLReasoner {
                 OWLAxiom axiom=change.getAxiom();
                 if (axiom.isLogicalAxiom()) {
                     if (axiom instanceof OWLClassAssertionAxiom) {
+//                        OWLClassExpression classExpression=((OWLClassAssertionAxiom)axiom).getClassExpression();
+//                        if (!(classExpression instanceof OWLClass) &&
+//                            !(classExpression instanceof OWLObjectComplementOf && ((OWLObjectComplementOf)classExpression).getOperand() instanceof OWLClass) &&
+//                            !(classExpression instanceof OWLObjectHasSelf) &&
+//                            !(classExpression instanceof OWLObjectComplementOf && ((OWLObjectComplementOf)classExpression).getOperand() instanceof OWLObjectHasSelf))
+//                            return false;
                         OWLClassExpression classExpression=((OWLClassAssertionAxiom)axiom).getClassExpression();
-                        if (!(classExpression instanceof OWLClass) &&
-                            !(classExpression instanceof OWLObjectComplementOf && ((OWLObjectComplementOf)classExpression).getOperand() instanceof OWLClass) &&
-                            !(classExpression instanceof OWLObjectHasSelf) &&
-                            !(classExpression instanceof OWLObjectComplementOf && ((OWLObjectComplementOf)classExpression).getOperand() instanceof OWLObjectHasSelf))
-                            return false;
-                    }
-                    else if (!(axiom instanceof OWLIndividualAxiom))
+                        if (classExpression instanceof OWLClass) {
+                            if (!isDefined((OWLClass)classExpression) && !Prefixes.isInternalIRI(((OWLClass)classExpression).getIRI().toString())) {
+                                return false;
+                            }
+                        } else if (classExpression instanceof OWLObjectComplementOf) {
+                            OWLClassExpression negated=((OWLObjectComplementOf)classExpression).getOperand();
+                            if (!(negated instanceof OWLObjectHasSelf || !(isDefined(((OWLObjectHasSelf)negated).getProperty().getNamedProperty()) || Prefixes.isInternalIRI(((OWLObjectHasSelf)negated).getProperty().getNamedProperty().getIRI().toString()))) && 
+                                    (!(negated instanceof OWLClass) || !(isDefined((OWLClass)negated) || Prefixes.isInternalIRI(((OWLClass)negated).getIRI().toString())))) {
+                                return false;
+                            }
+                        } else if (classExpression instanceof OWLObjectHasSelf) {
+                            OWLObjectProperty op=((OWLObjectHasSelf)classExpression).getProperty().getNamedProperty();
+                            if (!(isDefined(op) || Prefixes.isInternalIRI(op.getIRI().toString()))) {
+                                return false;
+                            }
+                        }
+                    } else if (!(axiom instanceof OWLIndividualAxiom)) {
                         return false;
+                    }
                 }
             }
         }
