@@ -11,6 +11,9 @@ import java.util.Set;
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.monitor.CountingMonitor;
 import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.io.OWLOntologyDocumentSource;
+import org.semanticweb.owlapi.io.StringDocumentSource;
+import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
@@ -27,6 +30,8 @@ import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObjectMaxCardinality;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLSubPropertyChainOfAxiom;
 import org.semanticweb.owlapi.reasoner.InferenceType;
 import org.semanticweb.owlapi.reasoner.NodeSet;
@@ -37,7 +42,255 @@ public class ReasonerTest extends AbstractReasonerTest {
     public ReasonerTest(String name) {
         super(name);
     }
-
+    public void testIncrementalWithNegatedHasValue() throws Exception {
+        String axioms = "Declaration( ObjectProperty( :r ) )"+LB+
+                "Declaration( Class( :A ) )"+LB+
+                "Declaration( Class( :B ) )"+LB+
+                "SubClassOf( :A ObjectSomeValuesFrom(:r :B) )"+LB+
+                "Declaration( NamedIndividual( :a ) )"+LB+
+                "Declaration( NamedIndividual( :b ) )"+LB+
+                "ClassAssertion(:A :a)";
+        loadOntologyWithAxioms(axioms);
+        createReasoner();
+        m_reasoner.precomputeInferences(InferenceType.CLASS_HIERARCHY, InferenceType.CLASS_ASSERTIONS);
+        assertTrue(m_reasoner.hasType(NS_NI("a"), NS_C("A"), false));
+        assertFalse(m_reasoner.hasType(NS_NI("a"), NS_C("B"), false));
+        assertFalse(m_reasoner.hasType(NS_NI("b"), NS_C("A"), false));
+        assertFalse(m_reasoner.hasType(NS_NI("b"), NS_C("B"), false));
+        assertFalse(m_reasoner.hasObjectPropertyRelationship(NS_NI("a"), NS_OP("r"), NS_NI("b")));
+        Set<OWLAxiom> assertions=new HashSet<OWLAxiom>();
+        assertions.add(m_dataFactory.getOWLClassAssertionAxiom(m_dataFactory.getOWLObjectComplementOf(m_dataFactory.getOWLObjectHasValue(NS_OP("r"), NS_NI("b"))), NS_NI("a")));
+        m_ontologyManager.addAxioms(m_ontology, assertions);
+        assertTrue(m_reasoner.canProcessPendingChangesIncrementally());
+        m_reasoner.flush();
+        assertFalse(m_reasoner.hasObjectPropertyRelationship(NS_NI("a"), NS_OP("r"), NS_NI("b")));
+        assertFalse(m_reasoner.hasObjectPropertyRelationship(NS_NI("b"), NS_OP("r"), NS_NI("a")));
+        assertFalse(m_reasoner.hasType(NS_NI("a"), NS_C("B"), false));
+        assertFalse(m_reasoner.hasType(NS_NI("b"), NS_C("A"), false));
+        assertFalse(m_reasoner.hasType(NS_NI("b"), NS_C("B"), false));
+        assertions.clear();
+        assertions.add(m_dataFactory.getOWLDeclarationAxiom(NS_OP("s")));
+        assertions.add(m_dataFactory.getOWLClassAssertionAxiom(m_dataFactory.getOWLObjectComplementOf(m_dataFactory.getOWLObjectHasValue(NS_OP("s"), NS_NI("b"))), NS_NI("a")));
+        m_ontologyManager.addAxioms(m_ontology, assertions);
+        assertFalse(m_reasoner.canProcessPendingChangesIncrementally());
+        m_reasoner.flush();
+        assertFalse(m_reasoner.hasObjectPropertyRelationship(NS_NI("a"), NS_OP("s"), NS_NI("b")));
+        assertions.clear();
+        assertions.add(m_dataFactory.getOWLDeclarationAxiom(NS_NI("c")));
+        assertions.add(m_dataFactory.getOWLClassAssertionAxiom(m_dataFactory.getOWLObjectComplementOf(m_dataFactory.getOWLObjectHasValue(NS_OP("s"), NS_NI("c"))), NS_NI("a")));
+        m_ontologyManager.addAxioms(m_ontology, assertions);
+        assertFalse(m_reasoner.canProcessPendingChangesIncrementally());
+        m_reasoner.flush();
+        assertFalse(m_reasoner.hasObjectPropertyRelationship(NS_NI("a"), NS_OP("s"), NS_NI("c")));
+        assertions.clear();
+        assertions.add(m_dataFactory.getOWLObjectPropertyAssertionAxiom(NS_OP("s"), NS_NI("a"), NS_NI("c")));
+        m_ontologyManager.addAxioms(m_ontology, assertions);
+        m_reasoner.flush();
+        assertFalse(m_reasoner.isConsistent());
+    }
+    public void testIncrementalWithHasValue() throws Exception {
+        String axioms = "Declaration( ObjectProperty( :r ) )"+LB+
+                "Declaration( Class( :A ) )"+LB+
+                "Declaration( Class( :B ) )"+LB+
+                "SubClassOf( :A ObjectSomeValuesFrom(:r :B) )"+LB+
+                "Declaration( NamedIndividual( :a ) )"+LB+
+                "Declaration( NamedIndividual( :b ) )"+LB+
+                "ClassAssertion(:A :a)";
+        loadOntologyWithAxioms(axioms);
+        createReasoner();
+        m_reasoner.precomputeInferences(InferenceType.CLASS_HIERARCHY, InferenceType.CLASS_ASSERTIONS);
+        assertTrue(m_reasoner.hasType(NS_NI("a"), NS_C("A"), false));
+        assertFalse(m_reasoner.hasType(NS_NI("a"), NS_C("B"), false));
+        Set<OWLAxiom> assertions=new HashSet<OWLAxiom>();
+        assertions.add(m_dataFactory.getOWLClassAssertionAxiom(m_dataFactory.getOWLObjectHasValue(NS_OP("r"), NS_NI("b")), NS_NI("a")));
+        m_ontologyManager.addAxioms(m_ontology, assertions);
+        assertTrue(m_reasoner.canProcessPendingChangesIncrementally());
+        m_reasoner.flush();
+        assertTrue(m_reasoner.hasObjectPropertyRelationship(NS_NI("a"), NS_OP("r"), NS_NI("b")));
+        assertions.clear();
+        assertions.add(m_dataFactory.getOWLDeclarationAxiom(NS_OP("s")));
+        assertions.add(m_dataFactory.getOWLClassAssertionAxiom(m_dataFactory.getOWLObjectHasValue(NS_OP("s"), NS_NI("b")), NS_NI("a")));
+        m_ontologyManager.addAxioms(m_ontology, assertions);
+        assertFalse(m_reasoner.canProcessPendingChangesIncrementally());
+        m_reasoner.flush();
+        assertTrue(m_reasoner.hasObjectPropertyRelationship(NS_NI("a"), NS_OP("s"), NS_NI("b")));
+        assertions.clear();
+        assertions.add(m_dataFactory.getOWLDeclarationAxiom(NS_NI("c")));
+        assertions.add(m_dataFactory.getOWLClassAssertionAxiom(m_dataFactory.getOWLObjectHasValue(NS_OP("r"), NS_NI("c")), NS_NI("a")));
+        m_ontologyManager.addAxioms(m_ontology, assertions);
+        assertFalse(m_reasoner.canProcessPendingChangesIncrementally());
+        m_reasoner.flush();
+        assertTrue(m_reasoner.hasObjectPropertyRelationship(NS_NI("a"), NS_OP("r"), NS_NI("c")));
+    }
+    public void testIncrementalWithNegatedClass() throws Exception {
+        String axioms = "Declaration( ObjectProperty( :r ) )"+LB+
+                "Declaration( Class( :A ) )"+LB+
+                "Declaration( Class( :B ) )"+LB+
+                "SubClassOf( :A ObjectSomeValuesFrom(:r :B) )"+LB+
+                "Declaration( NamedIndividual( :a ) )"+LB+
+                "ClassAssertion(:A :a)";
+        loadOntologyWithAxioms(axioms);
+        createReasoner();
+        m_reasoner.precomputeInferences(InferenceType.CLASS_HIERARCHY, InferenceType.CLASS_ASSERTIONS);
+        assertTrue(m_reasoner.hasType(NS_NI("a"), NS_C("A"), false));
+        assertFalse(m_reasoner.hasType(NS_NI("a"), NS_C("B"), false));
+        Set<OWLAxiom> assertions=new HashSet<OWLAxiom>();
+        assertions.add(m_dataFactory.getOWLClassAssertionAxiom(m_dataFactory.getOWLObjectComplementOf(NS_C("C")), NS_NI("a")));
+        m_ontologyManager.addAxioms(m_ontology, assertions);
+        assertFalse(m_reasoner.canProcessPendingChangesIncrementally());
+        m_reasoner.flush();
+        assertTrue(m_reasoner.hasType(NS_NI("a"), NS_C("A"), false));
+        assertFalse(m_reasoner.hasType(NS_NI("a"), NS_C("B"), false));
+        assertFalse(m_reasoner.hasType(NS_NI("a"), NS_C("C"), false));
+        assertions.clear();
+        assertions.add(m_dataFactory.getOWLClassAssertionAxiom(m_dataFactory.getOWLObjectComplementOf(NS_C("B")), NS_NI("a")));
+        m_ontologyManager.addAxioms(m_ontology, assertions);
+        assertTrue(m_reasoner.canProcessPendingChangesIncrementally());
+        m_reasoner.flush();
+        assertTrue(m_reasoner.hasType(NS_NI("a"), NS_C("A"), false));
+        assertFalse(m_reasoner.hasType(NS_NI("a"), NS_C("B"), false));
+        assertFalse(m_reasoner.hasType(NS_NI("a"), NS_C("C"), false));
+        assertions.clear();
+        assertions.add(m_dataFactory.getOWLClassAssertionAxiom(NS_C("C"), NS_NI("a")));
+        m_ontologyManager.addAxioms(m_ontology, assertions);
+        assertTrue(m_reasoner.canProcessPendingChangesIncrementally());
+        m_reasoner.flush();
+        assertFalse(m_reasoner.isConsistent());
+    }
+    public void testIncrementalWithClass() throws Exception {
+        String axioms = "Declaration( ObjectProperty( :r ) )"+LB+
+                "Declaration( Class( :A ) )"+LB+
+                "Declaration( Class( :B ) )"+LB+
+                "SubClassOf( :A ObjectSomeValuesFrom(:r :B) )"+LB+
+                "Declaration( NamedIndividual( :a ) )"+LB+
+                "ClassAssertion(:A :a)";
+        loadOntologyWithAxioms(axioms);
+        createReasoner();
+        m_reasoner.precomputeInferences(InferenceType.CLASS_HIERARCHY, InferenceType.CLASS_ASSERTIONS);
+        assertTrue(m_reasoner.hasType(NS_NI("a"), NS_C("A"), false));
+        assertFalse(m_reasoner.hasType(NS_NI("a"), NS_C("B"), false));
+        Set<OWLAxiom> assertions=new HashSet<OWLAxiom>();
+        assertions.add(m_dataFactory.getOWLClassAssertionAxiom(NS_C("C"), NS_NI("a")));
+        m_ontologyManager.addAxioms(m_ontology, assertions);
+        assertFalse(m_reasoner.canProcessPendingChangesIncrementally());
+        m_reasoner.flush();
+        assertTrue(m_reasoner.hasType(NS_NI("a"), NS_C("A"), false));
+        assertFalse(m_reasoner.hasType(NS_NI("a"), NS_C("B"), false));
+        assertTrue(m_reasoner.hasType(NS_NI("a"), NS_C("C"), false));
+        assertions.clear();
+        assertions.add(m_dataFactory.getOWLSubClassOfAxiom(NS_C("A"), NS_C("C")));
+        m_ontologyManager.addAxioms(m_ontology, assertions);
+        assertFalse(m_reasoner.canProcessPendingChangesIncrementally());
+        m_reasoner.flush();
+        assertTrue(m_reasoner.hasType(NS_NI("a"), NS_C("A"), false));
+        assertFalse(m_reasoner.hasType(NS_NI("a"), NS_C("B"), false));
+        assertTrue(m_reasoner.hasType(NS_NI("a"), NS_C("C"), false));
+        assertions.clear();
+        assertions.add(m_dataFactory.getOWLClassAssertionAxiom(NS_C("B"), NS_NI("a")));
+        m_ontologyManager.addAxioms(m_ontology, assertions);
+        assertTrue(m_reasoner.canProcessPendingChangesIncrementally());
+        m_reasoner.flush();
+        assertTrue(m_reasoner.hasType(NS_NI("a"), NS_C("A"), false));
+        assertTrue(m_reasoner.hasType(NS_NI("a"), NS_C("B"), false));
+        assertTrue(m_reasoner.hasType(NS_NI("a"), NS_C("C"), false));
+    }
+    public void testIncrementalWithNegatedHasSelf() throws Exception {
+        String axioms = "Declaration( ObjectProperty( :r ) )"+LB+
+                "Declaration( Class( :A ) )"+LB+
+                "Declaration( Class( :B ) )"+LB+
+                "SubClassOf( :A ObjectSomeValuesFrom(:r :B) )"+LB+
+                "Declaration( NamedIndividual( :a ) )"+LB+
+                "ClassAssertion(:A :a)";
+        loadOntologyWithAxioms(axioms);
+        createReasoner();
+        m_reasoner.precomputeInferences(InferenceType.CLASS_HIERARCHY, InferenceType.CLASS_ASSERTIONS);
+        assertTrue(m_reasoner.hasType(NS_NI("a"), NS_C("A"), false));
+        assertFalse(m_reasoner.hasType(NS_NI("a"), NS_C("B"), false));
+        Set<OWLAxiom> assertions=new HashSet<OWLAxiom>();
+        assertions.add(m_dataFactory.getOWLClassAssertionAxiom(m_dataFactory.getOWLObjectComplementOf(m_dataFactory.getOWLObjectHasSelf(NS_OP("r"))), NS_NI("a")));
+        m_ontologyManager.addAxioms(m_ontology, assertions);
+        assertTrue(m_reasoner.canProcessPendingChangesIncrementally());
+        m_reasoner.flush();
+        assertFalse(m_reasoner.hasObjectPropertyRelationship(NS_NI("a"), NS_OP("r"), NS_NI("a")));
+        assertions.clear();
+        assertions.add(m_dataFactory.getOWLObjectPropertyAssertionAxiom(NS_OP("r"), NS_NI("a"), NS_NI("a")));
+        m_ontologyManager.addAxioms(m_ontology, assertions);
+        assertTrue(m_reasoner.canProcessPendingChangesIncrementally());
+        m_reasoner.flush();
+        assertFalse(m_reasoner.isConsistent());
+    }
+    public void testIncrementalWithHasSelf() throws Exception {
+        String axioms = "Declaration( ObjectProperty( :r ) )"+LB+
+                "Declaration( Class( :A ) )"+LB+
+                "Declaration( Class( :B ) )"+LB+
+                "SubClassOf( :A ObjectSomeValuesFrom(:r :B) )"+LB+
+                "Declaration( NamedIndividual( :a ) )"+LB+
+                "ClassAssertion(:A :a)";
+        loadOntologyWithAxioms(axioms);
+        createReasoner();
+        m_reasoner.precomputeInferences(InferenceType.CLASS_HIERARCHY, InferenceType.CLASS_ASSERTIONS);
+        assertTrue(m_reasoner.hasType(NS_NI("a"), NS_C("A"), false));
+        assertFalse(m_reasoner.hasType(NS_NI("a"), NS_C("B"), false));
+        Set<OWLAxiom> assertions=new HashSet<OWLAxiom>();
+        assertions.add(m_dataFactory.getOWLClassAssertionAxiom(m_dataFactory.getOWLObjectHasSelf(NS_OP("r")), NS_NI("a")));
+        m_ontologyManager.addAxioms(m_ontology, assertions);
+        assertTrue(m_reasoner.canProcessPendingChangesIncrementally());
+        m_reasoner.flush();
+        assertTrue(m_reasoner.hasObjectPropertyRelationship(NS_NI("a"), NS_OP("r"), NS_NI("a")));
+        assertions.clear();
+        assertions.add(m_dataFactory.getOWLDeclarationAxiom(NS_OP("s")));
+        assertions.add(m_dataFactory.getOWLClassAssertionAxiom(m_dataFactory.getOWLObjectHasSelf(NS_OP("s")), NS_NI("a")));
+        m_ontologyManager.addAxioms(m_ontology, assertions);
+        assertFalse(m_reasoner.canProcessPendingChangesIncrementally());
+        m_reasoner.flush();
+        assertTrue(m_reasoner.hasObjectPropertyRelationship(NS_NI("a"), NS_OP("s"), NS_NI("a")));
+        assertions.clear();
+        assertions.add(m_dataFactory.getOWLDeclarationAxiom(NS_NI("b")));
+        assertions.add(m_dataFactory.getOWLClassAssertionAxiom(m_dataFactory.getOWLObjectHasSelf(NS_OP("r")), NS_NI("b")));
+        m_ontologyManager.addAxioms(m_ontology, assertions);
+        assertFalse(m_reasoner.canProcessPendingChangesIncrementally());
+        m_reasoner.flush();
+        assertTrue(m_reasoner.hasObjectPropertyRelationship(NS_NI("b"), NS_OP("r"), NS_NI("b")));
+        assertions.clear();
+        OWLOntology empty=getEmptyOntology("_:testEmpty"+System.currentTimeMillis());
+        OWLOntologyChange change=new AddAxiom(empty, m_dataFactory.getOWLClassAssertionAxiom(NS_C("B"), NS_NI("a")));
+        m_ontologyManager.applyChange(change);
+        assertTrue(m_reasoner.canProcessPendingChangesIncrementally());
+        m_reasoner.flush();
+        assertFalse(m_reasoner.hasType(NS_NI("a"), NS_C("B"), false));
+        assertions.clear();
+        assertions.add(m_dataFactory.getOWLSubClassOfAxiom(m_dataFactory.getOWLObjectSomeValuesFrom(NS_OP("r"), m_dataFactory.getOWLObjectOneOf(NS_NI("b"))), NS_C("B")));
+        m_ontologyManager.addAxioms(m_ontology, assertions);
+        assertFalse(m_reasoner.canProcessPendingChangesIncrementally());
+        m_reasoner.flush();
+        assertTrue(m_reasoner.hasType(NS_NI("b"), NS_C("B"), false));
+        assertions.clear();
+        assertions.add(m_dataFactory.getOWLClassAssertionAxiom(NS_C("B"), NS_NI("a")));
+        assertions.add(m_dataFactory.getOWLDeclarationAxiom(NS_C("C")));
+        assertions.add(m_dataFactory.getOWLSubClassOfAxiom(NS_C("B"), NS_C("C")));
+        m_ontologyManager.addAxioms(m_ontology, assertions);
+        assertFalse(m_reasoner.canProcessPendingChangesIncrementally());
+        m_reasoner.flush();
+        assertTrue(m_reasoner.hasType(NS_NI("a"), NS_C("B"), false));
+        assertTrue(m_reasoner.hasType(NS_NI("a"), NS_C("C"), false));
+        assertTrue(m_reasoner.hasType(NS_NI("b"), NS_C("C"), false));
+    }
+    protected OWLOntology getEmptyOntology(String ontologyID) throws Exception {
+        StringBuffer buffer=new StringBuffer();
+        buffer.append("Prefix(:=<"+NS+">)"+LB);
+        buffer.append("Prefix(a:=<"+NS+">)"+LB);
+        buffer.append("Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)"+LB);
+        buffer.append("Prefix(owl2xml:=<http://www.w3.org/2006/12/owl2-xml#>)"+LB);
+        buffer.append("Prefix(test:=<"+NS+">)"+LB);
+        buffer.append("Prefix(owl:=<http://www.w3.org/2002/07/owl#>)"+LB);
+        buffer.append("Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)"+LB);
+        buffer.append("Prefix(rdf:=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)"+LB);
+        buffer.append("Ontology(<"+ontologyID+">"+LB);
+        buffer.append(")");
+        OWLOntologyDocumentSource input=new StringDocumentSource(buffer.toString());
+        return m_ontologyManager.loadOntologyFromOntologyDocument(input);
+    }
+    
     public void testIncrementalWithFreshNames() throws Exception {
         String axioms = "Declaration( Class( :A ) )"+LB+
                 "Declaration( Class( :B ) )"+LB+

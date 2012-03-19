@@ -107,6 +107,7 @@ import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLObjectComplementOf;
 import org.semanticweb.owlapi.model.OWLObjectHasSelf;
+import org.semanticweb.owlapi.model.OWLObjectHasValue;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -376,9 +377,9 @@ public class Reasoner implements OWLReasoner {
     }
     public void flush() {
         if (!m_pendingChanges.isEmpty()) {
-            Set<OWLOntology> rootOntologyImportsClosure=m_rootOntology.getImportsClosure();
             // check if we can only reload the ABox
-            if (canProcessPendingChangesIncrementally(rootOntologyImportsClosure)) {
+            if (canProcessPendingChangesIncrementally()) {
+                Set<OWLOntology> rootOntologyImportsClosure=m_rootOntology.getImportsClosure();
                 Set<Atom> positiveFacts=m_dlOntology.getPositiveFacts();
                 Set<Atom> negativeFacts=m_dlOntology.getNegativeFacts();
                 Set<Individual> allIndividuals=new HashSet<Individual>();
@@ -416,33 +417,60 @@ public class Reasoner implements OWLReasoner {
             m_pendingChanges.clear();
         }
     }
-    protected boolean canProcessPendingChangesIncrementally(Set<OWLOntology> rootOntologyImportsClosure) {
-        if (m_dlOntology.hasNominals() || !m_dlOntology.getAllDescriptionGraphs().isEmpty())
-            return false;
+    public boolean canProcessPendingChangesIncrementally() {
+        Set<OWLOntology> rootOntologyImportsClosure=m_rootOntology.getImportsClosure();
         for (OWLOntologyChange change : m_pendingChanges) {
             if (rootOntologyImportsClosure.contains(change.getOntology())) {
+                if (m_dlOntology.hasNominals() || !m_dlOntology.getAllDescriptionGraphs().isEmpty())
+                    return false;
                 if (!change.isAxiomChange())
                     return false;
                 OWLAxiom axiom=change.getAxiom();
                 if (axiom.isLogicalAxiom()) {
                     if (axiom instanceof OWLClassAssertionAxiom) {
-                        OWLClassExpression classExpression=((OWLClassAssertionAxiom)axiom).getClassExpression();
+                        // we can handle everything that results in positive or negative facts
+                        // (C a) with C a named class, HasSelf, HasValue, negated named class, negated HasSelf, negatedHasValue
+                        // all used names must already exist in the loaded ontology
+                        OWLClassAssertionAxiom classAssertion=(OWLClassAssertionAxiom)axiom;
+                        OWLIndividual individual=classAssertion.getIndividual();
+                        if (!isDefined(individual))
+                            return false;
+                        OWLClassExpression classExpression=classAssertion.getClassExpression();
                         if (classExpression instanceof OWLClass) {
-                            if (!isDefined((OWLClass)classExpression) && !Prefixes.isInternalIRI(((OWLClass)classExpression).getIRI().toString())) {
+                            if (!(isDefined((OWLClass)classExpression) || Prefixes.isInternalIRI(((OWLClass)classExpression).getIRI().toString())))
                                 return false;
-                            }
+                        } else if (classExpression instanceof OWLObjectHasSelf) {
+                            OWLObjectProperty namedOP=((OWLObjectHasSelf)classExpression).getProperty().getNamedProperty();
+                            if (!(isDefined(namedOP) || Prefixes.isInternalIRI(namedOP.getIRI().toString())))
+                                return false;
+                        } else if (classExpression instanceof OWLObjectHasValue) {
+                            OWLObjectHasValue hasValue=(OWLObjectHasValue)classExpression;
+                            OWLObjectProperty namedOP=hasValue.getProperty().getNamedProperty();
+                            OWLIndividual filler=hasValue.getValue();
+                            if (!(isDefined(namedOP) || Prefixes.isInternalIRI(namedOP.getIRI().toString())) || !isDefined(filler))
+                                return false;
                         } else if (classExpression instanceof OWLObjectComplementOf) {
                             OWLClassExpression negated=((OWLObjectComplementOf)classExpression).getOperand();
-                            if (!(negated instanceof OWLObjectHasSelf || !(isDefined(((OWLObjectHasSelf)negated).getProperty().getNamedProperty()) || Prefixes.isInternalIRI(((OWLObjectHasSelf)negated).getProperty().getNamedProperty().getIRI().toString()))) && 
-                                    (!(negated instanceof OWLClass) || !(isDefined((OWLClass)negated) || Prefixes.isInternalIRI(((OWLClass)negated).getIRI().toString())))) {
+                            if (negated instanceof OWLClass) {
+                                OWLClass cls=(OWLClass)negated;
+                                if (!(isDefined(cls) || Prefixes.isInternalIRI(cls.getIRI().toString())))
+                                    return false;
+                            } else if (negated instanceof OWLObjectHasSelf) {
+                                OWLObjectHasSelf hasSelf=(OWLObjectHasSelf)negated;
+                                OWLObjectProperty namedOP=hasSelf.getProperty().getNamedProperty();
+                                if (!(isDefined(namedOP) || Prefixes.isInternalIRI(namedOP.getIRI().toString())))
+                                    return false;
+                            } else if (negated instanceof OWLObjectHasValue) {
+                                OWLObjectHasValue hasSelf=(OWLObjectHasValue)negated;
+                                OWLObjectProperty namedOP=hasSelf.getProperty().getNamedProperty();
+                                OWLIndividual filler=hasSelf.getValue();
+                                if (!(isDefined(namedOP) || Prefixes.isInternalIRI(namedOP.getIRI().toString())) || !isDefined(filler))
+                                    return false;
+                            } else {
                                 return false;
                             }
-                        } else if (classExpression instanceof OWLObjectHasSelf) {
-                            OWLObjectProperty op=((OWLObjectHasSelf)classExpression).getProperty().getNamedProperty();
-                            if (!(isDefined(op) || Prefixes.isInternalIRI(op.getIRI().toString()))) {
-                                return false;
-                            }
-                        }
+                        } else 
+                            return false;
                     } else if (!(axiom instanceof OWLIndividualAxiom)) {
                         return false;
                     }

@@ -46,6 +46,7 @@ import org.semanticweb.owlapi.model.OWLNegativeDataPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLNegativeObjectPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLObjectComplementOf;
 import org.semanticweb.owlapi.model.OWLObjectHasSelf;
+import org.semanticweb.owlapi.model.OWLObjectHasValue;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLObjectPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
@@ -149,16 +150,34 @@ public class ReducedABoxOnlyClausification extends OWLAxiomVisitorAdapter {
                 m_positiveFacts.add(Atom.create(Inequality.create(),getIndividual(individuals[i]),getIndividual(individuals[j])));
     }
     public void visit(OWLClassAssertionAxiom object) {
+        // we can handle everything that results in positive or negative facts
+        // (C a) with C a named class, HasSelf, HasValue, negated named class, negated HasSelf, negatedHasValue
+        // all used names must already exist in the loaded ontology
         OWLClassExpression description=object.getClassExpression();
-        if (description instanceof OWLClass)
+        if (description instanceof OWLClass) {
             m_positiveFacts.add(getConceptAtom((OWLClass)description,getIndividual(object.getIndividual())));
-        else if (description instanceof OWLObjectComplementOf && ((OWLObjectComplementOf)description).getOperand() instanceof OWLClass)
-            m_negativeFacts.add(getConceptAtom(((OWLClass)((OWLObjectComplementOf)description).getOperand()),getIndividual(object.getIndividual())));
-        else if (description instanceof OWLObjectHasSelf)
-            m_positiveFacts.add(getRoleAtom(((OWLObjectHasSelf)description).getProperty(),getIndividual(object.getIndividual()),getIndividual(object.getIndividual())));
-        else if (description instanceof OWLObjectComplementOf && ((OWLObjectComplementOf)description).getOperand() instanceof OWLObjectHasSelf)
-            m_negativeFacts.add(getRoleAtom(((OWLObjectHasSelf)(((OWLObjectComplementOf)description).getOperand())).getProperty(),getIndividual(object.getIndividual()),getIndividual(object.getIndividual())));
-        else
+        } else if (description instanceof OWLObjectHasSelf) {
+            m_positiveFacts.add(getRoleAtom(((OWLObjectHasSelf)description).getProperty().getNamedProperty(),getIndividual(object.getIndividual()),getIndividual(object.getIndividual())));
+        } else if (description instanceof OWLObjectHasValue) {
+            OWLObjectHasValue hasValue=(OWLObjectHasValue)description;
+            OWLObjectPropertyExpression role=hasValue.getProperty();
+            OWLIndividual filler=hasValue.getValue();
+            m_positiveFacts.add(getRoleAtom(role,getIndividual(object.getIndividual()),getIndividual(filler)));
+        } else if (description instanceof OWLObjectComplementOf) {
+            OWLClassExpression negated=((OWLObjectComplementOf)description).getOperand();
+            if (negated instanceof OWLClass) { 
+                m_negativeFacts.add(getConceptAtom((OWLClass)negated,getIndividual(object.getIndividual())));
+            } else if (negated instanceof OWLObjectHasSelf) {
+                m_negativeFacts.add(getRoleAtom(((OWLObjectHasSelf)negated).getProperty().getNamedProperty(),getIndividual(object.getIndividual()),getIndividual(object.getIndividual())));
+            } else if (negated instanceof OWLObjectHasValue) {
+                OWLObjectHasValue hasValue=(OWLObjectHasValue)negated;
+                OWLObjectPropertyExpression role=hasValue.getProperty();
+                OWLIndividual filler=hasValue.getValue();
+                m_negativeFacts.add(getRoleAtom(role,getIndividual(object.getIndividual()),getIndividual(filler)));                
+            } else {
+                throw new IllegalArgumentException("Internal error: invalid normal form for ABox updates (class assertion with negated class).");
+            }
+        } else
             throw new IllegalArgumentException("Internal error: invalid normal form for ABox updates.");
     }
     public void visit(OWLObjectPropertyAssertionAxiom object) {
