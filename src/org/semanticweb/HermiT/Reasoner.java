@@ -55,7 +55,6 @@ import org.semanticweb.HermiT.hierarchy.HierarchyNode;
 import org.semanticweb.HermiT.hierarchy.HierarchyPrinterFSS;
 import org.semanticweb.HermiT.hierarchy.HierarchySearch;
 import org.semanticweb.HermiT.hierarchy.InstanceManager;
-import org.semanticweb.HermiT.hierarchy.InstanceStatistics;
 import org.semanticweb.HermiT.hierarchy.QuasiOrderClassification;
 import org.semanticweb.HermiT.hierarchy.QuasiOrderClassificationForRoles;
 import org.semanticweb.HermiT.model.Atom;
@@ -2282,17 +2281,6 @@ public class Reasoner implements OWLReasoner {
         for (HierarchyNode<AtomicRole> hierarchyNode : hierarchyNodes)
             result.add(dataPropertyHierarchyNodeToNode(hierarchyNode));
         return new OWLDataPropertyNodeSet(result);
-    }
-
-    // statistics for cost-based query axiom ordering
-
-    public InstanceStatistics getInstanceStatistics() {
-        initialiseClassInstanceManager(); 
-        initialisePropertiesInstanceManager();
-        assert m_instanceManager!=null;
-        assert m_instanceManager.areClassesInitialised();
-        assert m_instanceManager.arePropertiesInitialised();
-        return new InstanceStatistics(m_instanceManager, this);
     }
 
     // The factory for OWL API reasoners
