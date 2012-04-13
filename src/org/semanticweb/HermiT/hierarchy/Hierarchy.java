@@ -1,22 +1,24 @@
 /* Copyright 2009 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
 package org.semanticweb.HermiT.hierarchy;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -30,7 +32,7 @@ public class Hierarchy<E> {
     protected final HierarchyNode<E> m_topNode;
     protected final HierarchyNode<E> m_bottomNode;
     protected final Map<E,HierarchyNode<E>> m_nodesByElements;
-    
+
     public Hierarchy(HierarchyNode<E> topNode,HierarchyNode<E> bottomNode) {
         m_topNode=topNode;
         m_bottomNode=bottomNode;
@@ -69,7 +71,7 @@ public class Hierarchy<E> {
     protected final class HierarchyDepthFinder<T> implements Hierarchy.HierarchyNodeVisitor<T> {
         protected final HierarchyNode<T> m_bottomNode;
         protected int depth=0;
-        
+
         public HierarchyDepthFinder(HierarchyNode<T> bottomNode) {
             m_bottomNode=bottomNode;
         }
@@ -141,6 +143,50 @@ public class Hierarchy<E> {
                     traverseDepthFirst(visitor,level+1,childNode,node,visited,redirectBuffer);
         }
     }
+    public String toString() {
+        StringWriter buffer=new StringWriter();
+        final PrintWriter output=new PrintWriter(buffer);
+        traverseDepthFirst(new HierarchyNodeVisitor<E>() {
+            public boolean redirect(HierarchyNode<E>[] nodes) {
+                return true;
+            }
+            public void visit(int level,HierarchyNode<E> node,HierarchyNode<E> parentNode,boolean firstVisit) {
+                if (!node.equals(m_bottomNode))
+                    printNode(level,node,parentNode,firstVisit);
+            }
+            public void printNode(int level,HierarchyNode<E> node,HierarchyNode<E> parentNode,boolean firstVisit) {
+                Set<E> equivalences=node.getEquivalentElements();
+                boolean printSubClasOf=(parentNode!=null);
+                boolean printEquivalences=firstVisit && equivalences.size()>1;
+                if (printSubClasOf || printEquivalences) {
+                    for (int i=4*level;i>0;--i)
+                        output.print(' ');
+                    output.print(node.getRepresentative().toString());
+                    if (printEquivalences) {
+                        output.print('[');
+                        boolean first=true;
+                        for (E element : equivalences) {
+                            if (!node.getRepresentative().equals(element)) {
+                                if (first)
+                                    first=false;
+                                else
+                                    output.print(' ');
+                                output.print(element);
+                            }
+                        }
+                        output.print(']');
+                    }
+                    if (printSubClasOf) {
+                        output.print(" -> ");
+                        output.print(parentNode.getRepresentative().toString());
+                    }
+                    output.println();
+                }
+            }
+        });
+        output.flush();
+        return buffer.toString();
+    }
     public static <T> Hierarchy<T> emptyHierarchy(Collection<T> elements,T topElement,T bottomElement) {
         HierarchyNode<T> topBottomNode=new HierarchyNode<T>(topElement);
         topBottomNode.m_equivalentElements.add(topElement);
@@ -166,7 +212,7 @@ public class Hierarchy<E> {
         T transform(E element);
         T determineRepresentative(E oldRepresentative,Set<T> newEquivalentElements);
     }
-    
+
     protected static class HierarchyNodeComparator<E> implements Comparator<HierarchyNode<E>> {
         protected final Comparator<E> m_elementComparator;
 
@@ -176,6 +222,6 @@ public class Hierarchy<E> {
         public int compare(HierarchyNode<E> n1,HierarchyNode<E> n2) {
             return m_elementComparator.compare(n1.m_representative,n2.m_representative);
         }
-        
+
     }
 }

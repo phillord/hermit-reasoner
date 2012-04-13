@@ -134,4 +134,25 @@ public class Graph<T> implements Serializable {
         }
         return result;
     }
+    public String toString() {
+        StringBuffer buffer=new StringBuffer();
+        for (T element : m_elements) {
+            buffer.append(element.toString());
+            buffer.append(" -> { ");
+            boolean firstSuccessor=true;
+            Set<T> successors=m_successorsByNodes.get(element);
+            if (successors!=null) {
+                for (T successor : successors) {
+                    if (firstSuccessor)
+                        firstSuccessor=false;
+                    else
+                        buffer.append(", ");
+                    buffer.append(successor.toString());
+                }
+            }
+            buffer.append(" }");
+            buffer.append(System.getProperty("line.separator"));
+        }
+        return buffer.toString();
+    }
 }
