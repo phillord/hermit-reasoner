@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -36,13 +36,13 @@ public class HierarchyPrinterFSS {
     protected final String m_defaultPrefixIRI;
     protected final Set<String> m_prefixIRIs;
     protected Prefixes m_prefixes;
-    
+
     public HierarchyPrinterFSS(PrintWriter out,String defaultPrefixIRI) {
         m_out=out;
         m_defaultPrefixIRI=defaultPrefixIRI;
         m_prefixIRIs=new TreeSet<String>();
         m_prefixIRIs.add(defaultPrefixIRI);
-        m_prefixIRIs.add(Prefixes.s_semanticWebPrefixes.get("owl"));
+        m_prefixIRIs.add(Prefixes.s_semanticWebPrefixes.get("owl:"));
     }
     public void loadAtomicConceptPrefixIRIs(Collection<AtomicConcept> atomicConcepts) {
         for (AtomicConcept atomicConcept : atomicConcepts) {
@@ -69,21 +69,21 @@ public class HierarchyPrinterFSS {
         }
     }
     public void startPrinting() {
-        String owlPrefixIRI=Prefixes.s_semanticWebPrefixes.get("owl");
+        String owlPrefixIRI=Prefixes.s_semanticWebPrefixes.get("owl:");
         m_prefixes=new Prefixes();
         m_prefixes.declareDefaultPrefix(m_defaultPrefixIRI);
-        m_prefixes.declarePrefix("owl",owlPrefixIRI);
+        m_prefixes.declarePrefix("owl:",owlPrefixIRI);
         int index=1;
         for (String prefixIRI : m_prefixIRIs)
             if (!m_defaultPrefixIRI.equals(prefixIRI) && !owlPrefixIRI.equals(prefixIRI)) {
-                String prefix="a"+(index++);
-                m_prefixes.declarePrefix(prefix,prefixIRI);
+                String prefixName="a"+(index++)+":";
+                m_prefixes.declarePrefix(prefixName,prefixIRI);
             }
         for (Map.Entry<String,String> entry : m_prefixes.getPrefixIRIsByPrefixName().entrySet())
-            if (!"owl".equals(entry.getKey()))
-                m_out.println("Prefix("+entry.getKey()+":=<"+entry.getValue()+">)");
+            if (!"owl:".equals(entry.getKey()))
+                m_out.println("Prefix("+entry.getKey()+"=<"+entry.getValue()+">)");
         m_out.println();
-        m_out.println("Ontology(<"+m_prefixes.getPrefixIRIsByPrefixName().get("")+">");
+        m_out.println("Ontology(<"+m_prefixes.getPrefixIRIsByPrefixName().get(":")+">");
         m_out.println();
     }
     public void printAtomicConceptHierarchy(Hierarchy<AtomicConcept> atomicConceptHierarchy) {
@@ -171,7 +171,7 @@ public class HierarchyPrinterFSS {
             return !AtomicConcept.NOTHING.equals(atomicConcept) && !AtomicConcept.THING.equals(atomicConcept);
         }
     }
-    
+
     protected class RolePrinter implements Hierarchy.HierarchyNodeVisitor<Role> {
         protected final Hierarchy<Role> m_hierarchy;
         protected final boolean m_objectProperties;
@@ -260,7 +260,7 @@ public class HierarchyPrinterFSS {
             return !AtomicRole.BOTTOM_OBJECT_ROLE.equals(role) && !AtomicRole.TOP_OBJECT_ROLE.equals(role) && !AtomicRole.BOTTOM_DATA_ROLE.equals(role) && !AtomicRole.TOP_DATA_ROLE.equals(role) && role instanceof AtomicRole;
         }
     }
-    
+
     protected static class RoleComparator implements Comparator<Role> {
         public static final RoleComparator INSTANCE=new RoleComparator();
 
@@ -295,10 +295,10 @@ public class HierarchyPrinterFSS {
             return role instanceof AtomicRole ? 0 : 1;
         }
     }
-    
+
     protected static class AtomicConceptComparator implements Comparator<AtomicConcept> {
         public static final AtomicConceptComparator INSTANCE=new AtomicConceptComparator();
-    
+
         public int compare(AtomicConcept atomicConcept1,AtomicConcept atomicConcept2) {
             int comparison=getAtomicConceptClass(atomicConcept1)-getAtomicConceptClass(atomicConcept2);
             if (comparison!=0)

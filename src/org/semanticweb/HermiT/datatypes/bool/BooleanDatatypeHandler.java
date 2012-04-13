@@ -29,7 +29,7 @@ import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
 import org.semanticweb.HermiT.model.DatatypeRestriction;
 
 public class BooleanDatatypeHandler implements DatatypeHandler {
-    protected static final String XSD_BOOLEAN=Prefixes.s_semanticWebPrefixes.get("xsd")+"boolean";
+    protected static final String XSD_BOOLEAN=Prefixes.s_semanticWebPrefixes.get("xsd:")+"boolean";
     protected static final ValueSpaceSubset BOOLEAN_ALL=new BooleanAll();
     protected static final ValueSpaceSubset EMPTY=new BooleanNone();
     protected final static Set<String> s_managedDatatypeURIs=Collections.singleton(XSD_BOOLEAN);

@@ -33,7 +33,7 @@ import org.semanticweb.HermiT.model.DatatypeRestriction;
  * Implements a handler for xsd:dateTime.
  */
 public class DateTimeDatatypeHandler implements DatatypeHandler {
-    protected static final String XSD_NS=Prefixes.s_semanticWebPrefixes.get("xsd");
+    protected static final String XSD_NS=Prefixes.s_semanticWebPrefixes.get("xsd:");
     protected static final String XSD_DATE_TIME=XSD_NS+"dateTime";
     protected static final String XSD_DATE_TIME_STAMP=XSD_NS+"dateTimeStamp";
     protected static final DateTimeInterval INTERVAL_ALL_WITH_TIMEZONE=new DateTimeInterval(IntervalType.WITH_TIMEZONE,Long.MIN_VALUE,BoundType.EXCLUSIVE,Long.MAX_VALUE,BoundType.EXCLUSIVE);

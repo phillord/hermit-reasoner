@@ -30,7 +30,7 @@ import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
 import org.semanticweb.HermiT.model.DatatypeRestriction;
 
 public class BinaryDataDatatypeHandler implements DatatypeHandler {
-    protected static final String XSD_NS=Prefixes.s_semanticWebPrefixes.get("xsd");
+    protected static final String XSD_NS=Prefixes.s_semanticWebPrefixes.get("xsd:");
     protected static final String XSD_HEX_BINARY=XSD_NS+"hexBinary";
     protected static final String XSD_BASE_64_BINARY=XSD_NS+"base64Binary";
     protected static final ValueSpaceSubset HEX_BINARY_ALL=new BinaryDataValueSpaceSubset(new BinaryDataLengthInterval(BinaryDataType.HEX_BINARY,0,Integer.MAX_VALUE));

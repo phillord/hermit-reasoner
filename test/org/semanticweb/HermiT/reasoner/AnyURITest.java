@@ -13,7 +13,7 @@ import org.semanticweb.HermiT.model.Constant;
 import org.semanticweb.HermiT.model.DatatypeRestriction;
 
 public class AnyURITest extends AbstractReasonerTest {
-    protected static final String XSD_ANY_URI=Prefixes.s_semanticWebPrefixes.get("xsd")+"anyURI";
+    protected static final String XSD_ANY_URI=Prefixes.s_semanticWebPrefixes.get("xsd:")+"anyURI";
 
     public AnyURITest(String name) {
         super(name);

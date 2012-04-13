@@ -530,7 +530,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     }
 
     protected static Constant INT_C(String value) {
-        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("xsd")+"integer");
+        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("xsd:")+"integer");
     }
 
     protected static String DEC(String value) {
@@ -538,7 +538,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     }
 
     protected static Constant DEC_C(String value) {
-        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("xsd")+"decimal");
+        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("xsd:")+"decimal");
     }
 
     protected static String RAT(String num,String denom) {
@@ -546,7 +546,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     }
 
     protected static Constant RAT_C(String value) {
-        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("xsd")+"rational");
+        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("xsd:")+"rational");
     }
 
     protected static String FLT(String value) {
@@ -554,7 +554,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     }
 
     protected static Constant FLT_C(String value) {
-        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("xsd")+"float");
+        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("xsd:")+"float");
     }
 
     protected static String DBL(String value) {
@@ -562,7 +562,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     }
 
     protected static Constant DBL_C(String value) {
-        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("xsd")+"double");
+        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("xsd:")+"double");
     }
 
     protected static String DATE(String value) {
@@ -570,7 +570,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     }
 
     protected static Constant DATE_C(String value) {
-        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("xsd")+"dateTime");
+        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("xsd:")+"dateTime");
     }
 
     protected static String DATES(String value) {
@@ -578,7 +578,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     }
 
     protected static Constant DATES_C(String value) {
-        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("xsd")+"dateTimeStamp");
+        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("xsd:")+"dateTimeStamp");
     }
 
     protected static String XMLL(String value) {
@@ -586,7 +586,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     }
 
     protected static Constant XMLL_C(String value) {
-        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("rdf")+"XMLLiteral");
+        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("rdf:")+"XMLLiteral");
     }
 
     protected static String HEXB(String value) {
@@ -594,7 +594,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     }
 
     protected static Constant HEXB_C(String value) {
-        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("xsd")+"hexBinary");
+        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("xsd:")+"hexBinary");
     }
 
     protected static String B64B(String value) {
@@ -602,7 +602,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     }
 
     protected static Constant B64B_C(String value) {
-        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("xsd")+"has64Binary");
+        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("xsd:")+"has64Binary");
     }
 
     protected static String STR(String value) {
@@ -610,7 +610,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     }
 
     protected static Constant STR_C(String value) {
-        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("xsd")+"string");
+        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("xsd:")+"string");
     }
 
     protected static String STR(String value,String languageTag) {
@@ -618,7 +618,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     }
 
     protected static Constant STR_C(String value,String languageTag) {
-        return Constant.create(value+"\"@"+languageTag,Prefixes.s_semanticWebPrefixes.get("xsd")+"string");
+        return Constant.create(value+"\"@"+languageTag,Prefixes.s_semanticWebPrefixes.get("xsd:")+"string");
     }
 
     protected static String AURI(String value) {
@@ -626,7 +626,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     }
 
     protected static Constant AURI_C(String value) {
-        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("xsd")+"anyURI");
+        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("xsd:")+"anyURI");
     }
 
     protected static String[] S(String... args) {

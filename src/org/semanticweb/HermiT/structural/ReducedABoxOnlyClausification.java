@@ -165,7 +165,7 @@ public class ReducedABoxOnlyClausification extends OWLAxiomVisitorAdapter {
             m_positiveFacts.add(getRoleAtom(role,getIndividual(object.getIndividual()),getIndividual(filler)));
         } else if (description instanceof OWLObjectComplementOf) {
             OWLClassExpression negated=((OWLObjectComplementOf)description).getOperand();
-            if (negated instanceof OWLClass) { 
+            if (negated instanceof OWLClass) {
                 m_negativeFacts.add(getConceptAtom((OWLClass)negated,getIndividual(object.getIndividual())));
             } else if (negated instanceof OWLObjectHasSelf) {
                 m_negativeFacts.add(getRoleAtom(((OWLObjectHasSelf)negated).getProperty().getNamedProperty(),getIndividual(object.getIndividual()),getIndividual(object.getIndividual())));
@@ -173,7 +173,7 @@ public class ReducedABoxOnlyClausification extends OWLAxiomVisitorAdapter {
                 OWLObjectHasValue hasValue=(OWLObjectHasValue)negated;
                 OWLObjectPropertyExpression role=hasValue.getProperty();
                 OWLIndividual filler=hasValue.getValue();
-                m_negativeFacts.add(getRoleAtom(role,getIndividual(object.getIndividual()),getIndividual(filler)));                
+                m_negativeFacts.add(getRoleAtom(role,getIndividual(object.getIndividual()),getIndividual(filler)));
             } else {
                 throw new IllegalArgumentException("Internal error: invalid normal form for ABox updates (class assertion with negated class).");
             }
@@ -198,9 +198,9 @@ public class ReducedABoxOnlyClausification extends OWLAxiomVisitorAdapter {
         try {
             if (literal.isRDFPlainLiteral()) {
                 if (literal.hasLang())
-                    return Constant.create(literal.getLiteral()+"@"+literal.getLang(),Prefixes.s_semanticWebPrefixes.get("rdf")+"PlainLiteral");
+                    return Constant.create(literal.getLiteral()+"@"+literal.getLang(),Prefixes.s_semanticWebPrefixes.get("rdf:")+"PlainLiteral");
                 else
-                    return Constant.create(literal.getLiteral()+"@",Prefixes.s_semanticWebPrefixes.get("rdf")+"PlainLiteral");
+                    return Constant.create(literal.getLiteral()+"@",Prefixes.s_semanticWebPrefixes.get("rdf:")+"PlainLiteral");
             }
             else
                 return Constant.create(literal.getLiteral(),literal.getDatatype().getIRI().toString());

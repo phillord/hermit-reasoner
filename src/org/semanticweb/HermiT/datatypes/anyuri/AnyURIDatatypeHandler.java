@@ -33,7 +33,7 @@ import org.semanticweb.HermiT.model.DatatypeRestriction;
 import dk.brics.automaton.Automaton;
 
 public class AnyURIDatatypeHandler implements DatatypeHandler {
-    protected static final String XSD_NS=Prefixes.s_semanticWebPrefixes.get("xsd");
+    protected static final String XSD_NS=Prefixes.s_semanticWebPrefixes.get("xsd:");
     protected static final ValueSpaceSubset ANY_URI_ALL=new AnyURIValueSpaceSubset(AnyURIValueSpaceSubset.s_anyURI);
     protected static final ValueSpaceSubset EMPTY_SUBSET=new AnyURIValueSpaceSubset(AnyURIValueSpaceSubset.s_empty);
     protected static final Set<String> s_managedDatatypeURIs=Collections.singleton(XSD_NS+"anyURI");

@@ -35,8 +35,8 @@ import org.semanticweb.HermiT.model.DatatypeRestriction;
 import dk.brics.automaton.Automaton;
 
 public class RDFPlainLiteralDatatypeHandler implements DatatypeHandler {
-    protected static final String XSD_NS=Prefixes.s_semanticWebPrefixes.get("xsd");
-    protected static final String RDF_NS=Prefixes.s_semanticWebPrefixes.get("rdf");
+    protected static final String XSD_NS=Prefixes.s_semanticWebPrefixes.get("xsd:");
+    protected static final String RDF_NS=Prefixes.s_semanticWebPrefixes.get("rdf:");
     protected static final Map<String,ValueSpaceSubset> s_subsetsByDatatype=new HashMap<String,ValueSpaceSubset>();
     static {
         s_subsetsByDatatype.put(RDF_NS+"PlainLiteral",new RDFPlainLiteralLengthValueSpaceSubset(new RDFPlainLiteralLengthInterval(RDFPlainLiteralLengthInterval.LanguageTagMode.ABSENT,0,Integer.MAX_VALUE),new RDFPlainLiteralLengthInterval(RDFPlainLiteralLengthInterval.LanguageTagMode.PRESENT,0,Integer.MAX_VALUE)));

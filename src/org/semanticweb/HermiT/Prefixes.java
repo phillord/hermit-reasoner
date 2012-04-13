@@ -51,14 +51,14 @@ public class Prefixes implements Serializable {
     public static final Map<String,String> s_semanticWebPrefixes;
     static {
         s_semanticWebPrefixes=new HashMap<String,String>();
-        s_semanticWebPrefixes.put("rdf","http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-        s_semanticWebPrefixes.put("rdfs","http://www.w3.org/2000/01/rdf-schema#");
-        s_semanticWebPrefixes.put("owl","http://www.w3.org/2002/07/owl#");
-        s_semanticWebPrefixes.put("xsd","http://www.w3.org/2001/XMLSchema#");
-        s_semanticWebPrefixes.put("swrl","http://www.w3.org/2003/11/swrl#");
-        s_semanticWebPrefixes.put("swrlb","http://www.w3.org/2003/11/swrlb#");
-        s_semanticWebPrefixes.put("swrlx","http://www.w3.org/2003/11/swrlx#");
-        s_semanticWebPrefixes.put("ruleml","http://www.w3.org/2003/11/ruleml#");
+        s_semanticWebPrefixes.put("rdf:","http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+        s_semanticWebPrefixes.put("rdfs:","http://www.w3.org/2000/01/rdf-schema#");
+        s_semanticWebPrefixes.put("owl:","http://www.w3.org/2002/07/owl#");
+        s_semanticWebPrefixes.put("xsd:","http://www.w3.org/2001/XMLSchema#");
+        s_semanticWebPrefixes.put("swrl:","http://www.w3.org/2003/11/swrl#");
+        s_semanticWebPrefixes.put("swrlb:","http://www.w3.org/2003/11/swrlb#");
+        s_semanticWebPrefixes.put("swrlx:","http://www.w3.org/2003/11/swrlx#");
+        s_semanticWebPrefixes.put("ruleml:","http://www.w3.org/2003/11/ruleml#");
     }
     public static final Prefixes STANDARD_PREFIXES=new ImmutablePrefixes(s_semanticWebPrefixes);
 
@@ -104,10 +104,7 @@ public class Prefixes implements Serializable {
                 String localName=iri.substring(matcher.end());
                 if (isValidLocalName(localName)) {
                     String prefix=m_prefixNamesByPrefixIRI.get(matcher.group(1));
-                    if (prefix==null || prefix.length()==0)
-                        return ":"+localName;
-                    else
-                        return prefix+":"+localName;
+                    return prefix+localName;
                 }
             }
         }
@@ -127,15 +124,15 @@ public class Prefixes implements Serializable {
         else {
             int pos=abbreviation.indexOf(':');
             if (pos!=-1) {
-                String prefix=abbreviation.substring(0,pos);
-                String ns=m_prefixIRIsByPrefixName.get(prefix);
-                if (ns==null) {
+                String prefix=abbreviation.substring(0,pos+1);
+                String prefixIRI=m_prefixIRIsByPrefixName.get(prefix);
+                if (prefixIRI==null) {
                     // Catch the common error of not quoting IRIs starting with http:
-                    if (prefix=="http")
+                    if (prefix=="http:")
                         throw new IllegalArgumentException("The IRI '"+abbreviation+"' must be enclosed in '<' and '>' to be used as an abbreviation.");
                     throw new IllegalArgumentException("The string '"+prefix+"' is not a registered prefix name.");
                 }
-                return ns+abbreviation.substring(pos+1);
+                return prefixIRI+abbreviation.substring(pos+1);
             }
             else
                 throw new IllegalArgumentException("The abbreviation '"+abbreviation+"' is not valid (it does not start with a colon).");
@@ -150,11 +147,8 @@ public class Prefixes implements Serializable {
         else {
             int pos=iri.indexOf(':');
             if (pos!=-1) {
-                String prefix=iri.substring(0,pos);
-                String ns=m_prefixIRIsByPrefixName.get(prefix);
-                if (ns==null)
-                    return false;
-                return true;
+                String prefix=iri.substring(0,pos+1);
+                return m_prefixIRIsByPrefixName.get(prefix)!=null;
             }
             else
                 return false;
@@ -166,14 +160,16 @@ public class Prefixes implements Serializable {
         return containsPrefix;
     }
     protected boolean declarePrefixRaw(String prefixName,String prefixIRI) {
+        if (!prefixName.endsWith(":"))
+            throw new IllegalArgumentException("Prefix name '"+prefixName+"' should end with a colon character.");
         String existingPrefixName=m_prefixNamesByPrefixIRI.get(prefixIRI);
         if (existingPrefixName!=null && !prefixName.equals(existingPrefixName))
-            throw new IllegalArgumentException("The prefix IRI '"+prefixIRI+"'has already been associated with the prefix name '"+existingPrefixName+"'.");
+            throw new IllegalArgumentException("The prefix IRI '"+prefixIRI+"' has already been associated with the prefix name '"+existingPrefixName+"'.");
         m_prefixNamesByPrefixIRI.put(prefixIRI,prefixName);
         return m_prefixIRIsByPrefixName.put(prefixName,prefixIRI)==null;
     }
     public boolean declareDefaultPrefix(String defaultPrefixIRI) {
-        return declarePrefix("",defaultPrefixIRI);
+        return declarePrefix(":",defaultPrefixIRI);
     }
     public Map<String,String> getPrefixIRIsByPrefixName() {
         return java.util.Collections.unmodifiableMap(m_prefixIRIsByPrefixName);
@@ -192,31 +188,31 @@ public class Prefixes implements Serializable {
      */
     public boolean declareInternalPrefixes(Collection<String> individualIRIs, Collection<String> anonIndividualIRIs) {
         boolean containsPrefix=false;
-        if (declarePrefixRaw("def","internal:def#"))
+        if (declarePrefixRaw("def:","internal:def#"))
             containsPrefix=true;
-        if (declarePrefixRaw("defdata","internal:defdata#"))
+        if (declarePrefixRaw("defdata:","internal:defdata#"))
             containsPrefix=true;
-        if (declarePrefixRaw("nnq","internal:nnq#"))
+        if (declarePrefixRaw("nnq:","internal:nnq#"))
             containsPrefix=true;
-        if (declarePrefixRaw("all","internal:all#"))
+        if (declarePrefixRaw("all:","internal:all#"))
             containsPrefix=true;
-        if (declarePrefixRaw("swrl","internal:swrl#"))
+        if (declarePrefixRaw("swrl:","internal:swrl#"))
             containsPrefix=true;
-        if (declarePrefixRaw("prop","internal:prop#"))
+        if (declarePrefixRaw("prop:","internal:prop#"))
             containsPrefix=true;
         int individualIRIsIndex=1;
         for (String iri : individualIRIs) {
-            if (declarePrefixRaw("nom"+(individualIRIsIndex==1 ? "" : String.valueOf(individualIRIsIndex)),"internal:nom#"+iri))
+            if (declarePrefixRaw("nom"+(individualIRIsIndex==1 ? "" : String.valueOf(individualIRIsIndex))+":","internal:nom#"+iri))
                 containsPrefix=true;
             individualIRIsIndex++;
         }
         int anonymousIndividualIRIsIndex=1;
         for (String iri : anonIndividualIRIs) {
-            if (declarePrefixRaw("anon"+(anonymousIndividualIRIsIndex==1 ? "" : String.valueOf(anonymousIndividualIRIsIndex)),"internal:anon#"+iri))
+            if (declarePrefixRaw("anon"+(anonymousIndividualIRIsIndex==1 ? "" : String.valueOf(anonymousIndividualIRIsIndex))+":","internal:anon#"+iri))
                 containsPrefix=true;
             anonymousIndividualIRIsIndex++;
         }
-        if (declarePrefixRaw("nam","internal:nam#"))
+        if (declarePrefixRaw("nam:","internal:nam#"))
             containsPrefix=true;
         buildPrefixIRIMatchingPattern();
         return containsPrefix;
@@ -247,6 +243,12 @@ public class Prefixes implements Serializable {
                 containsPrefix=true;
         buildPrefixIRIMatchingPattern();
         return containsPrefix;
+    }
+    /**
+     * Converts this object to a string.
+     */
+    public String toString() {
+        return m_prefixIRIsByPrefixName.toString();
     }
     /**
      * Determines whether the supplied IRI is used internally by HermiT.

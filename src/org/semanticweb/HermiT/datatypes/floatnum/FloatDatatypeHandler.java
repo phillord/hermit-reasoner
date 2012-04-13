@@ -31,7 +31,7 @@ import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
 import org.semanticweb.HermiT.model.DatatypeRestriction;
 
 public class FloatDatatypeHandler implements DatatypeHandler {
-    protected static final String XSD_NS=Prefixes.s_semanticWebPrefixes.get("xsd");
+    protected static final String XSD_NS=Prefixes.s_semanticWebPrefixes.get("xsd:");
     protected static final String XSD_FLOAT=XSD_NS+"float";
     protected static final ValueSpaceSubset FLOAT_ENTIRE=new EntireFloatSubset();
     protected static final ValueSpaceSubset EMPTY_SUBSET=new EmptyFloatSubset();
@@ -62,10 +62,10 @@ public class FloatDatatypeHandler implements DatatypeHandler {
         assert XSD_FLOAT.equals(datatypeRestriction.getDatatypeURI());
         for (int index=datatypeRestriction.getNumberOfFacetRestrictions()-1;index>=0;--index) {
             String facetURI=datatypeRestriction.getFacetURI(index);
-            if (!s_supportedFacetURIs.contains(facetURI)) 
+            if (!s_supportedFacetURIs.contains(facetURI))
                 throw new UnsupportedFacetException("A facet with URI '"+facetURI+"' is not supported on xsd:float. The xsd:float datatype supports only xsd:minInclusive, xsd:maxInclusive, xsd:minExclusive, and xsd:maxExclusive, but the ontology contains a datatype restriction "+this.toString());
             Object facetDataValue=datatypeRestriction.getFacetValue(index).getDataValue();
-            if (!(facetDataValue instanceof Float)) 
+            if (!(facetDataValue instanceof Float))
                 throw new UnsupportedFacetException("The '"+facetURI+"' facet takes only floats as values when used on an xsd:float datatype, but the ontology contains a datatype restriction "+this.toString());
         }
     }

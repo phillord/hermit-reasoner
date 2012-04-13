@@ -147,7 +147,7 @@ public class OWLLinkTest extends AbstractReasonerTest {
         }
         m_ontology=m_ontologyManager.loadOntology(IRI.create(mainOntology));
         createReasoner();
-        m_reasoner.getPrefixes().declarePrefix("", "http://www.iyouit.eu/agent-inst.owl#");
+        m_reasoner.getPrefixes().declareDefaultPrefix("http://www.iyouit.eu/agent-inst.owl#");
         OWLNamedIndividual e1079=m_dataFactory.getOWLNamedIndividual(IRI.create(mainOntology+"#1079"));
         OWLObjectProperty colleague=m_dataFactory.getOWLObjectProperty(IRI.create(mainOntology+"#colleague"));
         int[] expected= { 1079,1084,1086,1096,1098,1126,1127,1183 };

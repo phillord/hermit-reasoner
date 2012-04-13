@@ -1792,7 +1792,7 @@ public class Reasoner implements OWLReasoner {
                                     String lexicalForm=constant.getLexicalForm();
                                     String datatypeURI=constant.getDatatypeURI();
                                     OWLLiteral literal;
-                                    if ((Prefixes.s_semanticWebPrefixes.get("rdf")+"PlainLiteral").equals(datatypeURI)) {
+                                    if ((Prefixes.s_semanticWebPrefixes.get("rdf:")+"PlainLiteral").equals(datatypeURI)) {
                                         int atPosition=lexicalForm.lastIndexOf('@');
                                         literal=factory.getOWLLiteral(lexicalForm.substring(0,atPosition),lexicalForm.substring(atPosition+1));
                                     }

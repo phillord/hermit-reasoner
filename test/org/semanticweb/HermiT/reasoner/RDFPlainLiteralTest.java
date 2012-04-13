@@ -15,8 +15,8 @@ import org.semanticweb.HermiT.model.Constant;
 import org.semanticweb.HermiT.model.DatatypeRestriction;
 
 public class RDFPlainLiteralTest extends AbstractReasonerTest {
-    protected static final String RDF_PLAIN_LITERAL=Prefixes.s_semanticWebPrefixes.get("rdf")+"PlainLiteral";
-    protected static final String XSD_NS=Prefixes.s_semanticWebPrefixes.get("xsd");
+    protected static final String RDF_PLAIN_LITERAL=Prefixes.s_semanticWebPrefixes.get("rdf:")+"PlainLiteral";
+    protected static final String XSD_NS=Prefixes.s_semanticWebPrefixes.get("xsd:");
 
     public RDFPlainLiteralTest(String name) {
         super(name);

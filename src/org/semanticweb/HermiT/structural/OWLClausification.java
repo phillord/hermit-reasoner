@@ -826,9 +826,9 @@ public class OWLClausification {
             try {
                 if (object.isRDFPlainLiteral()) {
                     if (object.hasLang())
-                        return Constant.create(object.getLiteral()+"@"+object.getLang(),Prefixes.s_semanticWebPrefixes.get("rdf")+"PlainLiteral");
+                        return Constant.create(object.getLiteral()+"@"+object.getLang(),Prefixes.s_semanticWebPrefixes.get("rdf:")+"PlainLiteral");
                     else
-                        return Constant.create(object.getLiteral()+"@",Prefixes.s_semanticWebPrefixes.get("rdf")+"PlainLiteral");
+                        return Constant.create(object.getLiteral()+"@",Prefixes.s_semanticWebPrefixes.get("rdf:")+"PlainLiteral");
                 }
                 else
                     return Constant.create(object.getLiteral(),object.getDatatype().getIRI().toString());

@@ -29,7 +29,7 @@ import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
 import org.semanticweb.HermiT.model.DatatypeRestriction;
 
 public class XMLLiteralDatatypeHandler implements DatatypeHandler {
-    protected static final String RDF_XML_LITERAL=Prefixes.s_semanticWebPrefixes.get("rdf")+"XMLLiteral";
+    protected static final String RDF_XML_LITERAL=Prefixes.s_semanticWebPrefixes.get("rdf:")+"XMLLiteral";
     protected static final ValueSpaceSubset XML_LITERAL_ALL=new XMLLiteralAll();
     protected static final ValueSpaceSubset EMPTY=new XMLLiteralNone();
     protected final static Set<String> s_managedDatatypeURIs=Collections.singleton(RDF_XML_LITERAL);

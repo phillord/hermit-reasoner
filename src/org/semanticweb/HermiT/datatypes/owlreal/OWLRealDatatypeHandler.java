@@ -42,8 +42,8 @@ import org.semanticweb.HermiT.model.DatatypeRestriction;
  * as BigDecimal 3.5.
  */
 public class OWLRealDatatypeHandler implements DatatypeHandler {
-    protected static final String OWL_NS=Prefixes.s_semanticWebPrefixes.get("owl");
-    protected static final String XSD_NS=Prefixes.s_semanticWebPrefixes.get("xsd");
+    protected static final String OWL_NS=Prefixes.s_semanticWebPrefixes.get("owl:");
+    protected static final String XSD_NS=Prefixes.s_semanticWebPrefixes.get("xsd:");
 
     protected static final Map<String,NumberInterval> s_intervalsByDatatype=new HashMap<String,NumberInterval>();
     protected static final Map<String,ValueSpaceSubset> s_subsetsByDatatype=new HashMap<String,ValueSpaceSubset>();
@@ -129,7 +129,7 @@ public class OWLRealDatatypeHandler implements DatatypeHandler {
         assert s_intervalsByDatatype.keySet().contains(datatypeRestriction.getDatatypeURI());
         for (int index=datatypeRestriction.getNumberOfFacetRestrictions()-1;index>=0;--index) {
             String facetURI=datatypeRestriction.getFacetURI(index);
-            if (!s_supportedFacetURIs.contains(facetURI)) 
+            if (!s_supportedFacetURIs.contains(facetURI))
                 throw new UnsupportedFacetException("A facet with URI '"+facetURI+"' is not supported on datatypes derived from owl:real. The owl:real derived datatypes support only xsd:minInclusive, xsd:maxInclusive, xsd:minExclusive, and xsd:maxExclusive, but the ontology contains a datatype restriction "+this.toString());
             Constant facetValue=datatypeRestriction.getFacetValue(index);
             Object facetDataValue=facetValue.getDataValue();
