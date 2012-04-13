@@ -468,7 +468,7 @@ public class Reasoner implements OWLReasoner {
                             } else {
                                 return false;
                             }
-                        } else 
+                        } else
                             return false;
                     } else if (!(axiom instanceof OWLIndividualAxiom)) {
                         return false;
@@ -1986,10 +1986,7 @@ public class Reasoner implements OWLReasoner {
             blockingStrategy=new AnywhereValidatedBlocking(directBlockingChecker,hasInverseRoles,false);
             break;
         case OPTIMAL:
-            if (hasNominals)
-                blockingStrategy=new AnywhereValidatedBlocking(directBlockingChecker,hasInverseRoles,true);
-            else
-                blockingStrategy=new AnywhereBlocking(directBlockingChecker,blockingSignatureCache);
+            blockingStrategy=new AnywhereBlocking(directBlockingChecker,blockingSignatureCache);
             break;
         default:
             throw new IllegalArgumentException("Unknown blocking strategy type.");
