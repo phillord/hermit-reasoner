@@ -42,6 +42,17 @@ public class ReasonerTest extends AbstractReasonerTest {
     public ReasonerTest(String name) {
         super(name);
     }
+    
+    public void testClassificationWithValidatedBlockingError() throws Exception {
+        loadOntologyFromResource("res/classification-blocking-error.owl");
+        createReasoner();
+        OWLClass c1=C("http://www.co-ode.org/ontologies/galen#BloodVessel");
+        OWLClass c2=C("http://www.co-ode.org/ontologies/galen#HollowStructure");
+        OWLAxiom ax=m_dataFactory.getOWLSubClassOfAxiom(c1, c2);
+        m_reasoner.classifyClasses();       
+        assertTrue(m_reasoner.isEntailed(ax));
+    }
+    
     public void testIncrementalWithNegatedHasValue() throws Exception {
         String axioms = "Declaration( ObjectProperty( :r ) )"+LB+
                 "Declaration( Class( :A ) )"+LB+

@@ -1,0 +1,187 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY galen "http://www.co-ode.org/ontologies/galen#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+]>
+
+
+<rdf:RDF xmlns="file:/Users/zwang/Temp/HermiT-testing/ontologies/Module.owl#"
+     xml:base="file:/Users/zwang/Temp/HermiT-testing/ontologies/Module.owl"
+     xmlns:galen="http://www.co-ode.org/ontologies/galen#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <owl:Ontology rdf:about="file:/Users/zwang/Temp/HermiT-testing/ontologies/Module.owl"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.co-ode.org/ontologies/galen#hasAbsoluteState -->
+
+    <owl:ObjectProperty rdf:about="&galen;hasAbsoluteState"/>
+    
+
+
+    <!-- http://www.co-ode.org/ontologies/galen#hasTopology -->
+
+    <owl:ObjectProperty rdf:about="&galen;hasTopology"/>
+    
+
+
+    <!-- http://www.co-ode.org/ontologies/galen#isSpecificallyServedBy -->
+
+    <owl:ObjectProperty rdf:about="&galen;isSpecificallyServedBy"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.co-ode.org/ontologies/galen#BloodVessel -->
+
+    <owl:Class rdf:about="&galen;BloodVessel">
+        <rdfs:subClassOf rdf:resource="&galen;SolidStructure"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&galen;hasTopology"/>
+                <owl:someValuesFrom>
+                    <owl:Class>
+                        <owl:intersectionOf rdf:parseType="Collection">
+                            <rdf:Description rdf:about="&galen;Topology"/>
+                            <owl:Restriction>
+                                <owl:onProperty rdf:resource="&galen;hasAbsoluteState"/>
+                                <owl:someValuesFrom rdf:resource="&galen;tubular"/>
+                            </owl:Restriction>
+                        </owl:intersectionOf>
+                    </owl:Class>
+                </owl:someValuesFrom>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.co-ode.org/ontologies/galen#BloodVesselOfSystemicCirculation -->
+
+    <owl:Class rdf:about="&galen;BloodVesselOfSystemicCirculation">
+        <rdfs:subClassOf rdf:resource="&galen;BloodVessel"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.co-ode.org/ontologies/galen#Heart -->
+
+    <owl:Class rdf:about="&galen;Heart">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&galen;isSpecificallyServedBy"/>
+                <owl:someValuesFrom rdf:resource="&galen;BloodVessel"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&galen;hasTopology"/>
+                <owl:someValuesFrom>
+                    <owl:Class>
+                        <owl:intersectionOf rdf:parseType="Collection">
+                            <rdf:Description rdf:about="&galen;Topology"/>
+                            <owl:Restriction>
+                                <owl:onProperty rdf:resource="&galen;hasAbsoluteState"/>
+                                <owl:someValuesFrom rdf:resource="&galen;tubular"/>
+                            </owl:Restriction>
+                        </owl:intersectionOf>
+                    </owl:Class>
+                </owl:someValuesFrom>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.co-ode.org/ontologies/galen#HollowStructure -->
+
+    <owl:Class rdf:about="&galen;HollowStructure">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="&galen;SolidStructure"/>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="&galen;hasTopology"/>
+                        <owl:someValuesFrom>
+                            <owl:Class>
+                                <owl:intersectionOf rdf:parseType="Collection">
+                                    <rdf:Description rdf:about="&galen;Topology"/>
+                                    <owl:Restriction>
+                                        <owl:onProperty rdf:resource="&galen;hasAbsoluteState"/>
+                                        <owl:someValuesFrom>
+                                            <owl:Class>
+                                                <owl:unionOf rdf:parseType="Collection">
+                                                    <owl:Class>
+                                                        <owl:oneOf>
+                                                            <rdf:List>
+                                                               <rdf:first rdf:resource="&galen;SURFACEHOLLOW"/>
+                                                               <rdf:rest rdf:resource="&rdf;nil"/>
+                                                            </rdf:List>
+                                                        </owl:oneOf>
+                                                    </owl:Class>
+                                                    <rdf:Description rdf:about="&galen;tubular"/>
+                                                </owl:unionOf>
+                                            </owl:Class>
+                                        </owl:someValuesFrom>
+                                    </owl:Restriction>
+                                </owl:intersectionOf>
+                            </owl:Class>
+                        </owl:someValuesFrom>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+    </owl:Class>
+    
+
+
+    <!-- http://www.co-ode.org/ontologies/galen#SolidStructure -->
+
+    <owl:Class rdf:about="&galen;SolidStructure"/>
+    
+
+
+    <!-- http://www.co-ode.org/ontologies/galen#Topology -->
+
+    <owl:Class rdf:about="&galen;Topology"/>
+
+    <!-- http://www.co-ode.org/ontologies/galen#tubular -->
+
+    <owl:Class rdf:about="&galen;tubular"/>
+    
+
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 3.2.3.22702) http://owlapi.sourceforge.net -->
+
