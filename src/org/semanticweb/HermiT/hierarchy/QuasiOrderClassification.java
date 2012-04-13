@@ -145,39 +145,39 @@ public class QuasiOrderClassification {
         while (!toProcess.empty()) {
         	HierarchyNode<AtomicConcept> currentHierarchyElement=toProcess.pop();
             AtomicConcept currentHierarchyConcept=currentHierarchyElement.getRepresentative();
-            if (conceptsProcessed < java.lang.Math.ceil(totalNumberOfTasks*0.85)) {
+            if (conceptsProcessed < Math.ceil(totalNumberOfTasks*0.85)) {
 	            m_progressMonitor.elementClassified(currentHierarchyConcept);
 	            conceptsProcessed++;
             }
-            if (conceptHasBeenProcessedAlready(currentHierarchyConcept))
-                continue;
-            Node rootNodeOfModel=buildModelForConcept(currentHierarchyConcept);
-            // If the leaf was unsatisfable we go up to explore its parents, until a satisfiable parent is discovered. Each time a node is unsat this information is propagated downwards.
-            if (rootNodeOfModel==null) {
-            	makeConceptUnsatisfiable(currentHierarchyConcept);
-            	unsatHierarchyNodes.add(currentHierarchyElement);
-                toProcess.addAll(currentHierarchyElement.getParentNodes());
-                Set<HierarchyNode<AtomicConcept>> visited=new HashSet<HierarchyNode<AtomicConcept>>();
-                Queue<HierarchyNode<AtomicConcept>> toVisit=new LinkedList<HierarchyNode<AtomicConcept>>(currentHierarchyElement.getChildNodes());
-                while (!toVisit.isEmpty()) {
-                    HierarchyNode<AtomicConcept> current=toVisit.poll();
-                    if (visited.add(current) && !unsatHierarchyNodes.contains(current)) {
-                        toVisit.addAll(current.getChildNodes());
-                        unsatHierarchyNodes.add(current);
-                        makeConceptUnsatisfiable(current.getRepresentative());
-                        toProcess.remove(current);
-                        for (HierarchyNode<AtomicConcept> parentOfRemovedConcept : current.getParentNodes())
-                     	   if (!conceptHasBeenProcessedAlready(parentOfRemovedConcept.getRepresentative()))
-                     		   toProcess.add(parentOfRemovedConcept);
+            if (!conceptHasBeenProcessedAlready(currentHierarchyConcept)) {
+                Node rootNodeOfModel=buildModelForConcept(currentHierarchyConcept);
+                // If the leaf was unsatisfable we go up to explore its parents, until a satisfiable parent is discovered. Each time a node is unsat this information is propagated downwards.
+                if (rootNodeOfModel==null) {
+                	makeConceptUnsatisfiable(currentHierarchyConcept);
+                	unsatHierarchyNodes.add(currentHierarchyElement);
+                    toProcess.addAll(currentHierarchyElement.getParentNodes());
+                    Set<HierarchyNode<AtomicConcept>> visited=new HashSet<HierarchyNode<AtomicConcept>>();
+                    Queue<HierarchyNode<AtomicConcept>> toVisit=new LinkedList<HierarchyNode<AtomicConcept>>(currentHierarchyElement.getChildNodes());
+                    while (!toVisit.isEmpty()) {
+                        HierarchyNode<AtomicConcept> current=toVisit.poll();
+                        if (visited.add(current) && !unsatHierarchyNodes.contains(current)) {
+                            toVisit.addAll(current.getChildNodes());
+                            unsatHierarchyNodes.add(current);
+                            makeConceptUnsatisfiable(current.getRepresentative());
+                            toProcess.remove(current);
+                            for (HierarchyNode<AtomicConcept> parentOfRemovedConcept : current.getParentNodes())
+                         	   if (!conceptHasBeenProcessedAlready(parentOfRemovedConcept.getRepresentative()))
+                         		   toProcess.add(parentOfRemovedConcept);
+                        }
                     }
                 }
-            }
-            else {
-                // We cannot do rootNodeOfModel.getCanonicalNode() here. This is done
-                // in readKnownSubsumersFromRootNode(), but only if rootNodeOfModel
-                // has not been merged into another node, or if the merge was deterministic.
-                readKnownSubsumersFromRootNode(currentHierarchyConcept,rootNodeOfModel);
-                updatePossibleSubsumers();
+                else {
+                    // We cannot do rootNodeOfModel.getCanonicalNode() here. This is done
+                    // in readKnownSubsumersFromRootNode(), but only if rootNodeOfModel
+                    // has not been merged into another node, or if the merge was deterministic.
+                    readKnownSubsumersFromRootNode(currentHierarchyConcept,rootNodeOfModel);
+                    updatePossibleSubsumers();
+                }
             }
         }
         return conceptsProcessed;
