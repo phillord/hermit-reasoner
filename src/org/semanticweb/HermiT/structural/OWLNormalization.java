@@ -1035,7 +1035,7 @@ public class OWLNormalization {
             addFact(m_factory.getOWLDataPropertyAssertionAxiom(atom.getPredicate().asOWLDataProperty(),ind.asOWLNamedIndividual(),lit));
         }
         public void visit(SWRLBuiltInAtom atom) {
-            throw new IllegalArgumentException("Error: A rule uses built-in atoms ("+atom+"), but built-in atoms are not suported yet. ");
+            throw new IllegalArgumentException("Error: A rule uses built-in atoms ("+atom+"), but built-in atoms are not supported yet. ");
         }
         public void visit(SWRLSameIndividualAtom atom) {
             Set<OWLNamedIndividual> inds=new HashSet<OWLNamedIndividual>();
@@ -1246,7 +1246,7 @@ public class OWLNormalization {
             }
         }
         public void visit(SWRLBuiltInAtom at) {
-            throw new IllegalArgumentException("A SWRL rule uses built-in atom, but built-in atoms are not suported yet.");
+            throw new IllegalArgumentException("A SWRL rule uses a built-in atom, but built-in atoms are not supported yet.");
         }
         public void visit(SWRLSameIndividualAtom at) {
             if (m_isPositive)
