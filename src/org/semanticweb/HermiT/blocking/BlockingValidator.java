@@ -72,7 +72,7 @@ public class BlockingValidator {
         m_ternaryRetrieval2Bound=m_extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { false,false,true }, ExtensionTable.View.TOTAL);
         m_dlClauseInfos=new ArrayList<DLClauseInfo>();
         for (DLClause dlClause : dlClauses) {
-            if (dlClause.isAtomicConceptInclusion()) {
+            if (dlClause.isGeneralConceptInclusion()) {
                 DLClauseInfo clauseInfo=new DLClauseInfo(dlClause,m_extensionManager);
                 if (clauseInfo.m_yNodes.length>0 || clauseInfo.m_zConcepts.length>0)
                     m_dlClauseInfos.add(clauseInfo);

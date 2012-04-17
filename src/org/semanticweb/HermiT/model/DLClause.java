@@ -97,6 +97,48 @@ public class DLClause implements Serializable {
             bodyAtoms=m_bodyAtoms;
         return DLClause.create(headAtoms,bodyAtoms);
     }
+    public boolean isGeneralConceptInclusion() {
+        if (m_headAtoms.length==0) {
+            // not a GCI if all body atoms are data ranges
+            // could also be an asymmetry axiom of the form r(x, y) and r(y, x) -> bottom
+            if (m_bodyAtoms.length==2 && m_bodyAtoms[0].getArity()==2 && m_bodyAtoms[1].getArity()==2)
+                return false;
+            for (Atom bodyAtom : m_bodyAtoms)
+                if (bodyAtom.getArity()!=1 || !(bodyAtom.getDLPredicate() instanceof DataRange)) 
+                    return true;                
+        }
+        for (Atom headAtom : m_headAtoms) {
+            DLPredicate predicate=headAtom.getDLPredicate(); 
+            if (predicate instanceof AtLeast 
+                    || predicate instanceof LiteralConcept 
+                    || predicate instanceof AnnotatedEquality
+                    || predicate instanceof NodeIDLessEqualThan
+                    || predicate instanceof NodeIDsAscendingOrEqual) 
+                return true;
+            if (predicate instanceof Equality) {
+                // could be a key, which we do not count as GCI
+                // check if body uses the special named concept
+                for (Atom bodyAtom : m_bodyAtoms) {
+                    DLPredicate bodyPredicate=bodyAtom.getDLPredicate();
+                    if (bodyAtom.getArity()==1 
+                            && bodyPredicate instanceof AtomicConcept 
+                            && ((AtomicConcept)bodyPredicate).equals(AtomicConcept.INTERNAL_NAMED))
+                        return false;
+                }
+            }
+            if (predicate instanceof DataRange) {
+                // could be a data range inclusion or a universal, e.g., A -> for all dp.DR
+                for (Atom bodyAtom : m_bodyAtoms) {
+                    if (bodyAtom.getArity()==2)
+                        return true;
+                }
+                return false;
+            }
+            if (predicate instanceof Role) // role inclusion
+                return false;
+        }
+        return false;
+    }
     public boolean isAtomicConceptInclusion() {
         if (m_bodyAtoms.length==1 && m_headAtoms.length==1) {
             Atom bodyAtom=m_bodyAtoms[0];

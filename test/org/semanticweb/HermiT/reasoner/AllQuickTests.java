@@ -19,6 +19,7 @@ public class AllQuickTests extends TestCase {
         suite.addTestSuite(XMLLiteralTest.class);
         suite.addTestSuite(ReasonerTest.class);
         suite.addTestSuite(ReasonerIndividualReuseTest.class);
+        suite.addTestSuite(ReasonerCoreBlockingTest.class);
         suite.addTestSuite(ComplexConceptTest.class);
         suite.addTestSuite(EntailmentTest.class);
         suite.addTestSuite(RIARegularityTest.class);

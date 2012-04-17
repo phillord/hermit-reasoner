@@ -155,7 +155,7 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
         Node firstInvalidlyBlockedNode=null;
         while (node!=null) {
             if (node.isActive()) {
-                if (node.isBlocked() && node.hasUnprocessedExistentials()) {
+                if (node.isBlocked()) { // && node.hasUnprocessedExistentials()
                     checkedBlocks++;
                     // check whether the block is a correct one
                     if ((node.isDirectlyBlocked() && (m_directBlockingChecker.hasChangedSinceValidation(node) || m_directBlockingChecker.hasChangedSinceValidation(node.getParent()) || m_directBlockingChecker.hasChangedSinceValidation(node.getBlocker()))) || !node.getParent().isBlocked()) {
