@@ -283,8 +283,8 @@ public class OWLClausification {
             OWLClassExpression internal=((OWLObjectComplementOf)description).getOperand();
             if (internal instanceof OWLClass) {
                 OWLClass owlClass=(OWLClass)internal;
-                bodyAtoms.add(Atom.create(AtomicConcept.create(owlClass.getIRI().toString()),X1));
-                bodyAtoms.add(Atom.create(AtomicConcept.create(owlClass.getIRI().toString()),X2));
+                headAtoms.add(Atom.create(AtomicConcept.create(owlClass.getIRI().toString()),X1));
+                headAtoms.add(Atom.create(AtomicConcept.create(owlClass.getIRI().toString()),X2));
             }
             else
                 throw new IllegalStateException("Internal error: invalid normal form.");

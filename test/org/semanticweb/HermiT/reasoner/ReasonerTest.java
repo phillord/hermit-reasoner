@@ -1405,13 +1405,28 @@ public class ReasonerTest extends AbstractReasonerTest {
             + "DataPropertyAssertion(:hasWaitingListN :TestPatient2 \"123-45-6789\")"
             + "Declaration(NamedIndividual(:TestPatient2))"
             + "ClassAssertion(:RegisteredPatient :TestPatient2)"
-            + "ClassAssertion(:RegisteredPatient :TestPatient2)"
             + "HasKey(:RegisteredPatient () (:hasWaitingListN))"
             + "DifferentIndividuals(:TestPatient1 :TestPatient2)";
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
     }
-
+    public void testKeysNegatedClass() throws Exception {
+        String axioms = "Declaration(Class(:RegisteredPatient))"
+            + "Declaration(Class(:Staff))"
+            + "Declaration(DataProperty(:hasWaitingListN))"
+            + "Declaration(NamedIndividual(:TestPatient1))"
+            + "Declaration(NamedIndividual(:TestPatient2))"
+            + "DisjointClasses(:Staff :RegisteredPatient)"
+            + "SubDataPropertyOf(:hasWaitingListN owl:topDataProperty)"
+            + "ClassAssertion(:RegisteredPatient :TestPatient1)"
+            + "ClassAssertion(:RegisteredPatient :TestPatient2)"
+            + "DataPropertyAssertion(:hasWaitingListN :TestPatient1 \"123-45-6789\")"
+            + "DataPropertyAssertion(:hasWaitingListN :TestPatient2 \"123-45-6789\")"
+            + "HasKey(ObjectComplementOf(:Staff) () (:hasWaitingListN))"
+            + "DifferentIndividuals(:TestPatient1 :TestPatient2)";
+        loadReasonerWithAxioms(axioms);
+        assertABoxSatisfiable(false);
+    }
     public void testNonUnaryKeys() throws Exception {
         String axioms = "HasKey(:Car () (:licensePlate :nationality))"
             + "ClassAssertion(:Car :myCar1)"
