@@ -624,6 +624,7 @@ public class Reasoner implements OWLReasoner {
                     }
                     else
                         completedSteps=m_instanceManager.initializeKnowAndPossiblePropertyInstances(tableau,m_configuration.reasonerProgressMonitor,startIndividualIndex,completedSteps,steps);
+                    tableau.clearAdditionalDLOntology();
                     startIndividualIndex=m_instanceManager.getCurrentIndividualIndex();
                     additionalAxioms=m_instanceManager.getAxiomsForReadingOffCompexProperties(getDataFactory(),m_configuration.reasonerProgressMonitor,completedSteps,steps);
                     completedSteps+=stepsAdditionalAxioms/chunks;
@@ -663,6 +664,7 @@ public class Reasoner implements OWLReasoner {
                     m_instanceManager.initializeKnowAndPossibleClassInstances(tableau,m_configuration.reasonerProgressMonitor,completedSteps,steps);
                 if (m_isConsistent==null)
                     m_isConsistent=isConsistent;
+                tableau.clearAdditionalDLOntology();
             }
             if (m_configuration.reasonerProgressMonitor!=null)
                 m_configuration.reasonerProgressMonitor.reasonerTaskStopped();
@@ -1651,24 +1653,25 @@ public class Reasoner implements OWLReasoner {
             if (classExpression instanceof OWLClass)
                 result=m_instanceManager.getInstances(H((OWLClass)classExpression),direct);
             else {
-                HierarchyNode<AtomicConcept> hierarchyNode=getHierarchyNode(classExpression);
-                result=m_instanceManager.getInstances(hierarchyNode,direct);
+                HierarchyNode<AtomicConcept> hierarchyNode=getHierarchyNode(classExpression); //defines internal:query-concept as equivalent to the queried (complex) concepts and inserts internal:query-concept into the class hierarchy  
+                result=m_instanceManager.getInstances(hierarchyNode,direct); // gets instances of classes that are direct subclasses of internal:query-concept 
                 OWLDataFactory factory=getDataFactory();
                 OWLClass queryClass=factory.getOWLClass(IRI.create("internal:query-concept"));
                 OWLAxiom queryClassDefinition=factory.getOWLSubClassOfAxiom(queryClass,classExpression.getObjectComplementOf());
-                Tableau tableau=getTableau(queryClassDefinition);
                 AtomicConcept queryConcept=AtomicConcept.create("internal:query-concept");
                 Set<HierarchyNode<AtomicConcept>> visitedNodes=new HashSet<HierarchyNode<AtomicConcept>>(hierarchyNode.getChildNodes());
-                List<HierarchyNode<AtomicConcept>> toVisit=new ArrayList<HierarchyNode<AtomicConcept>>(hierarchyNode.getParentNodes());
+                List<HierarchyNode<AtomicConcept>> toVisit=new ArrayList<HierarchyNode<AtomicConcept>>(hierarchyNode.getParentNodes()); //look for (direct) sibling nodes
                 while (!toVisit.isEmpty()) {
                     HierarchyNode<AtomicConcept> node=toVisit.remove(toVisit.size()-1);
                     if (visitedNodes.add(node)) {
                         Set<Individual> realizationForNodeConcept=m_instanceManager.getInstances(node,true);
                         if (realizationForNodeConcept!=null)
                             for (Individual individual : realizationForNodeConcept)
-                                if (isResultRelevantIndividual(individual))
+                                if (isResultRelevantIndividual(individual)) {
+                                    Tableau tableau=getTableau(queryClassDefinition);
                                     if (!tableau.isSatisfiable(true,true,Collections.singleton(Atom.create(queryConcept,individual)),null,null,null,null,ReasoningTaskDescription.isInstanceOf(individual,classExpression)))
                                         result.add(individual);
+                                }
                         toVisit.addAll(node.getChildNodes());
                     }
                 }
@@ -1727,8 +1730,10 @@ public class Reasoner implements OWLReasoner {
             Node<OWLNamedIndividual> node=new OWLNamedIndividualNode(getAllNamedIndividuals());
             return new OWLNamedIndividualNodeSet(Collections.singleton(node));
         }
-        initialisePropertiesInstanceManager();
         Role role=H(propertyExpression.getNamedProperty());
+        if (!m_dlOntology.containsObjectRole((AtomicRole)role))
+            return new OWLNamedIndividualNodeSet();
+        initialisePropertiesInstanceManager();
         if (propertyExpression.getSimplified().isAnonymous())
             role=InverseRole.create((AtomicRole)role);
         Individual individual=H(namedIndividual);

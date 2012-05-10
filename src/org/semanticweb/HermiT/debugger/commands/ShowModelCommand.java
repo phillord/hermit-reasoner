@@ -26,6 +26,7 @@ import org.semanticweb.HermiT.debugger.Debugger;
 import org.semanticweb.HermiT.debugger.Printing;
 import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.DLPredicate;
+import org.semanticweb.HermiT.model.NegatedAtomicRole;
 import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.Node;
 
@@ -128,6 +129,8 @@ public class ShowModelCommand extends AbstractCommand {
         Object dlPredicate=fact[0];
         if (dlPredicate instanceof Concept)
             writer.print(((Concept)dlPredicate).toString(m_debugger.getPrefixes()));
+        else if (dlPredicate instanceof NegatedAtomicRole)
+            writer.print(((NegatedAtomicRole)dlPredicate).toString(m_debugger.getPrefixes()));
         else if (dlPredicate instanceof DLPredicate)
             writer.print(((DLPredicate)dlPredicate).toString(m_debugger.getPrefixes()));
         else
