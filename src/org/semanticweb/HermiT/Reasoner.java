@@ -588,7 +588,7 @@ public class Reasoner implements OWLReasoner {
             if (m_configuration.reasonerProgressMonitor!=null)
                 m_configuration.reasonerProgressMonitor.reasonerTaskStarted("Initializing property instance data structures");
             if (m_instanceManager==null)
-                m_instanceManager=new InstanceManager(m_interruptFlag,this,getTableau(),m_atomicConceptHierarchy,m_objectRoleHierarchy);
+                m_instanceManager=new InstanceManager(m_interruptFlag,this,m_atomicConceptHierarchy,m_objectRoleHierarchy);
             boolean isConsistent=true;
             if (m_isConsistent!=null && !m_isConsistent)
                 m_instanceManager.setInconsistent();
@@ -642,7 +642,7 @@ public class Reasoner implements OWLReasoner {
             if (m_configuration.reasonerProgressMonitor!=null)
                 m_configuration.reasonerProgressMonitor.reasonerTaskStarted("Initializing class instance data structures");
             if (m_instanceManager==null)
-                m_instanceManager=new InstanceManager(m_interruptFlag,this,getTableau(),m_atomicConceptHierarchy,m_objectRoleHierarchy);
+                m_instanceManager=new InstanceManager(m_interruptFlag,this,m_atomicConceptHierarchy,m_objectRoleHierarchy);
             boolean isConsistent=true;
             if (m_isConsistent!=null && !m_isConsistent)
                 m_instanceManager.setInconsistent();
@@ -788,7 +788,9 @@ public class Reasoner implements OWLReasoner {
             OWLClassAssertionAxiom assertSubClassExpression=factory.getOWLClassAssertionAxiom(subClassExpression,freshIndividual);
             OWLClassAssertionAxiom assertNotSuperClassExpression=factory.getOWLClassAssertionAxiom(superClassExpression.getObjectComplementOf(),freshIndividual);
             Tableau tableau=getTableau(assertSubClassExpression,assertNotSuperClassExpression);
-            return !tableau.isSatisfiable(true,null,null,null,null,null,ReasoningTaskDescription.isConceptSubsumedBy(subClassExpression,superClassExpression));
+            boolean result=tableau.isSatisfiable(true,null,null,null,null,null,ReasoningTaskDescription.isConceptSubsumedBy(subClassExpression,superClassExpression));
+            tableau.clearAdditionalDLOntology();
+            return !result;
         }
     }
     public Node<OWLClass> getEquivalentClasses(OWLClassExpression classExpression) {
@@ -927,7 +929,9 @@ public class Reasoner implements OWLReasoner {
                     return !tableau.isSatisfiable(true,Collections.singleton(Atom.create(child,freshIndividual)),null,null,Collections.singleton(Atom.create(parent,freshIndividual)),null,ReasoningTaskDescription.isConceptSubsumedBy(child,parent));
                 }
             };
-            return HierarchySearch.findPosition(hierarchyRelation,AtomicConcept.create("internal:query-concept"),m_atomicConceptHierarchy.getTopNode(),m_atomicConceptHierarchy.getBottomNode());
+            HierarchyNode<AtomicConcept> extendedHierarchy=HierarchySearch.findPosition(hierarchyRelation,AtomicConcept.create("internal:query-concept"),m_atomicConceptHierarchy.getTopNode(),m_atomicConceptHierarchy.getBottomNode());
+            tableau.clearAdditionalDLOntology();
+            return extendedHierarchy;
         }
     }
 
@@ -1012,6 +1016,7 @@ public class Reasoner implements OWLReasoner {
                         m_instanceManager.setToClassifiedRoleHierarchy(m_objectRoleHierarchy);
                 }
                 finally {
+                    tableau.clearAdditionalDLOntology();
                     if (m_configuration.reasonerProgressMonitor!=null)
                         m_configuration.reasonerProgressMonitor.reasonerTaskStopped();
                 }
@@ -1046,7 +1051,9 @@ public class Reasoner implements OWLReasoner {
             OWLAxiom pseudoNominalAssertion=factory.getOWLClassAssertionAxiom(pseudoNominal,freshIndividualB);
             OWLAxiom allSuperNotPseudoNominalAssertion=factory.getOWLClassAssertionAxiom(allSuperNotPseudoNominal,freshIndividualA);
             Tableau tableau=getTableau(subObjectPropertyAssertion,pseudoNominalAssertion,allSuperNotPseudoNominalAssertion);
-            return !tableau.isSatisfiable(true,null,null,null,null,null,ReasoningTaskDescription.isRoleSubsumedBy(subrole,superrole,true));
+            boolean result=tableau.isSatisfiable(true,null,null,null,null,null,ReasoningTaskDescription.isRoleSubsumedBy(subrole,superrole,true));
+            tableau.clearAdditionalDLOntology();
+            return !result;
         }
     }
     protected boolean isSubObjectPropertyExpressionOf(List<OWLObjectPropertyExpression> subPropertyChain,OWLObjectPropertyExpression superObjectPropertyExpression) {
@@ -1223,9 +1230,7 @@ public class Reasoner implements OWLReasoner {
         Set<Atom> perTestAtoms=new HashSet<Atom>(2);
         perTestAtoms.add(roleAssertion1);
         perTestAtoms.add(roleAssertion2);
-        Tableau tableau=getTableau();
-        boolean disjoint=!tableau.isSatisfiable(false,perTestAtoms,null,null,null,null,new ReasoningTaskDescription(true,"disjointness of {0} and {1}",role1,role2));
-        return disjoint;
+        return !getTableau().isSatisfiable(false,perTestAtoms,null,null,null,null,new ReasoningTaskDescription(true,"disjointness of {0} and {1}",role1,role2));
     }
     protected boolean isFunctional(OWLObjectPropertyExpression propertyExpression) {
         checkPreConditions(propertyExpression);
@@ -1274,7 +1279,9 @@ public class Reasoner implements OWLReasoner {
         OWLAxiom pseudoNominalAssertion=factory.getOWLClassAssertionAxiom(pseudoNominal,freshIndividual);
         OWLAxiom allNotPseudoNominalAssertion=factory.getOWLClassAssertionAxiom(allNotPseudoNominal,freshIndividual);
         Tableau tableau=getTableau(pseudoNominalAssertion,allNotPseudoNominalAssertion);
-        return !tableau.isSatisfiable(true,null,null,null,null,null,new ReasoningTaskDescription(true,"symmetry of {0}",H(propertyExpression)));
+        boolean result=tableau.isSatisfiable(true,null,null,null,null,null,new ReasoningTaskDescription(true,"symmetry of {0}",H(propertyExpression)));
+        tableau.clearAdditionalDLOntology();
+        return !result;
     }
     protected boolean isAsymmetric(OWLObjectPropertyExpression propertyExpression) {
         checkPreConditions(propertyExpression);
@@ -1286,7 +1293,9 @@ public class Reasoner implements OWLReasoner {
         OWLAxiom assertion1=factory.getOWLObjectPropertyAssertionAxiom(propertyExpression,freshIndividualA,freshIndividualB);
         OWLAxiom assertion2=factory.getOWLObjectPropertyAssertionAxiom(propertyExpression.getInverseProperty(),freshIndividualA,freshIndividualB);
         Tableau tableau=getTableau(assertion1,assertion2);
-        return !tableau.isSatisfiable(true,null,null,null,null,null,new ReasoningTaskDescription(true,"asymmetry of {0}",H(propertyExpression)));
+        boolean result=tableau.isSatisfiable(true,null,null,null,null,null,new ReasoningTaskDescription(true,"asymmetry of {0}",H(propertyExpression)));
+        tableau.clearAdditionalDLOntology();
+        return !result;
     }
     protected boolean isSymmetric(OWLObjectPropertyExpression propertyExpression) {
         checkPreConditions(propertyExpression);
@@ -1301,7 +1310,9 @@ public class Reasoner implements OWLReasoner {
         OWLAxiom assertion2=factory.getOWLClassAssertionAxiom(allNotPseudoNominal,freshIndividualB);
         OWLAxiom assertion3=factory.getOWLClassAssertionAxiom(pseudoNominal,freshIndividualA);
         Tableau tableau=getTableau(assertion1,assertion2,assertion3);
-        return !tableau.isSatisfiable(true,null,null,null,null,null,new ReasoningTaskDescription(true,"symmetry of {0}",propertyExpression));
+        boolean result=tableau.isSatisfiable(true,null,null,null,null,null,new ReasoningTaskDescription(true,"symmetry of {0}",propertyExpression));
+        tableau.clearAdditionalDLOntology();
+        return !result;
     }
     protected boolean isTransitive(OWLObjectPropertyExpression propertyExpression) {
         checkPreConditions(propertyExpression);
@@ -1318,7 +1329,9 @@ public class Reasoner implements OWLReasoner {
         OWLAxiom assertion3=factory.getOWLClassAssertionAxiom(allNotPseudoNominal,freshIndividualA);
         OWLAxiom assertion4=factory.getOWLClassAssertionAxiom(pseudoNominal,freshIndividualC);
         Tableau tableau=getTableau(assertion1,assertion2,assertion3,assertion4);
-        return !tableau.isSatisfiable(true,null,null,null,null,null,new ReasoningTaskDescription(true,"transitivity of {0}",H(propertyExpression)));
+        boolean result=tableau.isSatisfiable(true,null,null,null,null,null,new ReasoningTaskDescription(true,"transitivity of {0}",H(propertyExpression)));
+        tableau.clearAdditionalDLOntology();
+        return !result;
     }
     protected HierarchyNode<Role> getHierarchyNode(OWLObjectPropertyExpression propertyExpression) {
         checkPreConditions(propertyExpression);
@@ -1397,6 +1410,7 @@ public class Reasoner implements OWLReasoner {
                         m_dataRoleHierarchy=atomicConceptHierarchyForRoles.transform(transformer,null);
                     }
                     finally {
+                        tableau.clearAdditionalDLOntology();
                         if (m_configuration.reasonerProgressMonitor!=null)
                             m_configuration.reasonerProgressMonitor.reasonerTaskStopped();
                     }
@@ -1433,7 +1447,9 @@ public class Reasoner implements OWLReasoner {
             OWLAxiom negatedSuperpropertyAssertion=factory.getOWLDataPropertyAssertionAxiom(negatedSuperDataProperty,individual,freshConstant);
             OWLAxiom superpropertyAxiomatization=factory.getOWLDisjointDataPropertiesAxiom(superDataProperty,negatedSuperDataProperty);
             Tableau tableau=getTableau(subpropertyAssertion,negatedSuperpropertyAssertion,superpropertyAxiomatization);
-            return !tableau.isSatisfiable(true,null,null,null,null,null,ReasoningTaskDescription.isRoleSubsumedBy(subrole,superrole,false));
+            boolean result=tableau.isSatisfiable(true,null,null,null,null,null,ReasoningTaskDescription.isRoleSubsumedBy(subrole,superrole,false));
+            tableau.clearAdditionalDLOntology();
+            return !result;
         }
     }
     public NodeSet<OWLDataProperty> getSuperDataProperties(OWLDataProperty property,boolean direct) {
@@ -1635,7 +1651,9 @@ public class Reasoner implements OWLReasoner {
                 OWLDataFactory factory=getDataFactory();
                 OWLAxiom negatedAssertionAxiom=factory.getOWLClassAssertionAxiom(type.getObjectComplementOf(),namedIndividual);
                 Tableau tableau=getTableau(negatedAssertionAxiom);
-                return !tableau.isSatisfiable(true,true,null,null,null,null,null,ReasoningTaskDescription.isInstanceOf(namedIndividual,type));
+                boolean result=tableau.isSatisfiable(true,true,null,null,null,null,null,ReasoningTaskDescription.isInstanceOf(namedIndividual,type));
+                tableau.clearAdditionalDLOntology();
+                return !result;
             }
         }
     }
@@ -1665,13 +1683,14 @@ public class Reasoner implements OWLReasoner {
                     HierarchyNode<AtomicConcept> node=toVisit.remove(toVisit.size()-1);
                     if (visitedNodes.add(node)) {
                         Set<Individual> realizationForNodeConcept=m_instanceManager.getInstances(node,true);
-                        if (realizationForNodeConcept!=null)
+                        if (realizationForNodeConcept!=null) {
+                            Tableau tableau=getTableau(queryClassDefinition);
                             for (Individual individual : realizationForNodeConcept)
-                                if (isResultRelevantIndividual(individual)) {
-                                    Tableau tableau=getTableau(queryClassDefinition);
+                                if (isResultRelevantIndividual(individual))
                                     if (!tableau.isSatisfiable(true,true,Collections.singleton(Atom.create(queryConcept,individual)),null,null,null,null,ReasoningTaskDescription.isInstanceOf(individual,classExpression)))
                                         result.add(individual);
-                                }
+                            tableau.clearAdditionalDLOntology();
+                        }
                         toVisit.addAll(node.getChildNodes());
                     }
                 }
@@ -1820,7 +1839,9 @@ public class Reasoner implements OWLReasoner {
         OWLDataFactory factory=getDataFactory();
         OWLAxiom notAssertion=factory.getOWLNegativeDataPropertyAssertionAxiom(property,subject,object);
         Tableau tableau=getTableau(notAssertion);
-        return !tableau.isSatisfiable(true,true,null,null,null,null,null,new ReasoningTaskDescription(true,"is {0} connected to {1} via {2}",H(subject),object,H(property)));
+        boolean result=tableau.isSatisfiable(true,true,null,null,null,null,null,new ReasoningTaskDescription(true,"is {0} connected to {1} via {2}",H(subject),object,H(property)));
+        tableau.clearAdditionalDLOntology();
+        return !result;
     }
     protected Set<HierarchyNode<AtomicConcept>> getDirectSuperConceptNodes(final Individual individual) {
         HierarchySearch.SearchPredicate<HierarchyNode<AtomicConcept>> predicate=new HierarchySearch.SearchPredicate<HierarchyNode<AtomicConcept>>() {

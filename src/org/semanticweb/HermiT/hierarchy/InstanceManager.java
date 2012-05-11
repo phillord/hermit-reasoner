@@ -66,7 +66,6 @@ public class InstanceManager {
 
     protected final InterruptFlag m_interruptFlag;
     protected final Reasoner m_reasoner;
-    protected final Tableau m_tableau;
     protected final TableauMonitor m_tableauMonitor;
     protected final Individual[] m_individuals;
     protected final HashSet<AtomicRole> m_complexRoles;
@@ -102,13 +101,12 @@ public class InstanceManager {
     protected final ExtensionTable.Retrieval m_ternaryRetrieval012Bound;
     protected int m_currentIndividualIndex=0;
 
-    public InstanceManager(InterruptFlag interruptFlag,Reasoner reasoner,Tableau tableau,Hierarchy<AtomicConcept> atomicConceptHierarchy,Hierarchy<Role> objectRoleHierarchy) {
+    public InstanceManager(InterruptFlag interruptFlag,Reasoner reasoner,Hierarchy<AtomicConcept> atomicConceptHierarchy,Hierarchy<Role> objectRoleHierarchy) {
         m_interruptFlag=interruptFlag;
         m_interruptFlag.startTask();
         try {
             m_reasoner=reasoner;
-            m_tableau=tableau;
-            m_tableauMonitor=tableau.getTableauMonitor();
+            m_tableauMonitor=m_reasoner.getTableau().getTableauMonitor();
             DLOntology dlo=m_reasoner.getDLOntology();
             m_individuals=new ArrayList<Individual>(dlo.getAllIndividuals()).toArray(new Individual[0]);
             m_complexRoles=new HashSet<AtomicRole>();
@@ -187,7 +185,7 @@ public class InstanceManager {
                 m_currentConceptHierarchy=buildTransitivelyReducedConceptHierarchy(knownConceptSubsumptions);
             if (objectRoleHierarchy==null)
                 m_currentRoleHierarchy=buildTransitivelyReducedRoleHierarchy(knownRoleSubsumptions);
-            ExtensionManager extensionManager=m_tableau.getExtensionManager();
+            ExtensionManager extensionManager=m_reasoner.getTableau().getExtensionManager();
             m_binaryRetrieval0Bound=extensionManager.getBinaryExtensionTable().createRetrieval(new boolean[] { true, false }, ExtensionTable.View.TOTAL);
             m_binaryRetrieval1Bound=extensionManager.getBinaryExtensionTable().createRetrieval(new boolean[] { false, true }, ExtensionTable.View.TOTAL);
             m_binaryRetrieval01Bound=extensionManager.getBinaryExtensionTable().createRetrieval(new boolean[] { true, true }, ExtensionTable.View.TOTAL);
@@ -1283,8 +1281,7 @@ public class InstanceManager {
         return equivalenceClass;
     }
     public boolean isSameIndividual(Individual individual1, Individual individual2) {
-        m_tableau.clearAdditionalDLOntology();
-        return (!m_tableau.isSatisfiable(true,false,Collections.singleton(Atom.create(Inequality.INSTANCE,individual1,individual2)),null,null,null,null,new ReasoningTaskDescription(true,"is {0} same as {1}",individual1,individual2)));
+        return (!m_reasoner.getTableau().isSatisfiable(true,false,Collections.singleton(Atom.create(Inequality.INSTANCE,individual1,individual2)),null,null,null,null,new ReasoningTaskDescription(true,"is {0} same as {1}",individual1,individual2)));
     }
     public void computeSameAsEquivalenceClasses(ReasonerProgressMonitor progressMonitor) {
         if (!m_individualToPossibleEquivalenceClass.isEmpty()) {
@@ -1302,8 +1299,7 @@ public class InstanceManager {
         }
     }
     protected boolean isInstance(Individual individual,AtomicConcept atomicConcept) {
-        m_tableau.clearAdditionalDLOntology();
-        boolean result = !m_tableau.isSatisfiable(true,false,null,Collections.singleton(Atom.create(atomicConcept,individual)),null,null,null,ReasoningTaskDescription.isInstanceOf(atomicConcept,individual));
+        boolean result = !m_reasoner.getTableau().isSatisfiable(true,false,null,Collections.singleton(Atom.create(atomicConcept,individual)),null,null,null,ReasoningTaskDescription.isInstanceOf(atomicConcept,individual));
         if (m_tableauMonitor!=null) {
             if (result)
                 m_tableauMonitor.possibleInstanceIsInstance();
@@ -1338,6 +1334,7 @@ public class InstanceManager {
             else 
                 m_tableauMonitor.possibleInstanceIsNotInstance();
         }
+        tableau.clearAdditionalDLOntology();
         return result;
     }
     protected static boolean isResultRelevantIndividual(Individual individual) {
