@@ -1716,8 +1716,8 @@ public class Reasoner implements OWLReasoner {
         checkPreConditions(namedIndividual);
         if (!m_isConsistent)
             return new OWLNamedIndividualNode(getAllNamedIndividuals());
-        if (m_dlOntology.getAllIndividuals().size()==0)
-            return new OWLNamedIndividualNode();
+        if (m_dlOntology.getAllIndividuals().size()==0 || !m_dlOntology.containsIndividual(H(namedIndividual)))
+            return new OWLNamedIndividualNode(namedIndividual);
         else {
             initialiseClassInstanceManager();
             Set<Individual> sameIndividuals=m_instanceManager.getSameAsIndividuals(H(namedIndividual));

@@ -34,6 +34,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLSubPropertyChainOfAxiom;
 import org.semanticweb.owlapi.reasoner.InferenceType;
+import org.semanticweb.owlapi.reasoner.Node;
 import org.semanticweb.owlapi.reasoner.NodeSet;
 import org.semanticweb.owlapi.vocab.OWLFacet;
 
@@ -43,6 +44,20 @@ public class ReasonerTest extends AbstractReasonerTest {
         super(name);
     }
     
+    public void testIncrementalWithSameAs() throws Exception {
+        String axioms = "Declaration( Class( :A ) )"+LB+
+                "Declaration( NamedIndividual( :a ) )"+LB+
+                "ClassAssertion(:A :a)";
+        loadOntologyWithAxioms(axioms);
+        createReasoner();
+        Set<OWLAxiom> assertions=new HashSet<OWLAxiom>();
+        OWLNamedIndividual b=NS_NI("b");
+        assertions.add(m_dataFactory.getOWLClassAssertionAxiom(NS_C("A"), b));
+        m_ontologyManager.addAxioms(m_ontology, assertions);
+        Node<OWLNamedIndividual> result=m_reasoner.getSameIndividuals(b);
+        assertTrue(result.contains(b));
+        assertFalse(result.contains(NS_NI("a")));
+    }
     public void testClassificationWithValidatedBlockingError() throws Exception {
         loadOntologyFromResource("res/classification-blocking-error.owl");
         createReasoner();
