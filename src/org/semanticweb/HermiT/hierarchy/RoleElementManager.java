@@ -23,50 +23,50 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Individual;
-import org.semanticweb.HermiT.model.Role;
 
 public class RoleElementManager {
     
     public static final String LB=System.getProperty("line.separator");
     
-    protected final Map<Role,RoleElement> m_roleToElement;
+    protected final Map<AtomicRole,RoleElement> m_roleToElement;
 
     
     protected RoleElementManager() {
-        m_roleToElement=new HashMap<Role, RoleElement>();
+        m_roleToElement=new HashMap<AtomicRole, RoleElement>();
     }
-    public RoleElement getRoleElement(Role Role) {
-        if (m_roleToElement.containsKey(Role)) 
-            return m_roleToElement.get(Role);
+    public RoleElement getRoleElement(AtomicRole role) {
+        if (m_roleToElement.containsKey(role)) 
+            return m_roleToElement.get(role);
         else {
-            RoleElement element=new RoleElement(Role);
-            m_roleToElement.put(Role, element);
+            RoleElement element=new RoleElement(role);
+            m_roleToElement.put(role, element);
             return element;
         }
     }
     public String toString() {
         StringBuffer buffer=new StringBuffer();
-        for (Role Role : m_roleToElement.keySet()) {
-            buffer.append(Role);
+        for (AtomicRole role : m_roleToElement.keySet()) {
+            buffer.append(role);
             buffer.append(" -> ");
-            buffer.append(m_roleToElement.get(Role).toString());
+            buffer.append(m_roleToElement.get(role).toString());
             buffer.append(LB);
         }
         return buffer.toString();
     }
     
     public class RoleElement {
-        protected final Role m_role;
+        protected final AtomicRole m_role;
         protected Map<Individual,Set<Individual>> m_knownRelations;
         protected Map<Individual,Set<Individual>> m_possibleRelations;
         
-        protected RoleElement(Role Role) {
-            m_role=Role;
+        protected RoleElement(AtomicRole role) {
+            m_role=role;
             m_knownRelations=new HashMap<Individual,Set<Individual>>();
             m_possibleRelations=new HashMap<Individual,Set<Individual>>();
         }
-        public Role getRole() {
+        public AtomicRole getRole() {
             return m_role;
         }
         public boolean isKnown(Individual individual1, Individual individual2) {

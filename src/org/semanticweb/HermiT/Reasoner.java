@@ -1749,15 +1749,20 @@ public class Reasoner implements OWLReasoner {
             Node<OWLNamedIndividual> node=new OWLNamedIndividualNode(getAllNamedIndividuals());
             return new OWLNamedIndividualNodeSet(Collections.singleton(node));
         }
-        Role role=H(propertyExpression.getNamedProperty());
-        if (!m_dlOntology.containsObjectRole((AtomicRole)role))
+        AtomicRole role=H(propertyExpression.getNamedProperty());
+        if (!m_dlOntology.containsObjectRole(role))
             return new OWLNamedIndividualNodeSet();
         initialisePropertiesInstanceManager();
-        if (propertyExpression.getSimplified().isAnonymous())
-            role=InverseRole.create((AtomicRole)role);
         Individual individual=H(namedIndividual);
-        Set<Individual> successors=m_instanceManager.getObjectPropertyValues(role,individual);
-        return sortBySameAsIfNecessary(successors);
+        Set<Individual> result;
+        if (propertyExpression.getSimplified().isAnonymous()) {
+            // inverse role
+            result=m_instanceManager.getObjectPropertySubjects(role,individual);
+        } else {
+            // named role
+            result=m_instanceManager.getObjectPropertyValues(role,individual);    
+        }
+        return sortBySameAsIfNecessary(result);
     }
     public Map<OWLNamedIndividual,Set<OWLNamedIndividual>> getObjectPropertyInstances(OWLObjectProperty property) {
         checkPreConditions(property);

@@ -311,12 +311,14 @@ public class InstanceManager {
      * @param roleHierarchy
      * @return a hierarchy containing role element nodes and no inverses
      */
-    public Hierarchy<RoleElement> transformRoleHierarchy(final Hierarchy<Role> roleHierarchy) {
-        Hierarchy<Role> newHierarchy=removeInverses(roleHierarchy);
+    protected Hierarchy<RoleElement> transformRoleHierarchy(final Hierarchy<Role> roleHierarchy) {
+        Hierarchy<AtomicRole> newHierarchy=removeInverses(roleHierarchy);
         Hierarchy.Transformer<Role,RoleElement> transformer=new Hierarchy.Transformer<Role,RoleElement>() {
             public RoleElement transform(Role role) {
                 m_interruptFlag.checkInterrupt();
-                return m_roleElementManager.getRoleElement(role);
+                if (!(role instanceof AtomicRole))
+                    throw new IllegalArgumentException("Internal error: The instance manager should only use atomic roles, but here we got a hierarchy element for an inverse role:" + role);
+                return m_roleElementManager.getRoleElement((AtomicRole)role);
             }
             public RoleElement determineRepresentative(Role oldRepresentative,Set<RoleElement> newEquivalentElements) {
                 RoleElement representative=transform(oldRepresentative);
@@ -346,29 +348,29 @@ public class InstanceManager {
         };
         return newHierarchy.transform(transformer,null);
     }
-    protected Hierarchy<Role> removeInverses(Hierarchy<Role> hierarchy) {
-        final Map<Role,GraphNode<Role>> allSubsumers=new HashMap<Role,GraphNode<Role>>();
-        Set<Role> toProcess=new HashSet<Role>();
-        Set<Role> visited=new HashSet<Role>();
+    protected Hierarchy<AtomicRole> removeInverses(Hierarchy<Role> hierarchy) {
+        final Map<AtomicRole,GraphNode<AtomicRole>> allSubsumers=new HashMap<AtomicRole,GraphNode<AtomicRole>>();
+        Set<AtomicRole> toProcess=new HashSet<AtomicRole>();
+        Set<AtomicRole> visited=new HashSet<AtomicRole>();
         toProcess.add(m_bottomRoleElement.m_role);
         while (!toProcess.isEmpty()) {
-            Role current=toProcess.iterator().next();
+            AtomicRole current=toProcess.iterator().next();
             visited.add(current);
             HierarchyNode<Role> currentNode=hierarchy.getNodeForElement(current);
-            Set<Role> atomicRepresentatives=new HashSet<Role>();
+            Set<AtomicRole> atomicRepresentatives=new HashSet<AtomicRole>();
             findNextHierarchyNodeWithAtomic(atomicRepresentatives, currentNode);
-            allSubsumers.put(current,new GraphNode<Role>(current,atomicRepresentatives));
+            allSubsumers.put(current,new GraphNode<AtomicRole>(current,atomicRepresentatives));
             toProcess.addAll(atomicRepresentatives);
             toProcess.removeAll(visited);
             m_interruptFlag.checkInterrupt();
         }
-        Hierarchy<Role> newHierarchy=DeterministicClassification.buildHierarchy(m_topRoleElement.m_role,m_bottomRoleElement.m_role,allSubsumers);
-        for (Role element : newHierarchy.m_nodesByElements.keySet()) {
+        Hierarchy<AtomicRole> newHierarchy=DeterministicClassification.buildHierarchy(m_topRoleElement.m_role,m_bottomRoleElement.m_role,allSubsumers);
+        for (AtomicRole element : newHierarchy.m_nodesByElements.keySet()) {
             HierarchyNode<Role> oldNode=hierarchy.getNodeForElement(element);
-            HierarchyNode<Role> newNode=newHierarchy.getNodeForElement(element);
+            HierarchyNode<AtomicRole> newNode=newHierarchy.getNodeForElement(element);
             for (Role equivalent : oldNode.m_equivalentElements) {
                 if (equivalent instanceof AtomicRole)
-                    newNode.m_equivalentElements.add(equivalent);
+                    newNode.m_equivalentElements.add((AtomicRole)equivalent);
             }
             m_interruptFlag.checkInterrupt();
         }
@@ -420,12 +422,12 @@ public class InstanceManager {
         }
         m_usesClassifiedObjectRoleHierarchy=true;
     }
-    protected void findNextHierarchyNodeWithAtomic(Set<Role> atomicRepresentatives, HierarchyNode<Role> current) {
+    protected void findNextHierarchyNodeWithAtomic(Set<AtomicRole> atomicRepresentatives, HierarchyNode<Role> current) {
         for (HierarchyNode<Role> successor : current.getParentNodes()) {
-            Set<Role> suitable=new HashSet<Role>();
+            Set<AtomicRole> suitable=new HashSet<AtomicRole>();
             for (Role role : successor.getEquivalentElements()) {
                 if (role instanceof AtomicRole)
-                    suitable.add(role);
+                    suitable.add((AtomicRole)role);
             }
             if (!suitable.isEmpty())
                 atomicRepresentatives.add(suitable.iterator().next());
@@ -1174,17 +1176,16 @@ public class InstanceManager {
         for (HierarchyNode<RoleElement> child : node.getChildNodes())
             getObjectPropertyInstances(child, result);
     }
-    public Set<Individual> getObjectPropertyValues(Role role,Individual individual) {
+    public Set<Individual> getObjectPropertyValues(AtomicRole role,Individual individual) {
         Set<Individual> result=new HashSet<Individual>();
-        HierarchyNode<RoleElement> node;
-        if (role instanceof AtomicRole) {
-            node=m_currentRoleHierarchy.getNodeForElement(m_roleElementManager.getRoleElement(role));
-            getObjectPropertyValues(node,individual, result);
-        }
-        else {
-            node=m_currentRoleHierarchy.getNodeForElement(m_roleElementManager.getRoleElement(((InverseRole)role).getInverseOf()));
-            getObjectPropertySubjects(node, individual, result);
-        }
+        HierarchyNode<RoleElement> node=m_currentRoleHierarchy.getNodeForElement(m_roleElementManager.getRoleElement(role));;
+        getObjectPropertyValues(node,individual, result);
+        return result;
+    }
+    public Set<Individual> getObjectPropertySubjects(AtomicRole role,Individual individual) {
+        Set<Individual> result=new HashSet<Individual>();
+        HierarchyNode<RoleElement> node=m_currentRoleHierarchy.getNodeForElement(m_roleElementManager.getRoleElement(role));
+        getObjectPropertySubjects(node, individual, result);
         return result;
     }
     protected void getObjectPropertySubjects(HierarchyNode<RoleElement> node, Individual object, Set<Individual> result) {
@@ -1334,7 +1335,6 @@ public class InstanceManager {
             else 
                 m_tableauMonitor.possibleInstanceIsNotInstance();
         }
-        tableau.clearAdditionalDLOntology();
         return result;
     }
     protected static boolean isResultRelevantIndividual(Individual individual) {
@@ -1360,30 +1360,5 @@ public class InstanceManager {
     }
     public Map<Individual, Node> getNodesForIndividuals() {
         return m_nodesForIndividuals;
-    }
-    public HierarchyNode<AtomicConcept> getTopConceptNode() {
-        return m_currentConceptHierarchy.getTopNode();
-    }
-    public HierarchyNode<AtomicConcept> getBottomConceptNode() {
-        return m_currentConceptHierarchy.getBottomNode();
-    }
-    public RoleElement getTopRoleElement() {
-        return m_topRoleElement;
-    }
-    public RoleElement getBottomRoleElement() {
-        return m_bottomRoleElement;
-    }
-    public HierarchyNode<RoleElement> getTopRoleNode() {
-        return m_currentRoleHierarchy.getTopNode();
-    }
-    public HierarchyNode<RoleElement> getBottomRoleNode() {
-        return m_currentRoleHierarchy.getBottomNode();
-    }
-
-    public boolean hadPossibleConceptInstances() { 
-        return m_readingOffFoundPossibleConceptInstance;
-    }
-    public boolean hadPossibleRoleInstances() { 
-        return m_readingOffFoundPossiblePropertyInstance;
     }
 }
