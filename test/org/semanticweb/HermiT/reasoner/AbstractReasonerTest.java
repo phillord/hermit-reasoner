@@ -175,7 +175,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     /**
      * Checks the direct superproperties of some object property.
      */
-    @SuppressWarnings("unchecked") 
+    @SuppressWarnings("all")
     protected void assertDirectSuperObjectProperties(String objectProperty,Set<String>... control) {
         if (!objectProperty.contains("#"))
             objectProperty=NS+objectProperty;
@@ -187,7 +187,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     /**
      * Checks the direct superproperties of some object property.
      */
-    @SuppressWarnings("unchecked") 
+    @SuppressWarnings("all")
     protected void assertDirectSuperObjectPropertiesOfInverse(String objectProperty,Set<String>... control) {
         if (!objectProperty.contains("#"))
             objectProperty=NS+objectProperty;
@@ -200,7 +200,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     /**
      * Checks the superproperties of some object property.
      */
-    @SuppressWarnings("unchecked") 
+    @SuppressWarnings("all")
     protected void assertSuperObjectProperties(String objectProperty,Set<String>... control) {
         if (!objectProperty.contains("#"))
             objectProperty=NS+objectProperty;
@@ -212,7 +212,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     /**
      * Checks the superproperties of some object property.
      */
-    @SuppressWarnings("unchecked") 
+    @SuppressWarnings("all")
     protected void assertSuperObjectPropertiesOfInverse(String objectProperty,Set<String>... control) {
         if (!objectProperty.contains("#"))
             objectProperty=NS+objectProperty;
@@ -225,7 +225,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     /**
      * Checks the direct subproperties of some object property.
      */
-    @SuppressWarnings("unchecked") 
+    @SuppressWarnings("all")
     protected void assertDirectSubObjectProperties(String objectProperty,Set<String>... control) {
         if (!objectProperty.contains("#"))
             objectProperty=NS+objectProperty;
@@ -237,7 +237,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     /**
      * Checks the direct subproperties of the inverse of the given object property.
      */
-    @SuppressWarnings("unchecked") 
+    @SuppressWarnings("all")
     protected void assertDirectSubObjectPropertiesOfInverse(String objectProperty,Set<String>... control) {
         if (!objectProperty.contains("#"))
             objectProperty=NS+objectProperty;
@@ -250,7 +250,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     /**
      * Checks the subproperties of some object property.
      */
-    @SuppressWarnings("unchecked") 
+    @SuppressWarnings("all")
     protected void assertSubObjectProperties(String objectProperty,Set<String>... control) {
         if (!objectProperty.contains("#"))
             objectProperty=NS+objectProperty;
@@ -262,7 +262,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     /**
      * Checks the subproperties of the inverse of the given object property.
      */
-    @SuppressWarnings("unchecked") 
+    @SuppressWarnings("all")
     protected void assertSubObjectPropertiesOfInverse(String objectProperty,Set<String>... control) {
         if (!objectProperty.contains("#"))
             objectProperty=NS+objectProperty;
@@ -286,7 +286,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     /**
      * Checks the superproperties of some data property.
      */
-    @SuppressWarnings("unchecked") 
+    @SuppressWarnings("all")
     protected void assertSuperDataProperties(String dataProperty,Set<String>... control) {
         if (!dataProperty.contains("#"))
             dataProperty=NS+dataProperty;
@@ -298,7 +298,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     /**
      * Checks the direct superproperties of some data property.
      */
-    @SuppressWarnings("unchecked") 
+    @SuppressWarnings("all")
     protected void assertDirectSuperDataProperties(String dataProperty,Set<String>... control) {
         if (!dataProperty.contains("#"))
             dataProperty=NS+dataProperty;
@@ -310,7 +310,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     /**
      * Checks the subproperties of some data property.
      */
-    @SuppressWarnings("unchecked") 
+    @SuppressWarnings("all")
     protected void assertSubDataProperties(String dataProperty,Set<String>... control) {
         if (!dataProperty.contains("#"))
             dataProperty=NS+dataProperty;
@@ -322,7 +322,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     /**
      * Checks the direct subproperties of some data property.
      */
-    @SuppressWarnings("unchecked") 
+    @SuppressWarnings("all")
     protected void assertDirectSubDataProperties(String dataProperty,Set<String>... control) {
         if (!dataProperty.contains("#"))
             dataProperty=NS+dataProperty;

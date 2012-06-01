@@ -53,7 +53,7 @@ public abstract class AbstractHermiTTest extends TestCase {
         output.flush();
         return buffer.toString();
     }
-    @SuppressWarnings("unchecked") 
+    @SuppressWarnings("all")
     protected static <T> void assertContainsAll(Collection<T> actual,T... control) {
         try {
             assertEquals(control.length,actual.size());
