@@ -2381,7 +2381,7 @@ public class Reasoner implements OWLReasoner {
                 prepareReasonerInferences.classClassificationRequired=preferences.isEnabled(
                     ReasonerPreferences.OptionalInferenceTask.SHOW_CLASS_UNSATISFIABILITY) ||
                     preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_EQUIVALENT_CLASSES) ||
-                    preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_INHERITED_ANONYMOUS_CLASSES) ||
+                    preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_DISJOINT_CLASSES) ||
                     preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_SUPER_CLASSES) ||
                     preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_OBJECT_PROPERTY_DOMAINS) ||
                     preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_OBJECT_PROPERTY_RANGES) ||
@@ -2429,7 +2429,8 @@ public class Reasoner implements OWLReasoner {
 
                 // sameAs
                 prepareReasonerInferences.sameAs=preferences.isEnabled(
-                    ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_DATA_PROPERTY_ASSERTIONS
+                    ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_DATA_PROPERTY_ASSERTIONS) ||
+                    preferences.isEnabled(ReasonerPreferences.OptionalInferenceTask.SHOW_INFERRED_SAMEAS_INDIVIDUAL_ASSERTIONS
                 ); // we also substitute same individuals now
 
                 configuration.prepareReasonerInferences=prepareReasonerInferences;

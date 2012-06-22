@@ -158,22 +158,26 @@ public final class TupleIndex implements Serializable {
         return child;
     }
     protected void resizeBuckets() {
-        int[] newBuckets=new int[m_buckets.length*2];
-        int newBucketsLengthMinusOne=newBuckets.length-1;
-        for (int bucketIndex=m_bucketsLengthMinusOne;bucketIndex>=0;--bucketIndex) {
-            int trieNode=m_buckets[bucketIndex]-BUCKET_OFFSET;
-            while (trieNode!=-1) {
-                int nextTrieNode=m_trieNodeManager.getTrieNodeComponent(trieNode,TRIE_NODE_NEXT_ENTRY);
-                int hashCode=m_trieNodeManager.getTrieNodeObject(trieNode).hashCode()+m_trieNodeManager.getTrieNodeComponent(trieNode,TRIE_NODE_PARENT);
-                int newBucketIndex=getIndexFor(hashCode,newBucketsLengthMinusOne);
-                m_trieNodeManager.setTrieNodeComponent(trieNode,TRIE_NODE_NEXT_ENTRY,newBuckets[newBucketIndex]-BUCKET_OFFSET);
-                newBuckets[newBucketIndex]=trieNode+BUCKET_OFFSET;
-                trieNode=nextTrieNode;
+    	if (m_buckets.length==0x80000000)
+    		throw new OutOfMemoryError("Cannot resize the buckets table of TupleIndex: the table reached its maximal allowed size."); 
+    	else {
+    		int[] newBuckets=new int[m_buckets.length*2];
+            int newBucketsLengthMinusOne=newBuckets.length-1;
+            for (int bucketIndex=m_bucketsLengthMinusOne;bucketIndex>=0;--bucketIndex) {
+                int trieNode=m_buckets[bucketIndex]-BUCKET_OFFSET;
+                while (trieNode!=-1) {
+                    int nextTrieNode=m_trieNodeManager.getTrieNodeComponent(trieNode,TRIE_NODE_NEXT_ENTRY);
+                    int hashCode=m_trieNodeManager.getTrieNodeObject(trieNode).hashCode()+m_trieNodeManager.getTrieNodeComponent(trieNode,TRIE_NODE_PARENT);
+                    int newBucketIndex=getIndexFor(hashCode,newBucketsLengthMinusOne);
+                    m_trieNodeManager.setTrieNodeComponent(trieNode,TRIE_NODE_NEXT_ENTRY,newBuckets[newBucketIndex]-BUCKET_OFFSET);
+                    newBuckets[newBucketIndex]=trieNode+BUCKET_OFFSET;
+                    trieNode=nextTrieNode;
+                }
             }
-        }
-        m_buckets=newBuckets;
-        m_bucketsLengthMinusOne=newBucketsLengthMinusOne;
-        m_resizeThreshold=(int)(m_buckets.length*LOAD_FACTOR);
+            m_buckets=newBuckets;
+            m_bucketsLengthMinusOne=newBucketsLengthMinusOne;
+            m_resizeThreshold=(int)(m_buckets.length*LOAD_FACTOR);
+    	}
     }
     protected static int getIndexFor(int hashCode,int tableLengthMinusOne) {
         hashCode+=~(hashCode << 9);
