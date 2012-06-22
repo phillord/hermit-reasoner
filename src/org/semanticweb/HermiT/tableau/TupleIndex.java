@@ -1,17 +1,17 @@
 /* Copyright 2008, 2009, 2010 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -24,7 +24,7 @@ public final class TupleIndex implements Serializable {
 
     protected static final float LOAD_FACTOR=0.7f;
     protected static final int BUCKET_OFFSET=1;
-    
+
     protected final int[] m_indexingSequence;
     protected final TrieNodeManager m_trieNodeManager;
     protected int m_root;
@@ -32,7 +32,7 @@ public final class TupleIndex implements Serializable {
     protected int m_bucketsLengthMinusOne; // must be all ones in binary!
     protected int m_resizeThreshold;
     protected int m_numberOfNodes;
-    
+
     public TupleIndex(int[] indexingSequence) {
         m_indexingSequence=indexingSequence;
         m_trieNodeManager=new TrieNodeManager();
@@ -158,8 +158,8 @@ public final class TupleIndex implements Serializable {
         return child;
     }
     protected void resizeBuckets() {
-    	if (m_buckets.length==0x80000000)
-    		throw new OutOfMemoryError("Cannot resize the buckets table of TupleIndex: the table reached its maximal allowed size."); 
+    	if (m_buckets.length==0x40000000)
+    	    m_resizeThreshold=Integer.MAX_VALUE;
     	else {
     		int[] newBuckets=new int[m_buckets.length*2];
             int newBucketsLengthMinusOne=newBuckets.length-1;
@@ -186,7 +186,7 @@ public final class TupleIndex implements Serializable {
         hashCode^=(hashCode >>> 10);
         return hashCode & tableLengthMinusOne;
     }
-    
+
     protected static final int TRIE_NODE_PARENT=0;
     protected static final int TRIE_NODE_FIRST_CHILD=1;
     protected static final int TRIE_NODE_TUPLE_INDEX=1;
@@ -195,7 +195,7 @@ public final class TupleIndex implements Serializable {
     protected static final int TRIE_NODE_NEXT_ENTRY=4;
     protected static final int TRIE_NODE_SIZE=5;
     protected static final int TRIE_NODE_PAGE_SIZE=1024;
-    
+
     protected static final class TrieNodeManager implements Serializable {
         private static final long serialVersionUID=-1978070096232682717L;
 
@@ -203,7 +203,7 @@ public final class TupleIndex implements Serializable {
         protected Object[][] m_objectPages;
         protected int m_firstFreeTrieNode;
         protected int m_numberOfPages;
-        
+
         public TrieNodeManager() {
            clear();
         }
@@ -257,6 +257,8 @@ public final class TupleIndex implements Serializable {
                 m_firstFreeTrieNode=nextFreeTrieNode;
             else {
                 m_firstFreeTrieNode++;
+                if (m_firstFreeTrieNode<0)
+                    throw new OutOfMemoryError("The space of nodes in TupleIndex was exhausted: the onotlogy is just too large.");
                 int pageIndex=m_firstFreeTrieNode / TRIE_NODE_PAGE_SIZE;
                 if (pageIndex>=m_numberOfPages) {
                     if (pageIndex>=m_indexPages.length) {
@@ -281,7 +283,7 @@ public final class TupleIndex implements Serializable {
             m_firstFreeTrieNode=trieNode;
         }
     }
-    
+
     public static class TupleIndexRetrieval implements Serializable {
         private static final long serialVersionUID=3052986474027614595L;
 
@@ -291,7 +293,7 @@ public final class TupleIndex implements Serializable {
         protected final int m_selectionIndicesLength;
         protected final int m_indexingSequenceLength;
         protected int m_currentTrieNode;
-        
+
         public TupleIndexRetrieval(TupleIndex tupleIndex,Object[] bindingsBuffer,int[] selectionIndices) {
             m_tupleIndex=tupleIndex;
             m_bindingsBuffer=bindingsBuffer;
