@@ -258,7 +258,7 @@ public final class TupleIndex implements Serializable {
             else {
                 m_firstFreeTrieNode++;
                 if (m_firstFreeTrieNode<0)
-                    throw new OutOfMemoryError("The space of nodes in TupleIndex was exhausted: the onotlogy is just too large.");
+                    throw new OutOfMemoryError("The space of nodes in TupleIndex was exhausted: the ontology is just too large.");
                 int pageIndex=m_firstFreeTrieNode / TRIE_NODE_PAGE_SIZE;
                 if (pageIndex>=m_numberOfPages) {
                     if (pageIndex>=m_indexPages.length) {
