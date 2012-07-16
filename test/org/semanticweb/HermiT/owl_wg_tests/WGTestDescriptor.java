@@ -308,6 +308,10 @@ public class WGTestDescriptor {
                 return new EntailmentTest(this,true,dumpTestDataDirectory,useDisjunctionLearning);
             case NEGATIVE_ENTAILMENT:
                 return new EntailmentTest(this,false,dumpTestDataDirectory,useDisjunctionLearning);
+            case PROFILE_IDENTIFICATION:
+                break;
+            default:
+                break;
             }
         }
         return null;

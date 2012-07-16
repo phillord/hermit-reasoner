@@ -518,8 +518,7 @@ public class CommandLine {
                                 if (!file.exists())
                                     file.createNewFile();
                                 file=file.getAbsoluteFile();
-                                BufferedOutputStream stream=new BufferedOutputStream(new FileOutputStream(file));
-                                output=new PrintWriter(stream,true);
+                                output=new PrintWriter(new BufferedOutputStream(new FileOutputStream(file)),true);
                                 resultsFileLocation=file.getAbsolutePath();
                             }
                             catch (FileNotFoundException e) {
