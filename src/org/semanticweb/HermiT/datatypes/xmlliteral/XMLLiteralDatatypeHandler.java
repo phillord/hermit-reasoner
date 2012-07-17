@@ -43,7 +43,7 @@ public class XMLLiteralDatatypeHandler implements DatatypeHandler {
             return XMLLiteral.parse(lexicalForm);
         }
         catch (Exception e) {
-            throw new MalformedLiteralException(lexicalForm,datatypeURI,e);
+            throw new MalformedLiteralException(lexicalForm,datatypeURI);
         }
     }
     public void validateDatatypeRestriction(DatatypeRestriction datatypeRestriction) throws UnsupportedFacetException {

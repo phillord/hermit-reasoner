@@ -40,6 +40,7 @@
     <property name="protegeowl" value="${libdir}/org.protege.editor.owl-4.2.jar"/>
 	<property name="xmlcanonicalizer" value="${libdir}/axiom-1.2.8.jar"/>
 	<property name="logging" value="${libdir}/commons-logging-1.1.1.jar"/> <!-- required by canonicalizer -->
+	<property name="jaxp" value="${libdir}/jaxp-api-1.4.2.jar"/> <!-- required by canonicalizer (javax.xml.stream.XMLStreamException) -->
 	
     <!-- to generate a debug version, use -Ddebug=on argument when running ant -->
     <property name="debug" value="off"/>
@@ -63,6 +64,7 @@
         <pathelement location="${protegeowl}"/>
     	<pathelement location="${xmlcanonicalizer}"/>
     	<pathelement location="${logging}"/>
+    	<pathelement location="${jaxp}"/>
     </path>
     <path id="testclasspath">
         <pathelement path="${classdir}"/>
@@ -106,6 +108,7 @@
         <unjar src="${jautomaton}" dest="${classdir}"/>
         <unjar src="${xmlcanonicalizer}" dest="${classdir}"/>
         <unjar src="${logging}" dest="${classdir}"/>
+        <unjar src="${jaxp}" dest="${classdir}"/>
     </target>
     
     <target name="unpack-owlapi">
