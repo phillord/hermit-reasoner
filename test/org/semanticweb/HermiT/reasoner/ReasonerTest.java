@@ -44,6 +44,21 @@ public class ReasonerTest extends AbstractReasonerTest {
         super(name);
     }
     
+    public void testUniversalRolePartitionedABox() throws Exception {
+        loadOntologyWithAxioms(
+                "Declaration( Class( :A ) )"+
+                "Declaration( Class( :B ) )"+
+                "Declaration( NamedIndividual( :a ) )"+LB+
+                "Declaration( NamedIndividual( :nb ) )"+LB+
+                "SubClassOf( :A ObjectAllValuesFrom( owl:topObjectProperty :B ) )"+LB+
+                "ClassAssertion( ObjectComplementOf( :B ) :nb )"+LB+
+                "ClassAssertion( :A :a )"
+                );
+        createReasoner();
+        System.out.println(m_reasoner.getDLOntology().getStatistics());
+        System.out.println(m_reasoner.getDLOntology());
+        assertFalse(m_reasoner.isConsistent());
+    }
     public void testIncrementalWithSameAs() throws Exception {
         String axioms = "Declaration( Class( :A ) )"+LB+
                 "Declaration( NamedIndividual( :a ) )"+LB+

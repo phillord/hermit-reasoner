@@ -1965,7 +1965,7 @@ public class Reasoner implements OWLReasoner {
         DirectBlockingChecker directBlockingChecker=null;
         switch (configuration.directBlockingType) {
         case OPTIMAL:
-            if ((configuration.blockingStrategyType==BlockingStrategyType.OPTIMAL && hasNominals) || configuration.blockingStrategyType==BlockingStrategyType.SIMPLE_CORE || configuration.blockingStrategyType==BlockingStrategyType.COMPLEX_CORE)
+            if (configuration.blockingStrategyType==BlockingStrategyType.SIMPLE_CORE || configuration.blockingStrategyType==BlockingStrategyType.COMPLEX_CORE)
                 directBlockingChecker=new ValidatedSingleDirectBlockingChecker(hasInverseRoles);
             else if (hasInverseRoles)
                 directBlockingChecker=new PairWiseDirectBlockingChecker();
