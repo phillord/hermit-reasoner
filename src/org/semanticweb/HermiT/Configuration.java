@@ -239,7 +239,7 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
         directBlockingType=Configuration.DirectBlockingType.OPTIMAL;
         blockingStrategyType=Configuration.BlockingStrategyType.OPTIMAL;
         blockingSignatureCacheType=Configuration.BlockingSignatureCacheType.CACHED;
-        existentialStrategyType=Configuration.ExistentialStrategyType.CREATION_ORDER;
+        existentialStrategyType=Configuration.ExistentialStrategyType.INDIVIDUAL_REUSE;
         ignoreUnsupportedDatatypes=false;
         monitor=null;
         parameters=new HashMap<String,Object>();
