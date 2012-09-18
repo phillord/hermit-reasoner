@@ -43,7 +43,6 @@ public class ReasonerTest extends AbstractReasonerTest {
     public ReasonerTest(String name) {
         super(name);
     }
-    
     public void testUniversalRolePartitionedABox() throws Exception {
         loadOntologyWithAxioms(
                 "Declaration( Class( :A ) )"+
@@ -55,8 +54,6 @@ public class ReasonerTest extends AbstractReasonerTest {
                 "ClassAssertion( :A :a )"
                 );
         createReasoner();
-        System.out.println(m_reasoner.getDLOntology().getStatistics());
-        System.out.println(m_reasoner.getDLOntology());
         assertFalse(m_reasoner.isConsistent());
     }
     public void testIncrementalWithSameAs() throws Exception {
