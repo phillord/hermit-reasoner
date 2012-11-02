@@ -1671,8 +1671,8 @@ public class Reasoner implements OWLReasoner {
             if (classExpression instanceof OWLClass)
                 result=m_instanceManager.getInstances(H((OWLClass)classExpression),direct);
             else {
-                HierarchyNode<AtomicConcept> hierarchyNode=getHierarchyNode(classExpression); //defines internal:query-concept as equivalent to the queried (complex) concepts and inserts internal:query-concept into the class hierarchy  
-                result=m_instanceManager.getInstances(hierarchyNode,direct); // gets instances of classes that are direct subclasses of internal:query-concept 
+                HierarchyNode<AtomicConcept> hierarchyNode=getHierarchyNode(classExpression); //defines internal:query-concept as equivalent to the queried (complex) concepts and inserts internal:query-concept into the class hierarchy
+                result=m_instanceManager.getInstances(hierarchyNode,direct); // gets instances of classes that are direct subclasses of internal:query-concept
                 OWLDataFactory factory=getDataFactory();
                 OWLClass queryClass=factory.getOWLClass(IRI.create("internal:query-concept"));
                 OWLAxiom queryClassDefinition=factory.getOWLSubClassOfAxiom(queryClass,classExpression.getObjectComplementOf());
@@ -1760,7 +1760,7 @@ public class Reasoner implements OWLReasoner {
             result=m_instanceManager.getObjectPropertySubjects(role,individual);
         } else {
             // named role
-            result=m_instanceManager.getObjectPropertyValues(role,individual);    
+            result=m_instanceManager.getObjectPropertyValues(role,individual);
         }
         return sortBySameAsIfNecessary(result);
     }
@@ -1902,7 +1902,7 @@ public class Reasoner implements OWLReasoner {
 
     // Various creation methods
 
-    protected Tableau getTableau() {
+    public Tableau getTableau() {
         m_tableau.clearAdditionalDLOntology();
         return m_tableau;
     }
