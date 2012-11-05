@@ -399,7 +399,6 @@ public final class ExtensionManager implements Serializable {
     }
     public boolean addAnnotatedEquality(AnnotatedEquality annotatedEquality,Node node0,Node node1,Node node2,DependencySet dependencySet) {
         return m_tableau.m_nominalIntroductionManager.addAnnotatedEquality(annotatedEquality,node0,node1,node2,dependencySet);
-
     }
     public boolean addTuple(Object[] tuple,DependencySet dependencySet,boolean isCore) {
         if (tuple.length==0) {
