@@ -14,6 +14,7 @@ public class AllTests {
         suite.addTestSuite(DependencySetTest.class);
         suite.addTestSuite(NIRuleTest.class);
         suite.addTestSuite(MergeTest.class);
+        suite.addTestSuite(GraphTest.class);
         //$JUnit-END$
         return suite;
     }
