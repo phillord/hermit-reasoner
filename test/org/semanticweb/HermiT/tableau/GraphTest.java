@@ -7,11 +7,6 @@ import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.DescriptionGraph;
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLIndividual;
-import org.semanticweb.owlapi.model.OWLObjectProperty;
 
 public class GraphTest extends AbstractReasonerInternalsTest {
     protected Set<DescriptionGraph> m_descriptionGraphs;
@@ -41,6 +36,7 @@ public class GraphTest extends AbstractReasonerInternalsTest {
             }
         );
         m_descriptionGraphs.add(graph);
+        loadOntologyWithAxioms("");
         Tableau tableau=getTableau(m_descriptionGraphs);
         tableau.clear();
         ExtensionManager extensionManager=tableau.getExtensionManager();
@@ -137,44 +133,19 @@ public class GraphTest extends AbstractReasonerInternalsTest {
             }
         ));
         
-        OWLDataFactory df = m_ontologyManager.getOWLDataFactory();
-        Set<org.semanticweb.owlapi.model.OWLAxiom> axioms = new HashSet<org.semanticweb.owlapi.model.OWLAxiom>();
-        String base = m_ontology.getOntologyID().getDefaultDocumentIRI() == null ? "urn:hermit:kb" : m_ontology.getOntologyID().getDefaultDocumentIRI().toString();
-        
-        OWLClass A = df.getOWLClass(IRI.create(base + "#A"));
-        OWLClass B = df.getOWLClass(IRI.create(base + "#B"));
-        OWLClass C = df.getOWLClass(IRI.create(base + "#C"));
-        OWLClass D = df.getOWLClass(IRI.create(base + "#D"));
-        OWLObjectProperty S = df.getOWLObjectProperty(IRI.create(base + "#S"));
-        OWLObjectProperty T = df.getOWLObjectProperty(IRI.create(base + "#T"));
-        OWLIndividual i = df.getOWLNamedIndividual(IRI.create(base + "#i"));
-        
-        org.semanticweb.owlapi.model.OWLAxiom axiom = df.getOWLSubClassOfAxiom(A, df.getOWLObjectSomeValuesFrom(S, A));
-        axioms.add(axiom);
-        axiom = df.getOWLSubClassOfAxiom(A, df.getOWLObjectSomeValuesFrom(S, D));
-        axioms.add(axiom);
-        axiom = df.getOWLSubClassOfAxiom(B, df.getOWLObjectSomeValuesFrom(T, A));
-        axioms.add(axiom);
-        axiom = df.getOWLSubClassOfAxiom(C, df.getOWLObjectSomeValuesFrom(T, A));
-        axioms.add(axiom);
-        axiom = df.getOWLFunctionalObjectPropertyAxiom(S);
-        axioms.add(axiom);
-        axiom = df.getOWLClassAssertionAxiom(A,i);
-        axioms.add(axiom);
-        
-        m_ontologyManager.addAxioms(m_ontology, axioms);
+        String axioms="SubClassOf(:A ObjectSomeValuesFrom(:S :A))"
+                + "SubClassOf(:A ObjectSomeValuesFrom(:S :D))"
+                + "SubClassOf(:B ObjectSomeValuesFrom(:T :A))"
+                + "SubClassOf(:C ObjectSomeValuesFrom(:T :A))"
+                + "FunctionalObjectProperty(:S)"
+                + "ClassAssertion(:A :i)";
+        loadOntologyWithAxioms(axioms);
         Configuration c = new Configuration();
         c.directBlockingType = Configuration.DirectBlockingType.PAIR_WISE;
         c.blockingStrategyType = Configuration.BlockingStrategyType.ANYWHERE;
         c.existentialStrategyType = Configuration.ExistentialStrategyType.CREATION_ORDER;
         createReasoner(c, m_descriptionGraphs);
-        
-//        addAxiom("[subClassOf A [some S A]]");
-//        addAxiom("[subClassOf A [some S D]]");
-//        addAxiom("[subClassOf B [some T A]]");
-//        addAxiom("[subClassOf C [some T A]]");
-//        addAxiom("[objectFunctional S]");
-//        addAxiom("[classMember A i]");
+
         assertABoxSatisfiable(true);
     }
     
