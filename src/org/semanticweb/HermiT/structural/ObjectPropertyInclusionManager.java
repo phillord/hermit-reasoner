@@ -25,6 +25,7 @@ import java.util.Set;
 
 import org.semanticweb.HermiT.graph.Graph;
 import org.semanticweb.HermiT.structural.OWLAxioms.ComplexObjectPropertyInclusion;
+import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;
@@ -37,6 +38,7 @@ import org.semanticweb.owlapi.model.OWLObjectCardinalityRestriction;
 import org.semanticweb.owlapi.model.OWLObjectComplementOf;
 import org.semanticweb.owlapi.model.OWLObjectHasSelf;
 import org.semanticweb.owlapi.model.OWLObjectInverseOf;
+import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 
 import rationals.Automaton;
@@ -173,7 +175,6 @@ public class ObjectPropertyInclusionManager {
     protected void createAutomata(Map<OWLObjectPropertyExpression,Automaton> automataByProperty,Set<OWLObjectPropertyExpression> complexObjectPropertyExpressions,Collection<OWLObjectPropertyExpression[]> simpleObjectPropertyInclusions,Collection<ComplexObjectPropertyInclusion> complexObjectPropertyInclusions) {
         Map<OWLObjectPropertyExpression,Set<OWLObjectPropertyExpression>> equivalentPropertiesMap=findEquivalentProperties(simpleObjectPropertyInclusions);
         Set<OWLObjectPropertyExpression> symmetricObjectProperties=findSymmetricProperties(simpleObjectPropertyInclusions);
-
         Map<OWLObjectPropertyExpression,Set<OWLObjectPropertyExpression>> inversePropertiesMap=buildInversePropertiesMap(simpleObjectPropertyInclusions);
         Graph<OWLObjectPropertyExpression> propertyDependencyGraph=buildPropertyOrdering(simpleObjectPropertyInclusions,complexObjectPropertyInclusions,equivalentPropertiesMap);
         checkForRegularity(propertyDependencyGraph,equivalentPropertiesMap);
@@ -722,6 +723,29 @@ public class ObjectPropertyInclusionManager {
                     automataMap.put(superpropertyExpression.getInverseProperty().getSimplified(),getMirroredCopy(propertyAutomaton));
                 }
         }
+        // we always want to construct an automaton for the top object property since it might occur in queries
+        // the axiomatisation at query time fails if we don't have the automaton        
+        OWLDataFactory df=OWLManager.createOWLOntologyManager().getOWLDataFactory();
+        OWLObjectProperty topOP=df.getOWLTopObjectProperty();
+        if (!automataMap.keySet().contains(topOP)) {
+//            if (!symmetricObjectProperties.contains(topOP)) {
+//                symmetricObjectProperties.add(topOP);
+//                Set<OWLObjectPropertyExpression> inverses=new HashSet<OWLObjectPropertyExpression>();
+//                inverses.add(topOP.getInverseProperty());
+//                inversePropertiesMap.put(topOP, inverses);
+//            }
+            try {
+                Automaton automaton=new Automaton();
+                State initialState=automaton.addState(true,false);
+                State finalState=automaton.addState(false,true);
+                automaton.addTransition(new Transition(initialState,topOP,finalState));
+                automaton.addTransition(new Transition(finalState,null,initialState)); // transitivity
+                automataMap.put(topOP, automaton);
+            }
+            catch (NoSuchStateException e) {
+                throw new IllegalArgumentException("Could not create automaton");
+            }
+        }        
         return automataMap;
     }
     protected Map<State,State> getDisjointUnion(Automaton automaton1,Automaton automaton2) {

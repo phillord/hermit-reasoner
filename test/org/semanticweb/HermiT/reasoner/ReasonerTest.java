@@ -43,6 +43,23 @@ public class ReasonerTest extends AbstractReasonerTest {
     public ReasonerTest(String name) {
         super(name);
     }
+    public void testIsEntailed() throws Exception {
+        loadOntologyWithAxioms(
+                "Declaration( Class( :Infection ) )"+
+                "Declaration( Class( :DomainCategory ) )"+
+                "Declaration( ObjectProperty( :attribute ) )"+LB+
+                "SubClassOf( :Infection ObjectSomeValuesFrom( :attribute :DomainCategory ) )"
+                );
+        createReasoner();
+        OWLClass infection=NS_C("Infection");
+        OWLClassExpression notDomainCategory=m_dataFactory.getOWLObjectComplementOf(NS_C("DomainCategory"));
+        OWLObjectProperty topOP=m_dataFactory.getOWLTopObjectProperty();
+        OWLClassExpression and=m_dataFactory.getOWLObjectIntersectionOf(infection, m_dataFactory.getOWLObjectAllValuesFrom(topOP, notDomainCategory));
+        assertFalse(m_reasoner.isSatisfiable(and));
+        OWLObjectProperty attribute=NS_OP("attribute");
+        and=m_dataFactory.getOWLObjectIntersectionOf(infection, m_dataFactory.getOWLObjectAllValuesFrom(attribute, notDomainCategory));
+        assertFalse(m_reasoner.isSatisfiable(and));
+    }
     public void testUniversalRolePartitionedABox() throws Exception {
         loadOntologyWithAxioms(
                 "Declaration( Class( :A ) )"+
