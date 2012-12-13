@@ -728,12 +728,6 @@ public class ObjectPropertyInclusionManager {
         OWLDataFactory df=OWLManager.createOWLOntologyManager().getOWLDataFactory();
         OWLObjectProperty topOP=df.getOWLTopObjectProperty();
         if (!automataMap.keySet().contains(topOP)) {
-//            if (!symmetricObjectProperties.contains(topOP)) {
-//                symmetricObjectProperties.add(topOP);
-//                Set<OWLObjectPropertyExpression> inverses=new HashSet<OWLObjectPropertyExpression>();
-//                inverses.add(topOP.getInverseProperty());
-//                inversePropertiesMap.put(topOP, inverses);
-//            }
             try {
                 Automaton automaton=new Automaton();
                 State initialState=automaton.addState(true,false);
