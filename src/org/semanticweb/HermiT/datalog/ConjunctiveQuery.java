@@ -14,6 +14,7 @@ import org.semanticweb.HermiT.tableau.DLClauseEvaluator.Worker;
 import org.semanticweb.HermiT.tableau.DependencySet;
 import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.ExtensionTable.View;
+import org.semanticweb.HermiT.tableau.HyperresolutionManager;
 import org.semanticweb.HermiT.tableau.Node;
 
 public final class ConjunctiveQuery {
@@ -30,7 +31,9 @@ public final class ConjunctiveQuery {
         m_resultBuffer=answerTerms.clone();
         m_firstRetrieval=new OneEmptyTupleRetrieval();
         m_queryResultCollector=new QueryResultCollector[1];
-        QueryCompiler queryCompiler=new QueryCompiler(this,queryAtoms,answerTerms,datalogEngine.m_nodesToTerms,m_resultBuffer,m_queryResultCollector,m_firstRetrieval);
+        HyperresolutionManager.BodyAtomsSwapper swapper=new HyperresolutionManager.BodyAtomsSwapper(DLClause.create(new Atom[0],queryAtoms));
+        DLClause queryDLClause=swapper.getSwappedDLClause(0);
+        QueryCompiler queryCompiler=new QueryCompiler(this,queryDLClause,answerTerms,datalogEngine.m_nodesToTerms,m_resultBuffer,m_queryResultCollector,m_firstRetrieval);
         m_workers=new Worker[queryCompiler.m_workers.size()];
         queryCompiler.m_workers.toArray(m_workers);
     }
@@ -131,8 +134,8 @@ public final class ConjunctiveQuery {
         protected final Term[] m_resultBuffer;
         protected final QueryResultCollector[] m_queryResultCollector;
 
-        public QueryCompiler(ConjunctiveQuery conjunctiveQuery,Atom[] queryAtoms,Term[] answerTerms,Map<Node,Term> nodesToTerms,Term[] resultBuffer,QueryResultCollector[] queryResultCollector,ExtensionTable.Retrieval oneEmptyTupleRetrieval) {
-            super(new DLClauseEvaluator.BufferSupply(),new DLClauseEvaluator.ValuesBufferManager(Collections.singleton(DLClause.create(new Atom[0],queryAtoms))),null,conjunctiveQuery.m_datalogEngine.m_extensionManager,queryAtoms,getAnswerVariables(answerTerms));
+        public QueryCompiler(ConjunctiveQuery conjunctiveQuery,DLClause queryDLClause,Term[] answerTerms,Map<Node,Term> nodesToTerms,Term[] resultBuffer,QueryResultCollector[] queryResultCollector,ExtensionTable.Retrieval oneEmptyTupleRetrieval) {
+            super(new DLClauseEvaluator.BufferSupply(),new DLClauseEvaluator.ValuesBufferManager(Collections.singleton(queryDLClause)),null,conjunctiveQuery.m_datalogEngine.m_extensionManager,queryDLClause.getBodyAtoms(),getAnswerVariables(answerTerms));
             m_conjunctiveQuery=conjunctiveQuery;
             m_answerTerms=answerTerms;
             m_nodesToTerms=nodesToTerms;

@@ -266,7 +266,7 @@ public final class HyperresolutionManager implements Serializable {
         }
     }
 
-    protected static final class BodyAtomsSwapper {
+    public static final class BodyAtomsSwapper {
         protected final DLClause m_dlClause;
         protected final List<Atom> m_nodeIDComparisonAtoms;
         protected final boolean[] m_usedAtoms;
