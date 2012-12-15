@@ -32,17 +32,20 @@ public class OWLLinkTest extends AbstractReasonerTest {
         super(name);
     }
 
+    protected void registerMappingToResource(String ontologyIRI, String physicalResource) throws Exception {
+        IRI physicalIRI=IRI.create(getClass().getResource(physicalResource).toURI());
+        IRI logicalIRI=IRI.create(ontologyIRI);
+        m_ontologyManager.addIRIMapper(new SimpleIRIMapper(logicalIRI,physicalIRI));
+    }
+    
     // below are all the tests from the paper
     // "Who the heck is the father of Bob"
     public void testBobTestAandB() throws Exception {
         String[] ontologies=new String[] { "agent-inst.owl","test.owl","situation-inst.owl","situation.owl","space.owl","agent.owl","time.owl" };
         String base="http://www.iyouit.eu/";
         String mainOntology=base+"agent.owl";
-        for (String ont : ontologies) {
-            IRI physicalIRI=IRI.create(getClass().getResource("res/OWLLink/"+ont).toURI());
-            IRI logicalIRI=IRI.create(base+ont);
-            m_ontologyManager.addIRIMapper(new SimpleIRIMapper(logicalIRI,physicalIRI));
-        }
+        for (String ont : ontologies)
+            registerMappingToResource(base+ont,"res/OWLLink/"+ont);
         m_ontology=m_ontologyManager.loadOntology(IRI.create(mainOntology));
         createReasoner();
         OWLObjectProperty knows=m_dataFactory.getOWLObjectProperty(IRI.create(mainOntology+"#knows"));
@@ -114,6 +117,7 @@ public class OWLLinkTest extends AbstractReasonerTest {
         assertHierarchies("res/OWLLink/updateHierarchyFlushed.txt");
     }
     public void testInverses() throws Exception {
+        registerMappingToResource("http://www.owllink.org/ontologies/families","res/families.owl");
         loadReasonerFromResource("res/primer.owl");
         m_reasoner.getDisjointObjectProperties(m_ontologyManager.getOWLDataFactory().getOWLObjectProperty(IRI.create(NS+"hasParent")));
     }
@@ -126,6 +130,7 @@ public class OWLLinkTest extends AbstractReasonerTest {
     }
 
     public void testSuccessiveCalls() throws Exception {
+        registerMappingToResource("http://www.owllink.org/ontologies/families","res/families.owl");
         loadReasonerFromResource("res/primer.owl");
         try {
             m_reasoner.getDisjointObjectProperties(m_dataFactory.getOWLObjectProperty(IRI.create(NS+"hasParent")));
@@ -140,11 +145,8 @@ public class OWLLinkTest extends AbstractReasonerTest {
         String[] ontologies=new String[] { "agent-inst.owl","test.owl","situation-inst.owl","situation.owl","space.owl","agent.owl","time.owl" };
         String base="http://www.iyouit.eu/";
         String mainOntology=base+"agent-inst.owl";
-        for (String ont : ontologies) {
-            IRI physicalIRI=IRI.create(getClass().getResource("res/OWLLink/"+ont).toURI());
-            IRI logicalIRI=IRI.create(base+ont);
-            m_ontologyManager.addIRIMapper(new SimpleIRIMapper(logicalIRI,physicalIRI));
-        }
+        for (String ont : ontologies)
+            registerMappingToResource(base+ont,"res/OWLLink/"+ont);
         m_ontology=m_ontologyManager.loadOntology(IRI.create(mainOntology));
         createReasoner();
         m_reasoner.getPrefixes().declareDefaultPrefix("http://www.iyouit.eu/agent-inst.owl#");
@@ -164,6 +166,7 @@ public class OWLLinkTest extends AbstractReasonerTest {
             }
     }
     public void testDisjointProperties() throws Exception {
+        registerMappingToResource("http://www.owllink.org/ontologies/families","res/families.owl");
         loadReasonerFromResource("res/primer.owl");
         OWLObjectProperty hasParent=m_dataFactory.getOWLObjectProperty(IRI.create("http://example.com/owl/families/hasParent"));
         OWLObjectProperty hasSpouse=m_dataFactory.getOWLObjectProperty(IRI.create("http://example.com/owl/families/hasSpouse"));
@@ -235,6 +238,7 @@ public class OWLLinkTest extends AbstractReasonerTest {
             assertTrue(result.containsEntity(o));
     }
     public void testDisjointClasses() throws Exception {
+        registerMappingToResource("http://www.owllink.org/ontologies/families","res/families.owl");
         loadReasonerFromResource("res/primer.owl");
         OWLClass families=m_dataFactory.getOWLClass(IRI.create("http://example.com/owl/families/Father"));
         Set<Node<OWLClass>> expectedSet=new HashSet<Node<OWLClass>>();

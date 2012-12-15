@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns="http://example.org/otherOntologies/families/"
+     xml:base="http://example.org/otherOntologies/families/"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#">
+    <owl:Ontology rdf:about="http://www.owllink.org/ontologies/families">
+    </owl:Ontology>    
+    <owl:ObjectProperty rdf:about="child"/>
+    <owl:DatatypeProperty rdf:about="age"/>
+    <owl:Class rdf:about="Grownup">
+        <rdfs:subClassOf rdf:resource="http://example.com/owl/families/Person"/>
+    </owl:Class>
+    <owl:Class rdf:about="http://example.com/owl/families/Person"/>    
+    <owl:NamedIndividual rdf:about="JohnBrown">
+        <rdf:type rdf:resource="http://example.com/owl/families/Person"/>
+    </owl:NamedIndividual>    
+    <owl:NamedIndividual rdf:about="MaryBrown">
+        <rdf:type rdf:resource="http://example.com/owl/families/Person"/>
+    </owl:NamedIndividual>
+</rdf:RDF>
+

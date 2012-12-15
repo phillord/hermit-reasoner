@@ -26,6 +26,7 @@ public class AllQuickTests extends TestCase {
         suite.addTestSuite(SimpleRolesTest.class);
         suite.addTestSuite(RulesTest.class);
         suite.addTestSuite(OWLReasonerTest.class);
+        suite.addTestSuite(DatalogEngineTest.class);
         // $JUnit-END$
         return suite;
     }
