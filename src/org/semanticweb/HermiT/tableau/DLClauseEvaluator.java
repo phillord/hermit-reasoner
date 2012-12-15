@@ -658,33 +658,122 @@ public class DLClauseEvaluator implements Serializable {
         }
     }
 
-    protected static final class DLClauseCompiler {
+    protected static final class DLClauseCompiler extends ConjunctionCompiler {
         protected final DLClauseEvaluator m_dlClauseEvalautor;
-        protected final BufferSupply m_bufferSupply;
-        protected final ValuesBufferManager m_valuesBufferManager;
         protected final GroundDisjunctionHeaderManager m_groundDisjunctionHeaderManager;
-        protected final ExtensionManager m_extensionManager;
         protected final ExistentialExpansionStrategy m_existentialExpansionStrategy;
         protected final DLClause m_bodyDLClause;
         protected final List<DLClause> m_headDLClauses;
-        protected final List<Variable> m_variables;
-        protected final Set<Variable> m_boundSoFar;
         protected final boolean[] m_coreVariables;
-        protected final UnionDependencySet m_unionDependencySet;
-        protected final List<ExtensionTable.Retrieval> m_retrievals;
-        protected final List<Worker> m_workers;
-        protected final List<Integer> m_labels;
 
         public DLClauseCompiler(BufferSupply bufferSupply,ValuesBufferManager valuesBufferManager,GroundDisjunctionHeaderManager groundDisjunctionHeaderManager,Map<Integer,UnionDependencySet> unionDependencySetsBySize,DLClauseEvaluator dlClauseEvalautor,ExtensionManager extensionManager,ExistentialExpansionStrategy existentialExpansionStrategy,DLClause bodyDLClause,List<DLClause> headDLClauses,ExtensionTable.Retrieval firstAtomRetrieval) {
-            m_bufferSupply=bufferSupply;
-            m_valuesBufferManager=valuesBufferManager;
+            super(bufferSupply,valuesBufferManager,unionDependencySetsBySize,extensionManager,bodyDLClause.getBodyAtoms(),getHeadVariables(headDLClauses));
             m_groundDisjunctionHeaderManager=groundDisjunctionHeaderManager;
             m_dlClauseEvalautor=dlClauseEvalautor;
-            m_extensionManager=extensionManager;
             m_existentialExpansionStrategy=existentialExpansionStrategy;
             m_bodyDLClause=bodyDLClause;
             m_headDLClauses=headDLClauses;
+            m_coreVariables=new boolean[m_variables.size()];
+            generateCode(1,firstAtomRetrieval);
+        }
+        protected int getNumberOfHeads() {
+            return m_headDLClauses.size();
+        }
+        protected int getHeadLength(int dlClauseIndex) {
+            return m_headDLClauses.get(dlClauseIndex).getHeadLength();
+        }
+        protected Atom getHeadAtom(int dlClauseIndex,int atomIndex) {
+            return m_headDLClauses.get(dlClauseIndex).getHeadAtom(atomIndex);
+        }
+        protected void compileHeads() {
+            m_existentialExpansionStrategy.dlClauseBodyCompiled(m_workers,m_bodyDLClause,m_variables,m_valuesBufferManager.m_valuesBuffer,m_coreVariables);
+            for (int dlClauseIndex=0;dlClauseIndex<getNumberOfHeads();dlClauseIndex++) {
+                if (m_extensionManager.m_tableauMonitor!=null)
+                    m_workers.add(new CallMatchStartedOnMonitor(m_extensionManager.m_tableauMonitor,m_dlClauseEvalautor,dlClauseIndex));
+                if (getHeadLength(dlClauseIndex)==0)
+                    m_workers.add(new SetClash(m_extensionManager,m_unionDependencySet));
+                else if (getHeadLength(dlClauseIndex)==1) {
+                    Atom atom=getHeadAtom(dlClauseIndex,0);
+                    switch (atom.getArity()) {
+                    case 1:
+                        m_workers.add(new DeriveUnaryFact(m_extensionManager,m_valuesBufferManager.m_valuesBuffer,m_coreVariables,m_unionDependencySet,atom.getDLPredicate(),m_variables.indexOf(atom.getArgumentVariable(0))));
+                        break;
+                    case 2:
+                        m_workers.add(new DeriveBinaryFact(m_extensionManager,m_valuesBufferManager.m_valuesBuffer,m_unionDependencySet,atom.getDLPredicate(),m_variables.indexOf(atom.getArgumentVariable(0)),m_variables.indexOf(atom.getArgumentVariable(1))));
+                        break;
+                    case 3:
+                        m_workers.add(new DeriveTernaryFact(m_extensionManager,m_valuesBufferManager.m_valuesBuffer,m_unionDependencySet,atom.getDLPredicate(),m_variables.indexOf(atom.getArgumentVariable(0)),m_variables.indexOf(atom.getArgumentVariable(1)),m_variables.indexOf(atom.getArgumentVariable(2))));
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Unsupported atom arity.");
+                    }
+                }
+                else {
+                    int totalNumberOfArguments=0;
+                    for (int headIndex=0;headIndex<getHeadLength(dlClauseIndex);headIndex++)
+                        totalNumberOfArguments+=getHeadAtom(dlClauseIndex,headIndex).getArity();
+                    DLPredicate[] headDLPredicates=new DLPredicate[getHeadLength(dlClauseIndex)];
+                    int[] copyIsCore=new int[getHeadLength(dlClauseIndex)];
+                    int[] copyValuesToArguments=new int[totalNumberOfArguments];
+                    int index=0;
+                    for (int headIndex=0;headIndex<getHeadLength(dlClauseIndex);headIndex++) {
+                        Atom atom=getHeadAtom(dlClauseIndex,headIndex);
+                        headDLPredicates[headIndex]=atom.getDLPredicate();
+                        for (int argumentIndex=0;argumentIndex<atom.getArity();argumentIndex++) {
+                            Variable variable=atom.getArgumentVariable(argumentIndex);
+                            int variableIndex=m_variables.indexOf(variable);
+                            assert variableIndex!=-1;
+                            copyValuesToArguments[index++]=variableIndex;
+                        }
+                        if (headDLPredicates[headIndex].getArity()==1) {
+                            Variable variable=atom.getArgumentVariable(0);
+                            copyIsCore[headIndex]=m_variables.indexOf(variable);
+                        }
+                        else
+                            copyIsCore[headIndex]=-1;
+                    }
+                    GroundDisjunctionHeader groundDisjunctionHeader=m_groundDisjunctionHeaderManager.get(headDLPredicates);
+                    m_workers.add(new DeriveDisjunction(m_valuesBufferManager.m_valuesBuffer,m_coreVariables,m_unionDependencySet,m_extensionManager.m_tableau,groundDisjunctionHeader,copyIsCore,copyValuesToArguments));
+                }
+                if (m_extensionManager.m_tableauMonitor!=null)
+                    m_workers.add(new CallMatchFinishedOnMonitor(m_extensionManager.m_tableauMonitor,m_dlClauseEvalautor,dlClauseIndex));
+            }
+        }
+        protected static List<Variable> getHeadVariables(List<DLClause> headDLClauses) {
+            List<Variable> result=new ArrayList<Variable>();
+            for (DLClause dlClause : headDLClauses) {
+                for (int headIndex=0;headIndex<dlClause.getHeadLength();headIndex++) {
+                    Atom atom=dlClause.getHeadAtom(headIndex);
+                    for (int argumentIndex=0;argumentIndex<atom.getArity();argumentIndex++) {
+                        Variable variable=atom.getArgumentVariable(argumentIndex);
+                        if (variable!=null && !result.contains(variable))
+                            result.add(variable);
+                    }
+                }
+            }
+            return result;
+        }
+    }
+    
+    public static abstract class ConjunctionCompiler {
+        protected final BufferSupply m_bufferSupply;
+        protected final ValuesBufferManager m_valuesBufferManager;
+        protected final ExtensionManager m_extensionManager;
+        protected final Atom[] m_bodyAtoms;
+        protected final List<Variable> m_variables;
+        protected final Set<Variable> m_boundSoFar;
+        protected final UnionDependencySet m_unionDependencySet;
+        protected final List<ExtensionTable.Retrieval> m_retrievals;
+        public final List<Worker> m_workers;
+        protected final List<Integer> m_labels;
+
+        public ConjunctionCompiler(BufferSupply bufferSupply,ValuesBufferManager valuesBufferManager,Map<Integer,UnionDependencySet> unionDependencySetsBySize,ExtensionManager extensionManager,Atom[] bodyAtoms,List<Variable> headVariables) {
+            m_bufferSupply=bufferSupply;
+            m_valuesBufferManager=valuesBufferManager;
+            m_extensionManager=extensionManager;
+            m_bodyAtoms=bodyAtoms;
             m_variables=new ArrayList<Variable>();
+            m_boundSoFar=new HashSet<Variable>();
             int numberOfRealAtoms=0;
             for (int bodyIndex=0;bodyIndex<getBodyLength();bodyIndex++) {
                 Atom atom=getBodyAtom(bodyIndex);
@@ -696,35 +785,35 @@ public class DLClauseEvaluator implements Serializable {
                 if (!atom.getDLPredicate().equals(NodeIDLessEqualThan.INSTANCE) && !(atom.getDLPredicate() instanceof NodeIDsAscendingOrEqual))
                     numberOfRealAtoms++;
             }
-            for (int dlClauseIndex=0;dlClauseIndex<getNumberOfHeads();dlClauseIndex++) {
-                for (int headIndex=0;headIndex<getHeadLength(dlClauseIndex);headIndex++) {
-                    Atom atom=getHeadAtom(dlClauseIndex,headIndex);
-                    for (int argumentIndex=0;argumentIndex<atom.getArity();argumentIndex++) {
-                        Variable variable=atom.getArgumentVariable(argumentIndex);
-                        if (variable!=null && !m_variables.contains(variable))
-                            m_variables.add(variable);
-                    }
+            for (Variable variable : headVariables)
+                if (!m_variables.contains(variable))
+                    m_variables.add(variable);
+            if (unionDependencySetsBySize!=null) {
+                Integer numberOfRealAtomsInteger=Integer.valueOf(numberOfRealAtoms);
+                UnionDependencySet unionDependencySet=unionDependencySetsBySize.get(numberOfRealAtomsInteger);
+                if (unionDependencySet==null) {
+                    unionDependencySet=new UnionDependencySet(numberOfRealAtoms);
+                    unionDependencySetsBySize.put(numberOfRealAtomsInteger,unionDependencySet);
                 }
+                m_unionDependencySet=unionDependencySet;
             }
-            m_boundSoFar=new HashSet<Variable>();
-            m_coreVariables=new boolean[m_variables.size()];
-            Integer numberOfRealAtomsInteger=Integer.valueOf(numberOfRealAtoms);
-            UnionDependencySet unionDependencySet=unionDependencySetsBySize.get(numberOfRealAtomsInteger);
-            if (unionDependencySet==null) {
-                unionDependencySet=new UnionDependencySet(numberOfRealAtoms);
-                unionDependencySetsBySize.put(numberOfRealAtomsInteger,unionDependencySet);
-            }
-            m_unionDependencySet=unionDependencySet;
+            else
+                m_unionDependencySet=null;
             m_retrievals=new ArrayList<ExtensionTable.Retrieval>();
             m_workers=new ArrayList<Worker>();
             m_labels=new ArrayList<Integer>();
+        }
+        protected final void generateCode(int firstBodyAtomToCompile,ExtensionTable.Retrieval firstAtomRetrieval) {
             m_labels.add(null);
             m_retrievals.add(firstAtomRetrieval);
             int afterRule=addLabel();
-            compileCheckUnboundVariableMatches(getBodyAtom(0),firstAtomRetrieval,afterRule);
-            compileGenerateBindings(firstAtomRetrieval,getBodyAtom(0));
-            m_workers.add(new CopyDependencySet(firstAtomRetrieval,m_unionDependencySet.m_dependencySets,0));
-            compileBodyAtom(1,afterRule);
+            if (firstBodyAtomToCompile>0) {
+                compileCheckUnboundVariableMatches(getBodyAtom(0),firstAtomRetrieval,afterRule);
+                compileGenerateBindings(firstAtomRetrieval,getBodyAtom(0));
+                if (m_unionDependencySet!=null)
+                    m_workers.add(new CopyDependencySet(firstAtomRetrieval,m_unionDependencySet.m_dependencySets,0));
+            }
+            compileBodyAtom(firstBodyAtomToCompile,afterRule);
             setLabelProgramCounter(afterRule);
             for (Worker worker : m_workers)
                 if (worker instanceof BranchingWorker) {
@@ -736,32 +825,15 @@ public class DLClauseEvaluator implements Serializable {
                     }
                 }
         }
-        protected int getNumberOfHeads() {
-            return m_headDLClauses.size();
-        }
-        protected int getBodyLength() {
-            return m_bodyDLClause.getBodyLength();
-        }
-        protected Atom getBodyAtom(int atomIndex) {
-            return m_bodyDLClause.getBodyAtom(atomIndex);
-        }
-        protected int getHeadLength(int dlClauseIndex) {
-            return m_headDLClauses.get(dlClauseIndex).getHeadLength();
-        }
-        protected Atom getHeadAtom(int dlClauseIndex,int atomIndex) {
-            return m_headDLClauses.get(dlClauseIndex).getHeadAtom(atomIndex);
-        }
-        protected boolean occursInBodyAtomsAfter(Variable variable,int startIndex) {
+        protected final boolean occursInBodyAtomsAfter(Variable variable,int startIndex) {
             for (int argumentIndex=startIndex;argumentIndex<getBodyLength();argumentIndex++)
                 if (getBodyAtom(argumentIndex).containsVariable(variable))
                     return true;
             return false;
         }
-        protected void compileBodyAtom(int bodyAtomIndex,int lastAtomNextElement) {
-            if (bodyAtomIndex==getBodyLength()) {
-                m_existentialExpansionStrategy.dlClauseBodyCompiled(m_workers,m_bodyDLClause,m_variables,m_valuesBufferManager.m_valuesBuffer,m_coreVariables);
+        protected final void compileBodyAtom(int bodyAtomIndex,int lastAtomNextElement) {
+            if (bodyAtomIndex==getBodyLength())
                 compileHeads();
-            }
             else if (getBodyAtom(bodyAtomIndex).getDLPredicate().equals(NodeIDLessEqualThan.INSTANCE)) {
                 Atom atom=getBodyAtom(bodyAtomIndex);
                 int variable1Index=m_variables.indexOf(atom.getArgumentVariable(0));
@@ -816,7 +888,8 @@ public class DLClauseEvaluator implements Serializable {
                 m_workers.add(new HasMoreRetrieval(afterLoop,retrieval));
                 compileCheckUnboundVariableMatches(atom,retrieval,nextElement);
                 compileGenerateBindings(retrieval,atom);
-                m_workers.add(new CopyDependencySet(retrieval,m_unionDependencySet.m_dependencySets,m_retrievals.size()-1));
+                if (m_unionDependencySet!=null)
+                    m_workers.add(new CopyDependencySet(retrieval,m_unionDependencySet.m_dependencySets,m_retrievals.size()-1));
                 compileBodyAtom(bodyAtomIndex+1,nextElement);
                 setLabelProgramCounter(nextElement);
                 m_workers.add(new NextRetrieval(retrieval));
@@ -824,60 +897,13 @@ public class DLClauseEvaluator implements Serializable {
                 setLabelProgramCounter(afterLoop);
             }
         }
-        protected void compileHeads() {
-            for (int dlClauseIndex=0;dlClauseIndex<getNumberOfHeads();dlClauseIndex++) {
-                if (m_extensionManager.m_tableauMonitor!=null)
-                    m_workers.add(new CallMatchStartedOnMonitor(m_extensionManager.m_tableauMonitor,m_dlClauseEvalautor,dlClauseIndex));
-                if (getHeadLength(dlClauseIndex)==0)
-                    m_workers.add(new SetClash(m_extensionManager,m_unionDependencySet));
-                else if (getHeadLength(dlClauseIndex)==1) {
-                    Atom atom=getHeadAtom(dlClauseIndex,0);
-                    switch (atom.getArity()) {
-                    case 1:
-                        m_workers.add(new DeriveUnaryFact(m_extensionManager,m_valuesBufferManager.m_valuesBuffer,m_coreVariables,m_unionDependencySet,atom.getDLPredicate(),m_variables.indexOf(atom.getArgumentVariable(0))));
-                        break;
-                    case 2:
-                        m_workers.add(new DeriveBinaryFact(m_extensionManager,m_valuesBufferManager.m_valuesBuffer,m_unionDependencySet,atom.getDLPredicate(),m_variables.indexOf(atom.getArgumentVariable(0)),m_variables.indexOf(atom.getArgumentVariable(1))));
-                        break;
-                    case 3:
-                        m_workers.add(new DeriveTernaryFact(m_extensionManager,m_valuesBufferManager.m_valuesBuffer,m_unionDependencySet,atom.getDLPredicate(),m_variables.indexOf(atom.getArgumentVariable(0)),m_variables.indexOf(atom.getArgumentVariable(1)),m_variables.indexOf(atom.getArgumentVariable(2))));
-                        break;
-                    default:
-                        throw new IllegalArgumentException("Unsupported atom arity.");
-                    }
-                }
-                else {
-                    int totalNumberOfArguments=0;
-                    for (int headIndex=0;headIndex<getHeadLength(dlClauseIndex);headIndex++)
-                        totalNumberOfArguments+=getHeadAtom(dlClauseIndex,headIndex).getArity();
-                    DLPredicate[] headDLPredicates=new DLPredicate[getHeadLength(dlClauseIndex)];
-                    int[] copyIsCore=new int[getHeadLength(dlClauseIndex)];
-                    int[] copyValuesToArguments=new int[totalNumberOfArguments];
-                    int index=0;
-                    for (int headIndex=0;headIndex<getHeadLength(dlClauseIndex);headIndex++) {
-                        Atom atom=getHeadAtom(dlClauseIndex,headIndex);
-                        headDLPredicates[headIndex]=atom.getDLPredicate();
-                        for (int argumentIndex=0;argumentIndex<atom.getArity();argumentIndex++) {
-                            Variable variable=atom.getArgumentVariable(argumentIndex);
-                            int variableIndex=m_variables.indexOf(variable);
-                            assert variableIndex!=-1;
-                            copyValuesToArguments[index++]=variableIndex;
-                        }
-                        if (headDLPredicates[headIndex].getArity()==1) {
-                            Variable variable=atom.getArgumentVariable(0);
-                            copyIsCore[headIndex]=m_variables.indexOf(variable);
-                        }
-                        else
-                            copyIsCore[headIndex]=-1;
-                    }
-                    GroundDisjunctionHeader groundDisjunctionHeader=m_groundDisjunctionHeaderManager.get(headDLPredicates);
-                    m_workers.add(new DeriveDisjunction(m_valuesBufferManager.m_valuesBuffer,m_coreVariables,m_unionDependencySet,m_extensionManager.m_tableau,groundDisjunctionHeader,copyIsCore,copyValuesToArguments));
-                }
-                if (m_extensionManager.m_tableauMonitor!=null)
-                    m_workers.add(new CallMatchFinishedOnMonitor(m_extensionManager.m_tableauMonitor,m_dlClauseEvalautor,dlClauseIndex));
-            }
+        protected final int getBodyLength() {
+            return m_bodyAtoms.length;
         }
-        protected void compileCheckUnboundVariableMatches(Atom atom,ExtensionTable.Retrieval retrieval,int jumpIndex) {
+        protected final Atom getBodyAtom(int atomIndex) {
+            return m_bodyAtoms[atomIndex];
+        }
+        protected final void compileCheckUnboundVariableMatches(Atom atom,ExtensionTable.Retrieval retrieval,int jumpIndex) {
             for (int outerArgumentIndex=0;outerArgumentIndex<atom.getArity();outerArgumentIndex++) {
                 Variable variable=atom.getArgumentVariable(outerArgumentIndex);
                 if (variable!=null && !m_boundSoFar.contains(variable)) {
@@ -888,7 +914,7 @@ public class DLClauseEvaluator implements Serializable {
                 }
             }
         }
-        protected void compileGenerateBindings(ExtensionTable.Retrieval retrieval,Atom atom) {
+        protected final void compileGenerateBindings(ExtensionTable.Retrieval retrieval,Atom atom) {
             for (int argumentIndex=0;argumentIndex<atom.getArity();argumentIndex++) {
                 Variable variable=atom.getArgumentVariable(argumentIndex);
                 if (variable!=null && !m_boundSoFar.contains(variable)) {
@@ -900,13 +926,14 @@ public class DLClauseEvaluator implements Serializable {
                 }
             }
         }
-        protected int addLabel() {
+        protected final int addLabel() {
             int labelIndex=m_labels.size();
             m_labels.add(null);
             return -labelIndex;
         }
-        protected void setLabelProgramCounter(int labelID) {
+        protected final void setLabelProgramCounter(int labelID) {
             m_labels.set(-labelID,Integer.valueOf(m_workers.size()));
         }
-    }
+        protected abstract void compileHeads();
+   }
 }
