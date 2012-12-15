@@ -60,10 +60,13 @@ public final class DatalogEngine {
                 Term term=m_nodesToTerms.get(node);
                 Term canonicalTerm=m_nodesToTerms.get(node.getCanonicalNode());
                 Set<Term> equivalenceClass=m_termsToEquivalenceClasses.get(canonicalTerm);
-                if (equivalenceClass==null)
+                if (equivalenceClass==null) {
                     equivalenceClass=new HashSet<Term>();
+                    m_termsToEquivalenceClasses.put(canonicalTerm,equivalenceClass);
+                }
+                if (!term.equals(canonicalTerm))
+                    m_termsToEquivalenceClasses.put(term,equivalenceClass);
                 equivalenceClass.add(term);
-                m_termsToEquivalenceClasses.put(term,equivalenceClass);
                 m_termsToRepresentatives.put(term,canonicalTerm);
                 node=node.getNextTableauNode();
             }

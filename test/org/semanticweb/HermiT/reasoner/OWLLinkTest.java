@@ -32,7 +32,7 @@ public class OWLLinkTest extends AbstractReasonerTest {
         super(name);
     }
 
-    protected void registerMappingToResource(String ontologyIRI, String physicalResource) throws Exception {
+    protected void registerMappingToResource(String ontologyIRI,String physicalResource) throws Exception {
         IRI physicalIRI=IRI.create(getClass().getResource(physicalResource).toURI());
         IRI logicalIRI=IRI.create(ontologyIRI);
         m_ontologyManager.addIRIMapper(new SimpleIRIMapper(logicalIRI,physicalIRI));

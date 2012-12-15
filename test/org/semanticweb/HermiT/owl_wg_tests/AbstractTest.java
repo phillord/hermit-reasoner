@@ -30,9 +30,11 @@ import org.coode.owlapi.functionalrenderer.OWLFunctionalSyntaxRenderer;
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.ReasonerInterruptedException;
+import org.semanticweb.owlapi.util.SimpleIRIMapper;
 
 public abstract class AbstractTest extends TestCase {
     public static int TIMEOUT=300000;
@@ -55,7 +57,18 @@ public abstract class AbstractTest extends TestCase {
     }
     protected void setUp() throws Exception {
         m_ontologyManager=OWLManager.createOWLOntologyManager();
+        registerImportedReosurces();
         m_premiseOntology=m_wgTestDescriptor.getPremiseOntology(m_ontologyManager);
+    }
+    protected void registerMappingToResource(String ontologyIRI,String physicalResource) throws Exception {
+        IRI physicalIRI=IRI.create(getClass().getResource(physicalResource).toURI());
+        IRI logicalIRI=IRI.create(ontologyIRI);
+        m_ontologyManager.addIRIMapper(new SimpleIRIMapper(logicalIRI,physicalIRI));
+    }
+    protected void registerImportedReosurces() throws Exception {
+        registerMappingToResource("http://www.w3.org/2002/03owlt/miscellaneous/consistent001","ontologies/consistent001.rdf");
+        registerMappingToResource("http://www.w3.org/2002/03owlt/miscellaneous/consistent002","ontologies/consistent002.rdf");
+        registerMappingToResource("http://www.w3.org/2002/03owlt/imports/support011-A","ontologies/support011-A.rdf");
     }
     protected void tearDown() {
         m_wgTestDescriptor=null;
