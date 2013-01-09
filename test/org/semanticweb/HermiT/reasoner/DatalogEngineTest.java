@@ -133,11 +133,21 @@ public class DatalogEngineTest extends AbstractReasonerTest {
         loadOntologyWithAxioms(
             "ObjectPropertyAssertion( :R :c :b )"+LB+
             "ObjectPropertyAssertion( :S :c :a )"+LB+
-            "SameIndividual( :a :b )"
+            "SameIndividual( :a :b )"+LB+
+
+            "ObjectPropertyAssertion( :R :d :e )"+LB+
+            "ObjectPropertyAssertion( :S :d :f )"
         );
         createReasoner();
         DatalogEngine datalogEngine=new DatalogEngine(m_reasoner.getDLOntology());
         datalogEngine.materialize();
+        assertContainsAll(
+            datalogEngine.getEquivalenceClass(I("a")),
+            TS(
+                I("a"),
+                I("b")
+            )
+        );
         QueryChecker queryChecker=new QueryChecker();
         
         new ConjunctiveQuery(datalogEngine,
