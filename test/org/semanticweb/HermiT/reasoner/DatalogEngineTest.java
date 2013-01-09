@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.datalog.ConjunctiveQuery;
 import org.semanticweb.HermiT.datalog.DatalogEngine;
 import org.semanticweb.HermiT.datalog.QueryResultCollector;
@@ -152,6 +153,40 @@ public class DatalogEngineTest extends AbstractReasonerTest {
         queryChecker.
             add(I("c")).
             assertEquals();
+    }
+    
+    
+    public void testQueryWithIndividuals() throws Exception {
+
+    	loadOntologyWithAxioms(
+                "DLSafeRule(Body(ClassAtom(:D0 Variable(:x))) Head(ClassAtom(:A Variable(:x))))" + LB+
+                "DLSafeRule(Body(ClassAtom(:D0 Variable(:x))) Head(ClassAtom(:B Variable(:x))))" + LB+
+                "DLSafeRule(Body(ClassAtom(:A Variable(:x))ClassAtom(:RD0 Variable(:z))) Head(ClassAtom(:D0 Variable(:z))))" + LB+
+                "DLSafeRule(Body(ClassAtom(:A Variable(:x))ClassAtom(:RD0 Variable(:z))) Head(ObjectPropertyAtom(:R Variable(:x) Variable(:z))))" + LB+
+                "ClassAssertion( owl:Thing :a )"+LB+
+                "ClassAssertion( :RD0 :rd0 )"+LB+
+                 "ClassAssertion( :A :a )"
+            );
+        createReasoner();
+        Prefixes prefixes = new Prefixes();
+		prefixes.declareSemanticWebPrefixes();
+		prefixes.declareDefaultPrefix("file:/c/test.owl#");
+		prefixes.declarePrefix("n:", "internal:nam#");
+
+        System.err.println(m_reasoner.getDLOntology().toString(prefixes));
+        DatalogEngine datalogEngine=new DatalogEngine(m_reasoner.getDLOntology());
+        assertTrue(datalogEngine.materialize());
+        QueryChecker queryChecker=new QueryChecker();
+        
+        new ConjunctiveQuery(datalogEngine,
+            AS(
+                A(R("R"),V("x"),I("a"))
+            ),
+            TS(
+                V("x")
+            )
+        ).evaluate(queryChecker);
+        assertTrue(queryChecker.m_answerTuples.isEmpty());
     }
     
     protected static class AnswerTuple {
