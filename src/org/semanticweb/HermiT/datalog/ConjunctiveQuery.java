@@ -17,17 +17,21 @@ import org.semanticweb.HermiT.tableau.ExtensionTable.View;
 import org.semanticweb.HermiT.tableau.HyperresolutionManager;
 import org.semanticweb.HermiT.tableau.Node;
 
-public final class ConjunctiveQuery {
+public class ConjunctiveQuery {
     protected final DatalogEngine m_datalogEngine;
+    protected final Atom[] m_queryAtoms;
+    protected final Term[] m_answerTerms;
     protected final Term[] m_resultBuffer;
     protected final OneEmptyTupleRetrieval m_firstRetrieval;
     protected final QueryResultCollector[] m_queryResultCollector;
     protected final Worker[] m_workers;
 
-    public ConjunctiveQuery(DatalogEngine datalogEngine,Atom[] queryAtoms, Term[] answerTerms) {
+    public ConjunctiveQuery(DatalogEngine datalogEngine,Atom[] queryAtoms,Term[] answerTerms) {
         if (!datalogEngine.materialize())
             throw new IllegalStateException("The supplied DL ontology is unsatisfiable.");
         m_datalogEngine=datalogEngine;
+        m_queryAtoms=queryAtoms;
+        m_answerTerms=answerTerms;
         m_resultBuffer=answerTerms.clone();
         m_firstRetrieval=new OneEmptyTupleRetrieval();
         m_queryResultCollector=new QueryResultCollector[1];
@@ -39,6 +43,18 @@ public final class ConjunctiveQuery {
     }
     public DatalogEngine getDatalogEngine() {
         return m_datalogEngine;
+    }
+    public int getNumberOfQUeryAtoms() {
+        return m_queryAtoms.length;
+    }
+    public Atom getQueryAtom(int atomIndex) {
+        return m_queryAtoms[atomIndex];
+    }
+    public int getNumberOfAnswerTerms() {
+        return m_answerTerms.length;
+    }
+    public Term getAnswerTerm(int termIndex) {
+        return m_answerTerms[termIndex];
     }
     public void evaluate(QueryResultCollector queryResultCollector) {
         try {

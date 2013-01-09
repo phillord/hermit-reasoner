@@ -129,6 +129,30 @@ public class DatalogEngineTest extends AbstractReasonerTest {
             add(I("f"),datalogEngine.getRepresentative(I("a"))).
             assertEquals();
     }
+    public void testQueryWithIndividualsAndEquality() throws Exception {
+        loadOntologyWithAxioms(
+            "ObjectPropertyAssertion( :R :c :b )"+LB+
+            "ObjectPropertyAssertion( :S :c :a )"+LB+
+            "SameIndividual( :a :b )"
+        );
+        createReasoner();
+        DatalogEngine datalogEngine=new DatalogEngine(m_reasoner.getDLOntology());
+        datalogEngine.materialize();
+        QueryChecker queryChecker=new QueryChecker();
+        
+        new ConjunctiveQuery(datalogEngine,
+            AS(
+                A(R("R"),V("X"),I("a")),
+                A(R("S"),V("X"),I("b"))
+            ),
+            TS(
+                V("X")
+            )
+        ).evaluate(queryChecker);
+        queryChecker.
+            add(I("c")).
+            assertEquals();
+    }
     
     protected static class AnswerTuple {
         protected final Term[] m_terms;

@@ -319,7 +319,7 @@ public class DLOntology implements Serializable {
         for (Map.Entry<String,String> entry : prefixes.getPrefixIRIsByPrefixName().entrySet()) {
             stringBuffer.append("  ");
             stringBuffer.append(entry.getKey());
-            stringBuffer.append(": = <");
+            stringBuffer.append(" = <");
             stringBuffer.append(entry.getValue());
             stringBuffer.append('>');
             stringBuffer.append(CRLF);
