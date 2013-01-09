@@ -25,9 +25,10 @@ import org.semanticweb.HermiT.tableau.Tableau;
 public final class DatalogEngine {
     protected final InterruptFlag m_interruptFlag;
     protected final DLOntology m_dlOntology;
+    protected final Map<Term,Node> m_termsToNodes;
     protected final Map<Node,Term> m_nodesToTerms;
-    protected final Map<Term, Set<Term>> m_termsToEquivalenceClasses;
-    protected final Map<Term, Term> m_termsToRepresentatives;
+    protected final Map<Term,Set<Term>> m_termsToEquivalenceClasses;
+    protected final Map<Term,Term> m_termsToRepresentatives;
     protected ExtensionManager m_extensionManager;
     
     public DatalogEngine(DLOntology dlOntology) {
@@ -36,6 +37,7 @@ public final class DatalogEngine {
                 throw new IllegalArgumentException("The supplied DL ontology contains rules with disjunctive heads.");
         m_interruptFlag=new InterruptFlag(0);
         m_dlOntology=dlOntology;
+        m_termsToNodes=new HashMap<Term,Node>();
         m_nodesToTerms=new HashMap<Node,Term>();
         m_termsToEquivalenceClasses=new HashMap<Term,Set<Term>>();
         m_termsToRepresentatives=new HashMap<Term,Term>();
@@ -45,14 +47,14 @@ public final class DatalogEngine {
     }
     public boolean materialize() {
         if (m_extensionManager==null) {
+            m_termsToNodes.clear();
             m_nodesToTerms.clear();
             m_termsToEquivalenceClasses.clear();
             m_termsToRepresentatives.clear();
             Tableau tableau=new Tableau(m_interruptFlag,null,NullExistentialExpansionStrategy.INSTANCE,false,m_dlOntology,null,new HashMap<String,Object>());
             Set<Atom> noAtoms=Collections.emptySet();
-            Map<Term,Node> termsToNodes=new HashMap<Term,Node>();
-            tableau.isSatisfiable(true,false,noAtoms,noAtoms,noAtoms,noAtoms,termsToNodes,null,null);
-            for (Map.Entry<Term,Node> entry : termsToNodes.entrySet())
+            tableau.isSatisfiable(true,false,noAtoms,noAtoms,noAtoms,noAtoms,m_termsToNodes,null,null);
+            for (Map.Entry<Term,Node> entry : m_termsToNodes.entrySet())
                 m_nodesToTerms.put(entry.getValue(),entry.getKey());
             m_extensionManager=tableau.getExtensionManager();
             Node node=tableau.getFirstTableauNode();

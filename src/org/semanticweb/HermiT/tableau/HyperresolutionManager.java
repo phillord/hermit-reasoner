@@ -19,6 +19,7 @@ package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -75,7 +76,8 @@ public final class HyperresolutionManager implements Serializable {
         // Compile the DL clauses
         Map<Integer,ExtensionTable.Retrieval> retrievalsByArity=new HashMap<Integer,ExtensionTable.Retrieval>();
         DLClauseEvaluator.BufferSupply bufferSupply=new DLClauseEvaluator.BufferSupply();
-        DLClauseEvaluator.ValuesBufferManager valuesBufferManager=new DLClauseEvaluator.ValuesBufferManager(dlClauses);
+        Map<Term,Node> noTermsToNodes=Collections.emptyMap();
+        DLClauseEvaluator.ValuesBufferManager valuesBufferManager=new DLClauseEvaluator.ValuesBufferManager(dlClauses,noTermsToNodes);
         DLClauseEvaluator.GroundDisjunctionHeaderManager groundDisjunctionHeaderManager=new DLClauseEvaluator.GroundDisjunctionHeaderManager();
         Map<Integer,UnionDependencySet> unionDependencySetsBySize=new HashMap<Integer,UnionDependencySet>();
         ArrayList<Atom> guardingAtomicConceptAtoms1=new ArrayList<Atom>();

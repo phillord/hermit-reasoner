@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.datalog.ConjunctiveQuery;
 import org.semanticweb.HermiT.datalog.DatalogEngine;
 import org.semanticweb.HermiT.datalog.QueryResultCollector;
@@ -154,39 +153,30 @@ public class DatalogEngineTest extends AbstractReasonerTest {
             add(I("c")).
             assertEquals();
     }
-    
-    
     public void testQueryWithIndividuals() throws Exception {
-
     	loadOntologyWithAxioms(
-                "DLSafeRule(Body(ClassAtom(:D0 Variable(:x))) Head(ClassAtom(:A Variable(:x))))" + LB+
-                "DLSafeRule(Body(ClassAtom(:D0 Variable(:x))) Head(ClassAtom(:B Variable(:x))))" + LB+
-                "DLSafeRule(Body(ClassAtom(:A Variable(:x))ClassAtom(:RD0 Variable(:z))) Head(ClassAtom(:D0 Variable(:z))))" + LB+
-                "DLSafeRule(Body(ClassAtom(:A Variable(:x))ClassAtom(:RD0 Variable(:z))) Head(ObjectPropertyAtom(:R Variable(:x) Variable(:z))))" + LB+
-                "ClassAssertion( owl:Thing :a )"+LB+
-                "ClassAssertion( :RD0 :rd0 )"+LB+
-                 "ClassAssertion( :A :a )"
-            );
+            "DLSafeRule(Body(ClassAtom(:D0 Variable(:X))) Head(ClassAtom(:A Variable(:X))))" + LB+
+            "DLSafeRule(Body(ClassAtom(:D0 Variable(:X))) Head(ClassAtom(:B Variable(:X))))" + LB+
+            "DLSafeRule(Body(ClassAtom(:A Variable(:X))ClassAtom(:RD0 Variable(:Z))) Head(ClassAtom(:D0 Variable(:Z))))" + LB+
+            "DLSafeRule(Body(ClassAtom(:A Variable(:X))ClassAtom(:RD0 Variable(:Z))) Head(ObjectPropertyAtom(:R Variable(:X) Variable(:Z))))" + LB+
+            "ClassAssertion( owl:Thing :a )"+LB+
+            "ClassAssertion( :RD0 :rd0 )"+LB+
+            "ClassAssertion( :A :a )"
+        );
         createReasoner();
-        Prefixes prefixes = new Prefixes();
-		prefixes.declareSemanticWebPrefixes();
-		prefixes.declareDefaultPrefix("file:/c/test.owl#");
-		prefixes.declarePrefix("n:", "internal:nam#");
-
-        System.err.println(m_reasoner.getDLOntology().toString(prefixes));
         DatalogEngine datalogEngine=new DatalogEngine(m_reasoner.getDLOntology());
-        assertTrue(datalogEngine.materialize());
+        datalogEngine.materialize();
         QueryChecker queryChecker=new QueryChecker();
         
         new ConjunctiveQuery(datalogEngine,
             AS(
-                A(R("R"),V("x"),I("a"))
+                A(R("R"),V("X"),I("a"))
             ),
             TS(
-                V("x")
+                V("X")
             )
         ).evaluate(queryChecker);
-        assertTrue(queryChecker.m_answerTuples.isEmpty());
+        queryChecker.assertEquals();
     }
     
     protected static class AnswerTuple {

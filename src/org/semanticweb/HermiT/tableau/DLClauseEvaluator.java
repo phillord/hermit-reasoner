@@ -31,6 +31,7 @@ import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.model.NodeIDLessEqualThan;
 import org.semanticweb.HermiT.model.NodeIDsAscendingOrEqual;
+import org.semanticweb.HermiT.model.Term;
 import org.semanticweb.HermiT.model.Variable;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
 
@@ -142,10 +143,12 @@ public class DLClauseEvaluator implements Serializable {
         public final Object[] m_valuesBuffer;
         public final Map<DLPredicate,Integer> m_bodyDLPredicatesToIndexes;
         public final int m_maxNumberOfVariables;
+        public final Map<Term,Integer> m_bodyNonvariableTermsToIndexes;
 
-        public ValuesBufferManager(Set<DLClause> dlClauses) {
+        public ValuesBufferManager(Set<DLClause> dlClauses,Map<Term,Node> termsToNodes) {
             Set<DLPredicate> bodyDLPredicates=new HashSet<DLPredicate>();
             Set<Variable> variables=new HashSet<Variable>();
+            m_bodyNonvariableTermsToIndexes=new HashMap<Term,Integer>();
             int maxNumberOfVariables=0;
             for (DLClause dlClause : dlClauses) {
                 variables.clear();
@@ -153,21 +156,31 @@ public class DLClauseEvaluator implements Serializable {
                     Atom atom=dlClause.getBodyAtom(bodyIndex);
                     bodyDLPredicates.add(atom.getDLPredicate());
                     for (int argumentIndex=0;argumentIndex<atom.getArity();argumentIndex++) {
-                        Variable variable=atom.getArgumentVariable(argumentIndex);
-                        if (variable!=null)
-                            variables.add(variable);
+                        Term term=atom.getArgument(argumentIndex);
+                        if (term instanceof Variable)
+                            variables.add((Variable)term);
+                        else
+                            m_bodyNonvariableTermsToIndexes.put(term,-1);
                     }
                 }
                 if (variables.size()>maxNumberOfVariables)
                     maxNumberOfVariables=variables.size();
             }
-            m_valuesBuffer=new Object[maxNumberOfVariables+bodyDLPredicates.size()];
+            m_valuesBuffer=new Object[maxNumberOfVariables+bodyDLPredicates.size()+m_bodyNonvariableTermsToIndexes.size()];
             m_bodyDLPredicatesToIndexes=new HashMap<DLPredicate,Integer>();
-            int predicateIndex=maxNumberOfVariables;
+            int bindingIndex=maxNumberOfVariables;
             for (DLPredicate bodyDLPredicate : bodyDLPredicates) {
-                m_bodyDLPredicatesToIndexes.put(bodyDLPredicate,Integer.valueOf(predicateIndex));
-                m_valuesBuffer[predicateIndex]=bodyDLPredicate;
-                predicateIndex++;
+                m_bodyDLPredicatesToIndexes.put(bodyDLPredicate,Integer.valueOf(bindingIndex));
+                m_valuesBuffer[bindingIndex]=bodyDLPredicate;
+                bindingIndex++;
+            }
+            for (Map.Entry<Term,Integer> entry : m_bodyNonvariableTermsToIndexes.entrySet()) {
+                Node termNode=termsToNodes.get(entry.getKey());
+                if (termNode==null)
+                    throw new IllegalArgumentException("Term '"+entry.getValue()+"' is unknown to the reasoner.");
+                entry.setValue(bindingIndex);
+                m_valuesBuffer[bindingIndex]=termNode.getCanonicalNode();
+                bindingIndex++;
             }
             m_maxNumberOfVariables=maxNumberOfVariables;
         }
@@ -875,11 +888,15 @@ public class DLClauseEvaluator implements Serializable {
                 int[] bindingPositions=new int[atom.getArity()+1];
                 bindingPositions[0]=m_valuesBufferManager.m_bodyDLPredicatesToIndexes.get(atom.getDLPredicate()).intValue();
                 for (int argumentIndex=0;argumentIndex<atom.getArity();argumentIndex++) {
-                    Variable variable=atom.getArgumentVariable(argumentIndex);
-                    if (variable!=null && m_boundSoFar.contains(variable))
-                        bindingPositions[argumentIndex+1]=m_variables.indexOf(variable);
+                    Term term=atom.getArgument(argumentIndex);
+                    if (term instanceof Variable) {
+                        if (m_boundSoFar.contains(term))
+                            bindingPositions[argumentIndex+1]=m_variables.indexOf((Variable)term);
+                        else
+                            bindingPositions[argumentIndex+1]=-1;
+                    }
                     else
-                        bindingPositions[argumentIndex+1]=-1;
+                        bindingPositions[argumentIndex+1]=m_valuesBufferManager.m_bodyNonvariableTermsToIndexes.get(term).intValue();
                 }
                 ExtensionTable.Retrieval retrieval=m_extensionManager.getExtensionTable(atom.getArity()+1).createRetrieval(bindingPositions,m_valuesBufferManager.m_valuesBuffer,m_bufferSupply.getBuffer(atom.getArity()+1),false,ExtensionTable.View.EXTENSION_THIS);
                 m_retrievals.add(retrieval);

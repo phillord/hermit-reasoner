@@ -37,7 +37,7 @@ public class ConjunctiveQuery {
         m_queryResultCollector=new QueryResultCollector[1];
         HyperresolutionManager.BodyAtomsSwapper swapper=new HyperresolutionManager.BodyAtomsSwapper(DLClause.create(new Atom[0],queryAtoms));
         DLClause queryDLClause=swapper.getSwappedDLClause(0);
-        QueryCompiler queryCompiler=new QueryCompiler(this,queryDLClause,answerTerms,datalogEngine.m_nodesToTerms,m_resultBuffer,m_queryResultCollector,m_firstRetrieval);
+        QueryCompiler queryCompiler=new QueryCompiler(this,queryDLClause,answerTerms,datalogEngine.m_termsToNodes,datalogEngine.m_nodesToTerms,m_resultBuffer,m_queryResultCollector,m_firstRetrieval);
         m_workers=new Worker[queryCompiler.m_workers.size()];
         queryCompiler.m_workers.toArray(m_workers);
     }
@@ -150,8 +150,8 @@ public class ConjunctiveQuery {
         protected final Term[] m_resultBuffer;
         protected final QueryResultCollector[] m_queryResultCollector;
 
-        public QueryCompiler(ConjunctiveQuery conjunctiveQuery,DLClause queryDLClause,Term[] answerTerms,Map<Node,Term> nodesToTerms,Term[] resultBuffer,QueryResultCollector[] queryResultCollector,ExtensionTable.Retrieval oneEmptyTupleRetrieval) {
-            super(new DLClauseEvaluator.BufferSupply(),new DLClauseEvaluator.ValuesBufferManager(Collections.singleton(queryDLClause)),null,conjunctiveQuery.m_datalogEngine.m_extensionManager,queryDLClause.getBodyAtoms(),getAnswerVariables(answerTerms));
+        public QueryCompiler(ConjunctiveQuery conjunctiveQuery,DLClause queryDLClause,Term[] answerTerms,Map<Term,Node> termsToNodes,Map<Node,Term> nodesToTerms,Term[] resultBuffer,QueryResultCollector[] queryResultCollector,ExtensionTable.Retrieval oneEmptyTupleRetrieval) {
+            super(new DLClauseEvaluator.BufferSupply(),new DLClauseEvaluator.ValuesBufferManager(Collections.singleton(queryDLClause),termsToNodes),null,conjunctiveQuery.m_datalogEngine.m_extensionManager,queryDLClause.getBodyAtoms(),getAnswerVariables(answerTerms));
             m_conjunctiveQuery=conjunctiveQuery;
             m_answerTerms=answerTerms;
             m_nodesToTerms=nodesToTerms;
