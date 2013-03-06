@@ -32,7 +32,7 @@
     
     <!-- libraries -->
     <property name="libdir" value="${projectroot}/lib"/>
-    <property name="owlapi" value="${libdir}/owlapi-3.2.4.jar"/>
+    <property name="owlapi" value="${libdir}/owlapi-3.4.3.jar"/>
     <property name="automaton" value="${libdir}/dk.brics.automaton-1.11-2.jar"/>
     <property name="jautomaton" value="${libdir}/jautomata-core-2.0-alpha-1.jar"/>
     <property name="junit" value="${libdir}/junit-4.4.jar"/>
