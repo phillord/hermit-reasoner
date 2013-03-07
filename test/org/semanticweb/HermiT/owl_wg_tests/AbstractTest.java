@@ -116,7 +116,7 @@ public abstract class AbstractTest extends TestCase {
     }
     protected void saveOntology(OWLOntologyManager manager,OWLOntology ontology,File file) throws Exception {
         BufferedWriter writer=new BufferedWriter(new FileWriter(file));
-        OWLFunctionalSyntaxRenderer renderer=new OWLFunctionalSyntaxRenderer(manager);
+        OWLFunctionalSyntaxRenderer renderer=new OWLFunctionalSyntaxRenderer();
         renderer.render(ontology,writer);
         writer.close();
     }
