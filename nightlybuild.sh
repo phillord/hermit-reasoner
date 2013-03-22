@@ -98,11 +98,11 @@ if [ -n "$files" ]; then
 fi
 echo -------------------------------------------- >> $log
 echo Publishing the nightly build and report... >> $log
-eval scp $bindir/$project-$date.zip birg@edison.comlab.ox.ac.uk:/data/hermit/download/nightlybuilds/ 2>&1 3>&1 4>&1 5>&1 6>&1 7>&1 8>&1 9>&1 >> $log
-eval scp $reportdir/$project-JUnitResults-$date.html birg@edison.comlab.ox.ac.uk:/data/hermit/download/nightlybuilds/ 2>&1 3>&1 4>&1 5>&1 6>&1 7>&1 8>&1 9>&1 >> $log
+eval scp $bindir/$project-$date.zip ernesto@linux.cs.ox.ac.uk:/fs/website/research/themes/isg/tools/HermiT/download/nightlybuilds/ 2>&1 3>&1 4>&1 5>&1 6>&1 7>&1 8>&1 9>&1 >> $log
+eval scp $reportdir/$project-JUnitResults-$date.html ernesto@linux.cs.ox.ac.uk:/fs/website/research/themes/isg/tools/HermiT/download/nightlybuilds/ 2>&1 3>&1 4>&1 5>&1 6>&1 7>&1 8>&1 9>&1 >> $log
 echo -------------------------------------------- >> $log
 echo Removing old nightly builds and reports from edison >> $log
-eval ssh birg@edison.comlab.ox.ac.uk '/data/hermit/scripts/rmOldNightlyBuilds.sh' 2>&1 3>&1 4>&1 5>&1 6>&1 7>&1 8>&1 9>&1 >> $log 
+eval ssh ernesto@linux.cs.ox.ac.uk '/data/hermit/scripts/rmOldNightlyBuilds.sh' 2>&1 3>&1 4>&1 5>&1 6>&1 7>&1 8>&1 9>&1 >> $log 
 echo -------------------------------------------- >> $log
 echo >> $log
 
