@@ -141,6 +141,16 @@ HermiT 1.3.6
   to check whether the changes were relevant to the import closure of the root ontology. 
   Fixed a problem with absolute IRIs that had <> around the string as officially required, 
   which, however, causes problems in OWL API. Fixed a bug with property chain encoding.
+HermiT 1.3.7
+- New OWL API is used (3.4.3). Added new statistics methods in the counting monitor. 
+  Changed the Prefixes class so that it uses the terminology from the OWL 2 specification. 
+  Added a new library to fix the javax.xml.stream.XMLStreamException error in Protege for 
+  malformed XML literals. Improved the handling of owl:topObjectProperty when loading 
+  additional axioms (e.g., for entailment checking). Fixed a bug in incremental ABox 
+  updates with fresh names. Fixed a bug with core blocking. Fixed HasKey clausification 
+  bug for negated classes. Fixed a bug in the instance retrieval process and a NPE problem 
+  when tried to retirve same individuals for an individual that does not exist in the ontology. 
+  Fixed a bug in the Protege plugin that is caused by a change to the Protege sources.
 
   
   
