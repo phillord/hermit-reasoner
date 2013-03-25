@@ -147,10 +147,11 @@ HermiT 1.3.7
   Added a new library to fix the javax.xml.stream.XMLStreamException error in Protege for 
   malformed XML literals. Improved the handling of owl:topObjectProperty when loading 
   additional axioms (e.g., for entailment checking). Fixed a bug in incremental ABox 
-  updates with fresh names. Fixed a bug with core blocking. Fixed HasKey clausification 
+  updates with fresh names. Fixed a bug with core blocking. Fixed a HasKey clausification 
   bug for negated classes. Fixed a bug in the instance retrieval process and a NPE problem 
-  when tried to retirve same individuals for an individual that does not exist in the ontology. 
+  when retirving same individuals for an individual that does not exist in the ontology. 
   Fixed a bug in the Protege plugin that is caused by a change to the Protege sources.
+  Fixed some warnings in Java 1.7.
 
   
   
