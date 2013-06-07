@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.semanticweb.HermiT.Configuration;
+import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.HermiT.monitor.CountingMonitor;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.OWLOntologyDocumentSource;
@@ -32,10 +33,12 @@ import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLSubPropertyChainOfAxiom;
 import org.semanticweb.owlapi.reasoner.InferenceType;
 import org.semanticweb.owlapi.reasoner.Node;
 import org.semanticweb.owlapi.reasoner.NodeSet;
+import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.vocab.OWLFacet;
 
 public class ReasonerTest extends AbstractReasonerTest {
@@ -43,6 +46,34 @@ public class ReasonerTest extends AbstractReasonerTest {
     public ReasonerTest(String name) {
         super(name);
     }
+    
+    public void testOnyDeclaredEntitiesInHierarchy() throws Exception {
+        IRI testOntologyIRI = IRI.create("http://test.org");
+        OWLOntologyManager m = OWLManager.createOWLOntologyManager();
+        OWLOntology o = m.createOntology(testOntologyIRI);
+        
+        Reasoner.ReasonerFactory reasonerFactory = new Reasoner.ReasonerFactory();
+        OWLReasoner hermit = reasonerFactory.createNonBufferingReasoner(o);
+        
+        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+        IRI physicalIRI=IRI.create(getClass().getResource("res/iso19112-D-different.owl.xml").toURI());
+        manager.loadOntologyFromOntologyDocument(physicalIRI);
+        for (OWLOntology ontology : manager.getOntologies()) {
+            m.addAxioms(m.getOntology(testOntologyIRI), ontology.getAxioms());
+        }
+        hermit.flush();
+        OWLClass rs_identifier=m_dataFactory.getOWLClass(IRI.create("http://www.laits.gmu.edu/geo/ontology/domain/iso/v2/iso19112.owl#RS_Identifier"));
+        OWLClass md_identifier=m_dataFactory.getOWLClass(IRI.create("http://www.laits.gmu.edu/geo/ontology/domain/iso/v2/iso19115.owl#MD_Identifier"));
+        OWLClass thing=m.getOWLDataFactory().getOWLThing();
+        NodeSet<OWLClass> result = hermit.getSubClasses(thing, true);
+        for (OWLClass owlClass : result.getFlattened()) {
+            System.out.println(owlClass.getIRI().toString());
+        }
+        assertTrue(result.containsEntity(rs_identifier));
+        assertTrue(result.containsEntity(md_identifier));
+        assertTrue(result.getFlattened().size()==2);
+    }
+    
     public void testIsEntailed() throws Exception {
         loadOntologyWithAxioms(
                 "Declaration( Class( :Infection ) )"+

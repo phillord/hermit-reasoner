@@ -422,6 +422,21 @@ public class OWLNormalization {
         public void visit(OWLImportsDeclaration axiom) {
         }
         public void visit(OWLDeclarationAxiom axiom) {
+//            if (axiom.getEntity().isOWLClass()) {
+//                OWLClass cls=(OWLClass)axiom.getEntity(); 
+//                if (!m_axioms.m_classes.contains(cls)) 
+//                    m_axioms.m_classes.add(cls);
+//            }
+//            if (axiom.getEntity().isOWLObjectProperty()) {
+//                OWLObjectProperty op=(OWLObjectProperty)axiom.getEntity(); 
+//                if (!m_axioms.m_objectProperties.contains(op)) 
+//                    m_axioms.m_objectProperties.add(op);
+//            }
+//            if (axiom.getEntity().isOWLDataProperty()) {
+//                OWLDataProperty dp=(OWLDataProperty)axiom.getEntity(); 
+//                if (!m_axioms.m_dataProperties.contains(dp)) 
+//                    m_axioms.m_dataProperties.add(dp);
+//            }
         }
         public void visit(OWLAnnotationAssertionAxiom axiom) {
         }

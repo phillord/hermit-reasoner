@@ -92,6 +92,7 @@ import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLDataPropertyExpression;
 import org.semanticweb.owlapi.model.OWLDatatype;
+import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
 import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLFunctionalObjectPropertyAxiom;
@@ -469,6 +470,14 @@ public class Reasoner implements OWLReasoner {
                     } else if (!(axiom instanceof OWLIndividualAxiom)) {
                         return false;
                     }
+                } else if (axiom instanceof OWLDeclarationAxiom) {
+                    OWLEntity entity=((OWLDeclarationAxiom)axiom).getEntity();
+                    if (entity.isOWLClass() && !(isDefined((OWLClass)entity) || Prefixes.isInternalIRI(((OWLClass)entity).getIRI().toString())))
+                        return false;
+                    else if (entity.isOWLObjectProperty() && !(isDefined((OWLObjectProperty)entity) || Prefixes.isInternalIRI(((OWLObjectProperty)entity).getIRI().toString())))
+                        return false;
+                    else if (entity.isOWLDataProperty() && !(isDefined((OWLDataProperty)entity) || Prefixes.isInternalIRI(((OWLDataProperty)entity).getIRI().toString())))
+                        return false;
                 }
             }
         }

@@ -135,7 +135,6 @@ public class ReducedABoxOnlyClausification extends OWLAxiomVisitorAdapter {
         m_allIndividuals.add(ind);
         return ind;
     }
-
     public void visit(OWLSameIndividualAxiom object) {
         OWLIndividual[] individuals=new OWLIndividual[object.getIndividuals().size()];
         object.getIndividuals().toArray(individuals);
