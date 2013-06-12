@@ -47,6 +47,21 @@ public class ReasonerTest extends AbstractReasonerTest {
         super(name);
     }
     
+    public void testEmptyChain() {
+        try {
+            loadReasonerFromResource("res/only1.owl");
+            boolean errorThrown=false;
+            try {
+                m_reasoner.isConsistent();
+            } catch (IllegalArgumentException e) {
+                errorThrown=true;
+            }
+            assertTrue(errorThrown);
+        } catch (Exception e1) {
+            e1.printStackTrace();
+        }
+    }
+    
     public void testOnyDeclaredEntitiesInHierarchy() throws Exception {
         IRI testOntologyIRI = IRI.create("http://test.org");
         OWLOntologyManager m = OWLManager.createOWLOntologyManager();
