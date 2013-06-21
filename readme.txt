@@ -152,6 +152,8 @@ HermiT 1.3.7
   when retirving same individuals for an individual that does not exist in the ontology. 
   Fixed a bug in the Protege plugin that is caused by a change to the Protege sources.
   Fixed some warnings in Java 1.7.
-
+HermiT 1.3.8
+- Fixed a bug where we ignored declared classes/properties after an incremental change. 
+  Fixed array index out of bound error for empty property chains.
   
   
