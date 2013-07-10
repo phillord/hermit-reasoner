@@ -198,13 +198,21 @@ public class ObjectPropertyInclusionManager {
         for (OWLObjectPropertyExpression propExprWithAutomaton : automataByProperty.keySet())
         	if (equivalentPropertiesMap.get(propExprWithAutomaton)!=null) {
         		Automaton autoOfPropExpr = automataByProperty.get(propExprWithAutomaton);
-	        	for (OWLObjectPropertyExpression equivProp : equivalentPropertiesMap.get(propExprWithAutomaton))
+	        	for (OWLObjectPropertyExpression equivProp : equivalentPropertiesMap.get(propExprWithAutomaton)) {
 	        		if (!equivProp.equals(propExprWithAutomaton) && !automataByProperty.containsKey(equivProp)) {
 	        			Automaton automatonOfEquivalent=(Automaton)autoOfPropExpr.clone();
 						individualAutomataForEquivRoles.put(equivProp, automatonOfEquivalent);
 						simpleProperties.remove(equivProp);
 				        complexObjectPropertyExpressions.add(equivProp);
 	        		}
+	        		OWLObjectPropertyExpression inverseEquivProp = equivProp.getInverseProperty().getSimplified();
+	        		if (!inverseEquivProp.equals(propExprWithAutomaton) && !automataByProperty.containsKey(inverseEquivProp)) {
+	        			Automaton automatonOfEquivalent=(Automaton)autoOfPropExpr.clone();
+						individualAutomataForEquivRoles.put(inverseEquivProp, getMirroredCopy(automatonOfEquivalent));
+						simpleProperties.remove(inverseEquivProp);
+				        complexObjectPropertyExpressions.add(inverseEquivProp);
+	        		}
+	        	}
         	}
         automataByProperty.putAll(individualAutomataForEquivRoles);
     }
