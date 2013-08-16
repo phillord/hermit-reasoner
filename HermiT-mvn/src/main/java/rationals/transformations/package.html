@@ -1,0 +1,74 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<head>
+<!--
+
+  @(#)package.html	1.60 98/01/27
+
+  Copyright 1998 Sun Microsystems, Inc. 901 San Antonio Road, 
+  Palo Alto, California, 94303, U.S.A.  All Rights Reserved.
+
+  This software is the confidential and proprietary information of Sun
+  Microsystems, Inc. ("Confidential Information").  You shall not
+  disclose such Confidential Information and shall use it only in
+  accordance with the terms of the license agreement you entered into
+  with Sun.
+
+  CopyrightVersion 1.2
+
+-->
+</head>
+<body bgcolor="white">
+<!-- $Id: package.html 884 2005-03-23 12:33:25Z bailly $ -->
+A package containing various binary and unary operations on automaton 
+objects.
+<h2>Documentation</h2>
+This package offers a lot of standard transformations on automata objects: 
+<dl>
+	<dd >concatenation: </dd> 
+	<dt >concatenate two automaton so that <code>L(A.B) = L(A).L(B)</code>, </dt>
+	<dd>union: </dd>
+	<dt> union of two automaton , <code>L(A+B) = L(A) U L(B)</code>, </dt> 
+	<dd>star closure: </dd>
+	<dt > the standard kleene-closure operator, <code>L(A*) = epsilon U L(A).L(A*)</code></dt>
+	<dd>minimization: </dd>
+	<dt>compute the minimal - canonical - DFA from a given DFA</dt>
+	<dd>determinization: </dd>
+	<dt>make an automaton deterministic: Each state has at most one transition labelled with 
+		a given letter, </dt>
+		<dd>epsilon transition removals: </dd>
+		<dt>Removes transition labelled with <code>null</code> while keeping the same language</dt>
+	<dd>complementation: </dd>
+	<dt>complement the language over the alphabet of the automaton, for an alphabet <code>X</code>,
+		<code>L(-A-)=X*\L(A)</code></dt>
+	<dd>synchronization product: </dd>
+	<dt>Compute the synchronization product of two automaton, also named mixed product </dt>
+	<dd>parametric intersection: </dd>
+	<dt>compute the intersection of two automaton with a synchronization object,</dt>
+	<dd>normalization: </dd>
+	<dt>normalize an automaton: One start state, one end state, no incoming transitions
+		on start state </dt>
+	<dd>prefix closure: </dd>
+	<dt>an automaton with all states made terminal</dt><B> </B>
+	<dd>pruning: </dd>
+	<dt>remove all states that are neither accessible from a start state nor can
+		reach a terminal state</dt>
+	<dd>projection over an alphabet: </dd>
+	<dt>remove all transitions from an automaton that are not in an alphabet</dt>
+	<dd>reversal: </dd>
+	<dt>reverse the language of an automaton so that it recognizes mirrored words 
+		from the original automaton.
+	<dd>shuffle product: </dd>
+	<dt>compute all possible interleavings of words from two automaton</dt>
+</dl>
+These transformations are usually not very efficient so that applying any one of them
+on large automaton may yield poor performances. Possible exceptions are the epsilon 
+transition removal, synchronization products and intersections which compute the 
+results using reachable states set only so that the cartesian product of the
+involved automata is not computed. <p />
+Work is underway to improve ultimately performance of this library.
+
+<!-- Put @see and @since tags down here. -->
+
+</body>
+</html>

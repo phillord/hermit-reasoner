@@ -22,6 +22,16 @@ import java.io.File;
 import org.semanticweb.HermiT.EntailmentChecker;
 import org.semanticweb.owlapi.model.OWLOntology;
 
+
+import java.util.Collection;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+import org.junit.runner.RunWith;
+import org.junit.Test;
+import org.junit.Before;
+import org.junit.After;
+
+@RunWith(Parameterized.class)
 public class EntailmentTest extends AbstractTest {
     protected final boolean m_positive;
     protected OWLOntology m_conclusionOntology;
@@ -51,4 +61,25 @@ public class EntailmentTest extends AbstractTest {
         if (m_dumpTestDataDirectory!=null)
             saveOntology(m_ontologyManager,m_conclusionOntology,new File(m_dumpTestDataDirectory,m_positive ? "conclusion.owl" : "nonconclusion.owl"));
     }
+
+     // junit 4 stuff...
+    @Test
+    public void test() throws Throwable{
+        runTest();
+    }
+ 
+    @Before
+    public void before() throws Exception{
+        setUp();
+    }
+ 
+    @After
+    public void after() throws Exception{
+        tearDown();
+    }
+    @Parameters
+    public static Collection<Object[]> params() throws Exception{
+        return TstDescriptorForMaven.getEntailmentTestParams();
+    }
+
 }

@@ -1,0 +1,60 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<head>
+<!--
+
+  @(#)package.html	1.60 98/01/27
+
+  Copyright 1998 Sun Microsystems, Inc. 901 San Antonio Road, 
+  Palo Alto, California, 94303, U.S.A.  All Rights Reserved.
+
+  This software is the confidential and proprietary information of Sun
+  Microsystems, Inc. ("Confidential Information").  You shall not
+  disclose such Confidential Information and shall use it only in
+  accordance with the terms of the license agreement you entered into
+  with Sun.
+
+  CopyrightVersion 1.2
+
+-->
+</head>
+<body bgcolor="white">
+<!-- $Id: package.html 884 2005-03-23 12:33:25Z bailly $ -->
+A package containing various properties checkers on automaton objects, 
+mainly simple unary tests and equivalence relations.
+<h2>Documentation</h2>
+This package offers the following unary tests on automaton:
+<dl>
+	<dd >emptiness: </dd> 
+	<dt >checks if given automaton is empty</dt>
+	<dd>normalized: </dd>
+	<dt>checks if automaton as one start state with no incoming transitions 
+and one end state, </dt> 
+	<dd>contains epsilon: </dd>
+	<dt >checks if the automaton recognizes the empty word epsilon, </dt>
+</dl>
+It also offers an extensible framework for computing equivalence 
+relations over automata. The {@see rationals.properties.AreEquivalent} class
+checks that starting states of both automata are equivalent according to
+some {@see rationals.properties.Relation}. Predefined relation objects are;
+<dl>
+	<dd>Completed Trace equivalence: </dd>
+	<dt>compute the equivalence of two states according to the language they 
+	recognize, </dt>
+	<dd>Weak Bisimulation: </dd>
+	<dt>checks that two states produces the same labels and lead to equivalent states, 
+	without taking into account epsilon transitions, </dt>
+		<dd>(Strong) Bisimulation: </dd>
+		<dt>checks that two states produces the same labels and lead to equivalent states, 
+epsilon transitions are accounted for. </dt>
+	<dd>Isomorphism: </dd>
+	<dt>checks that two automaton are isomorph up to a renaming of states.</dt>
+</dl>
+Obviously, these equivalence relations are meaningful only when one does not want 
+to compute the minimal DFA for a given automaton as in this case they all collapse
+into (completed) trace equivalence.
+
+<!-- Put @see and @since tags down here. -->
+
+</body>
+</html>

@@ -19,7 +19,16 @@ package org.semanticweb.HermiT.owl_wg_tests;
 
 import java.io.File;
 
+import java.util.Collection;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+import org.junit.runner.RunWith;
+import org.junit.Test;
+import org.junit.Before;
+import org.junit.After;
 
+
+@RunWith(Parameterized.class)
 public class ConsistencyTest extends AbstractTest {
     protected final boolean m_positive;
 
@@ -30,4 +39,25 @@ public class ConsistencyTest extends AbstractTest {
     protected void doTest() {
         assertEquals(m_positive,m_reasoner.isConsistent());
     }
+
+
+    @Test
+    public void test() throws Throwable{
+        runTest();
+    }
+    
+    @Before
+    public void before() throws Exception{
+        setUp();
+    }
+    
+    @After
+    public void after() throws Exception{
+        tearDown();
+    }
+    @Parameters
+    public static Collection<Object[]> params() throws Exception{
+        return TstDescriptorForMaven.getConsistencyTestParams();
+    }
+
 }
