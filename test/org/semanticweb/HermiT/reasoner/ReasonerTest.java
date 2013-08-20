@@ -48,18 +48,16 @@ public class ReasonerTest extends AbstractReasonerTest {
     }
     
     public void testEmptyChain() {
-        try {
+        boolean errorThrown=false;
+        try{
             loadReasonerFromResource("res/only1.owl");
-            boolean errorThrown=false;
-            try {
-                m_reasoner.isConsistent();
-            } catch (IllegalArgumentException e) {
-                errorThrown=true;
-            }
-            assertTrue(errorThrown);
-        } catch (Exception e1) {
-            e1.printStackTrace();
+            m_reasoner.isConsistent();
+        } catch (IllegalArgumentException e) {
+            errorThrown=true;
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+        assertTrue(errorThrown);
     }
     
     public void testOnyDeclaredEntitiesInHierarchy() throws Exception {
