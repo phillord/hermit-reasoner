@@ -51,7 +51,6 @@ public class ReasonerTest extends AbstractReasonerTest {
         boolean errorThrown=false;
         try{
             loadReasonerFromResource("res/only1.owl");
-            m_reasoner.isConsistent();
         } catch (IllegalArgumentException e) {
             errorThrown=true;
         } catch (Exception e) {
