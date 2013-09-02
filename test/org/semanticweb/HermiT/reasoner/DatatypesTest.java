@@ -9,6 +9,34 @@ public class DatatypesTest extends AbstractReasonerTest {
         super(name);
     }
 
+    public void testRationalConversion() throws Exception {
+        String axioms = "EquivalentClasses(:Rational_Larger_Or_Equal_Than_10    DataSomeValuesFrom(:dp DatatypeRestriction(owl:rational xsd:minInclusive \"10\"^^xsd:integer)))"
+                + "EquivalentClasses(:Rational_Larger_Than_10      DataSomeValuesFrom(:dp DatatypeRestriction(owl:rational xsd:minExclusive \"10\"^^xsd:integer)))"
+                + "EquivalentClasses(:Rational_Less_Or_Equal_Than10    DataSomeValuesFrom(:dp DatatypeRestriction(owl:rational xsd:maxInclusive \"10\"^^xsd:integer)))"
+                + "EquivalentClasses(:Rational_LessThan10          DataSomeValuesFrom(:dp DatatypeRestriction(owl:rational xsd:maxExclusive \"10\"^^xsd:integer)))"
+
+                + "EquivalentClasses(:Rationals_Between_0_and_10_Ex    DataSomeValuesFrom(:dp DatatypeRestriction(owl:rational xsd:minExclusive \"0\"^^xsd:integer xsd:maxExclusive \"10\"^^xsd:integer)))"
+                + "EquivalentClasses(:Rationals_Between_0_and_10_Inc   DataSomeValuesFrom(:dp DatatypeRestriction(owl:rational xsd:minInclusive \"0\"^^xsd:integer xsd:maxInclusive \"10\"^^xsd:integer)))"
+                + "EquivalentClasses(:Rationals_Between_0_and_10_IncEx     DataSomeValuesFrom(:dp DatatypeRestriction(owl:rational xsd:minInclusive \"0\"^^xsd:integer xsd:maxExclusive \"10\"^^xsd:integer)))"
+                + "EquivalentClasses(:Rationals_Between_0_and_10_ExInc     DataSomeValuesFrom(:dp DatatypeRestriction(owl:rational xsd:minExclusive \"0\"^^xsd:integer xsd:maxInclusive \"10\"^^xsd:integer)))"
+
+                + "EquivalentClasses(:Rationals_Between_10_and_11_Ex   DataSomeValuesFrom(:dp DatatypeRestriction(owl:rational xsd:minExclusive \"10/1\"^^owl:rational xsd:maxExclusive \"11/1\"^^owl:rational)))"
+                + "EquivalentClasses(:Rationals_Between_10_and_11_Inc  DataSomeValuesFrom(:dp DatatypeRestriction(owl:rational xsd:minInclusive \"10/1\"^^owl:rational xsd:maxInclusive \"11/1\"^^owl:rational)))"
+                + "EquivalentClasses(:Rationals_Between_10_and_11_ExInc    DataSomeValuesFrom(:dp DatatypeRestriction(owl:rational xsd:minExclusive \"10/1\"^^owl:rational xsd:maxInclusive \"11/1\"^^owl:rational)))"
+                + "EquivalentClasses(:Rationals_Between_10_and_11_IncEx    DataSomeValuesFrom(:dp DatatypeRestriction(owl:rational xsd:minInclusive \"10/1\"^^owl:rational xsd:maxExclusive \"11/1\"^^owl:rational)))"
+
+                + "EquivalentClasses(:InconsistentRational         DataSomeValuesFrom(:dp DatatypeRestriction(owl:rational xsd:minExclusive \"10\"^^xsd:integer xsd:maxExclusive \"0\"^^xsd:integer)))"
+
+                + "EquivalentClasses(DataHasValue(:dp \"10/2\"^^owl:rational)    :_Five)"
+                + "EquivalentClasses(DataHasValue(:dp \"-10/2\"^^owl:rational)   :_NegFive)"
+                + "EquivalentClasses(DataHasValue(:dp \"+0/1\"^^owl:rational)    :_Zero)"
+                + "EquivalentClasses(DataHasValue(:dp \"17/3\"^^owl:rational)    :_17div3)"
+                + "EquivalentClasses(DataHasValue(:dp \"1/999999\"^^owl:rational)    :_1div999999)";
+        loadReasonerWithAxioms(axioms);
+        m_reasoner.classifyClasses();
+        assertABoxSatisfiable(true);
+    }
+    
     public void testNotXsdString() throws Exception {
         String axioms = "Declaration(NamedIndividual(:a)) Declaration(Class(:A)) Declaration(DataProperty(:dp)) Declaration(Datatype(:dt))"
                 + "SubClassOf(:A ObjectIntersectionOf( DataMinCardinality( 2 :dp xsd:string ) DataMaxCardinality( 1 :dp xsd:string ) )) "
