@@ -30,6 +30,7 @@ public class DatatypesTest extends AbstractReasonerTest {
                 + "EquivalentClasses(DataHasValue(:dp \"10/2\"^^owl:rational)    :_Five)"
                 + "EquivalentClasses(DataHasValue(:dp \"-10/2\"^^owl:rational)   :_NegFive)"
                 + "EquivalentClasses(DataHasValue(:dp \"+0/1\"^^owl:rational)    :_Zero)"
+                + "EquivalentClasses(DataHasValue(:dp \"-0/1\"^^owl:rational)    :_Zero)"
                 + "EquivalentClasses(DataHasValue(:dp \"17/3\"^^owl:rational)    :_17div3)"
                 + "EquivalentClasses(DataHasValue(:dp \"1/999999\"^^owl:rational)    :_1div999999)";
         loadReasonerWithAxioms(axioms);
