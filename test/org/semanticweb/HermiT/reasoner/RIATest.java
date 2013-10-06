@@ -1,11 +1,24 @@
 package org.semanticweb.HermiT.reasoner;
 
-public class RIARegularityTest extends AbstractReasonerTest {
+public class RIATest extends AbstractReasonerTest {
 
-	 public RIARegularityTest(String name) {
+	 public RIATest(String name) {
 	        super(name);
 	 }
 
+	 public void testInverseAndChain() throws Exception{
+	     String axioms = "ObjectPropertyAssertion(:hasFemalePartner :marriage_of_david_and_margaret :margaret) " +
+	                     "ObjectPropertyAssertion(:hasHusband :marriage_of_david_and_margaret :david) " +
+                         "SubObjectPropertyOf(ObjectInverseOf(:hasHusband) :isHusbandOf) " +
+	                      // comment the following axiom out and the ontology becomes consistent!
+                         "SubObjectPropertyOf(ObjectInverseOf(:isWifeOf) :hasWife) " +
+                         "SubObjectPropertyOf(ObjectInverseOf(:hasWife) :isWifeOf) " +
+                         "SubObjectPropertyOf(ObjectPropertyChain(:isHusbandOf :hasFemalePartner) :hasWife) " +
+                         "NegativeObjectPropertyAssertion(:isWifeOf :margaret :david) ";
+	     loadReasonerWithAxioms(axioms);
+	     assertFalse(m_reasoner.isConsistent());
+	}
+	 
     public void testRIARegularity0() throws Exception{
         // This is not really regular according to the OWL 2 specification due to the first axiom;
         // however, we simply don't care about it!

@@ -22,7 +22,7 @@ public class AllQuickTests extends TestCase {
         suite.addTestSuite(ReasonerCoreBlockingTest.class);
         suite.addTestSuite(ComplexConceptTest.class);
         suite.addTestSuite(EntailmentTest.class);
-        suite.addTestSuite(RIARegularityTest.class);
+        suite.addTestSuite(RIATest.class);
         suite.addTestSuite(SimpleRolesTest.class);
         suite.addTestSuite(RulesTest.class);
         suite.addTestSuite(OWLReasonerTest.class);
