@@ -336,8 +336,8 @@ public class ObjectPropertyInclusionManager {
             completeAutomata.put(propertyToBuildAutomatonFor,mirroredCopy);
             return mirroredCopy;
         }
-        //if the role has no sub-role which is complex and we need to completely construct its automaton
-        if (inversedPropertyDependencyGraph.getSuccessors(propertyToBuildAutomatonFor).isEmpty()) {
+        //if the role has no (inv) sub-role which is complex and we need to completely construct its automaton
+        if (inversedPropertyDependencyGraph.getSuccessors(propertyToBuildAutomatonFor).isEmpty() && inversedPropertyDependencyGraph.getSuccessors(propertyToBuildAutomatonFor.getInverseProperty().getSimplified()).isEmpty()) {
             Automaton automatonForLeafProperty=individualAutomata.get(propertyToBuildAutomatonFor);
             //if the individual automaton for the role is empty
             if (automatonForLeafProperty==null) {
