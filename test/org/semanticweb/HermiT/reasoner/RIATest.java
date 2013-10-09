@@ -9,10 +9,10 @@ public class RIATest extends AbstractReasonerTest {
 	 public void testInverseAndChain() throws Exception{
 	     String axioms = "ObjectPropertyAssertion(:hasFemalePartner :marriage_of_david_and_margaret :margaret) " +
 	                     "ObjectPropertyAssertion(:hasHusband :marriage_of_david_and_margaret :david) " +
-                         "SubObjectPropertyOf(ObjectInverseOf(:hasHusband) :isHusbandOf) " +
-	                      // comment the following axiom out and the ontology becomes consistent!
-                         "SubObjectPropertyOf(ObjectInverseOf(:isWifeOf) :hasWife) " +
                          "SubObjectPropertyOf(ObjectInverseOf(:hasWife) :isWifeOf) " +
+//                         "SubObjectPropertyOf(:isWifeOf ObjectInverseOf(:hasWife)) " +
+                         "SubObjectPropertyOf(ObjectInverseOf(:isWifeOf) :hasWife) " +
+                         "SubObjectPropertyOf(ObjectInverseOf(:hasHusband) :isHusbandOf) " +
                          "SubObjectPropertyOf(ObjectPropertyChain(:isHusbandOf :hasFemalePartner) :hasWife) " +
                          "NegativeObjectPropertyAssertion(:isWifeOf :margaret :david) ";
 	     loadReasonerWithAxioms(axioms);

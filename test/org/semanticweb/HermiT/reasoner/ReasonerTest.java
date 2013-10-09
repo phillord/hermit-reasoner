@@ -78,9 +78,9 @@ public class ReasonerTest extends AbstractReasonerTest {
         OWLClass md_identifier=m_dataFactory.getOWLClass(IRI.create("http://www.laits.gmu.edu/geo/ontology/domain/iso/v2/iso19115.owl#MD_Identifier"));
         OWLClass thing=m.getOWLDataFactory().getOWLThing();
         NodeSet<OWLClass> result = hermit.getSubClasses(thing, true);
-        for (OWLClass owlClass : result.getFlattened()) {
-            System.out.println(owlClass.getIRI().toString());
-        }
+//        for (OWLClass owlClass : result.getFlattened()) {
+//            System.out.println(owlClass.getIRI().toString());
+//        }
         assertTrue(result.containsEntity(rs_identifier));
         assertTrue(result.containsEntity(md_identifier));
         assertTrue(result.getFlattened().size()==2);
