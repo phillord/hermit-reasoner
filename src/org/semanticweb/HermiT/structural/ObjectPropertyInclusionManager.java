@@ -235,6 +235,13 @@ public class ObjectPropertyInclusionManager {
                 inverseProperties.add(inclusion[1].getInverseProperty().getSimplified());
                 inversePropertiesMap.put(inclusion[0],inverseProperties);
             }
+            else if (inclusion[0] instanceof OWLObjectInverseOf) {
+                Set<OWLObjectPropertyExpression> inverseProperties=inversePropertiesMap.get(inclusion[1]);
+                if (inverseProperties==null)
+                    inverseProperties=new HashSet<OWLObjectPropertyExpression>();
+                inverseProperties.add(inclusion[0].getInverseProperty().getSimplified());
+                inversePropertiesMap.put(inclusion[1],inverseProperties);
+            }
         return inversePropertiesMap;
     }
     protected Map<OWLObjectPropertyExpression,Set<OWLObjectPropertyExpression>> findEquivalentProperties(Collection<OWLObjectPropertyExpression[]> simpleObjectPropertyInclusions) {
@@ -321,6 +328,24 @@ public class ObjectPropertyInclusionManager {
 
         completeAutomata.putAll(extraCompleteAutomataForInverseProperties);
         extraCompleteAutomataForInverseProperties.clear();
+        
+        for (OWLObjectPropertyExpression propExprWithAutomaton : completeAutomata.keySet())
+        	if (inversePropertiesMap.get(propExprWithAutomaton)!=null) {
+        		Automaton autoOfPropExpr = completeAutomata.get(propExprWithAutomaton);
+	        	for (OWLObjectPropertyExpression inverseProp : inversePropertiesMap.get(propExprWithAutomaton)) {
+	        		Automaton automatonOfInverse=(Automaton)completeAutomata.get(inverseProp);
+	        		if (automatonOfInverse!=null) {
+	        			increaseAutomatonWithInversePropertyAutomaton(autoOfPropExpr,automatonOfInverse);
+	        			extraCompleteAutomataForInverseProperties.put(propExprWithAutomaton,autoOfPropExpr);
+	        		}
+	        		else {
+	        			automatonOfInverse=getMirroredCopy(autoOfPropExpr);
+	        			extraCompleteAutomataForInverseProperties.put(inverseProp,automatonOfInverse);
+	        		}
+	        	}
+	        }
+        completeAutomata.putAll(extraCompleteAutomataForInverseProperties);
+        
     }
     protected void increaseAutomatonWithInversePropertyAutomaton(Automaton propertyAutomaton,Automaton inversePropertyAutomaton) {
         State initialState=(State)propertyAutomaton.initials().iterator().next();
