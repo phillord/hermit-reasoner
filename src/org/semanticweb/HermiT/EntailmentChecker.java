@@ -250,7 +250,8 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
             anonymousIndividualAxioms.add(axiom);
             return true; // will be checked afterwards by rolling-up
         }
-        return reasoner.hasDataPropertyRelationship(sub.asOWLNamedIndividual(),axiom.getProperty().asOWLDataProperty(),axiom.getObject());
+        OWLClassExpression hasValue=factory.getOWLDataHasValue(axiom.getProperty(),axiom.getObject());
+        return reasoner.hasType(axiom.getSubject().asOWLNamedIndividual(),hasValue,false);
     }
     public Boolean visit(OWLNegativeDataPropertyAssertionAxiom axiom) {
         // see OWL 2 Syntax, Sec 11.2

@@ -11,6 +11,15 @@ public class EntailmentTest extends AbstractReasonerTest {
     public EntailmentTest(String name) {
         super(name);
     }
+    public void testIntegerEntailment() throws Exception {
+        String axioms = "Declaration(DataProperty(:dp))"
+            + "Declaration(NamedIndividual(:a))"
+            + "DataPropertyAssertion(:dp :a \"010\"^^xsd:integer)";
+        loadReasonerWithAxioms(axioms);
+        axioms = "DataPropertyAssertion(:dp :a \"0010\"^^xsd:integer)";
+        OWLOntology conlusions=getOntologyWithAxioms(axioms);
+        assertEntails(conlusions.getLogicalAxioms(), true);
+    }
     public void testHasKey() throws Exception {
         String axioms = "Declaration(DataProperty(:dp))"
             + "ClassAssertion(owl:Thing :a)"
