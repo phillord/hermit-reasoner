@@ -342,7 +342,8 @@ public class CommandLine {
         kTaxonomy=1011,
         kIgnoreUnsupportedDatatypes=1012,
         kPremise=1013,
-        kConclusion=1014;
+        kConclusion=1014,
+        kNoInconsistentException=1015;
 
     protected static final String versionString;
     static {
@@ -422,7 +423,8 @@ public class CommandLine {
         new Option(kBlockCache,"blockersCache",kAlgorithm,"cache blocking nodes for use in later tests; not possible with nominals or core blocking"),
         new Option(kIgnoreUnsupportedDatatypes,"ignoreUnsupportedDatatypes",kAlgorithm,"ignore unsupported datatypes"),
         new Option(kExpansion,"expansion-strategy",kAlgorithm,true,"TYPE","use TYPE as existential expansion strategy; supported values are 'el', 'creation', 'reuse', and 'optimal' (default 'optimal')"),
-
+        new Option(kNoInconsistentException,"noInconsistentException",kAlgorithm,"do not throw an exception for an inconsistent ontology"),
+        
         // internals:
         new Option(kDumpClauses,"dump-clauses",kInternals,false,"FILE","output DL-clauses to FILE (default stdout)")
     };
@@ -697,6 +699,9 @@ public class CommandLine {
                         break;
                     case kIgnoreUnsupportedDatatypes: {
                         config.ignoreUnsupportedDatatypes=true;
+                    }
+                    case kNoInconsistentException: {
+                        config.throwInconsistentOntologyException=false;
                     }
                         break;
                     case kDumpClauses: {
