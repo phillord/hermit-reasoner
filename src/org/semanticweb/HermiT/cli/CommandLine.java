@@ -700,6 +700,7 @@ public class CommandLine {
                     case kIgnoreUnsupportedDatatypes: {
                         config.ignoreUnsupportedDatatypes=true;
                     }
+                        break;
                     case kNoInconsistentException: {
                         config.throwInconsistentOntologyException=false;
                     }

@@ -333,7 +333,7 @@ public class ObjectPropertyInclusionManager {
         	if (inversePropertiesMap.get(propExprWithAutomaton)!=null) {
         		Automaton autoOfPropExpr = completeAutomata.get(propExprWithAutomaton);
 	        	for (OWLObjectPropertyExpression inverseProp : inversePropertiesMap.get(propExprWithAutomaton)) {
-	        		Automaton automatonOfInverse=(Automaton)completeAutomata.get(inverseProp);
+	        		Automaton automatonOfInverse=completeAutomata.get(inverseProp);
 	        		if (automatonOfInverse!=null) {
 	        			increaseAutomatonWithInversePropertyAutomaton(autoOfPropExpr,automatonOfInverse);
 	        			extraCompleteAutomataForInverseProperties.put(propExprWithAutomaton,autoOfPropExpr);
