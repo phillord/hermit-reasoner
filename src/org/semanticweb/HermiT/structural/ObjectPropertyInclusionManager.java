@@ -188,6 +188,17 @@ public class ObjectPropertyInclusionManager {
 
         complexPropertiesDependencyGraph.removeElements(simpleProperties);
         complexObjectPropertyExpressions.addAll(complexPropertiesDependencyGraph.getElements());
+       	for (OWLObjectPropertyExpression[] inclusion : simpleObjectPropertyInclusions) {
+       		if (complexObjectPropertyExpressions.contains(inclusion[0]) && individualAutomata.containsKey(inclusion[1])) {
+       			Automaton auto = individualAutomata.get(inclusion[1]);
+       			try {
+       				auto.addTransition(new Transition((State)auto.initials().iterator().next(),inclusion[0],(State)auto.terminals().iterator().next()));
+       				individualAutomata.put(inclusion[1], auto);
+       			} catch (NoSuchStateException e) {
+       				throw new IllegalArgumentException("Could not create automaton for property at the bottom of hierarchy (simple property).");
+       			}
+       		}
+       	}
         Set<OWLObjectPropertyExpression> inverseOfComplexProperties = new HashSet<OWLObjectPropertyExpression>();
         for( OWLObjectPropertyExpression complexProp : complexObjectPropertyExpressions )
         	inverseOfComplexProperties.add( complexProp.getInverseProperty().getSimplified() );
