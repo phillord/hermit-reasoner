@@ -1,12 +1,22 @@
 package org.semanticweb.HermiT.reasoner;
 
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataProperty;
 
 public class DatatypesTest extends AbstractReasonerTest {
 
     public DatatypesTest(String name) {
         super(name);
+    }
+    
+    public void testEnumWithIntPlusFloatRestriction() throws Exception {
+        String axioms = "Declaration(Class(:MeterToCentimeter)) Declaration(DataProperty(:conversionFactor))"
+                + "SubClassOf(:MeterToCentimeter DataHasValue(:conversionFactor \"100\"^^xsd:int)) "
+                + "DataPropertyRange(:conversionFactor xsd:float)";
+        loadReasonerWithAxioms(axioms);
+        OWLClass mtc=NS_C("MeterToCentimeter");
+        assertSatisfiable(mtc, false);
     }
 
     public void testRationalConversion() throws Exception {
