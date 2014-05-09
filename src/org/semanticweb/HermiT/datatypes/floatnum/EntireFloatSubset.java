@@ -29,8 +29,9 @@ public class EntireFloatSubset implements ValueSpaceSubset {
         return leftover<=1;
     }
     public boolean containsDataValue(Object dataValue) {
-        assert dataValue instanceof Float;
-        return true;
+        if (dataValue instanceof Float)
+            return true;
+        return false;
     }
     public void enumerateDataValues(Collection<Object> dataValues) {
         dataValues.add(Float.NaN);

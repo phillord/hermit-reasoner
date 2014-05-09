@@ -29,8 +29,9 @@ public class EntireDoubleSubset implements ValueSpaceSubset {
         return leftover<=1;
     }
     public boolean containsDataValue(Object dataValue) {
-        assert dataValue instanceof Double;
-        return true;
+        if (dataValue instanceof Double) 
+            return true;
+        return false;
     }
     public void enumerateDataValues(Collection<Object> dataValues) {
         dataValues.add(Double.NaN);
