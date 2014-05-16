@@ -945,38 +945,56 @@ public class InstanceManager {
         Set<HierarchyNode<AtomicConcept>> result=new HashSet<HierarchyNode<AtomicConcept>>();
         assert !direct || m_usesClassifiedConceptHierarchy;
         Queue<HierarchyNode<AtomicConcept>> toProcess=new LinkedList<HierarchyNode<AtomicConcept>>();
+        Set<HierarchyNode<AtomicConcept>> visited=new HashSet<HierarchyNode<AtomicConcept>>();
         toProcess.add(m_currentConceptHierarchy.m_bottomNode);
         while (!toProcess.isEmpty()) {
             HierarchyNode<AtomicConcept> current=toProcess.remove();
-            Set<HierarchyNode<AtomicConcept>> parents=current.getParentNodes();
-            AtomicConcept atomicConcept=current.getRepresentative();
-            AtomicConceptElement atomicConceptElement=m_conceptToElement.get(atomicConcept);
-            if (atomicConceptElement!=null && atomicConceptElement.isPossible(individual)) {
-                if (isInstance(individual, atomicConcept)) {
-                    atomicConceptElement.setToKnown(individual);
-                }
-                else {
-                    for (HierarchyNode<AtomicConcept> parent : parents) {
-                        AtomicConcept parentRepresentative=parent.getRepresentative();
-                        AtomicConceptElement parentElement=m_conceptToElement.get(parentRepresentative);
-                        if (parentElement==null) {
-                            parentElement=new AtomicConceptElement(null, null);
-                            m_conceptToElement.put(parentRepresentative,parentElement);
-                        }
-                        parentElement.addPossible(individual);
+            boolean ancestor=true;
+            while (ancestor && current!=null) {
+                ancestor=false;
+                for (HierarchyNode<AtomicConcept> node : result) {
+                    if (current.isDescendantElement(node.m_representative)) {
+                        ancestor=true;
+                        visited.add(current);
+                        if (!toProcess.isEmpty()) 
+                            current=toProcess.remove();
+                        else 
+                            current=null;
+                        break;
                     }
                 }
             }
-            if (atomicConceptElement!=null && atomicConceptElement.isKnown(individual)) {
-                if (direct)
-                    result.add(current);
-                else
-                    result.addAll(current.getAncestorNodes());
-            }
-            else {
-                for (HierarchyNode<AtomicConcept> parent : parents)
-                    if (!toProcess.contains(parent))
-                        toProcess.add(parent);
+            if (current!=null) {
+                Set<HierarchyNode<AtomicConcept>> parents=current.getParentNodes();
+                AtomicConcept atomicConcept=current.getRepresentative();
+                AtomicConceptElement atomicConceptElement=m_conceptToElement.get(atomicConcept);
+                if (atomicConceptElement!=null && atomicConceptElement.isPossible(individual)) {
+                    if (isInstance(individual, atomicConcept)) {
+                        atomicConceptElement.setToKnown(individual);
+                    }
+                    else {
+                        for (HierarchyNode<AtomicConcept> parent : parents) {
+                            AtomicConcept parentRepresentative=parent.getRepresentative();
+                            AtomicConceptElement parentElement=m_conceptToElement.get(parentRepresentative);
+                            if (parentElement==null) {
+                                parentElement=new AtomicConceptElement(null, null);
+                                m_conceptToElement.put(parentRepresentative,parentElement);
+                            }
+                            parentElement.addPossible(individual);
+                        }
+                    }
+                }
+                if (atomicConceptElement!=null && atomicConceptElement.isKnown(individual)) {
+                    if (direct)
+                        result.add(current);
+                    else
+                        result.addAll(current.getAncestorNodes());
+                }
+                else {
+                    for (HierarchyNode<AtomicConcept> parent : parents)
+                        if (!toProcess.contains(parent) && !visited.contains(parent))
+                            toProcess.add(parent);
+                }
             }
         }
         return result;

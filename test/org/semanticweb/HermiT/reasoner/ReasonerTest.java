@@ -1150,6 +1150,31 @@ public class ReasonerTest extends AbstractReasonerTest {
         NodeSet<OWLNamedIndividual> result=m_reasoner.getObjectPropertyValues(c, r);
         assertTrue(result.containsEntity(d));
     }
+    public void testDirect() throws Exception {
+        StringBuffer buffer=new StringBuffer();
+        buffer.append("Declaration(Class(:A))"+LB);
+        buffer.append("Declaration(Class(:B))"+LB);
+        buffer.append("Declaration(Class(:C))"+LB);
+        buffer.append("Declaration(Class(:Cp))"+LB);
+        buffer.append("Declaration(Class(:D))"+LB);
+        buffer.append("Declaration(Class(:E))"+LB);
+        buffer.append("Declaration(Class(:F))"+LB);
+        buffer.append("Declaration(NamedIndividual(:a))"+LB);
+        buffer.append("SubClassOf(:F :A)"+LB);
+        buffer.append("SubClassOf(:C :B)"+LB);
+        buffer.append("SubClassOf(:D :C)"+LB);
+        buffer.append("SubClassOf(:E :C)"+LB);
+        buffer.append("SubClassOf(:Cp owl:Nothing)"+LB);
+        buffer.append("ClassAssertion(ObjectUnionOf(:D :E) :a)"+LB);
+        buffer.append("ClassAssertion(ObjectUnionOf(:C :Cp) :a)"+LB);
+        loadOntologyWithAxioms(buffer.toString());
+        createReasoner();
+        OWLNamedIndividual a=NS_NI("a");
+        OWLClass c=NS_C("C");
+        NodeSet<OWLClass> result=m_reasoner.getTypes(a, true);
+        assertTrue(result.getFlattened().size()==1);
+        assertTrue(result.getFlattened().contains(c));
+    }
     public void testIndividualRetrieval() throws Exception {
         StringBuffer buffer=new StringBuffer();
         buffer.append("Declaration(Class(:C))"+LB);
