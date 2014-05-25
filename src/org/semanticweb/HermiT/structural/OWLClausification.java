@@ -134,7 +134,9 @@ public class OWLClausification {
     }
     public Object[] preprocessAndClausify(OWLOntology rootOntology,Collection<DescriptionGraph> descriptionGraphs) {
         OWLDataFactory factory=rootOntology.getOWLOntologyManager().getOWLDataFactory();
-        String ontologyIRI=rootOntology.getOntologyID().getDefaultDocumentIRI()==null ? "urn:hermit:kb" : rootOntology.getOntologyID().getDefaultDocumentIRI().toString();
+        String ontologyIRI = rootOntology.getOntologyID()
+                .getDefaultDocumentIRI().or(IRI.create("urn:hermit:kb"))
+                .toString();
         Collection<OWLOntology> importClosure=rootOntology.getImportsClosure();
         OWLAxioms axioms=new OWLAxioms();
         OWLNormalization normalization=new OWLNormalization(factory,axioms,0);

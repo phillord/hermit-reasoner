@@ -26,7 +26,7 @@ import java.io.FileWriter;
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 
-import org.coode.owlapi.functionalrenderer.OWLFunctionalSyntaxRenderer;
+import org.semanticweb.owlapi.functional.renderer.OWLFunctionalSyntaxRenderer;
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -63,7 +63,8 @@ public abstract class AbstractTest extends TestCase {
     protected void registerMappingToResource(String ontologyIRI,String physicalResource) throws Exception {
         IRI physicalIRI=IRI.create(getClass().getResource(physicalResource).toURI());
         IRI logicalIRI=IRI.create(ontologyIRI);
-        m_ontologyManager.addIRIMapper(new SimpleIRIMapper(logicalIRI,physicalIRI));
+        m_ontologyManager.getIRIMappers().add(
+                new SimpleIRIMapper(logicalIRI, physicalIRI));
     }
     protected void registerImportedReosurces() throws Exception {
         registerMappingToResource("http://www.w3.org/2002/03owlt/miscellaneous/consistent001","ontologies/consistent001.rdf");

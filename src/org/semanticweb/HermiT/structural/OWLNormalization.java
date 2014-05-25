@@ -123,6 +123,7 @@ import org.semanticweb.owlapi.model.SWRLObjectVisitor;
 import org.semanticweb.owlapi.model.SWRLRule;
 import org.semanticweb.owlapi.model.SWRLSameIndividualAtom;
 import org.semanticweb.owlapi.model.SWRLVariable;
+import org.semanticweb.owlapi.model.parameters.Imports;
 
 /**
  * This class implements the structural transformation from our new tableau paper. This transformation departs in the following way from the paper: it keeps the concepts of the form \exists R.{ a_1, ..., a_n }, \forall R.{ a_1, ..., a_n }, and \forall R.\neg { a } intact. These concepts are then clausified in a more efficient way.
@@ -152,10 +153,14 @@ public class OWLNormalization {
         // concepts -- that is, each OWLClassExpression in an entry contributes a
         // disjunct. It is thus not really inclusions, but rather a disjunction
         // of concepts that represents an inclusion axiom.
-        m_axioms.m_classes.addAll(ontology.getClassesInSignature(true));
-        m_axioms.m_objectProperties.addAll(ontology.getObjectPropertiesInSignature(true));
-        m_axioms.m_dataProperties.addAll(ontology.getDataPropertiesInSignature(true));
-        m_axioms.m_namedIndividuals.addAll(ontology.getIndividualsInSignature(true));
+        m_axioms.m_classes.addAll(ontology
+                .getClassesInSignature(Imports.INCLUDED));
+        m_axioms.m_objectProperties.addAll(ontology
+                .getObjectPropertiesInSignature(Imports.INCLUDED));
+        m_axioms.m_dataProperties.addAll(ontology
+                .getDataPropertiesInSignature(Imports.INCLUDED));
+        m_axioms.m_namedIndividuals.addAll(ontology
+                .getIndividualsInSignature(Imports.INCLUDED));
         processAxioms(ontology.getLogicalAxioms());
     }
     public void processAxioms(Collection<? extends OWLAxiom> axioms) {
@@ -674,7 +679,9 @@ public class OWLNormalization {
             OWLClassExpression classExpression=axiom.getClassExpression();
             if (classExpression instanceof OWLDataHasValue) {
                 OWLDataHasValue hasValue=(OWLDataHasValue)classExpression;
-                addFact(m_factory.getOWLDataPropertyAssertionAxiom(hasValue.getProperty(), axiom.getIndividual(), hasValue.getValue()));
+                addFact(m_factory.getOWLDataPropertyAssertionAxiom(
+                        hasValue.getProperty(), axiom.getIndividual(),
+                        hasValue.getFiller()));
                 return;
             }
             if (classExpression instanceof OWLDataSomeValuesFrom) {
