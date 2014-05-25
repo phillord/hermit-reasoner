@@ -79,6 +79,7 @@ import org.semanticweb.HermiT.structural.ReducedABoxOnlyClausification;
 import org.semanticweb.HermiT.tableau.InterruptFlag;
 import org.semanticweb.HermiT.tableau.ReasoningTaskDescription;
 import org.semanticweb.HermiT.tableau.Tableau;
+import org.semanticweb.owlapi.formats.PrefixOWLOntologyFormat;
 import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.AddOntologyAnnotation;
 import org.semanticweb.owlapi.model.AxiomType;
@@ -139,7 +140,6 @@ import org.semanticweb.owlapi.reasoner.impl.OWLNamedIndividualNodeSet;
 import org.semanticweb.owlapi.reasoner.impl.OWLObjectPropertyNode;
 import org.semanticweb.owlapi.reasoner.impl.OWLObjectPropertyNodeSet;
 import org.semanticweb.owlapi.util.Version;
-import org.semanticweb.owlapi.vocab.PrefixOWLOntologyFormat;
 
 /**
  * Answers queries about the logical implications of a particular knowledge base. A Reasoner is associated with a single knowledge base, which is "loaded" when the reasoner is constructed. By default a full classification of all atomic terms in the knowledge base is also performed at this time (which can take quite a while for large or complex ontologies), but this behavior can be disabled as a part of the Reasoner configuration. Internal details of the loading and reasoning algorithms can be configured in the Reasoner constructor and do not change over the lifetime of the Reasoner object---internal data structures and caches are optimized for a particular configuration. By default, HermiT will use the set of options which provide optimal performance.
@@ -148,7 +148,7 @@ public class Reasoner implements OWLReasoner {
     protected final OntologyChangeListener m_ontologyChangeListener;
     protected final Configuration m_configuration;
     protected final OWLOntology m_rootOntology;
-    protected final List<OWLOntologyChange> m_pendingChanges;
+    protected final List<OWLOntologyChange<?>> m_pendingChanges;
     protected final Collection<DescriptionGraph> m_descriptionGraphs;
     protected final InterruptFlag m_interruptFlag;
     protected ObjectPropertyInclusionManager m_objectPropertyInclusionManager;
@@ -201,7 +201,7 @@ public class Reasoner implements OWLReasoner {
         m_ontologyChangeListener=new OntologyChangeListener();
         m_configuration=configuration;
         m_rootOntology=rootOntology;
-        m_pendingChanges=new ArrayList<OWLOntologyChange>();
+        m_pendingChanges = new ArrayList<OWLOntologyChange<?>>();
         m_rootOntology.getOWLOntologyManager().addOntologyChangeListener(m_ontologyChangeListener);
         if (descriptionGraphs==null)
             m_descriptionGraphs=Collections.emptySet();
@@ -344,7 +344,10 @@ public class Reasoner implements OWLReasoner {
     // Ontology change management methods
 
     protected class OntologyChangeListener implements OWLOntologyChangeListener {
-        public void ontologiesChanged(List<? extends OWLOntologyChange> changes) throws OWLException {
+
+        public void ontologiesChanged(
+                List<? extends OWLOntologyChange<?>> changes)
+                throws OWLException {
             for (OWLOntologyChange change : changes)
                 if (!(change instanceof RemoveOntologyAnnotation || change instanceof AddOntologyAnnotation))
                     m_pendingChanges.add(change);
@@ -368,7 +371,8 @@ public class Reasoner implements OWLReasoner {
                 removed.add(change.getAxiom());
         return removed;
     }
-    public List<OWLOntologyChange> getPendingChanges() {
+
+    public List<OWLOntologyChange<?>> getPendingChanges() {
         return m_pendingChanges;
     }
     public void flush() {
@@ -442,7 +446,7 @@ public class Reasoner implements OWLReasoner {
                         } else if (classExpression instanceof OWLObjectHasValue) {
                             OWLObjectHasValue hasValue=(OWLObjectHasValue)classExpression;
                             OWLObjectProperty namedOP=hasValue.getProperty().getNamedProperty();
-                            OWLIndividual filler=hasValue.getValue();
+                            OWLIndividual filler = hasValue.getFiller();
                             if (!(isDefined(namedOP) || Prefixes.isInternalIRI(namedOP.getIRI().toString())) || !isDefined(filler))
                                 return false;
                         } else if (classExpression instanceof OWLObjectComplementOf) {
@@ -459,7 +463,7 @@ public class Reasoner implements OWLReasoner {
                             } else if (negated instanceof OWLObjectHasValue) {
                                 OWLObjectHasValue hasSelf=(OWLObjectHasValue)negated;
                                 OWLObjectProperty namedOP=hasSelf.getProperty().getNamedProperty();
-                                OWLIndividual filler=hasSelf.getValue();
+                                OWLIndividual filler = hasSelf.getFiller();
                                 if (!(isDefined(namedOP) || Prefixes.isInternalIRI(namedOP.getIRI().toString())) || !isDefined(filler))
                                     return false;
                             } else {

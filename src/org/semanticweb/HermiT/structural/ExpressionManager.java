@@ -128,7 +128,8 @@ public class ExpressionManager {
             return m_factory.getOWLObjectAllValuesFrom(d.getProperty().getSimplified(),filler);
         }
         public OWLClassExpression visit(OWLObjectHasValue d) {
-            return m_factory.getOWLObjectHasValue(d.getProperty().getSimplified(),d.getValue());
+            return m_factory.getOWLObjectHasValue(d.getProperty()
+                    .getSimplified(), d.getFiller());
         }
         public OWLClassExpression visit(OWLObjectHasSelf d) {
             return m_factory.getOWLObjectHasSelf(d.getProperty().getSimplified());
@@ -409,7 +410,7 @@ public class ExpressionManager {
                 return m_factory.getOWLObjectAllValuesFrom(d.getProperty().getSimplified(),filler);
         }
         public OWLClassExpression visit(OWLObjectHasValue d) {
-            OWLObjectOneOf nominal=m_factory.getOWLObjectOneOf(d.getValue());
+            OWLObjectOneOf nominal = m_factory.getOWLObjectOneOf(d.getFiller());
             return m_factory.getOWLObjectSomeValuesFrom(d.getProperty().getSimplified(),nominal);
         }
         public OWLClassExpression visit(OWLObjectHasSelf d) {
@@ -464,7 +465,7 @@ public class ExpressionManager {
                 return m_factory.getOWLDataAllValuesFrom(d.getProperty(),filler);
         }
         public OWLClassExpression visit(OWLDataHasValue d) {
-            OWLDataOneOf nominal=m_factory.getOWLDataOneOf(d.getValue());
+            OWLDataOneOf nominal = m_factory.getOWLDataOneOf(d.getFiller());
             return m_factory.getOWLDataSomeValuesFrom(d.getProperty(),nominal);
         }
         public OWLClassExpression visit(OWLDataMinCardinality d) {

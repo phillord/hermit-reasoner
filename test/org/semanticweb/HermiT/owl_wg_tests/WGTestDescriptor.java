@@ -19,27 +19,40 @@
 package org.semanticweb.HermiT.owl_wg_tests;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.semanticweb.owlapi.api.test.objectproperties.TestOWLClassExpressionsAndObjectOneOfTestCase;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.StringDocumentSource;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDataProperty;
+import org.semanticweb.owlapi.model.OWLDataPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLDataPropertyExpression;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLLiteral;
+import org.semanticweb.owlapi.model.OWLNamedIndividual;
+import org.semanticweb.owlapi.model.OWLNegativeDataPropertyAssertionAxiom;
+import org.semanticweb.owlapi.model.OWLNegativeObjectPropertyAssertionAxiom;
+import org.semanticweb.owlapi.model.OWLObjectProperty;
+import org.semanticweb.owlapi.model.OWLObjectPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.parameters.Imports;
+import org.semanticweb.owlapi.model.parameters.Search;
+import org.semanticweb.owlapi.search.Searcher;
 
 public class WGTestDescriptor {
     protected static final IRI TEST_CASE_IRI=IRI.create(WGTestRegistry.URI_BASE+"TestCase");
@@ -109,7 +122,9 @@ public class WGTestDescriptor {
     public final EnumSet<Semantics> semantics;
     public final EnumSet<Semantics> notsemantics;
 
-    public WGTestDescriptor(OWLOntologyManager m,OWLOntology o,OWLIndividual i) throws InvalidWGTestException {
+    public WGTestDescriptor(OWLOntologyManager m, OWLOntology o,
+ OWLIndividual i)
+            throws InvalidWGTestException {
         testContainer=o;
         testIndividual=i;
         if (i.isAnonymous())
@@ -118,11 +133,12 @@ public class WGTestDescriptor {
         testID=testIndividualIRI.substring(WGTestRegistry.TEST_ID_PREFIX.length());
 
         OWLDataFactory df=m.getOWLDataFactory();
-        Map<OWLDataPropertyExpression,Set<OWLLiteral>> dps=i.getDataPropertyValues(o);
-        Map<OWLObjectPropertyExpression,Set<OWLIndividual>> ops=i.getObjectPropertyValues(o);
-        Map<OWLObjectPropertyExpression,Set<OWLIndividual>> nops=i.getNegativeObjectPropertyValues(o);
 
-        identifier=getIdentifier(dps,df);
+        identifier = getIdentifier(o.getDataPropertyAssertionAxioms(i), df);
+        Set<OWLObjectPropertyAssertionAxiom> ops = o
+                .getObjectPropertyAssertionAxioms(i);
+        Set<OWLNegativeObjectPropertyAssertionAxiom> nops = o
+                .getNegativeObjectPropertyAssertionAxioms(i);
         status=getStatus(ops,df);
         testTypes=getTestType();
         species=getSpecies(ops,df);
@@ -134,18 +150,33 @@ public class WGTestDescriptor {
         return semantics.contains(Semantics.DIRECT) && species.contains(Species.DL);
     }
 
-    protected String getIdentifier(Map<OWLDataPropertyExpression,Set<OWLLiteral>> dps,OWLDataFactory df) throws InvalidWGTestException {
-        Set<OWLLiteral> identifiers=dps.get(df.getOWLDataProperty(IRI.create(WGTestRegistry.URI_BASE+"identifier")));
-        if (identifiers==null || identifiers.isEmpty())
+    protected String getIdentifier(Set<OWLDataPropertyAssertionAxiom> dps,
+            OWLDataFactory df) throws InvalidWGTestException {
+        OWLDataProperty id = df.getOWLDataProperty(IRI
+                .create(WGTestRegistry.URI_BASE + "identifier"));
+        Set<OWLLiteral> identifiers = new HashSet<OWLLiteral>();
+        for (OWLDataPropertyAssertionAxiom ax : dps) {
+            if (ax.getProperty().equals(id)) {
+                identifiers.add(ax.getObject());
+                }
+        }
+        if (identifiers.isEmpty())
             throw new InvalidWGTestException("Test does not have an identifier.");
         if (identifiers.size()!=1)
             throw new InvalidWGTestException("Test has more than one identifier.");
         return identifiers.iterator().next().getLiteral();
     }
 
-    protected Status getStatus(Map<OWLObjectPropertyExpression,Set<OWLIndividual>> ops,OWLDataFactory df) throws InvalidWGTestException {
-        Set<OWLIndividual> statuses=ops.get(df.getOWLObjectProperty(IRI.create(WGTestRegistry.URI_BASE+"status")));
-        if (statuses==null || statuses.isEmpty())
+    protected Status getStatus(Set<OWLObjectPropertyAssertionAxiom> ops,
+            OWLDataFactory df) throws InvalidWGTestException {
+        OWLObjectProperty stat = df.getOWLObjectProperty(IRI.create(WGTestRegistry.URI_BASE+"status"));
+        Set<OWLIndividual> statuses = new HashSet<OWLIndividual>();
+        for (OWLObjectPropertyAssertionAxiom ax : ops) {
+            if (ax.getProperty().equals(stat)) {
+                statuses.add(ax.getObject());
+            }
+        }
+        if (statuses.isEmpty())
             return null;
         else if (statuses.size()>1)
             throw new InvalidWGTestException("The test "+testID+" has more than one status.");
@@ -163,7 +194,8 @@ public class WGTestDescriptor {
 
     protected EnumSet<TestType> getTestType() throws InvalidWGTestException {
         EnumSet<TestType> testTypes=EnumSet.noneOf(TestType.class);
-        Set<OWLClassExpression> types=testIndividual.getTypes(testContainer);
+        Collection<OWLClassExpression> types = Searcher.types(testContainer
+                .getClassAssertionAxioms(testIndividual));
         nextItem: for (OWLClassExpression type : types) {
             if (type instanceof OWLClass) {
                 IRI testTypeIRI=((OWLClass)type).getIRI();
@@ -180,10 +212,18 @@ public class WGTestDescriptor {
         return testTypes;
     }
 
-    protected EnumSet<Species> getSpecies(Map<OWLObjectPropertyExpression,Set<OWLIndividual>> ops,OWLDataFactory df) throws InvalidWGTestException {
+    protected EnumSet<Species> getSpecies(
+            Set<OWLObjectPropertyAssertionAxiom> ops, OWLDataFactory df)
+            throws InvalidWGTestException {
         EnumSet<Species> species=EnumSet.noneOf(Species.class);
-        Set<OWLIndividual> specs=ops.get(df.getOWLObjectProperty(IRI.create(WGTestRegistry.URI_BASE+"species")));
-        if (specs!=null) {
+        OWLObjectProperty spec = df.getOWLObjectProperty(IRI
+                .create(WGTestRegistry.URI_BASE + "species"));
+        Set<OWLIndividual> specs = new HashSet<OWLIndividual>();
+        for (OWLObjectPropertyAssertionAxiom ax : ops) {
+            if (ax.getProperty().equals(spec)) {
+                specs.add(ax.getObject());
+            }
+        }
             nextItem: for (OWLIndividual s : specs) {
                 if (s.isAnonymous()) {
                     throw new InvalidWGTestException("Invalid test error: Test individuals must be named. ");
@@ -197,14 +237,21 @@ public class WGTestDescriptor {
                 }
                 throw new InvalidWGTestException("The test "+testID+" has an invalid species "+speciesIRI.toString()+".");
             }
-        }
         return species;
     }
 
-    protected EnumSet<Semantics> getSemantics(Map<OWLObjectPropertyExpression,Set<OWLIndividual>> ops,OWLDataFactory df) throws InvalidWGTestException {
+    protected EnumSet<Semantics> getSemantics(
+            Set<OWLObjectPropertyAssertionAxiom> ops, OWLDataFactory df)
+            throws InvalidWGTestException {
         EnumSet<Semantics> semantics=EnumSet.noneOf(Semantics.class);
-        Set<OWLIndividual> sems=ops.get(df.getOWLObjectProperty(IRI.create(WGTestRegistry.URI_BASE+"semantics")));
-        if (sems!=null) {
+        OWLObjectProperty semantic = df.getOWLObjectProperty(IRI
+                .create(WGTestRegistry.URI_BASE + "semantics"));
+        Set<OWLIndividual> sems = new HashSet<OWLIndividual>();
+        for (OWLObjectPropertyAssertionAxiom ax : ops) {
+            if (ax.getProperty().equals(semantic)) {
+                sems.add(ax.getObject());
+            }
+        }
             nextItem: for (OWLIndividual s : sems) {
                 if (s.isAnonymous())
                     throw new InvalidWGTestException("Invalid test error: Test individuals must be named. ");
@@ -217,14 +264,21 @@ public class WGTestDescriptor {
                 }
                 throw new InvalidWGTestException("The test "+testID+" has an invalid semantics "+semanticsIRI.toString()+".");
             }
-        }
         return semantics;
     }
 
-    protected EnumSet<Semantics> getNotSemantics(Map<OWLObjectPropertyExpression,Set<OWLIndividual>> nops,OWLDataFactory df) throws InvalidWGTestException {
+    protected EnumSet<Semantics>
+            getNotSemantics(Set<OWLNegativeObjectPropertyAssertionAxiom> nops,
+                    OWLDataFactory df) throws InvalidWGTestException {
         EnumSet<Semantics> notSemantics=EnumSet.noneOf(Semantics.class);
-        Set<OWLIndividual> nsems=nops.get(df.getOWLObjectProperty(IRI.create(WGTestRegistry.URI_BASE+"semantics")));
-        if (nsems!=null) {
+        Set<OWLIndividual> nsems = new HashSet<OWLIndividual>();
+        OWLObjectProperty nsemantic = df.getOWLObjectProperty(IRI
+                .create(WGTestRegistry.URI_BASE + "semantics"));
+        for (OWLNegativeObjectPropertyAssertionAxiom ax : nops) {
+            if (ax.getProperty().equals(nsemantic)) {
+                nsems.add(ax.getObject());
+            }
+        }
             nextItem: for (OWLIndividual s : nsems) {
                 if (s.isAnonymous())
                     throw new InvalidWGTestException("Invalid test error: Test individuals must be named. ");
@@ -237,16 +291,21 @@ public class WGTestDescriptor {
                 }
                 throw new InvalidWGTestException("The test "+testID+" has an invalid not semantics "+semanticsIRI.toString()+".");
             }
-        }
         return notSemantics;
     }
 
     public OWLOntology getPremiseOntology(OWLOntologyManager manager) throws InvalidWGTestException {
-        Map<OWLDataPropertyExpression,Set<OWLLiteral>> dps=testIndividual.getDataPropertyValues(testContainer);
+        Set<OWLDataPropertyAssertionAxiom> dps = testContainer
+                .getDataPropertyAssertionAxioms(testIndividual);
         for (SerializationFormat format : SerializationFormat.values()) {
-            Set<OWLLiteral> premises=dps.get(format.premise);
-            if (premises!=null) {
-                if (premises.size()!=1)
+            Set<OWLLiteral> premises = new HashSet<OWLLiteral>();
+            for (OWLDataPropertyAssertionAxiom ax : dps) {
+                if (ax.getProperty().equals(format.premise)) {
+                    premises.add(ax.getObject());
+                }
+            }
+            if (!premises.isEmpty()) {
+                if (premises.size() > 1)
                     throw new InvalidWGTestException("Test "+testID+" has an incorrect number of premises.");
                 StringDocumentSource source=new StringDocumentSource(premises.iterator().next().getLiteral());
                 try {
@@ -267,11 +326,18 @@ public class WGTestDescriptor {
     }
 
     public OWLOntology getConclusionOntology(OWLOntologyManager manager,boolean positive) throws InvalidWGTestException {
-        Map<OWLDataPropertyExpression,Set<OWLLiteral>> dps=testIndividual.getDataPropertyValues(testContainer);
+        Set<OWLDataPropertyAssertionAxiom> dps = testContainer
+                .getDataPropertyAssertionAxioms(testIndividual);
         for (SerializationFormat format : SerializationFormat.values()) {
-            Set<OWLLiteral> conclusions=dps.get(positive ? format.conclusion : format.nonconclusion);
-            if (conclusions!=null) {
-                if (conclusions.size()!=1)
+            Set<OWLLiteral> conclusions = new HashSet<OWLLiteral>();
+            for (OWLDataPropertyAssertionAxiom ax : dps) {
+                if (ax.getProperty().equals(
+                        positive ? format.conclusion : format.nonconclusion)) {
+                    conclusions.add(ax.getObject());
+                }
+            }
+            if(!conclusions.isEmpty()) {
+                if (conclusions.size() > 1)
                     throw new InvalidWGTestException("Test "+testID+" has an incorrect number of "+(positive ? "" : "non")+"conclusions.");
                 StringDocumentSource source=new StringDocumentSource(conclusions.iterator().next().getLiteral());
                 try {

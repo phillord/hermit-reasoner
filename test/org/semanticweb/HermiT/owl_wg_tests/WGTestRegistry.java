@@ -44,7 +44,8 @@ public class WGTestRegistry {
         m_testDescriptors=new ArrayList<WGTestDescriptor>();
         OWLClass testCaseClass=m_ontologyManager.getOWLDataFactory().getOWLClass(IRI.create(URI_BASE+"TestCase"));
         for (OWLClassAssertionAxiom ax : m_testContainer.getClassAssertionAxioms(testCaseClass)) {
-            WGTestDescriptor wgTestDescriptor=new WGTestDescriptor(m_ontologyManager,m_testContainer,ax.getIndividual());
+            WGTestDescriptor wgTestDescriptor = new WGTestDescriptor(
+                    m_ontologyManager, m_testContainer, ax.getIndividual());
             m_testDescriptors.add(wgTestDescriptor);
         }
     }

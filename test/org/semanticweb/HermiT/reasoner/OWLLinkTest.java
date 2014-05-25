@@ -35,7 +35,8 @@ public class OWLLinkTest extends AbstractReasonerTest {
     protected void registerMappingToResource(String ontologyIRI,String physicalResource) throws Exception {
         IRI physicalIRI=IRI.create(getClass().getResource(physicalResource).toURI());
         IRI logicalIRI=IRI.create(ontologyIRI);
-        m_ontologyManager.addIRIMapper(new SimpleIRIMapper(logicalIRI,physicalIRI));
+        m_ontologyManager.getIRIMappers().add(
+                new SimpleIRIMapper(logicalIRI, physicalIRI));
     }
     
     // below are all the tests from the paper
@@ -69,7 +70,7 @@ public class OWLLinkTest extends AbstractReasonerTest {
 
         createOWLReasoner();
 
-        List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
+        List<OWLOntologyChange<?>> changes = new ArrayList<OWLOntologyChange<?>>();
         changes.add(new AddAxiom(m_ontology, m_dataFactory.getOWLSubClassOfAxiom(d, f)));
         changes.add(new RemoveAxiom(m_ontology, m_dataFactory.getOWLSubClassOfAxiom(d, f)));
         changes.add(new RemoveAxiom(m_ontology, m_dataFactory.getOWLSubClassOfAxiom(a, b)));
@@ -103,7 +104,7 @@ public class OWLLinkTest extends AbstractReasonerTest {
 
         assertHierarchies("res/OWLLink/updateHierarchy.txt");
 
-        List<OWLOntologyChange> changes = new ArrayList<OWLOntologyChange>();
+        List<OWLOntologyChange<?>> changes = new ArrayList<OWLOntologyChange<?>>();
         changes.add(new AddAxiom(m_ontology, m_dataFactory.getOWLSubClassOfAxiom(d, f)));
         changes.add(new RemoveAxiom(m_ontology, m_dataFactory.getOWLSubClassOfAxiom(d, f)));
         changes.add(new RemoveAxiom(m_ontology, m_dataFactory.getOWLSubClassOfAxiom(a, b)));
