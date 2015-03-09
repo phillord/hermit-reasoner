@@ -95,7 +95,6 @@ public class InstanceManager {
     protected Map<Set<Individual>,Set<Set<Individual>>> m_individualToPossibleEquivalenceClass;
     protected final ExtensionTable.Retrieval m_binaryRetrieval0Bound;
     protected final ExtensionTable.Retrieval m_binaryRetrieval1Bound;
-    protected final ExtensionTable.Retrieval m_binaryRetrieval01Bound;
     protected final ExtensionTable.Retrieval m_ternaryRetrieval1Bound;
     protected final ExtensionTable.Retrieval m_ternaryRetrieval0Bound;
     protected final ExtensionTable.Retrieval m_ternaryRetrieval012Bound;
@@ -188,7 +187,6 @@ public class InstanceManager {
             ExtensionManager extensionManager=m_reasoner.getTableau().getExtensionManager();
             m_binaryRetrieval0Bound=extensionManager.getBinaryExtensionTable().createRetrieval(new boolean[] { true, false }, ExtensionTable.View.TOTAL);
             m_binaryRetrieval1Bound=extensionManager.getBinaryExtensionTable().createRetrieval(new boolean[] { false, true }, ExtensionTable.View.TOTAL);
-            m_binaryRetrieval01Bound=extensionManager.getBinaryExtensionTable().createRetrieval(new boolean[] { true, true }, ExtensionTable.View.TOTAL);
             m_ternaryRetrieval1Bound=extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { false,true,false }, ExtensionTable.View.TOTAL);
             m_ternaryRetrieval0Bound=extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,false,false }, ExtensionTable.View.TOTAL);
             m_ternaryRetrieval012Bound=extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,true,true }, ExtensionTable.View.TOTAL);

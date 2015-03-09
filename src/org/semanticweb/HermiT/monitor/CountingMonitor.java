@@ -36,6 +36,7 @@ public class CountingMonitor extends TableauMonitorAdapter {
 
     protected long m_problemStartTime;
     protected long m_validationStartTime;
+    protected long m_datatypeCheckingStartTime;
     protected int m_testNo=0;
     // current test
     protected long m_time;
@@ -50,6 +51,9 @@ public class CountingMonitor extends TableauMonitorAdapter {
     protected int m_initiallyInvalid;
     protected int m_noValidations;
     protected long m_validationTime;
+    // datatype checking
+    protected int m_numberDatatypesChecked;
+    protected int m_datatypeCheckingTime;
 
     // overall numbers
     protected final Map<String,List<TestRecord>> m_testRecords=new HashMap<String, List<TestRecord>>();
@@ -61,18 +65,21 @@ public class CountingMonitor extends TableauMonitorAdapter {
     protected int m_overallNumberOfClashes=0;
     protected int m_possibleInstancesTested=0;
     protected int m_possibleInstancesInstances=0;
-    
     // validated blocking
     protected int m_overallInitialModelSize=0;
     protected int m_overallInitiallyBlocked=0;
     protected int m_overallInitiallyInvalid=0;
     protected int m_overallNoValidations=0;
     protected long m_overallValidationTime=0;
+    // datatye checking
+    protected int m_overallDatatypeCheckingTime=0;
+    protected int m_overallNumberDatatypesChecked;
 
 
     public void reset() {
         m_problemStartTime=0;
         m_validationStartTime=0;
+        m_datatypeCheckingStartTime=0;
         m_time=0;
         m_numberOfBacktrackings=0;
         m_numberOfNodes=0;
@@ -84,6 +91,8 @@ public class CountingMonitor extends TableauMonitorAdapter {
         m_initiallyInvalid=0;
         m_noValidations=0;
         m_validationTime=0;
+        m_numberDatatypesChecked=0;
+        m_datatypeCheckingTime=0;
         m_testRecords.clear();
         m_overallTime=0;
         m_overallNumberOfBacktrackings=0;
@@ -98,6 +107,8 @@ public class CountingMonitor extends TableauMonitorAdapter {
         m_overallInitiallyInvalid=0;
         m_overallNoValidations=0;
         m_overallValidationTime=0;
+        m_overallNumberDatatypesChecked=0;
+        m_overallDatatypeCheckingTime=0;
     }
 
     public void isSatisfiableStarted(ReasoningTaskDescription reasoningTaskDescription) {
@@ -114,6 +125,8 @@ public class CountingMonitor extends TableauMonitorAdapter {
         m_initiallyInvalid=0;
         m_noValidations=0;
         m_validationTime=0;
+        m_datatypeCheckingTime=0;
+        m_numberDatatypesChecked=0;
     }
     public void isSatisfiableFinished(ReasoningTaskDescription reasoningTaskDescription,boolean result) {
         super.isSatisfiableFinished(reasoningTaskDescription,result);
@@ -145,6 +158,8 @@ public class CountingMonitor extends TableauMonitorAdapter {
         m_overallInitiallyInvalid+=m_initiallyInvalid;
         m_overallNoValidations+=m_noValidations;
         m_overallValidationTime+=m_validationTime;
+        m_overallDatatypeCheckingTime+=m_datatypeCheckingTime;
+        m_overallNumberDatatypesChecked+=m_numberDatatypesChecked;
     }
     public void backtrackToFinished(BranchingPoint newCurrentBrancingPoint) {
         m_numberOfBacktrackings++;
@@ -178,6 +193,13 @@ public class CountingMonitor extends TableauMonitorAdapter {
     	if (m_noValidations==1)
     	    m_initiallyInvalid=noInvalidlyBlocked;
     }
+    public void datatypeCheckingStarted() {
+        m_numberDatatypesChecked++;
+        m_datatypeCheckingStartTime=System.currentTimeMillis();
+    }
+    public void datatypeCheckingFinished(boolean result) {
+        m_datatypeCheckingTime+=(System.currentTimeMillis()-m_datatypeCheckingStartTime);
+    }
     // getters for test records
     public Set<String> getUsedMessagePatterns() {
         return m_testRecords.keySet();
@@ -194,8 +216,11 @@ public class CountingMonitor extends TableauMonitorAdapter {
             for (List<TestRecord> records : m_testRecords.values())
                 filteredRecords.addAll(records);
         }
-        else
-            filteredRecords=m_testRecords.get(messagePattern);
+        else {
+            List<TestRecord> filtered=m_testRecords.get(messagePattern);
+            if (filtered != null)
+                filteredRecords=filtered;
+        }
         Collections.sort(filteredRecords);
         if (limit>filteredRecords.size()) limit=filteredRecords.size();
         return filteredRecords.subList(0, limit);
@@ -235,6 +260,12 @@ public class CountingMonitor extends TableauMonitorAdapter {
 	public long getValidationTime() {
 		return m_validationTime;
 	}
+    public int getNumberDatatypesChecked() {
+        return m_numberDatatypesChecked;
+    }
+	public long getDatatypeCheckingTime() {
+        return m_datatypeCheckingTime;
+    }
 
 	// getters for overall measurements
 	public long getOverallTime() {
@@ -279,6 +310,12 @@ public class CountingMonitor extends TableauMonitorAdapter {
 	}
     public long getOverallValidationTime() {
         return m_overallValidationTime;
+    }
+    public int getOverallNumberDatatypesChecked() {
+        return m_overallNumberDatatypesChecked;
+    }
+    public long getOverallDatatypeCheckingTime() {
+        return m_overallDatatypeCheckingTime;
     }
 
     // getters for average measurements
@@ -345,6 +382,16 @@ public class CountingMonitor extends TableauMonitorAdapter {
         if (m_testNo==0)
             return m_testNo;
         return m_overallValidationTime/m_testNo;
+    }
+    public long getAverageNumberDatatypesChecked() {
+        if (m_testNo==0)
+            return m_testNo;
+        return m_overallNumberDatatypesChecked/m_testNo;
+    }
+    public long getAverageDatatypeCheckingTime() {
+        if (m_testNo==0)
+            return m_testNo;
+        return m_overallDatatypeCheckingTime/m_testNo;
     }
 
     public static String millisToHoursMinutesSecondsString(long millis) {
