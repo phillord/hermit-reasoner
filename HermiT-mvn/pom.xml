@@ -64,8 +64,8 @@
            <artifactId>maven-compiler-plugin</artifactId>
            <version>2.3.1</version>
            <configuration>
-               <source>1.6</source>
-               <target>1.6</target>
+               <source>1.7</source>
+               <target>1.7</target>
                <excludes>
                  <!-- exclude the protege dependency and the command line 
                  because we don't built a command line capable jar -->
@@ -152,7 +152,7 @@
     <dependency>
       <groupId>net.sourceforge.owlapi</groupId>
       <artifactId>owlapi-distribution</artifactId>
-      <version>3.4.10</version>
+      <version>[4.0.2,4.1)</version>
     </dependency>
     
     <dependency>
