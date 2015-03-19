@@ -79,6 +79,7 @@ import org.semanticweb.HermiT.structural.ReducedABoxOnlyClausification;
 import org.semanticweb.HermiT.tableau.InterruptFlag;
 import org.semanticweb.HermiT.tableau.ReasoningTaskDescription;
 import org.semanticweb.HermiT.tableau.Tableau;
+import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
 import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.AddOntologyAnnotation;
 import org.semanticweb.owlapi.model.AxiomType;
@@ -93,6 +94,7 @@ import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLDataPropertyExpression;
 import org.semanticweb.owlapi.model.OWLDatatype;
 import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
+import org.semanticweb.owlapi.model.OWLDocumentFormat;
 import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLFunctionalObjectPropertyAxiom;
@@ -110,7 +112,6 @@ import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyChangeListener;
-import org.semanticweb.owlapi.model.OWLOntologyFormat;
 import org.semanticweb.owlapi.model.OWLSubObjectPropertyOfAxiom;
 import org.semanticweb.owlapi.model.OWLSubPropertyChainOfAxiom;
 import org.semanticweb.owlapi.model.OWLTransitiveObjectPropertyAxiom;
@@ -139,7 +140,6 @@ import org.semanticweb.owlapi.reasoner.impl.OWLNamedIndividualNodeSet;
 import org.semanticweb.owlapi.reasoner.impl.OWLObjectPropertyNode;
 import org.semanticweb.owlapi.reasoner.impl.OWLObjectPropertyNodeSet;
 import org.semanticweb.owlapi.util.Version;
-import org.semanticweb.owlapi.vocab.PrefixOWLOntologyFormat;
 
 /**
  * Answers queries about the logical implications of a particular knowledge base. A Reasoner is associated with a single knowledge base, which is "loaded" when the reasoner is constructed. By default a full classification of all atomic terms in the knowledge base is also performed at this time (which can take quite a while for large or complex ontologies), but this behavior can be disabled as a part of the Reasoner configuration. Internal details of the loading and reasoning algorithms can be configured in the Reasoner constructor and do not change over the lifetime of the Reasoner object---internal data structures and caches are optimized for a particular configuration. By default, HermiT will use the set of options which provide optimal performance.
@@ -239,9 +239,9 @@ public class Reasoner implements OWLReasoner {
         m_prefixes.declareInternalPrefixes(individualIRIs,anonIndividualIRIs);
         m_prefixes.declareDefaultPrefix(m_dlOntology.getOntologyIRI()+"#");
         // declare prefixes as used in the ontology if possible
-        OWLOntologyFormat format=m_rootOntology.getOWLOntologyManager().getOntologyFormat(m_rootOntology);
-        if (format instanceof PrefixOWLOntologyFormat) {
-            PrefixOWLOntologyFormat prefixFormat=(PrefixOWLOntologyFormat)format;
+        OWLDocumentFormat format=m_rootOntology.getOWLOntologyManager().getOntologyFormat(m_rootOntology);
+        if (format instanceof PrefixDocumentFormat) {
+        	PrefixDocumentFormat prefixFormat=(PrefixDocumentFormat)format;
             for (String prefixName : prefixFormat.getPrefixName2PrefixMap().keySet()) {
                 String prefix=prefixFormat.getPrefixName2PrefixMap().get(prefixName);
                 if (m_prefixes.getPrefixName(prefix)==null)
