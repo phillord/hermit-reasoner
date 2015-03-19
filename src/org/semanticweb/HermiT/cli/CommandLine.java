@@ -733,10 +733,10 @@ public class CommandLine {
                     long startTime=System.currentTimeMillis();
                     OWLOntologyManager ontologyManager=OWLManager.createOWLOntologyManager();
                     if (ont.isAbsolute()) {
-                        URI uri=URI.create(ont.getStart());
+                        URI uri=URI.create(ont.getNamespace());
                         String scheme = uri.getScheme();
                         if (scheme!=null && scheme.equalsIgnoreCase("file")) {
-                            File file=new File(URI.create(ont.getStart()));
+                            File file=new File(URI.create(ont.getNamespace()));
                             if (file.isDirectory()) {
                                 OWLOntologyIRIMapper mapper=new AutoIRIMapper(file, false);
                                 ontologyManager.addIRIMapper(mapper);
