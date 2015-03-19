@@ -26,7 +26,7 @@ import java.io.FileWriter;
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 
-import org.coode.owlapi.functionalrenderer.OWLFunctionalSyntaxRenderer;
+import org.semanticweb.owlapi.functional.renderer.OWLFunctionalSyntaxRenderer;
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.owlapi.apibinding.OWLManager;
