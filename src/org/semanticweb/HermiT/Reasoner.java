@@ -148,6 +148,7 @@ public class Reasoner implements OWLReasoner {
     protected final OntologyChangeListener m_ontologyChangeListener;
     protected final Configuration m_configuration;
     protected final OWLOntology m_rootOntology;
+    protected final OWLDataFactory df;
     protected final List<OWLOntologyChange> m_pendingChanges;
     protected final Collection<DescriptionGraph> m_descriptionGraphs;
     protected final InterruptFlag m_interruptFlag;
@@ -201,6 +202,7 @@ public class Reasoner implements OWLReasoner {
         m_ontologyChangeListener=new OntologyChangeListener();
         m_configuration=configuration;
         m_rootOntology=rootOntology;
+        df=m_rootOntology.getOWLOntologyManager().getOWLDataFactory();
         m_pendingChanges=new ArrayList<OWLOntologyChange>();
         m_rootOntology.getOWLOntologyManager().addOntologyChangeListener(m_ontologyChangeListener);
         if (descriptionGraphs==null)
@@ -290,7 +292,7 @@ public class Reasoner implements OWLReasoner {
         m_interruptFlag.interrupt();
     }
     public OWLDataFactory getDataFactory() {
-        return m_rootOntology.getOWLOntologyManager().getOWLDataFactory();
+        return df;
     }
 
     // Accessor methods of the OWL API
@@ -1642,7 +1644,7 @@ public class Reasoner implements OWLReasoner {
         if (!m_isConsistent)
             return true;
         if (!isDefined(namedIndividual))
-            return getEquivalentClasses(type).contains(m_rootOntology.getOWLOntologyManager().getOWLDataFactory().getOWLThing());
+            return getEquivalentClasses(type).contains(df.getOWLThing());
         else {
             if (type instanceof OWLClass) {
                 if (direct)
