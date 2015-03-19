@@ -138,7 +138,7 @@ public class WGTestDescriptor {
 
     protected String getIdentifier(Multimap<OWLDataPropertyExpression,OWLLiteral> dps,OWLDataFactory df) throws InvalidWGTestException {
         Collection<OWLLiteral> identifiers=dps.get(df.getOWLDataProperty(IRI.create(WGTestRegistry.URI_BASE+"identifier")));
-        if (identifiers==null || identifiers.isEmpty())
+        if ( identifiers.isEmpty())
             throw new InvalidWGTestException("Test does not have an identifier.");
         if (identifiers.size()!=1)
             throw new InvalidWGTestException("Test has more than one identifier.");
@@ -147,7 +147,7 @@ public class WGTestDescriptor {
 
     protected Status getStatus(Multimap<OWLObjectPropertyExpression,OWLIndividual> ops,OWLDataFactory df) throws InvalidWGTestException {
         Collection<OWLIndividual> statuses=ops.get(df.getOWLObjectProperty(IRI.create(WGTestRegistry.URI_BASE+"status")));
-        if (statuses==null || statuses.isEmpty())
+        if (statuses.isEmpty())
             return null;
         else if (statuses.size()>1)
             throw new InvalidWGTestException("The test "+testID+" has more than one status.");
@@ -185,20 +185,18 @@ public class WGTestDescriptor {
     protected EnumSet<Species> getSpecies(Multimap<OWLObjectPropertyExpression,OWLIndividual> ops,OWLDataFactory df) throws InvalidWGTestException {
         EnumSet<Species> species=EnumSet.noneOf(Species.class);
         Collection<OWLIndividual> specs=ops.get(df.getOWLObjectProperty(IRI.create(WGTestRegistry.URI_BASE+"species")));
-        if (specs!=null) {
-            nextItem: for (OWLIndividual s : specs) {
-                if (s.isAnonymous()) {
-                    throw new InvalidWGTestException("Invalid test error: Test individuals must be named. ");
-                }
-                IRI speciesIRI=s.asOWLNamedIndividual().getIRI();
-                for (Species spc : Species.values()) {
-                    if (speciesIRI.equals(spc.uri)) {
-                        species.add(spc);
-                        continue nextItem;
-                    }
-                }
-                throw new InvalidWGTestException("The test "+testID+" has an invalid species "+speciesIRI.toString()+".");
+        nextItem: for (OWLIndividual s : specs) {
+            if (s.isAnonymous()) {
+                throw new InvalidWGTestException("Invalid test error: Test individuals must be named. ");
             }
+            IRI speciesIRI=s.asOWLNamedIndividual().getIRI();
+            for (Species spc : Species.values()) {
+                if (speciesIRI.equals(spc.uri)) {
+                    species.add(spc);
+                    continue nextItem;
+                }
+            }
+            throw new InvalidWGTestException("The test "+testID+" has an invalid species "+speciesIRI.toString()+".");
         }
         return species;
     }
@@ -206,19 +204,17 @@ public class WGTestDescriptor {
     protected EnumSet<Semantics> getSemantics(Multimap<OWLObjectPropertyExpression,OWLIndividual> ops,OWLDataFactory df) throws InvalidWGTestException {
         EnumSet<Semantics> semantics=EnumSet.noneOf(Semantics.class);
         Collection<OWLIndividual> sems=ops.get(df.getOWLObjectProperty(IRI.create(WGTestRegistry.URI_BASE+"semantics")));
-        if (sems!=null) {
-            nextItem: for (OWLIndividual s : sems) {
-                if (s.isAnonymous())
-                    throw new InvalidWGTestException("Invalid test error: Test individuals must be named. ");
-                IRI semanticsIRI=s.asOWLNamedIndividual().getIRI();
-                for (Semantics sem : Semantics.values()) {
-                    if (semanticsIRI.equals(sem.uri)) {
-                        semantics.add(sem);
-                        continue nextItem;
-                    }
+        nextItem: for (OWLIndividual s : sems) {
+            if (s.isAnonymous())
+                throw new InvalidWGTestException("Invalid test error: Test individuals must be named. ");
+            IRI semanticsIRI=s.asOWLNamedIndividual().getIRI();
+            for (Semantics sem : Semantics.values()) {
+                if (semanticsIRI.equals(sem.uri)) {
+                    semantics.add(sem);
+                    continue nextItem;
                 }
-                throw new InvalidWGTestException("The test "+testID+" has an invalid semantics "+semanticsIRI.toString()+".");
             }
+            throw new InvalidWGTestException("The test "+testID+" has an invalid semantics "+semanticsIRI.toString()+".");
         }
         return semantics;
     }
@@ -226,19 +222,17 @@ public class WGTestDescriptor {
     protected EnumSet<Semantics> getNotSemantics(Multimap<OWLObjectPropertyExpression,OWLIndividual> nops,OWLDataFactory df) throws InvalidWGTestException {
         EnumSet<Semantics> notSemantics=EnumSet.noneOf(Semantics.class);
         Collection<OWLIndividual> nsems=nops.get(df.getOWLObjectProperty(IRI.create(WGTestRegistry.URI_BASE+"semantics")));
-        if (nsems!=null) {
-            nextItem: for (OWLIndividual s : nsems) {
-                if (s.isAnonymous())
-                    throw new InvalidWGTestException("Invalid test error: Test individuals must be named. ");
-                IRI semanticsIRI=s.asOWLNamedIndividual().getIRI();
-                for (Semantics sem : Semantics.values()) {
-                    if (semanticsIRI.equals(sem.uri)) {
-                        notSemantics.add(sem);
-                        continue nextItem;
-                    }
+        nextItem: for (OWLIndividual s : nsems) {
+            if (s.isAnonymous())
+                throw new InvalidWGTestException("Invalid test error: Test individuals must be named. ");
+            IRI semanticsIRI=s.asOWLNamedIndividual().getIRI();
+            for (Semantics sem : Semantics.values()) {
+                if (semanticsIRI.equals(sem.uri)) {
+                    notSemantics.add(sem);
+                    continue nextItem;
                 }
-                throw new InvalidWGTestException("The test "+testID+" has an invalid not semantics "+semanticsIRI.toString()+".");
             }
+            throw new InvalidWGTestException("The test "+testID+" has an invalid not semantics "+semanticsIRI.toString()+".");
         }
         return notSemantics;
     }
@@ -247,9 +241,9 @@ public class WGTestDescriptor {
         Multimap<OWLDataPropertyExpression,OWLLiteral> dps=EntitySearcher.getDataPropertyValues(testIndividual, testContainer);
         for (SerializationFormat format : SerializationFormat.values()) {
             Collection<OWLLiteral> premises=dps.get(format.premise);
-            if (premises!=null) {
-                if (premises.size()!=1)
-                    throw new InvalidWGTestException("Test "+testID+" has an incorrect number of premises.");
+            if(!premises.isEmpty()) {
+                if (premises.size()>1)
+                    throw new InvalidWGTestException("Test "+testID+" has an incorrect number of premises: "+premises);
                 StringDocumentSource source=new StringDocumentSource(premises.iterator().next().getLiteral());
                 try {
                     return manager.loadOntologyFromOntologyDocument(source);
@@ -272,7 +266,7 @@ public class WGTestDescriptor {
         Multimap<OWLDataPropertyExpression,OWLLiteral> dps=EntitySearcher.getDataPropertyValues(testIndividual,testContainer);
         for (SerializationFormat format : SerializationFormat.values()) {
             Collection<OWLLiteral> conclusions=dps.get(positive ? format.conclusion : format.nonconclusion);
-            if (conclusions!=null) {
+            if(!conclusions.isEmpty()) {
                 if (conclusions.size()!=1)
                     throw new InvalidWGTestException("Test "+testID+" has an incorrect number of "+(positive ? "" : "non")+"conclusions.");
                 StringDocumentSource source=new StringDocumentSource(conclusions.iterator().next().getLiteral());
