@@ -19,6 +19,7 @@ package org.semanticweb.HermiT.blocking;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -35,13 +36,13 @@ public class SingleDirectBlockingChecker implements DirectBlockingChecker,Serial
     private static final long serialVersionUID=9093753046859877016L;
 
     protected final SetFactory<AtomicConcept> m_atomicConceptsSetFactory;
-    protected final List<AtomicConcept> m_atomicConceptsBuffer;
+    protected final Set<AtomicConcept> m_atomicConceptsBuffer;
     protected Tableau m_tableau;
     protected ExtensionTable.Retrieval m_binaryTableSearch1Bound;
 
     public SingleDirectBlockingChecker() {
         m_atomicConceptsSetFactory=new SetFactory<AtomicConcept>();
-        m_atomicConceptsBuffer=new ArrayList<AtomicConcept>();
+        m_atomicConceptsBuffer=new LinkedHashSet<AtomicConcept>();
     }
     public void initialize(Tableau tableau) {
         m_tableau=tableau;

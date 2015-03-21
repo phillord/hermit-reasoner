@@ -19,6 +19,7 @@ package org.semanticweb.HermiT.blocking;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -88,10 +89,8 @@ public class SetFactory<E> implements Serializable {
     public void makePermanent(Set<E> set) {
         ((Entry)set).m_permanent=true;
     }
-    public Set<E> getSet(List<E> elements) {
-        int hashCode=0;
-        for (int index=elements.size()-1;index>=0;--index)
-            hashCode+=elements.get(index).hashCode();
+    public Set<E> getSet(Set<E> elements) {
+        int hashCode=elements.hashCode();
         int index=getIndexFor(hashCode,m_entries.length);
         Entry<E> entry=m_entries[index];
         while (entry!=null) {
@@ -181,7 +180,7 @@ public class SetFactory<E> implements Serializable {
             m_hashCode=0;
             m_table=(T[])new Object[size];
         }
-        public void initialize(List<T> elements,int hashCode) {
+        public void initialize(Collection<T> elements,int hashCode) {
             elements.toArray(m_table);
             m_hashCode=hashCode;
         }
@@ -192,6 +191,14 @@ public class SetFactory<E> implements Serializable {
             throw new UnsupportedOperationException();
         }
         public boolean equalsTo(List<T> elements) {
+            if (m_table.length!=elements.size())
+                return false;
+            for (int index=m_table.length-1;index>=0;--index)
+                if (!elements.contains(m_table[index]))
+                    return false;
+            return true;
+        }
+        public boolean equalsTo(Set<T> elements) {
             if (m_table.length!=elements.size())
                 return false;
             for (int index=m_table.length-1;index>=0;--index)

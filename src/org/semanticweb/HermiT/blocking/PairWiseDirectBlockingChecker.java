@@ -19,6 +19,7 @@ package org.semanticweb.HermiT.blocking;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -36,8 +37,8 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
 
     protected final SetFactory<AtomicConcept> m_atomicConceptsSetFactory;
     protected final SetFactory<AtomicRole> m_atomicRolesSetFactory;
-    protected final List<AtomicConcept> m_atomicConceptsBuffer;
-    protected final List<AtomicRole> m_atomicRolesBuffer;
+    protected final Set<AtomicConcept> m_atomicConceptsBuffer;
+    protected final Set<AtomicRole> m_atomicRolesBuffer;
     protected Tableau m_tableau;
     protected ExtensionTable.Retrieval m_binaryTableSearch1Bound;
     protected ExtensionTable.Retrieval m_ternaryTableSearch12Bound;
@@ -45,8 +46,8 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
     public PairWiseDirectBlockingChecker() {
         m_atomicConceptsSetFactory=new SetFactory<AtomicConcept>();
         m_atomicRolesSetFactory=new SetFactory<AtomicRole>();
-        m_atomicConceptsBuffer=new ArrayList<AtomicConcept>();
-        m_atomicRolesBuffer=new ArrayList<AtomicRole>();
+        m_atomicConceptsBuffer=new LinkedHashSet<AtomicConcept>();
+        m_atomicRolesBuffer=new LinkedHashSet<AtomicRole>();
     }
     public void initialize(Tableau tableau) {
         m_tableau=tableau;

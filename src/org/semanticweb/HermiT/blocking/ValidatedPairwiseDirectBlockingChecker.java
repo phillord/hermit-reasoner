@@ -19,6 +19,7 @@ package org.semanticweb.HermiT.blocking;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -37,8 +38,8 @@ public class ValidatedPairwiseDirectBlockingChecker implements DirectBlockingChe
 
     protected final SetFactory<AtomicConcept> m_atomicConceptsSetFactory=new SetFactory<AtomicConcept>();
     protected final SetFactory<AtomicRole> m_atomicRolesSetFactory=new SetFactory<AtomicRole>();
-    protected final List<AtomicConcept> m_atomicConceptsBuffer=new ArrayList<AtomicConcept>();
-    protected final List<AtomicRole> m_atomicRolesBuffer=new ArrayList<AtomicRole>();
+    protected final Set<AtomicConcept> m_atomicConceptsBuffer=new LinkedHashSet<AtomicConcept>();
+    protected final Set<AtomicRole> m_atomicRolesBuffer=new LinkedHashSet<AtomicRole>();
     protected final boolean m_hasInverses;
     protected Tableau m_tableau;
     protected ExtensionTable.Retrieval m_binaryTableSearch1Bound;
