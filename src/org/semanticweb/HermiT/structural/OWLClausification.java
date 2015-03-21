@@ -122,6 +122,8 @@ import org.semanticweb.owlapi.model.SWRLSameIndividualAtom;
 import org.semanticweb.owlapi.model.SWRLVariable;
 import org.semanticweb.owlapi.util.OWLAxiomVisitorAdapter;
 
+import com.google.common.base.Optional;
+
 public class OWLClausification {
     protected static final Variable X=Variable.create("X");
     protected static final Variable Y=Variable.create("Y");
@@ -134,7 +136,8 @@ public class OWLClausification {
     }
     public Object[] preprocessAndClausify(OWLOntology rootOntology,Collection<DescriptionGraph> descriptionGraphs) {
         OWLDataFactory factory=rootOntology.getOWLOntologyManager().getOWLDataFactory();
-        String ontologyIRI=rootOntology.getOntologyID().getDefaultDocumentIRI()==null ? "urn:hermit:kb" : rootOntology.getOntologyID().getDefaultDocumentIRI().toString();
+        Optional<IRI> defaultDocumentIRI = rootOntology.getOntologyID().getDefaultDocumentIRI();
+        String ontologyIRI=defaultDocumentIRI.isPresent()?defaultDocumentIRI.get().toString(): "urn:hermit:kb" ;
         Collection<OWLOntology> importClosure=rootOntology.getImportsClosure();
         OWLAxioms axioms=new OWLAxioms();
         OWLNormalization normalization=new OWLNormalization(factory,axioms,0);
