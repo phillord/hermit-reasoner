@@ -685,7 +685,7 @@ public class InstanceManager {
                         }
                     }
 
-                    for (Node sourceNode : possiblyEquivalentToNode) {
+                    for (Node sourceNode : new HashSet<Node>(possiblyEquivalentToNode)) {
                         Individual sourceIndividual=m_individualsForNodes.get(sourceNode);
                         possiblyEquivalentToSuccessor.addAll(equivalentToSuccessor);
                         for (Node targetNode : possiblyEquivalentToSuccessor) {
