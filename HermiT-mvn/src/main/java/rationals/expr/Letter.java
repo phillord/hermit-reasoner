@@ -38,10 +38,9 @@ package rationals.expr;
 import rationals.algebra.SemiRing;
 
 /**
- * A letter expression is simply a wrapper over any object. 
- * Note that the semantics of equals and hashcode must be properly
- * implemented by the wrapped object as this may be used in 
- * Collections, for example as keys in hashtables.
+ * A letter expression is simply a wrapper over any object. Note that the
+ * semantics of equals and hashcode must be properly implemented by the wrapped
+ * object as this may be used in Collections, for example as keys in hashtables.
  * 
  * @author nono
  * @version $Id: Letter.java 2 2006-08-24 14:41:48Z oqube $
@@ -49,30 +48,6 @@ import rationals.algebra.SemiRing;
 public class Letter extends RationalExpr {
 
     private Object label;
-
-    public static final Letter epsilon = new Letter(null) {
-
-        @Override
-        public boolean equals(Object o) {
-            return o == epsilon;
-        }
-        
-
-        @Override
-        public SemiRing mult(SemiRing s2) {
-            return s2;
-        }
-        
-        @Override
-        public String toString() {
-            return "1";
-        }
-
-        @Override
-        public int hashCode() {
-            return 0;
-        }
-    };
 
     /**
      * Construct a new letter expression.

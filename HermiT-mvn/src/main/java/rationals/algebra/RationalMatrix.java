@@ -131,7 +131,7 @@ public class RationalMatrix  {
                 RationalExpr re = null;
                 for (Transition tr :trs) {
                     Object o = tr.label();
-                    Letter l = (o == null) ? Letter.epsilon : new Letter(o);
+                    RationalExpr l = (o == null) ? Letter.epsilon : new Letter(o);
                     if (re == null)
                         re = l;
                     else

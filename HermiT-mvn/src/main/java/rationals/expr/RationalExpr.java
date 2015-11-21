@@ -43,7 +43,6 @@ import rationals.algebra.SemiRing;
  */
 public abstract class RationalExpr implements SemiRing {
 
-    
     public static final RationalExpr zero = new RationalExpr() {
         
         @Override
@@ -71,7 +70,31 @@ public abstract class RationalExpr implements SemiRing {
             return "0";
         }
     };
-    
+
+    public static final RationalExpr epsilon = new RationalExpr() {
+
+        @Override
+        public boolean equals(Object o) {
+            return o == epsilon;
+        }
+        
+
+        @Override
+        public SemiRing mult(SemiRing s2) {
+            return s2;
+        }
+        
+        @Override
+        public String toString() {
+            return "1";
+        }
+
+        @Override
+        public int hashCode() {
+            return 0;
+        }
+    };
+
     public static final RationalExpr one = Letter.epsilon;
     
     @Override
