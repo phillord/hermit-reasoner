@@ -50,6 +50,7 @@ public class ShowSubtreeCommand extends AbstractCommand {
         writer.println("    magenta: description graph node");
         writer.println("    blue: concrete/data value node");
     }
+    @SuppressWarnings("unused")
     @Override
     public void execute(String[] args) {
         if (args.length<2) {

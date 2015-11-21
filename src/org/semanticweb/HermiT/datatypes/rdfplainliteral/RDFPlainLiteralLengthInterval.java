@@ -28,7 +28,7 @@ public class RDFPlainLiteralLengthInterval {
     protected final int m_maxLength;
 
     public RDFPlainLiteralLengthInterval(LanguageTagMode languageTagMode,int minLength,int maxLength) {
-        assert !isIntervalEmpty(languageTagMode,minLength,maxLength);
+        assert !isIntervalEmpty(minLength,maxLength);
         m_languageTagMode=languageTagMode;
         m_minLength=minLength;
         m_maxLength=maxLength;
@@ -41,7 +41,7 @@ public class RDFPlainLiteralLengthInterval {
             return null;
         int newMinLength=Math.max(m_minLength,that.m_minLength);
         int newMaxLength=Math.min(m_maxLength,that.m_maxLength);
-        if (isIntervalEmpty(m_languageTagMode,newMinLength,newMaxLength))
+        if (isIntervalEmpty(newMinLength,newMaxLength))
             return null;
         else if (isEqual(m_languageTagMode,newMinLength,newMaxLength))
             return this;
@@ -130,7 +130,7 @@ public class RDFPlainLiteralLengthInterval {
             buffer.append("@<lt>");
         return buffer.toString();
     }
-    protected static boolean isIntervalEmpty(LanguageTagMode languageTagMode,int minLength,int maxLength) {
+    protected static boolean isIntervalEmpty(int minLength,int maxLength) {
         return minLength>maxLength;
     }
     protected static boolean isRDFPlainLiteralCharacter(char c) {

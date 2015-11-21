@@ -89,15 +89,15 @@ public class WGTestDescriptor {
     }
 
     public enum SerializationFormat {
-        FUNCTIONAL("FUNCTIONAL", "fsPremiseOntology", "fsConclusionOntology", "fsNonConclusionOntology"), OWLXML(
-                "OWLXML", "owlXmlPremiseOntology", "owlXmlConclusionOntology", "owlXmlNonConclusionOntology"), RDFXML(
-                        "RDFXML", "rdfXmlPremiseOntology", "rdfXmlConclusionOntology", "rdfXmlNonConclusionOntology");
+        FUNCTIONAL("fsPremiseOntology", "fsConclusionOntology", "fsNonConclusionOntology"), 
+        OWLXML("owlXmlPremiseOntology", "owlXmlConclusionOntology", "owlXmlNonConclusionOntology"), 
+        RDFXML("rdfXmlPremiseOntology", "rdfXmlConclusionOntology", "rdfXmlNonConclusionOntology");
 
         public final OWLDataProperty premise;
         public final OWLDataProperty conclusion;
         public final OWLDataProperty nonconclusion;
 
-        private SerializationFormat(String indIRI, String premiseIRI, String conclusionIRI, String nonconclusionIRI) {
+        private SerializationFormat(String premiseIRI, String conclusionIRI, String nonconclusionIRI) {
             OWLDataFactory df = OWLManager.createOWLOntologyManager().getOWLDataFactory();
             premise = df.getOWLDataProperty(IRI.create(WGTestRegistry.URI_BASE + premiseIRI));
             conclusion = df.getOWLDataProperty(IRI.create(WGTestRegistry.URI_BASE + conclusionIRI));

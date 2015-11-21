@@ -109,7 +109,7 @@ public abstract class ExtensionTable implements Serializable {
             ((Node)tuple[1]).m_numberOfNegatedRoleAssertions++;
         else if (dlPredicateObject instanceof DescriptionGraph)
             m_tableau.m_descriptionGraphManager.descriptionGraphTupleAdded(tupleIndex,tuple);
-        m_tableau.m_clashManager.tupleAdded(this,tuple,dependencySet,isCore);
+        m_tableau.m_clashManager.tupleAdded(this,tuple,dependencySet);
     }
     public abstract boolean containsTuple(Object[] tuple);
     public Retrieval createRetrieval(boolean[] bindingPattern,View extensionView) {
@@ -294,6 +294,8 @@ public abstract class ExtensionTable implements Serializable {
             case TOTAL:
                 m_currentTupleIndex=0;
                 m_afterLastTupleIndex=m_afterDeltaNewTupleIndex;
+                break;
+            default:
                 break;
             }
             while (m_currentTupleIndex<m_afterLastTupleIndex) {

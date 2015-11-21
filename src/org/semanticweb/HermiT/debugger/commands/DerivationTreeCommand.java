@@ -54,6 +54,7 @@ public class DerivationTreeCommand extends AbstractCommand {
         writer.println("    red: existential expansion");
         writer.println("    magenta: base/given fact");
     }
+    @SuppressWarnings("unused")
     @Override
     public void execute(String[] args) {
         if (args.length<2) {

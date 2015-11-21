@@ -180,7 +180,7 @@ public class ObjectPropertyInclusionManager {
 
         Graph<OWLObjectPropertyExpression> complexPropertiesDependencyGraph=propertyDependencyGraph.clone();
         Set<OWLObjectPropertyExpression> transitiveProperties=new HashSet<>();
-        Map<OWLObjectPropertyExpression,Automaton> individualAutomata=buildIndividualAutomata(complexPropertiesDependencyGraph,simpleObjectPropertyInclusions,complexObjectPropertyInclusions,equivalentPropertiesMap,transitiveProperties);
+        Map<OWLObjectPropertyExpression,Automaton> individualAutomata=buildIndividualAutomata(complexPropertiesDependencyGraph,complexObjectPropertyInclusions,equivalentPropertiesMap,transitiveProperties);
         Set<OWLObjectPropertyExpression> simpleProperties=findSimpleProperties(complexPropertiesDependencyGraph,individualAutomata);
 
         propertyDependencyGraph.removeElements(simpleProperties);
@@ -199,7 +199,7 @@ public class ObjectPropertyInclusionManager {
             inverseOfComplexProperties.add(complexProp.getInverseProperty());
         complexObjectPropertyExpressions.addAll(inverseOfComplexProperties);
 
-        connectAllAutomata(automataByProperty,propertyDependencyGraph,inversePropertiesMap,individualAutomata,simpleObjectPropertyInclusions,symmetricObjectProperties,transitiveProperties);
+        connectAllAutomata(automataByProperty,propertyDependencyGraph,inversePropertiesMap,individualAutomata,symmetricObjectProperties,transitiveProperties);
         Map<OWLObjectPropertyExpression,Automaton> individualAutomataForEquivRoles=new HashMap<>();
         for (OWLObjectPropertyExpression propExprWithAutomaton : automataByProperty.keySet())
             if (equivalentPropertiesMap.get(propExprWithAutomaton)!=null) {
@@ -307,7 +307,7 @@ public class ObjectPropertyInclusionManager {
         }
         return simpleProperties;
     }
-    protected void connectAllAutomata(Map<OWLObjectPropertyExpression,Automaton> completeAutomata,Graph<OWLObjectPropertyExpression> propertyDependencyGraph,Map<OWLObjectPropertyExpression,Set<OWLObjectPropertyExpression>> inversePropertiesMap,Map<OWLObjectPropertyExpression,Automaton> individualAutomata,Collection<OWLObjectPropertyExpression[]> simpleObjectPropertyInclusions, Set<OWLObjectPropertyExpression> symmetricObjectProperties, Set<OWLObjectPropertyExpression> transitiveProperties) {
+    protected void connectAllAutomata(Map<OWLObjectPropertyExpression,Automaton> completeAutomata,Graph<OWLObjectPropertyExpression> propertyDependencyGraph,Map<OWLObjectPropertyExpression,Set<OWLObjectPropertyExpression>> inversePropertiesMap,Map<OWLObjectPropertyExpression,Automaton> individualAutomata,Set<OWLObjectPropertyExpression> symmetricObjectProperties, Set<OWLObjectPropertyExpression> transitiveProperties) {
         Graph<OWLObjectPropertyExpression> transClosedGraph=propertyDependencyGraph.clone();
         transClosedGraph.transitivelyClose();
 
@@ -633,7 +633,7 @@ public class ObjectPropertyInclusionManager {
                 throw new IllegalArgumentException("The given property hierarchy is not regular.\nThere is a cyclic dependency involving property "+prop);
         }
     }
-    protected Map<OWLObjectPropertyExpression,Automaton> buildIndividualAutomata(Graph<OWLObjectPropertyExpression> complexPropertiesDependencyGraph,Collection<OWLObjectPropertyExpression[]> simpleObjectPropertyInclusions,Collection<ComplexObjectPropertyInclusion> complexObjectPropertyInclusions,Map<OWLObjectPropertyExpression,Set<OWLObjectPropertyExpression>> equivalentPropertiesMap,Set<OWLObjectPropertyExpression> transitiveProperties) {
+    protected Map<OWLObjectPropertyExpression,Automaton> buildIndividualAutomata(Graph<OWLObjectPropertyExpression> complexPropertiesDependencyGraph,Collection<ComplexObjectPropertyInclusion> complexObjectPropertyInclusions,Map<OWLObjectPropertyExpression,Set<OWLObjectPropertyExpression>> equivalentPropertiesMap,Set<OWLObjectPropertyExpression> transitiveProperties) {
         Map<OWLObjectPropertyExpression,Automaton> automataMap=new HashMap<>();
         for (OWLAxioms.ComplexObjectPropertyInclusion inclusion : complexObjectPropertyInclusions) {
             OWLObjectPropertyExpression[] subObjectProperties=inclusion.m_subObjectProperties;

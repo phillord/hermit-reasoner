@@ -84,9 +84,6 @@ public class DerivationHistory extends TableauMonitorAdapter {
         }
         m_derivations.push(new DLClauseApplication(dlClauseEvaluator.getDLClause(dlClauseIndex),premises));
     }
-    public void dlClauseMatchedFinished(DLClauseEvaluator dlClauseEvaluator) {
-        m_derivations.pop();
-    }
     @Override
     public void addFactFinished(Object[] tuple,boolean isCore,boolean factAdded) {
         if (factAdded)

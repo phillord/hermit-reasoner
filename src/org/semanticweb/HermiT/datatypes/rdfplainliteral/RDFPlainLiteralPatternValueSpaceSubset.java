@@ -186,12 +186,13 @@ public class RDFPlainLiteralPatternValueSpaceSubset implements ValueSpaceSubset 
             stringPart=s_anyString.intersection(BasicOperations.repeat(s_anyChar,minLength,maxLength));
         return stringPart.concatenate(s_anyLangTag);
     }
+    @SuppressWarnings("unused")
     public static boolean isValidPattern(String pattern) {
         try {
             new RegExp(pattern);
             return true;
         }
-        catch (@SuppressWarnings("unused") IllegalArgumentException e) {
+        catch (IllegalArgumentException e) {
             return false;
         }
     }

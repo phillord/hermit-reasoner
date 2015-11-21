@@ -131,6 +131,8 @@ public abstract class AbstractExpansionStrategy implements ExistentialExpansionS
                             if (monitor!=null)
                                 monitor.existentialSatisfied(existentialConcept,node);
                             break;
+                        default:
+                            break;
                         }
                     }
                     else if (existentialConcept instanceof ExistsDescriptionGraph) {

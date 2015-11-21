@@ -27,7 +27,7 @@ public class DateTimeInterval {
     protected final BoundType m_upperBoundType;
     
     public DateTimeInterval(IntervalType intervalType,long lowerBound,BoundType lowerBoundType,long upperBound,BoundType upperBoundType) {
-        assert !isIntervalEmpty(intervalType,lowerBound,lowerBoundType,upperBound,upperBoundType);
+        assert !isIntervalEmpty(lowerBound,lowerBoundType,upperBound,upperBoundType);
         m_intervalType=intervalType;
         m_lowerBound=lowerBound;
         m_lowerBoundType=lowerBoundType;
@@ -69,7 +69,7 @@ public class DateTimeInterval {
             newUpperBound=m_upperBound;
             newUpperBoundType=BoundType.getMoreRestrictive(m_upperBoundType,that.m_upperBoundType);
         }
-        if (isIntervalEmpty(m_intervalType,newLowerBound,newLowerBoundType,newUpperBound,newUpperBoundType))
+        if (isIntervalEmpty(newLowerBound,newLowerBoundType,newUpperBound,newUpperBoundType))
             return null;
         // The following lines ensure that we don't create a new interval object unless there is need to.
         if (isEqual(m_intervalType,newLowerBound,newLowerBoundType,newUpperBound,newUpperBoundType))
@@ -189,7 +189,7 @@ public class DateTimeInterval {
         else
             throw new IllegalStateException("The data range is infinite.");
     }
-    protected static boolean isIntervalEmpty(IntervalType intervalType,long lowerBound,BoundType lowerBoundType,long upperBound,BoundType upperBoundType) {
+    protected static boolean isIntervalEmpty(long lowerBound,BoundType lowerBoundType,long upperBound,BoundType upperBoundType) {
         return lowerBound>upperBound ||(lowerBound==upperBound && (lowerBoundType==BoundType.EXCLUSIVE || upperBoundType==BoundType.EXCLUSIVE));
     }
     @Override

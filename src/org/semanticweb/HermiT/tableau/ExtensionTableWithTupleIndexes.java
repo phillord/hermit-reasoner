@@ -218,6 +218,8 @@ public class ExtensionTableWithTupleIndexes extends ExtensionTable {
                 m_firstTupleIndex=0;
                 m_afterLastTupleIndex=m_afterDeltaNewTupleIndex;
                 break;
+            default:
+                break;
             }
             super.open();
             while (!afterLast()) {

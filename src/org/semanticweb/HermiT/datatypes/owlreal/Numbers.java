@@ -343,6 +343,8 @@ public class Numbers {
                 else
                     return leftover.intValue();
             }
+        case BIG_DECIMAL:
+        case BIG_RATIONAL:
         default:
             throw new IllegalArgumentException();
         }
@@ -365,6 +367,8 @@ public class Numbers {
             }
         case BIG_INTEGER:
             return ((BigInteger)integer).add(BigInteger.ONE);
+        case BIG_DECIMAL:
+        case BIG_RATIONAL:
         default:
             throw new IllegalArgumentException();
         }

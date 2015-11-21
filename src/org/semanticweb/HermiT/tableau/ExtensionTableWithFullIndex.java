@@ -198,6 +198,8 @@ public class ExtensionTableWithFullIndex extends ExtensionTable {
                 if (!(0<=m_currentTupleIndex && m_currentTupleIndex<m_afterDeltaNewTupleIndex))
                     m_currentTupleIndex=-1;
                 break;
+            default:
+                break;
             }
             if (m_currentTupleIndex!=-1) {
                 m_tupleTable.retrieveTuple(m_tupleBuffer,m_currentTupleIndex);

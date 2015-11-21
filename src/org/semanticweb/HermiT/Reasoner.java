@@ -561,6 +561,9 @@ public class Reasoner implements OWLReasoner {
             // return m_dataRoleHierarchy!=null; // used to find sub-propeties
         case SAME_INDIVIDUAL:
             return m_instanceManager!=null && m_instanceManager.sameAsIndividualsComputed();
+        case DATA_PROPERTY_ASSERTIONS:
+        case DIFFERENT_INDIVIDUALS:
+        case DISJOINT_CLASSES:
             // case DIFFERENT_INDIVIDUALS:
             // return false;
             // case DISJOINT_CLASSES:
@@ -647,7 +650,7 @@ public class Reasoner implements OWLReasoner {
                         break;
                     }
                     else
-                        completedSteps=m_instanceManager.initializeKnowAndPossiblePropertyInstances(tableau,m_configuration.reasonerProgressMonitor,startIndividualIndex,completedSteps,steps);
+                        completedSteps=m_instanceManager.initializeKnowAndPossiblePropertyInstances(m_configuration.reasonerProgressMonitor,startIndividualIndex,completedSteps,steps);
                     tableau.clearAdditionalDLOntology();
                     startIndividualIndex=m_instanceManager.getCurrentIndividualIndex();
                     additionalAxioms=m_instanceManager.getAxiomsForReadingOffCompexProperties(getDataFactory(),m_configuration.reasonerProgressMonitor,completedSteps,steps);
@@ -685,7 +688,7 @@ public class Reasoner implements OWLReasoner {
                 if (!isConsistent)
                     m_instanceManager.setInconsistent();
                 else
-                    m_instanceManager.initializeKnowAndPossibleClassInstances(tableau,m_configuration.reasonerProgressMonitor,completedSteps,steps);
+                    m_instanceManager.initializeKnowAndPossibleClassInstances(m_configuration.reasonerProgressMonitor,completedSteps,steps);
                 if (m_isConsistent==null)
                     m_isConsistent=isConsistent;
                 tableau.clearAdditionalDLOntology();

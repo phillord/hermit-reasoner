@@ -294,7 +294,7 @@ public class BlockingValidator {
                 return satisfiesDLClauseForBlockedXAnyZAndAnyY(dlClauseInfo,blockedX,parentOfBlockedXIndex,toMatchIndexXToY,toMatchIndexYToX+1);
         }
         else if ((toMatchIndexXToY+toMatchIndexYToX)==dlClauseInfo.m_yConstraints.length)
-            return satisfiesDLClauseForBlockedXAndMatchedNodes(dlClauseInfo,blockedX,parentOfBlockedXIndex);
+            return satisfiesDLClauseForBlockedXAndMatchedNodes(dlClauseInfo,blockedX);
         else {
             int xToYIncrement=0;
             int yToXIncrement=0;
@@ -334,7 +334,7 @@ public class BlockingValidator {
             return true;
         }
     }
-    protected boolean satisfiesDLClauseForBlockedXAndMatchedNodes(DLClauseInfo dlClauseInfo,Node blockedX,int parentOfBlockedXIndex) {
+    protected boolean satisfiesDLClauseForBlockedXAndMatchedNodes(DLClauseInfo dlClauseInfo,Node blockedX) {
         for (ConsequenceAtom consequenceAtom : dlClauseInfo.m_consequencesForBlockedX) {
             if (consequenceAtom.isSatisfied(m_extensionManager,dlClauseInfo,blockedX))
                 return true;
@@ -546,6 +546,7 @@ public class BlockingValidator {
         protected Variable[] m_zVariables;
 
 
+        @SuppressWarnings("null")
         public DLClauseInfo(DLClause dlClause,ExtensionManager extensionManager) {
             m_dlClause=dlClause;
             // TODO: We'll sort our variables by names. This introduces a dependency
@@ -900,6 +901,8 @@ public class BlockingValidator {
                     break;
                 case ZVAR:
                     m_assertionBuffer[argumentIndex+1]=dlClauseInfo.m_zNodes[m_argumentIndexes[argumentIndex]];
+                    break;
+                default:
                     break;
                 }
             }

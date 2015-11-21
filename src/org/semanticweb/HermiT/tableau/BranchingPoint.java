@@ -41,6 +41,11 @@ public class BranchingPoint implements Serializable {
     public int getLevel() {
         return m_level;
     }
+    /**
+     * @param tableau
+     * @param clashDepdendencySet
+     */
+    @SuppressWarnings("unused")
     public void startNextChoice(Tableau tableau,DependencySet clashDepdendencySet) {
     }
 }

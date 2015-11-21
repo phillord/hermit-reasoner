@@ -471,7 +471,7 @@ public class InstanceManager {
             return new OWLAxiom[0];
         }
     }
-    public void initializeKnowAndPossibleClassInstances(Tableau tableau, ReasonerProgressMonitor monitor, int completedSteps, int steps) {
+    public void initializeKnowAndPossibleClassInstances(ReasonerProgressMonitor monitor, int completedSteps, int steps) {
         if (!m_classesInitialised) {
             m_interruptFlag.startTask();
             try {
@@ -480,7 +480,7 @@ public class InstanceManager {
                     // nothing has been read-off yet
                     initializeSameAs();
                 }
-                completedSteps=readOffClassInstancesByIndividual(tableau, monitor, completedSteps, steps);
+                completedSteps=readOffClassInstancesByIndividual(monitor, completedSteps, steps);
                 if (!m_readingOffFoundPossibleConceptInstance && m_usesClassifiedConceptHierarchy)
                     m_realizationCompleted=true;
                 m_classesInitialised=true;
@@ -492,7 +492,7 @@ public class InstanceManager {
             }
         }
     }
-    protected int readOffClassInstancesByIndividual(Tableau tableau, ReasonerProgressMonitor monitor, int completedSteps, int steps) {
+    protected int readOffClassInstancesByIndividual(ReasonerProgressMonitor monitor, int completedSteps, int steps) {
         for (Individual ind : m_individuals) {
             Node nodeForIndividual=m_nodesForIndividuals.get(ind);
             // read of concept instances and normal role instances only once, we don't slice that
@@ -512,7 +512,7 @@ public class InstanceManager {
         }
         return completedSteps;
     }
-    public int initializeKnowAndPossiblePropertyInstances(Tableau tableau, ReasonerProgressMonitor monitor, int startIndividualIndex, int completedSteps, int steps) {
+    public int initializeKnowAndPossiblePropertyInstances(ReasonerProgressMonitor monitor, int startIndividualIndex, int completedSteps, int steps) {
         if (!m_propertiesInitialised) {
             m_interruptFlag.startTask();
             try {
@@ -520,7 +520,7 @@ public class InstanceManager {
                 if (!m_classesInitialised)
                     // nothing has been read-off yet
                     initializeSameAs();
-                completedSteps=readOffPropertyInstancesByIndividual(tableau,m_individualsForNodes, monitor, completedSteps, steps, startIndividualIndex);
+                completedSteps=readOffPropertyInstancesByIndividual(monitor, completedSteps, steps, startIndividualIndex);
                 if (m_currentIndividualIndex>=m_individuals.length-1) {
                     // we are done now with everything
                     if (!m_readingOffFoundPossiblePropertyInstance)
@@ -534,7 +534,7 @@ public class InstanceManager {
         }
         return completedSteps;
     }
-    protected int readOffPropertyInstancesByIndividual(Tableau tableau,Map<Node,Individual> individualsForNodes, ReasonerProgressMonitor monitor, int completedSteps, int steps, int startIndividualIndex) {
+    protected int readOffPropertyInstancesByIndividual(ReasonerProgressMonitor monitor, int completedSteps, int steps, int startIndividualIndex) {
         // first round we go over all individuals
         int endIndex=(startIndividualIndex==0) ? m_individuals.length : m_currentIndividualIndex;
         for (int index=startIndividualIndex;index<endIndex;index++) {
@@ -551,7 +551,7 @@ public class InstanceManager {
             }
             // read-off complex role instances only for the slice for which extra axioms have been added
             if (index<m_currentIndividualIndex)
-                completedSteps=readOffComplexRoleSuccessors(ind,nodeForIndividual, monitor, completedSteps, steps);
+                completedSteps=readOffComplexRoleSuccessors(ind, monitor, completedSteps, steps);
             m_interruptFlag.checkInterrupt();
         }
         return completedSteps;
@@ -702,7 +702,7 @@ public class InstanceManager {
             m_ternaryRetrieval1Bound.next();
         }
     }
-    protected int readOffComplexRoleSuccessors(Individual ind, Node nodeForIndividual, ReasonerProgressMonitor monitor, int completedSteps, int steps) {
+    protected int readOffComplexRoleSuccessors(Individual ind, ReasonerProgressMonitor monitor, int completedSteps, int steps) {
         String indIRI=ind.getIRI();
         AtomicConcept conceptForRole;
         for (AtomicRole atomicRole : m_complexRoles) {

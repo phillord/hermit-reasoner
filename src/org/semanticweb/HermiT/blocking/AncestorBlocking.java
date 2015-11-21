@@ -82,9 +82,6 @@ public class AncestorBlocking implements BlockingStrategy,Serializable {
             node=node.getNextTableauNode();
         }
     }
-    public boolean computeIsBlocked(Node node) {
-        throw new UnsupportedOperationException("Unsupported operation: Ancestor blocking cannot be used with a lazy expansion strategy. ");
-    }
     protected final void checkParentBlocking(Node node) {
         Node blocker=node.getParent();
         while (blocker!=null) {

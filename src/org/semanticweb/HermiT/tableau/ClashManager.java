@@ -68,7 +68,7 @@ public final class ClashManager implements Serializable {
         m_binaryUnionDependencySet.m_dependencySets[0]=null;
         m_binaryUnionDependencySet.m_dependencySets[1]=null;
     }
-    public void tupleAdded(ExtensionTable extensionTable,Object[] tuple,DependencySet dependencySet,boolean isCore) {
+    public void tupleAdded(ExtensionTable extensionTable,Object[] tuple,DependencySet dependencySet) {
         Object dlPredicateObject=tuple[0];
         Node node0=(Node)tuple[1];
         if (AtomicConcept.NOTHING.equals(dlPredicateObject) || NOT_RDFS_LITERAL.equals(dlPredicateObject) || (Inequality.INSTANCE.equals(dlPredicateObject) && tuple[1]==tuple[2])) {
