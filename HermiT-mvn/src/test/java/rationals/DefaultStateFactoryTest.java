@@ -39,6 +39,7 @@ package rationals;
  * @author nono
  * @version $Id: DefaultStateFactoryTest.java 2 2006-08-24 14:41:48Z oqube $
  */
+@SuppressWarnings("javadoc")
 public class DefaultStateFactoryTest extends StateFactoryTest {
 
     /**

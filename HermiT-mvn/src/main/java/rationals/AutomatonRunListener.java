@@ -42,7 +42,8 @@ import java.util.Set;
  * An interface to communicate run events.
  * <p>
  * This interface should be implemented by objects interested in being notified
- * of run events, that is the firing of transitions during a run of an automaton.
+ * of run events, that is the firing of transitions during a run of an
+ * automaton.
  * 
  * @author nono
  * @version $Id: AutomatonRunListener.java 2 2006-08-24 14:41:48Z oqube $
@@ -50,23 +51,24 @@ import java.util.Set;
 public interface AutomatonRunListener {
 
     /**
-     * Callback method for notification of fire events occuring during the 
-     * run of an automaton.
+     * Callback method for notification of fire events occuring during the run
+     * of an automaton.
      * 
-     * @param automatonutomaton where the event took place
-     * @param transitions the set of transitions which have been fired
-     * @param o the object effectively "read" for firing transitions 
+     * @param automaton
+     *            automaton where the event took place
+     * @param transitions
+     *            the set of transitions which have been fired
+     * @param o
+     *            the object effectively "read" for firing transitions
      */
-    public void fire(Automaton automaton,Set transitions,Object o);
+    public void fire(Automaton automaton, Set<Transition> transitions, Object o);
 
 }
 
-/* 
- * $Log: AutomatonRunListener.java,v $
- * Revision 1.2  2004/07/23 14:36:34  bailly
+/*
+ * $Log: AutomatonRunListener.java,v $ Revision 1.2 2004/07/23 14:36:34 bailly
  * ajout setTag
  *
- * Revision 1.1  2004/07/23 11:59:17  bailly
- * added listener interfaces
+ * Revision 1.1 2004/07/23 11:59:17 bailly added listener interfaces
  *
-*/
+ */

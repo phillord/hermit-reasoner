@@ -59,44 +59,34 @@ import rationals.Transition;
  */
 public class Projection implements UnaryTransformation {
 
-    private Set alphabet;
+    private Set<Object> alphabet;
 
-    public Projection(Set alphabet) {
+    public Projection(Set<Object> alphabet) {
         this.alphabet = alphabet;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see rationals.transformations.UnaryTransformation#transform(rationals.Automaton)
-     */
+    @Override
     public Automaton transform(Automaton a) {
         Automaton b = new Automaton();
-        Map smap = new HashMap();
-        Iterator it = a.delta().iterator();
+        Map<State, State> smap = new HashMap<>();
+        Iterator<Transition> it = a.delta().iterator();
         while (it.hasNext()) {
-            Transition tr = (Transition) it.next();
+            Transition tr = it.next();
             State os = tr.start();
             State oe = tr.end();
             Object l = tr.label();
             /* check states exist */
-            State ns = (State) smap.get(os);
-            State ne = (State) smap.get(oe);
+            State ns = smap.get(os);
+            State ne = smap.get(oe);
             if (ns == null)
                 smap.put(os, ns = b.addState(os.isInitial(), os.isTerminal()));
             if (ne == null)
                 smap.put(oe, ne = b.addState(oe.isInitial(), oe.isTerminal()));
             /* check label is in alphabet */
             if (alphabet.contains(l))
-                try {
-                    b.addTransition(new Transition(ns, l, ne));
-                } catch (NoSuchStateException e) {
-                }
+                    b.addTransition(new Transition(ns, l, ne),null);
             else
-                try {
-                    b.addTransition(new Transition(ns, null, ne));
-                } catch (NoSuchStateException e1) {
-                }
+                    b.addTransition(new Transition(ns, null, ne),null);
         }
         return b;
     }

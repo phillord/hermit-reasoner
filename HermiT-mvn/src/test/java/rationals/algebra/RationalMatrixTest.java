@@ -44,9 +44,9 @@ import rationals.converters.Expression;
  * @author nono
  * @version $Id: RationalMatrixTest.java 2 2006-08-24 14:41:48Z oqube $
  */
+@SuppressWarnings("javadoc")
 public class RationalMatrixTest extends TestCase {
 
-    
     /**
      * @param arg0
      */
@@ -54,16 +54,16 @@ public class RationalMatrixTest extends TestCase {
         super(arg0);
         // TODO Auto-generated constructor stub
     }
-    
+
     public void testCtor() throws ConverterException {
-       Automaton a = new Expression().fromString("a(b+a*)b*a");
-       RationalMatrix mat = new RationalMatrix(a);
-       System.err.println(mat);
+        Automaton a = new Expression().fromString("a(b+a*)b*a");
+        RationalMatrix mat = new RationalMatrix(a);
+        System.err.println(mat);
     }
-    
+
     public void testPower() throws ConverterException {
         Automaton a = new Expression().fromString("(ab+a)*b*");
         RationalMatrix mat = new RationalMatrix(a);
-        System.err.println(mat.nwords(3));   
+        System.err.println(mat.nwords(3));
     }
 }

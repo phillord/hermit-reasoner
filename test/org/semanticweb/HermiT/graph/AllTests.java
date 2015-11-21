@@ -6,7 +6,7 @@ import junit.framework.TestSuite;
 public class AllTests {
 
     public static Test suite() {
-        TestSuite suite=new TestSuite("Unit tests for the graph library");
+        TestSuite suite = new TestSuite("Unit tests for the graph library");
         // $JUnit-BEGIN$
         suite.addTestSuite(GraphTest.class);
         // $JUnit-END$

@@ -11,34 +11,34 @@ import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLHasKeyAxiom;
-
+@SuppressWarnings("javadoc")
 public class ClausificationTest extends AbstractStructuralTest {
     static {
-        System.setProperty("entityExpansionLimit",String.valueOf(Integer.MAX_VALUE));
+        System.setProperty("entityExpansionLimit", String.valueOf(Integer.MAX_VALUE));
     }
 
     public ClausificationTest(String name) {
         super(name);
     }
-    
+
     public void testBasic() throws Exception {
-        assertClausification("res/basic-input.xml","res/basic-control.txt");
+        assertClausification("res/basic-input.xml", "res/basic-control.txt");
     }
 
     public void testNominals1() throws Exception {
-        assertClausification("res/nominals-1-input.xml","res/nominals-1-control.txt");
+        assertClausification("res/nominals-1-input.xml", "res/nominals-1-control.txt");
     }
 
-   public void testNominals2() throws Exception {
-        assertClausification("res/nominals-2-input.xml","res/nominals-2-control.txt");
+    public void testNominals2() throws Exception {
+        assertClausification("res/nominals-2-input.xml", "res/nominals-2-control.txt");
     }
 
     public void testNominals3() throws Exception {
-        assertClausification("res/nominals-3-input.xml","res/nominals-3-control.txt");
+        assertClausification("res/nominals-3-input.xml", "res/nominals-3-control.txt");
     }
 
     public void testNominals4() throws Exception {
-        assertClausification("res/nominals-4-input.xml","res/nominals-4-control.txt");
+        assertClausification("res/nominals-4-input.xml", "res/nominals-4-control.txt");
     }
 
     public void testAsymmetry() throws Exception {
@@ -55,18 +55,20 @@ public class ClausificationTest extends AbstractStructuralTest {
     }
 
     public void testExistsSelf1() throws Exception {
-        assertClausification("res/has-self-1-input.owl","res/has-self-1-control.txt");
+        assertClausification("res/has-self-1-input.owl", "res/has-self-1-control.txt");
     }
 
     public void testExistsSelf2() throws Exception {
-        assertClausification("res/has-self-2-input.owl","res/has-self-2-control.txt");
+        assertClausification("res/has-self-2-input.owl", "res/has-self-2-control.txt");
     }
-    
-    public void testHasKeys() throws Exception {
-        OWLClausification clausifier=new OWLClausification(new Configuration());
-        OWLHasKeyAxiom key = m_dataFactory.getOWLHasKeyAxiom(m_dataFactory.getOWLClass(IRI.create("int:C_test")), m_dataFactory.getOWLObjectProperty(IRI.create("int:r_test")), m_dataFactory.getOWLDataProperty(IRI.create("int:dp_test")));
-        DLClause clause=clausifier.clausifyKey(key);
-        Set<String> bAtoms=new HashSet<String>();
+
+    public void testHasKeys() {
+        OWLClausification clausifier = new OWLClausification(new Configuration());
+        OWLHasKeyAxiom key = m_dataFactory.getOWLHasKeyAxiom(m_dataFactory.getOWLClass(IRI.create("int:C_test")),
+                m_dataFactory.getOWLObjectProperty(IRI.create("int:r_test")),
+                m_dataFactory.getOWLDataProperty(IRI.create("int:dp_test")));
+        DLClause clause = clausifier.clausifyKey(key);
+        Set<String> bAtoms = new HashSet<>();
         bAtoms.add("<internal:nam#Named>(X)");
         bAtoms.add("<internal:nam#Named>(X2)");
         bAtoms.add("<int:C_test>(X)");
@@ -76,46 +78,45 @@ public class ClausificationTest extends AbstractStructuralTest {
         bAtoms.add("<internal:nam#Named>(Y0)");
         bAtoms.add("<int:dp_test>(X,Y1)");
         bAtoms.add("<int:dp_test>(X2,Y2)");
-        assertTrue(bAtoms.size()==clause.getBodyLength());
-        for (int i=0;i<clause.getBodyLength();i++) {
+        assertTrue(bAtoms.size() == clause.getBodyLength());
+        for (int i = 0; i < clause.getBodyLength(); i++) {
             assertTrue(bAtoms.contains(clause.getBodyAtom(i).toString()));
         }
-        Set<String> hAtoms=new HashSet<String>();
+        Set<String> hAtoms = new HashSet<>();
         hAtoms.add("X == X2");
         hAtoms.add("Y1 != Y2");
-        assertTrue(hAtoms.size()==clause.getHeadLength());
-        for (int i=0;i<clause.getHeadLength();i++) {
+        assertTrue(hAtoms.size() == clause.getHeadLength());
+        for (int i = 0; i < clause.getHeadLength(); i++) {
             assertTrue(hAtoms.contains(clause.getHeadAtom(i).toString()));
         }
     }
 
     protected String[] getControl(String resource) throws Exception {
-        if (resource==null)
+        if (resource == null)
             return null;
-        List<String> control=new ArrayList<String>();
-        BufferedReader reader=new BufferedReader(new InputStreamReader(getClass().getResourceAsStream(resource)));
+        List<String> control = new ArrayList<>();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream(resource)));
         try {
-            String line=reader.readLine();
-            while (line!=null) {
+            String line = reader.readLine();
+            while (line != null) {
                 control.add(line);
-                line=reader.readLine();
+                line = reader.readLine();
             }
-        }
-        finally {
+        } finally {
             reader.close();
         }
-        String[] controlArray=new String[control.size()];
+        String[] controlArray = new String[control.size()];
         control.toArray(controlArray);
         return controlArray;
     }
 
-    protected void assertClausification(String ontologyResource,String controlResource) throws Exception {
+    protected void assertClausification(String ontologyResource, String controlResource) throws Exception {
         loadOntologyFromResource(ontologyResource);
         assertDLClauses(getControl(controlResource));
     }
 
-    protected void assertDLClauses(String[] control) throws Exception {
+    protected void assertDLClauses(String[] control) {
         List<String> actualStrings = getDLClauses();
-        assertContainsAll(this.getName(),actualStrings,control);
+        assertContainsAll(this.getName(), actualStrings, control);
     }
 }

@@ -57,26 +57,26 @@ public class OWLAxioms {
     public final Collection<DisjunctiveRule> m_rules;
 
     public OWLAxioms() {
-        m_classes=new HashSet<OWLClass>();
-        m_objectProperties=new HashSet<OWLObjectProperty>();
-        m_objectPropertiesOccurringInOWLAxioms=new HashSet<OWLObjectProperty>();
-        m_complexObjectPropertyExpressions=new HashSet<OWLObjectPropertyExpression>();
-        m_dataProperties=new HashSet<OWLDataProperty>();
-        m_namedIndividuals=new HashSet<OWLNamedIndividual>();
-        m_conceptInclusions=new ArrayList<OWLClassExpression[]>();
-        m_dataRangeInclusions=new ArrayList<OWLDataRange[]>();
-        m_simpleObjectPropertyInclusions=new ArrayList<OWLObjectPropertyExpression[]>();
-        m_complexObjectPropertyInclusions=new ArrayList<ComplexObjectPropertyInclusion>();
-        m_disjointObjectProperties=new ArrayList<OWLObjectPropertyExpression[]>();
-        m_reflexiveObjectProperties=new HashSet<OWLObjectPropertyExpression>();
-        m_irreflexiveObjectProperties=new HashSet<OWLObjectPropertyExpression>();
-        m_asymmetricObjectProperties=new HashSet<OWLObjectPropertyExpression>();
-        m_disjointDataProperties=new ArrayList<OWLDataPropertyExpression[]>();
-        m_dataPropertyInclusions=new ArrayList<OWLDataPropertyExpression[]>();
-        m_facts=new HashSet<OWLIndividualAxiom>();
-        m_hasKeys=new HashSet<OWLHasKeyAxiom>();
-        m_definedDatatypesIRIs=new HashSet<String>();
-        m_rules=new HashSet<DisjunctiveRule>();
+        m_classes=new HashSet<>();
+        m_objectProperties=new HashSet<>();
+        m_objectPropertiesOccurringInOWLAxioms=new HashSet<>();
+        m_complexObjectPropertyExpressions=new HashSet<>();
+        m_dataProperties=new HashSet<>();
+        m_namedIndividuals=new HashSet<>();
+        m_conceptInclusions=new ArrayList<>();
+        m_dataRangeInclusions=new ArrayList<>();
+        m_simpleObjectPropertyInclusions=new ArrayList<>();
+        m_complexObjectPropertyInclusions=new ArrayList<>();
+        m_disjointObjectProperties=new ArrayList<>();
+        m_reflexiveObjectProperties=new HashSet<>();
+        m_irreflexiveObjectProperties=new HashSet<>();
+        m_asymmetricObjectProperties=new HashSet<>();
+        m_disjointDataProperties=new ArrayList<>();
+        m_dataPropertyInclusions=new ArrayList<>();
+        m_facts=new HashSet<>();
+        m_hasKeys=new HashSet<>();
+        m_definedDatatypesIRIs=new HashSet<>();
+        m_rules=new HashSet<>();
     }
 
     public static class ComplexObjectPropertyInclusion {
@@ -101,6 +101,7 @@ public class OWLAxioms {
             m_body=body;
             m_head=head;
         }
+        @Override
         public String toString() {
             StringBuffer buffer=new StringBuffer();
             boolean first=true;

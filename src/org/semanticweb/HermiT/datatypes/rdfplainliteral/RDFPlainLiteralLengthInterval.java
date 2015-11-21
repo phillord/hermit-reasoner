@@ -21,7 +21,7 @@ import java.util.Collection;
 
 public class RDFPlainLiteralLengthInterval {
     public static final int CHARACTER_COUNT=1112033;
-    public static enum LanguageTagMode { PRESENT,ABSENT };
+    public static enum LanguageTagMode { PRESENT,ABSENT }
     
     protected final LanguageTagMode m_languageTagMode;
     protected final int m_minLength;
@@ -71,7 +71,7 @@ public class RDFPlainLiteralLengthInterval {
             long valuesOfLength=1L;
             long total=1L;
             for (int i=1;i<=length;i++) {
-                valuesOfLength*=(long)CHARACTER_COUNT;
+                valuesOfLength*=CHARACTER_COUNT;
                 total+=valuesOfLength;
             }
             return total;
@@ -113,6 +113,7 @@ public class RDFPlainLiteralLengthInterval {
                 }
         }
     }
+    @Override
     public String toString() {
         StringBuffer buffer=new StringBuffer();
         buffer.append('[');

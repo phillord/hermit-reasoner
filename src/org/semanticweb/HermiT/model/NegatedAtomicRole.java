@@ -32,6 +32,7 @@ public class NegatedAtomicRole {
     public AtomicRole getNegatedAtomicRole() {
         return m_negatedAtomicRole;
     }
+    @Override
     public String toString() {
         return toString(Prefixes.STANDARD_PREFIXES);
     }
@@ -43,9 +44,11 @@ public class NegatedAtomicRole {
     }
 
     protected static InterningManager<NegatedAtomicRole> s_interningManager=new InterningManager<NegatedAtomicRole>() {
+        @Override
         protected boolean equal(NegatedAtomicRole object1,NegatedAtomicRole object2) {
             return object1.m_negatedAtomicRole==object2.m_negatedAtomicRole;
         }
+        @Override
         protected int getHashCode(NegatedAtomicRole object) {
             return -object.m_negatedAtomicRole.hashCode();
         }

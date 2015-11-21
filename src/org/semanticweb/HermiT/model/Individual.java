@@ -36,20 +36,24 @@ public class Individual extends Term {
     public boolean isAnonymous() {
         return m_uri.startsWith("internal:anonymous#");
     }
+    @Override
     public String toString() {
         return toString(Prefixes.STANDARD_PREFIXES);
     }
     protected Object readResolve() {
         return s_interningManager.intern(this);
     }
+    @Override
     public String toString(Prefixes prefixes) {
         return prefixes.abbreviateIRI(m_uri);
     }
 
     protected static InterningManager<Individual> s_interningManager=new InterningManager<Individual>() {
+        @Override
         protected boolean equal(Individual object1,Individual object2) {
             return object1.m_uri.equals(object2.m_uri);
         }
+        @Override
         protected int getHashCode(Individual object) {
             return object.m_uri.hashCode();
         }

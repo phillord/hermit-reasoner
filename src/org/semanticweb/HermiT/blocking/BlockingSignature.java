@@ -32,6 +32,8 @@ public abstract class BlockingSignature {
         m_nextEntry=nextEntry;
     }
     public abstract boolean blocksNode(Node node);
+    @Override
     public abstract int hashCode();
+    @Override
     public abstract boolean equals(Object that);
 }

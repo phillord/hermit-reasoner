@@ -54,11 +54,12 @@ public class DerivationHistory extends TableauMonitorAdapter {
     protected final Stack<Atom> m_mergeAtoms;
 
     public DerivationHistory() {
-        m_derivedAtoms=new HashMap<AtomKey,Atom>();
-        m_derivedDisjunctions=new HashMap<GroundDisjunction,Disjunction>();
-        m_derivations=new Stack<Derivation>();
-        m_mergeAtoms=new Stack<Atom>();
+        m_derivedAtoms=new HashMap<>();
+        m_derivedDisjunctions=new HashMap<>();
+        m_derivations=new Stack<>();
+        m_mergeAtoms=new Stack<>();
     }
+    @Override
     public void tableauCleared() {
         m_derivedAtoms.clear();
         m_derivedDisjunctions.clear();
@@ -66,6 +67,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
         m_derivations.push(BaseFact.INSTANCE);
         m_mergeAtoms.clear();
     }
+    @Override
     public void dlClauseMatchedStarted(DLClauseEvaluator dlClauseEvaluator,int dlClauseIndex) {
         int regularBodyAtomsNumber=0;
         for (int index=0;index<dlClauseEvaluator.getBodyLength();index++) {
@@ -85,77 +87,97 @@ public class DerivationHistory extends TableauMonitorAdapter {
     public void dlClauseMatchedFinished(DLClauseEvaluator dlClauseEvaluator) {
         m_derivations.pop();
     }
+    @Override
     public void addFactFinished(Object[] tuple,boolean isCore,boolean factAdded) {
         if (factAdded)
             addAtom(tuple);
     }
+    @Override
     public void mergeStarted(Node nodeFrom,Node nodeInto) {
         Atom equalityAtom=addAtom(new Object[] { Equality.INSTANCE,nodeFrom,nodeInto });
         m_mergeAtoms.add(equalityAtom);
     }
+    @Override
     public void mergeFactStarted(Node mergeFrom,Node mergeInto,Object[] sourceTuple,Object[] targetTuple) {
         m_derivations.push(new Merging(m_mergeAtoms.peek(),getAtom(sourceTuple)));
     }
+    @Override
     public void mergeFactFinished(Node mergeFrom,Node mergeInto,Object[] sourceTuple,Object[] targetTuple) {
         m_derivations.pop();
     }
+    @Override
     public void mergeFinished(Node nodeFrom,Node nodeInto) {
         m_mergeAtoms.pop();
     }
+    @Override
     public void clashDetectionStarted(Object[]... tuples) {
         Atom[] atoms=new Atom[tuples.length];
         for (int index=0;index<tuples.length;index++)
             atoms[index]=getAtom(tuples[index]);
         m_derivations.push(new ClashDetection(atoms));
     }
+    @Override
     public void clashDetectionFinished(Object[]... tuples) {
         m_derivations.pop();
     }
+    @Override
     public void clashDetected() {
         addAtom(EMPTY_TUPLE);
     }
+    @Override
     public void tupleRemoved(Object[] tuple) {
         m_derivedAtoms.remove(new AtomKey(tuple));
     }
+    @Override
     public void backtrackToFinished(BranchingPoint newCurrentBrancingPoint) {
         m_derivedAtoms.remove(new AtomKey(EMPTY_TUPLE));
     }
+    @Override
     public void groundDisjunctionDerived(GroundDisjunction groundDisjunction) {
         Disjunction disjunction=new Disjunction(groundDisjunction,m_derivations.peek());
         m_derivedDisjunctions.put(groundDisjunction,disjunction);
     }
+    @Override
     public void disjunctProcessingStarted(GroundDisjunction groundDisjunction,int disjunct) {
         Disjunction disjunction=getDisjunction(groundDisjunction);
         m_derivations.push(new DisjunctApplication(disjunction,disjunct));
     }
+    @Override
     public void disjunctProcessingFinished(GroundDisjunction groundDisjunction,int disjunct) {
         m_derivations.pop();
     }
+    @Override
     public void existentialExpansionStarted(ExistentialConcept existentialConcept,Node forNode) {
         Atom existentialAtom=getAtom(new Object[] { existentialConcept,forNode });
         m_derivations.push(new ExistentialExpansion(existentialAtom));
     }
+    @Override
     public void existentialExpansionFinished(ExistentialConcept existentialConcept,Node forNode) {
         m_derivations.pop();
     }
+    @Override
     public void descriptionGraphCheckingStarted(int graphIndex1,int tupleIndex1,int position1,int graphIndex2,int tupleIndex2,int position2) {
         Atom graph1=getAtom(m_tableau.getDescriptionGraphManager().getDescriptionGraphTuple(graphIndex1,tupleIndex1));
         Atom graph2=getAtom(m_tableau.getDescriptionGraphManager().getDescriptionGraphTuple(graphIndex2,tupleIndex2));
         m_derivations.push(new GraphChecking(graph1,position1,graph2,position2));
     }
+    @Override
     public void descriptionGraphCheckingFinished(int graphIndex1,int tupleIndex1,int position1,int graphIndex2,int tupleIndex2,int position2) {
         m_derivations.pop();
     }
+    @Override
     public void unknownDatatypeRestrictionDetectionStarted(DataRange dataRange1,Node node1,DataRange dataRange2,Node node2) {
         Atom atom1=getAtom(new Object[] { dataRange1,node1 });
         Atom atom2=getAtom(new Object[] { dataRange2,node2 });
         m_derivations.push(new UnknownDatatypeRestrictionDetection(new Atom[] { atom1,atom2 }));
     }
+    @Override
     public void unknownDatatypeRestrictionDetectionFinished(DataRange dataRange1,Node node1, DataRange dataRange2,Node node2) {
         m_derivations.pop();
     }
+    @Override
     public void datatypeConjunctionCheckingStarted(DatatypeManager.DConjunction conjunction) {
-        List<Atom> atoms=new ArrayList<Atom>();
+        List<Atom> atoms=new ArrayList<>();
         for (DatatypeManager.DVariable variable : conjunction.getActiveVariables()) {
             Node node=variable.getNode();
             for (DatatypeRestriction datatypeRestriction : variable.getPositiveDatatypeRestrictions())
@@ -173,6 +195,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
         atoms.toArray(atomsArray);
         m_derivations.push(new DatatypeChecking(atomsArray));
     }
+    @Override
     public void datatypeConjunctionCheckingFinished(DatatypeManager.DConjunction conjunction,boolean result) {
         m_derivations.pop();
     }
@@ -202,9 +225,11 @@ public class DerivationHistory extends TableauMonitorAdapter {
                 hashCode+=tuple[index].hashCode();
             m_hashCode=hashCode;
         }
+        @Override
         public int hashCode() {
             return m_hashCode;
         }
+        @Override
         public boolean equals(Object that) {
             if (this==that)
                 return true;
@@ -244,9 +269,11 @@ public class DerivationHistory extends TableauMonitorAdapter {
         public Node getArgument(int index) {
             return (Node)m_tuple[index+1];
         }
+        @Override
         public Derivation getDerivation() {
             return m_derivedBy;
         }
+        @Override
         public String toString(Prefixes prefixes) {
             if (m_tuple.length==0)
                 return "[ ]";
@@ -278,6 +305,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
                 return buffer.toString();
             }
         }
+        @Override
         public String toString() {
             return toString(Prefixes.STANDARD_PREFIXES);
         }
@@ -310,9 +338,11 @@ public class DerivationHistory extends TableauMonitorAdapter {
         public Node getArgument(int disjunctIndex,int argumentIndex) {
             return (Node)m_atoms[disjunctIndex][argumentIndex+1];
         }
+        @Override
         public Derivation getDerivation() {
             return m_derivedBy;
         }
+        @Override
         public String toString(Prefixes prefixes) {
             StringBuffer buffer=new StringBuffer();
             for (int disjunctIndex=0;disjunctIndex<m_atoms.length;disjunctIndex++) {
@@ -335,6 +365,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
             }
             return buffer.toString();
         }
+        @Override
         public String toString() {
             return toString(Prefixes.STANDARD_PREFIXES);
         }
@@ -343,6 +374,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
     @SuppressWarnings("serial")
     public abstract static class Derivation implements Serializable {
         public abstract String toString(Prefixes prefixes);
+        @Override
         public String toString() {
             return toString(Prefixes.STANDARD_PREFIXES);
         }
@@ -363,12 +395,15 @@ public class DerivationHistory extends TableauMonitorAdapter {
         public DLClause getDLClause() {
             return m_dlClause;
         }
+        @Override
         public int getNumberOfPremises() {
             return m_premises.length;
         }
+        @Override
         public Fact getPremise(int premiseIndex) {
             return m_premises[premiseIndex];
         }
+        @Override
         public String toString(Prefixes prefixes) {
             return "  <--  "+m_dlClause.toString(prefixes);
         }
@@ -387,9 +422,11 @@ public class DerivationHistory extends TableauMonitorAdapter {
         public int getDisjunctIndex() {
             return m_disjunctIndex;
         }
+        @Override
         public int getNumberOfPremises() {
             return 1;
         }
+        @Override
         public Fact getPremise(int premiseIndex) {
             switch (premiseIndex) {
             case 0:
@@ -398,6 +435,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
                 throw new IndexOutOfBoundsException();
             }
         }
+        @Override
         public String toString(Prefixes prefixes) {
             return "  |  "+String.valueOf(m_disjunctIndex);
         }
@@ -413,9 +451,11 @@ public class DerivationHistory extends TableauMonitorAdapter {
             m_equality=equality;
             m_fromAtom=fromAtom;
         }
+        @Override
         public int getNumberOfPremises() {
             return 2;
         }
+        @Override
         public Fact getPremise(int premiseIndex) {
             switch (premiseIndex) {
             case 0:
@@ -426,6 +466,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
                 throw new IndexOutOfBoundsException();
             }
         }
+        @Override
         public String toString(Prefixes prefixes) {
             return "   <--|";
         }
@@ -445,9 +486,11 @@ public class DerivationHistory extends TableauMonitorAdapter {
             m_graph2=graph2;
             m_position2=position2;
         }
+        @Override
         public int getNumberOfPremises() {
             return 2;
         }
+        @Override
         public Fact getPremise(int premiseIndex) {
             switch (premiseIndex) {
             case 0:
@@ -458,6 +501,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
                 throw new IndexOutOfBoundsException();
             }
         }
+        @Override
         public String toString(Prefixes prefixes) {
             return "   << DGRAPHS | "+m_position1+" and "+m_position2;
         }
@@ -471,9 +515,11 @@ public class DerivationHistory extends TableauMonitorAdapter {
         public ExistentialExpansion(Atom existentialAtom) {
             m_existentialAtom=existentialAtom;
         }
+        @Override
         public int getNumberOfPremises() {
             return 1;
         }
+        @Override
         public Fact getPremise(int premiseIndex) {
             switch (premiseIndex) {
             case 0:
@@ -482,6 +528,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
                 throw new IndexOutOfBoundsException();
             }
         }
+        @Override
         public String toString(Prefixes prefixes) {
             return " <<  EXISTS";
         }
@@ -494,12 +541,15 @@ public class DerivationHistory extends TableauMonitorAdapter {
         public ClashDetection(Atom[] causes) {
             m_causes=causes;
         }
+        @Override
         public int getNumberOfPremises() {
             return m_causes.length;
         }
+        @Override
         public Fact getPremise(int premiseIndex) {
             return m_causes[premiseIndex];
         }
+        @Override
         public String toString(Prefixes prefixes) {
             return "   << CLASH";
         }
@@ -512,12 +562,15 @@ public class DerivationHistory extends TableauMonitorAdapter {
         public DatatypeChecking(Atom[] causes) {
             m_causes=causes;
         }
+        @Override
         public int getNumberOfPremises() {
             return m_causes.length;
         }
+        @Override
         public Fact getPremise(int premiseIndex) {
             return m_causes[premiseIndex];
         }
+        @Override
         public String toString(Prefixes prefixes) {
             return "   << DATATYPES";
         }
@@ -530,12 +583,15 @@ public class DerivationHistory extends TableauMonitorAdapter {
         public UnknownDatatypeRestrictionDetection(Atom[] causes) {
             m_causes=causes;
         }
+        @Override
         public int getNumberOfPremises() {
             return m_causes.length;
         }
+        @Override
         public Fact getPremise(int premiseIndex) {
             return m_causes[premiseIndex];
         }
+        @Override
         public String toString(Prefixes prefixes) {
             return "   << UNKNOWN DATATYPE";
         }
@@ -546,12 +602,15 @@ public class DerivationHistory extends TableauMonitorAdapter {
 
         public static Derivation INSTANCE=new BaseFact();
 
+        @Override
         public int getNumberOfPremises() {
             return 0;
         }
+        @Override
         public Fact getPremise(int premiseIndex) {
             throw new IndexOutOfBoundsException();
         }
+        @Override
         public String toString(Prefixes prefixes) {
             return ".";
         }

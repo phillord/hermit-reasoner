@@ -205,6 +205,7 @@ public final class NominalIntroductionManager implements Serializable {
             m_annotatedEquality=annotatedEquality;
             m_currentRootNode=1; // This reflects the assumption that the first merge is performed from the NominalIntroductionManager
         }
+        @Override
         public void startNextChoice(Tableau tableau,DependencySet clashDepdendencySet) {
             m_currentRootNode++;
             assert m_currentRootNode<=m_annotatedEquality.getCaridnality();

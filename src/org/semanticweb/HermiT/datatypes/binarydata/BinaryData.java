@@ -57,6 +57,7 @@ public class BinaryData {
     public byte getByte(int index) {
         return m_data[index];
     }
+    @Override
     public boolean equals(Object that) {
         if (this==that)
             return true;
@@ -70,9 +71,11 @@ public class BinaryData {
                 return false;
         return true;
     }
+    @Override
     public int hashCode() {
         return m_hashCode;
     }
+    @Override
     public String toString() {
         switch (m_binaryDataType) {
         case HEX_BINARY:

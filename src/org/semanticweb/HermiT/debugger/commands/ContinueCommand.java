@@ -26,16 +26,20 @@ public class ContinueCommand extends AbstractCommand {
     public ContinueCommand(Debugger debugger) {
         super(debugger);
     }
+    @Override
     public String getCommandName() {
         return "c";
     }
+    @Override
     public String[] getDescription() {
         return new String[] { "","continues with the current reasoning tasks" };
     }
+    @Override
     public void printHelp(PrintWriter writer) {
         writer.println("usage: c");
         writer.println("    Continues with the current reasoning tasks.");
     }
+    @Override
     public void execute(String[] args) {
           m_debugger.setInMainLoop(false);
     }

@@ -37,7 +37,7 @@ import org.semanticweb.HermiT.model.DatatypeRestriction;
  * A registry for all available datatype handlers.
  */
 public class DatatypeRegistry {
-    protected static final Map<String,DatatypeHandler> s_handlersByDatatypeURI=new HashMap<String,DatatypeHandler>();
+    protected static final Map<String,DatatypeHandler> s_handlersByDatatypeURI=new HashMap<>();
     static {
         registerDatatypeHandler(new AnonymousConstantsDatatypeHandler());
         registerDatatypeHandler(new BooleanDatatypeHandler());
@@ -128,28 +128,36 @@ public class DatatypeRegistry {
         protected static final String ANONYMOUS_CONSTANTS="internal:anonymous-constants";
         protected final static Set<String> s_managedDatatypeURIs=Collections.singleton(ANONYMOUS_CONSTANTS);
 
+        @Override
         public Set<String> getManagedDatatypeURIs() {
             return s_managedDatatypeURIs;
         }
+        @Override
         public Object parseLiteral(String lexicalForm,String datatypeURI) throws MalformedLiteralException {
             assert ANONYMOUS_CONSTANTS.equals(datatypeURI);
             return new AnonymousConstantValue(lexicalForm.trim());
         }
+        @Override
         public void validateDatatypeRestriction(DatatypeRestriction datatypeRestriction) throws UnsupportedFacetException {
             throw new IllegalStateException("Internal error: anonymous constants datatype should not occur in datatype restrictions.");
         }
+        @Override
         public ValueSpaceSubset createValueSpaceSubset(DatatypeRestriction datatypeRestriction) {
             throw new IllegalStateException("Internal error: anonymous constants datatype should not occur in datatype restrictions.");
         }
+        @Override
         public ValueSpaceSubset conjoinWithDR(ValueSpaceSubset valueSpaceSubset,DatatypeRestriction datatypeRestriction) {
             throw new IllegalStateException("Internal error: anonymous constants datatype should not occur in datatype restrictions.");
         }
+        @Override
         public ValueSpaceSubset conjoinWithDRNegation(ValueSpaceSubset valueSpaceSubset,DatatypeRestriction datatypeRestriction) {
             throw new IllegalStateException("Internal error: anonymous constants datatype should not occur in datatype restrictions.");
         }
+        @Override
         public boolean isSubsetOf(String subsetDatatypeURI,String supersetDatatypeURI) {
             throw new IllegalStateException("Internal error: anonymous constants datatype should not occur in datatype restrictions.");
         }
+        @Override
         public boolean isDisjointWith(String datatypeURI1,String datatypeURI2) {
             throw new IllegalStateException("Internal error: anonymous constants datatype should not occur in datatype restrictions.");
         }
@@ -164,9 +172,11 @@ public class DatatypeRegistry {
         public String getName() {
             return m_name;
         }
+        @Override
         public int hashCode() {
             return m_name.hashCode();
         }
+        @Override
         public boolean equals(Object that) {
             if (this==that)
                 return true;

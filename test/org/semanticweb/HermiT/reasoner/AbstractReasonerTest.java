@@ -35,17 +35,18 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
         super(name);
     }
 
+    @Override
     protected void tearDown() {
         super.tearDown();
-        m_reasoner=null;
-        m_dataFactory=null;
-        m_ontology=null;
-        m_ontologyManager=null;
+        m_reasoner = null;
+        m_dataFactory = null;
+        m_ontology = null;
+        m_ontologyManager = null;
     }
 
     protected void loadReasonerFromResource(String resourceName) throws Exception {
-        IRI physicalIRI=IRI.create(getClass().getResource(resourceName).toURI());
-        m_ontology=m_ontologyManager.loadOntologyFromOntologyDocument(physicalIRI);
+        IRI physicalIRI = IRI.create(getClass().getResource(resourceName).toURI());
+        m_ontology = m_ontologyManager.loadOntologyFromOntologyDocument(physicalIRI);
         createReasoner();
     }
 
@@ -53,18 +54,22 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
         loadOntologyWithAxioms(axioms);
         createReasoner();
     }
+
     protected void createReasoner() {
-        createReasoner(getConfiguration(),null);
+        createReasoner(getConfiguration(), null);
     }
-    protected void createReasoner(Configuration configuration,Set<DescriptionGraph> descriptionGraphs) {
-        if (descriptionGraphs==null)
-            descriptionGraphs=Collections.emptySet();
-        m_reasoner=new Reasoner(configuration,m_ontology,descriptionGraphs);
+
+    protected void createReasoner(Configuration configuration, Set<DescriptionGraph> descriptionGraphs) {
+        if (descriptionGraphs == null)
+            descriptionGraphs = Collections.emptySet();
+        m_reasoner = new Reasoner(configuration, m_ontology, descriptionGraphs);
     }
+
     protected void createOWLReasoner(Configuration c) {
-        OWLReasonerFactory factory=new ReasonerFactory();
-        m_reasoner=(Reasoner)factory.createReasoner(m_ontology,c);
+        OWLReasonerFactory factory = new ReasonerFactory();
+        m_reasoner = (Reasoner) factory.createReasoner(m_ontology, c);
     }
+
     protected void createOWLReasoner() {
         createOWLReasoner(getConfiguration());
     }
@@ -73,15 +78,17 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
      * Returns the class and the property hierarchies as text.
      */
     protected String getHierarchiesAsText() {
-        CharArrayWriter buffer=new CharArrayWriter();
-        PrintWriter output=new PrintWriter(buffer);
-        m_reasoner.printHierarchies(output,true,true,true);
+        CharArrayWriter buffer = new CharArrayWriter();
+        PrintWriter output = new PrintWriter(buffer);
+        m_reasoner.printHierarchies(output, true, true, true);
         output.flush();
         return buffer.toString();
     }
 
     /**
-     * Loads the ontology from ontologyResource and the string in controlResource and compares the computed taxonomy for the ontology with the one in the controlResource by comparing the sorted ancestor list.
+     * Loads the ontology from ontologyResource and the string in
+     * controlResource and compares the computed taxonomy for the ontology with
+     * the one in the controlResource by comparing the sorted ancestor list.
      *
      * @param ontologyResource
      *            the ontology
@@ -89,269 +96,281 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
      *            the expected taxonomy (sorted ancestor list)
      */
     protected void assertHierarchies(String controlResource) throws Exception {
-        String taxonomy=getHierarchiesAsText();
-        String controlString=getResourceText(controlResource);
-        assertEquals(controlString,taxonomy);
+        String taxonomy = getHierarchiesAsText();
+        String controlString = getResourceText(controlResource);
+        assertEquals(controlString, taxonomy);
     }
 
     /**
-     * Tests whether the loaded ontology is consistent or not and asserts that this coincides with the given parameter satisfiable.
+     * Tests whether the loaded ontology is consistent or not and asserts that
+     * this coincides with the given parameter satisfiable.
      *
      * @param satisfiable
      *            if the currently loaded ontology is expected to be satisfiable
      */
     protected void assertABoxSatisfiable(boolean satisfiable) {
-        assertEquals(satisfiable,m_reasoner.isConsistent());
+        assertEquals(satisfiable, m_reasoner.isConsistent());
     }
 
     /**
-     * Tests whether the atomic concept subAtomicConcept is subsumed by the atomic concept superAtomicConcept and asserts that this coincides with the expected result.
+     * Tests whether the atomic concept subAtomicConcept is subsumed by the
+     * atomic concept superAtomicConcept and asserts that this coincides with
+     * the expected result.
      *
      * @param subAtomicConcept
-     *            a string that represents an atomic concept. If no prefix is given, NS is used as prefix
+     *            a string that represents an atomic concept. If no prefix is
+     *            given, NS is used as prefix
      * @param superAtomicConcept
-     *            a string that represents an atomic concept. If no prefix is given, NS is used as prefix
+     *            a string that represents an atomic concept. If no prefix is
+     *            given, NS is used as prefix
      * @param expectedResult
      */
-    protected void assertSubsumedBy(String subAtomicConcept,String superAtomicConcept,boolean expectedResult) {
+    protected void assertSubsumedBy(String subAtomicConcept, String superAtomicConcept, boolean expectedResult) {
         if (!subAtomicConcept.contains("#"))
-            subAtomicConcept=NS+subAtomicConcept;
+            subAtomicConcept = NS + subAtomicConcept;
         if (!superAtomicConcept.contains("#"))
-            superAtomicConcept=NS+superAtomicConcept;
-        OWLClass subClass=m_dataFactory.getOWLClass(IRI.create(subAtomicConcept));
-        OWLClass superClass=m_dataFactory.getOWLClass(IRI.create(superAtomicConcept));
-        boolean result=m_reasoner.isEntailed(m_dataFactory.getOWLSubClassOfAxiom(subClass, superClass));
-        assertEquals(expectedResult,result);
+            superAtomicConcept = NS + superAtomicConcept;
+        OWLClass subClass = m_dataFactory.getOWLClass(IRI.create(subAtomicConcept));
+        OWLClass superClass = m_dataFactory.getOWLClass(IRI.create(superAtomicConcept));
+        boolean result = m_reasoner.isEntailed(m_dataFactory.getOWLSubClassOfAxiom(subClass, superClass));
+        assertEquals(expectedResult, result);
     }
 
     /**
-     * Tests whether the possibly complex concept subConcept is subsumed by the possibly complex concept superConcept and asserts that this coincides with the expected result.
+     * Tests whether the possibly complex concept subConcept is subsumed by the
+     * possibly complex concept superConcept and asserts that this coincides
+     * with the expected result.
      */
-    protected void assertSubsumedBy(OWLClassExpression subClass,OWLClassExpression superClass,boolean expectedResult) {
-        boolean result=m_reasoner.isEntailed(m_dataFactory.getOWLSubClassOfAxiom(subClass, superClass));
-        assertEquals(expectedResult,result);
+    protected void assertSubsumedBy(OWLClassExpression subClass, OWLClassExpression superClass,
+            boolean expectedResult) {
+        boolean result = m_reasoner.isEntailed(m_dataFactory.getOWLSubClassOfAxiom(subClass, superClass));
+        assertEquals(expectedResult, result);
     }
 
     /**
-     * Tests whether the atomic concept atomicConcept is satisfiable and asserts that this coincides with the expected result (satisfiable).
+     * Tests whether the atomic concept atomicConcept is satisfiable and asserts
+     * that this coincides with the expected result (satisfiable).
      */
-    protected void assertSatisfiable(String atomicConcept,boolean expectedResult) {
+    protected void assertSatisfiable(String atomicConcept, boolean expectedResult) {
         if (!atomicConcept.contains("#"))
-            atomicConcept=NS+atomicConcept;
-        OWLClass clazz=m_dataFactory.getOWLClass(IRI.create(atomicConcept));
-        boolean result=m_reasoner.isSatisfiable(clazz);
-        assertEquals(expectedResult,result);
+            atomicConcept = NS + atomicConcept;
+        OWLClass clazz = m_dataFactory.getOWLClass(IRI.create(atomicConcept));
+        boolean result = m_reasoner.isSatisfiable(clazz);
+        assertEquals(expectedResult, result);
     }
 
     /**
-     * Tests whether the given possibly complex concept is satisfiable and asserts that this coincides with the expected result (satisfiable).
+     * Tests whether the given possibly complex concept is satisfiable and
+     * asserts that this coincides with the expected result (satisfiable).
      */
-    protected void assertSatisfiable(OWLClassExpression concept,boolean satisfiable) throws Exception {
-        assertEquals(satisfiable,m_reasoner.isSatisfiable(concept));
+    protected void assertSatisfiable(OWLClassExpression concept, boolean satisfiable) {
+        assertEquals(satisfiable, m_reasoner.isSatisfiable(concept));
     }
 
     /**
-     * Tests whether the given individual is an instance of the given concept and asserts that this coincides with the expected result.
+     * Tests whether the given individual is an instance of the given concept
+     * and asserts that this coincides with the expected result.
      */
-    protected void assertInstanceOf(OWLClassExpression concept,OWLNamedIndividual individual,boolean expectedResult) {
-        boolean result=m_reasoner.hasType(individual,concept,false);
-        assertEquals(expectedResult,result);
+    protected void assertInstanceOf(OWLClassExpression concept, OWLNamedIndividual individual, boolean expectedResult) {
+        boolean result = m_reasoner.hasType(individual, concept, false);
+        assertEquals(expectedResult, result);
     }
 
     /**
      * Tests whether the given concept has the specified individuals.
      */
-    protected void assertInstancesOf(OWLClassExpression concept,boolean direct,String... expectedIndividuals) {
-        NodeSet<OWLNamedIndividual> actual=m_reasoner.getInstances(concept,direct);
-        Set<String> actualIndividualIRIs=new HashSet<String>();
+    protected void assertInstancesOf(OWLClassExpression concept, boolean direct, String... expectedIndividuals) {
+        NodeSet<OWLNamedIndividual> actual = m_reasoner.getInstances(concept, direct);
+        Set<String> actualIndividualIRIs = new HashSet<>();
         for (OWLIndividual individual : actual.getFlattened()) {
             if (!individual.isAnonymous())
                 actualIndividualIRIs.add(individual.asOWLNamedIndividual().getIRI().toString());
         }
-        String[] expectedModified=expectedIndividuals.clone();
-        assertContainsAll(actualIndividualIRIs,expectedModified);
+        String[] expectedModified = expectedIndividuals.clone();
+        assertContainsAll(actualIndividualIRIs, expectedModified);
     }
 
     /**
      * Checks the direct superproperties of some object property.
      */
     @SuppressWarnings("all")
-    protected void assertDirectSuperObjectProperties(String objectProperty,Set<String>... control) {
+    protected void assertDirectSuperObjectProperties(String objectProperty, Set<String>... control) {
         if (!objectProperty.contains("#"))
-            objectProperty=NS+objectProperty;
-        OWLObjectPropertyExpression ope=m_dataFactory.getOWLObjectProperty(IRI.create(objectProperty));
-        Set<Set<String>> actual=nodeSetOfOPEsToStrings(m_reasoner.getSuperObjectProperties(ope,true));
-        assertContainsAll(actual,control);
+            objectProperty = NS + objectProperty;
+        OWLObjectPropertyExpression ope = m_dataFactory.getOWLObjectProperty(IRI.create(objectProperty));
+        Set<Set<String>> actual = nodeSetOfOPEsToStrings(m_reasoner.getSuperObjectProperties(ope, true));
+        assertContainsAll(actual, control);
     }
 
     /**
      * Checks the direct superproperties of some object property.
      */
     @SuppressWarnings("all")
-    protected void assertDirectSuperObjectPropertiesOfInverse(String objectProperty,Set<String>... control) {
+    protected void assertDirectSuperObjectPropertiesOfInverse(String objectProperty, Set<String>... control) {
         if (!objectProperty.contains("#"))
-            objectProperty=NS+objectProperty;
-        OWLObjectProperty op=m_dataFactory.getOWLObjectProperty(IRI.create(objectProperty));
-        OWLObjectPropertyExpression ope=m_dataFactory.getOWLObjectInverseOf(op);
-        Set<Set<String>> actual=nodeSetOfOPEsToStrings(m_reasoner.getSuperObjectProperties(ope,true));
-        assertContainsAll(actual,control);
+            objectProperty = NS + objectProperty;
+        OWLObjectProperty op = m_dataFactory.getOWLObjectProperty(IRI.create(objectProperty));
+        OWLObjectPropertyExpression ope = m_dataFactory.getOWLObjectInverseOf(op);
+        Set<Set<String>> actual = nodeSetOfOPEsToStrings(m_reasoner.getSuperObjectProperties(ope, true));
+        assertContainsAll(actual, control);
     }
 
     /**
      * Checks the superproperties of some object property.
      */
     @SuppressWarnings("all")
-    protected void assertSuperObjectProperties(String objectProperty,Set<String>... control) {
+    protected void assertSuperObjectProperties(String objectProperty, Set<String>... control) {
         if (!objectProperty.contains("#"))
-            objectProperty=NS+objectProperty;
-        OWLObjectPropertyExpression ope=m_dataFactory.getOWLObjectProperty(IRI.create(objectProperty));
-        Set<Set<String>> actual=nodeSetOfOPEsToStrings(m_reasoner.getSuperObjectProperties(ope,false));
-        assertContainsAll(actual,control);
+            objectProperty = NS + objectProperty;
+        OWLObjectPropertyExpression ope = m_dataFactory.getOWLObjectProperty(IRI.create(objectProperty));
+        Set<Set<String>> actual = nodeSetOfOPEsToStrings(m_reasoner.getSuperObjectProperties(ope, false));
+        assertContainsAll(actual, control);
     }
 
     /**
      * Checks the superproperties of some object property.
      */
     @SuppressWarnings("all")
-    protected void assertSuperObjectPropertiesOfInverse(String objectProperty,Set<String>... control) {
+    protected void assertSuperObjectPropertiesOfInverse(String objectProperty, Set<String>... control) {
         if (!objectProperty.contains("#"))
-            objectProperty=NS+objectProperty;
-        OWLObjectProperty op=m_dataFactory.getOWLObjectProperty(IRI.create(objectProperty));
-        OWLObjectPropertyExpression ope=m_dataFactory.getOWLObjectInverseOf(op);
-        Set<Set<String>> actual=nodeSetOfOPEsToStrings(m_reasoner.getSuperObjectProperties(ope,false));
-        assertContainsAll(actual,control);
+            objectProperty = NS + objectProperty;
+        OWLObjectProperty op = m_dataFactory.getOWLObjectProperty(IRI.create(objectProperty));
+        OWLObjectPropertyExpression ope = m_dataFactory.getOWLObjectInverseOf(op);
+        Set<Set<String>> actual = nodeSetOfOPEsToStrings(m_reasoner.getSuperObjectProperties(ope, false));
+        assertContainsAll(actual, control);
     }
 
     /**
      * Checks the direct subproperties of some object property.
      */
     @SuppressWarnings("all")
-    protected void assertDirectSubObjectProperties(String objectProperty,Set<String>... control) {
+    protected void assertDirectSubObjectProperties(String objectProperty, Set<String>... control) {
         if (!objectProperty.contains("#"))
-            objectProperty=NS+objectProperty;
-        OWLObjectPropertyExpression ope=m_dataFactory.getOWLObjectProperty(IRI.create(objectProperty));
-        Set<Set<String>> actual=nodeSetOfOPEsToStrings(m_reasoner.getSubObjectProperties(ope,true));
-        assertContainsAll(actual,control);
+            objectProperty = NS + objectProperty;
+        OWLObjectPropertyExpression ope = m_dataFactory.getOWLObjectProperty(IRI.create(objectProperty));
+        Set<Set<String>> actual = nodeSetOfOPEsToStrings(m_reasoner.getSubObjectProperties(ope, true));
+        assertContainsAll(actual, control);
     }
 
     /**
-     * Checks the direct subproperties of the inverse of the given object property.
+     * Checks the direct subproperties of the inverse of the given object
+     * property.
      */
     @SuppressWarnings("all")
-    protected void assertDirectSubObjectPropertiesOfInverse(String objectProperty,Set<String>... control) {
+    protected void assertDirectSubObjectPropertiesOfInverse(String objectProperty, Set<String>... control) {
         if (!objectProperty.contains("#"))
-            objectProperty=NS+objectProperty;
-        OWLObjectProperty op=m_dataFactory.getOWLObjectProperty(IRI.create(objectProperty));
-        OWLObjectPropertyExpression ope=m_dataFactory.getOWLObjectInverseOf(op);
-        Set<Set<String>> actual=nodeSetOfOPEsToStrings(m_reasoner.getSubObjectProperties(ope,true));
-        assertContainsAll(actual,control);
+            objectProperty = NS + objectProperty;
+        OWLObjectProperty op = m_dataFactory.getOWLObjectProperty(IRI.create(objectProperty));
+        OWLObjectPropertyExpression ope = m_dataFactory.getOWLObjectInverseOf(op);
+        Set<Set<String>> actual = nodeSetOfOPEsToStrings(m_reasoner.getSubObjectProperties(ope, true));
+        assertContainsAll(actual, control);
     }
 
     /**
      * Checks the subproperties of some object property.
      */
     @SuppressWarnings("all")
-    protected void assertSubObjectProperties(String objectProperty,Set<String>... control) {
+    protected void assertSubObjectProperties(String objectProperty, Set<String>... control) {
         if (!objectProperty.contains("#"))
-            objectProperty=NS+objectProperty;
-        OWLObjectPropertyExpression ope=m_dataFactory.getOWLObjectProperty(IRI.create(objectProperty));
-        Set<Set<String>> actual=nodeSetOfOPEsToStrings(m_reasoner.getSubObjectProperties(ope,false));
-        assertContainsAll(actual,control);
+            objectProperty = NS + objectProperty;
+        OWLObjectPropertyExpression ope = m_dataFactory.getOWLObjectProperty(IRI.create(objectProperty));
+        Set<Set<String>> actual = nodeSetOfOPEsToStrings(m_reasoner.getSubObjectProperties(ope, false));
+        assertContainsAll(actual, control);
     }
 
     /**
      * Checks the subproperties of the inverse of the given object property.
      */
     @SuppressWarnings("all")
-    protected void assertSubObjectPropertiesOfInverse(String objectProperty,Set<String>... control) {
+    protected void assertSubObjectPropertiesOfInverse(String objectProperty, Set<String>... control) {
         if (!objectProperty.contains("#"))
-            objectProperty=NS+objectProperty;
-        OWLObjectProperty op=m_dataFactory.getOWLObjectProperty(IRI.create(objectProperty));
-        OWLObjectPropertyExpression ope=m_dataFactory.getOWLObjectInverseOf(op);
-        Set<Set<String>> actual=nodeSetOfOPEsToStrings(m_reasoner.getSubObjectProperties(ope,false));
-        assertContainsAll(actual,control);
+            objectProperty = NS + objectProperty;
+        OWLObjectProperty op = m_dataFactory.getOWLObjectProperty(IRI.create(objectProperty));
+        OWLObjectPropertyExpression ope = m_dataFactory.getOWLObjectInverseOf(op);
+        Set<Set<String>> actual = nodeSetOfOPEsToStrings(m_reasoner.getSubObjectProperties(ope, false));
+        assertContainsAll(actual, control);
     }
 
     /**
      * Checks the equivalents of some object property.
      */
-    protected void assertEquivalentObjectProperties(String objectProperty,String... control) {
+    protected void assertEquivalentObjectProperties(String objectProperty, String... control) {
         if (!objectProperty.contains("#"))
-            objectProperty=NS+objectProperty;
-        OWLObjectPropertyExpression ope=m_dataFactory.getOWLObjectProperty(IRI.create(objectProperty));
-        Set<String> actual=nodeOfOPEs(m_reasoner.getEquivalentObjectProperties(ope));
-        assertContainsAll(actual,control);
+            objectProperty = NS + objectProperty;
+        OWLObjectPropertyExpression ope = m_dataFactory.getOWLObjectProperty(IRI.create(objectProperty));
+        Set<String> actual = nodeOfOPEs(m_reasoner.getEquivalentObjectProperties(ope));
+        assertContainsAll(actual, control);
     }
 
     /**
      * Checks the superproperties of some data property.
      */
     @SuppressWarnings("all")
-    protected void assertSuperDataProperties(String dataProperty,Set<String>... control) {
+    protected void assertSuperDataProperties(String dataProperty, Set<String>... control) {
         if (!dataProperty.contains("#"))
-            dataProperty=NS+dataProperty;
-        OWLDataProperty dp=m_dataFactory.getOWLDataProperty(IRI.create(dataProperty));
-        Set<Set<String>> actual=nodeSetOfDPsToStrings(m_reasoner.getSuperDataProperties(dp,false));
-        assertContainsAll(actual,control);
+            dataProperty = NS + dataProperty;
+        OWLDataProperty dp = m_dataFactory.getOWLDataProperty(IRI.create(dataProperty));
+        Set<Set<String>> actual = nodeSetOfDPsToStrings(m_reasoner.getSuperDataProperties(dp, false));
+        assertContainsAll(actual, control);
     }
 
     /**
      * Checks the direct superproperties of some data property.
      */
     @SuppressWarnings("all")
-    protected void assertDirectSuperDataProperties(String dataProperty,Set<String>... control) {
+    protected void assertDirectSuperDataProperties(String dataProperty, Set<String>... control) {
         if (!dataProperty.contains("#"))
-            dataProperty=NS+dataProperty;
-        OWLDataProperty dp=m_dataFactory.getOWLDataProperty(IRI.create(dataProperty));
-        Set<Set<String>> actual=nodeSetOfDPsToStrings(m_reasoner.getSuperDataProperties(dp,true));
-        assertContainsAll(actual,control);
+            dataProperty = NS + dataProperty;
+        OWLDataProperty dp = m_dataFactory.getOWLDataProperty(IRI.create(dataProperty));
+        Set<Set<String>> actual = nodeSetOfDPsToStrings(m_reasoner.getSuperDataProperties(dp, true));
+        assertContainsAll(actual, control);
     }
 
     /**
      * Checks the subproperties of some data property.
      */
     @SuppressWarnings("all")
-    protected void assertSubDataProperties(String dataProperty,Set<String>... control) {
+    protected void assertSubDataProperties(String dataProperty, Set<String>... control) {
         if (!dataProperty.contains("#"))
-            dataProperty=NS+dataProperty;
-        OWLDataProperty dp=m_dataFactory.getOWLDataProperty(IRI.create(dataProperty));
-        Set<Set<String>> actual=nodeSetOfDPsToStrings(m_reasoner.getSubDataProperties(dp,false));
-        assertContainsAll(actual,control);
+            dataProperty = NS + dataProperty;
+        OWLDataProperty dp = m_dataFactory.getOWLDataProperty(IRI.create(dataProperty));
+        Set<Set<String>> actual = nodeSetOfDPsToStrings(m_reasoner.getSubDataProperties(dp, false));
+        assertContainsAll(actual, control);
     }
 
     /**
      * Checks the direct subproperties of some data property.
      */
     @SuppressWarnings("all")
-    protected void assertDirectSubDataProperties(String dataProperty,Set<String>... control) {
+    protected void assertDirectSubDataProperties(String dataProperty, Set<String>... control) {
         if (!dataProperty.contains("#"))
-            dataProperty=NS+dataProperty;
-        OWLDataProperty dp=m_dataFactory.getOWLDataProperty(IRI.create(dataProperty));
-        Set<Set<String>> actual=nodeSetOfDPsToStrings(m_reasoner.getSubDataProperties(dp,true));
-        assertContainsAll(actual,control);
+            dataProperty = NS + dataProperty;
+        OWLDataProperty dp = m_dataFactory.getOWLDataProperty(IRI.create(dataProperty));
+        Set<Set<String>> actual = nodeSetOfDPsToStrings(m_reasoner.getSubDataProperties(dp, true));
+        assertContainsAll(actual, control);
     }
 
     /**
      * Checks the equivalents of some data property.
      */
-    protected void assertEquivalentDataProperties(String dataProperty,String... control) {
+    protected void assertEquivalentDataProperties(String dataProperty, String... control) {
         if (!dataProperty.contains("#"))
-            dataProperty=NS+dataProperty;
-        OWLDataProperty dp=m_dataFactory.getOWLDataProperty(IRI.create(dataProperty));
-        Set<String> actual=nodeOfDPEs(m_reasoner.getEquivalentDataProperties(dp));
-        assertContainsAll(actual,control);
+            dataProperty = NS + dataProperty;
+        OWLDataProperty dp = m_dataFactory.getOWLDataProperty(IRI.create(dataProperty));
+        Set<String> actual = nodeOfDPEs(m_reasoner.getEquivalentDataProperties(dp));
+        assertContainsAll(actual, control);
     }
 
-    protected void assertEntails(OWLAxiom axiom,boolean expectedResult) {
-        assertTrue(new EntailmentChecker(m_reasoner,m_dataFactory).entails(axiom)==expectedResult);
+    protected void assertEntails(OWLAxiom axiom, boolean expectedResult) {
+        assertTrue(new EntailmentChecker(m_reasoner, m_dataFactory).entails(axiom) == expectedResult);
     }
 
-    protected void assertEntails(Set<OWLLogicalAxiom> axioms,boolean expectedResult) {
-        assertTrue(new EntailmentChecker(m_reasoner,m_dataFactory).entails(axioms)==expectedResult);
+    protected void assertEntails(Set<OWLLogicalAxiom> axioms, boolean expectedResult) {
+        assertTrue(new EntailmentChecker(m_reasoner, m_dataFactory).entails(axioms) == expectedResult);
     }
 
     protected static Set<Set<String>> nodeSetOfOPEsToStrings(NodeSet<OWLObjectPropertyExpression> nodeSet) {
-        Set<Set<String>> result=new HashSet<Set<String>>();
+        Set<Set<String>> result = new HashSet<>();
         for (Node<OWLObjectPropertyExpression> node : nodeSet.getNodes()) {
             result.add(nodeOfOPEs(node));
         }
@@ -359,67 +378,73 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     }
 
     protected static Set<String> nodeOfOPEs(Node<OWLObjectPropertyExpression> node) {
-        Set<String> translatedSet=new HashSet<String>();
+        Set<String> translatedSet = new HashSet<>();
         for (OWLObjectPropertyExpression ope : node.getEntities()) {
-            if (ope.getSimplified().isAnonymous()) {
+            if (ope.isAnonymous()) {
                 // inverse
-                translatedSet.add("InverseOf("+ope.getNamedProperty().getIRI().toString()+")");
-            }
-            else
+                translatedSet.add("InverseOf(" + ope.getNamedProperty().getIRI().toString() + ")");
+            } else
                 translatedSet.add(ope.asOWLObjectProperty().getIRI().toString());
         }
         return translatedSet;
     }
 
     protected static Set<Set<String>> nodeSetOfDPsToStrings(NodeSet<OWLDataProperty> nodeSet) {
-        Set<Set<String>> result=new HashSet<Set<String>>();
+        Set<Set<String>> result = new HashSet<>();
         for (Node<OWLDataProperty> set : nodeSet) {
-            Set<String> translatedSet=nodeOfDPEs(set);
+            Set<String> translatedSet = nodeOfDPEs(set);
             result.add(translatedSet);
         }
         return result;
     }
 
     protected static Set<String> nodeOfDPEs(Node<OWLDataProperty> node) {
-        Set<String> translatedSet=new HashSet<String>();
+        Set<String> translatedSet = new HashSet<>();
         for (OWLDataProperty dp : node)
             translatedSet.add(dp.getIRI().toString());
         return translatedSet;
     }
 
     /**
-     * Can be overridden by the subclass to provide a different configuration for the tests.
+     * Can be overridden by the subclass to provide a different configuration
+     * for the tests.
      */
     protected Configuration getConfiguration() {
-        Configuration c=new Configuration();
-        c.throwInconsistentOntologyException=false;
+        Configuration c = new Configuration();
+        c.throwInconsistentOntologyException = false;
         return c;
     }
 
-    protected void assertDRSatisfiable(boolean value,String... parts) throws Exception {
-        assertDRSatisfiableNEQ(value,1,null,parts);
+    protected void assertDRSatisfiable(boolean value, String... parts) throws Exception {
+        assertDRSatisfiableNEQ(value, 1, null, parts);
     }
 
-    protected void assertDRSatisfiable(boolean value,int cardinality,String... parts) throws Exception {
-        // The dummy forbidden value is used to turn off the "symmetric clique" optimization in the DatatypeManager.
-        // This is useful only when value>=1 (otherwise, there is just one individual and the D-conjunction is a clique).
+    protected void assertDRSatisfiable(boolean value, int cardinality, String... parts) throws Exception {
+        // The dummy forbidden value is used to turn off the "symmetric clique"
+        // optimization in the DatatypeManager.
+        // This is useful only when value>=1 (otherwise, there is just one
+        // individual and the D-conjunction is a clique).
         // This is so that we test the basic algorithm.
-        assertDRSatisfiableNEQ(value,cardinality,new String[] { STR("$internal$") },parts);
+        assertDRSatisfiableNEQ(value, cardinality, new String[] { STR("$internal$") }, parts);
     }
 
-    protected void assertDRSatisfiableUseCliqueOptimization(boolean value,int cardinality,String... parts) throws Exception {
-        // This version of the method does not introduce any forbidden values, which allows the DatatypeManager
+    protected void assertDRSatisfiableUseCliqueOptimization(boolean value, int cardinality, String... parts)
+            throws Exception {
+        // This version of the method does not introduce any forbidden values,
+        // which allows the DatatypeManager
         // to use the "symmetric clique" optimization if possible.
-        assertDRSatisfiableNEQ(value,cardinality,null,parts);
+        assertDRSatisfiableNEQ(value, cardinality, null, parts);
     }
 
-    protected void assertDRSatisfiableNEQ(boolean value,String[] forbiddenValues,String... parts) throws Exception {
-        assertDRSatisfiableNEQ(value,1,forbiddenValues,parts);
+    protected void assertDRSatisfiableNEQ(boolean value, String[] forbiddenValues, String... parts) throws Exception {
+        assertDRSatisfiableNEQ(value, 1, forbiddenValues, parts);
     }
 
-    protected void assertDRSatisfiableNEQ(boolean value,int cardinality,String[] forbiddenValues,String... parts) throws Exception {
-        StringBuffer buffer=new StringBuffer();
-        buffer.append("Declaration(NamedIndividual(test:a)) Declaration(Class(test:A)) Declaration(DataProperty(test:dp)) SubClassOf( test:A DataMinCardinality( ");
+    protected void assertDRSatisfiableNEQ(boolean value, int cardinality, String[] forbiddenValues, String... parts)
+            throws Exception {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append(
+                "Declaration(NamedIndividual(test:a)) Declaration(Class(test:A)) Declaration(DataProperty(test:dp)) SubClassOf( test:A DataMinCardinality( ");
         buffer.append(cardinality);
         buffer.append(" test:dp rdfs:Literal ) ) ");
         for (String part : parts) {
@@ -428,10 +453,10 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
             buffer.append(" ) ) ");
         }
         buffer.append("ClassAssertion( test:A test:a ) ");
-        if (forbiddenValues!=null) {
-            int index=0;
+        if (forbiddenValues != null) {
+            int index = 0;
             for (String forbiddenValue : forbiddenValues) {
-                String fvName="test:fv"+index;
+                String fvName = "test:fv" + index;
                 buffer.append("DisjointDataProperties( test:dp ");
                 buffer.append(fvName);
                 buffer.append(" ) ");
@@ -447,72 +472,71 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
         assertABoxSatisfiable(value);
     }
 
-    protected void assertRegular(String axioms,boolean b) throws Exception {
-        boolean regular=true;
+    protected void assertRegular(String axioms, boolean b) throws Exception {
+        boolean regular = true;
         try {
             loadReasonerWithAxioms(axioms);
-        }
-        catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             if (e.getMessage().contains("The given property hierarchy is not regular"))
-                regular=false;
+                regular = false;
             else
                 throw new Exception(e.getMessage());
         }
-        assertEquals(regular,b);
+        assertEquals(regular, b);
     }
-    protected void assertSimple(String axioms,boolean b) throws Exception {
-        boolean simple=true;
+
+    protected void assertSimple(String axioms, boolean b) throws Exception {
+        boolean simple = true;
         try {
             loadReasonerWithAxioms(axioms);
-        }
-        catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             if (e.getMessage().contains("Non-simple property '"))
-                simple=false;
+                simple = false;
             else
                 throw new Exception(e.getMessage());
         }
-        assertEquals(simple,b);
+        assertEquals(simple, b);
     }
 
     protected static Set<String> EQ(String... args) {
-        Set<String> result=new HashSet<String>();
+        Set<String> result = new HashSet<>();
         for (String arg : args) {
             if (!arg.contains("#"))
-                arg=NS+arg;
+                arg = NS + arg;
             result.add(arg);
         }
         return result;
     }
 
     protected static Set<String> EQInv(String... args) {
-        Set<String> result=new HashSet<String>();
+        Set<String> result = new HashSet<>();
         for (String arg : args) {
             if (!arg.contains("#"))
-                arg=NS+arg;
-            result.add("InverseOf("+arg+")");
+                arg = NS + arg;
+            result.add("InverseOf(" + arg + ")");
         }
         return result;
     }
 
     protected static String[] IRIs(String... args) {
-        for (int index=0;index<args.length;index++)
-            args[index]=IRI(args[index]);
+        for (int index = 0; index < args.length; index++)
+            args[index] = IRI(args[index]);
         return args;
     }
 
     protected static String IRI(String arg) {
         if (!arg.contains("#"))
-            arg=NS+arg;
+            arg = NS + arg;
         return arg;
     }
 
     protected static String NOT(String argument) {
-        return "DataComplementOf( "+argument+" )";
+        return "DataComplementOf( " + argument + " )";
     }
 
-    protected static String DR(String datatype,String... restrictions) {
-        StringBuffer buffer=new StringBuffer();
-        if (restrictions.length==0)
+    protected static String DR(String datatype, String... restrictions) {
+        StringBuffer buffer = new StringBuffer();
+        if (restrictions.length == 0)
             buffer.append(datatype);
         else {
             buffer.append("DatatypeRestriction( ");
@@ -527,7 +551,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     }
 
     protected static String OO(String... elements) {
-        StringBuffer buffer=new StringBuffer();
+        StringBuffer buffer = new StringBuffer();
         buffer.append("DataOneOf(");
         for (String element : elements) {
             buffer.append(' ');
@@ -538,107 +562,107 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     }
 
     protected static String INT(String value) {
-        return '\"'+value+"\"^^xsd:integer";
+        return '\"' + value + "\"^^xsd:integer";
     }
 
     protected static Constant INT_C(String value) {
-        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("xsd:")+"integer");
+        return Constant.create(value, Prefixes.s_semanticWebPrefixes.get("xsd:") + "integer");
     }
 
     protected static String DEC(String value) {
-        return '\"'+value+"\"^^xsd:decimal";
+        return '\"' + value + "\"^^xsd:decimal";
     }
 
     protected static Constant DEC_C(String value) {
-        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("xsd:")+"decimal");
+        return Constant.create(value, Prefixes.s_semanticWebPrefixes.get("xsd:") + "decimal");
     }
 
-    protected static String RAT(String num,String denom) {
-        return '\"'+num+"/"+denom+"\"^^owl:rational";
+    protected static String RAT(String num, String denom) {
+        return '\"' + num + "/" + denom + "\"^^owl:rational";
     }
 
     protected static Constant RAT_C(String value) {
-        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("xsd:")+"rational");
+        return Constant.create(value, Prefixes.s_semanticWebPrefixes.get("xsd:") + "rational");
     }
 
     protected static String FLT(String value) {
-        return '\"'+value+"\"^^xsd:float";
+        return '\"' + value + "\"^^xsd:float";
     }
 
     protected static Constant FLT_C(String value) {
-        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("xsd:")+"float");
+        return Constant.create(value, Prefixes.s_semanticWebPrefixes.get("xsd:") + "float");
     }
 
     protected static String DBL(String value) {
-        return '\"'+value+"\"^^xsd:double";
+        return '\"' + value + "\"^^xsd:double";
     }
 
     protected static Constant DBL_C(String value) {
-        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("xsd:")+"double");
+        return Constant.create(value, Prefixes.s_semanticWebPrefixes.get("xsd:") + "double");
     }
 
     protected static String DATE(String value) {
-        return '\"'+value+"\"^^xsd:dateTime";
+        return '\"' + value + "\"^^xsd:dateTime";
     }
 
     protected static Constant DATE_C(String value) {
-        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("xsd:")+"dateTime");
+        return Constant.create(value, Prefixes.s_semanticWebPrefixes.get("xsd:") + "dateTime");
     }
 
     protected static String DATES(String value) {
-        return '\"'+value+"\"^^xsd:dateTimeStamp";
+        return '\"' + value + "\"^^xsd:dateTimeStamp";
     }
 
     protected static Constant DATES_C(String value) {
-        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("xsd:")+"dateTimeStamp");
+        return Constant.create(value, Prefixes.s_semanticWebPrefixes.get("xsd:") + "dateTimeStamp");
     }
 
     protected static String XMLL(String value) {
-        return '\"'+value+"\"^^rdf:XMLLiteral";
+        return '\"' + value + "\"^^rdf:XMLLiteral";
     }
 
     protected static Constant XMLL_C(String value) {
-        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("rdf:")+"XMLLiteral");
+        return Constant.create(value, Prefixes.s_semanticWebPrefixes.get("rdf:") + "XMLLiteral");
     }
 
     protected static String HEXB(String value) {
-        return '\"'+value+"\"^^xsd:hexBinary";
+        return '\"' + value + "\"^^xsd:hexBinary";
     }
 
     protected static Constant HEXB_C(String value) {
-        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("xsd:")+"hexBinary");
+        return Constant.create(value, Prefixes.s_semanticWebPrefixes.get("xsd:") + "hexBinary");
     }
 
     protected static String B64B(String value) {
-        return '\"'+value+"\"^^xsd:base64Binary";
+        return '\"' + value + "\"^^xsd:base64Binary";
     }
 
     protected static Constant B64B_C(String value) {
-        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("xsd:")+"has64Binary");
+        return Constant.create(value, Prefixes.s_semanticWebPrefixes.get("xsd:") + "has64Binary");
     }
 
     protected static String STR(String value) {
-        return '\"'+value+"\"^^xsd:string";
+        return '\"' + value + "\"^^xsd:string";
     }
 
     protected static Constant STR_C(String value) {
-        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("xsd:")+"string");
+        return Constant.create(value, Prefixes.s_semanticWebPrefixes.get("xsd:") + "string");
     }
 
-    protected static String STR(String value,String languageTag) {
-        return '\"'+value+"\"@"+languageTag;
+    protected static String STR(String value, String languageTag) {
+        return '\"' + value + "\"@" + languageTag;
     }
 
-    protected static Constant STR_C(String value,String languageTag) {
-        return Constant.create(value+"\"@"+languageTag,Prefixes.s_semanticWebPrefixes.get("xsd:")+"string");
+    protected static Constant STR_C(String value, String languageTag) {
+        return Constant.create(value + "\"@" + languageTag, Prefixes.s_semanticWebPrefixes.get("xsd:") + "string");
     }
 
     protected static String AURI(String value) {
-        return '\"'+value+"\"^^xsd:anyURI";
+        return '\"' + value + "\"^^xsd:anyURI";
     }
 
     protected static Constant AURI_C(String value) {
-        return Constant.create(value,Prefixes.s_semanticWebPrefixes.get("xsd:")+"anyURI");
+        return Constant.create(value, Prefixes.s_semanticWebPrefixes.get("xsd:") + "anyURI");
     }
 
     protected static String[] S(String... args) {

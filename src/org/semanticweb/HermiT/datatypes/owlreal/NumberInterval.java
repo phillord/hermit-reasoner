@@ -198,6 +198,7 @@ public class NumberInterval {
             return Numbers.compare(lowerBoundInclusive,upperBoundInclusive)>0;
         }
     }
+    @Override
     public String toString() {
         StringBuffer buffer=new StringBuffer();
         buffer.append(m_baseRange.toString());

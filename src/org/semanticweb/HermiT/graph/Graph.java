@@ -35,13 +35,13 @@ public class Graph<T> implements Serializable {
     protected final Map<T,Set<T>> m_successorsByNodes;
 
     public Graph() {
-        m_elements=new HashSet<T>();
-        m_successorsByNodes=new HashMap<T,Set<T>>();
+        m_elements=new HashSet<>();
+        m_successorsByNodes=new HashMap<>();
     }
     public void addEdge(T from,T to) {
         Set<T> successors=m_successorsByNodes.get(from);
         if (successors==null) {
-            successors=new HashSet<T>();
+            successors=new HashSet<>();
             m_successorsByNodes.put(from,successors);
         }
         successors.add(to);
@@ -51,7 +51,7 @@ public class Graph<T> implements Serializable {
     public void addEdges(T from,Set<T> to) {
         Set<T> successors=m_successorsByNodes.get(from);
         if (successors==null) {
-            successors=new HashSet<T>();
+            successors=new HashSet<>();
             m_successorsByNodes.put(from,successors);
         }
         successors.addAll(to);
@@ -68,7 +68,7 @@ public class Graph<T> implements Serializable {
         return result;
     }
     public void transitivelyClose() {
-        List<T> toProcess=new ArrayList<T>();
+        List<T> toProcess=new ArrayList<>();
         for (Set<T> reachable : m_successorsByNodes.values()) {
             toProcess.clear();
             toProcess.addAll(reachable);
@@ -83,7 +83,7 @@ public class Graph<T> implements Serializable {
         }
     }
     public Graph<T> getInverse() {
-        Graph<T> result=new Graph<T>();
+        Graph<T> result=new Graph<>();
         for (Map.Entry<T,Set<T>> entry : m_successorsByNodes.entrySet()) {
             T from=entry.getKey();
             for (T successor : entry.getValue())
@@ -91,8 +91,9 @@ public class Graph<T> implements Serializable {
         }
         return result;
     }
+    @Override
     public Graph<T> clone() {
-        Graph<T> result=new Graph<T>();
+        Graph<T> result=new Graph<>();
         result.m_elements.addAll( m_elements );
         for (Map.Entry<T,Set<T>> entry : m_successorsByNodes.entrySet()) {
             T from=entry.getKey();
@@ -101,31 +102,31 @@ public class Graph<T> implements Serializable {
         }
         return result;
     }
-	public void removeElements(Set<T> elements) {
-		for(T element : elements){
-			m_elements.remove( element );
-			m_successorsByNodes.remove( element );
-		}
-	}
+    public void removeElements(Set<T> elements) {
+        for(T element : elements){
+            m_elements.remove( element );
+            m_successorsByNodes.remove( element );
+        }
+    }
     public boolean isReachableSuccessor(T fromNode,T toNode) {
-		if (fromNode.equals(toNode))
-			return true;
-		Set<T> result=new HashSet<T>();
-		Queue<T> toVisit=new LinkedList<T>();
-		toVisit.add(fromNode);
-		while (!toVisit.isEmpty()) {
-			T current=toVisit.poll();
-			Set<T> successors = getSuccessors(current);
-			if (successors.contains(toNode))
-				return true;
-			if (result.add(current))
-				toVisit.addAll(successors);
-		}
-		return false;
+        if (fromNode.equals(toNode))
+            return true;
+        Set<T> result=new HashSet<>();
+        Queue<T> toVisit=new LinkedList<>();
+        toVisit.add(fromNode);
+        while (!toVisit.isEmpty()) {
+            T current=toVisit.poll();
+            Set<T> successors = getSuccessors(current);
+            if (successors.contains(toNode))
+                return true;
+            if (result.add(current))
+                toVisit.addAll(successors);
+        }
+        return false;
     }
     public Set<T> getReachableSuccessors(T fromNode) {
-        Set<T> result = new HashSet<T>();
-        Queue<T> toVisit=new LinkedList<T>();
+        Set<T> result = new HashSet<>();
+        Queue<T> toVisit=new LinkedList<>();
         toVisit.add(fromNode);
         while (!toVisit.isEmpty()) {
             T current=toVisit.poll();
@@ -134,6 +135,7 @@ public class Graph<T> implements Serializable {
         }
         return result;
     }
+    @Override
     public String toString() {
         StringBuffer buffer=new StringBuffer();
         for (T element : m_elements) {

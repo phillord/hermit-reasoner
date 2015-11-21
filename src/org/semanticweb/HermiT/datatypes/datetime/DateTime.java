@@ -71,6 +71,7 @@ public class DateTime {
         m_lastDayInstant=lastDayInstant;
         m_timeZoneOffset=timeZoneOffset;
     }
+    @Override
     public String toString() {
         long timeOnTimeline=m_timeOnTimeline;
         if (m_timeZoneOffset!=NO_TIMEZONE)
@@ -237,6 +238,7 @@ public class DateTime {
             return null;
         }
     }
+    @Override
     public boolean equals(Object that) {
         if (this==that)
             return true;
@@ -245,6 +247,7 @@ public class DateTime {
         DateTime thatObject=(DateTime)that;
         return m_timeOnTimeline==thatObject.m_timeOnTimeline && m_lastDayInstant==thatObject.m_lastDayInstant && m_timeZoneOffset==thatObject.m_timeZoneOffset;
     }
+    @Override
     public int hashCode() {
         return (int)(m_timeOnTimeline*3L+m_timeZoneOffset+(m_lastDayInstant ? 117L : 0L));
     }

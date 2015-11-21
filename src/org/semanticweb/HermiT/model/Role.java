@@ -30,6 +30,7 @@ public abstract class Role implements Serializable {
     public abstract Role getInverse();
     public abstract Atom getRoleAssertion(Term term0,Term term1);
     public abstract String toString(Prefixes prefixes);
+    @Override
     public String toString() {
         return toString(Prefixes.STANDARD_PREFIXES);
     }

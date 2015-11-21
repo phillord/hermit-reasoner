@@ -47,17 +47,20 @@ public class Timer extends TableauMonitorAdapter {
         m_problemStartTime=System.currentTimeMillis();
         m_lastStatusTime=m_problemStartTime;
     }
+    @Override
     public void isSatisfiableStarted(ReasoningTaskDescription reasoningTaskDescription) {
         m_output.print(reasoningTaskDescription.getTaskDescription(Prefixes.STANDARD_PREFIXES)+" ...");
         m_output.flush();
         start();
     }
+    @Override
     public void isSatisfiableFinished(ReasoningTaskDescription reasoningTaskDescription,boolean result) {
         if (reasoningTaskDescription.flipSatisfiabilityResult())
             result=!result;
         m_output.println(result ? "YES" : "NO");
         doStatistics();
     }
+    @Override
     public void iterationStarted() {
         if (System.currentTimeMillis()-m_lastStatusTime>30000) {
             if (m_lastStatusTime==m_problemStartTime)
@@ -66,9 +69,11 @@ public class Timer extends TableauMonitorAdapter {
             m_lastStatusTime=System.currentTimeMillis();
         }
     }
+    @Override
     public void saturateStarted() {
         m_testNumber++;
     }
+    @Override
     public void backtrackToFinished(BranchingPoint newCurrentBrancingPoint) {
         m_numberOfBacktrackings++;
     }

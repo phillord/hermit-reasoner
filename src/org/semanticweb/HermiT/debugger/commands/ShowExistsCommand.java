@@ -31,16 +31,20 @@ public class ShowExistsCommand extends AbstractCommand {
     public ShowExistsCommand(Debugger debugger) {
         super(debugger);
     }
+    @Override
     public String getCommandName() {
         return "showExists";
     }
+    @Override
     public String[] getDescription() {
         return new String[] { "","prints nodes with unprocessed existentials" };
     }
+    @Override
     public void printHelp(PrintWriter writer) {
         writer.println("usage: showExists");
         writer.println("    Prints a list of nodes that have unprocessed existentials, together with information that generated these nodes.");
     }
+    @Override
     public void execute(String[] args) {
         CharArrayWriter buffer=new CharArrayWriter();
         PrintWriter writer=new PrintWriter(buffer);

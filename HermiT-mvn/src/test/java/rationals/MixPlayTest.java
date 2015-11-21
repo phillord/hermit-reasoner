@@ -37,6 +37,7 @@ import rationals.transformations.Pruner;
  * @author bailly
  * @version $Id: MixPlayTest.java 2 2006-08-24 14:41:48Z oqube $
  */
+@SuppressWarnings("javadoc")
 public class MixPlayTest extends TestCase {
 
     /**
@@ -47,68 +48,63 @@ public class MixPlayTest extends TestCase {
     }
 
     public void test01Simple() throws Exception {
-        Automaton a = new Pruner().transform(new Expression()
-                .fromString("a(bbb)*e"));
-        Automaton b = new Pruner().transform(new Expression()
-                .fromString("a(bb)^e"));
-        //      Automaton c = new Pruner().transform(new Expression().fromString("bdde"));      
+        Automaton a = new Pruner().transform(new Expression().fromString("a(bbb)*e"));
+        Automaton b = new Pruner().transform(new Expression().fromString("a(bb)^e"));
+        // Automaton c = new Pruner().transform(new
+        // Expression().fromString("bdde"));
         MixPlay mp = new MixPlay();
         mp.addAutomaton(b);
         mp.addAutomaton(a);
-        //      mp.addAutomaton(c);
-        List check = Arrays.asList(new String[] { "a", "b", "b", "b", "b", "b",
-                "b", "e" });
+        // mp.addAutomaton(c);
+        List<String> check = Arrays.asList("a", "b", "b", "b", "b", "b", "b", "e");
         mp.reset();
-        List word = mp.play("e");
+        List<Object> word = mp.play("e");
         assertEquals(check, word);
     }
 
     public void test02Simple() throws Exception {
-        Automaton a = new Pruner().transform(new Expression()
-                .fromString("a(bbb)*e"));
-        Automaton b = new Pruner().transform(new Expression()
-                .fromString("a(bb)*e"));
-        //      Automaton c = new Pruner().transform(new Expression().fromString("bdde"));      
+        Automaton a = new Pruner().transform(new Expression().fromString("a(bbb)*e"));
+        Automaton b = new Pruner().transform(new Expression().fromString("a(bb)*e"));
+        // Automaton c = new Pruner().transform(new
+        // Expression().fromString("bdde"));
         MixPlay mp = new MixPlay();
         mp.addAutomaton(b);
         mp.addAutomaton(a);
-        //      mp.addAutomaton(c);
-        List check = Arrays.asList(new String[] { "a", "e" });
+        // mp.addAutomaton(c);
+        List<String> check = Arrays.asList("a", "e");
         mp.reset();
-        List word = mp.play("e");
+        List<Object> word = mp.play("e");
         assertEquals(check, word);
     }
 
     public void test03Simple() throws Exception {
-        Automaton a = new Pruner().transform(new Expression()
-                .fromString("abbbe"));
-        Automaton b = new Pruner().transform(new Expression()
-                .fromString("abbe"));
-        //      Automaton c = new Pruner().transform(new Expression().fromString("bdde"));      
+        Automaton a = new Pruner().transform(new Expression().fromString("abbbe"));
+        Automaton b = new Pruner().transform(new Expression().fromString("abbe"));
+        // Automaton c = new Pruner().transform(new
+        // Expression().fromString("bdde"));
         MixPlay mp = new MixPlay();
         mp.addAutomaton(b);
         mp.addAutomaton(a);
-        //      mp.addAutomaton(c);
+        // mp.addAutomaton(c);
         mp.reset();
-        List word = mp.play("e");
+        List<Object> word = mp.play("e");
         assertTrue(word.isEmpty());
     }
 
     public void test04Replay() throws Exception {
-        Automaton a = new Pruner().transform(new Expression()
-                .fromString("a(bbb)*e"));
-        Automaton b = new Pruner().transform(new Expression()
-                .fromString("a(bb)*e"));
-        //      Automaton c = new Pruner().transform(new Expression().fromString("bdde"));      
+        Automaton a = new Pruner().transform(new Expression().fromString("a(bbb)*e"));
+        Automaton b = new Pruner().transform(new Expression().fromString("a(bb)*e"));
+        // Automaton c = new Pruner().transform(new
+        // Expression().fromString("bdde"));
         MixPlay mp = new MixPlay();
         mp.addAutomaton(b);
         mp.addAutomaton(a);
-        //      mp.addAutomaton(c);
-        List check = Arrays.asList(new String[] { "a" });
+        // mp.addAutomaton(c);
+        List<String> check = Arrays.asList("a");
         mp.reset();
-        List word = mp.play("a");
+        List<Object> word = mp.play("a");
         word = mp.play("e");
-        check = Arrays.asList(new String[] { "e" });
+        check = Arrays.asList("e");
         assertEquals(check, word);
     }
 }

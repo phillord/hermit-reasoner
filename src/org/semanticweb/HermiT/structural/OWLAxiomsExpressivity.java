@@ -75,10 +75,10 @@ public class OWLAxiomsExpressivity extends OWLAxiomVisitorAdapter implements OWL
         for (OWLObjectPropertyExpression property : axioms.m_asymmetricObjectProperties)
             visitProperty(property);
         if (!axioms.m_dataProperties.isEmpty()
-        		|| !axioms.m_disjointDataProperties.isEmpty()
-        		|| !axioms.m_dataPropertyInclusions.isEmpty()
-        		|| !axioms.m_dataRangeInclusions.isEmpty()
-        		|| !axioms.m_definedDatatypesIRIs.isEmpty())
+                || !axioms.m_disjointDataProperties.isEmpty()
+                || !axioms.m_dataPropertyInclusions.isEmpty()
+                || !axioms.m_dataRangeInclusions.isEmpty()
+                || !axioms.m_definedDatatypesIRIs.isEmpty())
             m_hasDatatypes=true;
         for (OWLIndividualAxiom fact : axioms.m_facts)
             fact.accept(this);
@@ -86,103 +86,125 @@ public class OWLAxiomsExpressivity extends OWLAxiomVisitorAdapter implements OWL
     }
 
     protected void visitProperty(OWLObjectPropertyExpression object) {
-        if (object.getSimplified().isAnonymous())
+        if (object.isAnonymous())
             m_hasInverseRoles=true;
     }
 
+    @Override
     public void visit(OWLClass desc) {
     }
 
+    @Override
     public void visit(OWLObjectComplementOf object) {
         object.getOperand().accept(this);
     }
 
+    @Override
     public void visit(OWLObjectIntersectionOf object) {
         for (OWLClassExpression description : object.getOperands())
             description.accept(this);
     }
 
+    @Override
     public void visit(OWLObjectUnionOf object) {
         for (OWLClassExpression description : object.getOperands())
             description.accept(this);
     }
 
+    @Override
     public void visit(OWLObjectOneOf object) {
         m_hasNominals=true;
     }
 
+    @Override
     public void visit(OWLObjectSomeValuesFrom object) {
         visitProperty(object.getProperty());
         object.getFiller().accept(this);
     }
 
+    @Override
     public void visit(OWLObjectHasValue object) {
         m_hasNominals=true;
         visitProperty(object.getProperty());
     }
 
+    @Override
     public void visit(OWLObjectHasSelf object) {
         visitProperty(object.getProperty());
     }
 
+    @Override
     public void visit(OWLObjectAllValuesFrom object) {
         visitProperty(object.getProperty());
         object.getFiller().accept(this);
     }
 
+    @Override
     public void visit(OWLObjectMinCardinality object) {
         visitProperty(object.getProperty());
         object.getFiller().accept(this);
     }
 
+    @Override
     public void visit(OWLObjectMaxCardinality object) {
         m_hasAtMostRestrictions=true;
         visitProperty(object.getProperty());
         object.getFiller().accept(this);
     }
 
+    @Override
     public void visit(OWLObjectExactCardinality object) {
         m_hasAtMostRestrictions=true;
         visitProperty(object.getProperty());
         object.getFiller().accept(this);
     }
 
+    @Override
     public void visit(OWLDataHasValue object) {
         m_hasDatatypes=true;
     }
 
+    @Override
     public void visit(OWLDataSomeValuesFrom object) {
         m_hasDatatypes=true;
     }
 
+    @Override
     public void visit(OWLDataAllValuesFrom object) {
         m_hasDatatypes=true;
     }
 
+    @Override
     public void visit(OWLDataMinCardinality object) {
         m_hasDatatypes=true;
     }
 
+    @Override
     public void visit(OWLDataMaxCardinality object) {
         m_hasDatatypes=true;
     }
 
+    @Override
     public void visit(OWLDataExactCardinality object) {
         m_hasDatatypes=true;
     }
 
-     public void visit(OWLClassAssertionAxiom object) {
+     @Override
+    public void visit(OWLClassAssertionAxiom object) {
         object.getClassExpression().accept(OWLAxiomsExpressivity.this);
     }
 
+    @Override
     public void visit(OWLObjectPropertyAssertionAxiom object) {
         visitProperty(object.getProperty());
     }
 
+    @Override
     public void visit(OWLNegativeObjectPropertyAssertionAxiom object) {
         visitProperty(object.getProperty());
     }
 
+    @Override
     public void visit(OWLDataPropertyAssertionAxiom object) {
         m_hasDatatypes=true;
     }

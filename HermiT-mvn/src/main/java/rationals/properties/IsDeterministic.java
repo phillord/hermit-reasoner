@@ -36,7 +36,6 @@
 package rationals.properties;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import rationals.Automaton;
@@ -57,19 +56,15 @@ import rationals.Transition;
  */
 public class IsDeterministic implements UnaryTest {
 
-    /* (non-Javadoc)
-     * @see rationals.properties.UnaryTest#test(rationals.Automaton)
-     */
+    @Override
     public boolean test(Automaton a) {
         if(a.alphabet().contains(null))
             return false;
         if(a.initials().size() > 1)
             return false;
-        for(Iterator it = a.states().iterator();it.hasNext();) {
-            State s = (State)it.next();
-            Set tra = new HashSet();
-            for(Iterator it2 = a.delta(s).iterator();it2.hasNext();) {
-                Transition tr =(Transition)it2.next();
+        for(State s : a.states()) {
+            Set<Object> tra = new HashSet<>();
+            for(Transition tr : a.delta(s)) {
                 if(tra.contains(tr.label()))
                     return false;
                 else

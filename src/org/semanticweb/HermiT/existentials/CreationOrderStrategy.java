@@ -35,9 +35,11 @@ public class CreationOrderStrategy extends AbstractExpansionStrategy implements 
     public CreationOrderStrategy(BlockingStrategy strategy) {
         super(strategy,true);
     }
+    @Override
     public boolean isDeterministic() {
         return true;
     }
+    @Override
     protected void expandExistential(AtLeast atLeast,Node forNode) {
         m_existentialExpansionManager.expand(atLeast,forNode);
         m_existentialExpansionManager.markExistentialProcessed(atLeast,forNode);

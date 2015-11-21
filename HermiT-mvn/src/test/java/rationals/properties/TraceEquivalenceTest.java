@@ -44,6 +44,7 @@ import rationals.Transition;
  * @author nono
  * @version $Id: TraceEquivalenceTest.java 2 2006-08-24 14:41:48Z oqube $
  */
+@SuppressWarnings("javadoc")
 public class TraceEquivalenceTest extends TestCase {
 
     /**
@@ -63,15 +64,15 @@ public class TraceEquivalenceTest extends TestCase {
         State a1 = a.addState(true, false);
         State a2 = a.addState(false, true);
         State a3 = a.addState(false, true);
-        a.addTransition(new Transition(a1, "a", a2));
-        a.addTransition(new Transition(a1, "a", a3));
-        a.addTransition(new Transition(a2, "b", a3));
-        a.addTransition(new Transition(a3, "b", a2));
+        a.addTransition(new Transition(a1, "a", a2), null);
+        a.addTransition(new Transition(a1, "a", a3), null);
+        a.addTransition(new Transition(a2, "b", a3), null);
+        a.addTransition(new Transition(a3, "b", a2), null);
         Automaton b = new Automaton();
         State b1 = b.addState(true, false);
         State b2 = b.addState(false, true);
-        b.addTransition(new Transition(b1, "a", b2));
-        b.addTransition(new Transition(b2, "b", b2));
+        b.addTransition(new Transition(b1, "a", b2), null);
+        b.addTransition(new Transition(b2, "b", b2), null);
         TraceEquivalence equiv = new TraceEquivalence();
         AreEquivalent eq = new AreEquivalent(equiv);
         assertTrue(eq.test(a, b));

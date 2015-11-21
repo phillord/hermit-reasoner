@@ -26,12 +26,15 @@ public class WaitForCommand extends AbstractCommand implements DebuggerCommand {
     public WaitForCommand(Debugger debugger) {
         super(debugger);
     }
+    @Override
     public String getCommandName() {
         return "waitFor";
     }
+    @Override
     public String[] getDescription() {
         return new String[] { "([+|-]gexists|exists|clash|merge|dtcheck|blvalstart|blvalfinish)+","sets (+ default) or removes (-) breakpoint options" };
     }
+    @Override
     public void printHelp(PrintWriter writer) {
         writer.println("usage: waitFor ([+|-]gexists|exists|clash|merge)+");
         writer.println("    Sets (+ default) or removes (-) breakpoint options for the debugger.");
@@ -45,6 +48,7 @@ public class WaitForCommand extends AbstractCommand implements DebuggerCommand {
         writer.println("        blvalfinish - stop after blocking validation");
         writer.println("    Example: waitFor -clash +gexists");
     }
+    @Override
     public void execute(String[] args) {
         boolean add;
         for (int index=1;index<args.length;index++) {

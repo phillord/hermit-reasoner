@@ -29,15 +29,18 @@ public class DerivationTreeCommand extends AbstractCommand {
     public DerivationTreeCommand(Debugger debugger) {
         super(debugger);
     }
+    @Override
     public String getCommandName() {
         return "dertree";
     }
+    @Override
     public String[] getDescription() {
         return new String[] {
             "clash","shows the derivation tree for the clash",
             "predicate [nodeID]+","shows the derivation tree for the given atom",
         };
     }
+    @Override
     public void printHelp(PrintWriter writer) {
         writer.println("usage: dertree clash");
         writer.println("    Shows the derivation tree for the clash.");
@@ -51,6 +54,7 @@ public class DerivationTreeCommand extends AbstractCommand {
         writer.println("    red: existential expansion");
         writer.println("    magenta: base/given fact");
     }
+    @Override
     public void execute(String[] args) {
         if (args.length<2) {
             m_debugger.getOutput().println("The specification of the predicate is missing.");

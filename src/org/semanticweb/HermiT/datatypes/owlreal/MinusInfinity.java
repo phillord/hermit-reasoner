@@ -23,21 +23,27 @@ public final class MinusInfinity extends Number {
 
     private MinusInfinity() {
     }
+    @Override
     public boolean equals(Object that) {
         return this==that;
     }
+    @Override
     public String toString() {
         return "-INF";
     }
+    @Override
     public double doubleValue() {
         throw new UnsupportedOperationException();
     }
+    @Override
     public float floatValue() {
         throw new UnsupportedOperationException();
     }
+    @Override
     public int intValue() {
         throw new UnsupportedOperationException();
     }
+    @Override
     public long longValue() {
         throw new UnsupportedOperationException();
     }

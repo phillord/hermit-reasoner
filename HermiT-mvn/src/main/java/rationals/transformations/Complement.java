@@ -59,48 +59,37 @@ import rationals.Transition;
  */
 public class Complement implements UnaryTransformation {
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see rationals.transformations.UnaryTransformation#transform(rationals.Automaton)
-     */
+    @Override
     public Automaton transform(Automaton a) {
         Automaton ret = new Automaton();
-        List todo = new ArrayList();
-        Map sm = new HashMap();
-        Set done = new HashSet();
-        Set s = a.initials();
+        List<State> todo = new ArrayList<>();
+        Map<State, State> sm = new HashMap<>();
+        Set<State> done = new HashSet<>();
+        Set<State> s = a.initials();
         todo.addAll(s);
         while (!todo.isEmpty()) {
-            State st = (State) todo.remove(0);
-            State ns = (State) sm.get(st);
+            State st = todo.remove(0);
+            State ns = sm.get(st);
             if (ns == null) {
                 ns = ret.addState(st.isInitial(), !st.isTerminal());
                 sm.put(st, ns);
             }
             done.add(st);
-            for (Iterator it = a.alphabet().iterator(); it.hasNext();) {
-                Object l = it.next();
-                Set ends = a.delta(st, l);
+            for (Object l : a.alphabet()) {
+                Set<Transition> ends = a.delta(st, l);
                 if (ends.isEmpty())
-                    try {
-                        ret.addTransition(new Transition(ns, l, ns));
-                    } catch (NoSuchStateException e) {
-                    }
+                        ret.addTransition(new Transition(ns, l, ns),null);
                 else {
-                    for (Iterator i = ends.iterator(); i.hasNext();) {
-                        State end = ((Transition) i.next()).end();
-                        State ne = (State) sm.get(end);
+                    for (Iterator<Transition> i = ends.iterator(); i.hasNext();) {
+                        State end = i.next().end();
+                        State ne = sm.get(end);
                         if (ne == null) {
                             ne = ret.addState(end.isInitial(), !end
                                     .isTerminal());
                             sm.put(end, ne);
                             todo.add(end);
                         }
-                        try {
-                            ret.addTransition(new Transition(ns, l, ne));
-                        } catch (NoSuchStateException e) {
-                        }
+                            ret.addTransition(new Transition(ns, l, ne),null);
                     }
                 }
 

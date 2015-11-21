@@ -62,9 +62,7 @@ public class Iteration extends RationalExpr{
         this.expr = expr;
     }
     
-    /* (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
+    @Override
     public String toString() {
        return expr.toString() + "*";
     }

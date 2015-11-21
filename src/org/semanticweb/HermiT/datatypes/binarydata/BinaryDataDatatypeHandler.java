@@ -36,21 +36,23 @@ public class BinaryDataDatatypeHandler implements DatatypeHandler {
     protected static final ValueSpaceSubset HEX_BINARY_ALL=new BinaryDataValueSpaceSubset(new BinaryDataLengthInterval(BinaryDataType.HEX_BINARY,0,Integer.MAX_VALUE));
     protected static final ValueSpaceSubset BASE_64_BINARY_ALL=new BinaryDataValueSpaceSubset(new BinaryDataLengthInterval(BinaryDataType.BASE_64_BINARY,0,Integer.MAX_VALUE));
     protected static final ValueSpaceSubset EMPTY=new BinaryDataValueSpaceSubset();
-    protected static final Set<String> s_managedDatatypeURIs=new HashSet<String>();
+    protected static final Set<String> s_managedDatatypeURIs=new HashSet<>();
     static {
         s_managedDatatypeURIs.add(XSD_HEX_BINARY);
         s_managedDatatypeURIs.add(XSD_BASE_64_BINARY);
     }
-    protected static final Set<String> s_supportedFacetURIs=new HashSet<String>();
+    protected static final Set<String> s_supportedFacetURIs=new HashSet<>();
     static {
         s_supportedFacetURIs.add(XSD_NS+"minLength");
         s_supportedFacetURIs.add(XSD_NS+"maxLength");
         s_supportedFacetURIs.add(XSD_NS+"length");
     }
 
+    @Override
     public Set<String> getManagedDatatypeURIs() {
         return s_managedDatatypeURIs;
     }
+    @Override
     public Object parseLiteral(String lexicalForm,String datatypeURI) throws MalformedLiteralException {
         assert s_managedDatatypeURIs.contains(datatypeURI);
         BinaryData binaryDataValue;
@@ -63,6 +65,7 @@ public class BinaryDataDatatypeHandler implements DatatypeHandler {
         else
             return binaryDataValue;
     }
+    @Override
     public void validateDatatypeRestriction(DatatypeRestriction datatypeRestriction) throws UnsupportedFacetException {
         String datatypeURI=datatypeRestriction.getDatatypeURI();
         assert s_managedDatatypeURIs.contains(datatypeURI);
@@ -78,6 +81,7 @@ public class BinaryDataDatatypeHandler implements DatatypeHandler {
                 throw new UnsupportedFacetException("The datatype restriction "+this.toString()+" cannot be handled. The facet with URI '"+facetURI+"' does not support integer "+value+" as value. "+(value<0?"The value should not be negative. ":"The value is outside of the supported integer range, i.e., it is larger than "+Integer.MAX_VALUE));
         }
     }
+    @Override
     public ValueSpaceSubset createValueSpaceSubset(DatatypeRestriction datatypeRestriction) {
         String datatypeURI=datatypeRestriction.getDatatypeURI();
         assert s_managedDatatypeURIs.contains(datatypeURI);
@@ -92,6 +96,7 @@ public class BinaryDataDatatypeHandler implements DatatypeHandler {
         else
             return new BinaryDataValueSpaceSubset(interval);
     }
+    @Override
     public ValueSpaceSubset conjoinWithDR(ValueSpaceSubset valueSpaceSubset,DatatypeRestriction datatypeRestriction) {
         assert s_managedDatatypeURIs.contains(datatypeRestriction.getDatatypeURI());
         if (datatypeRestriction.getNumberOfFacetRestrictions()==0 || valueSpaceSubset==EMPTY)
@@ -103,7 +108,7 @@ public class BinaryDataDatatypeHandler implements DatatypeHandler {
             else {
                 BinaryDataValueSpaceSubset doubleSubset=(BinaryDataValueSpaceSubset)valueSpaceSubset;
                 List<BinaryDataLengthInterval> oldIntervals=doubleSubset.m_intervals;
-                List<BinaryDataLengthInterval> newIntervals=new ArrayList<BinaryDataLengthInterval>();
+                List<BinaryDataLengthInterval> newIntervals=new ArrayList<>();
                 for (int index=0;index<oldIntervals.size();index++) {
                     BinaryDataLengthInterval oldInterval=oldIntervals.get(index);
                     BinaryDataLengthInterval intersection=oldInterval.intersectWith(interval);
@@ -117,6 +122,7 @@ public class BinaryDataDatatypeHandler implements DatatypeHandler {
             }
         }
     }
+    @Override
     public ValueSpaceSubset conjoinWithDRNegation(ValueSpaceSubset valueSpaceSubset,DatatypeRestriction datatypeRestriction) {
         String datatypeURI=datatypeRestriction.getDatatypeURI();
         assert datatypeRestriction.getNumberOfFacetRestrictions()!=0;
@@ -136,7 +142,7 @@ public class BinaryDataDatatypeHandler implements DatatypeHandler {
                 if (interval.m_maxLength!=Integer.MAX_VALUE)
                     complementInterval2=new BinaryDataLengthInterval(binaryDataType,interval.m_maxLength+1,Integer.MAX_VALUE);
                 List<BinaryDataLengthInterval> oldIntervals=doubleSubset.m_intervals;
-                List<BinaryDataLengthInterval> newIntervals=new ArrayList<BinaryDataLengthInterval>();
+                List<BinaryDataLengthInterval> newIntervals=new ArrayList<>();
                 for (int index=0;index<oldIntervals.size();index++) {
                     BinaryDataLengthInterval oldInterval=oldIntervals.get(index);
                     if (complementInterval1!=null) {
@@ -182,9 +188,11 @@ public class BinaryDataDatatypeHandler implements DatatypeHandler {
         else
             return new BinaryDataLengthInterval(binaryDataType,minLength,maxLength);
     }
+    @Override
     public boolean isSubsetOf(String subsetDatatypeURI,String supersetDatatypeURI) {
         return subsetDatatypeURI.equals(supersetDatatypeURI);
     }
+    @Override
     public boolean isDisjointWith(String datatypeURI1,String datatypeURI2) {
         return !datatypeURI1.equals(datatypeURI2);
     }

@@ -45,9 +45,7 @@ import rationals.Automaton;
  */
 public class Identity implements UnaryTransformation {
 
-    /* (non-Javadoc)
-     * @see rationals.transformations.UnaryTransformation#transform(rationals.Automaton)
-     */
+    @Override
     public Automaton transform(Automaton a) {
         return (Automaton)a.clone();
     }

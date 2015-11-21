@@ -120,7 +120,7 @@ public final class Tableau implements Serializable {
             m_descriptionGraphManager=new DescriptionGraphManager(this);
             m_datatypeManager=new DatatypeManager(this);
             m_existentialExpansionStrategy.initialize(this);
-            m_existentialConceptsBuffers=new ArrayList<List<ExistentialConcept>>();
+            m_existentialConceptsBuffers=new ArrayList<>();
             m_useDisjunctionLearning=useDisjunctionLearning;
             m_hasDescriptionGraphs=!m_permanentDLOntology.getAllDescriptionGraphs().isEmpty();
             m_branchingPoints=new BranchingPoint[2];
@@ -769,7 +769,7 @@ public final class Tableau implements Serializable {
     }
     protected List<ExistentialConcept> getExistentialConceptsBuffer() {
         if (m_existentialConceptsBuffers.isEmpty())
-            return new ArrayList<ExistentialConcept>();
+            return new ArrayList<>();
         else
             return m_existentialConceptsBuffers.remove(m_existentialConceptsBuffers.size()-1);
     }

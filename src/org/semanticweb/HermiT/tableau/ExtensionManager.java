@@ -58,7 +58,7 @@ public final class ExtensionManager implements Serializable {
         m_tableau=tableau;
         m_tableauMonitor=m_tableau.m_tableauMonitor;
         m_dependencySetFactory=m_tableau.m_dependencySetFactory;
-        m_extensionTablesByArity=new HashMap<Integer,ExtensionTable>();
+        m_extensionTablesByArity=new HashMap<>();
         m_binaryExtensionTable=
             new ExtensionTableWithTupleIndexes(m_tableau,2,!m_tableau.isDeterministic(),
                 new TupleIndex[] {
@@ -68,9 +68,11 @@ public final class ExtensionManager implements Serializable {
             ) {
                 private static final long serialVersionUID=1462821385000191875L;
 
+                @Override
                 public boolean isTupleActive(Object[] tuple) {
                     return ((Node)tuple[1]).isActive();
                 }
+                @Override
                 public boolean isTupleActive(int tupleIndex) {
                     return ((Node)m_tupleTable.getTupleObject(tupleIndex,1)).isActive();
                 }
@@ -86,9 +88,11 @@ public final class ExtensionManager implements Serializable {
             ) {
                 private static final long serialVersionUID=-731201626401421877L;
 
+                @Override
                 public boolean isTupleActive(Object[] tuple) {
                     return ((Node)tuple[1]).isActive() && ((Node)tuple[2]).isActive();
                 }
+                @Override
                 public boolean isTupleActive(int tupleIndex) {
                     return ((Node)m_tupleTable.getTupleObject(tupleIndex,1)).isActive()
                         && ((Node)m_tupleTable.getTupleObject(tupleIndex,2)).isActive();

@@ -33,18 +33,22 @@ public class AtomicRole extends Role implements DLPredicate {
     public String getIRI() {
         return m_iri;
     }
+    @Override
     public int getArity() {
         return 2;
     }
+    @Override
     public Role getInverse() {
         if (this==TOP_OBJECT_ROLE || this==BOTTOM_OBJECT_ROLE)
             return this;
         else
             return InverseRole.create(this);
     }
+    @Override
     public Atom getRoleAssertion(Term term0,Term term1) {
         return Atom.create(this,term0,term1);
     }
+    @Override
     public String toString(Prefixes prefixes) {
         return prefixes.abbreviateIRI(m_iri);
     }
@@ -53,9 +57,11 @@ public class AtomicRole extends Role implements DLPredicate {
     }
 
     protected static InterningManager<AtomicRole> s_interningManager=new InterningManager<AtomicRole>() {
+        @Override
         protected boolean equal(AtomicRole object1,AtomicRole object2) {
             return object1.m_iri.equals(object2.m_iri);
         }
+        @Override
         protected int getHashCode(AtomicRole object) {
             return object.m_iri.hashCode();
         }

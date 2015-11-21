@@ -35,12 +35,14 @@ public class NoNaNFloatSubset implements ValueSpaceSubset {
     public NoNaNFloatSubset(List<FloatInterval> intervals) {
         m_intervals=intervals;
     }
+    @Override
     public boolean hasCardinalityAtLeast(int number) {
         int left=number;
         for (int index=m_intervals.size()-1;left>0 && index>=0;--index)
             left=m_intervals.get(index).subtractSizeFrom(left);
         return left==0;
     }
+    @Override
     public boolean containsDataValue(Object dataValue) {
         if (dataValue instanceof Float) {
             float number=(Float)dataValue;
@@ -50,10 +52,12 @@ public class NoNaNFloatSubset implements ValueSpaceSubset {
         }
         return false;
     }
+    @Override
     public void enumerateDataValues(Collection<Object> dataValues) {
         for (int index=m_intervals.size()-1;index>=0;--index)
             m_intervals.get(index).enumerateNumbers(dataValues);
     }
+    @Override
     public String toString() {
         StringBuffer buffer=new StringBuffer();
         buffer.append("xsd:float{");

@@ -63,12 +63,7 @@ public class ModelCheck implements BinaryTest {
 
     private Automaton cex;
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see rationals.properties.BinaryTest#test(rationals.Automaton,
-     *      rationals.Automaton)
-     */
+    @Override
     public boolean test(Automaton a, Automaton b) {
         Automaton ca = new Complement().transform(a);
         cex = new Pruner().transform(new Mix().transform(ca, b));

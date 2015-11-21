@@ -27,16 +27,20 @@ public class IsAncestorOfCommand extends AbstractCommand {
     public IsAncestorOfCommand(Debugger debugger) {
         super(debugger);
     }
+    @Override
     public String getCommandName() {
         return "isAncOf";
     }
+    @Override
     public String[] getDescription() {
         return new String[] { "nodeID1 nodeID2","tests whether nodeID1 is an ancestor of nodeID2" };
     }
+    @Override
     public void printHelp(PrintWriter writer) {
         writer.println("usage: isAncOf nodeID1 nodeID2");
         writer.println("    Prints whether the node for nodeID1 is an ancestor of the node for nodeID2.");
     }
+    @Override
     public void execute(String[] args) {
         if (args.length<3) {
             m_debugger.getOutput().println("Node IDs are missing.");

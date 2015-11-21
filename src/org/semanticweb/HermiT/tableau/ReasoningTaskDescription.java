@@ -64,6 +64,7 @@ public class ReasoningTaskDescription {
     public String getMessagePattern() {
         return m_messagePattern;
     }
+    @Override
     public String toString() {
         return getTaskDescription(Prefixes.STANDARD_PREFIXES);
     }

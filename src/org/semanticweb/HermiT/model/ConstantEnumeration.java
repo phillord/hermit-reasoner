@@ -36,15 +36,19 @@ public class ConstantEnumeration extends AtomicDataRange {
     public Constant getConstant(int index) {
         return m_constants[index];
     }
+    @Override
     public LiteralDataRange getNegation() {
         return AtomicNegationDataRange.create(this);
     }
+    @Override
     public boolean isAlwaysTrue() {
         return false;
     }
+    @Override
     public boolean isAlwaysFalse() {
         return m_constants.length==0;
     }
+    @Override
     public String toString(Prefixes prefixes) {
         StringBuffer buffer=new StringBuffer();
         buffer.append("{ ");
@@ -61,6 +65,7 @@ public class ConstantEnumeration extends AtomicDataRange {
     }
 
     protected static InterningManager<ConstantEnumeration> s_interningManager=new InterningManager<ConstantEnumeration>() {
+        @Override
         protected boolean equal(ConstantEnumeration object1,ConstantEnumeration object2) {
             if (object1.m_constants.length!=object2.m_constants.length)
                 return false;
@@ -75,6 +80,7 @@ public class ConstantEnumeration extends AtomicDataRange {
                     return true;
             return false;
         }
+        @Override
         protected int getHashCode(ConstantEnumeration object) {
             int hashCode=0;
             for (int index=object.m_constants.length-1;index>=0;--index)

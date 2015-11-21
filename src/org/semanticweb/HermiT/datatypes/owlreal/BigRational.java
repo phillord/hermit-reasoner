@@ -55,9 +55,11 @@ public class BigRational extends Number implements Comparable<BigRational> {
             return false;
         }
     }
+    @Override
     public int compareTo(BigRational that) {
         return m_numerator.multiply(that.m_denominator).compareTo(m_denominator.multiply(that.m_numerator));
     }
+    @Override
     public boolean equals(Object that) {
         if (that==this)
             return true;
@@ -66,21 +68,27 @@ public class BigRational extends Number implements Comparable<BigRational> {
         BigRational thatRational=(BigRational)that;
         return m_numerator.equals(thatRational.m_numerator) && m_denominator.equals(thatRational.m_denominator);
     }
+    @Override
     public int hashCode() {
         return m_numerator.hashCode()*3+m_denominator.hashCode();
     }
+    @Override
     public String toString() {
         return m_numerator.toString()+"/"+m_denominator.toString();
     }
+    @Override
     public double doubleValue() {
         return m_numerator.divide(m_denominator).doubleValue();
     }
+    @Override
     public float floatValue() {
         return m_numerator.divide(m_denominator).floatValue();
     }
+    @Override
     public int intValue() {
         return m_numerator.divide(m_denominator).intValue();
     }
+    @Override
     public long longValue() {
         return m_numerator.divide(m_denominator).longValue();
     }

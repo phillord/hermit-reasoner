@@ -35,6 +35,7 @@
  */
 package rationals.properties;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -52,43 +53,26 @@ import rationals.transformations.EpsilonTransitionRemover;
  */
 public class WeakBisimulation implements Relation {
 
-    private Automaton a1;
-
-    private Automaton a2;
-
-    private Set exp;
-
     private Bisimulation bisim;
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see rationals.tests.Relation#setAutomata(rationals.Automaton,
-     *      rationals.Automaton)
-     */
+    @Override
     public void setAutomata(Automaton a1, Automaton a2) {
         EpsilonTransitionRemover er = new EpsilonTransitionRemover();
         this.bisim = new Bisimulation( er.transform(a1), er.transform(a2));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see rationals.tests.Relation#equivalence(rationals.State,
-     *      rationals.State)
-     */
+    @Override
     public boolean equivalence(State q0a, State q0b) {
         return bisim.equivalence(q0a,q0b);
     }
 
-    public boolean equivalence(Set nsa, Set nsb) {
+    @Override
+    public boolean equivalence(Set<State> nsa, Set<State> nsb) {
         return bisim.equivalence(nsa,nsb);
     }
-    /* (non-Javadoc)
-     * @see rationals.properties.Relation#getErrorTrace()
-     */
-    public List getErrorTrace() {
-        // TODO Auto-generated method stub
-        return null;
+
+    @Override
+    public List<Object> getErrorTrace() {
+        return Collections.emptyList();
     }
 }

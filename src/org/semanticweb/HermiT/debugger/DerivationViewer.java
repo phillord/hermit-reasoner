@@ -28,12 +28,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.Serializable;
 
-import javax.swing.Icon;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTree;
+import javax.swing.*;
 import javax.swing.event.EventListenerList;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
@@ -51,7 +46,7 @@ public class DerivationViewer extends JFrame {
 
     public DerivationViewer(Prefixes prefixes,DerivationHistory.Fact root) {
         super("Derivation tree for "+root.toString(prefixes));
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         m_prefixes=prefixes;
         m_derivationTreeTreeModel=new DerivationTreeTreeModel(root);
         m_derivationTree=new JTree(m_derivationTreeTreeModel);
@@ -62,6 +57,7 @@ public class DerivationViewer extends JFrame {
         scrollPane.setPreferredSize(new Dimension(600,400));
         JButton button=new JButton("Refresh");
         button.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 refresh();
             }
@@ -89,22 +85,27 @@ public class DerivationViewer extends JFrame {
             m_eventListeners=new EventListenerList();
             m_root=root;
         }
+        @Override
         public void addTreeModelListener(TreeModelListener listener) {
             m_eventListeners.add(TreeModelListener.class,listener);
         }
+        @Override
         public void removeTreeModelListener(TreeModelListener listener) {
             m_eventListeners.remove(TreeModelListener.class,listener);
         }
+        @Override
         public Object getChild(Object parent,int index) {
             DerivationHistory.Fact parentFact=(DerivationHistory.Fact)parent;
             DerivationHistory.Derivation derivation=parentFact.getDerivation();
             return derivation.getPremise(index);
         }
+        @Override
         public int getChildCount(Object parent) {
             DerivationHistory.Fact parentFact=(DerivationHistory.Fact)parent;
             DerivationHistory.Derivation derivation=parentFact.getDerivation();
             return derivation.getNumberOfPremises();
         }
+        @Override
         public int getIndexOfChild(Object parent,Object child) {
             DerivationHistory.Fact parentFact=(DerivationHistory.Fact)parent;
             DerivationHistory.Derivation derivation=parentFact.getDerivation();
@@ -113,14 +114,17 @@ public class DerivationViewer extends JFrame {
                     return index;
             return -1;
         }
+        @Override
         public Object getRoot() {
             return m_root;
         }
+        @Override
         public boolean isLeaf(Object node) {
             DerivationHistory.Fact nodeFact=(DerivationHistory.Fact)node;
             DerivationHistory.Derivation derivation=nodeFact.getDerivation();
             return derivation.getNumberOfPremises()==0;
         }
+        @Override
         public void valueForPathChanged(TreePath path,Object newValue) {
         }
         public void refresh() {
@@ -135,8 +139,8 @@ public class DerivationViewer extends JFrame {
     protected static class TextIcon implements Icon,Serializable {
         private static final long serialVersionUID=2955881594360729470L;
 
-        protected static final int WIDTH=16;
-        protected static final int HEIGHT=16;
+        protected static final int WIDTH16=16;
+        protected static final int HEIGHT16=16;
 
         protected final Color m_background;
         protected final Color m_foreground;
@@ -149,22 +153,25 @@ public class DerivationViewer extends JFrame {
             m_text=text;
             m_font=font;
         }
+        @Override
         public int getIconHeight() {
-            return WIDTH;
+            return WIDTH16;
         }
+        @Override
         public int getIconWidth() {
-            return HEIGHT;
+            return HEIGHT16;
         }
+        @Override
         public void paintIcon(Component c,Graphics g,int x,int y) {
             Color oldColor=g.getColor();
             g.setColor(m_background);
-            g.fillOval(x+2,y+2,x+WIDTH-2,y+HEIGHT-2);
+            g.fillOval(x+2,y+2,x+WIDTH16-2,y+HEIGHT16-2);
             g.setColor(m_foreground);
             Font oldFont=g.getFont();
             g.setFont(m_font);
             FontMetrics fontMetrics=g.getFontMetrics();
-            int textX=x+(WIDTH-fontMetrics.stringWidth(m_text))/2+2;
-            int textY=y+(HEIGHT+fontMetrics.getAscent()-fontMetrics.getDescent())/2;
+            int textX=x+(WIDTH16-fontMetrics.stringWidth(m_text))/2+2;
+            int textY=y+(HEIGHT16+fontMetrics.getAscent()-fontMetrics.getDescent())/2;
             g.drawString(m_text,textX,textY);
             g.setFont(oldFont);
             g.setColor(oldColor);
@@ -183,13 +190,14 @@ public class DerivationViewer extends JFrame {
 
     protected class DerivationTreeCellRenderer extends DefaultTreeCellRenderer {
 
-        public Component getTreeCellRendererComponent(JTree tree,Object value,boolean selected,boolean expanded,boolean leaf,int row,boolean hasFocus) {
+        @Override
+        public Component getTreeCellRendererComponent(JTree tree,Object value,boolean s,boolean expanded,boolean leaf,int row,boolean focus) {
             DerivationHistory.Fact fact=(DerivationHistory.Fact)value;
             DerivationHistory.Derivation derivation=fact.getDerivation();
             StringBuffer text=new StringBuffer();
             text.append(fact.toString(m_prefixes));
             text.append(derivation.toString(m_prefixes));
-            super.getTreeCellRendererComponent(tree,text.toString(),selected,expanded,leaf,row,hasFocus);
+            super.getTreeCellRendererComponent(tree,text.toString(),s,expanded,leaf,row,focus);
             if (derivation instanceof DerivationHistory.DLClauseApplication)
                 setIcon(DLCLAUSE_APPLICATION_ICON);
             else if (derivation instanceof DerivationHistory.DisjunctApplication)

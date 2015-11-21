@@ -64,12 +64,13 @@ public class DefaultLexer implements Lexer {
         end = false;
     }
     
+    @Override
     public void read() throws ConverterException {
         if (end) {
             current = END;
             return;
         }
-        ;
+
         int tk;
         try {
             tk = tokenizer.nextToken();
@@ -143,18 +144,22 @@ public class DefaultLexer implements Lexer {
         }
     }
 
+    @Override
     public int lineNumber() {
         return tokenizer.lineno();
     }
 
+    @Override
     public Object label() {
         return image;
     }
 
+    @Override
     public int value() {
         return value;
     }
 
+    @Override
     public int current() {
         return current;
     }

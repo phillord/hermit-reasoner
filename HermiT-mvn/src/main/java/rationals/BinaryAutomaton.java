@@ -60,9 +60,9 @@ import rationals.DefaultStateFactory.DefaultState;
  */
 public class BinaryAutomaton extends Automaton {
 
-    private Object one;
+    protected Object one;
 
-    private Object zero;
+    protected Object zero;
 
     // array of transitions
     private BitSet[][] trans;
@@ -79,62 +79,58 @@ public class BinaryAutomaton extends Automaton {
      * @author nono
      * @version $Id: BinaryAutomaton.java 2 2006-08-24 14:41:48Z oqube $
      */
+    @SuppressWarnings("rawtypes")
     class TransitionSet implements Set {
 
-        private BitSet from;
+        protected BitSet from;
 
-        private BitSet[][] trans;
+        private BitSet[][] transactions;
 
         private BitSet bits;
-        
+
         /**
          * @param fromSet
          *            the set of states indices to take into account
-         * @param trans the set of transitions
+         * @param trans
+         *            the set of transitions
          */
-        public TransitionSet(BitSet fromSet,BitSet[][] trans) {
+        public TransitionSet(BitSet fromSet, BitSet[][] trans) {
             this.from = fromSet;
-            this.trans = trans;
+            this.transactions = trans;
         }
 
-
+        @Override
         public boolean equals(Object obj) {
             TransitionSet ts = (TransitionSet) obj;
-            return (ts == null) ? false
-                    : (ts.from.equals(from) && ts.trans == trans);
+            return (ts == null) ? false : (ts.from.equals(from) && ts.transactions == transactions);
         }
 
+        @Override
         public int hashCode() {
-            return from.hashCode() << 9 ^trans.hashCode() ;
+            return from.hashCode() << 9 ^ transactions.hashCode();
         }
 
-        public String toString() {
-            return super.toString();
-        }
+        protected int modcount = 0;
 
-        private int modcount = 0;
+        protected int mods = 0;
 
-        private int mods = 0;
+        protected int frombit = -1;
+        protected int lblbit = -1;
 
-        private int frombit = -1;
-        private int tobit = -1;
-        private int lblbit = -1;
+        private Iterator<Transition> it = new Iterator<Transition>() {
 
-        private Iterator it = new Iterator() {
-
-            /*
-             *  (non-Javadoc)
-             * @see java.util.Iterator#remove()
-             */
+            @Override
             public void remove() {
                 // NOT IMPLEMENTED
             }
 
+            @Override
             public boolean hasNext() {
-                return from.nextSetBit(frombit) > -1 ;
+                return from.nextSetBit(frombit) > -1;
             }
 
-            public Object next() {
+            @Override
+            public Transition next() {
                 frombit = from.nextSetBit(frombit);
                 if (frombit == -1)
                     throw new NoSuchElementException();
@@ -143,69 +139,65 @@ public class BinaryAutomaton extends Automaton {
                 if (mods != modcount)
                     throw new ConcurrentModificationException();
                 // construct transition
-                DefaultStateFactory.DefaultState from = null;/*getStateFactory().new DefaultStateFactory.DefaultState(frombit,false,false);*/
-                from.initial = BinaryAutomaton.this.initials().contains(from);
-                from.terminal = BinaryAutomaton.this.terminals().contains(from);
-                
-                DefaultStateFactory.DefaultState to = null; /*new DefaultStateFactory.DefaultState(tobit,false,false);*/
-                to.initial = BinaryAutomaton.this.initials().contains(to);
-                to.terminal = BinaryAutomaton.this.terminals().contains(to);
-                
-                Transition tr = new Transition(from,lblbit == 1 ? one : zero,to);
+                DefaultStateFactory.DefaultState fromState = null;/*
+                                                                   * getStateFactory
+                                                                   * ().new
+                                                                   * DefaultStateFactory
+                                                                   * .
+                                                                   * DefaultState
+                                                                   * (frombit,
+                                                                   * false,false
+                                                                   * );
+                                                                   */
+                fromState.initial = BinaryAutomaton.this.initials().contains(fromState);
+                fromState.terminal = BinaryAutomaton.this.terminals().contains(fromState);
+
+                DefaultStateFactory.DefaultState toState = null; /*
+                                                                  * new
+                                                                  * DefaultStateFactory
+                                                                  * .
+                                                                  * DefaultState
+                                                                  * (tobit,false
+                                                                  * ,false);
+                                                                  */
+                toState.initial = BinaryAutomaton.this.initials().contains(toState);
+                toState.terminal = BinaryAutomaton.this.terminals().contains(toState);
+
+                Transition tr = new Transition(fromState, lblbit == 1 ? one : zero, toState);
                 /* advance iterator */
-                //bit++;
+                // bit++;
                 return tr;
             }
         };
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.util.Set#size()
-         */
+        @Override
         public int size() {
             return bits.cardinality();
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.util.Set#clear()
-         */
+        @Override
         public void clear() {
             modcount++;
             bits.clear();
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.util.Set#isEmpty()
-         */
+        @Override
         public boolean isEmpty() {
             return bits.isEmpty();
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.util.Set#toArray()
-         */
+        @Override
         public Object[] toArray() {
             Object[] ret = new Object[size()];
-            Iterator it = iterator();
+            Iterator<Transition> iterator = iterator();
             int i = 0;
-            while (it.hasNext()) {
-                ret[i++] = it.next();
+            while (iterator.hasNext()) {
+                ret[i++] = iterator.next();
             }
             return ret;
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.util.Set#add(java.lang.Object)
-         */
+        @Override
         public boolean add(Object o) {
             DefaultState ds = (DefaultState) o;
             if (bits.get(ds.i))
@@ -215,21 +207,13 @@ public class BinaryAutomaton extends Automaton {
             return true;
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.util.Set#contains(java.lang.Object)
-         */
+        @Override
         public boolean contains(Object o) {
             DefaultState ds = (DefaultState) o;
             return bits.get(ds.i);
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.util.Set#remove(java.lang.Object)
-         */
+        @Override
         public boolean remove(Object o) {
             DefaultState ds = (DefaultState) o;
             if (!bits.get(ds.i))
@@ -239,70 +223,46 @@ public class BinaryAutomaton extends Automaton {
             return true;
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.util.Set#addAll(java.util.Collection)
-         */
+        @Override
         public boolean addAll(Collection c) {
-        return false;
+            return false;
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.util.Set#containsAll(java.util.Collection)
-         */
+        @Override
         public boolean containsAll(Collection c) {
- return false;
+            return false;
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.util.Set#removeAll(java.util.Collection)
-         */
+        @Override
         public boolean removeAll(Collection c) {
             return false;
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.util.Set#retainAll(java.util.Collection)
-         */
+        @Override
         public boolean retainAll(Collection c) {
-        return false;
+            return false;
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.util.Set#iterator()
-         */
-        public Iterator iterator() {
+        @Override
+        public Iterator<Transition> iterator() {
             /* reset iterator */
             frombit = modcount = mods = 0;
             return it;
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.util.Set#toArray(java.lang.Object[])
-         */
+        @Override
         public Object[] toArray(Object[] a) {
             Object[] ret;
             if (a.length == size())
                 ret = a;
             else { /* create array dynamically */
-                ret = (Object[]) Array.newInstance(a.getClass()
-                        .getComponentType(), size());
+                ret = (Object[]) Array.newInstance(a.getClass().getComponentType(), size());
             }
-            Iterator it = iterator();
-            int i = 0;
-            while (it.hasNext()) {
-                DefaultState ds = (DefaultState) it.next();
+            Iterator iterator = iterator();
+            while (iterator.hasNext()) {
+                // XXX this code is never used. Transitions are returned from
+                // the iterator, but cast to states here
+                DefaultState ds = (DefaultState) iterator.next();
                 ret[ds.i] = ds;
             }
             return ret;
@@ -345,54 +305,9 @@ public class BinaryAutomaton extends Automaton {
         this(null, new Object());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see rationals.Rational#accessibleAndCoAccessibleStates()
-     */
-    public Set accessibleAndCoAccessibleStates() {
-        // TODO Auto-generated method stub
-        return super.accessibleAndCoAccessibleStates();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see rationals.Rational#accessibleStates()
-     */
-    public Set accessibleStates() {
-        // TODO Auto-generated method stub
-        return super.accessibleStates();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see rationals.Rational#accessibleStates(java.util.Set)
-     */
-    public Set accessibleStates(Set states) {
-        // TODO Auto-generated method stub
-        return super.accessibleStates(states);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see rationals.Rational#accessibleStates(rationals.State)
-     */
-    public Set accessibleStates(State state) {
-        // TODO Auto-generated method stub
-        return super.accessibleStates(state);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see rationals.Rational#addState(boolean, boolean)
-     */
+    @Override
     public State addState(boolean initial, boolean terminal) {
-        DefaultStateFactory.DefaultState st = (DefaultStateFactory.DefaultState) super
-                .addState(initial, terminal);
+        DefaultStateFactory.DefaultState st = (DefaultStateFactory.DefaultState) super.addState(initial, terminal);
         // add a new row to the matrix
         idx = st.i;
         BitSet[][] ntr = new BitSet[idx + 1][];
@@ -411,111 +326,30 @@ public class BinaryAutomaton extends Automaton {
         return st;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see rationals.Rational#addTransition(rationals.Transition)
-     */
-    public void addTransition(Transition transition)
-            throws NoSuchStateException {
+    @Override
+    public boolean addTransition(Transition transition) {
+        int i = transition.label() == one ? 1 : 0;
         // extract states' indices
-        DefaultStateFactory.DefaultState from = (DefaultStateFactory.DefaultState) transition
-                .start();
-        DefaultStateFactory.DefaultState to = (DefaultStateFactory.DefaultState) transition
-                .end();
-        int i = transition.label() == one ? 1
-                : (transition.label() == zero) ? 0 : -1;
-        if (i == -1)
-            throw new IllegalArgumentException(
-                    "Bad transition label for binary automaton");
+        int from = ((DefaultStateFactory.DefaultState) transition.start()).i;
+        int to = ((DefaultStateFactory.DefaultState) transition.end()).i;
         // update transition matrix
-        try {
-            trans[from.i][i].set(to.i);
-            reverse[to.i][i].set(from.i);
-        } catch (ArrayIndexOutOfBoundsException e) {
-            throw new NoSuchStateException("Invalid from or to state in "
-                    + transition);
+        trans[from][i].set(to);
+        reverse[to][i].set(from);
+        return true;
+    }
+
+    @Override
+    public boolean validTransition(Transition transition) {
+        int i = transition.label() == one ? 1 : (transition.label() == zero) ? 0 : -1;
+        if (i == -1)
+            return false;
+        if (trans.length == 0 || trans[0].length < 2 || reverse.length == 0 || reverse[0].length < 2) {
+            return false;
         }
-    }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#clone()
-     */
-    public Object clone() {
-        // TODO Auto-generated method stub
-        return super.clone();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see rationals.Rational#delta()
-     */
-    public Set delta() {
-        // TODO Auto-generated method stub
-        return super.delta();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see rationals.StateMachine#delta(java.util.Set)
-     */
-    public Set delta(Set s) {
-        // TODO Auto-generated method stub
-        return super.delta(s);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see rationals.Rational#delta(rationals.State, java.lang.Object)
-     */
-    public Set delta(State state, Object label) {
-        // TODO Auto-generated method stub
-        return super.delta(state, label);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see rationals.Rational#delta(rationals.State)
-     */
-    public Set delta(State state) {
-        // TODO Auto-generated method stub
-        return super.delta(state);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see rationals.Rational#deltaFrom(rationals.State, rationals.State)
-     */
-    public Set deltaFrom(State from, State to) {
-        // TODO Auto-generated method stub
-        return super.deltaFrom(from, to);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see rationals.Rational#deltaMinusOne(rationals.State, java.lang.Object)
-     */
-    public Set deltaMinusOne(State state, Object label) {
-        // TODO Auto-generated method stub
-        return super.deltaMinusOne(state, label);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see rationals.Rational#deltaMinusOne(rationals.State)
-     */
-    public Set deltaMinusOne(State st) {
-        // TODO Auto-generated method stub
-        return super.deltaMinusOne(st);
+        int from = ((DefaultStateFactory.DefaultState) transition.start()).i;
+        int to = ((DefaultStateFactory.DefaultState) transition.end()).i;
+        return from < trans[0].length && to < reverse[0].length;
     }
 
     // ACCESSORS

@@ -35,7 +35,7 @@ public class HierarchyDumperFSS {
     }
     public void printAtomicConceptHierarchy(Hierarchy<AtomicConcept> atomicConceptHierarchy) {
         for (HierarchyNode<AtomicConcept> node : atomicConceptHierarchy.getAllNodesSet()) {
-            SortedSet<AtomicConcept> equivs=new TreeSet<AtomicConcept>(AtomicConceptComparator.INSTANCE);
+            SortedSet<AtomicConcept> equivs=new TreeSet<>(AtomicConceptComparator.INSTANCE);
             equivs.addAll(node.getEquivalentElements());
             AtomicConcept representative=equivs.first();
             if (equivs.size()>1) {
@@ -74,7 +74,7 @@ public class HierarchyDumperFSS {
     }
     public void printObjectPropertyHierarchy(Hierarchy<Role> objectRoleHierarchy) {
         for (HierarchyNode<Role> node : objectRoleHierarchy.getAllNodesSet()) {
-            SortedSet<Role> equivs=new TreeSet<Role>(ObjectRoleComparator.INSTANCE);
+            SortedSet<Role> equivs=new TreeSet<>(ObjectRoleComparator.INSTANCE);
             equivs.addAll(node.getEquivalentElements());
             Role representative=equivs.first();
             if (equivs.size()>1) {
@@ -111,7 +111,7 @@ public class HierarchyDumperFSS {
     }
     public void printDataPropertyHierarchy(Hierarchy<AtomicRole> dataRoleHierarchy) {
         for (HierarchyNode<AtomicRole> node : dataRoleHierarchy.getAllNodesSet()) {
-            SortedSet<AtomicRole> equivs=new TreeSet<AtomicRole>(DataRoleComparator.INSTANCE);
+            SortedSet<AtomicRole> equivs=new TreeSet<>(DataRoleComparator.INSTANCE);
             equivs.addAll(node.getEquivalentElements());
             AtomicRole representative=equivs.first();
             if (equivs.size()>1) {
@@ -166,6 +166,7 @@ public class HierarchyDumperFSS {
     protected static class AtomicConceptComparator implements Comparator<AtomicConcept> {
         public static final AtomicConceptComparator INSTANCE=new AtomicConceptComparator();
 
+        @Override
         public int compare(AtomicConcept atomicConcept1,AtomicConcept atomicConcept2) {
             int comparison=getAtomicConceptClass(atomicConcept1)-getAtomicConceptClass(atomicConcept2);
             if (comparison!=0)
@@ -185,6 +186,7 @@ public class HierarchyDumperFSS {
     protected static class ObjectRoleComparator implements Comparator<Role> {
         public static final ObjectRoleComparator INSTANCE=new ObjectRoleComparator();
 
+        @Override
         public int compare(Role role1,Role role2) {
             int comparison=getRoleClass(role1)-getRoleClass(role2);
             if (comparison!=0)
@@ -216,6 +218,7 @@ public class HierarchyDumperFSS {
     protected static class DataRoleComparator implements Comparator<AtomicRole> {
         public static final DataRoleComparator INSTANCE=new DataRoleComparator();
 
+        @Override
         public int compare(AtomicRole atomicRole1,AtomicRole atomicRole2) {
             int comparison=getAtomicRoleClass(atomicRole1)-getAtomicRoleClass(atomicRole2);
             if (comparison!=0)

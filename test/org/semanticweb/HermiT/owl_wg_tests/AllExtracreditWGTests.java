@@ -24,10 +24,10 @@ import junit.framework.TestSuite;
 
 public class AllExtracreditWGTests {
     public static Test suite() throws Exception {
-        WGTestRegistry wgTestRegistry=new WGTestRegistry();
-        TestSuite suite=new TestSuite("OWL WG Extracredit Tests");
+        WGTestRegistry wgTestRegistry = new WGTestRegistry();
+        TestSuite suite = new TestSuite("OWL WG Extracredit Tests");
         for (WGTestDescriptor wgTestDescriptor : wgTestRegistry.getTestDescriptors())
-            if (wgTestDescriptor.isDLTest() && wgTestDescriptor.status==WGTestDescriptor.Status.EXTRACREDIT)
+            if (wgTestDescriptor.isDLTest() && wgTestDescriptor.status == WGTestDescriptor.Status.EXTRACREDIT)
                 wgTestDescriptor.addTestsToSuite(suite);
         return suite;
     }

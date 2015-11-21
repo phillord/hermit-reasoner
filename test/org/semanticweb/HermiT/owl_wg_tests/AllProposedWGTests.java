@@ -22,10 +22,10 @@ import junit.framework.TestSuite;
 
 public class AllProposedWGTests {
     public static Test suite() throws Exception {
-        WGTestRegistry wgTestRegistry=new WGTestRegistry();
-        TestSuite suite=new TestSuite("OWL WG Proposed Tests");
+        WGTestRegistry wgTestRegistry = new WGTestRegistry();
+        TestSuite suite = new TestSuite("OWL WG Proposed Tests");
         for (WGTestDescriptor wgTestDescriptor : wgTestRegistry.getTestDescriptors())
-            if (wgTestDescriptor.isDLTest() && wgTestDescriptor.status==WGTestDescriptor.Status.PROPOSED)
+            if (wgTestDescriptor.isDLTest() && wgTestDescriptor.status == WGTestDescriptor.Status.PROPOSED)
                 wgTestDescriptor.addTestsToSuite(suite);
         return suite;
     }

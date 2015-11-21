@@ -24,13 +24,15 @@ import junit.framework.TestSuite;
 
 public class AllNonRejectedNonExtracreditWGTests {
     public static Test suite() throws Exception {
-        WGTestRegistry wgTestRegistry=new WGTestRegistry();
-        TestSuite suite=new TestSuite("OWL WG Non-Rejected Non-Extracredit Tests");
+        WGTestRegistry wgTestRegistry = new WGTestRegistry();
+        TestSuite suite = new TestSuite("OWL WG Non-Rejected Non-Extracredit Tests");
         for (WGTestDescriptor wgTestDescriptor : wgTestRegistry.getTestDescriptors())
-            if (wgTestDescriptor.isDLTest()&&(wgTestDescriptor.status==WGTestDescriptor.Status.APPROVED || wgTestDescriptor.status==WGTestDescriptor.Status.PROPOSED))
-                if (wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-209") || wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-208"))
-                    wgTestDescriptor.addTestsToSuite(suite,false);
-                else 
+            if (wgTestDescriptor.isDLTest() && (wgTestDescriptor.status == WGTestDescriptor.Status.APPROVED
+                    || wgTestDescriptor.status == WGTestDescriptor.Status.PROPOSED))
+                if (wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-209")
+                        || wgTestDescriptor.identifier.startsWith("WebOnt-description-logic-208"))
+                    wgTestDescriptor.addTestsToSuite(suite, false);
+                else
                     wgTestDescriptor.addTestsToSuite(suite);
         return suite;
     }

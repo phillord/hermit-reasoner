@@ -1,31 +1,37 @@
 package rationals;
 
-
-/** 
+/**
  * Interface for State objects
  * 
- * This class defines the notion of state of an automaton. 
+ * This class defines the notion of state of an automaton.
+ * 
  * @author yroos@lifl.fr
  * @version 1.0
  * @see Automaton
  * @see StateFactory
-*/
+ */
 public interface State {
 
-
-    /** Determines if this state is initial.
-     *  @return true iff this state is initial.
+    /**
+     * Determines if this state is initial.
+     * 
+     * @return true iff this state is initial.
      */
     public boolean isInitial();
-    
-    /** Determines if this state is terminal.
-     *  @return true iff this state is terminal.
+
+    /**
+     * Determines if this state is terminal.
+     * 
+     * @return true iff this state is terminal.
      */
     public boolean isTerminal();
-    
-    /** returns a textual representation of this state.
-     *  @return a textual representation of this state.
+
+    /**
+     * returns a textual representation of this state.
+     * 
+     * @return a textual representation of this state.
      */
+    @Override
     public String toString();
 
     /**

@@ -35,11 +35,9 @@
  */
 package rationals;
 
-import java.util.Iterator;
 import java.util.Set;
 
 import junit.framework.TestCase;
-import rationals.properties.isEmpty;
 import rationals.transformations.EpsilonTransitionRemover;
 import rationals.transformations.Reducer;
 
@@ -47,6 +45,7 @@ import rationals.transformations.Reducer;
  * @author nono
  * @version $Id: EpsilonRemoverTest.java 2 2006-08-24 14:41:48Z oqube $
  */
+@SuppressWarnings("javadoc")
 public class EpsilonRemoverTest extends TestCase {
 
     /**
@@ -63,15 +62,15 @@ public class EpsilonRemoverTest extends TestCase {
         State s1 = a.addState(true, false);
         State s2 = a.addState(false, false);
         State s3 = a.addState(false, true);
-        a.addTransition(new Transition(s1, null, s1));
-        a.addTransition(new Transition(s1, "a", s2));
-        a.addTransition(new Transition(s2, null, s3));
-        a.addTransition(new Transition(s3, null, s1));
-        a.addTransition(new Transition(s3, "b", s3));
+        a.addTransition(new Transition(s1, null, s1), null);
+        a.addTransition(new Transition(s1, "a", s2), null);
+        a.addTransition(new Transition(s2, null, s3), null);
+        a.addTransition(new Transition(s3, null, s1), null);
+        a.addTransition(new Transition(s3, "b", s3), null);
         Automaton b = new EpsilonTransitionRemover().transform(a);
         assertTrue(!b.alphabet().contains(null));
         /* check there is no transition with null labels */
-        Set s = b.delta();
+        Set<Transition> s = b.delta();
         assertNoEpsilon(s);
 
         b = new Reducer().transform(b);
@@ -83,14 +82,14 @@ public class EpsilonRemoverTest extends TestCase {
         State s1 = a.addState(true, false);
         State s2 = a.addState(false, false);
         State s3 = a.addState(false, true);
-        a.addTransition(new Transition(s1, null, s2));
-        a.addTransition(new Transition(s1, "a", s2));
-        a.addTransition(new Transition(s2, "a", s3));
-        a.addTransition(new Transition(s3, null, s2));
+        a.addTransition(new Transition(s1, null, s2), null);
+        a.addTransition(new Transition(s1, "a", s2), null);
+        a.addTransition(new Transition(s2, "a", s3), null);
+        a.addTransition(new Transition(s3, null, s2), null);
         Automaton b = new EpsilonTransitionRemover().transform(a);
         assertTrue(!b.alphabet().contains(null));
         /* check there is no transition with null labels */
-        Set s = b.delta();
+        Set<Transition> s = b.delta();
         assertNoEpsilon(s);
 
         b = new Reducer().transform(b);
@@ -102,27 +101,24 @@ public class EpsilonRemoverTest extends TestCase {
         State s1 = a.addState(true, false);
         State s2 = a.addState(false, false);
         State s3 = a.addState(false, true);
-        a.addTransition(new Transition(s1, "a", s2));
-        a.addTransition(new Transition(s2, null, s3));
+        a.addTransition(new Transition(s1, "a", s2), null);
+        a.addTransition(new Transition(s2, null, s3), null);
         Automaton b = new EpsilonTransitionRemover().transform(a);
         assertTrue(!b.alphabet().contains(null));
         /* check there is no transition with null labels */
-        Set s = b.delta();
+        Set<Transition> s = b.delta();
         assertNoEpsilon(s);
         b = new Reducer().transform(b);
         System.err.println(b);
     }
 
-    
     /**
      * @param s
      */
-    private void assertNoEpsilon(Set s) {
-        for (Iterator i = s.iterator(); i.hasNext();) {
-            Transition tr = (Transition) i.next();
-            assertTrue("Transition " + tr + " labelled with epsilon", tr
-                    .label() != null);
+    private static void assertNoEpsilon(Set<Transition> s) {
+        for (Transition tr : s) {
+            assertTrue("Transition " + tr + " labelled with epsilon", tr.label() != null);
         }
     }
-    
+
 }

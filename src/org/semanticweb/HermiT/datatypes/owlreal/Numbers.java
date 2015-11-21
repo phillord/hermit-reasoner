@@ -331,7 +331,7 @@ public class Numbers {
                 if (size<=0L)
                     return 0;
                 else
-                    return (int)Math.max(((long)argument)-size,0);
+                    return (int)Math.max((argument)-size,0);
             }
         case BIG_INTEGER: {
                 BigInteger leftover=BigInteger.valueOf(argument).subtract(toBigInteger(upperBoundInclusive,typeUpperBound)).add(toBigInteger(lowerBoundInclusive,typeLowerBound)).subtract(BigInteger.ONE);

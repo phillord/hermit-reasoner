@@ -7,7 +7,7 @@ public class AllTests {
 
     public static Test suite() {
         TestSuite suite = new TestSuite("Test for the HermiT internals (tableau)");
-        //$JUnit-BEGIN$
+        // $JUnit-BEGIN$
         suite.addTestSuite(TupleIndexTest.class);
         suite.addTestSuite(TupleTableFullIndexTest.class);
         suite.addTestSuite(DLClauseEvaluationTest.class);
@@ -15,11 +15,11 @@ public class AllTests {
         suite.addTestSuite(NIRuleTest.class);
         suite.addTestSuite(MergeTest.class);
         suite.addTestSuite(GraphTest.class);
-        //$JUnit-END$
+        // $JUnit-END$
         return suite;
     }
 
-    public static void main(String... args) throws Throwable {
+    public static void main(String... args) {
         junit.textui.TestRunner.run(suite());
         System.exit(0);
     }

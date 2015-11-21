@@ -56,7 +56,7 @@ public class CountingMonitor extends TableauMonitorAdapter {
     protected int m_datatypeCheckingTime;
 
     // overall numbers
-    protected final Map<String,List<TestRecord>> m_testRecords=new HashMap<String, List<TestRecord>>();
+    protected final Map<String,List<TestRecord>> m_testRecords=new HashMap<>();
     protected long m_overallTime=0;
     protected int m_overallNumberOfBacktrackings=0;
     protected int m_overallNumberOfNodes=0;
@@ -111,6 +111,7 @@ public class CountingMonitor extends TableauMonitorAdapter {
         m_overallDatatypeCheckingTime=0;
     }
 
+    @Override
     public void isSatisfiableStarted(ReasoningTaskDescription reasoningTaskDescription) {
         super.isSatisfiableStarted(reasoningTaskDescription);
         m_testNo++;
@@ -128,6 +129,7 @@ public class CountingMonitor extends TableauMonitorAdapter {
         m_datatypeCheckingTime=0;
         m_numberDatatypesChecked=0;
     }
+    @Override
     public void isSatisfiableFinished(ReasoningTaskDescription reasoningTaskDescription,boolean result) {
         super.isSatisfiableFinished(reasoningTaskDescription,result);
         if (reasoningTaskDescription.flipSatisfiabilityResult())
@@ -137,7 +139,7 @@ public class CountingMonitor extends TableauMonitorAdapter {
         String messagePattern=m_reasoningTaskDescription.getMessagePattern();
         List<TestRecord> records=m_testRecords.get(messagePattern);
         if (records==null) {
-            records=new ArrayList<TestRecord>();
+            records=new ArrayList<>();
             m_testRecords.put(messagePattern, records);
         }
         records.add(new TestRecord(m_time, m_reasoningTaskDescription.getTaskDescription(Prefixes.STANDARD_PREFIXES), m_testResult));
@@ -161,20 +163,24 @@ public class CountingMonitor extends TableauMonitorAdapter {
         m_overallDatatypeCheckingTime+=m_datatypeCheckingTime;
         m_overallNumberDatatypesChecked+=m_numberDatatypesChecked;
     }
+    @Override
     public void backtrackToFinished(BranchingPoint newCurrentBrancingPoint) {
         m_numberOfBacktrackings++;
     }
+    @Override
     public void possibleInstanceIsInstance() {
         m_possibleInstancesTested++;
         m_possibleInstancesInstances++;
     }
+    @Override
     public void possibleInstanceIsNotInstance() {
         m_possibleInstancesTested++;
     }
+    @Override
     public void blockingValidationStarted() {
-    	m_noValidations++;
-    	Node node;
-    	if (m_noValidations==1) {
+        m_noValidations++;
+        Node node;
+        if (m_noValidations==1) {
             node=m_tableau.getFirstTableauNode();
             while (node!=null) {
                 if (node.isActive()) {
@@ -185,18 +191,21 @@ public class CountingMonitor extends TableauMonitorAdapter {
                 }
                 node=node.getNextTableauNode();
             }
-    	}
-    	m_validationStartTime=System.currentTimeMillis();
+        }
+        m_validationStartTime=System.currentTimeMillis();
     }
+    @Override
     public void blockingValidationFinished(int noInvalidlyBlocked) {
-    	m_validationTime+=(System.currentTimeMillis()-m_validationStartTime);
-    	if (m_noValidations==1)
-    	    m_initiallyInvalid=noInvalidlyBlocked;
+        m_validationTime+=(System.currentTimeMillis()-m_validationStartTime);
+        if (m_noValidations==1)
+            m_initiallyInvalid=noInvalidlyBlocked;
     }
+    @Override
     public void datatypeCheckingStarted() {
         m_numberDatatypesChecked++;
         m_datatypeCheckingStartTime=System.currentTimeMillis();
     }
+    @Override
     public void datatypeCheckingFinished(boolean result) {
         m_datatypeCheckingTime+=(System.currentTimeMillis()-m_datatypeCheckingStartTime);
     }
@@ -211,7 +220,7 @@ public class CountingMonitor extends TableauMonitorAdapter {
         return getTimeSortedTestRecords(limit, standardTestType.messagePattern);
     }
     public List<TestRecord> getTimeSortedTestRecords(int limit, String messagePattern) {
-        List<TestRecord> filteredRecords=new ArrayList<TestRecord>();;
+        List<TestRecord> filteredRecords=new ArrayList<>();
         if (messagePattern==null) {
             for (List<TestRecord> records : m_testRecords.values())
                 filteredRecords.addAll(records);
@@ -229,23 +238,23 @@ public class CountingMonitor extends TableauMonitorAdapter {
     public long getTime() {
         return m_time;
     }
-	public int getNumberOfBacktrackings() {
-		return m_numberOfBacktrackings;
-	}
-	public int getNumberOfNodes() {
-		return m_numberOfNodes;
-	}
-	public int getNumberOfBlockedNodes() {
+    public int getNumberOfBacktrackings() {
+        return m_numberOfBacktrackings;
+    }
+    public int getNumberOfNodes() {
+        return m_numberOfNodes;
+    }
+    public int getNumberOfBlockedNodes() {
         return m_numberOfBlockedNodes;
     }
-	public String getTestDescription() {
-	    return m_reasoningTaskDescription.getTaskDescription(Prefixes.STANDARD_PREFIXES);
-	}
-	public boolean getTestResult() {
+    public String getTestDescription() {
+        return m_reasoningTaskDescription.getTaskDescription(Prefixes.STANDARD_PREFIXES);
+    }
+    public boolean getTestResult() {
         return m_testResult;
     }
-	// getters for current test blocking validation measurements
-	public int getInitialModelSize() {
+    // getters for current test blocking validation measurements
+    public int getInitialModelSize() {
         return m_initialModelSize;
     }
     public int getInitiallyBlocked() {
@@ -257,45 +266,45 @@ public class CountingMonitor extends TableauMonitorAdapter {
     public int getNoValidations() {
         return m_noValidations;
     }
-	public long getValidationTime() {
-		return m_validationTime;
-	}
+    public long getValidationTime() {
+        return m_validationTime;
+    }
     public int getNumberDatatypesChecked() {
         return m_numberDatatypesChecked;
     }
-	public long getDatatypeCheckingTime() {
+    public long getDatatypeCheckingTime() {
         return m_datatypeCheckingTime;
     }
 
-	// getters for overall measurements
-	public long getOverallTime() {
-		return m_overallTime;
-	}
-	public int getOverallNumberOfBacktrackings() {
-		return m_overallNumberOfBacktrackings;
-	}
-	public int getOverallNumberOfNodes() {
-		return m_overallNumberOfNodes;
-	}
-	public int getOverallNumberOfBlockedNodes() {
+    // getters for overall measurements
+    public long getOverallTime() {
+        return m_overallTime;
+    }
+    public int getOverallNumberOfBacktrackings() {
+        return m_overallNumberOfBacktrackings;
+    }
+    public int getOverallNumberOfNodes() {
+        return m_overallNumberOfNodes;
+    }
+    public int getOverallNumberOfBlockedNodes() {
         return m_overallNumberOfBlockedNodes;
     }
-	public int getOverallNumberOfTests() {
-		return m_overallNumberOfTests;
-	}
-	public int getOverallNumberOfTests(StandardTestType testType) {
-		return m_testRecords.containsKey(testType.messagePattern) ? m_testRecords.get(testType.messagePattern).size() : 0;
-	}
-	public int getOverallNumberOfClashes() {
-		return m_overallNumberOfClashes;
-	}
-	public int getNumberOfPossibleInstancesTested() {
+    public int getOverallNumberOfTests() {
+        return m_overallNumberOfTests;
+    }
+    public int getOverallNumberOfTests(StandardTestType testType) {
+        return m_testRecords.containsKey(testType.messagePattern) ? m_testRecords.get(testType.messagePattern).size() : 0;
+    }
+    public int getOverallNumberOfClashes() {
+        return m_overallNumberOfClashes;
+    }
+    public int getNumberOfPossibleInstancesTested() {
         return m_possibleInstancesTested;
     }
-	public int getNumberOfPossibleInstancesInstances() {
+    public int getNumberOfPossibleInstancesInstances() {
         return m_possibleInstancesInstances;
     }
-	// getters for overall blocking validation measurements
+    // getters for overall blocking validation measurements
     public int getOverallInitialModelSize() {
         return m_overallInitialModelSize;
     }
@@ -305,9 +314,9 @@ public class CountingMonitor extends TableauMonitorAdapter {
     public int getOverallInitiallyInvalid() {
         return m_overallInitiallyInvalid;
     }
-	public int getOverallNoValidations() {
-		return m_overallNoValidations;
-	}
+    public int getOverallNoValidations() {
+        return m_overallNoValidations;
+    }
     public long getOverallValidationTime() {
         return m_overallValidationTime;
     }
@@ -408,17 +417,18 @@ public class CountingMonitor extends TableauMonitorAdapter {
         return timeStr;
     }
 
-	public static class TestRecord implements Comparable<TestRecord>, Serializable {
+    public static class TestRecord implements Comparable<TestRecord>, Serializable {
         private static final long serialVersionUID = -3815493500625020183L;
-	    protected final long m_testTime;
-	    protected final String m_testDescription;
-	    protected final boolean m_testResult;
+        protected final long m_testTime;
+        protected final String m_testDescription;
+        protected final boolean m_testResult;
 
-	    public TestRecord(long testTime, String testDescription, boolean result) {
-	        m_testTime=testTime;
-	        m_testDescription=testDescription;
-	        m_testResult=result;
-	    }
+        public TestRecord(long testTime, String testDescription, boolean result) {
+            m_testTime=testTime;
+            m_testDescription=testDescription;
+            m_testResult=result;
+        }
+        @Override
         public int compareTo(TestRecord that) {
             if (this==that) return 0;
             int result=((Long)that.m_testTime).compareTo(m_testTime);
@@ -434,8 +444,9 @@ public class CountingMonitor extends TableauMonitorAdapter {
         public boolean getTestResult() {
             return m_testResult;
         }
+        @Override
         public String toString() {
             return m_testTime+" ms"+(m_testTime>1000?" ("+CountingMonitor.millisToHoursMinutesSecondsString(m_testTime)+")":"")+" for "+m_testDescription+" (result: "+m_testResult+")";
         }
-	}
+    }
 }

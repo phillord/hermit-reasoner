@@ -26,16 +26,20 @@ public class HistoryCommand extends AbstractCommand {
     public HistoryCommand(Debugger debugger) {
         super(debugger);
     }
+    @Override
     public String getCommandName() {
         return "history";
     }
+    @Override
     public String[] getDescription() {
         return new String[] { "on|off","switch derivation history on/off" };
     }
+    @Override
     public void printHelp(PrintWriter writer) {
         writer.println("usage: history on/off");
         writer.println("    Switches the derivation history on or off.");
     }
+    @Override
     public void execute(String[] args) {
         if (args.length<2) {
             m_debugger.getOutput().println("The status is missing.");

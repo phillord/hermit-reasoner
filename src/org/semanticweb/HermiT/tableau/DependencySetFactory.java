@@ -45,8 +45,8 @@ public final class DependencySetFactory implements Serializable {
 
     public DependencySetFactory() {
         m_mergeArray=new IntegerArray();
-        m_mergeSets=new ArrayList<PermanentDependencySet>();
-        m_unprocessedSets=new ArrayList<UnionDependencySet>();
+        m_mergeSets=new ArrayList<>();
+        m_unprocessedSets=new ArrayList<>();
         clear();
     }
     public int sizeInMemory() {

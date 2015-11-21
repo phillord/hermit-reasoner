@@ -57,44 +57,36 @@ import rationals.Transition;
  */
 public class Morphism implements UnaryTransformation {
 
-    private Map morph;
+    private Map<Object, Object> morph;
 
-    public Morphism(Map m) {
+    public Morphism(Map<Object, Object> m) {
         this.morph = m;
     }
     
-    /* (non-Javadoc)
-     * @see rationals.transformations.UnaryTransformation#transform(rationals.Automaton)
-     */
+    @Override
     public Automaton transform(Automaton a) {
         Automaton b = new Automaton();
         /* state map */
-        Map stm = new HashMap();
-        for(Iterator i = a.delta().iterator();i.hasNext();) {
-            Transition tr = (Transition)i.next();
+        Map<State, State> stm = new HashMap<>();
+        for(Iterator<Transition> i = a.delta().iterator();i.hasNext();) {
+            Transition tr = i.next();
             State ns = tr.start();
-            State nss = (State)stm.get(ns);
+            State nss = stm.get(ns);
             if(nss == null) {
                 nss = b.addState(ns.isInitial(),ns.isTerminal());
                 stm.put(ns,nss);
             }
             State ne = tr.end();
-            State nse = (State)stm.get(ne);
+            State nse = stm.get(ne);
             if(nse == null) {
                 nse = b.addState(ne.isInitial(),ne.isTerminal());
                 stm.put(ne,nse);
             }
             Object lbl = tr.label();
             if(!morph.containsKey(lbl))
-                try {
-                    b.addTransition(new Transition(nss,lbl,nse));
-                } catch (NoSuchStateException e) {
-                }
+                    b.addTransition(new Transition(nss,lbl,nse),null);
             else
-                try {
-                    b.addTransition(new Transition(nss,morph.get(lbl),nse));
-                } catch (NoSuchStateException e1) {
-                }
+                    b.addTransition(new Transition(nss,morph.get(lbl),nse),null);
         }
         return b;
     }

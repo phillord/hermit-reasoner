@@ -32,17 +32,21 @@ public class NodesForCommand extends AbstractCommand {
     public NodesForCommand(Debugger debugger) {
         super(debugger);
     }
+    @Override
     public String getCommandName() {
         return "nodesFor";
     }
+    @Override
     public String[] getDescription() {
         return new String[] { "conceptName","prints nodes that have been created by (atleast n r.conceptName)" };
     }
+    @Override
     public void printHelp(PrintWriter writer) {
         writer.println("usage: nodesFor conceptName");
         writer.println("    Prints all nodes that have been created by a concept (atleast n r.conceptName)");
         writer.println("    together with the information whether the nodes are active or not.");
     }
+    @Override
     public void execute(String[] args) {
         if (args.length<2) {
             m_debugger.getOutput().println("Concept name is missing.");

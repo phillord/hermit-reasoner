@@ -44,6 +44,7 @@ import rationals.converters.Expression;
  * @author nono
  * @version $Id: ModelCheckTest.java 2 2006-08-24 14:41:48Z oqube $
  */
+@SuppressWarnings("javadoc")
 public class ModelCheckTest extends TestCase {
 
     /**
@@ -52,12 +53,12 @@ public class ModelCheckTest extends TestCase {
     public ModelCheckTest(String arg0) {
         super(arg0);
     }
-    
+
     public void test() throws ConverterException {
         Automaton a = new Expression().fromString("a(b+c)(ab)*");
         Automaton b = new Expression().fromString("(a+b)*c");
         ModelCheck mc = new ModelCheck();
-        assertFalse(mc.test(b,a));
+        assertFalse(mc.test(b, a));
         System.err.println(mc.counterExamples());
     }
 }

@@ -27,16 +27,20 @@ public class ActiveNodesCommand extends AbstractCommand {
     public ActiveNodesCommand(Debugger debugger) {
         super(debugger);
     }
+    @Override
     public String getCommandName() {
         return "activeNodes";
     }
+    @Override
     public String[] getDescription() {
         return new String[] { "","shows all active nodes" };
     }
+    @Override
     public void printHelp(PrintWriter writer) {
         writer.println("usage: activeNodes");
         writer.println("    Prints list of all active (non-blocked) nodes in the current model.");
     }
+    @Override
     public void execute(String[] args) {
         int numberOfNodes=0;
         CharArrayWriter buffer=new CharArrayWriter();

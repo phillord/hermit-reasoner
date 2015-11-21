@@ -30,6 +30,7 @@ public abstract class Concept implements Serializable {
     public abstract boolean isAlwaysTrue();
     public abstract boolean isAlwaysFalse();
     public abstract String toString(Prefixes prefixes);
+    @Override
     public String toString() {
         return toString(Prefixes.STANDARD_PREFIXES);
     }

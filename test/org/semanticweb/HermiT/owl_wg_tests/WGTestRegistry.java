@@ -28,30 +28,35 @@ import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-
+@SuppressWarnings("javadoc")
 public class WGTestRegistry {
-    public static String URI_BASE="http://www.w3.org/2007/OWL/testOntology#";
-    public static String TEST_ID_PREFIX="http://owl.semanticweb.org/id/";
+    public static String URI_BASE = "http://www.w3.org/2007/OWL/testOntology#";
+    public static String TEST_ID_PREFIX = "http://owl.semanticweb.org/id/";
 
     protected final OWLOntologyManager m_ontologyManager;
     protected final OWLOntology m_testContainer;
     protected final List<WGTestDescriptor> m_testDescriptors;
 
     public WGTestRegistry() throws Exception {
-        m_ontologyManager=OWLManager.createOWLOntologyManager();
-        m_ontologyManager.loadOntologyFromOntologyDocument(IRI.create(WGTestRegistry.class.getResource("ontologies/test-ontology.owl").toURI()));
-        m_testContainer=m_ontologyManager.loadOntologyFromOntologyDocument(IRI.create(WGTestRegistry.class.getResource("ontologies/all.rdf").toURI()));
-        m_testDescriptors=new ArrayList<WGTestDescriptor>();
-        OWLClass testCaseClass=m_ontologyManager.getOWLDataFactory().getOWLClass(IRI.create(URI_BASE+"TestCase"));
+        m_ontologyManager = OWLManager.createOWLOntologyManager();
+        m_ontologyManager.loadOntologyFromOntologyDocument(
+                IRI.create(WGTestRegistry.class.getResource("ontologies/test-ontology.owl").toURI()));
+        m_testContainer = m_ontologyManager.loadOntologyFromOntologyDocument(
+                IRI.create(WGTestRegistry.class.getResource("ontologies/all.rdf").toURI()));
+        m_testDescriptors = new ArrayList<>();
+        OWLClass testCaseClass = m_ontologyManager.getOWLDataFactory().getOWLClass(IRI.create(URI_BASE + "TestCase"));
         for (OWLClassAssertionAxiom ax : m_testContainer.getClassAssertionAxioms(testCaseClass)) {
-            WGTestDescriptor wgTestDescriptor=new WGTestDescriptor(m_ontologyManager,m_testContainer,ax.getIndividual());
+            WGTestDescriptor wgTestDescriptor = new WGTestDescriptor(m_ontologyManager, m_testContainer,
+                    ax.getIndividual());
             m_testDescriptors.add(wgTestDescriptor);
         }
     }
+
     public List<WGTestDescriptor> getTestDescriptors() {
         return m_testDescriptors;
     }
-    public WGTestDescriptor getDescriptorByIdentifier(String identifier) throws Exception {
+
+    public WGTestDescriptor getDescriptorByIdentifier(String identifier) {
         for (WGTestDescriptor testDescriptor : m_testDescriptors)
             if (identifier.equals(testDescriptor.identifier))
                 return testDescriptor;

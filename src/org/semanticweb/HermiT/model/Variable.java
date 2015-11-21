@@ -33,9 +33,11 @@ public class Variable extends Term {
     public String getName() {
         return m_name;
     }
+    @Override
     public String toString() {
         return toString(Prefixes.STANDARD_PREFIXES);
     }
+    @Override
     public String toString(Prefixes prefixes) {
         return m_name;
     }
@@ -44,9 +46,11 @@ public class Variable extends Term {
     }
 
     protected static InterningManager<Variable> s_interningManager=new InterningManager<Variable>() {
+        @Override
         protected boolean equal(Variable object1,Variable object2) {
             return object1.m_name.equals(object2.m_name);
         }
+        @Override
         protected int getHashCode(Variable object) {
             return object.m_name.hashCode();
         }

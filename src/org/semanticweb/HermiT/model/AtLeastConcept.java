@@ -34,9 +34,11 @@ public class AtLeastConcept extends AtLeast {
     public LiteralConcept getToConcept() {
         return m_toConcept;
     }
+    @Override
     public boolean isAlwaysFalse() {
         return m_toConcept.isAlwaysFalse();
     }
+    @Override
     public String toString(Prefixes prefixes) {
         return "atLeast("+m_number+' '+m_onRole.toString(prefixes)+' '+m_toConcept.toString(prefixes)+')';
     }
@@ -45,9 +47,11 @@ public class AtLeastConcept extends AtLeast {
     }
 
     protected static InterningManager<AtLeastConcept> s_interningManager=new InterningManager<AtLeastConcept>() {
+        @Override
         protected boolean equal(AtLeastConcept object1,AtLeastConcept object2) {
             return object1.m_number==object2.m_number && object1.m_onRole==object2.m_onRole && object1.m_toConcept==object2.m_toConcept;
         }
+        @Override
         protected int getHashCode(AtLeastConcept object) {
             return (object.m_number*7+object.m_onRole.hashCode())*7+object.m_toConcept.hashCode();
         }

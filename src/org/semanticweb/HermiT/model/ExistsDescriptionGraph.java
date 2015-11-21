@@ -35,18 +35,23 @@ public class ExistsDescriptionGraph extends ExistentialConcept implements DLPred
     public int getVertex() {
         return m_vertex;
     }
+    @Override
     public int getArity() {
         return 1;
     }
+    @Override
     public boolean isAlwaysTrue() {
         return false;
     }
+    @Override
     public boolean isAlwaysFalse() {
         return false;
     }
+    @Override
     public String toString(Prefixes prefixes) {
         return "exists("+prefixes.abbreviateIRI(m_descriptionGraph.getName())+'|'+m_vertex+')';
     }
+    @Override
     public String toString() {
         return toString(Prefixes.STANDARD_PREFIXES);
     }
@@ -55,9 +60,11 @@ public class ExistsDescriptionGraph extends ExistentialConcept implements DLPred
     }
 
     protected static InterningManager<ExistsDescriptionGraph> s_interningManager=new InterningManager<ExistsDescriptionGraph>() {
+        @Override
         protected boolean equal(ExistsDescriptionGraph object1,ExistsDescriptionGraph object2) {
             return object1.m_descriptionGraph.equals(object2.m_descriptionGraph) && object1.m_vertex==object2.m_vertex;
         }
+        @Override
         protected int getHashCode(ExistsDescriptionGraph object) {
             return object.m_descriptionGraph.hashCode()+7*object.m_vertex;
         }

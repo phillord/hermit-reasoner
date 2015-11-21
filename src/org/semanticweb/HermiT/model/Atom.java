@@ -28,7 +28,7 @@ import org.semanticweb.HermiT.Prefixes;
  */
 public class Atom implements Serializable {
     private static final long serialVersionUID=7884900540178779422L;
-    public static final Set<DLPredicate> s_infixPredicates=new HashSet<DLPredicate>();
+    public static final Set<DLPredicate> s_infixPredicates=new HashSet<>();
     static {
         s_infixPredicates.add(Equality.INSTANCE);
         s_infixPredicates.add(Inequality.INSTANCE);
@@ -121,6 +121,7 @@ public class Atom implements Serializable {
         }
         return buffer.toString();
     }
+    @Override
     public String toString() {
         return toString(Prefixes.STANDARD_PREFIXES);
     }
@@ -129,6 +130,7 @@ public class Atom implements Serializable {
     }
 
     protected static InterningManager<Atom> s_interningManager=new InterningManager<Atom>() {
+        @Override
         protected boolean equal(Atom object1,Atom object2) {
             if (object1.m_dlPredicate!=object2.m_dlPredicate)
                 return false;
@@ -137,6 +139,7 @@ public class Atom implements Serializable {
                     return false;
             return true;
         }
+        @Override
         protected int getHashCode(Atom object) {
             int hashCode=object.m_dlPredicate.hashCode();
             for (int index=object.m_arguments.length-1;index>=0;--index)

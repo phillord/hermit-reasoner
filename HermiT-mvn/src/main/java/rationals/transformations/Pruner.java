@@ -1,7 +1,6 @@
 package rationals.transformations;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import rationals.Automaton;
@@ -17,27 +16,22 @@ import rationals.Transition;
  */
 public class Pruner implements UnaryTransformation {
 
-  public Automaton transform(Automaton a) {
-    Map conversion = new HashMap() ;
-    Iterator i = a.accessibleAndCoAccessibleStates().iterator();
+  @Override
+public Automaton transform(Automaton a) {
+    Map<State, State> conversion = new HashMap<>() ;
     Automaton b = new Automaton() ;
-    while(i.hasNext()) {
-      State e = (State) i.next() ;
+    for (State e : a.accessibleAndCoAccessibleStates()) {
       conversion.put(e , b.addState(e.isInitial() , e.isTerminal())) ;
     }
-    i = a.delta().iterator();
-    while(i.hasNext()) {
-      Transition t = (Transition) i.next() ;
-      State bs = (State) conversion.get(t.start()) ;
-      State be = (State) conversion.get(t.end()) ;
+    for (Transition t :a.delta()){
+      State bs = conversion.get(t.start()) ;
+      State be = conversion.get(t.end()) ;
       if(bs == null || be == null)
           continue;
-      try {
         b.addTransition(new Transition(
           bs,
           t.label() ,
-          be)) ;
-      } catch (NoSuchStateException x) {}
+          be),null);
     }
     return b ;
   }

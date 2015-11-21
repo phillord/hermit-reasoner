@@ -26,17 +26,21 @@ public class BreakpointTimeCommand extends AbstractCommand {
     public BreakpointTimeCommand(Debugger debugger) {
         super(debugger);
     }
+    @Override
     public String getCommandName() {
         return "bpTime";
     }
+    @Override
     public String[] getDescription() {
         return new String[] { "timeInSeconds","sets the break point time" };
     }
+    @Override
     public void printHelp(PrintWriter writer) {
         writer.println("usage: bpTime timeInSeconds");
         writer.println("    Sets the breakpoint time -- that is, after timeInSeconds,");
         writer.println("    the debugger will return control to the user.");
     }
+    @Override
     public void execute(String[] args) {
         if (args.length<2) {
             m_debugger.getOutput().println("Time is missing.");

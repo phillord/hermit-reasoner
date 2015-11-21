@@ -47,25 +47,25 @@ import rationals.properties.ContainsEpsilon;
  * @author nono
  * @version $Id: StarTest.java 2 2006-08-24 14:41:48Z oqube $
  */
+@SuppressWarnings("javadoc")
 public class StarTest extends TestCase {
 
     private Automaton automaton;
 
-    /*
-     * @see TestCase#setUp()
-     */
+    @Override
     protected void setUp() throws Exception {
         super.setUp();
         automaton = new Automaton();
-        State s1 = automaton.addState(true,false);
-        State s2 = automaton.addState(false,false);
-        State s3 = automaton.addState(false,true);
-        automaton.addTransition(new Transition(s1,"a",s2));
-        automaton.addTransition(new Transition(s2,"b",s3));        
+        State s1 = automaton.addState(true, false);
+        State s2 = automaton.addState(false, false);
+        State s3 = automaton.addState(false, true);
+        automaton.addTransition(new Transition(s1, "a", s2), null);
+        automaton.addTransition(new Transition(s2, "b", s3), null);
     }
 
     /**
      * Constructor for StarTest.
+     * 
      * @param arg0
      */
     public StarTest(String arg0) {
@@ -76,10 +76,10 @@ public class StarTest extends TestCase {
         Star star = new Star();
         Automaton b = star.transform(automaton);
         assertTrue(new ContainsEpsilon().test(b));
-        Object[] word = new Object[]{"a","b","a","b"};
-        Object[] word1 = new Object[]{"a","b","a","b","a"};
+        Object[] word = new Object[] { "a", "b", "a", "b" };
+        Object[] word1 = new Object[] { "a", "b", "a", "b", "a" };
         assertTrue(b.accept(Arrays.asList(word)));
         assertTrue(!b.accept(Arrays.asList(word1)));
     }
-    
+
 }

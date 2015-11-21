@@ -52,19 +52,23 @@ public class Letter extends RationalExpr {
 
     public static final Letter epsilon = new Letter(null) {
 
+        @Override
         public boolean equals(Object o) {
             return o == epsilon;
         }
         
 
+        @Override
         public SemiRing mult(SemiRing s2) {
             return s2;
         }
         
+        @Override
         public String toString() {
             return "1";
         }
 
+        @Override
         public int hashCode() {
             return 0;
         }
@@ -80,11 +84,7 @@ public class Letter extends RationalExpr {
         this.label = o;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
+    @Override
     public boolean equals(Object obj) {
         Letter lt = (Letter) obj;
         if (lt == null)
@@ -92,20 +92,12 @@ public class Letter extends RationalExpr {
         return lt.label == null ? this.label == null : lt.label.equals(label);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#hashCode()
-     */
+    @Override
     public int hashCode() {
         return label.hashCode();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#toString()
-     */
+    @Override
     public String toString() {
         return label.toString();
     }

@@ -35,10 +35,7 @@
  */
 package rationals.transformations;
 
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -52,6 +49,7 @@ import rationals.properties.isEmpty;
  * @author nono
  * @version $Id: MixTest.java 10 2007-05-30 17:25:00Z oqube $
  */
+@SuppressWarnings("javadoc")
 public class MixTest extends TestCase {
 
     /**
@@ -65,8 +63,7 @@ public class MixTest extends TestCase {
 
     public void testMix1() throws ConverterException {
         Automaton a = new Expression().fromString("ab*cd");
-        Automaton b = new Pruner().transform(new Expression()
-                .fromString("a*ebc"));
+        Automaton b = new Pruner().transform(new Expression().fromString("a*ebc"));
         Automaton c = new Mix().transform(a, b);
         String re = new ToRExpression().toString(c);
         System.out.println(re);
@@ -74,10 +71,8 @@ public class MixTest extends TestCase {
     }
 
     public void testMix2() throws ConverterException {
-        Automaton a = new Pruner().transform(new Expression()
-                .fromString("a(bb)*e"));
-        Automaton b = new Pruner().transform(new Expression()
-                .fromString("a(bbb)*e"));
+        Automaton a = new Pruner().transform(new Expression().fromString("a(bb)*e"));
+        Automaton b = new Pruner().transform(new Expression().fromString("a(bbb)*e"));
         Automaton c = new Reducer().transform(new Mix().transform(a, b));
         System.out.println(new ToRExpression().toString(c));
         assertTrue("automata should accept word", c.accept(makeList("abbbbbbbbbbbbe")));
@@ -86,10 +81,10 @@ public class MixTest extends TestCase {
     }
 
     private List<Object> makeList(String string) {
-      List<Object> l = new ArrayList<Object>();
-      for(int i=0;i<string.length();i++)
-        l.add(string.charAt(i)+"");
-      return l;
+        List<Object> l = new ArrayList<>();
+        for (int i = 0; i < string.length(); i++)
+            l.add(string.charAt(i) + "");
+        return l;
     }
 
     public void testMix4() throws ConverterException {
@@ -103,21 +98,19 @@ public class MixTest extends TestCase {
 
     public void testMixCommute() throws ConverterException {
         Automaton a = new Expression().fromString("ab*cd");
-        Automaton b = new Pruner().transform(new Expression()
-                .fromString("a*ebc"));
+        Automaton b = new Pruner().transform(new Expression().fromString("a*ebc"));
         Automaton c = new Mix().transform(a, b);
         Automaton d = new Mix().transform(b, a);
         String rec = new ToRExpression().toString(c);
-        System.err.println("a m b =" +rec);
+        System.err.println("a m b =" + rec);
         String red = new ToRExpression().toString(d);
-        System.err.println("b m a =" +red);
-        assertEquals(rec,red);
+        System.err.println("b m a =" + red);
+        assertEquals(rec, red);
     }
 
     public void testMixEmpty() throws ConverterException {
         Automaton a = new Expression().fromString("abc");
-        Automaton b = new Expression()
-                .fromString("acb");
+        Automaton b = new Expression().fromString("acb");
         Automaton c = new Mix().transform(a, b);
         assertTrue(new isEmpty().test(c));
     }

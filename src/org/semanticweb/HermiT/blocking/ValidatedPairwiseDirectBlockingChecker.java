@@ -18,9 +18,7 @@
 package org.semanticweb.HermiT.blocking;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.semanticweb.HermiT.blocking.ValidatedSingleDirectBlockingChecker.ValidatedBlockingObject;
@@ -36,29 +34,32 @@ import org.semanticweb.HermiT.tableau.Tableau;
 public class ValidatedPairwiseDirectBlockingChecker implements DirectBlockingChecker,Serializable {
     private static final long serialVersionUID=9093753046859877016L;
 
-    protected final SetFactory<AtomicConcept> m_atomicConceptsSetFactory=new SetFactory<AtomicConcept>();
-    protected final SetFactory<AtomicRole> m_atomicRolesSetFactory=new SetFactory<AtomicRole>();
-    protected final Set<AtomicConcept> m_atomicConceptsBuffer=new LinkedHashSet<AtomicConcept>();
-    protected final Set<AtomicRole> m_atomicRolesBuffer=new LinkedHashSet<AtomicRole>();
+    protected final SetFactory<AtomicConcept> m_atomicConceptsSetFactory=new SetFactory<>();
+    protected final SetFactory<AtomicRole> m_atomicRolesSetFactory=new SetFactory<>();
+    protected final Set<AtomicConcept> m_atomicConceptsBuffer=new LinkedHashSet<>();
+    protected final Set<AtomicRole> m_atomicRolesBuffer=new LinkedHashSet<>();
     protected final boolean m_hasInverses;
     protected Tableau m_tableau;
     protected ExtensionTable.Retrieval m_binaryTableSearch1Bound;
     protected ExtensionTable.Retrieval m_ternaryTableSearch12Bound;
 
     public ValidatedPairwiseDirectBlockingChecker(boolean hasInverses) {
-    	m_hasInverses=hasInverses;
+        m_hasInverses=hasInverses;
     }
+    @Override
     public void initialize(Tableau tableau) {
         m_tableau=tableau;
         m_binaryTableSearch1Bound=tableau.getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
         m_ternaryTableSearch12Bound=tableau.getExtensionManager().getTernaryExtensionTable().createRetrieval(new boolean[] { false,true,true },ExtensionTable.View.TOTAL);
     }
+    @Override
     public void clear() {
         m_atomicConceptsSetFactory.clearNonpermanent();
         m_atomicRolesSetFactory.clearNonpermanent();
         m_binaryTableSearch1Bound.clear();
         m_ternaryTableSearch12Bound.clear();
     }
+    @Override
     public boolean isBlockedBy(Node blocker,Node blocked) {
         ValidatedPairwiseBlockingObject blockerObject=(ValidatedPairwiseBlockingObject)blocker.getBlockingObject();
         ValidatedPairwiseBlockingObject blockedObject=(ValidatedPairwiseBlockingObject)blocked.getBlockingObject();
@@ -70,63 +71,80 @@ public class ValidatedPairwiseDirectBlockingChecker implements DirectBlockingChe
             ((ValidatedPairwiseBlockingObject)blocker.getParent().getBlockingObject()).getAtomicConceptsLabel()==((ValidatedPairwiseBlockingObject)blocked.getParent().getBlockingObject()).getAtomicConceptsLabel();
         return isBlockedBy;
     }
+    @Override
     public int blockingHashCode(Node node) {
         ValidatedPairwiseBlockingObject nodeObject=(ValidatedPairwiseBlockingObject)node.getBlockingObject();
         return
             nodeObject.m_blockingRelevantHashCode+
             ((ValidatedPairwiseBlockingObject)node.getParent().getBlockingObject()).m_blockingRelevantHashCode;
     }
+    @Override
     public boolean canBeBlocker(Node node) {
-    	Node parent=node.getParent();
+        Node parent=node.getParent();
         return node.getNodeType()==NodeType.TREE_NODE && (!m_hasInverses || node.getParent().getNodeType()==NodeType.TREE_NODE || parent.getNodeType()==NodeType.GRAPH_NODE);
     }
+    @Override
     public boolean canBeBlocked(Node node) {
-    	Node parent=node.getParent();
+        Node parent=node.getParent();
         return node.getNodeType()==NodeType.TREE_NODE && (!m_hasInverses || node.getParent().getNodeType()==NodeType.TREE_NODE || parent.getNodeType()==NodeType.GRAPH_NODE);
     }
+    @Override
     public boolean hasBlockingInfoChanged(Node node) {
         return ((ValidatedPairwiseBlockingObject)node.getBlockingObject()).m_hasChangedForBlocking;
     }
+    @Override
     public void clearBlockingInfoChanged(Node node) {
         ((ValidatedPairwiseBlockingObject)node.getBlockingObject()).m_hasChangedForBlocking=false;
     }
+    @Override
     public boolean hasChangedSinceValidation(Node node) {
         return ((ValidatedPairwiseBlockingObject)node.getBlockingObject()).m_hasChangedForValidation;
     }
+    @Override
     public void setHasChangedSinceValidation(Node node, boolean hasChanged) {
         ((ValidatedPairwiseBlockingObject)node.getBlockingObject()).m_hasChangedForValidation=hasChanged;
     }
+    @Override
     public void nodeInitialized(Node node) {
         if (node.getBlockingObject()==null)
             node.setBlockingObject(new ValidatedPairwiseBlockingObject(node));
         ((ValidatedPairwiseBlockingObject)node.getBlockingObject()).initialize();
     }
+    @Override
     public void nodeDestroyed(Node node) {
         ((ValidatedPairwiseBlockingObject)node.getBlockingObject()).destroy();
     }
+    @Override
     public Node assertionAdded(Concept concept,Node node,boolean isCore) {
         ((ValidatedPairwiseBlockingObject)node.getBlockingObject()).addConcept(concept, isCore);
         return (concept instanceof AtomicConcept && isCore)?node:null;
     }
+    @Override
     public Node assertionRemoved(Concept concept, Node node, boolean isCore) {
         ((ValidatedPairwiseBlockingObject) node.getBlockingObject()).removeConcept(concept, isCore);
         return (concept instanceof AtomicConcept && isCore)?node:null;
     }
+    @Override
     public Node assertionAdded(DataRange range,Node node,boolean isCore) {
         return null;
     }
+    @Override
     public Node assertionRemoved(DataRange range,Node node,boolean isCore) {
         return null;
     }
+    @Override
     public Node assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
         return null;
     }
+    @Override
     public Node assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
         return null;
     }
+    @Override
     public Node nodesMerged(Node mergeFrom,Node mergeInto) {
         return null;
     }
+    @Override
     public Node nodesUnmerged(Node mergeFrom,Node mergeInto) {
         return null;
     }
@@ -165,6 +183,7 @@ public class ValidatedPairwiseDirectBlockingChecker implements DirectBlockingChe
         m_atomicRolesBuffer.clear();
         return result;
     }
+    @Override
     public BlockingSignature getBlockingSignatureFor(Node node) {
         return new ValidatedBlockingSignature(this,node);
     }
@@ -184,6 +203,7 @@ public class ValidatedPairwiseDirectBlockingChecker implements DirectBlockingChe
         public ValidatedPairwiseBlockingObject(Node node) {
             m_node=node;
         }
+        @Override
         public void initialize() {
             m_blockingRelevantLabel=null;
             m_blockingRelevantHashCode=0;
@@ -193,6 +213,7 @@ public class ValidatedPairwiseDirectBlockingChecker implements DirectBlockingChe
             m_hasChangedForBlocking=true;
             m_hasChangedForValidation=true;
         }
+        @Override
         public void destroy() {
             if (m_blockingRelevantLabel!=null) {
                 m_atomicConceptsSetFactory.removeReference(m_blockingRelevantLabel);
@@ -213,6 +234,7 @@ public class ValidatedPairwiseDirectBlockingChecker implements DirectBlockingChe
             m_hasChangedForBlocking=true;
             m_hasChangedForValidation=true;
         }
+        @Override
         public Set<AtomicConcept> getAtomicConceptsLabel() {
             if (m_blockingRelevantLabel==null) {
                 m_blockingRelevantLabel=ValidatedPairwiseDirectBlockingChecker.this.fetchAtomicConceptsLabel(m_node,true);
@@ -220,6 +242,7 @@ public class ValidatedPairwiseDirectBlockingChecker implements DirectBlockingChe
             }
             return m_blockingRelevantLabel;
         }
+        @Override
         public void addConcept(Concept concept, boolean isCore) {
           // for validation purposes not only the core and atomic concept changes matter
           m_hasChangedForValidation=true;
@@ -241,6 +264,7 @@ public class ValidatedPairwiseDirectBlockingChecker implements DirectBlockingChe
               }
           }
         }
+        @Override
         public void removeConcept(Concept concept, boolean isCore) {
             // for validation purposes not only the core and atomicConcept
             // changes matter
@@ -262,6 +286,7 @@ public class ValidatedPairwiseDirectBlockingChecker implements DirectBlockingChe
                 }
             }
         }
+        @Override
         public Set<AtomicConcept> getFullAtomicConceptsLabel() {
             if (m_fullAtomicConceptsLabel==null) {
                 m_fullAtomicConceptsLabel=ValidatedPairwiseDirectBlockingChecker.this.fetchAtomicConceptsLabel(m_node,false);
@@ -269,6 +294,7 @@ public class ValidatedPairwiseDirectBlockingChecker implements DirectBlockingChe
             }
             return m_fullAtomicConceptsLabel;
         }
+        @Override
         public Set<AtomicRole> getFullFromParentLabel() {
             if (m_hasChangedForValidation || m_fullFromParentLabel==null) {
                 m_fullFromParentLabel=ValidatedPairwiseDirectBlockingChecker.this.fetchAtomicRolesLabel(m_node.getParent(),m_node,false);
@@ -276,6 +302,7 @@ public class ValidatedPairwiseDirectBlockingChecker implements DirectBlockingChe
             }
             return m_fullFromParentLabel;
         }
+        @Override
         public Set<AtomicRole> getFullToParentLabel() {
             if (m_hasChangedForValidation || m_fullToParentLabel==null) {
                 m_fullToParentLabel=ValidatedPairwiseDirectBlockingChecker.this.fetchAtomicRolesLabel(m_node,m_node.getParent(),false);
@@ -283,15 +310,19 @@ public class ValidatedPairwiseDirectBlockingChecker implements DirectBlockingChe
             }
             return m_fullToParentLabel;
         }
+        @Override
         public void setBlockViolatesParentConstraints(boolean violates) {
             m_blockViolatesParentConstraints=violates;
         }
+        @Override
         public void setHasAlreadyBeenChecked(boolean hasBeenChecked) {
             m_hasAlreadyBeenChecked=hasBeenChecked;
         }
+        @Override
         public boolean hasAlreadyBeenChecked() {
             return m_hasAlreadyBeenChecked;
         }
+        @Override
         public boolean blockViolatesParentConstraints() {
             return m_blockViolatesParentConstraints;
         }
@@ -318,13 +349,16 @@ public class ValidatedPairwiseDirectBlockingChecker implements DirectBlockingChe
             checker.m_atomicRolesSetFactory.makePermanent(m_fromParentLabel);
             checker.m_atomicRolesSetFactory.makePermanent(m_toParentLabel);
         }
+        @Override
         public boolean blocksNode(Node node) {
             ValidatedPairwiseBlockingObject nodeBlockingObject = (ValidatedPairwiseBlockingObject) node.getBlockingObject();
             return nodeBlockingObject.getAtomicConceptsLabel() == m_blockingRelevantConceptsLabel;
         }
+        @Override
         public int hashCode() {
             return m_hashCode;
         }
+        @Override
         public boolean equals(Object that) {
             if (this==that)
                 return true;

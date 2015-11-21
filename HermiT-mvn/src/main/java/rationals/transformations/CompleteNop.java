@@ -65,43 +65,33 @@ import rationals.Transition;
  */
 public class CompleteNop implements UnaryTransformation {
 
-    private Set alphabet;
+    private Set<Object> alphabet;
 
-    public CompleteNop(Set alphabet) {
+    public CompleteNop(Set<Object> alphabet) {
         this.alphabet = alphabet;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see rationals.transformations.UnaryTransformation#transform(rationals.Automaton)
-     */
+    @Override
     public Automaton transform(Automaton a) {
         Automaton b = new Automaton();
-        Map qm = new HashMap();
-        for (Iterator i = a.states().iterator(); i.hasNext();) {
-            State q = (State) i.next();
+        Map<State, State> qm = new HashMap<>();
+        for (Iterator<State> i = a.states().iterator(); i.hasNext();) {
+            State q = i.next();
             State p = b.addState(q.isInitial(), q.isTerminal());
             qm.put(q, p);
         }
-        Set alph = new HashSet();
-        for (Iterator it = a.states().iterator(); it.hasNext();) {
-            State q = (State) it.next();
+        Set<Object> alph = new HashSet<>();
+        for (Iterator<State> it = a.states().iterator(); it.hasNext();) {
+            State q = it.next();
             alph.addAll(alphabet);
-            for (Iterator i2 = a.delta(q).iterator(); i2.hasNext();) {
-                Transition tr = (Transition) i2.next();
-                try {
-                    b.addTransition(new Transition((State) qm.get(tr.start()),
-                            tr.label(), (State) qm.get(tr.end())));
-                } catch (NoSuchStateException e) {
-                }
+            for (Iterator<Transition> i2 = a.delta(q).iterator(); i2.hasNext();) {
+                Transition tr = i2.next();
+                    b.addTransition(new Transition(qm.get(tr.start()),
+                            tr.label(), qm.get(tr.end())),null);
                 alph.remove(tr.label());
             }
-            for (Iterator i2 = alph.iterator(); i2.hasNext();) {
-                try {
-                    b.addTransition(new Transition(q, i2.next(), q));
-                } catch (NoSuchStateException e) {
-                }
+            for (Iterator<Object> i2 = alph.iterator(); i2.hasNext();) {
+                    b.addTransition(new Transition(q, i2.next(), q),null);
             }
             alph.clear();
         }

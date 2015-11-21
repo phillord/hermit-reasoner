@@ -23,16 +23,19 @@ import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
 
 public class EntireFloatSubset implements ValueSpaceSubset {
 
+    @Override
     public boolean hasCardinalityAtLeast(int number) {
         int leftover=FloatInterval.subtractIntervalSizeFrom(Float.NEGATIVE_INFINITY,Float.POSITIVE_INFINITY,number);
         // The following check contains 1 because there is one NaN in the value space.
         return leftover<=1;
     }
+    @Override
     public boolean containsDataValue(Object dataValue) {
         if (dataValue instanceof Float)
             return true;
         return false;
     }
+    @Override
     public void enumerateDataValues(Collection<Object> dataValues) {
         dataValues.add(Float.NaN);
         float number=Float.NEGATIVE_INFINITY;
@@ -42,6 +45,7 @@ public class EntireFloatSubset implements ValueSpaceSubset {
         }
         dataValues.add(Float.POSITIVE_INFINITY);
     }
+    @Override
     public String toString() {
         return "xsd:float";
     }

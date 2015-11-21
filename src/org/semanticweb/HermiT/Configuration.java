@@ -242,7 +242,7 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
         existentialStrategyType=Configuration.ExistentialStrategyType.CREATION_ORDER;
         ignoreUnsupportedDatatypes=false;
         monitor=null;
-        parameters=new HashMap<String,Object>();
+        parameters=new HashMap<>();
         individualTaskTimeout=-1;
         bufferChanges=true;
         individualNodeSetPolicy=IndividualNodeSetPolicy.BY_NAME;
@@ -267,7 +267,7 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
         setIndividualReuseStrategyReuseNever(concepts);
     }
     protected Set<AtomicConcept> loadConceptsFromFile(File file) throws IOException {
-        Set<AtomicConcept> result=new HashSet<AtomicConcept>();
+        Set<AtomicConcept> result=new HashSet<>();
         BufferedReader reader=new BufferedReader(new FileReader(file));
         try {
             String line=reader.readLine();
@@ -281,10 +281,11 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
             reader.close();
         }
     }
+    @Override
     public Configuration clone() {
         try {
             Configuration result=(Configuration)super.clone();
-            result.parameters=new HashMap<String,Object>(parameters);
+            result.parameters=new HashMap<>(parameters);
             return result;
         }
         catch (CloneNotSupportedException cantHappen) {
@@ -294,27 +295,31 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
     public static interface WarningMonitor {
         void warning(String warning);
     }
+    @Override
     public long getTimeOut() {
         return individualTaskTimeout;
     }
-	public IndividualNodeSetPolicy getIndividualNodeSetPolicy() {
-		return individualNodeSetPolicy;
-	}
-	public ReasonerProgressMonitor getProgressMonitor() {
-		return reasonerProgressMonitor;
-	}
-	public FreshEntityPolicy getFreshEntityPolicy() {
-		return freshEntityPolicy;
-	}
-	public static class PrepareReasonerInferences {
-	    public boolean classClassificationRequired=true;
-	    public boolean objectPropertyClassificationRequired=true;
-	    public boolean dataPropertyClassificationRequired=true;
-	    public boolean objectPropertyDomainsRequired=true;
-	    public boolean objectPropertyRangesRequired=true;
-	    public boolean realisationRequired=true;
-	    public boolean objectPropertyRealisationRequired=true;
-	    public boolean dataPropertyRealisationRequired=true;
-	    public boolean sameAs=true;
-	}
+    @Override
+    public IndividualNodeSetPolicy getIndividualNodeSetPolicy() {
+        return individualNodeSetPolicy;
+    }
+    @Override
+    public ReasonerProgressMonitor getProgressMonitor() {
+        return reasonerProgressMonitor;
+    }
+    @Override
+    public FreshEntityPolicy getFreshEntityPolicy() {
+        return freshEntityPolicy;
+    }
+    public static class PrepareReasonerInferences {
+        public boolean classClassificationRequired=true;
+        public boolean objectPropertyClassificationRequired=true;
+        public boolean dataPropertyClassificationRequired=true;
+        public boolean objectPropertyDomainsRequired=true;
+        public boolean objectPropertyRangesRequired=true;
+        public boolean realisationRequired=true;
+        public boolean objectPropertyRealisationRequired=true;
+        public boolean dataPropertyRealisationRequired=true;
+        public boolean sameAs=true;
+    }
 }

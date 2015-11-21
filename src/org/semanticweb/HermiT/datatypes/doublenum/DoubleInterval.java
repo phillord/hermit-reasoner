@@ -70,6 +70,7 @@ public class DoubleInterval {
         }
         numbers.add(m_upperBoundInclusive);
     }
+    @Override
     public String toString() {
         StringBuffer buffer=new StringBuffer();
         buffer.append("DOUBLE[");
@@ -160,12 +161,12 @@ public class DoubleInterval {
         if (positiveLowerBoundInclusive && positiveUpperBoundInclusive) {
             // It must be that magnitudeLowerBoundInclusive<magnitudeUpperBoundInclusive.
             long size=magnitudeUpperBoundInclusive-magnitudeLowerBoundInclusive+1;
-            return (int)Math.max(((long)argument)-size,0);
+            return (int)Math.max((argument)-size,0);
         }
         else if (!positiveLowerBoundInclusive && !positiveUpperBoundInclusive) {
             // It must be that magnitudeUpperBoundInclusive<magnitudeLowerBoundInclusive.
             long size=magnitudeLowerBoundInclusive-magnitudeUpperBoundInclusive+1;
-            return (int)Math.max(((long)argument)-size,0);
+            return (int)Math.max((argument)-size,0);
         }
         else if (!positiveLowerBoundInclusive && positiveUpperBoundInclusive) {
             // the number of values from 'lowerBoundInclusive' to -0

@@ -48,17 +48,20 @@ import rationals.transformations.ToDFA;
  * @author nono
  * @version $Id: IsDeterministicTest.java 2 2006-08-24 14:41:48Z oqube $
  */
+@SuppressWarnings("javadoc")
 public class IsDeterministicTest extends TestCase {
 
     /*
      * @see TestCase#setUp()
      */
+    @Override
     protected void setUp() throws Exception {
         super.setUp();
     }
 
     /**
      * Constructor for IsDeterministicTest.
+     * 
      * @param arg0
      */
     public IsDeterministicTest(String arg0) {
@@ -69,29 +72,29 @@ public class IsDeterministicTest extends TestCase {
         Automaton a = new ToDFA().transform(new Expression().fromString("a(b+a*c)bc*"));
         assertTrue(new IsDeterministic().test(a));
     }
-    
+
     public void testFalse1() throws NoSuchStateException {
         Automaton a = new Automaton();
-        State s1 = a.addState(true,false);
-        State s2 = a.addState(true,false);
-        State s3 = a.addState(false,true);
-        a.addTransition(new Transition(s1,"a",s2));
-        a.addTransition(new Transition(s2,"b",s1));
-        a.addTransition(new Transition(s1,"b",s3));
-        a.addTransition(new Transition(s3,"a",s2));
+        State s1 = a.addState(true, false);
+        State s2 = a.addState(true, false);
+        State s3 = a.addState(false, true);
+        a.addTransition(new Transition(s1, "a", s2), null);
+        a.addTransition(new Transition(s2, "b", s1), null);
+        a.addTransition(new Transition(s1, "b", s3), null);
+        a.addTransition(new Transition(s3, "a", s2), null);
         assertTrue(!new IsDeterministic().test(a));
-        
+
     }
 
     public void testFalse2() throws NoSuchStateException {
         Automaton a = new Automaton();
-        State s1 = a.addState(true,false);
-        State s2 = a.addState(false,false);
-        State s3 = a.addState(false,true);
-        a.addTransition(new Transition(s1,"a",s2));
-        a.addTransition(new Transition(s2,"b",s1));
-        a.addTransition(new Transition(s2,"b",s3));
-        a.addTransition(new Transition(s3,"a",s2));
+        State s1 = a.addState(true, false);
+        State s2 = a.addState(false, false);
+        State s3 = a.addState(false, true);
+        a.addTransition(new Transition(s1, "a", s2), null);
+        a.addTransition(new Transition(s2, "b", s1), null);
+        a.addTransition(new Transition(s2, "b", s3), null);
+        a.addTransition(new Transition(s3, "a", s2), null);
         assertTrue(!new IsDeterministic().test(a));
     }
 }

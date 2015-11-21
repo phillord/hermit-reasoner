@@ -34,7 +34,7 @@ public class RoleElementManager {
 
     
     protected RoleElementManager() {
-        m_roleToElement=new HashMap<AtomicRole, RoleElement>();
+        m_roleToElement=new HashMap<>();
     }
     public RoleElement getRoleElement(AtomicRole role) {
         if (m_roleToElement.containsKey(role)) 
@@ -45,6 +45,7 @@ public class RoleElementManager {
             return element;
         }
     }
+    @Override
     public String toString() {
         StringBuffer buffer=new StringBuffer();
         for (AtomicRole role : m_roleToElement.keySet()) {
@@ -63,8 +64,8 @@ public class RoleElementManager {
         
         protected RoleElement(AtomicRole role) {
             m_role=role;
-            m_knownRelations=new HashMap<Individual,Set<Individual>>();
-            m_possibleRelations=new HashMap<Individual,Set<Individual>>();
+            m_knownRelations=new HashMap<>();
+            m_possibleRelations=new HashMap<>();
         }
         public AtomicRole getRole() {
             return m_role;
@@ -94,7 +95,7 @@ public class RoleElementManager {
         public boolean addKnown(Individual individual1, Individual individual2) {
             Set<Individual> successors=m_knownRelations.get(individual1);
             if (successors==null) {
-                successors=new HashSet<Individual>();
+                successors=new HashSet<>();
                 m_knownRelations.put(individual1, successors);
             }
             return successors.add(individual2);
@@ -102,7 +103,7 @@ public class RoleElementManager {
         public boolean addKnowns(Individual individual, Set<Individual> individuals) {
             Set<Individual> successors=m_knownRelations.get(individual);
             if (successors==null) {
-                successors=new HashSet<Individual>();
+                successors=new HashSet<>();
                 m_knownRelations.put(individual, successors);
             }
             return successors.addAll(individuals);
@@ -120,7 +121,7 @@ public class RoleElementManager {
         public boolean addPossible(Individual individual1, Individual individual2) {
             Set<Individual> successors=m_possibleRelations.get(individual1);
             if (successors==null) {
-                successors=new HashSet<Individual>();
+                successors=new HashSet<>();
                 m_possibleRelations.put(individual1, successors);
             }
             return successors.add(individual2);
@@ -138,11 +139,12 @@ public class RoleElementManager {
         public boolean addPossibles(Individual individual, Set<Individual> individuals) {
             Set<Individual> successors=m_possibleRelations.get(individual);
             if (successors==null) {
-                successors=new HashSet<Individual>();
+                successors=new HashSet<>();
                 m_possibleRelations.put(individual, successors);
             }
             return successors.addAll(individuals);
         }
+        @Override
         public String toString() {
             StringBuffer buffer=new StringBuffer();
             buffer.append(m_role);

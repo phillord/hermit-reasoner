@@ -35,6 +35,7 @@
  */
 package rationals.properties;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -57,7 +58,7 @@ public class Bisimulation implements Relation {
 
     private Automaton a2;
 
-    private Set exp;
+    private Set<Couple> exp;
 
     /**
      * Constructor with two automataon.
@@ -78,24 +79,14 @@ public class Bisimulation implements Relation {
     public Bisimulation() {
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see rationals.tests.Relation#setAutomata(rationals.Automaton,
-     *      rationals.Automaton)
-     */
+    @Override
     public void setAutomata(Automaton a1, Automaton a2) {
         this.a1 = a1;
         this.a2 = a2;
-        this.exp = new HashSet();
+        this.exp = new HashSet<>();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see rationals.tests.Relation#equivalence(rationals.State,
-     *      rationals.State)
-     */
+    @Override
     public boolean equivalence(State q0a, State q0b) {
         Couple cpl = new Couple(q0a, q0b);
         /* check states are unknown */
@@ -103,19 +94,19 @@ public class Bisimulation implements Relation {
             return true;
         exp.add(cpl);
         /* iterate over all transitions */
-        Set tas = a1.delta(q0a);
-        Set tbs = a2.delta(q0b);
-        Iterator it = tas.iterator();
+        Set<Transition> tas = a1.delta(q0a);
+        Set<Transition> tbs = a2.delta(q0b);
+        Iterator<Transition> it = tas.iterator();
         while (it.hasNext()) {
-            Transition tr = (Transition) it.next();
+            Transition tr = it.next();
             State ea = tr.end();
             /* check transition exists in b */
-            Set tbsl = a2.delta(q0b, tr.label());
+            Set<Transition> tbsl = a2.delta(q0b, tr.label());
             if (tbsl.isEmpty())
                 return false;
-            Iterator trb = tbsl.iterator();
+            Iterator<Transition> trb = tbsl.iterator();
             while (trb.hasNext()) {
-                Transition tb = (Transition) trb.next();
+                Transition tb = trb.next();
                 /* mark transition as visited */
                 tbs.remove(tb);
                 State eb = tb.end();
@@ -132,16 +123,12 @@ public class Bisimulation implements Relation {
         return true;
     }
 
-    /**
-     * Checks that all combination of states from nsa and nsb
-     * are bisimilar.
-     * 
-     */
-    public boolean equivalence(Set nsa, Set nsb) {
-       for(Iterator i = nsa.iterator();i.hasNext();) {
-           State sa = (State)i.next();
-           for(Iterator j = nsb.iterator();j.hasNext();) {
-               State sb = (State)j.next();
+    @Override
+    public boolean equivalence(Set<State> nsa, Set<State> nsb) {
+       for(Iterator<State> i = nsa.iterator();i.hasNext();) {
+           State sa = i.next();
+           for(Iterator<State> j = nsb.iterator();j.hasNext();) {
+               State sb = j.next();
                if(!equivalence(sa,sb))
                    return false;
            }
@@ -149,11 +136,7 @@ public class Bisimulation implements Relation {
        return true;
     }
     
-    /* (non-Javadoc)
-     * @see rationals.properties.Relation#getErrorTrace()
-     */
-    public List getErrorTrace() {
-        // TODO Auto-generated method stub
-        return null;
+    public List<Object> getErrorTrace() {
+        return Collections.emptyList();
     }
 }

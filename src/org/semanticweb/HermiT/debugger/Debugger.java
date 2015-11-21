@@ -77,7 +77,7 @@ public class Debugger extends TableauMonitorForwarder {
 
     public static enum WaitOption {
         GRAPH_EXPANSION,EXISTENTIAL_EXPANSION,CLASH,MERGE,DATATYPE_CHECKING,BLOCKING_VALIDATION_STARTED,BLOCKING_VALIDATION_FINISHED
-    };
+    }
 
     protected final Map<String,DebuggerCommand> m_commandsByName;
     protected final Prefixes m_prefixes;
@@ -101,7 +101,7 @@ public class Debugger extends TableauMonitorForwarder {
 
     public Debugger(Prefixes prefixes,boolean historyOn) {
         super(new DerivationHistory());
-        m_commandsByName=new TreeMap<String,DebuggerCommand>();
+        m_commandsByName=new TreeMap<>();
         registerCommands();
         m_prefixes=prefixes;
         m_derivationHistory=(DerivationHistory)m_forwardingTargetMonitor;
@@ -119,8 +119,8 @@ public class Debugger extends TableauMonitorForwarder {
         Dimension preferredSize=m_mainFrame.getPreferredSize();
         m_mainFrame.setLocation((screenSize.width-preferredSize.width)/2,screenSize.height-100-preferredSize.height);
         m_forwardingOn=historyOn;
-        m_waitOptions=new HashSet<WaitOption>();
-        m_nodeCreationInfos=new HashMap<Node,NodeCreationInfo>();
+        m_waitOptions=new HashSet<>();
+        m_nodeCreationInfos=new HashMap<>();
         m_forever=false;
         m_singlestep=false;
         m_breakpointTime=30000;
@@ -238,7 +238,7 @@ public class Debugger extends TableauMonitorForwarder {
     }
     protected String[] parse(String command) {
         command=command.trim();
-        List<String> arguments=new ArrayList<String>();
+        List<String> arguments=new ArrayList<>();
         int firstChar=0;
         int nextSpace=command.indexOf(' ');
         while (nextSpace!=-1) {
@@ -276,15 +276,18 @@ public class Debugger extends TableauMonitorForwarder {
         m_output.println("Nodes: "+numberOfNodes+"  Inactive nodes: "+inactiveNodes+"  Blocked nodes: "+blockedNodes+"  Nodes with exists: "+nodesWithExistentials+"  Pending existentials: "+pendingExistentials);
     }
 
+    @Override
     public void setTableau(Tableau tableau) {
         super.setTableau(tableau);
         m_tableau=tableau;
     }
+    @Override
     public void isSatisfiableStarted(ReasoningTaskDescription reasoningTaskDescription) {
         super.isSatisfiableStarted(reasoningTaskDescription);
         m_output.println("Reasoning task started: "+reasoningTaskDescription.getTaskDescription(m_prefixes));
         mainLoop();
     }
+    @Override
     public void isSatisfiableFinished(ReasoningTaskDescription reasoningTaskDescription,boolean result) {
         super.isSatisfiableFinished(reasoningTaskDescription,result);
         if (reasoningTaskDescription.flipSatisfiabilityResult())
@@ -292,12 +295,14 @@ public class Debugger extends TableauMonitorForwarder {
         m_output.println("Reasoning task finished: "+(result ? "true" : "false"));
         mainLoop();
     }
+    @Override
     public void tableauCleared() {
         super.tableauCleared();
         m_nodeCreationInfos.clear();
         m_lastExistentialNode=null;
         m_lastExistentialConcept=null;
     }
+    @Override
     public void saturateStarted() {
         super.saturateStarted();
         m_currentIteration=0;
@@ -306,6 +311,7 @@ public class Debugger extends TableauMonitorForwarder {
             mainLoop();
         }
     }
+    @Override
     public void iterationStarted() {
         super.iterationStarted();
         m_currentIteration++;
@@ -314,6 +320,7 @@ public class Debugger extends TableauMonitorForwarder {
             mainLoop();
         }
     }
+    @Override
     public void iterationFinished() {
         super.iterationFinished();
         if (m_singlestep) {
@@ -326,6 +333,7 @@ public class Debugger extends TableauMonitorForwarder {
             m_lastStatusMark=System.currentTimeMillis();
         }
     }
+    @Override
     public void clashDetected() {
         super.clashDetected();
         if (m_waitOptions.contains(WaitOption.CLASH)) {
@@ -334,6 +342,7 @@ public class Debugger extends TableauMonitorForwarder {
             mainLoop();
         }
     }
+    @Override
     public void mergeStarted(Node mergeFrom,Node mergeInto) {
         super.mergeStarted(mergeFrom,mergeInto);
         if (m_waitOptions.contains(WaitOption.MERGE)) {
@@ -342,11 +351,13 @@ public class Debugger extends TableauMonitorForwarder {
             mainLoop();
         }
     }
+    @Override
     public void existentialExpansionStarted(ExistentialConcept existentialConcept,Node forNode) {
         super.existentialExpansionStarted(existentialConcept,forNode);
         m_lastExistentialNode=forNode;
         m_lastExistentialConcept=existentialConcept;
     }
+    @Override
     public void existentialExpansionFinished(ExistentialConcept existentialConcept,Node forNode) {
         super.existentialExpansionFinished(existentialConcept,forNode);
         m_lastExistentialNode=null;
@@ -357,18 +368,21 @@ public class Debugger extends TableauMonitorForwarder {
             mainLoop();
         }
     }
+    @Override
     public void nodeCreated(Node node) {
         super.nodeCreated(node);
         m_nodeCreationInfos.put(node,new NodeCreationInfo(node,m_lastExistentialNode,m_lastExistentialConcept));
         if (m_lastExistentialNode!=null)
             m_nodeCreationInfos.get(m_lastExistentialNode).m_children.add(node);
     }
+    @Override
     public void nodeDestroyed(Node node) {
         super.nodeDestroyed(node);
         NodeCreationInfo nodeCreationInfo=m_nodeCreationInfos.remove(node);
         if (nodeCreationInfo.m_createdByNode!=null)
             m_nodeCreationInfos.get(nodeCreationInfo.m_createdByNode).m_children.remove(node);
     }
+    @Override
     public void datatypeCheckingStarted() {
         super.datatypeCheckingStarted();
         if (m_waitOptions.contains(WaitOption.DATATYPE_CHECKING)) {
@@ -377,6 +391,7 @@ public class Debugger extends TableauMonitorForwarder {
             mainLoop();
         }
     }
+    @Override
     public void blockingValidationStarted() {
         super.blockingValidationStarted();
         if (m_waitOptions.contains(WaitOption.BLOCKING_VALIDATION_STARTED)) {
@@ -385,6 +400,7 @@ public class Debugger extends TableauMonitorForwarder {
             mainLoop();
         }
     }
+    @Override
     public void blockingValidationFinished(int noInvalidlyBlocked) {
         super.blockingValidationFinished(noInvalidlyBlocked);
         if (m_waitOptions.contains(WaitOption.BLOCKING_VALIDATION_FINISHED)) {
@@ -404,7 +420,7 @@ public class Debugger extends TableauMonitorForwarder {
             m_node=node;
             m_createdByNode=createdByNode;
             m_createdByExistential=createdByExistential;
-            m_children=new ArrayList<Node>(4);
+            m_children=new ArrayList<>(4);
         }
     }
 }

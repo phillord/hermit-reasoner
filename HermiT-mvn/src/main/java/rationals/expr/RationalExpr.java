@@ -46,22 +46,27 @@ public abstract class RationalExpr implements SemiRing {
     
     public static final RationalExpr zero = new RationalExpr() {
         
+        @Override
         public SemiRing mult(SemiRing s1) {
             return zero;
         }
 
+        @Override
         public SemiRing plus(SemiRing s1) {
             return s1;
         }
         
+        @Override
         public boolean equals(Object o) {
             return this == o;
         }
         
-        public int hashcode() {
+        @Override
+        public int hashCode() {
             return -1;
         }
         
+        @Override
         public String toString() {
             return "0";
         }
@@ -69,21 +74,17 @@ public abstract class RationalExpr implements SemiRing {
     
     public static final RationalExpr one = Letter.epsilon;
     
-    /* (non-Javadoc)
-     * @see rationals.SemiRing#one()
-     */
+    @Override
     public final SemiRing one() {
         return one;
     }
     
-    /* (non-Javadoc)
-     * @see rationals.SemiRing#zero()
-     */
+    @Override
     public final SemiRing zero() {
         return zero;
     }
-    
-    
+
+    @Override
     public SemiRing mult(SemiRing s2) {
         if(s2 == zero)
             return zero;
@@ -93,6 +94,7 @@ public abstract class RationalExpr implements SemiRing {
         return new Product(this,re);
     }
     
+    @Override
     public SemiRing plus(SemiRing s2) {
         if(s2 == zero)
             return this;

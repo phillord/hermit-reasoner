@@ -47,24 +47,23 @@ import rationals.properties.ContainsEpsilon;
  * @author nono
  * @version $Id: NormalizerTest.java 2 2006-08-24 14:41:48Z oqube $
  */
+@SuppressWarnings("javadoc")
 public class NormalizerTest extends TestCase {
 
     private Automaton automaton;
 
-    /*
-     * @see TestCase#setUp()
-     */
+    @Override
     protected void setUp() throws Exception {
         super.setUp();
         automaton = new Automaton();
         State s1 = automaton.addState(true, true);
         State s2 = automaton.addState(false, false);
         State s3 = automaton.addState(false, true);
-        automaton.addTransition(new Transition(s1, "c", s1));
-        automaton.addTransition(new Transition(s1, "a", s2));
-        automaton.addTransition(new Transition(s2, "b", s3));
-        automaton.addTransition(new Transition(s3, "a", s2));
-        automaton.addTransition(new Transition(s2, "b", s1));
+        automaton.addTransition(new Transition(s1, "c", s1), null);
+        automaton.addTransition(new Transition(s1, "a", s2), null);
+        automaton.addTransition(new Transition(s2, "b", s3), null);
+        automaton.addTransition(new Transition(s3, "a", s2), null);
+        automaton.addTransition(new Transition(s2, "b", s1), null);
     }
 
     /**
@@ -88,14 +87,15 @@ public class NormalizerTest extends TestCase {
         Normalizer norm = new Normalizer();
         Automaton b = norm.transform(automaton);
         assertTrue(new ContainsEpsilon().test(b));
-        Object[] word3 = new Object[] { };
+        Object[] word3 = new Object[] {};
         assertTrue(b.accept(Arrays.asList(word3)));
     }
+
     public void test3() {
         Normalizer norm = new Normalizer();
         Automaton b = norm.transform(automaton);
         assertTrue(new ContainsEpsilon().test(b));
-        Object[] word2 = new Object[] { "c","c","a", "b", "a", "b", "a", "b" };
+        Object[] word2 = new Object[] { "c", "c", "a", "b", "a", "b", "a", "b" };
         assertTrue(b.accept(Arrays.asList(word2)));
     }
 
@@ -111,7 +111,7 @@ public class NormalizerTest extends TestCase {
         Normalizer norm = new Normalizer();
         Automaton b = norm.transform(automaton);
         assertTrue(new ContainsEpsilon().test(b));
-        Object[] word2 = new Object[] { "c","c","c"};
+        Object[] word2 = new Object[] { "c", "c", "c" };
         assertTrue(b.accept(Arrays.asList(word2)));
     }
 }

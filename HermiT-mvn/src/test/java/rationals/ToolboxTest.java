@@ -44,29 +44,31 @@ import rationals.transformations.TransformationsToolBox;
  * @author nono
  * @version $Id: ToolboxTest.java 2 2006-08-24 14:41:48Z oqube $
  */
+@SuppressWarnings("javadoc")
 public class ToolboxTest extends TestCase {
 
     /**
      * Constructor for ToolboxTest.
+     * 
      * @param arg0
      */
     public ToolboxTest(String arg0) {
         super(arg0);
     }
 
-    public void testClosure1() throws NoSuchStateException{
+    public void testClosure1() throws NoSuchStateException {
         Automaton a = new Automaton();
-        State s1 = a.addState(true,false);
-        State s2 = a.addState(false,false);
-        State s3 = a.addState(false,true);
-        a.addTransition(new Transition(s1,null,s1));
-        a.addTransition(new Transition(s1,"a",s2));
-        a.addTransition(new Transition(s2,null,s3));
-        a.addTransition(new Transition(s3,null,s1));
-        a.addTransition(new Transition(s3,"b",s3));
-        Set st = a.getStateFactory().stateSet();
+        State s1 = a.addState(true, false);
+        State s2 = a.addState(false, false);
+        State s3 = a.addState(false, true);
+        a.addTransition(new Transition(s1, null, s1), null);
+        a.addTransition(new Transition(s1, "a", s2), null);
+        a.addTransition(new Transition(s2, null, s3), null);
+        a.addTransition(new Transition(s3, null, s1), null);
+        a.addTransition(new Transition(s3, "b", s3), null);
+        Set<State> st = a.getStateFactory().stateSet();
         st.add(s2);
-        Set r = TransformationsToolBox.epsilonClosure(st,a);
+        Set<State> r = TransformationsToolBox.epsilonClosure(st, a);
         assertTrue(r.contains(s1));
         assertTrue(r.contains(s3));
         assertTrue(r.contains(s2));

@@ -31,12 +31,15 @@ public class Inequality implements DLPredicate,Serializable {
     
     protected Inequality () {
     }
+    @Override
     public int getArity() {
         return 2;
     }
+    @Override
     public String toString(Prefixes prefixes) {
         return "!=";
     }
+    @Override
     public String toString() {
         return toString(Prefixes.STANDARD_PREFIXES);
     }

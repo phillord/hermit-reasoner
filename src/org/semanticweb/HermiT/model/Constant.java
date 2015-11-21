@@ -48,9 +48,11 @@ public class Constant extends Term {
     public boolean isAnonymous() {
         return "internal:anonymous-constants".equals(m_datatypeURI);
     }
+    @Override
     public String toString() {
         return toString(Prefixes.STANDARD_PREFIXES);
     }
+    @Override
     public String toString(Prefixes prefixes) {
         StringBuffer buffer=new StringBuffer();
         buffer.append('"');
@@ -77,9 +79,11 @@ public class Constant extends Term {
     }
 
     protected static InterningManager<Constant> s_interningManager=new InterningManager<Constant>() {
+        @Override
         protected boolean equal(Constant object1,Constant object2) {
             return object1.m_lexicalForm.equals(object2.m_lexicalForm) && object1.m_datatypeURI.equals(object2.m_datatypeURI);
         }
+        @Override
         protected int getHashCode(Constant object) {
             return object.m_lexicalForm.hashCode()+object.m_datatypeURI.hashCode();
         }

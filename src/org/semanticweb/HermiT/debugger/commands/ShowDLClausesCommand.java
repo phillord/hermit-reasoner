@@ -28,16 +28,20 @@ public class ShowDLClausesCommand extends AbstractCommand {
     public ShowDLClausesCommand(Debugger debugger) {
         super(debugger);
     }
+    @Override
     public String getCommandName() {
         return "showDLClauses";
     }
+    @Override
     public String[] getDescription() {
         return new String[] { "","prints the currently used set of DL-clauses" };
     }
+    @Override
     public void printHelp(PrintWriter writer) {
         writer.println("usage: showDLClauses");
         writer.println("    Prints the currently used set of DL-clauses.");
     }
+    @Override
     public void execute(String[] args) {
         CharArrayWriter buffer=new CharArrayWriter();
         PrintWriter writer=new PrintWriter(buffer);

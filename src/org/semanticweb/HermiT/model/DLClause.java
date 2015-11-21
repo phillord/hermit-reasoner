@@ -55,7 +55,7 @@ public class DLClause implements Serializable {
         return m_bodyAtoms.clone();
     }
     public DLClause getSafeVersion(DLPredicate safeMakingPredicate) {
-        Set<Variable> variables=new HashSet<Variable>();
+        Set<Variable> variables=new HashSet<>();
         // collect all the variables that occur in the head into the set variables
         for (int headIndex=0;headIndex<m_headAtoms.length;headIndex++) {
             Atom atom=m_headAtoms[headIndex];
@@ -227,11 +227,13 @@ public class DLClause implements Serializable {
         }
         return buffer.toString();
     }
+    @Override
     public String toString() {
         return toString(Prefixes.STANDARD_PREFIXES);
     }
 
     protected static InterningManager<DLClause> s_interningManager=new InterningManager<DLClause>() {
+        @Override
         protected boolean equal(DLClause object1,DLClause object2) {
             if (object1.m_headAtoms.length!=object2.m_headAtoms.length || object1.m_bodyAtoms.length!=object2.m_bodyAtoms.length)
                 return false;
@@ -243,6 +245,7 @@ public class DLClause implements Serializable {
                     return false;
             return true;
         }
+        @Override
         protected int getHashCode(DLClause object) {
             int hashCode=0;
             for (int index=object.m_bodyAtoms.length-1;index>=0;--index)

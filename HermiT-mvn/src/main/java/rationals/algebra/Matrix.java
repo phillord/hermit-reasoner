@@ -133,6 +133,7 @@ public final class Matrix implements SemiRing {
         return line;
     }
     
+    @Override
     public String toString() {
         final String ln = System.getProperty("line.separator");
         StringBuffer sb = new StringBuffer();
@@ -148,9 +149,7 @@ public final class Matrix implements SemiRing {
         return sb.toString();
     }
 
-    /* (non-Javadoc)
-     * @see rationals.algebra.SemiRing#plus(rationals.algebra.SemiRing)
-     */
+    @Override
     public SemiRing plus(SemiRing s2) {
         if(s2 == null)
             throw new IllegalArgumentException("Null argument");
@@ -166,9 +165,7 @@ public final class Matrix implements SemiRing {
         return res;               
     }
 
-    /* (non-Javadoc)
-     * @see rationals.algebra.SemiRing#mult(rationals.algebra.SemiRing)
-     */
+    @Override
     public SemiRing mult(SemiRing s2) {
         if(s2 == null)
             throw new IllegalArgumentException("Null argument");
@@ -191,18 +188,14 @@ public final class Matrix implements SemiRing {
         return res;
     }
 
-    /* (non-Javadoc)
-     * @see rationals.algebra.SemiRing#one()
-     */
+    @Override
     public SemiRing one() {
         if(line != col)
             throw new IllegalStateException("Cannot get unit matrix on non-square matrices");
         return one(line,matrix[0][0]);
     }
 
-    /* (non-Javadoc)
-     * @see rationals.algebra.SemiRing#zero()
-     */
+    @Override
     public SemiRing zero() {
         return zero(line,col,matrix[0][0]);
     }

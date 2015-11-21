@@ -29,6 +29,7 @@ public class TimerWithPause extends Timer {
     public TimerWithPause() {
         m_in=new BufferedReader(new InputStreamReader(System.in));
     }
+    @Override
     protected void doStatistics() {
         super.doStatistics();
         System.out.print("Press something to continue.. ");

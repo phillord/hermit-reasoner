@@ -72,9 +72,9 @@ public class ReducedABoxOnlyClausification extends OWLAxiomVisitorAdapter {
         m_allAtomicConcepts=allAtomicConcepts;
         m_allAtomicObjectRoles=allAtomicObjectRoles;
         m_allAtomicDataRoles=allAtomicDataRoles;
-        m_positiveFacts=new HashSet<Atom>();
-        m_negativeFacts=new HashSet<Atom>();
-        m_allIndividuals=new HashSet<Individual>();
+        m_positiveFacts=new HashSet<>();
+        m_negativeFacts=new HashSet<>();
+        m_allIndividuals=new HashSet<>();
     }
     public void clausify(OWLIndividualAxiom... axioms) {
         m_positiveFacts.clear();
@@ -100,7 +100,6 @@ public class ReducedABoxOnlyClausification extends OWLAxiomVisitorAdapter {
     }
     protected Atom getRoleAtom(OWLObjectPropertyExpression objectProperty,Term first,Term second) {
         AtomicRole atomicRole;
-        objectProperty=objectProperty.getSimplified();
         if (objectProperty.isAnonymous()) {
             OWLObjectProperty internalObjectProperty=objectProperty.getNamedProperty();
             atomicRole=AtomicRole.create(internalObjectProperty.getIRI().toString());
@@ -135,12 +134,14 @@ public class ReducedABoxOnlyClausification extends OWLAxiomVisitorAdapter {
         m_allIndividuals.add(ind);
         return ind;
     }
+    @Override
     public void visit(OWLSameIndividualAxiom object) {
         OWLIndividual[] individuals=new OWLIndividual[object.getIndividuals().size()];
         object.getIndividuals().toArray(individuals);
         for (int i=0;i<individuals.length-1;i++)
             m_positiveFacts.add(Atom.create(Equality.create(),getIndividual(individuals[i]),getIndividual(individuals[i+1])));
     }
+    @Override
     public void visit(OWLDifferentIndividualsAxiom object) {
         OWLIndividual[] individuals=new OWLIndividual[object.getIndividuals().size()];
         object.getIndividuals().toArray(individuals);
@@ -148,6 +149,7 @@ public class ReducedABoxOnlyClausification extends OWLAxiomVisitorAdapter {
             for (int j=i+1;j<individuals.length;j++)
                 m_positiveFacts.add(Atom.create(Inequality.create(),getIndividual(individuals[i]),getIndividual(individuals[j])));
     }
+    @Override
     public void visit(OWLClassAssertionAxiom object) {
         // we can handle everything that results in positive or negative facts
         // (C a) with C a named class, HasSelf, HasValue, negated named class, negated HasSelf, negatedHasValue
@@ -160,7 +162,7 @@ public class ReducedABoxOnlyClausification extends OWLAxiomVisitorAdapter {
         } else if (description instanceof OWLObjectHasValue) {
             OWLObjectHasValue hasValue=(OWLObjectHasValue)description;
             OWLObjectPropertyExpression role=hasValue.getProperty();
-            OWLIndividual filler=hasValue.getValue();
+            OWLIndividual filler=hasValue.getFiller();
             m_positiveFacts.add(getRoleAtom(role,getIndividual(object.getIndividual()),getIndividual(filler)));
         } else if (description instanceof OWLObjectComplementOf) {
             OWLClassExpression negated=((OWLObjectComplementOf)description).getOperand();
@@ -171,7 +173,7 @@ public class ReducedABoxOnlyClausification extends OWLAxiomVisitorAdapter {
             } else if (negated instanceof OWLObjectHasValue) {
                 OWLObjectHasValue hasValue=(OWLObjectHasValue)negated;
                 OWLObjectPropertyExpression role=hasValue.getProperty();
-                OWLIndividual filler=hasValue.getValue();
+                OWLIndividual filler=hasValue.getFiller();
                 m_negativeFacts.add(getRoleAtom(role,getIndividual(object.getIndividual()),getIndividual(filler)));
             } else {
                 throw new IllegalArgumentException("Internal error: invalid normal form for ABox updates (class assertion with negated class).");
@@ -179,16 +181,20 @@ public class ReducedABoxOnlyClausification extends OWLAxiomVisitorAdapter {
         } else
             throw new IllegalArgumentException("Internal error: invalid normal form for ABox updates.");
     }
+    @Override
     public void visit(OWLObjectPropertyAssertionAxiom object) {
         m_positiveFacts.add(getRoleAtom(object.getProperty(),getIndividual(object.getSubject()),getIndividual(object.getObject())));
     }
+    @Override
     public void visit(OWLNegativeObjectPropertyAssertionAxiom object) {
         m_negativeFacts.add(getRoleAtom(object.getProperty(),getIndividual(object.getSubject()),getIndividual(object.getObject())));
     }
+    @Override
     public void visit(OWLDataPropertyAssertionAxiom object) {
         Constant targetValue=getConstant(object.getObject());
         m_positiveFacts.add(getRoleAtom(object.getProperty(),getIndividual(object.getSubject()),targetValue));
     }
+    @Override
     public void visit(OWLNegativeDataPropertyAssertionAxiom object) {
         Constant targetValue=getConstant(object.getObject());
         m_negativeFacts.add(getRoleAtom(object.getProperty(),getIndividual(object.getSubject()),targetValue));

@@ -164,107 +164,132 @@ public class BuiltInPropertyManager {
                 m_usesBottomDataProperty=true;
         }
 
+        @Override
         public void visit(OWLClass object) {
         }
 
+        @Override
         public void visit(OWLObjectComplementOf object) {
             object.getOperand().accept(this);
         }
 
+        @Override
         public void visit(OWLObjectIntersectionOf object) {
             for (OWLClassExpression description : object.getOperands())
                 description.accept(this);
         }
 
+        @Override
         public void visit(OWLObjectUnionOf object) {
             for (OWLClassExpression description : object.getOperands())
                 description.accept(this);
         }
 
+        @Override
         public void visit(OWLObjectOneOf object) {
         }
 
+        @Override
         public void visit(OWLObjectSomeValuesFrom object) {
             visitProperty(object.getProperty());
             object.getFiller().accept(this);
         }
 
+        @Override
         public void visit(OWLObjectHasValue object) {
             visitProperty(object.getProperty());
         }
 
+        @Override
         public void visit(OWLObjectHasSelf object) {
             visitProperty(object.getProperty());
         }
 
+        @Override
         public void visit(OWLObjectAllValuesFrom object) {
             visitProperty(object.getProperty());
             object.getFiller().accept(this);
         }
 
+        @Override
         public void visit(OWLObjectMinCardinality object) {
             visitProperty(object.getProperty());
             object.getFiller().accept(this);
         }
 
+        @Override
         public void visit(OWLObjectMaxCardinality object) {
             visitProperty(object.getProperty());
             object.getFiller().accept(this);
         }
 
+        @Override
         public void visit(OWLObjectExactCardinality object) {
             visitProperty(object.getProperty());
             object.getFiller().accept(this);
         }
 
+        @Override
         public void visit(OWLDataHasValue object) {
             visitProperty(object.getProperty());
         }
 
+        @Override
         public void visit(OWLDataSomeValuesFrom object) {
             visitProperty(object.getProperty());
         }
 
+        @Override
         public void visit(OWLDataAllValuesFrom object) {
             visitProperty(object.getProperty());
         }
 
+        @Override
         public void visit(OWLDataMinCardinality object) {
             visitProperty(object.getProperty());
         }
 
+        @Override
         public void visit(OWLDataMaxCardinality object) {
             visitProperty(object.getProperty());
         }
 
+        @Override
         public void visit(OWLDataExactCardinality object) {
             visitProperty(object.getProperty());
         }
 
         protected class FactVisitor extends OWLAxiomVisitorAdapter {
 
+            @Override
             public void visit(OWLSameIndividualAxiom object) {
             }
 
+            @Override
             public void visit(OWLDifferentIndividualsAxiom object) {
             }
 
+            @Override
             public void visit(OWLClassAssertionAxiom object) {
                 object.getClassExpression().accept(Checker.this);
             }
 
+            @Override
             public void visit(OWLObjectPropertyAssertionAxiom object) {
                 visitProperty(object.getProperty());
             }
 
+            @Override
             public void visit(OWLNegativeObjectPropertyAssertionAxiom object) {
                 visitProperty(object.getProperty());
             }
 
+            @Override
             public void visit(OWLDataPropertyAssertionAxiom object) {
                 visitProperty(object.getProperty());
             }
 
+            @Override
             public void visit(OWLNegativeDataPropertyAssertionAxiom object) {
                 visitProperty(object.getProperty());
             }

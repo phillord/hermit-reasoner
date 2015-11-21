@@ -75,7 +75,7 @@ public final class DatatypeManager implements Serializable {
         m_assertions0Retrieval=m_extensionManager.getBinaryExtensionTable().createRetrieval(new boolean[] { true,false },ExtensionTable.View.EXTENSION_THIS);
         m_assertions1Retrieval=m_extensionManager.getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.EXTENSION_THIS);
         m_conjunction=new DConjunction();
-        m_auxiliaryVariableList=new ArrayList<DVariable>();
+        m_auxiliaryVariableList=new ArrayList<>();
         m_unionDependencySet=new UnionDependencySet(16);
         m_newVariableAdded=new boolean[1];
         m_unknownDatatypeRestrictionsPermanent=tableau.m_permanentDLOntology.getAllUnknownDatatypeRestrictions();
@@ -547,9 +547,9 @@ public final class DatatypeManager implements Serializable {
         protected int m_resizeThreshold;
 
         public DConjunction() {
-            m_unusedVariables=new ArrayList<DVariable>();
-            m_usedVariables=new ArrayList<DVariable>();
-            m_activeVariables=new ArrayList<DVariable>();
+            m_unusedVariables=new ArrayList<>();
+            m_usedVariables=new ArrayList<>();
+            m_activeVariables=new ArrayList<>();
             m_buckets=new DVariable[16];
             m_resizeThreshold=(int)(m_buckets.length*0.75);
             m_numberOfEntries=0;
@@ -646,6 +646,7 @@ public final class DatatypeManager implements Serializable {
             }
             return true;
         }
+        @Override
         public String toString() {
             return toString(Prefixes.STANDARD_PREFIXES);
         }
@@ -691,14 +692,14 @@ public final class DatatypeManager implements Serializable {
         protected Object m_dataValue;
 
         protected DVariable() {
-            m_positiveConstantEnumerations=new ArrayList<ConstantEnumeration>();
-            m_negativeConstantEnumerations=new ArrayList<ConstantEnumeration>();
-            m_positiveDatatypeRestrictions=new ArrayList<DatatypeRestriction>();
-            m_negativeDatatypeRestrictions=new ArrayList<DatatypeRestriction>();
-            m_unequalTo=new ArrayList<DVariable>();
-            m_unequalToDirect=new ArrayList<DVariable>();
-            m_forbiddenDataValues=new ArrayList<Object>();
-            m_explicitDataValues=new ArrayList<Object>();
+            m_positiveConstantEnumerations=new ArrayList<>();
+            m_negativeConstantEnumerations=new ArrayList<>();
+            m_positiveDatatypeRestrictions=new ArrayList<>();
+            m_negativeDatatypeRestrictions=new ArrayList<>();
+            m_unequalTo=new ArrayList<>();
+            m_unequalToDirect=new ArrayList<>();
+            m_forbiddenDataValues=new ArrayList<>();
+            m_explicitDataValues=new ArrayList<>();
         }
         protected void dispose() {
             m_positiveConstantEnumerations.clear();
@@ -768,6 +769,7 @@ public final class DatatypeManager implements Serializable {
             }
             return true;
         }
+        @Override
         public String toString() {
             return toString(Prefixes.STANDARD_PREFIXES);
         }
@@ -820,6 +822,7 @@ public final class DatatypeManager implements Serializable {
         private static final long serialVersionUID = 8838838641444833249L;
         public static final Comparator<DVariable> INSTANCE=new SmallestEnumerationFirst();
 
+        @Override
         public int compare(DVariable o1,DVariable o2) {
             return o1.m_explicitDataValues.size()-o2.m_explicitDataValues.size();
         }

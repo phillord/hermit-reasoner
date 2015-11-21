@@ -42,16 +42,15 @@ public class Parser {
       this.lexico = lexer;
   }
   
-  private Automaton error(String message) throws ConverterException {
-    if (true) throw new ConverterException(
+  private ConverterException error(String message) {
+      return new ConverterException(
       "line " + lexico.lineNumber() + " , " + lexico.label() + " : " + message) ;
-    return new Automaton() ;
   }
   
   public Automaton analyze() throws ConverterException {
     lexico.read() ;
     Automaton r = E() ;
-    if (lexico.current() != Lexer.END) error("end of expression expected") ;
+    if (lexico.current() != Lexer.END) throw error("end of expression expected") ;
     return r ; 
   }
   
@@ -69,11 +68,11 @@ public class Parser {
       case Lexer.END :
       case Lexer.UNION :
       case Lexer.SHUFFLE :
-	  case Lexer.MIX : 
+      case Lexer.MIX : 
       case Lexer.STAR :
       case Lexer.ITERATION :
       case Lexer.INT :
-      default : return error("expression expected") ;
+      default : throw error("expression expected") ;
     }
   }
 
@@ -82,7 +81,7 @@ public class Parser {
       case Lexer.EPSILON :
       case Lexer.EMPTY :
       case Lexer.OPEN :
-      case Lexer.LABEL : return error("union expected") ; 
+      case Lexer.LABEL : throw error("union expected") ; 
       case Lexer.CLOSE :
       case Lexer.END : return new Automaton() ;
       case Lexer.UNION : {
@@ -92,11 +91,11 @@ public class Parser {
         return new Reducer().transform(new Union().transform(a , b)) ;
       }
       case Lexer.SHUFFLE :
-	  case Lexer.MIX : 
+      case Lexer.MIX : 
       case Lexer.STAR :
       case Lexer.ITERATION :
       case Lexer.INT :
-      default : return error("union expected") ; 
+      default : throw error("union expected") ; 
     }
   }
 
@@ -115,11 +114,11 @@ public class Parser {
       case Lexer.END :
       case Lexer.UNION :
       case Lexer.SHUFFLE :
-	  case Lexer.MIX : 
+      case Lexer.MIX : 
       case Lexer.STAR :
       case Lexer.ITERATION :
       case Lexer.INT :
-      default : return error("expression expected") ;
+      default : throw error("expression expected") ;
     }
   }
 
@@ -128,29 +127,29 @@ public class Parser {
       case Lexer.EPSILON :
       case Lexer.EMPTY :
       case Lexer.OPEN :
-      case Lexer.LABEL :return error("concatenation expected") ;
+      case Lexer.LABEL :throw error("concatenation expected") ;
       case Lexer.CLOSE :
       case Lexer.END : 
       case Lexer.UNION : return Automaton.epsilonAutomaton() ;
-	  case Lexer.SHUFFLE : {
-		lexico.read() ;
-		Automaton a = S() ;
-		Automaton b = TS() ;
-		return new Reducer().transform(
-		  new Shuffle().transform(a , b)) ;
-	  }
-	  case Lexer.MIX : 
-	  	{
-		lexico.read() ;
-		Automaton a = S() ;
-		Automaton b = TS() ;
-		return new Reducer().transform(
-		  new Mix().transform(a , b)) ;
-	  }
+      case Lexer.SHUFFLE : {
+        lexico.read() ;
+        Automaton a = S() ;
+        Automaton b = TS() ;
+        return new Reducer().transform(
+          new Shuffle().transform(a , b)) ;
+      }
+      case Lexer.MIX : 
+          {
+        lexico.read() ;
+        Automaton a = S() ;
+        Automaton b = TS() ;
+        return new Reducer().transform(
+          new Mix().transform(a , b)) ;
+      }
       case Lexer.STAR :
       case Lexer.ITERATION :
       case Lexer.INT :
-      default : return error("concatenation expected") ; 
+      default : throw error("concatenation expected") ; 
     }
   }
 
@@ -169,11 +168,11 @@ public class Parser {
       case Lexer.END :
       case Lexer.UNION :
       case Lexer.SHUFFLE :
-	  case Lexer.MIX : 
+      case Lexer.MIX : 
       case Lexer.STAR :
       case Lexer.ITERATION :
       case Lexer.INT :
-      default : return error("expression expected") ;
+      default : throw error("expression expected") ;
     }
   }
 
@@ -191,12 +190,12 @@ public class Parser {
       case Lexer.CLOSE :
       case Lexer.END : 
       case Lexer.UNION : 
-	  case Lexer.MIX : 
+      case Lexer.MIX : 
       case Lexer.SHUFFLE :return Automaton.epsilonAutomaton() ;
       case Lexer.STAR :
       case Lexer.ITERATION :
       case Lexer.INT :
-      default : return error("concatenation expected") ; 
+      default : throw error("concatenation expected") ; 
     }
   }
 
@@ -212,12 +211,12 @@ public class Parser {
       case Lexer.CLOSE :
       case Lexer.END :
       case Lexer.UNION :
-	  case Lexer.MIX : 
+      case Lexer.MIX : 
       case Lexer.SHUFFLE :
       case Lexer.STAR :
       case Lexer.ITERATION :
       case Lexer.INT :
-      default : return error("factor expected") ;
+      default : throw error("factor expected") ;
     }
   }
 
@@ -236,7 +235,7 @@ public class Parser {
       case Lexer.OPEN : {
         lexico.read() ;
         Automaton a = E() ;
-        if (lexico.current() != Lexer.CLOSE) return error("( expected") ;
+        if (lexico.current() != Lexer.CLOSE) throw error("( expected") ;
         lexico.read() ;
         return a ;
       }
@@ -248,12 +247,12 @@ public class Parser {
       case Lexer.CLOSE :
       case Lexer.END :
       case Lexer.SHUFFLE :
-	  case Lexer.MIX : 
+      case Lexer.MIX : 
       case Lexer.UNION :
       case Lexer.STAR :
       case Lexer.ITERATION :
       case Lexer.INT :
-      default : return error("factor expected") ;
+      default : throw error("factor expected") ;
     }
   }
 
@@ -264,7 +263,7 @@ public class Parser {
       case Lexer.CLOSE :
       case Lexer.END :
       case Lexer.UNION : 
-	  case Lexer.MIX : 
+      case Lexer.MIX : 
       case Lexer.SHUFFLE :return a ;
       case Lexer.STAR : {
         lexico.read() ; 
@@ -287,7 +286,7 @@ public class Parser {
         }
         return b ;
       }
-      default : return error("Unexpected character") ;
+      default : throw error("Unexpected character") ;
     }
   }
 }

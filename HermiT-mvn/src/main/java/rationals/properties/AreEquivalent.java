@@ -67,12 +67,7 @@ public class AreEquivalent implements BinaryTest {
         this.relation = r;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see rationals.tests.BinaryTest#test(rationals.Automaton,
-     *      rationals.Automaton)
-     */
+    @Override
     public boolean test(Automaton a, Automaton b) {
         relation.setAutomata(a, b);
         return relation.equivalence(a.initials(), b.initials());

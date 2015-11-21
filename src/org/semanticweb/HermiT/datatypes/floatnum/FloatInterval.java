@@ -70,6 +70,7 @@ public class FloatInterval {
         }
         numbers.add(m_upperBoundInclusive);
     }
+    @Override
     public String toString() {
         StringBuffer buffer=new StringBuffer();
         buffer.append("FLOAT[");

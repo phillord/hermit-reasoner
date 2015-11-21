@@ -14,10 +14,12 @@ public class MemoryConsumptionMonitor extends CountingMonitor {
     protected int m_maxMem=0; // in KB
     protected int m_testNumber=0;
     
+    @Override
     public void isSatisfiableStarted(ReasoningTaskDescription reasoningTaskDescription) {
         super.isSatisfiableStarted(reasoningTaskDescription);
         m_testNumber++;
     }
+    @Override
     public void isSatisfiableFinished(ReasoningTaskDescription reasoningTaskDescription,boolean result) {
         super.isSatisfiableFinished(reasoningTaskDescription, result);
         m_binaryTableMem=m_tableau.getExtensionManager().getBinaryExtensionTable().sizeInMemory()/1024;
@@ -30,6 +32,7 @@ public class MemoryConsumptionMonitor extends CountingMonitor {
         if (sum>m_maxMem)
             m_maxMem=sum;
     }
+    @Override
     public void reset() {
         super.reset();
         m_binaryTableMem=0; // in KB

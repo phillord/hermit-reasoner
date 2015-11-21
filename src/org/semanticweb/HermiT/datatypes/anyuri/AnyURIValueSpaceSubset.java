@@ -46,6 +46,7 @@ public class AnyURIValueSpaceSubset implements ValueSpaceSubset {
     public AnyURIValueSpaceSubset(Automaton automaton) {
         m_automaton=automaton;
     }
+    @Override
     public boolean hasCardinalityAtLeast(int number) {
         Set<String> elements=m_automaton.getFiniteStrings(number);
         if (elements==null)
@@ -53,12 +54,14 @@ public class AnyURIValueSpaceSubset implements ValueSpaceSubset {
         else
             return elements.size()>=number;
     }
+    @Override
     public boolean containsDataValue(Object dataValue) {
         if (dataValue instanceof URI)
             return m_automaton.run(dataValue.toString());
         else
             return false;
     }
+    @Override
     public void enumerateDataValues(Collection<Object> dataValues) {
         Set<String> elements=m_automaton.getFiniteStrings();
         if (elements==null)
@@ -68,6 +71,7 @@ public class AnyURIValueSpaceSubset implements ValueSpaceSubset {
                 dataValues.add(URI.create(element));
         }
     }
+    @Override
     public String toString() {
         StringBuffer buffer=new StringBuffer();
         buffer.append("xsd:anyURI{");

@@ -63,13 +63,9 @@ import rationals.transformations.Normalizer;
  */
 public class ToRExpression implements ToString {
 
-    private Map /* < Key, String > */keys = new HashMap();
+    private Map  < Couple, String > keys = new HashMap<>();
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see rationals.converters.ToString#toString(rationals.Automaton)
-     */
+    @Override
     public String toString(Automaton a) {
         if(a == null)
             return "0";
@@ -80,11 +76,11 @@ public class ToRExpression implements ToString {
         if (ret.initials().isEmpty())
             return "0";        
         /* add all transitions from start to end state */
-        State init  = (State)ret.initials().iterator().next();
-        State fini  = (State)ret.terminals().iterator().next();
+        State init  = ret.initials().iterator().next();
+        State fini  = ret.terminals().iterator().next();
         String re = "";
-        for(Iterator i = ret.deltaFrom(init,fini).iterator();i.hasNext();) {
-            Transition tr = (Transition)i.next();
+        for(Iterator<Transition> i = ret.deltaFrom(init,fini).iterator();i.hasNext();) {
+            Transition tr = i.next();
             if("".equals(re)) {
                 re = (tr.label() == null) ? "1" : tr.label().toString();
             }else
@@ -92,17 +88,17 @@ public class ToRExpression implements ToString {
         }
         if(!"".equals(re))
             keys.put(new Couple(init,fini), re);
-        Iterator it = ret.states().iterator();
+        Iterator<State> it = ret.states().iterator();
         while (it.hasNext()) {
-            State st = (State) it.next();
+            State st = it.next();
             if (st.isInitial() || st.isTerminal())
                 continue;
           
             re = "";
             /* first handle self transitions */
-            Iterator it2 = ret.delta(st).iterator();
+            Iterator<Transition> it2 = ret.delta(st).iterator();
             while (it2.hasNext()) {
-                Transition t1 = (Transition) it2.next();
+                Transition t1 = it2.next();
                 if (!t1.end().equals(st))
                     continue;
                 re += "+" + t1.label();
@@ -115,42 +111,37 @@ public class ToRExpression implements ToString {
                 else
                     re = re + "*";
             }
-            Set to = ret.delta(st); /* outgoing */
-            Set from = ret.deltaMinusOne(st); /* incoming */
+            Set<Transition> to = ret.delta(st); /* outgoing */
+            Set<Transition> from = ret.deltaMinusOne(st); /* incoming */
             it2 = from.iterator();
             while (it2.hasNext()) {
                 /* beware : this is reverse transition */
-                Transition t1 = (Transition) it2.next();
+                Transition t1 = it2.next();
                 if (t1.end().equals(st)) /* skip self transitions */
                     continue;
-                Iterator it3 = to.iterator();
+                Iterator<Transition> it3 = to.iterator();
                 while (it3.hasNext()) {
-                    Transition t2 = (Transition) it3.next();
+                    Transition t2 = it3.next();
                     if (t2.end().equals(st))
                         continue;
                     /* find completed expression from start to end */
                     State s2 = t2.end();
                     State s1 = t1.end();
                     Couple k = new Couple(s1, s2);
-                    String oldre = (String) keys.get(k);
+                    String oldre = keys.get(k);
                     String nre = t1.label() + "" + re + t2.label();
                     if (oldre == null) {
                         oldre = nre;
                     } else {
                         oldre += "+" + nre;
                     }
-                    try {
                         keys.put(k, oldre);
-                        ret.addTransition(new Transition(s1, oldre, s2));
-                    } catch (NoSuchStateException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
+                        ret.addTransition(new Transition(s1, oldre, s2),null);
                 }
             }
         }
         /* returns the transition from stat to end */
-        re = (String) keys.get(new Couple(init,fini));
+        re = keys.get(new Couple(init,fini));
         return re;
     }
 

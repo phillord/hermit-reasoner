@@ -50,14 +50,15 @@ public class IndividualReuseStrategy extends AbstractExpansionStrategy implement
     public IndividualReuseStrategy(BlockingStrategy strategy,boolean isDeterministic) {
         super(strategy,true);
         m_isDeterministic=isDeterministic;
-        m_reusedNodes=new HashMap<AtomicConcept,NodeBranchingPointPair>();
-        m_doReuseConceptsAlways=new HashSet<AtomicConcept>();
-        m_dontReuseConceptsThisRun=new HashSet<AtomicConcept>();
-        m_dontReuseConceptsEver=new HashSet<AtomicConcept>();
+        m_reusedNodes=new HashMap<>();
+        m_doReuseConceptsAlways=new HashSet<>();
+        m_dontReuseConceptsThisRun=new HashSet<>();
+        m_dontReuseConceptsEver=new HashSet<>();
         m_reuseBacktrackingTable=new TupleTable(1);
         m_auxiliaryBuffer=new Object[1];
         m_indicesByBranchingPoint=new int[10];
     }
+    @Override
     @SuppressWarnings("unchecked")
     public void initialize(Tableau tableau) {
         super.initialize(tableau);
@@ -70,6 +71,7 @@ public class IndividualReuseStrategy extends AbstractExpansionStrategy implement
         if (object instanceof Set)
             m_dontReuseConceptsEver.addAll((Set<? extends AtomicConcept>)object);
     }
+    @Override
     public void clear() {
         super.clear();
         m_reusedNodes.clear();
@@ -77,6 +79,7 @@ public class IndividualReuseStrategy extends AbstractExpansionStrategy implement
         m_dontReuseConceptsThisRun.clear();
         m_dontReuseConceptsThisRun.addAll(m_dontReuseConceptsEver);
     }
+    @Override
     public void branchingPointPushed() {
         int start=m_tableau.getCurrentBranchingPoint().getLevel();
         int requiredSize=start+1;
@@ -90,6 +93,7 @@ public class IndividualReuseStrategy extends AbstractExpansionStrategy implement
         }
         m_indicesByBranchingPoint[start]=m_reuseBacktrackingTable.getFirstFreeTupleIndex();
     }
+    @Override
     public void backtrack() {
         int requiredFirstFreeTupleIndex=m_indicesByBranchingPoint[m_tableau.getCurrentBranchingPoint().getLevel()];
         for (int index=m_reuseBacktrackingTable.getFirstFreeTupleIndex()-1;index>=requiredFirstFreeTupleIndex;--index) {
@@ -99,9 +103,11 @@ public class IndividualReuseStrategy extends AbstractExpansionStrategy implement
         }
         m_reuseBacktrackingTable.truncate(requiredFirstFreeTupleIndex);
     }
+    @Override
     public void modelFound() {
         m_dontReuseConceptsEver.addAll(m_dontReuseConceptsThisRun);
     }
+    @Override
     public boolean isDeterministic() {
         return m_isDeterministic;
     }
@@ -114,6 +120,7 @@ public class IndividualReuseStrategy extends AbstractExpansionStrategy implement
     public Set<AtomicConcept> getDontReuseConceptsEver() {
         return m_dontReuseConceptsEver;
     }
+    @Override
     protected void expandExistential(AtLeast atLeast,Node forNode) {
         // Mark existential as processed BEFORE branching takes place!
         m_existentialExpansionManager.markExistentialProcessed(atLeast,forNode);
@@ -197,6 +204,7 @@ public class IndividualReuseStrategy extends AbstractExpansionStrategy implement
             m_node=node;
             m_wasParentReuse=wasParentReuse;
         }
+        @Override
         public void startNextChoice(Tableau tableau,DependencySet clashDependencySet) {
             if (!m_wasParentReuse)
                 m_dontReuseConceptsThisRun.add((AtomicConcept)m_existential.getToConcept());

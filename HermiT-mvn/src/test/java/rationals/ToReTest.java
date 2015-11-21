@@ -48,50 +48,48 @@ import rationals.converters.ToRExpression;
  * @author nono
  * @version $Id: ToReTest.java 2 2006-08-24 14:41:48Z oqube $
  */
+@SuppressWarnings("javadoc")
 public class ToReTest extends TestCase {
 
-  public ToReTest(String n) {
-    super(n);
-  }
-  
-  public void testRE1() throws ConverterException {
-      String re = "ab*c";
-      Automaton a = new Expression().fromString(re);
-      String er = new ToRExpression().toString(a);
-      System.err.println(er);
-      a = new Expression().fromString(er);
-      assertTrue(a.accept(Arrays.asList(new Object[]{"a","b","b","c"})));    
-      assertTrue(!a.accept(Arrays.asList(new Object[]{"a","b","b"})));  
+    public ToReTest(String n) {
+        super(n);
     }
-    
-  public void testRESingleton() throws ConverterException {
-      String re = "a";
-      Automaton a = new Expression().fromString(re);
-      String er = new ToRExpression().toString(a);
-      System.err.println(er);
-      a = new Expression().fromString(er);
-      assertTrue(a.accept(Arrays.asList(new Object[]{"a"})));   
+
+    public void testRE1() throws ConverterException {
+        String re = "ab*c";
+        Automaton a = new Expression().fromString(re);
+        String er = new ToRExpression().toString(a);
+        System.err.println(er);
+        a = new Expression().fromString(er);
+        assertTrue(a.accept(Arrays.asList(new Object[] { "a", "b", "b", "c" })));
+        assertTrue(!a.accept(Arrays.asList(new Object[] { "a", "b", "b" })));
     }
-    
-  public void testREEpsilon() throws ConverterException {
-    String re = "(ab*c)*";
-    Automaton a = new Expression().fromString(re);
-    String er = new ToRExpression().toString(a);
-    System.err.println(er);
-    a = new Expression().fromString(er);
-    assertTrue(a.accept(new ArrayList()));    
-    assertTrue(a.accept(Arrays.asList(new Object[]{"a","b","b","c"})));    
-    assertTrue(!a.accept(Arrays.asList(new Object[]{"a","b","b"})));  
-  }
-  
-  
+
+    public void testRESingleton() throws ConverterException {
+        String re = "a";
+        Automaton a = new Expression().fromString(re);
+        String er = new ToRExpression().toString(a);
+        System.err.println(er);
+        a = new Expression().fromString(er);
+        assertTrue(a.accept(Arrays.asList(new Object[] { "a" })));
+    }
+
+    public void testREEpsilon() throws ConverterException {
+        String re = "(ab*c)*";
+        Automaton a = new Expression().fromString(re);
+        String er = new ToRExpression().toString(a);
+        System.err.println(er);
+        a = new Expression().fromString(er);
+        assertTrue(a.accept(new ArrayList<>()));
+        assertTrue(a.accept(Arrays.asList(new Object[] { "a", "b", "b", "c" })));
+        assertTrue(!a.accept(Arrays.asList(new Object[] { "a", "b", "b" })));
+    }
+
 }
 
-/* 
- * $Log: ToReTest.java,v $
- * Revision 1.1  2004/09/21 11:50:28  bailly
- * added interface BinaryTest
- * added class for testing automaton equivalence (isomorphism of normalized automata)
- * added computation of RE from Automaton
+/*
+ * $Log: ToReTest.java,v $ Revision 1.1 2004/09/21 11:50:28 bailly added
+ * interface BinaryTest added class for testing automaton equivalence
+ * (isomorphism of normalized automata) added computation of RE from Automaton
  *
-*/
+ */

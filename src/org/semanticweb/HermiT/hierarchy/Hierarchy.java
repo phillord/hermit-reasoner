@@ -36,7 +36,7 @@ public class Hierarchy<E> {
     public Hierarchy(HierarchyNode<E> topNode,HierarchyNode<E> bottomNode) {
         m_topNode=topNode;
         m_bottomNode=bottomNode;
-        m_nodesByElements=new HashMap<E,HierarchyNode<E>>();
+        m_nodesByElements=new HashMap<>();
         for (E element : m_topNode.m_equivalentElements)
             m_nodesByElements.put(element,m_topNode);
         for (E element : m_bottomNode.m_equivalentElements)
@@ -58,54 +58,56 @@ public class Hierarchy<E> {
         return Collections.unmodifiableCollection(m_nodesByElements.values());
     }
     public Set<HierarchyNode<E>> getAllNodesSet() {
-        return Collections.unmodifiableSet(new HashSet<HierarchyNode<E>>(m_nodesByElements.values()));
+        return Collections.unmodifiableSet(new HashSet<>(m_nodesByElements.values()));
     }
     public Set<E> getAllElements() {
         return Collections.unmodifiableSet(m_nodesByElements.keySet());
     }
     public int getDepth() {
-        HierarchyDepthFinder<E> depthFinder=new HierarchyDepthFinder<E>(m_bottomNode);
+        HierarchyDepthFinder<E> depthFinder=new HierarchyDepthFinder<>(m_bottomNode);
         traverseDepthFirst(depthFinder);
         return depthFinder.depth;
     }
     protected final class HierarchyDepthFinder<T> implements Hierarchy.HierarchyNodeVisitor<T> {
-        protected final HierarchyNode<T> m_bottomNode;
+        protected final HierarchyNode<T> bottomNode;
         protected int depth=0;
 
         public HierarchyDepthFinder(HierarchyNode<T> bottomNode) {
-            m_bottomNode=bottomNode;
+            this.bottomNode=bottomNode;
         }
+        @Override
         public boolean redirect(HierarchyNode<T>[] nodes) {
             return true;
         }
+        @Override
         public void visit(int level,HierarchyNode<T> node,HierarchyNode<T> parentNode,boolean firstVisit) {
-            if (node.equals(m_bottomNode)&&level>depth)
+            if (node.equals(bottomNode)&&level>depth)
                 depth=level;
         }
     }
     public <T> Hierarchy<T> transform(Transformer<? super E,T> transformer,Comparator<T> comparator) {
-        HierarchyNodeComparator<T> newNodeComparator=new HierarchyNodeComparator<T>(comparator);
-        Map<HierarchyNode<E>,HierarchyNode<T>> oldToNew=new HashMap<HierarchyNode<E>,HierarchyNode<T>>();
+        HierarchyNodeComparator<T> newNodeComparator=new HierarchyNodeComparator<>(comparator);
+        Map<HierarchyNode<E>,HierarchyNode<T>> oldToNew=new HashMap<>();
         for (HierarchyNode<E> oldNode : m_nodesByElements.values()) {
             Set<T> newEquivalentElements;
             Set<HierarchyNode<T>> newParentNodes;
             Set<HierarchyNode<T>> newChildNodes;
             if (comparator==null) {
-                newEquivalentElements=new HashSet<T>();
-                newParentNodes=new HashSet<HierarchyNode<T>>();
-                newChildNodes=new HashSet<HierarchyNode<T>>();
+                newEquivalentElements=new HashSet<>();
+                newParentNodes=new HashSet<>();
+                newChildNodes=new HashSet<>();
             }
             else {
-                newEquivalentElements=new TreeSet<T>(comparator);
-                newParentNodes=new TreeSet<HierarchyNode<T>>(newNodeComparator);
-                newChildNodes=new TreeSet<HierarchyNode<T>>(newNodeComparator);
+                newEquivalentElements=new TreeSet<>(comparator);
+                newParentNodes=new TreeSet<>(newNodeComparator);
+                newChildNodes=new TreeSet<>(newNodeComparator);
             }
             for (E oldElement : oldNode.m_equivalentElements) {
                 T newElement=transformer.transform(oldElement);
                 newEquivalentElements.add(newElement);
             }
             T newRepresentative=transformer.determineRepresentative(oldNode.m_representative,newEquivalentElements);
-            HierarchyNode<T> newNode=new HierarchyNode<T>(newRepresentative,newEquivalentElements,newParentNodes,newChildNodes);
+            HierarchyNode<T> newNode=new HierarchyNode<>(newRepresentative,newEquivalentElements,newParentNodes,newChildNodes);
             oldToNew.put(oldNode,newNode);
         }
         for (HierarchyNode<E> oldParentNode : m_nodesByElements.values()) {
@@ -118,7 +120,7 @@ public class Hierarchy<E> {
         }
         HierarchyNode<T> newTopNode=oldToNew.get(m_topNode);
         HierarchyNode<T> newBottomNode=oldToNew.get(m_bottomNode);
-        Hierarchy<T> newHierarchy=new Hierarchy<T>(newTopNode,newBottomNode);
+        Hierarchy<T> newHierarchy=new Hierarchy<>(newTopNode,newBottomNode);
         for (HierarchyNode<T> newNode : oldToNew.values())
             for (T newElement : newNode.m_equivalentElements)
                 newHierarchy.m_nodesByElements.put(newElement,newNode);
@@ -127,7 +129,7 @@ public class Hierarchy<E> {
     @SuppressWarnings("unchecked")
     public void traverseDepthFirst(HierarchyNodeVisitor<E> visitor) {
         HierarchyNode<E>[] redirectBuffer=new HierarchyNode[2];
-        Set<HierarchyNode<E>> visited=new HashSet<HierarchyNode<E>>();
+        Set<HierarchyNode<E>> visited=new HashSet<>();
         traverseDepthFirst(visitor,0,m_topNode,null,visited,redirectBuffer);
     }
     protected void traverseDepthFirst(HierarchyNodeVisitor<E> visitor,int level,HierarchyNode<E> node,HierarchyNode<E> parentNode,Set<HierarchyNode<E>> visited,HierarchyNode<E>[] redirectBuffer) {
@@ -143,13 +145,16 @@ public class Hierarchy<E> {
                     traverseDepthFirst(visitor,level+1,childNode,node,visited,redirectBuffer);
         }
     }
+    @Override
     public String toString() {
         StringWriter buffer=new StringWriter();
         final PrintWriter output=new PrintWriter(buffer);
         traverseDepthFirst(new HierarchyNodeVisitor<E>() {
+            @Override
             public boolean redirect(HierarchyNode<E>[] nodes) {
                 return true;
             }
+            @Override
             public void visit(int level,HierarchyNode<E> node,HierarchyNode<E> parentNode,boolean firstVisit) {
                 if (!node.equals(m_bottomNode))
                     printNode(level,node,parentNode,firstVisit);
@@ -188,20 +193,20 @@ public class Hierarchy<E> {
         return buffer.toString();
     }
     public static <T> Hierarchy<T> emptyHierarchy(Collection<T> elements,T topElement,T bottomElement) {
-        HierarchyNode<T> topBottomNode=new HierarchyNode<T>(topElement);
+        HierarchyNode<T> topBottomNode=new HierarchyNode<>(topElement);
         topBottomNode.m_equivalentElements.add(topElement);
         topBottomNode.m_equivalentElements.add(bottomElement);
         topBottomNode.m_equivalentElements.addAll(elements);
-        return new Hierarchy<T>(topBottomNode,topBottomNode);
+        return new Hierarchy<>(topBottomNode,topBottomNode);
     }
     public static <T> Hierarchy<T> trivialHierarchy(T topElement,T bottomElement) {
-        HierarchyNode<T> topNode=new HierarchyNode<T>(topElement);
+        HierarchyNode<T> topNode=new HierarchyNode<>(topElement);
         topNode.m_equivalentElements.add(topElement);
-        HierarchyNode<T> bottomNode=new HierarchyNode<T>(bottomElement);
+        HierarchyNode<T> bottomNode=new HierarchyNode<>(bottomElement);
         bottomNode.m_equivalentElements.add(bottomElement);
         topNode.m_childNodes.add(bottomNode);
         bottomNode.m_parentNodes.add(topNode);
-        return new Hierarchy<T>(topNode,bottomNode);
+        return new Hierarchy<>(topNode,bottomNode);
     }
     protected static interface HierarchyNodeVisitor<E> {
         boolean redirect(HierarchyNode<E>[] nodes);
@@ -219,6 +224,7 @@ public class Hierarchy<E> {
         public HierarchyNodeComparator(Comparator<E> elementComparator) {
             m_elementComparator=elementComparator;
         }
+        @Override
         public int compare(HierarchyNode<E> n1,HierarchyNode<E> n2) {
             return m_elementComparator.compare(n1.m_representative,n2.m_representative);
         }

@@ -45,8 +45,8 @@ public class OWLRealDatatypeHandler implements DatatypeHandler {
     protected static final String OWL_NS=Prefixes.s_semanticWebPrefixes.get("owl:");
     protected static final String XSD_NS=Prefixes.s_semanticWebPrefixes.get("xsd:");
 
-    protected static final Map<String,NumberInterval> s_intervalsByDatatype=new HashMap<String,NumberInterval>();
-    protected static final Map<String,ValueSpaceSubset> s_subsetsByDatatype=new HashMap<String,ValueSpaceSubset>();
+    protected static final Map<String,NumberInterval> s_intervalsByDatatype=new HashMap<>();
+    protected static final Map<String,ValueSpaceSubset> s_subsetsByDatatype=new HashMap<>();
     static {
         Object[][] initializer=new Object[][] {
             { OWL_NS+"real",              NumberRange.REAL,    MinusInfinity.INSTANCE,BoundType.EXCLUSIVE,PlusInfinity.INSTANCE,                  BoundType.EXCLUSIVE },
@@ -74,15 +74,15 @@ public class OWLRealDatatypeHandler implements DatatypeHandler {
         }
     }
     protected static final ValueSpaceSubset EMPTY_SUBSET=new OWLRealValueSpaceSubset();
-    protected static final Set<String> s_supportedFacetURIs=new HashSet<String>();
+    protected static final Set<String> s_supportedFacetURIs=new HashSet<>();
     static {
         s_supportedFacetURIs.add(XSD_NS+"minInclusive");
         s_supportedFacetURIs.add(XSD_NS+"minExclusive");
         s_supportedFacetURIs.add(XSD_NS+"maxInclusive");
         s_supportedFacetURIs.add(XSD_NS+"maxExclusive");
     }
-    protected static final Map<String,Set<String>> s_datatypeSupersets=new HashMap<String,Set<String>>();
-    protected static final Map<String,Set<String>> s_datatypeDisjoints=new HashMap<String,Set<String>>();
+    protected static final Map<String,Set<String>> s_datatypeSupersets=new HashMap<>();
+    protected static final Map<String,Set<String>> s_datatypeDisjoints=new HashMap<>();
     static {
         for (String datatypeURI : s_intervalsByDatatype.keySet()) {
             s_datatypeSupersets.put(datatypeURI,new HashSet<String>());
@@ -106,9 +106,11 @@ public class OWLRealDatatypeHandler implements DatatypeHandler {
         }
     }
 
+    @Override
     public Set<String> getManagedDatatypeURIs() {
         return s_intervalsByDatatype.keySet();
     }
+    @Override
     public Object parseLiteral(String lexicalForm,String datatypeURI) throws MalformedLiteralException {
         assert s_intervalsByDatatype.keySet().contains(datatypeURI);
         try {
@@ -125,6 +127,7 @@ public class OWLRealDatatypeHandler implements DatatypeHandler {
             throw new MalformedLiteralException(lexicalForm,datatypeURI);
         }
     }
+    @Override
     public void validateDatatypeRestriction(DatatypeRestriction datatypeRestriction) throws UnsupportedFacetException {
         assert s_intervalsByDatatype.keySet().contains(datatypeRestriction.getDatatypeURI());
         for (int index=datatypeRestriction.getNumberOfFacetRestrictions()-1;index>=0;--index) {
@@ -139,6 +142,7 @@ public class OWLRealDatatypeHandler implements DatatypeHandler {
                 throw new UnsupportedFacetException("The facet with URI '"+facetURI+"' does not support '"+facetValue.toString()+"' as value. The value should be an integer, a decimal, or a rational, but this seems not to be the case in the datatype restriction "+this.toString());
         }
     }
+    @Override
     public ValueSpaceSubset createValueSpaceSubset(DatatypeRestriction datatypeRestriction) {
         assert s_intervalsByDatatype.keySet().contains(datatypeRestriction.getDatatypeURI());
         if (datatypeRestriction.getNumberOfFacetRestrictions()==0)
@@ -149,6 +153,7 @@ public class OWLRealDatatypeHandler implements DatatypeHandler {
         else
             return new OWLRealValueSpaceSubset(interval);
     }
+    @Override
     public ValueSpaceSubset conjoinWithDR(ValueSpaceSubset valueSpaceSubset,DatatypeRestriction datatypeRestriction) {
         assert s_intervalsByDatatype.keySet().contains(datatypeRestriction.getDatatypeURI());
         NumberInterval interval=getIntervalFor(datatypeRestriction);
@@ -157,7 +162,7 @@ public class OWLRealDatatypeHandler implements DatatypeHandler {
         else {
             OWLRealValueSpaceSubset realSubset=(OWLRealValueSpaceSubset)valueSpaceSubset;
             List<NumberInterval> oldIntervals=realSubset.m_intervals;
-            List<NumberInterval> newIntervals=new ArrayList<NumberInterval>();
+            List<NumberInterval> newIntervals=new ArrayList<>();
             for (int index=0;index<oldIntervals.size();index++) {
                 NumberInterval oldInterval=oldIntervals.get(index);
                 NumberInterval intersection=oldInterval.intersectWith(interval);
@@ -170,6 +175,7 @@ public class OWLRealDatatypeHandler implements DatatypeHandler {
                 return new OWLRealValueSpaceSubset(newIntervals);
         }
     }
+    @Override
     public ValueSpaceSubset conjoinWithDRNegation(ValueSpaceSubset valueSpaceSubset,DatatypeRestriction datatypeRestriction) {
         assert s_intervalsByDatatype.keySet().contains(datatypeRestriction.getDatatypeURI());
         NumberInterval interval=getIntervalFor(datatypeRestriction);
@@ -187,7 +193,7 @@ public class OWLRealDatatypeHandler implements DatatypeHandler {
                 complementInterval3=new NumberInterval(NumberRange.REAL,NumberRange.NOTHING,interval.m_upperBound,interval.m_upperBoundType.getComplement(),PlusInfinity.INSTANCE,BoundType.EXCLUSIVE);
             OWLRealValueSpaceSubset realSubset=(OWLRealValueSpaceSubset)valueSpaceSubset;
             List<NumberInterval> oldIntervals=realSubset.m_intervals;
-            List<NumberInterval> newIntervals=new ArrayList<NumberInterval>();
+            List<NumberInterval> newIntervals=new ArrayList<>();
             for (int index=0;index<oldIntervals.size();index++) {
                 NumberInterval oldInterval=oldIntervals.get(index);
                 if (complementInterval1!=null) {
@@ -273,11 +279,13 @@ public class OWLRealDatatypeHandler implements DatatypeHandler {
         else
             return new NumberInterval(baseRange,excludedRange,lowerBound,lowerBoundType,upperBound,upperBoundType);
     }
+    @Override
     public boolean isSubsetOf(String subsetDatatypeURI,String supersetDatatypeURI) {
         assert s_intervalsByDatatype.keySet().contains(subsetDatatypeURI);
         assert s_intervalsByDatatype.keySet().contains(supersetDatatypeURI);
         return s_datatypeSupersets.get(subsetDatatypeURI).contains(supersetDatatypeURI);
     }
+    @Override
     public boolean isDisjointWith(String datatypeURI1,String datatypeURI2) {
         assert s_intervalsByDatatype.keySet().contains(datatypeURI1);
         assert s_intervalsByDatatype.keySet().contains(datatypeURI2);

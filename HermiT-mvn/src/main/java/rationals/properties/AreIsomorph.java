@@ -35,9 +35,6 @@
  */
 package rationals.properties;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import rationals.Automaton;
 
 /**
@@ -51,15 +48,11 @@ import rationals.Automaton;
  */
 public class AreIsomorph implements BinaryTest {
 
-    /* (non-Javadoc)
-     * @see rationals.properties.BinaryTest#test(rationals.Automaton, rationals.Automaton)
-     */
+    @Override
     public boolean test(Automaton a, Automaton b) {
         /* basic test */
         if(a.states().size() != b.states().size() || a.initials().size() != b.initials().size() || a.terminals().size() != b.terminals().size())
             return false;
-        Map /* < State , State > */ atob = new HashMap();
-        
         return false;
     }
 

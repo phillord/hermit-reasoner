@@ -25,48 +25,48 @@ package rationals;
  */
 public interface Builder<T extends Builder<T>> {
 
-  /**
-   * Factory method.
-   * 
-   * @param label
-   * @param auto
-   * @return
-   */
-  T build(State label, Automaton<T> auto);
-  
-  /**
-   * Sets the label of the transition.
-   * 
-   * @param label
-   * @return this transition builder.
-   */
-  public T on(Object label);
+    /**
+     * Factory method.
+     * 
+     * @param label
+     * @param auto
+     * @return
+     */
+    T build(State label, Automaton auto);
 
-  /**
-   * Sets the end state and terminates transition construction. This method
-   * effectively adds the transition to the automaton.
-   * 
-   * @param o
-   *          the label of the end state.
-   */
-  public T go(Object o);
+    /**
+     * Sets the label of the transition.
+     * 
+     * @param label
+     * @return this transition builder.
+     */
+    public T on(Object label);
 
-  /**
-   * Adds a new transition in the automaton that loops on current label and from
-   * state.
-   * 
-   * @return
-   */
-  public T loop();
+    /**
+     * Sets the end state and terminates transition construction. This method
+     * effectively adds the transition to the automaton.
+     * 
+     * @param o
+     *            the label of the end state.
+     */
+    public T go(Object o);
 
-  /**
-   * Resets this builder to another starting state. Note that the state is
-   * created if needed.
-   * 
-   * @param label
-   *          the state to start from.
-   * @return this builder.
-   */
-  public T from(Object label);
+    /**
+     * Adds a new transition in the automaton that loops on current label and
+     * from state.
+     * 
+     * @return
+     */
+    public T loop();
+
+    /**
+     * Resets this builder to another starting state. Note that the state is
+     * created if needed.
+     * 
+     * @param label
+     *            the state to start from.
+     * @return this builder.
+     */
+    public T from(Object label);
 
 }

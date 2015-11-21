@@ -31,15 +31,18 @@ public class Equality implements DLPredicate,Serializable {
     
     protected Equality () {
     }
+    @Override
     public int getArity() {
         return 2;
     }
+    @Override
     public String toString(Prefixes prefixes) {
         return "==";
     }
     public String toOrderedString(Prefixes prefixes) {
         return toString(prefixes);
     }
+    @Override
     public String toString() {
         return toString(Prefixes.STANDARD_PREFIXES);
     }

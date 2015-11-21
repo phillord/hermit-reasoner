@@ -2,7 +2,6 @@ package rationals.transformations;
 
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import rationals.Automaton;
@@ -26,23 +25,18 @@ import rationals.Transition;
  */
 public class Reverser implements UnaryTransformation {
 
-  public Automaton transform(Automaton a) {
+  @Override
+public Automaton transform(Automaton a) {
     Automaton b = new Automaton() ;
-    Map map = new HashMap() ;
-    Iterator i = a.states().iterator() ;
-    while(i.hasNext()) {
-      State e = (State) i.next() ;
+    Map<State, State> map = new HashMap<>() ;
+    for(State e : a.states()) {
       map.put(e , b.addState(e.isTerminal() , e.isInitial())) ;
     }
-    i = a.delta().iterator() ;
-    while(i.hasNext()) {
-      Transition t = (Transition) i.next() ;
-      try {
+    for(Transition t : a.delta()) {
         b.addTransition(new Transition(
-          (State) map.get(t.end()) ,
+          map.get(t.end()) ,
           t.label() ,
-          (State) map.get(t.start()))) ;
-      } catch(NoSuchStateException x) {}
+          map.get(t.start())),null) ;
     }
     return b ;
   }

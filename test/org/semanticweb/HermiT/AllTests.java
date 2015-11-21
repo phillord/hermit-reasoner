@@ -16,6 +16,7 @@ public class AllTests extends TestCase {
         // $JUnit-END$
         return suite;
     }
+
     public static void main(String... args) throws Throwable {
         junit.textui.TestRunner.run(suite());
         System.exit(0);

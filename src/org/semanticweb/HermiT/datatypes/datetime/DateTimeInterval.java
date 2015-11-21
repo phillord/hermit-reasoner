@@ -192,6 +192,7 @@ public class DateTimeInterval {
     protected static boolean isIntervalEmpty(IntervalType intervalType,long lowerBound,BoundType lowerBoundType,long upperBound,BoundType upperBoundType) {
         return lowerBound>upperBound ||(lowerBound==upperBound && (lowerBoundType==BoundType.EXCLUSIVE || upperBoundType==BoundType.EXCLUSIVE));
     }
+    @Override
     public String toString() {
         StringBuffer buffer=new StringBuffer();
         buffer.append(m_intervalType.toString());

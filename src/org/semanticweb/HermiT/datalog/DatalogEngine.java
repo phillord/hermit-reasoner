@@ -37,10 +37,10 @@ public final class DatalogEngine {
                 throw new IllegalArgumentException("The supplied DL ontology contains rules with disjunctive heads.");
         m_interruptFlag=new InterruptFlag(0);
         m_dlOntology=dlOntology;
-        m_termsToNodes=new HashMap<Term,Node>();
-        m_nodesToTerms=new HashMap<Node,Term>();
-        m_termsToEquivalenceClasses=new HashMap<Term,Set<Term>>();
-        m_termsToRepresentatives=new HashMap<Term,Term>();
+        m_termsToNodes=new HashMap<>();
+        m_nodesToTerms=new HashMap<>();
+        m_termsToEquivalenceClasses=new HashMap<>();
+        m_termsToRepresentatives=new HashMap<>();
     }
     public void interrupt() {
         m_interruptFlag.interrupt();
@@ -63,7 +63,7 @@ public final class DatalogEngine {
                 Term canonicalTerm=m_nodesToTerms.get(node.getCanonicalNode());
                 Set<Term> equivalenceClass=m_termsToEquivalenceClasses.get(canonicalTerm);
                 if (equivalenceClass==null) {
-                    equivalenceClass=new HashSet<Term>();
+                    equivalenceClass=new HashSet<>();
                     m_termsToEquivalenceClasses.put(canonicalTerm,equivalenceClass);
                 }
                 if (!term.equals(canonicalTerm))
@@ -88,57 +88,82 @@ public final class DatalogEngine {
     protected static class NullExistentialExpansionStrategy implements ExistentialExpansionStrategy {
         public static final ExistentialExpansionStrategy INSTANCE=new NullExistentialExpansionStrategy();
 
+        @Override
         public void initialize(Tableau tableau) {
         }
+        @Override
         public void additionalDLOntologySet(DLOntology additionalDLOntology) {
         }
+        @Override
         public void additionalDLOntologyCleared() {
         }
+        @Override
         public void clear() {
         }
+        @Override
         public boolean expandExistentials(boolean finalChance) {
             return false;
         }
+        @Override
         public void assertionAdded(Concept concept,Node node,boolean isCore) {
         }
+        @Override
         public void assertionAdded(DataRange dataRange,Node node,boolean isCore) {
         }
+        @Override
         public void assertionCoreSet(Concept concept,Node node) {
         }
+        @Override
         public void assertionCoreSet(DataRange dataRange,Node node) {
         }
+        @Override
         public void assertionRemoved(Concept concept,Node node,boolean isCore) {
         }
+        @Override
         public void assertionRemoved(DataRange dataRange,Node node,boolean isCore) {
         }
+        @Override
         public void assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
         }
+        @Override
         public void assertionCoreSet(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
         }
+        @Override
         public void assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
         }
+        @Override
         public void nodesMerged(Node mergeFrom,Node mergeInto) {
         }
+        @Override
         public void nodesUnmerged(Node mergeFrom,Node mergeInto) {
         }
+        @Override
         public void nodeStatusChanged(Node node) {
         }
+        @Override
         public void nodeInitialized(Node node) {
         }
+        @Override
         public void nodeDestroyed(Node node) {
         }
+        @Override
         public void branchingPointPushed() {
         }
+        @Override
         public void backtrack() {
         }
+        @Override
         public void modelFound() {
         }
+        @Override
         public boolean isDeterministic() {
             return true;
         }
+        @Override
         public boolean isExact() {
             return true;
         }
+        @Override
         public void dlClauseBodyCompiled(List<DLClauseEvaluator.Worker> workers,DLClause dlClause,List<Variable> variables,Object[] valuesBuffer,boolean[] coreVariables) {
         }
     }

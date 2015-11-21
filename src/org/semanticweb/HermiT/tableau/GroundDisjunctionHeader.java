@@ -115,20 +115,21 @@ public final class GroundDisjunctionHeader {
     public String toString(Prefixes prefixes) {
         StringBuffer buffer=new StringBuffer();
         for (int disjunctIndex=0;disjunctIndex<m_dlPredicates.length;disjunctIndex++) {
-        	if (disjunctIndex>0)
-        	    buffer.append(" \\/ ");
-    	    buffer.append(m_dlPredicates[disjunctIndex].toString(prefixes));
-    	    buffer.append(" (");
+            if (disjunctIndex>0)
+                buffer.append(" \\/ ");
+            buffer.append(m_dlPredicates[disjunctIndex].toString(prefixes));
+            buffer.append(" (");
             for (DisjunctIndexWithBacktrackings disjunctIndexWithBacktrackings : m_disjunctIndexesWithBacktrackings) {
-            	if (disjunctIndexWithBacktrackings.m_disjunctIndex==disjunctIndex) {
-            	    buffer.append(disjunctIndexWithBacktrackings.m_numberOfBacktrackings);
-            		break;
-            	}
+                if (disjunctIndexWithBacktrackings.m_disjunctIndex==disjunctIndex) {
+                    buffer.append(disjunctIndexWithBacktrackings.m_numberOfBacktrackings);
+                    break;
+                }
             }
             buffer.append(")");
         }
         return buffer.toString();
     }
+    @Override
     public String toString() {
         return toString(Prefixes.STANDARD_PREFIXES);
     }

@@ -57,31 +57,31 @@ public final class HyperresolutionManager implements Serializable {
     public HyperresolutionManager(Tableau tableau,Set<DLClause> dlClauses) {
         InterruptFlag interruptFlag=tableau.m_interruptFlag;
         m_extensionManager=tableau.m_extensionManager;
-        m_tupleConsumersByDeltaPredicate=new HashMap<DLPredicate,CompiledDLClauseInfo>();
-        m_atomicRoleTupleConsumersUnguarded=new HashMap<AtomicRole,CompiledDLClauseInfo>();
-        m_atomicRoleTupleConsumersByGuardConcept1=new HashMap<AtomicRole,Map<AtomicConcept,CompiledDLClauseInfo>>();
-        m_atomicRoleTupleConsumersByGuardConcept2=new HashMap<AtomicRole,Map<AtomicConcept,CompiledDLClauseInfo>>();
+        m_tupleConsumersByDeltaPredicate=new HashMap<>();
+        m_atomicRoleTupleConsumersUnguarded=new HashMap<>();
+        m_atomicRoleTupleConsumersByGuardConcept1=new HashMap<>();
+        m_atomicRoleTupleConsumersByGuardConcept2=new HashMap<>();
         // Index DL clauses by body
-        Map<DLClauseBodyKey,List<DLClause>> dlClausesByBody=new HashMap<DLClauseBodyKey,List<DLClause>>();
+        Map<DLClauseBodyKey,List<DLClause>> dlClausesByBody=new HashMap<>();
         for (DLClause dlClause : dlClauses) {
             DLClauseBodyKey key=new DLClauseBodyKey(dlClause);
             List<DLClause> dlClausesForKey=dlClausesByBody.get(key);
             if (dlClausesForKey==null) {
-                dlClausesForKey=new ArrayList<DLClause>();
+                dlClausesForKey=new ArrayList<>();
                 dlClausesByBody.put(key,dlClausesForKey);
             }
             dlClausesForKey.add(dlClause);
             interruptFlag.checkInterrupt();
         }
         // Compile the DL clauses
-        Map<Integer,ExtensionTable.Retrieval> retrievalsByArity=new HashMap<Integer,ExtensionTable.Retrieval>();
+        Map<Integer,ExtensionTable.Retrieval> retrievalsByArity=new HashMap<>();
         DLClauseEvaluator.BufferSupply bufferSupply=new DLClauseEvaluator.BufferSupply();
         Map<Term,Node> noTermsToNodes=Collections.emptyMap();
         DLClauseEvaluator.ValuesBufferManager valuesBufferManager=new DLClauseEvaluator.ValuesBufferManager(dlClauses,noTermsToNodes);
         DLClauseEvaluator.GroundDisjunctionHeaderManager groundDisjunctionHeaderManager=new DLClauseEvaluator.GroundDisjunctionHeaderManager();
-        Map<Integer,UnionDependencySet> unionDependencySetsBySize=new HashMap<Integer,UnionDependencySet>();
-        ArrayList<Atom> guardingAtomicConceptAtoms1=new ArrayList<Atom>();
-        ArrayList<Atom> guardingAtomicConceptAtoms2=new ArrayList<Atom>();
+        Map<Integer,UnionDependencySet> unionDependencySetsBySize=new HashMap<>();
+        ArrayList<Atom> guardingAtomicConceptAtoms1=new ArrayList<>();
+        ArrayList<Atom> guardingAtomicConceptAtoms2=new ArrayList<>();
         for (Map.Entry<DLClauseBodyKey,List<DLClause>> entry : dlClausesByBody.entrySet()) {
             DLClause bodyDLClause=entry.getKey().m_dlClause;
             BodyAtomsSwapper bodyAtomsSwapper=new BodyAtomsSwapper(bodyDLClause);
@@ -106,7 +106,7 @@ public final class HyperresolutionManager implements Serializable {
                         if (!guardingAtomicConceptAtoms1.isEmpty()) {
                             Map<AtomicConcept,CompiledDLClauseInfo> compiledDLClauseInfos=m_atomicRoleTupleConsumersByGuardConcept1.get(deltaAtomicRole);
                             if (compiledDLClauseInfos==null) {
-                                compiledDLClauseInfos=new HashMap<AtomicConcept,CompiledDLClauseInfo>();
+                                compiledDLClauseInfos=new HashMap<>();
                                 m_atomicRoleTupleConsumersByGuardConcept1.put(deltaAtomicRole,compiledDLClauseInfos);
                             }
                             for (Atom guardingAtom : guardingAtomicConceptAtoms1) {
@@ -118,7 +118,7 @@ public final class HyperresolutionManager implements Serializable {
                         if (!guardingAtomicConceptAtoms2.isEmpty()) {
                             Map<AtomicConcept,CompiledDLClauseInfo> compiledDLClauseInfos=m_atomicRoleTupleConsumersByGuardConcept2.get(deltaAtomicRole);
                             if (compiledDLClauseInfos==null) {
-                                compiledDLClauseInfos=new HashMap<AtomicConcept,CompiledDLClauseInfo>();
+                                compiledDLClauseInfos=new HashMap<>();
                                 m_atomicRoleTupleConsumersByGuardConcept2.put(deltaAtomicRole,compiledDLClauseInfos);
                             }
                             for (Atom guardingAtom : guardingAtomicConceptAtoms2) {
@@ -277,10 +277,10 @@ public final class HyperresolutionManager implements Serializable {
 
         public BodyAtomsSwapper(DLClause dlClause) {
             m_dlClause=dlClause;
-            m_nodeIDComparisonAtoms=new ArrayList<Atom>(m_dlClause.getBodyLength());
+            m_nodeIDComparisonAtoms=new ArrayList<>(m_dlClause.getBodyLength());
             m_usedAtoms=new boolean[m_dlClause.getBodyLength()];
-            m_reorderedAtoms=new ArrayList<Atom>(m_dlClause.getBodyLength());
-            m_boundVariables=new HashSet<Variable>();
+            m_reorderedAtoms=new ArrayList<>(m_dlClause.getBodyLength());
+            m_boundVariables=new HashSet<>();
         }
         public DLClause getSwappedDLClause(int bodyIndex) {
             m_nodeIDComparisonAtoms.clear();
@@ -385,6 +385,7 @@ public final class HyperresolutionManager implements Serializable {
                 hashCode+=m_dlClause.getBodyAtom(atomIndex).hashCode();
             m_hashCode=hashCode;
         }
+        @Override
         public boolean equals(Object that) {
             if (this==that)
                 return true;
@@ -396,6 +397,7 @@ public final class HyperresolutionManager implements Serializable {
                     return false;
             return true;
         }
+        @Override
         public int hashCode() {
             return m_hashCode;
         }

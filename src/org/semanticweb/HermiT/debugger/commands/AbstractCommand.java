@@ -23,6 +23,7 @@ import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
 
 import org.semanticweb.HermiT.debugger.Debugger;
 import org.semanticweb.HermiT.model.AtomicConcept;
@@ -45,7 +46,7 @@ public abstract class AbstractCommand implements DebuggerCommand {
         JScrollPane scrollPane=new JScrollPane(textArea);
         scrollPane.setPreferredSize(new Dimension(400,300));
         JFrame frame=new JFrame(title);
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         frame.setContentPane(scrollPane);
         frame.pack();
         frame.setLocation(100,100);
@@ -53,13 +54,14 @@ public abstract class AbstractCommand implements DebuggerCommand {
     }
     protected void selectConsoleWindow() {
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 if (m_debugger!=null)
                     m_debugger.getMainFrame().toFront();
             }
         });
     }
-    protected DLPredicate getDLPredicate(String predicate) throws Exception {
+    protected DLPredicate getDLPredicate(String predicate) {
         if ("==".equals(predicate))
             return Equality.INSTANCE;
         else if ("!=".equals(predicate))

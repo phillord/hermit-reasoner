@@ -19,7 +19,6 @@ package org.semanticweb.HermiT.blocking;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -150,7 +149,7 @@ public class SetFactory<E> implements Serializable {
         }
         Entry<E> entry=m_unusedEntries[size];
         if (entry==null)
-            return new Entry<E>(size);
+            return new Entry<>(size);
         else {
             m_unusedEntries[size]=entry.m_nextEntry;
             entry.m_nextEntry=null;
@@ -184,9 +183,11 @@ public class SetFactory<E> implements Serializable {
             elements.toArray(m_table);
             m_hashCode=hashCode;
         }
+        @Override
         public void clear() {
             throw new UnsupportedOperationException();
         }
+        @Override
         public boolean add(T object) {
             throw new UnsupportedOperationException();
         }
@@ -206,49 +207,62 @@ public class SetFactory<E> implements Serializable {
                     return false;
             return true;
         }
+        @Override
         public boolean addAll(Collection<? extends T> c) {
             throw new UnsupportedOperationException();
         }
+        @Override
         public boolean contains(Object o) {
             for (int index=m_table.length-1;index>=0;--index)
                 if (m_table[index].equals(o))
                     return true;
             return false;
         }
+        @Override
         public boolean containsAll(Collection<?> c) {
             for (Object object : c)
                 if (!contains(object))
                     return false;
             return true;
         }
+        @Override
         public boolean isEmpty() {
             return m_table.length==0;
         }
+        @Override
         public Iterator<T> iterator() {
             return new EntryIterator();
         }
+        @Override
         public boolean remove(Object o) {
             throw new UnsupportedOperationException();
         }
+        @Override
         public boolean removeAll(Collection<?> c) {
             throw new UnsupportedOperationException();
         }
+        @Override
         public boolean retainAll(Collection<?> c) {
             throw new UnsupportedOperationException();
         }
+        @Override
         public int size() {
             return m_table.length;
         }
+        @Override
         public Object[] toArray() {
             return m_table.clone();
         }
+        @Override
         public <E> E[] toArray(E[] a) {
             System.arraycopy(m_table,0,a,0,m_table.length);
             return a;
         }
+        @Override
         public int hashCode() {
             return m_hashCode;
         }
+        @Override
         public boolean equals(Object that) {
             return this==that;
         }
@@ -259,14 +273,17 @@ public class SetFactory<E> implements Serializable {
             public EntryIterator() {
                 m_currentIndex=0;
             }
+            @Override
             public boolean hasNext() {
                 return m_currentIndex<m_table.length;
             }
+            @Override
             public T next() {
                 if (m_currentIndex>=m_table.length)
                     throw new NoSuchElementException();
                 return m_table[m_currentIndex++];
             }
+            @Override
             public void remove() {
                 throw new UnsupportedOperationException();
             }

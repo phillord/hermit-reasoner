@@ -40,7 +40,7 @@ public class HierarchyPrinterFSS {
     public HierarchyPrinterFSS(PrintWriter out,String defaultPrefixIRI) {
         m_out=out;
         m_defaultPrefixIRI=defaultPrefixIRI;
-        m_prefixIRIs=new TreeSet<String>();
+        m_prefixIRIs=new TreeSet<>();
         m_prefixIRIs.add(defaultPrefixIRI);
         m_prefixIRIs.add(Prefixes.s_semanticWebPrefixes.get("owl:"));
     }
@@ -110,9 +110,11 @@ public class HierarchyPrinterFSS {
         public AtomicConceptPrinter(HierarchyNode<AtomicConcept> bottomNode) {
             m_bottomNode=bottomNode;
         }
+        @Override
         public boolean redirect(HierarchyNode<AtomicConcept>[] nodes) {
             return true;
         }
+        @Override
         public void visit(int level,HierarchyNode<AtomicConcept> node,HierarchyNode<AtomicConcept> parentNode,boolean firstVisit) {
             if (!node.equals(m_bottomNode))
                 printNode(level,node,parentNode,firstVisit);
@@ -180,9 +182,11 @@ public class HierarchyPrinterFSS {
             m_hierarchy=hierarchy;
             m_objectProperties=objectProperties;
         }
+        @Override
         public boolean redirect(HierarchyNode<Role>[] nodes) {
             return true;
         }
+        @Override
         public void visit(int level,HierarchyNode<Role> node,HierarchyNode<Role> parentNode,boolean firstVisit) {
             if (!node.equals(m_hierarchy.getBottomNode()))
                 printNode(level,node,parentNode,firstVisit);
@@ -264,6 +268,7 @@ public class HierarchyPrinterFSS {
     protected static class RoleComparator implements Comparator<Role> {
         public static final RoleComparator INSTANCE=new RoleComparator();
 
+        @Override
         public int compare(Role role1,Role role2) {
             int comparison=getRoleClass(role1)-getRoleClass(role2);
             if (comparison!=0)
@@ -299,6 +304,7 @@ public class HierarchyPrinterFSS {
     protected static class AtomicConceptComparator implements Comparator<AtomicConcept> {
         public static final AtomicConceptComparator INSTANCE=new AtomicConceptComparator();
 
+        @Override
         public int compare(AtomicConcept atomicConcept1,AtomicConcept atomicConcept2) {
             int comparison=getAtomicConceptClass(atomicConcept1)-getAtomicConceptClass(atomicConcept2);
             if (comparison!=0)
@@ -317,9 +323,11 @@ public class HierarchyPrinterFSS {
 
     protected class IdentityTransformer<E> implements Hierarchy.Transformer<E,E> {
 
+        @Override
         public E transform(E object) {
             return object;
         }
+        @Override
         public E determineRepresentative(E oldRepresentative,Set<E> newEquivalentElements) {
             return ((SortedSet<E>)newEquivalentElements).first();
         }

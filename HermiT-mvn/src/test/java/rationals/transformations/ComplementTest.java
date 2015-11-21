@@ -45,6 +45,7 @@ import rationals.converters.ToRExpression;
  * @author nono
  * @version $Id: ComplementTest.java 2 2006-08-24 14:41:48Z oqube $
  */
+@SuppressWarnings("javadoc")
 public class ComplementTest extends TestCase {
 
     /**
@@ -53,14 +54,13 @@ public class ComplementTest extends TestCase {
     public ComplementTest(String arg0) {
         super(arg0);
     }
-    
+
     public void testComp() throws ConverterException {
-        Automaton a = new Pruner().transform(new Expression()
-                .fromString("a(bb)*e"));
-        Automaton c= new ToDFA().transform(new Complement().transform(a));
+        Automaton a = new Pruner().transform(new Expression().fromString("a(bb)*e"));
+        Automaton c = new ToDFA().transform(new Complement().transform(a));
         System.out.println(c);
         String re;
-        System.out.println(re =new ToRExpression().toString(c));
+        System.out.println(re = new ToRExpression().toString(c));
     }
 
 }

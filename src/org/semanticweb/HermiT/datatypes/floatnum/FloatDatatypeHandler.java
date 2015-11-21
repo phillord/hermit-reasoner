@@ -36,7 +36,7 @@ public class FloatDatatypeHandler implements DatatypeHandler {
     protected static final ValueSpaceSubset FLOAT_ENTIRE=new EntireFloatSubset();
     protected static final ValueSpaceSubset EMPTY_SUBSET=new EmptyFloatSubset();
     protected static final Set<String> s_managedDatatypeURIs=Collections.singleton(XSD_FLOAT);
-    protected static final Set<String> s_supportedFacetURIs=new HashSet<String>();
+    protected static final Set<String> s_supportedFacetURIs=new HashSet<>();
     static {
         s_supportedFacetURIs.add(XSD_NS+"minInclusive");
         s_supportedFacetURIs.add(XSD_NS+"minExclusive");
@@ -44,9 +44,11 @@ public class FloatDatatypeHandler implements DatatypeHandler {
         s_supportedFacetURIs.add(XSD_NS+"maxExclusive");
     }
 
+    @Override
     public Set<String> getManagedDatatypeURIs() {
         return s_managedDatatypeURIs;
     }
+    @Override
     public Object parseLiteral(String lexicalForm,String datatypeURI) throws MalformedLiteralException {
         assert XSD_FLOAT.equals(datatypeURI);
         try {
@@ -58,6 +60,7 @@ public class FloatDatatypeHandler implements DatatypeHandler {
             throw new MalformedLiteralException(lexicalForm,datatypeURI);
         }
     }
+    @Override
     public void validateDatatypeRestriction(DatatypeRestriction datatypeRestriction) throws UnsupportedFacetException {
         assert XSD_FLOAT.equals(datatypeRestriction.getDatatypeURI());
         for (int index=datatypeRestriction.getNumberOfFacetRestrictions()-1;index>=0;--index) {
@@ -69,6 +72,7 @@ public class FloatDatatypeHandler implements DatatypeHandler {
                 throw new UnsupportedFacetException("The '"+facetURI+"' facet takes only floats as values when used on an xsd:float datatype, but the ontology contains a datatype restriction "+this.toString());
         }
     }
+    @Override
     public ValueSpaceSubset createValueSpaceSubset(DatatypeRestriction datatypeRestriction) {
         assert XSD_FLOAT.equals(datatypeRestriction.getDatatypeURI());
         if (datatypeRestriction.getNumberOfFacetRestrictions()==0)
@@ -81,6 +85,7 @@ public class FloatDatatypeHandler implements DatatypeHandler {
                 return new NoNaNFloatSubset(interval);
         }
     }
+    @Override
     public ValueSpaceSubset conjoinWithDR(ValueSpaceSubset valueSpaceSubset,DatatypeRestriction datatypeRestriction) {
         assert XSD_FLOAT.equals(datatypeRestriction.getDatatypeURI());
         if (datatypeRestriction.getNumberOfFacetRestrictions()==0 || valueSpaceSubset==EMPTY_SUBSET)
@@ -94,7 +99,7 @@ public class FloatDatatypeHandler implements DatatypeHandler {
             else {
                 NoNaNFloatSubset floatSubset=(NoNaNFloatSubset)valueSpaceSubset;
                 List<FloatInterval> oldIntervals=floatSubset.m_intervals;
-                List<FloatInterval> newIntervals=new ArrayList<FloatInterval>();
+                List<FloatInterval> newIntervals=new ArrayList<>();
                 for (int index=0;index<oldIntervals.size();index++) {
                     FloatInterval oldInterval=oldIntervals.get(index);
                     FloatInterval intersection=oldInterval.intersectWith(interval);
@@ -108,6 +113,7 @@ public class FloatDatatypeHandler implements DatatypeHandler {
             }
         }
     }
+    @Override
     public ValueSpaceSubset conjoinWithDRNegation(ValueSpaceSubset valueSpaceSubset,DatatypeRestriction datatypeRestriction) {
         assert XSD_FLOAT.equals(datatypeRestriction.getDatatypeURI());
         if (datatypeRestriction.getNumberOfFacetRestrictions()==0 || valueSpaceSubset==EMPTY_SUBSET)
@@ -117,7 +123,7 @@ public class FloatDatatypeHandler implements DatatypeHandler {
             if (interval==null)
                 return valueSpaceSubset;
             else if (valueSpaceSubset==FLOAT_ENTIRE) {
-                List<FloatInterval> newIntervals=new ArrayList<FloatInterval>();
+                List<FloatInterval> newIntervals=new ArrayList<>();
                 if (!FloatInterval.areIdentical(interval.m_lowerBoundInclusive,Float.NEGATIVE_INFINITY))
                     newIntervals.add(new FloatInterval(Float.NEGATIVE_INFINITY,FloatInterval.previousFloat(interval.m_lowerBoundInclusive)));
                 if (!FloatInterval.areIdentical(interval.m_upperBoundInclusive,Float.POSITIVE_INFINITY))
@@ -136,7 +142,7 @@ public class FloatDatatypeHandler implements DatatypeHandler {
                 if (!FloatInterval.areIdentical(interval.m_upperBoundInclusive,Float.POSITIVE_INFINITY))
                     complementInterval2=new FloatInterval(FloatInterval.nextFloat(interval.m_upperBoundInclusive),Float.POSITIVE_INFINITY);
                 List<FloatInterval> oldIntervals=floatSubset.m_intervals;
-                List<FloatInterval> newIntervals=new ArrayList<FloatInterval>();
+                List<FloatInterval> newIntervals=new ArrayList<>();
                 for (int index=0;index<oldIntervals.size();index++) {
                     FloatInterval oldInterval=oldIntervals.get(index);
                     if (complementInterval1!=null) {
@@ -198,11 +204,13 @@ public class FloatDatatypeHandler implements DatatypeHandler {
         else
             return new FloatInterval(lowerBoundInclusive,upperBoundInclusive);
     }
+    @Override
     public boolean isSubsetOf(String subsetDatatypeURI,String supersetDatatypeURI) {
         assert XSD_FLOAT.equals(subsetDatatypeURI);
         assert XSD_FLOAT.equals(supersetDatatypeURI);
         return true;
     }
+    @Override
     public boolean isDisjointWith(String datatypeURI1,String datatypeURI2) {
         assert XSD_FLOAT.equals(datatypeURI1);
         assert XSD_FLOAT.equals(datatypeURI2);

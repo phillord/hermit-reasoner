@@ -38,9 +38,11 @@ public class AnyURIDatatypeHandler implements DatatypeHandler {
     protected static final ValueSpaceSubset EMPTY_SUBSET=new AnyURIValueSpaceSubset(AnyURIValueSpaceSubset.s_empty);
     protected static final Set<String> s_managedDatatypeURIs=Collections.singleton(XSD_NS+"anyURI");
 
+    @Override
     public Set<String> getManagedDatatypeURIs() {
         return s_managedDatatypeURIs;
     }
+    @Override
     public Object parseLiteral(String lexicalForm,String datatypeURI) throws MalformedLiteralException {
         assert s_managedDatatypeURIs.contains(datatypeURI);
         if (!AnyURIValueSpaceSubset.s_anyURI.run(lexicalForm))
@@ -52,6 +54,7 @@ public class AnyURIDatatypeHandler implements DatatypeHandler {
             throw new MalformedLiteralException(lexicalForm,datatypeURI);
         }
     }
+    @Override
     public void validateDatatypeRestriction(DatatypeRestriction datatypeRestriction) throws UnsupportedFacetException {
         assert s_managedDatatypeURIs.contains(datatypeRestriction.getDatatypeURI());
         for (int index=datatypeRestriction.getNumberOfFacetRestrictions()-1;index>=0;--index) {
@@ -80,6 +83,7 @@ public class AnyURIDatatypeHandler implements DatatypeHandler {
                 throw new UnsupportedFacetException("Facet with URI '"+facetURI+"' is not supported on xsd:anyURI; only xsd:minLength, xsd:maxLength, xsd:length, and xsd:pattern are supported, but the ontology contains the restriction: "+this.toString());
         }
     }
+    @Override
     public ValueSpaceSubset createValueSpaceSubset(DatatypeRestriction datatypeRestriction) {
         assert s_managedDatatypeURIs.contains(datatypeRestriction.getDatatypeURI());
         if (datatypeRestriction.getNumberOfFacetRestrictions()==0)
@@ -92,6 +96,7 @@ public class AnyURIDatatypeHandler implements DatatypeHandler {
                 return new AnyURIValueSpaceSubset(automaton);
         }
     }
+    @Override
     public ValueSpaceSubset conjoinWithDR(ValueSpaceSubset valueSpaceSubset,DatatypeRestriction datatypeRestriction) {
         assert s_managedDatatypeURIs.contains(datatypeRestriction.getDatatypeURI());
         if (valueSpaceSubset==EMPTY_SUBSET || datatypeRestriction.getNumberOfFacetRestrictions()==0)
@@ -104,6 +109,7 @@ public class AnyURIDatatypeHandler implements DatatypeHandler {
                 return new AnyURIValueSpaceSubset(restrictionAutomaton);
         }
     }
+    @Override
     public ValueSpaceSubset conjoinWithDRNegation(ValueSpaceSubset valueSpaceSubset,DatatypeRestriction datatypeRestriction) {
         assert s_managedDatatypeURIs.contains(datatypeRestriction.getDatatypeURI());
         if (valueSpaceSubset==EMPTY_SUBSET || datatypeRestriction.getNumberOfFacetRestrictions()==0)
@@ -150,11 +156,13 @@ public class AnyURIDatatypeHandler implements DatatypeHandler {
         else
             return automaton;
     }
+    @Override
     public boolean isSubsetOf(String subsetDatatypeURI,String supersetDatatypeURI) {
         assert s_managedDatatypeURIs.contains(subsetDatatypeURI);
         assert s_managedDatatypeURIs.contains(supersetDatatypeURI);
         return true;
     }
+    @Override
     public boolean isDisjointWith(String datatypeURI1,String datatypeURI2) {
         assert s_managedDatatypeURIs.contains(datatypeURI1);
         assert s_managedDatatypeURIs.contains(datatypeURI2);

@@ -41,12 +41,12 @@ public class DateTimeDatatypeHandler implements DatatypeHandler {
     protected static final DateTimeValueSpaceSubset ENTIRE_SUBSET=new DateTimeValueSpaceSubset(INTERVAL_ALL_WITH_TIMEZONE,INTERVAL_ALL_WITHOUT_TIMEZONE);
     protected static final DateTimeValueSpaceSubset WITH_TIMEZONE_SUBSET=new DateTimeValueSpaceSubset(INTERVAL_ALL_WITH_TIMEZONE,null);
     protected static final DateTimeValueSpaceSubset EMPTY_SUBSET=new DateTimeValueSpaceSubset();
-    protected static final Set<String> s_managedDatatypeURIs=new HashSet<String>();
+    protected static final Set<String> s_managedDatatypeURIs=new HashSet<>();
     static {
         s_managedDatatypeURIs.add(XSD_DATE_TIME);
         s_managedDatatypeURIs.add(XSD_DATE_TIME_STAMP);
     }
-    protected static final Set<String> s_supportedFacetURIs=new HashSet<String>();
+    protected static final Set<String> s_supportedFacetURIs=new HashSet<>();
     static {
         s_supportedFacetURIs.add(XSD_NS+"minInclusive");
         s_supportedFacetURIs.add(XSD_NS+"minExclusive");
@@ -54,9 +54,11 @@ public class DateTimeDatatypeHandler implements DatatypeHandler {
         s_supportedFacetURIs.add(XSD_NS+"maxExclusive");
     }
 
+    @Override
     public Set<String> getManagedDatatypeURIs() {
         return s_managedDatatypeURIs;
     }
+    @Override
     public Object parseLiteral(String lexicalForm,String datatypeURI) throws MalformedLiteralException {
         assert s_managedDatatypeURIs.contains(datatypeURI);
         DateTime dateTime=DateTime.parse(lexicalForm);
@@ -64,6 +66,7 @@ public class DateTimeDatatypeHandler implements DatatypeHandler {
             throw new MalformedLiteralException(lexicalForm,datatypeURI);
         return dateTime;
     }
+    @Override
     public void validateDatatypeRestriction(DatatypeRestriction datatypeRestriction) throws UnsupportedFacetException {
         assert s_managedDatatypeURIs.contains(datatypeRestriction.getDatatypeURI());
         for (int index=datatypeRestriction.getNumberOfFacetRestrictions()-1;index>=0;--index) {
@@ -75,6 +78,7 @@ public class DateTimeDatatypeHandler implements DatatypeHandler {
                 throw new UnsupportedFacetException("Facet with URI '"+facetURI+"' supports only date/time values, but "+facetDataValue+" is not a date/time instance in the restriction "+this.toString()+".");
         }
     }
+    @Override
     public ValueSpaceSubset createValueSpaceSubset(DatatypeRestriction datatypeRestriction) {
         assert s_managedDatatypeURIs.contains(datatypeRestriction.getDatatypeURI());
         if (datatypeRestriction.getNumberOfFacetRestrictions()==0) {
@@ -89,6 +93,7 @@ public class DateTimeDatatypeHandler implements DatatypeHandler {
         else
             return new DateTimeValueSpaceSubset(intervals[0],intervals[1]);
     }
+    @Override
     public ValueSpaceSubset conjoinWithDR(ValueSpaceSubset valueSpaceSubset,DatatypeRestriction datatypeRestriction) {
         assert s_managedDatatypeURIs.contains(datatypeRestriction.getDatatypeURI());
         DateTimeInterval[] intervals=getIntervalsFor(datatypeRestriction);
@@ -97,7 +102,7 @@ public class DateTimeDatatypeHandler implements DatatypeHandler {
         else {
             DateTimeValueSpaceSubset dateTimeSubset=(DateTimeValueSpaceSubset)valueSpaceSubset;
             List<DateTimeInterval> oldIntervals=dateTimeSubset.m_intervals;
-            List<DateTimeInterval> newIntervals=new ArrayList<DateTimeInterval>();
+            List<DateTimeInterval> newIntervals=new ArrayList<>();
             for (int index=0;index<oldIntervals.size();index++) {
                 DateTimeInterval oldInterval=oldIntervals.get(index);
                 if (intervals[0]!=null) {
@@ -117,13 +122,14 @@ public class DateTimeDatatypeHandler implements DatatypeHandler {
                 return new DateTimeValueSpaceSubset(newIntervals);
         }
     }
+    @Override
     public ValueSpaceSubset conjoinWithDRNegation(ValueSpaceSubset valueSpaceSubset,DatatypeRestriction datatypeRestriction) {
         assert s_managedDatatypeURIs.contains(datatypeRestriction.getDatatypeURI());
         DateTimeInterval[] intervals=getIntervalsFor(datatypeRestriction);
         if (intervals[0]==null && intervals[1]==null)
             return valueSpaceSubset;
         else {
-            List<DateTimeInterval> complementedIntervals=new ArrayList<DateTimeInterval>(4);
+            List<DateTimeInterval> complementedIntervals=new ArrayList<>(4);
             if (intervals[0]==null)
                 complementedIntervals.add(INTERVAL_ALL_WITH_TIMEZONE);
             else {
@@ -142,7 +148,7 @@ public class DateTimeDatatypeHandler implements DatatypeHandler {
             }
             DateTimeValueSpaceSubset dateTimeSubset=(DateTimeValueSpaceSubset)valueSpaceSubset;
             List<DateTimeInterval> oldIntervals=dateTimeSubset.m_intervals;
-            List<DateTimeInterval> newIntervals=new ArrayList<DateTimeInterval>();
+            List<DateTimeInterval> newIntervals=new ArrayList<>();
             for (int index=0;index<oldIntervals.size();index++) {
                 DateTimeInterval oldInterval=oldIntervals.get(index);
                 for (int complementedIndex=0;complementedIndex<complementedIntervals.size();complementedIndex++) {
@@ -203,6 +209,7 @@ public class DateTimeDatatypeHandler implements DatatypeHandler {
         }
         return intervals;
     }
+    @Override
     public boolean isSubsetOf(String subsetDatatypeURI,String supersetDatatypeURI) {
         assert XSD_DATE_TIME_STAMP.equals(subsetDatatypeURI) || XSD_DATE_TIME.equals(subsetDatatypeURI);
         assert XSD_DATE_TIME_STAMP.equals(supersetDatatypeURI) || XSD_DATE_TIME.equals(supersetDatatypeURI);
@@ -211,6 +218,7 @@ public class DateTimeDatatypeHandler implements DatatypeHandler {
         else
             return true;
     }
+    @Override
     public boolean isDisjointWith(String datatypeURI1,String datatypeURI2) {
         assert XSD_DATE_TIME_STAMP.equals(datatypeURI1) || XSD_DATE_TIME.equals(datatypeURI1);
         assert XSD_DATE_TIME_STAMP.equals(datatypeURI2) || XSD_DATE_TIME.equals(datatypeURI2);

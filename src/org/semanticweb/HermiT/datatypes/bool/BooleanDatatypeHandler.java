@@ -34,9 +34,11 @@ public class BooleanDatatypeHandler implements DatatypeHandler {
     protected static final ValueSpaceSubset EMPTY=new BooleanNone();
     protected final static Set<String> s_managedDatatypeURIs=Collections.singleton(XSD_BOOLEAN);
 
+    @Override
     public Set<String> getManagedDatatypeURIs() {
         return s_managedDatatypeURIs;
     }
+    @Override
     public Object parseLiteral(String lexicalForm,String datatypeURI) throws MalformedLiteralException {
         assert XSD_BOOLEAN.equals(datatypeURI);
         lexicalForm=lexicalForm.trim();
@@ -47,31 +49,37 @@ public class BooleanDatatypeHandler implements DatatypeHandler {
         else
             throw new MalformedLiteralException(lexicalForm,datatypeURI);
     }
+    @Override
     public void validateDatatypeRestriction(DatatypeRestriction datatypeRestriction) throws UnsupportedFacetException {
         assert XSD_BOOLEAN.equals(datatypeRestriction.getDatatypeURI());
         if (datatypeRestriction.getNumberOfFacetRestrictions()>0)
             throw new UnsupportedFacetException("The xsd:boolean datatype does not provide any facets, but the ontology contains a restriction on boolean with facets: "+this.toString());
     }
+    @Override
     public ValueSpaceSubset createValueSpaceSubset(DatatypeRestriction datatypeRestriction) {
         assert XSD_BOOLEAN.equals(datatypeRestriction.getDatatypeURI());
         assert datatypeRestriction.getNumberOfFacetRestrictions()==0;
         return BOOLEAN_ALL;
     }
+    @Override
     public ValueSpaceSubset conjoinWithDR(ValueSpaceSubset valueSpaceSubset,DatatypeRestriction datatypeRestriction) {
         assert XSD_BOOLEAN.equals(datatypeRestriction.getDatatypeURI());
         assert datatypeRestriction.getNumberOfFacetRestrictions()==0;
         return BOOLEAN_ALL;
     }
+    @Override
     public ValueSpaceSubset conjoinWithDRNegation(ValueSpaceSubset valueSpaceSubset,DatatypeRestriction datatypeRestriction) {
         assert XSD_BOOLEAN.equals(datatypeRestriction.getDatatypeURI());
         assert datatypeRestriction.getNumberOfFacetRestrictions()==0;
         return EMPTY;
     }
+    @Override
     public boolean isSubsetOf(String subsetDatatypeURI,String supersetDatatypeURI) {
         assert XSD_BOOLEAN.equals(subsetDatatypeURI);
         assert XSD_BOOLEAN.equals(supersetDatatypeURI);
         return true;
     }
+    @Override
     public boolean isDisjointWith(String datatypeURI1,String datatypeURI2) {
         assert XSD_BOOLEAN.equals(datatypeURI1);
         assert XSD_BOOLEAN.equals(datatypeURI2);
@@ -80,12 +88,15 @@ public class BooleanDatatypeHandler implements DatatypeHandler {
 
     protected static class BooleanAll implements ValueSpaceSubset {
 
+        @Override
         public boolean hasCardinalityAtLeast(int number) {
             return number<=2;
         }
+        @Override
         public boolean containsDataValue(Object dataValue) {
             return Boolean.FALSE.equals(dataValue) || Boolean.TRUE.equals(dataValue);
         }
+        @Override
         public void enumerateDataValues(Collection<Object> dataValues) {
             dataValues.add(Boolean.FALSE);
             dataValues.add(Boolean.TRUE);
@@ -94,12 +105,15 @@ public class BooleanDatatypeHandler implements DatatypeHandler {
 
     protected static class BooleanNone implements ValueSpaceSubset {
 
+        @Override
         public boolean hasCardinalityAtLeast(int number) {
             return number<=0;
         }
+        @Override
         public boolean containsDataValue(Object dataValue) {
             return false;
         }
+        @Override
         public void enumerateDataValues(Collection<Object> dataValues) {
         }
     }

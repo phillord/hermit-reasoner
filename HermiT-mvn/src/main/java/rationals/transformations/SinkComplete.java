@@ -24,50 +24,41 @@ import rationals.Transition;
  */
 public class SinkComplete implements UnaryTransformation {
 
-  private Set alphabet;
+    private Set<Object> alphabet;
 
-  public SinkComplete(Set alphabet) {
-    this.alphabet = alphabet;
-  }
+    public SinkComplete(Set<Object> alphabet) {
+        this.alphabet = alphabet;
+    }
 
-  public SinkComplete() {
-  }
+    public SinkComplete() {
+    }
 
-    /*
-     *  (non-Javadoc)
-     * @see rationals.transformations.UnaryTransformation#transform(rationals.Automaton)
-     */
+    @Override
     public Automaton transform(Automaton a) {
-      Automaton b = (Automaton) a.clone();
-      Set alph = (alphabet == null) ? b.alphabet() : alphabet;
-      State hole = null;
-      Set states = b.getStateFactory().stateSet();
-      states.addAll(b.states());
-      Iterator i = states.iterator();
-      while (i.hasNext()) {
-	State e = (State) i.next();
-	Iterator j = alph.iterator();
-	while (j.hasNext()) {
-	  Object label = j.next();
-	  if (b.delta(e, label).isEmpty()) {
-	    if (hole == null)
-	      hole = b.addState(false, false);
-	    try {
-	      b.addTransition(new Transition(e, label, hole));
-	    } catch (NoSuchStateException x) {
-	    }
-	  }
-	}
-      }
-      if (!(hole == null)) {
-	Iterator j = alph.iterator();
-	while (j.hasNext()) {
-	  try {
-	    b.addTransition(new Transition(hole, j.next(), hole));
-	  } catch (NoSuchStateException x) {
-	  }
-	}
-      }
-      return b;
+        Automaton b = (Automaton) a.clone();
+        Set<Object> alph = (alphabet == null) ? b.alphabet() : alphabet;
+        State hole = null;
+        Set<State> states = b.getStateFactory().stateSet();
+        states.addAll(b.states());
+        Iterator<State> i = states.iterator();
+        while (i.hasNext()) {
+            State e = i.next();
+            Iterator<Object> j = alph.iterator();
+            while (j.hasNext()) {
+                Object label = j.next();
+                if (b.delta(e, label).isEmpty()) {
+                    if (hole == null)
+                        hole = b.addState(false, false);
+                    b.addTransition(new Transition(e, label, hole), null);
+                }
+            }
+        }
+        if (!(hole == null)) {
+            Iterator<Object> j = alph.iterator();
+            while (j.hasNext()) {
+                b.addTransition(new Transition(hole, j.next(), hole), null);
+            }
+        }
+        return b;
     }
 }

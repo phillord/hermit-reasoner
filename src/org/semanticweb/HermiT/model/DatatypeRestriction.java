@@ -49,15 +49,19 @@ public class DatatypeRestriction extends AtomicDataRange {
     public Constant getFacetValue(int index) {
         return m_facetValues[index];
     }
+    @Override
     public LiteralDataRange getNegation() {
         return AtomicNegationDataRange.create(this);
     }
+    @Override
     public boolean isAlwaysTrue() {
         return false;
     }
+    @Override
     public boolean isAlwaysFalse() {
         return false;
     }
+    @Override
     public String toString(Prefixes prefixes) {
         StringBuffer buffer=new StringBuffer();
         buffer.append(prefixes.abbreviateIRI(m_datatypeURI));
@@ -79,6 +83,7 @@ public class DatatypeRestriction extends AtomicDataRange {
     }
 
     protected static InterningManager<DatatypeRestriction> s_interningManager=new InterningManager<DatatypeRestriction>() {
+        @Override
         protected boolean equal(DatatypeRestriction object1,DatatypeRestriction object2) {
             if (!object1.m_datatypeURI.equals(object2.m_datatypeURI) || object1.m_facetURIs.length!=object2.m_facetURIs.length)
                 return false;
@@ -93,6 +98,7 @@ public class DatatypeRestriction extends AtomicDataRange {
                     return true;
             return false;
         }
+        @Override
         protected int getHashCode(DatatypeRestriction object) {
             int hashCode=object.m_datatypeURI.hashCode();
             for (int index=object.m_facetURIs.length-1;index>=0;--index)

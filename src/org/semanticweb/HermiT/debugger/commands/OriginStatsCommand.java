@@ -38,18 +38,22 @@ public class OriginStatsCommand extends AbstractCommand {
     public OriginStatsCommand(Debugger debugger) {
         super(debugger);
     }
+    @Override
     public String getCommandName() {
         return "originStats";
     }
+    @Override
     public String[] getDescription() {
         return new String[] { "","prints origin information for nodes in the model" };
     }
+    @Override
     public void printHelp(PrintWriter writer) {
         writer.println("usage: originStats");
         writer.println("    Prints origin information for the nodes in the current model.");
     }
+    @Override
     public void execute(String[] args) {
-        Map<Concept,OriginInfo> originInfos=new HashMap<Concept,OriginInfo>();
+        Map<Concept,OriginInfo> originInfos=new HashMap<>();
         Node node=m_debugger.getTableau().getFirstTableauNode();
         while (node!=null) {
             Debugger.NodeCreationInfo nodeCreationInfo=m_debugger.getNodeCreationInfo(node);
@@ -110,13 +114,14 @@ public class OriginStatsCommand extends AbstractCommand {
 
         public OriginInfo(Concept concept) {
             m_concept=concept;
-            m_nodes=new ArrayList<Node>();
+            m_nodes=new ArrayList<>();
         }
     }
 
     protected static class OriginInfoComparator implements Comparator<OriginInfo> {
         public static final OriginInfoComparator INSTANCE=new OriginInfoComparator();
 
+        @Override
         public int compare(OriginInfo o1,OriginInfo o2) {
             int comparison=o1.m_nodes.size()-o2.m_nodes.size();
             if (comparison==0) {

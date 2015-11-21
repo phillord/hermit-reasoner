@@ -33,21 +33,27 @@ public class InternalDatatype extends AtomicDataRange implements DLPredicate {
     public String getIRI() {
         return m_iri;
     }
+    @Override
     public int getArity() {
         return 1;
     }
+    @Override
     public LiteralDataRange getNegation() {
         return AtomicNegationDataRange.create(this);
     }
+    @Override
     public boolean isAlwaysTrue() {
         return this==RDFS_LITERAL;
     }
+    @Override
     public boolean isAlwaysFalse() {
         return false;
     }
+    @Override
     public boolean isInternalDatatype() {
         return true;
     }
+    @Override
     public String toString(Prefixes prefixes) {
         return prefixes.abbreviateIRI(m_iri);
     }
@@ -56,9 +62,11 @@ public class InternalDatatype extends AtomicDataRange implements DLPredicate {
     }
 
     protected static InterningManager<InternalDatatype> s_interningManager=new InterningManager<InternalDatatype>() {
+        @Override
         protected boolean equal(InternalDatatype object1,InternalDatatype object2) {
             return object1.m_iri.equals(object2.m_iri);
         }
+        @Override
         protected int getHashCode(InternalDatatype object) {
             return object.m_iri.hashCode();
         }

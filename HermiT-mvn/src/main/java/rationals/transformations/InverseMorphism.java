@@ -47,102 +47,89 @@ import rationals.State;
 import rationals.Transition;
 
 /**
- * A general  class for applying inverse morphism on rational sets.
+ * A general class for applying inverse morphism on rational sets.
  * <p>
- * A morphism is constructed from a {@see java.util.Map} from letters to
- * letters (ie. from Object to Object). An inverse morphism is then computed 
- * by inversing the given map. A morphism is usually surjective, which is
- * not the case of an inverse morphism, unless of course it is also 
- * injective. This means that the image of a single letter may be a
- * set of letters. 
+ * A morphism is constructed from a {@link Map} from letters to letters (ie.
+ * from Object to Object). An inverse morphism is then computed by inversing the
+ * given map. A morphism is usually surjective, which is not the case of an
+ * inverse morphism, unless of course it is also injective. This means that the
+ * image of a single letter may be a set of letters.
  * </p>
  * <p>
  * 
  * </p>
- *  
+ * 
  * @author nono
  * @version $Id: InverseMorphism.java 2 2006-08-24 14:41:48Z oqube $
  * @see rationals.transformations.Morphism
  */
 public class InverseMorphism implements UnaryTransformation {
 
-    private Map morph;
+    private Map<Object, Set<Object>> morph;
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public InverseMorphism(Map m) {
         this.morph = inverse(m);
     }
-    
-    /*
-     * create inverse mapping from given map.
-     * The key are letters (Object) and the values 
-     * are sets of letters (Set).
-     */
-    private Map inverse(Map m) {
-    	Map inv = new HashMap();
-    	for(Iterator i = m.entrySet().iterator();i.hasNext();) {
-    		Map.Entry e  = (Map.Entry)i.next();
-    		Object v = e.getValue();
-    		Object k = e.getKey();
-    		Set s = (Set)inv.get(v);
-    		if(s == null) {
-    			s = new HashSet();
-    			inv.put(v,s);
-    		}
-    		s.add(k);
-    	}
-    	return inv;
-	}
 
-	/* (non-Javadoc)
-     * @see rationals.transformations.UnaryTransformation#transform(rationals.Automaton)
+    /*
+     * create inverse mapping from given map. The key are letters (Object) and
+     * the values are sets of letters (Set).
      */
+    private <K, V> Map<V, Set<K>> inverse(Map<K, V> m) {
+        Map<V, Set<K>> inv = new HashMap<>();
+        for (Map.Entry<K, V> e : m.entrySet()) {
+            V v = e.getValue();
+            K k = e.getKey();
+            Set<K> s = inv.get(v);
+            if (s == null) {
+                s = new HashSet<>();
+                inv.put(v, s);
+            }
+            s.add(k);
+        }
+        return inv;
+    }
+
+    @Override
     public Automaton transform(Automaton a) {
         Automaton b = new Automaton();
         /* state map */
-        Map stm = new HashMap();
-        for(Iterator i = a.delta().iterator();i.hasNext();) {
-            Transition tr = (Transition)i.next();
+        Map<State, State> stm = new HashMap<>();
+        for (Iterator<Transition> i = a.delta().iterator(); i.hasNext();) {
+            Transition tr = i.next();
             State ns = tr.start();
-            State nss = (State)stm.get(ns);
-            if(nss == null) {
-                nss = b.addState(ns.isInitial(),ns.isTerminal());
-                stm.put(ns,nss);
+            State nss = stm.get(ns);
+            if (nss == null) {
+                nss = b.addState(ns.isInitial(), ns.isTerminal());
+                stm.put(ns, nss);
             }
             State ne = tr.end();
-            State nse = (State)stm.get(ne);
-            if(nse == null) {
-                nse = b.addState(ne.isInitial(),ne.isTerminal());
-                stm.put(ne,nse);
+            State nse = stm.get(ne);
+            if (nse == null) {
+                nse = b.addState(ne.isInitial(), ne.isTerminal());
+                stm.put(ne, nse);
             }
             Object lbl = tr.label();
-            Set s = (Set)morph.get(lbl);
-            if(s == null)
-                try {
-                    b.addTransition(new Transition(nss,lbl,nse));
-                } catch (NoSuchStateException e) {
-                }
+            Set<Object> s = morph.get(lbl);
+            if (s == null)
+                b.addTransition(new Transition(nss, lbl, nse), null);
             else
-                try {
-                	for(Iterator j = s.iterator();j.hasNext();)
-                		b.addTransition(new Transition(nss,j.next(),nse));
-                } catch (NoSuchStateException e1) {
-                }
+                for (Iterator<Object> j = s.iterator(); j.hasNext();)
+                    b.addTransition(new Transition(nss, j.next(), nse), null);
         }
         // handle epsilon's image
-        Set s = (Set)morph.get(null);
-        if(s != null) {
-        	// append auto transition to each state
-        	for(Iterator i = b.states().iterator();i.hasNext();){
-        		State st = (State)i.next();
-        		for(Iterator j = s.iterator();j.hasNext();) {
-        			Object o = j.next();
-        			try {
-						if(o != null)
-							b.addTransition(new Transition(st,o,st));
-					} catch (NoSuchStateException e) {
-					}
-        		}
-        	}
+        Set<Object> s = morph.get(null);
+        if (s != null) {
+            // append auto transition to each state
+            for (Iterator<State> i = b.states().iterator(); i.hasNext();) {
+                State st = i.next();
+                for (Iterator<Object> j = s.iterator(); j.hasNext();) {
+                    Object o = j.next();
+                    if (o != null)
+                        b.addTransition(new Transition(st, o, st), null);
+                }
+            }
         }
         return b;
     }

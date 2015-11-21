@@ -34,64 +34,63 @@ import rationals.Transition;
  */
 public class Accessible implements UnaryTransformation {
 
-	private State state;
+    private State state;
 
-	/**
-	 * The state we must start exploration from
-	 * 
-	 */
-	public Accessible(State s) {
-		this.state = s;
-	}
+    /**
+     * The state we must start exploration from
+     * 
+     */
+    public Accessible(State s) {
+        this.state = s;
+    }
 
-	/* (non-Javadoc)
-	 * @see rationals.transformations.UnaryTransformation#transform(rationals.Automaton)
-	 */
-	public Automaton transform(Automaton a) {
-		Set trs = a.delta();
-		Automaton b = new Automaton();
-		Map stmap = new HashMap();
-		/* initial state = state */
-		State ns = b.addState(true,state.isTerminal());
-		stmap.put(state,ns);
-		explore(state,stmap,a,b);
-		/* eplore a and remove transitions from trs */
-		Iterator it = trs.iterator();
-		while(it.hasNext()) {
-			Transition tr = (Transition)it.next();
-			State nstart = (State)stmap.get(tr.start());
-			State nend = (State)stmap.get(tr.end());
-			if((nstart != null) && (nend != null))
-				try {
-					b.addTransition(new Transition(nstart,tr.label(),nend));
-				} catch (NoSuchStateException e) {
-					System.err.println(e.getMessage());
-					return null;
-				}
-		}
-		return b;
-	}
+    @Override
+    public Automaton transform(Automaton a) {
+        Set<Transition> trs = a.delta();
+        Automaton b = new Automaton();
+        Map<State, State> stmap = new HashMap<>();
+        /* initial state = state */
+        State ns = b.addState(true,state.isTerminal());
+        stmap.put(state,ns);
+        explore(state,stmap,a,b);
+        /* eplore a and remove transitions from trs */
+        for (Transition tr : trs) {
+            State nstart = stmap.get(tr.start());
+            State nend = stmap.get(tr.end());
+            if((nstart != null) && (nend != null)) {
+                    Transition transition = new Transition(nstart,tr.label(),nend);
+            if(b.validTransition(transition)) {
+                    b.addTransition(transition,null);
+                } else{
+                    System.err.println("Invalid transition: "+transition);
+                    return null;
+                }
+            }
+        }
+        return b;
+    }
 
-	/**
-	 * Recursive function to explore transitions from a state
-	 * @param state
-	 * @param stmap
-	 * @param b
-	 */
-	private void explore(State curstate, Map stmap, Automaton a,Automaton b) {
-		Iterator it = a.delta(curstate).iterator();
-		while(it.hasNext()) {
-			Transition tr = (Transition)it.next();
-			State e= tr.end();
-			State ne = (State)stmap.get(e);
-			if(ne != null)
-				continue;
-			else {
-				ne = b.addState(e.isInitial(),e.isTerminal());
-				stmap.put(e,ne);
-				explore(e,stmap,a,b);
-			}
-		}
-	}
+    /**
+     * Recursive function to explore transitions from a state
+     * @param curstate
+     * @param stmap
+     * @param a
+     * @param b
+     */
+    private void explore(State curstate, Map<State, State> stmap, Automaton a,Automaton b) {
+        Iterator<Transition> it = a.delta(curstate).iterator();
+        while(it.hasNext()) {
+            Transition tr = it.next();
+            State e= tr.end();
+            State ne = stmap.get(e);
+            if(ne != null)
+                continue;
+            else {
+                ne = b.addState(e.isInitial(),e.isTerminal());
+                stmap.put(e,ne);
+                explore(e,stmap,a,b);
+            }
+        }
+    }
 
 }

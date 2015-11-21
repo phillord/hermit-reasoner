@@ -82,13 +82,13 @@ public interface Relation {
      * @param nsb a Set of State objects from b
      * @return true if nsa is equivalent to nsb
      */
-    public boolean equivalence(Set nsa, Set nsb);
+    public boolean equivalence(Set<State> nsa, Set<State> nsb);
     
     /**
      * Returns the trace of labels that lead to an error.
      * 
      * @return a List of objects or null.
      */
-    public List getErrorTrace();
+    public List<Object> getErrorTrace();
 
 }

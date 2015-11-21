@@ -29,16 +29,20 @@ public class ShowNodeCommand extends AbstractCommand {
     public ShowNodeCommand(Debugger debugger) {
         super(debugger);
     }
+    @Override
     public String getCommandName() {
         return "showNode";
     }
+    @Override
     public String[] getDescription() {
         return new String[] { "nodeID","prints information about the given node" };
     }
+    @Override
     public void printHelp(PrintWriter writer) {
         writer.println("usage: showNode nodeID");
         writer.println("    Prints information about the node for the given node ID.");
     }
+    @Override
     public void execute(String[] args) {
         if (args.length<2) {
             m_debugger.getOutput().println("Node ID is missing.");

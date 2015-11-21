@@ -19,22 +19,22 @@ import rationals.Transition;
  */
 public class TransformationsToolBox {
 
-  public static boolean containsATerminalState(Set s) {
-    Iterator i = s.iterator() ;
+  public static boolean containsATerminalState(Set<State> s) {
+    Iterator<State> i = s.iterator() ;
     while(i.hasNext()) {
       try {
-        State e = (State) i.next() ;
+        State e = i.next() ;
         if (e.isTerminal()) return true ;
       } catch(ClassCastException x) {}
     }
     return false ;
   } 
 
-  public static boolean containsAnInitialState(Set s) {
-    Iterator i = s.iterator() ;
+  public static boolean containsAnInitialState(Set<State> s) {
+    Iterator<State> i = s.iterator() ;
     while(i.hasNext()) {
       try {
-        State e = (State) i.next() ;
+        State e = i.next() ;
         if (e.isInitial()) return true ;
       } catch(ClassCastException x) {}
     }
@@ -60,12 +60,12 @@ public class TransformationsToolBox {
       do {
           Set<State> ns = a.getStateFactory().stateSet();
           ns.addAll(exp); /* arrival states */
-          Iterator it = ns.iterator();
+          Iterator<State> it = ns.iterator();
           while (it.hasNext()) {
-              State st = (State) it.next();
-              Iterator it2 = a.delta(st).iterator();
+              State st = it.next();
+              Iterator<Transition> it2 = a.delta(st).iterator();
               while (it2.hasNext()) {
-                  Transition tr = (Transition) it2.next();
+                  Transition tr = it2.next();
                   if (tr.label() == null && !view.contains(tr.end())
                           && !tr.end().equals(st)) {
                       /* compute closure of epsilon transitions */
@@ -91,16 +91,16 @@ public class TransformationsToolBox {
    * @param ts a Set of Transition objects.
    * @return a Map from Object - transition labels - to Set of State objects. 
    */
-  public static Map mapAlphabet(Set ts,Automaton a) {
-      Map am = new HashMap();
-      List tas =new ArrayList(ts);
+  public static Map<Object, Set<State>> mapAlphabet(Set<Transition> ts,Automaton a) {
+      Map<Object, Set<State>> am = new HashMap<>();
+      List<Transition> tas =new ArrayList<>(ts);
       /* compute set of states for each letter */
       while (!tas.isEmpty()) {
-          Transition tr = (Transition) tas.remove(0);
+          Transition tr = tas.remove(0);
           Object l = tr.label();
           if (l == null)
               continue;
-          Set as = (Set) am.get(l);
+          Set<State> as = am.get(l);
           if (as == null) {
               as = a.getStateFactory().stateSet();
               am.put(l, as);

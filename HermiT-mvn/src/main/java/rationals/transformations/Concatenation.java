@@ -1,7 +1,6 @@
 package rationals.transformations;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import rationals.Automaton;
@@ -36,6 +35,7 @@ import rationals.properties.ContainsEpsilon;
  */
 public class Concatenation implements BinaryTransformation {
 
+    @Override
     public Automaton transform(Automaton a, Automaton b) {
         Automaton ap = new Normalizer().transform(a);
         Automaton bp = new Normalizer().transform(b);
@@ -48,58 +48,40 @@ public class Concatenation implements BinaryTransformation {
             return a;
         State junc = null; /* junction state */
         Automaton c = new Automaton();
-        Map map = new HashMap();
+        Map<State, State> map = new HashMap<>();
         /* add all states from ap */
-        Iterator i = ap.states().iterator();
-        while (i.hasNext()) {
-            State e = (State) i.next();
+        for (State e : ap.states()) {
             State n;
             if (e.isInitial()) {
                 n = c.addState(true, ace && bce);
-            } else if(!e.isTerminal())
+            } else if (!e.isTerminal())
                 n = c.addState(false, e.isTerminal() && bce);
             else
                 continue;
             map.put(e, n);
         }
         /* add states from bp */
-        i = bp.states().iterator();
-        while (i.hasNext()) {
-            State e = (State) i.next();
+        for (State e : bp.states()) {
             State n;
-            if (!e.isInitial())  {
+            if (!e.isInitial()) {
                 n = c.addState(false, e.isTerminal());
                 map.put(e, n);
             }
         }
         /* create junction state */
-        junc = c.addState(ace,bce);
-        i = ap.delta().iterator();
-        while (i.hasNext()) {
-            Transition t = (Transition) i.next();
-            try {
-                if (t.end().isTerminal())
-                    c.addTransition(new Transition((State) map.get(t.start()),
-                            t.label(), junc));
-                else
-                    c.addTransition(new Transition((State) map.get(t.start()),
-                            t.label(), (State) map.get(t.end())));
-            } catch (NoSuchStateException x) {
-            }
+        junc = c.addState(ace, bce);
+        for (Transition t : ap.delta()) {
+            if (t.end().isTerminal())
+                c.addTransition(new Transition(map.get(t.start()), t.label(), junc), null);
+            else
+                c.addTransition(new Transition(map.get(t.start()), t.label(), map.get(t.end())), null);
 
         }
-        i = bp.delta().iterator();
-        while (i.hasNext()) {
-            Transition t = (Transition) i.next();
-            try {
-                if (t.start().isInitial())
-                    c.addTransition(new Transition(junc, t.label(), (State) map
-                            .get(t.end())));
-                else
-                    c.addTransition(new Transition((State) map.get(t.start()),
-                            t.label(), (State) map.get(t.end())));
-            } catch (NoSuchStateException x) {
-            }
+        for (Transition t : bp.delta()) {
+            if (t.start().isInitial())
+                c.addTransition(new Transition(junc, t.label(), map.get(t.end())), null);
+            else
+                c.addTransition(new Transition(map.get(t.start()), t.label(), map.get(t.end())), null);
         }
         return c;
     }

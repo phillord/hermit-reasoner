@@ -33,9 +33,11 @@ public class AtomicConcept extends LiteralConcept implements DLPredicate {
     public String getIRI() {
         return m_iri;
     }
+    @Override
     public int getArity() {
         return 1;
     }
+    @Override
     public LiteralConcept getNegation() {
         if (this==THING)
             return NOTHING;
@@ -44,12 +46,15 @@ public class AtomicConcept extends LiteralConcept implements DLPredicate {
         else
             return AtomicNegationConcept.create(this);
     }
+    @Override
     public boolean isAlwaysTrue() {
         return this==THING;
     }
+    @Override
     public boolean isAlwaysFalse() {
         return this==NOTHING;
     }
+    @Override
     public String toString(Prefixes prefixes) {
         return prefixes.abbreviateIRI(m_iri);
     }
@@ -58,9 +63,11 @@ public class AtomicConcept extends LiteralConcept implements DLPredicate {
     }
 
     protected static InterningManager<AtomicConcept> s_interningManager=new InterningManager<AtomicConcept>() {
+        @Override
         protected boolean equal(AtomicConcept object1,AtomicConcept object2) {
             return object1.m_iri.equals(object2.m_iri);
         }
+        @Override
         protected int getHashCode(AtomicConcept object) {
             return object.m_iri.hashCode();
         }

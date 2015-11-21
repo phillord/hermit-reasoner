@@ -78,39 +78,51 @@ public class ConjunctiveQuery {
         public OneEmptyTupleRetrieval() {
             m_afterLast=true;
         }
+        @Override
         public ExtensionTable getExtensionTable() {
             throw new UnsupportedOperationException();
         }
+        @Override
         public View getExtensionView() {
             return View.TOTAL;
         }
+        @Override
         public void clear() {
             throw new UnsupportedOperationException();
         }
+        @Override
         public int[] getBindingPositions() {
             return s_noBindings;
         }
+        @Override
         public Object[] getBindingsBuffer() {
             return s_noObjects;
         }
+        @Override
         public Object[] getTupleBuffer() {
             return s_noObjects;
         }
+        @Override
         public DependencySet getDependencySet() {
             throw new UnsupportedOperationException();
         }
+        @Override
         public boolean isCore() {
             return false;
         }
+        @Override
         public void open() {
             m_afterLast=false;
         }
+        @Override
         public boolean afterLast() {
             return m_afterLast;
         }
+        @Override
         public int getCurrentTupleIndex() {
             return m_afterLast ? -1 : 0;
         }
+        @Override
         public void next() {
             m_afterLast=true;
         }
@@ -132,12 +144,14 @@ public class ConjunctiveQuery {
             m_copyAnswers=copyAnswers;
             m_valuesBuffer=valuesBuffer;
         }
+        @Override
         public int execute(int programCounter) {
             for (int copyIndex=m_copyAnswers.length-1;copyIndex>=0;--copyIndex)
-                m_resultBuffer[m_copyAnswers[copyIndex][1]]=m_nodesToTerms.get((Node)m_valuesBuffer[m_copyAnswers[copyIndex][0]]);
+                m_resultBuffer[m_copyAnswers[copyIndex][1]]=m_nodesToTerms.get(m_valuesBuffer[m_copyAnswers[copyIndex][0]]);
             m_queryResultCollector[0].processResult(m_conjunctiveQuery,m_resultBuffer);
             return programCounter+1;
         }
+        @Override
         public String toString() {
             return "Call query consumer";
         }
@@ -159,8 +173,9 @@ public class ConjunctiveQuery {
             m_queryResultCollector=queryResultCollector;
             generateCode(0,oneEmptyTupleRetrieval);
         }
+        @Override
         protected void compileHeads() {
-            List<int[]> copyAnswers=new ArrayList<int[]>();
+            List<int[]> copyAnswers=new ArrayList<>();
             for (int index=0;index<m_answerTerms.length;++index) {
                 Term answerTerm=m_answerTerms[index];
                 if (answerTerm instanceof Variable) {
@@ -172,7 +187,7 @@ public class ConjunctiveQuery {
         }
         
         protected static List<Variable> getAnswerVariables(Term[] answerTerms) {
-            List<Variable> result=new ArrayList<Variable>();
+            List<Variable> result=new ArrayList<>();
             for (Term answerTerm : answerTerms)
                 if (answerTerm instanceof Variable)
                     result.add((Variable)answerTerm);

@@ -51,9 +51,7 @@ public class Plus extends BinaryExpr {
         super(e, f);
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
+    @Override
     public String toString() {
         return getLeft() + "+"+getRight();
     }

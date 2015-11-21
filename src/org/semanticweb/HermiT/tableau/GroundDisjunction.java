@@ -166,6 +166,7 @@ public final class GroundDisjunction implements Serializable {
         }
         return buffer.toString();
     }
+    @Override
     public String toString() {
         return toString(Prefixes.STANDARD_PREFIXES);
     }

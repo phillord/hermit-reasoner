@@ -30,16 +30,20 @@ public class ReuseNodeForCommand extends AbstractCommand {
     public ReuseNodeForCommand(Debugger debugger) {
         super(debugger);
     }
+    @Override
     public String getCommandName() {
         return "reuseNodeFor";
     }
+    @Override
     public String[] getDescription() {
         return new String[] { "nodeID","prints concepts for which the given node is a reuse node under individual reuse strategy" };
     }
+    @Override
     public void printHelp(PrintWriter writer) {
         writer.println("usage: reuseNodeFor nodeID");
         writer.println("    If individual reuse strategy is used, prints the concepts for which the given node is a reuse node.");
     }
+    @Override
     public void execute(String[] args) {
         if (args.length<2) {
             m_debugger.getOutput().println("Node ID is missing.");

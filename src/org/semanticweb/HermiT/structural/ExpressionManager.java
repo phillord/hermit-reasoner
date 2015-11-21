@@ -94,76 +94,94 @@ public class ExpressionManager {
     // -----------------------------------------------------------------------------------
     
     protected class DescriptionNNFVisitor implements OWLClassExpressionVisitorEx<OWLClassExpression> {
+        @Override
         public OWLClassExpression visit(OWLClass d) {
             return d;
         }
+        @Override
         public OWLClassExpression visit(OWLObjectIntersectionOf d) {
-            Set<OWLClassExpression> newConjuncts=new HashSet<OWLClassExpression>();
+            Set<OWLClassExpression> newConjuncts=new HashSet<>();
             for (OWLClassExpression description : d.getOperands()) {
                 OWLClassExpression descriptionNNF=getNNF(description);
                 newConjuncts.add(descriptionNNF);
             }
             return m_factory.getOWLObjectIntersectionOf(newConjuncts);
         }
+        @Override
         public OWLClassExpression visit(OWLObjectUnionOf d) {
-            Set<OWLClassExpression> newDisjuncts=new HashSet<OWLClassExpression>();
+            Set<OWLClassExpression> newDisjuncts=new HashSet<>();
             for (OWLClassExpression description : d.getOperands()) {
                 OWLClassExpression descriptionNNF=getNNF(description);
                 newDisjuncts.add(descriptionNNF);
             }
             return m_factory.getOWLObjectUnionOf(newDisjuncts);
         }
+        @Override
         public OWLClassExpression visit(OWLObjectComplementOf d) {
             return getComplementNNF(d.getOperand());
         }
+        @Override
         public OWLClassExpression visit(OWLObjectOneOf d) {
             return d;
         }
+        @Override
         public OWLClassExpression visit(OWLObjectSomeValuesFrom d) {
             OWLClassExpression filler=getNNF(d.getFiller());
-            return m_factory.getOWLObjectSomeValuesFrom(d.getProperty().getSimplified(),filler);
+            return m_factory.getOWLObjectSomeValuesFrom(d.getProperty(),filler);
         }
+        @Override
         public OWLClassExpression visit(OWLObjectAllValuesFrom d) {
             OWLClassExpression filler=getNNF(d.getFiller());
-            return m_factory.getOWLObjectAllValuesFrom(d.getProperty().getSimplified(),filler);
+            return m_factory.getOWLObjectAllValuesFrom(d.getProperty(),filler);
         }
+        @Override
         public OWLClassExpression visit(OWLObjectHasValue d) {
-            return m_factory.getOWLObjectHasValue(d.getProperty().getSimplified(),d.getValue());
+            return m_factory.getOWLObjectHasValue(d.getProperty(),d.getFiller());
         }
+        @Override
         public OWLClassExpression visit(OWLObjectHasSelf d) {
-            return m_factory.getOWLObjectHasSelf(d.getProperty().getSimplified());
+            return m_factory.getOWLObjectHasSelf(d.getProperty());
         }
+        @Override
         public OWLClassExpression visit(OWLObjectMinCardinality d) {
             OWLClassExpression filler=getNNF(d.getFiller());
-            return m_factory.getOWLObjectMinCardinality(d.getCardinality(),d.getProperty().getSimplified(),filler);
+            return m_factory.getOWLObjectMinCardinality(d.getCardinality(),d.getProperty(),filler);
         }
+        @Override
         public OWLClassExpression visit(OWLObjectMaxCardinality d) {
             OWLClassExpression filler=getNNF(d.getFiller());
-            return m_factory.getOWLObjectMaxCardinality(d.getCardinality(),d.getProperty().getSimplified(),filler);
+            return m_factory.getOWLObjectMaxCardinality(d.getCardinality(),d.getProperty(),filler);
         }
+        @Override
         public OWLClassExpression visit(OWLObjectExactCardinality d) {
             OWLClassExpression filler=getNNF(d.getFiller());
-            return m_factory.getOWLObjectExactCardinality(d.getCardinality(),d.getProperty().getSimplified(),filler);
+            return m_factory.getOWLObjectExactCardinality(d.getCardinality(),d.getProperty(),filler);
         }
+        @Override
         public OWLClassExpression visit(OWLDataSomeValuesFrom d) {
             OWLDataRange filler=getNNF(d.getFiller());
             return m_factory.getOWLDataSomeValuesFrom(d.getProperty(),filler);
         }
+        @Override
         public OWLClassExpression visit(OWLDataAllValuesFrom d) {
             OWLDataRange filler=getNNF(d.getFiller());
             return m_factory.getOWLDataAllValuesFrom(d.getProperty(),filler);
         }
+        @Override
         public OWLClassExpression visit(OWLDataHasValue d) {
             return d;
         }
+        @Override
         public OWLClassExpression visit(OWLDataMinCardinality d) {
             OWLDataRange filler=getNNF(d.getFiller());
             return m_factory.getOWLDataMinCardinality(d.getCardinality(),d.getProperty(),filler);
         }
+        @Override
         public OWLClassExpression visit(OWLDataMaxCardinality d) {
             OWLDataRange filler=getNNF(d.getFiller());
             return m_factory.getOWLDataMaxCardinality(d.getCardinality(),d.getProperty(),filler);
         }
+        @Override
         public OWLClassExpression visit(OWLDataExactCardinality d) {
             OWLDataRange filler=getNNF(d.getFiller());
             return m_factory.getOWLDataExactCardinality(d.getCardinality(),d.getProperty(),filler);
@@ -171,35 +189,43 @@ public class ExpressionManager {
     }
     
     protected class DataRangeNNFVisitor implements OWLDataVisitorEx<OWLDataRange> {
+        @Override
         public OWLDataRange visit(OWLDatatype o) {
             return o;
         }
+        @Override
         public OWLDataRange visit(OWLDataComplementOf o) {
             return getComplementNNF(o.getDataRange());
         }
+        @Override
         public OWLDataRange visit(OWLDataOneOf o) {
             return o;
         }
         public OWLDataRange visit(OWLDataRange o) {
             return o;
         }
+        @Override
         public OWLDataRange visit(OWLDatatypeRestriction o) {
             return o;
         }
+        @Override
         public OWLDataRange visit(OWLFacetRestriction node) {
             return null;
         }
+        @Override
         public OWLDataRange visit(OWLLiteral o) {
             return null;
         }
+        @Override
         public OWLDataRange visit(OWLDataIntersectionOf range) {
-            Set<OWLDataRange> newConjuncts=new HashSet<OWLDataRange>();
+            Set<OWLDataRange> newConjuncts=new HashSet<>();
             for (OWLDataRange dr : range.getOperands())
                 newConjuncts.add(getNNF(dr));
             return m_factory.getOWLDataIntersectionOf(newConjuncts);
         }
+        @Override
         public OWLDataRange visit(OWLDataUnionOf range) {
-            Set<OWLDataRange> newDisjuncts=new HashSet<OWLDataRange>();
+            Set<OWLDataRange> newDisjuncts=new HashSet<>();
             for (OWLDataRange dr : range.getOperands())
                 newDisjuncts.add(getNNF(dr));
             return m_factory.getOWLDataUnionOf(newDisjuncts);
@@ -211,6 +237,7 @@ public class ExpressionManager {
     // -----------------------------------------------------------------------------------
     
     protected class DescriptionComplementNNFVisitor implements OWLClassExpressionVisitorEx<OWLClassExpression> {
+        @Override
         public OWLClassExpression visit(OWLClass d) {
             if (d.isOWLThing())
                 return m_factory.getOWLNothing();
@@ -218,72 +245,87 @@ public class ExpressionManager {
                 return m_factory.getOWLThing();
             return m_factory.getOWLObjectComplementOf(d);
         }
+        @Override
         public OWLClassExpression visit(OWLObjectIntersectionOf d) {
-            Set<OWLClassExpression> newDisjuncts=new HashSet<OWLClassExpression>();
+            Set<OWLClassExpression> newDisjuncts=new HashSet<>();
             for (OWLClassExpression description : d.getOperands())
                 newDisjuncts.add(getComplementNNF(description));
             return m_factory.getOWLObjectUnionOf(newDisjuncts);
         }
+        @Override
         public OWLClassExpression visit(OWLObjectUnionOf d) {
-            Set<OWLClassExpression> newConjuncts=new HashSet<OWLClassExpression>();
+            Set<OWLClassExpression> newConjuncts=new HashSet<>();
             for (OWLClassExpression description : d.getOperands())
                 newConjuncts.add(getComplementNNF(description));
             return m_factory.getOWLObjectIntersectionOf(newConjuncts);
         }
+        @Override
         public OWLClassExpression visit(OWLObjectComplementOf d) {
             return getNNF(d.getOperand());
         }
+        @Override
         public OWLClassExpression visit(OWLObjectOneOf d) {
             return m_factory.getOWLObjectComplementOf(d);
         }
+        @Override
         public OWLClassExpression visit(OWLObjectSomeValuesFrom d) {
             OWLClassExpression filler=getComplementNNF(d.getFiller());
-            return m_factory.getOWLObjectAllValuesFrom(d.getProperty().getSimplified(),filler);
+            return m_factory.getOWLObjectAllValuesFrom(d.getProperty(),filler);
         }
+        @Override
         public OWLClassExpression visit(OWLObjectAllValuesFrom d) {
             OWLClassExpression filler=getComplementNNF(d.getFiller());
-            return m_factory.getOWLObjectSomeValuesFrom(d.getProperty().getSimplified(),filler);
+            return m_factory.getOWLObjectSomeValuesFrom(d.getProperty(),filler);
         }
+        @Override
         public OWLClassExpression visit(OWLObjectHasValue d) {
             return m_factory.getOWLObjectComplementOf(getNNF(d));
         }
+        @Override
         public OWLClassExpression visit(OWLObjectHasSelf d) {
             return m_factory.getOWLObjectComplementOf(getNNF(d));
         }
+        @Override
         public OWLClassExpression visit(OWLObjectMinCardinality d) {
             if (d.getCardinality()==0)
                 return m_factory.getOWLNothing();
             else {
                 OWLClassExpression filler=getNNF(d.getFiller());
-                return m_factory.getOWLObjectMaxCardinality(d.getCardinality()-1,d.getProperty().getSimplified(),filler);
+                return m_factory.getOWLObjectMaxCardinality(d.getCardinality()-1,d.getProperty(),filler);
             }
         }
+        @Override
         public OWLClassExpression visit(OWLObjectMaxCardinality d) {
             OWLClassExpression filler=getNNF(d.getFiller());
-            return m_factory.getOWLObjectMinCardinality(d.getCardinality()+1,d.getProperty().getSimplified(),filler);
+            return m_factory.getOWLObjectMinCardinality(d.getCardinality()+1,d.getProperty(),filler);
         }
+        @Override
         public OWLClassExpression visit(OWLObjectExactCardinality d) {
             OWLClassExpression filler=getNNF(d.getFiller());
             if (d.getCardinality()==0)
-                return m_factory.getOWLObjectMinCardinality(1,d.getProperty().getSimplified(),filler);
+                return m_factory.getOWLObjectMinCardinality(1,d.getProperty(),filler);
             else {
-                Set<OWLClassExpression> disjuncts=new HashSet<OWLClassExpression>();
-                disjuncts.add(m_factory.getOWLObjectMaxCardinality(d.getCardinality()-1,d.getProperty().getSimplified(),filler));
-                disjuncts.add(m_factory.getOWLObjectMinCardinality(d.getCardinality()+1,d.getProperty().getSimplified(),filler));
+                Set<OWLClassExpression> disjuncts=new HashSet<>();
+                disjuncts.add(m_factory.getOWLObjectMaxCardinality(d.getCardinality()-1,d.getProperty(),filler));
+                disjuncts.add(m_factory.getOWLObjectMinCardinality(d.getCardinality()+1,d.getProperty(),filler));
                 return m_factory.getOWLObjectUnionOf(disjuncts);
             }
         }
+        @Override
         public OWLClassExpression visit(OWLDataSomeValuesFrom d) {
             OWLDataRange filler=getComplementNNF(d.getFiller());
             return m_factory.getOWLDataAllValuesFrom(d.getProperty(),filler);
         }
+        @Override
         public OWLClassExpression visit(OWLDataAllValuesFrom d) {
             OWLDataRange filler=getComplementNNF(d.getFiller());
             return m_factory.getOWLDataSomeValuesFrom(d.getProperty(),filler);
         }
+        @Override
         public OWLClassExpression visit(OWLDataHasValue d) {
             return m_factory.getOWLObjectComplementOf(d);
         }
+        @Override
         public OWLClassExpression visit(OWLDataMinCardinality d) {
             if (d.getCardinality()==0)
                 return m_factory.getOWLNothing();
@@ -292,16 +334,18 @@ public class ExpressionManager {
                 return m_factory.getOWLDataMaxCardinality(d.getCardinality()-1,d.getProperty(),filler);
             }
         }
+        @Override
         public OWLClassExpression visit(OWLDataMaxCardinality d) {
             OWLDataRange filler=getNNF(d.getFiller());
             return m_factory.getOWLDataMinCardinality(d.getCardinality()+1,d.getProperty(),filler);
         }
+        @Override
         public OWLClassExpression visit(OWLDataExactCardinality d) {
             OWLDataRange filler=getNNF(d.getFiller());
             if (d.getCardinality()==0)
                 return m_factory.getOWLDataMinCardinality(1,d.getProperty(),filler);
             else {
-                Set<OWLClassExpression> disjuncts=new HashSet<OWLClassExpression>();
+                Set<OWLClassExpression> disjuncts=new HashSet<>();
                 disjuncts.add(m_factory.getOWLDataMaxCardinality(d.getCardinality()-1,d.getProperty(),filler));
                 disjuncts.add(m_factory.getOWLDataMinCardinality(d.getCardinality()+1,d.getProperty(),filler));
                 return m_factory.getOWLObjectUnionOf(disjuncts);
@@ -310,32 +354,40 @@ public class ExpressionManager {
     }
     
     protected class DataRangeComplementNNFVisitor implements OWLDataVisitorEx<OWLDataRange> {
+        @Override
         public OWLDataRange visit(OWLDatatype o) {
             return m_factory.getOWLDataComplementOf(o);
         }
+        @Override
         public OWLDataRange visit(OWLDataComplementOf o) {
             return getNNF(o.getDataRange());
         }
+        @Override
         public OWLDataRange visit(OWLDataOneOf o) {
             return m_factory.getOWLDataComplementOf(o);
         }
+        @Override
         public OWLDataRange visit(OWLDatatypeRestriction o) {
             return m_factory.getOWLDataComplementOf(o);
         }
+        @Override
         public OWLDataRange visit(OWLFacetRestriction o) {
             return null;
         }
+        @Override
         public OWLDataRange visit(OWLLiteral o) {
             return null;
         }
+        @Override
         public OWLDataRange visit(OWLDataIntersectionOf range) {
-            Set<OWLDataRange> newDisjuncts=new HashSet<OWLDataRange>();
+            Set<OWLDataRange> newDisjuncts=new HashSet<>();
             for (OWLDataRange dr : range.getOperands())
                 newDisjuncts.add(getComplementNNF(dr));
             return m_factory.getOWLDataUnionOf(newDisjuncts);
         }
+        @Override
         public OWLDataRange visit(OWLDataUnionOf range) {
-            Set<OWLDataRange> newConjuncts=new HashSet<OWLDataRange>();
+            Set<OWLDataRange> newConjuncts=new HashSet<>();
             for (OWLDataRange dr : range.getOperands())
                 newConjuncts.add(getComplementNNF(dr));
             return m_factory.getOWLDataIntersectionOf(newConjuncts);
@@ -347,11 +399,13 @@ public class ExpressionManager {
     // -----------------------------------------------------------------------------------
     
     protected class DescriptionSimplificationVisitor implements OWLClassExpressionVisitorEx<OWLClassExpression> {
+        @Override
         public OWLClassExpression visit(OWLClass d) {
             return d;
         }
+        @Override
         public OWLClassExpression visit(OWLObjectIntersectionOf d) {
-            Set<OWLClassExpression> newConjuncts=new HashSet<OWLClassExpression>();
+            Set<OWLClassExpression> newConjuncts=new HashSet<>();
             for (OWLClassExpression description : d.getOperands()) {
                 OWLClassExpression descriptionSimplified=getSimplified(description);
                 if (descriptionSimplified.isOWLThing())
@@ -365,8 +419,9 @@ public class ExpressionManager {
             }
             return m_factory.getOWLObjectIntersectionOf(newConjuncts);
         }
+        @Override
         public OWLClassExpression visit(OWLObjectUnionOf d) {
-            Set<OWLClassExpression> newDisjuncts=new HashSet<OWLClassExpression>();
+            Set<OWLClassExpression> newDisjuncts=new HashSet<>();
             for (OWLClassExpression description : d.getOperands()) {
                 OWLClassExpression descriptionSimplified=getSimplified(description);
                 if (descriptionSimplified.isOWLThing())
@@ -380,6 +435,7 @@ public class ExpressionManager {
             }
             return m_factory.getOWLObjectUnionOf(newDisjuncts);
         }
+        @Override
         public OWLClassExpression visit(OWLObjectComplementOf d) {
             OWLClassExpression operandSimplified=getSimplified(d.getOperand());
             if (operandSimplified.isOWLThing())
@@ -391,30 +447,36 @@ public class ExpressionManager {
             else
                 return m_factory.getOWLObjectComplementOf(operandSimplified);
         }
+        @Override
         public OWLClassExpression visit(OWLObjectOneOf d) {
             return d;
         }
+        @Override
         public OWLClassExpression visit(OWLObjectSomeValuesFrom d) {
             OWLClassExpression filler=getSimplified(d.getFiller());
             if (filler.isOWLNothing())
                 return m_factory.getOWLNothing();
             else
-                return m_factory.getOWLObjectSomeValuesFrom(d.getProperty().getSimplified(),filler);
+                return m_factory.getOWLObjectSomeValuesFrom(d.getProperty(),filler);
         }
+        @Override
         public OWLClassExpression visit(OWLObjectAllValuesFrom d) {
             OWLClassExpression filler=getSimplified(d.getFiller());
             if (filler.isOWLThing())
                 return m_factory.getOWLThing();
             else
-                return m_factory.getOWLObjectAllValuesFrom(d.getProperty().getSimplified(),filler);
+                return m_factory.getOWLObjectAllValuesFrom(d.getProperty(),filler);
         }
+        @Override
         public OWLClassExpression visit(OWLObjectHasValue d) {
-            OWLObjectOneOf nominal=m_factory.getOWLObjectOneOf(d.getValue());
-            return m_factory.getOWLObjectSomeValuesFrom(d.getProperty().getSimplified(),nominal);
+            OWLObjectOneOf nominal=m_factory.getOWLObjectOneOf(d.getFiller());
+            return m_factory.getOWLObjectSomeValuesFrom(d.getProperty(),nominal);
         }
+        @Override
         public OWLClassExpression visit(OWLObjectHasSelf d) {
-            return m_factory.getOWLObjectHasSelf(d.getProperty().getSimplified());
+            return m_factory.getOWLObjectHasSelf(d.getProperty());
         }
+        @Override
         public OWLClassExpression visit(OWLObjectMinCardinality d) {
             OWLClassExpression filler=getSimplified(d.getFiller());
             if (d.getCardinality()<=0)
@@ -422,33 +484,36 @@ public class ExpressionManager {
             else if (filler.isOWLNothing())
                 return m_factory.getOWLNothing();
             else if (d.getCardinality()==1)
-                return m_factory.getOWLObjectSomeValuesFrom(d.getProperty().getSimplified(),filler);
+                return m_factory.getOWLObjectSomeValuesFrom(d.getProperty(),filler);
             else
-                return m_factory.getOWLObjectMinCardinality(d.getCardinality(),d.getProperty().getSimplified(),filler);
+                return m_factory.getOWLObjectMinCardinality(d.getCardinality(),d.getProperty(),filler);
         }
+        @Override
         public OWLClassExpression visit(OWLObjectMaxCardinality d) {
             OWLClassExpression filler=getSimplified(d.getFiller());
             if (filler.isOWLNothing())
                 return m_factory.getOWLThing();
             else if (d.getCardinality()<=0)
-                return m_factory.getOWLObjectAllValuesFrom(d.getProperty().getSimplified(),m_factory.getOWLObjectComplementOf(filler));
+                return m_factory.getOWLObjectAllValuesFrom(d.getProperty(),m_factory.getOWLObjectComplementOf(filler));
             else
-                return m_factory.getOWLObjectMaxCardinality(d.getCardinality(),d.getProperty().getSimplified(),filler);
+                return m_factory.getOWLObjectMaxCardinality(d.getCardinality(),d.getProperty(),filler);
         }
+        @Override
         public OWLClassExpression visit(OWLObjectExactCardinality d) {
             OWLClassExpression filler=getSimplified(d.getFiller());
             if (d.getCardinality()<0)
                 return m_factory.getOWLNothing();
             else if (d.getCardinality()==0)
-                return m_factory.getOWLObjectAllValuesFrom(d.getProperty().getSimplified(),m_factory.getOWLObjectComplementOf(filler));
+                return m_factory.getOWLObjectAllValuesFrom(d.getProperty(),m_factory.getOWLObjectComplementOf(filler));
             else if (filler.isOWLNothing())
                 return m_factory.getOWLNothing();
             else {
-                OWLObjectMinCardinality minCardinality=m_factory.getOWLObjectMinCardinality(d.getCardinality(),d.getProperty().getSimplified(),filler);
-                OWLObjectMaxCardinality maxCardinality=m_factory.getOWLObjectMaxCardinality(d.getCardinality(),d.getProperty().getSimplified(),filler);
+                OWLObjectMinCardinality minCardinality=m_factory.getOWLObjectMinCardinality(d.getCardinality(),d.getProperty(),filler);
+                OWLObjectMaxCardinality maxCardinality=m_factory.getOWLObjectMaxCardinality(d.getCardinality(),d.getProperty(),filler);
                 return m_factory.getOWLObjectIntersectionOf(minCardinality,maxCardinality);
             }
         }
+        @Override
         public OWLClassExpression visit(OWLDataSomeValuesFrom d) {
             OWLDataRange filler=getSimplified(d.getFiller());
             if (isBottomDataRange(filler))
@@ -456,6 +521,7 @@ public class ExpressionManager {
             else
                 return m_factory.getOWLDataSomeValuesFrom(d.getProperty(),filler);
         }
+        @Override
         public OWLClassExpression visit(OWLDataAllValuesFrom d) {
             OWLDataRange filler=getSimplified(d.getFiller());
             if (filler.isTopDatatype())
@@ -463,10 +529,12 @@ public class ExpressionManager {
             else
                 return m_factory.getOWLDataAllValuesFrom(d.getProperty(),filler);
         }
+        @Override
         public OWLClassExpression visit(OWLDataHasValue d) {
-            OWLDataOneOf nominal=m_factory.getOWLDataOneOf(d.getValue());
+            OWLDataOneOf nominal=m_factory.getOWLDataOneOf(d.getFiller());
             return m_factory.getOWLDataSomeValuesFrom(d.getProperty(),nominal);
         }
+        @Override
         public OWLClassExpression visit(OWLDataMinCardinality d) {
             OWLDataRange filler=getSimplified(d.getFiller());
             if (d.getCardinality()<=0)
@@ -478,6 +546,7 @@ public class ExpressionManager {
             else
                 return m_factory.getOWLDataMinCardinality(d.getCardinality(),d.getProperty(),filler);
         }
+        @Override
         public OWLClassExpression visit(OWLDataMaxCardinality d) {
             OWLDataRange filler=getSimplified(d.getFiller());
             if (isBottomDataRange(filler))
@@ -487,6 +556,7 @@ public class ExpressionManager {
             else
                 return m_factory.getOWLDataMaxCardinality(d.getCardinality(),d.getProperty(),filler);
         }
+        @Override
         public OWLClassExpression visit(OWLDataExactCardinality d) {
             OWLDataRange filler=getSimplified(d.getFiller());
             if (d.getCardinality()<0)
@@ -507,9 +577,11 @@ public class ExpressionManager {
     }
     
     protected class DataRangeSimplificationVisitor implements OWLDataVisitorEx<OWLDataRange> {
+        @Override
         public OWLDataRange visit(OWLDatatype o) {
             return o;
         }
+        @Override
         public OWLDataRange visit(OWLDataComplementOf o) {
             OWLDataRange dataRangeSimplified=getSimplified(o.getDataRange());
             if (dataRangeSimplified instanceof OWLDataComplementOf)
@@ -517,20 +589,25 @@ public class ExpressionManager {
             else
                 return m_factory.getOWLDataComplementOf(dataRangeSimplified);
         }
+        @Override
         public OWLDataRange visit(OWLDataOneOf o) {
             return o;
         }
+        @Override
         public OWLDataRange visit(OWLDatatypeRestriction o) {
             return o;
         }
+        @Override
         public OWLDataRange visit(OWLFacetRestriction o) {
             return null;
         }
+        @Override
         public OWLDataRange visit(OWLLiteral o) {
             return null;
         }
+        @Override
         public OWLDataRange visit(OWLDataIntersectionOf range) {
-            Set<OWLDataRange> newConjuncts=new HashSet<OWLDataRange>();
+            Set<OWLDataRange> newConjuncts=new HashSet<>();
             for (OWLDataRange dr : range.getOperands()) {
                 OWLDataRange drSimplified=getSimplified(dr);
                 if (drSimplified.isTopDatatype())
@@ -542,8 +619,9 @@ public class ExpressionManager {
             }
             return m_factory.getOWLDataIntersectionOf(newConjuncts);
         }
+        @Override
         public OWLDataRange visit(OWLDataUnionOf range) {
-            Set<OWLDataRange> newDisjuncts=new HashSet<OWLDataRange>();
+            Set<OWLDataRange> newDisjuncts=new HashSet<>();
             for (OWLDataRange dr : range.getOperands()) {
                 OWLDataRange drSimplified=getSimplified(dr);
                 if (drSimplified.isTopDatatype())

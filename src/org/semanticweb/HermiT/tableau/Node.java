@@ -255,6 +255,7 @@ public final class Node implements Serializable {
     public Collection<ExistentialConcept> getUnprocessedExistentials() {
         return m_unprocessedExistentials;
     }
+    @Override
     public String toString() {
         return String.valueOf(m_nodeID);
     }

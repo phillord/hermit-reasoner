@@ -158,10 +158,10 @@ public class OWLClausification {
         return new Object[] { objectPropertyInclusionManager,dlOntology };
     }
     public DLOntology clausify(OWLDataFactory factory,String ontologyIRI,OWLAxioms axioms,OWLAxiomsExpressivity axiomsExpressivity,Collection<DescriptionGraph> descriptionGraphs) {
-        Set<DLClause> dlClauses=new LinkedHashSet<DLClause>();
-        Set<Atom> positiveFacts=new HashSet<Atom>();
-        Set<Atom> negativeFacts=new HashSet<Atom>();
-        Set<DatatypeRestriction> allUnknownDatatypeRestrictions=new HashSet<DatatypeRestriction>();
+        Set<DLClause> dlClauses=new LinkedHashSet<>();
+        Set<Atom> positiveFacts=new HashSet<>();
+        Set<Atom> negativeFacts=new HashSet<>();
+        Set<DatatypeRestriction> allUnknownDatatypeRestrictions=new HashSet<>();
         for (OWLObjectPropertyExpression[] inclusion : axioms.m_simpleObjectPropertyInclusions) {
             Atom subRoleAtom=getRoleAtom(inclusion[0],X,Y);
             Atom superRoleAtom=getRoleAtom(inclusion[1],X,Y);
@@ -234,13 +234,13 @@ public class OWLClausification {
             fact.accept(factClausifier);
         for (DescriptionGraph descriptionGraph : descriptionGraphs)
             descriptionGraph.produceStartDLClauses(dlClauses);
-        Set<AtomicConcept> atomicConcepts=new HashSet<AtomicConcept>();
-        Set<AtomicRole> atomicObjectRoles=new HashSet<AtomicRole>();
-        Set<Role> complexObjectRoles=new HashSet<Role>();
-        Set<AtomicRole> atomicDataRoles=new HashSet<AtomicRole>();
+        Set<AtomicConcept> atomicConcepts=new HashSet<>();
+        Set<AtomicRole> atomicObjectRoles=new HashSet<>();
+        Set<Role> complexObjectRoles=new HashSet<>();
+        Set<AtomicRole> atomicDataRoles=new HashSet<>();
         for (OWLClass owlClass : axioms.m_classes)
             atomicConcepts.add(AtomicConcept.create(owlClass.getIRI().toString()));
-        Set<Individual> individuals=new HashSet<Individual>();
+        Set<Individual> individuals=new HashSet<>();
         for (OWLNamedIndividual owlIndividual : axioms.m_namedIndividuals) {
             Individual individual=Individual.create(owlIndividual.getIRI().toString());
             individuals.add(individual);
@@ -262,8 +262,8 @@ public class OWLClausification {
         return new DLOntology(ontologyIRI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,atomicObjectRoles,complexObjectRoles,atomicDataRoles,allUnknownDatatypeRestrictions,axioms.m_definedDatatypesIRIs,individuals,axiomsExpressivity.m_hasInverseRoles,axiomsExpressivity.m_hasAtMostRestrictions,axiomsExpressivity.m_hasNominals,axiomsExpressivity.m_hasDatatypes);
     }
     protected DLClause clausifyKey(OWLHasKeyAxiom object) {
-        List<Atom> headAtoms=new ArrayList<Atom>();
-        List<Atom> bodyAtoms=new ArrayList<Atom>();
+        List<Atom> headAtoms=new ArrayList<>();
+        List<Atom> bodyAtoms=new ArrayList<>();
         // we have two named individuals (corresponding to X1 and X2) that
         // might have to be equated
         Variable X2=Variable.create("X2");
@@ -339,7 +339,6 @@ public class OWLClausification {
             throw new IllegalStateException("Internal error: invalid normal form.");
     }
     protected static Role getRole(OWLObjectPropertyExpression objectPropertyExpression) {
-        objectPropertyExpression=objectPropertyExpression.getSimplified();
         if (objectPropertyExpression instanceof OWLObjectProperty)
             return AtomicRole.create(((OWLObjectProperty)objectPropertyExpression).getIRI().toString());
         else if (objectPropertyExpression instanceof OWLObjectInverseOf) {
@@ -355,7 +354,6 @@ public class OWLClausification {
         return AtomicRole.create(((OWLDataProperty)dataPropertyExpression).getIRI().toString());
     }
     protected static Atom getRoleAtom(OWLObjectPropertyExpression objectProperty,Term first,Term second) {
-        objectProperty=objectProperty.getSimplified();
         if (!objectProperty.isAnonymous()) {
             AtomicRole role=AtomicRole.create(objectProperty.asOWLObjectProperty().getIRI().toString());
             return Atom.create(role,first,second);
@@ -394,8 +392,8 @@ public class OWLClausification {
 
         public NormalizedAxiomClausifier(DataRangeConverter dataRangeConverter,Set<Atom> positiveFacts,OWLDataFactory factory) {
             m_dataRangeConverter=dataRangeConverter;
-            m_headAtoms=new ArrayList<Atom>();
-            m_bodyAtoms=new ArrayList<Atom>();
+            m_headAtoms=new ArrayList<>();
+            m_bodyAtoms=new ArrayList<>();
             m_positiveFacts=positiveFacts;
             m_factory=factory;
         }
@@ -447,15 +445,19 @@ public class OWLClausification {
 
         // Various types of descriptions
 
+        @Override
         public void visit(OWLClass object) {
             m_headAtoms.add(Atom.create(AtomicConcept.create(object.getIRI().toString()),X));
         }
+        @Override
         public void visit(OWLObjectIntersectionOf object) {
             throw new IllegalStateException("Internal error: invalid normal form.");
         }
+        @Override
         public void visit(OWLObjectUnionOf object) {
             throw new IllegalStateException("Internal error: invalid normal form.");
         }
+        @Override
         public void visit(OWLObjectComplementOf object) {
             OWLClassExpression description=object.getOperand();
             if (description instanceof OWLObjectHasSelf) {
@@ -472,6 +474,7 @@ public class OWLClausification {
             else
                 m_bodyAtoms.add(Atom.create(AtomicConcept.create(((OWLClass)description).getIRI().toString()),X));
         }
+        @Override
         public void visit(OWLObjectOneOf object) {
             for (OWLIndividual individual : object.getIndividuals()) {
                 Variable z=nextZ();
@@ -480,6 +483,7 @@ public class OWLClausification {
                 m_bodyAtoms.add(Atom.create(conceptForNominal,z));
             }
         }
+        @Override
         public void visit(OWLObjectSomeValuesFrom object) {
             OWLClassExpression filler=object.getFiller();
             if (filler instanceof OWLObjectOneOf) {
@@ -497,6 +501,7 @@ public class OWLClausification {
                     m_headAtoms.add(Atom.create(atLeastConcept,X));
             }
         }
+        @Override
         public void visit(OWLObjectAllValuesFrom object) {
             Variable y=nextY();
             m_bodyAtoms.add(getRoleAtom(object.getProperty(),X,y));
@@ -530,14 +535,17 @@ public class OWLClausification {
             else
                 throw new IllegalStateException("Internal error: invalid normal form.");
         }
+        @Override
         public void visit(OWLObjectHasValue object) {
             throw new IllegalStateException("Internal error: invalid normal form.");
         }
+        @Override
         public void visit(OWLObjectHasSelf object) {
             OWLObjectPropertyExpression objectProperty=object.getProperty();
             Atom roleAtom=getRoleAtom(objectProperty,X,X);
             m_headAtoms.add(roleAtom);
         }
+        @Override
         public void visit(OWLObjectMinCardinality object) {
             LiteralConcept toConcept=getLiteralConcept(object.getFiller());
             Role onRole=getRole(object.getProperty());
@@ -545,6 +553,7 @@ public class OWLClausification {
             if (!atLeastConcept.isAlwaysFalse())
                 m_headAtoms.add(Atom.create(atLeastConcept,X));
         }
+        @Override
         public void visit(OWLObjectMaxCardinality object) {
             int cardinality=object.getCardinality();
             OWLObjectPropertyExpression onObjectProperty=object.getProperty();
@@ -595,9 +604,11 @@ public class OWLClausification {
                 for (int j=i+1;j<yVars.length;j++)
                     m_headAtoms.add(Atom.create(annotatedEquality,yVars[i],yVars[j],X));
         }
+        @Override
         public void visit(OWLObjectExactCardinality object) {
             throw new IllegalStateException("Internal error: invalid normal form.");
         }
+        @Override
         public void visit(OWLDataSomeValuesFrom object) {
             if (!object.getProperty().isOWLBottomDataProperty()) {
                 AtomicRole atomicRole=getAtomicRole(object.getProperty());
@@ -607,6 +618,7 @@ public class OWLClausification {
                     m_headAtoms.add(Atom.create(atLeastDataRange,X));
             }
         }
+        @Override
         public void visit(OWLDataAllValuesFrom object) {
             LiteralDataRange literalRange=m_dataRangeConverter.convertDataRange(object.getFiller());
             if (object.getProperty().isOWLTopDataProperty()) {
@@ -625,9 +637,11 @@ public class OWLClausification {
                     m_headAtoms.add(Atom.create((DLPredicate)literalRange,y));
             }
         }
+        @Override
         public void visit(OWLDataHasValue object) {
             throw new IllegalStateException("Internal error: Invalid normal form.");
         }
+        @Override
         public void visit(OWLDataMinCardinality object) {
             if (!object.getProperty().isOWLBottomDataProperty() || object.getCardinality()==0) {
                 AtomicRole atomicRole=getAtomicRole(object.getProperty());
@@ -637,6 +651,7 @@ public class OWLClausification {
                     m_headAtoms.add(Atom.create(atLeast,X));
             }
         }
+        @Override
         public void visit(OWLDataMaxCardinality object) {
             int number=object.getCardinality();
             LiteralDataRange negatedDataRange=m_dataRangeConverter.convertDataRange(object.getFiller()).getNegation();
@@ -659,6 +674,7 @@ public class OWLClausification {
                 for (int j=i+1;j<yVars.length;j++)
                     m_headAtoms.add(Atom.create(Equality.INSTANCE,yVars[i],yVars[j]));
         }
+        @Override
         public void visit(OWLDataExactCardinality object) {
             throw new IllegalStateException("Internal error: invalid normal form.");
         }
@@ -675,8 +691,8 @@ public class OWLClausification {
         public NormalizedDataRangeAxiomClausifier(DataRangeConverter dataRangeConverter,OWLDataFactory factory,Set<String> definedDatatypeIRIs) {
             m_dataRangeConverter=dataRangeConverter;
             m_definedDatatypeIRIs=definedDatatypeIRIs;
-            m_headAtoms=new ArrayList<Atom>();
-            m_bodyAtoms=new ArrayList<Atom>();
+            m_headAtoms=new ArrayList<>();
+            m_bodyAtoms=new ArrayList<>();
             m_factory=factory;
         }
         protected DLClause getDLClause() {
@@ -706,16 +722,20 @@ public class OWLClausification {
 
         // Various types of descriptions
 
+        @Override
         public void visit(OWLDatatype dt) {
             LiteralDataRange literalRange=m_dataRangeConverter.convertDataRange(dt);
             m_headAtoms.add(Atom.create((DLPredicate)literalRange,X));
         }
+        @Override
         public void visit(OWLDataIntersectionOf dr) {
             throw new IllegalStateException("Internal error: invalid normal form.");
         }
+        @Override
         public void visit(OWLDataUnionOf dr) {
             throw new IllegalStateException("Internal error: invalid normal form.");
         }
+        @Override
         public void visit(OWLDataComplementOf dr) {
             OWLDataRange description=dr.getDataRange();
             if (description.isDatatype() && (Prefixes.isInternalIRI(description.asOWLDatatype().getIRI().toString()) || m_definedDatatypeIRIs.contains(description.asOWLDatatype()))) {
@@ -734,17 +754,21 @@ public class OWLClausification {
                 }
             }
         }
+        @Override
         public void visit(OWLDataOneOf object) {
             LiteralDataRange literalRange=m_dataRangeConverter.convertDataRange(object);
             m_headAtoms.add(Atom.create((DLPredicate)literalRange,X));
         }
+        @Override
         public void visit(OWLFacetRestriction node) {
             throw new IllegalStateException("Internal error: Invalid normal form. ");
         }
+        @Override
         public void visit(OWLDatatypeRestriction node) {
             LiteralDataRange literalRange=m_dataRangeConverter.convertDataRange(node);
             m_headAtoms.add(Atom.create((DLPredicate)literalRange,X));
         }
+        @Override
         public void visit(OWLLiteral node) {
             throw new IllegalStateException("Internal error: Invalid normal form. ");
         }
@@ -765,6 +789,7 @@ public class OWLClausification {
         public LiteralDataRange convertDataRange(OWLDataRange dataRange) {
             return (LiteralDataRange)dataRange.accept(this);
         }
+        @Override
         public Object visit(OWLDatatype object) {
             String datatypeURI=object.getIRI().toString();
             if (InternalDatatype.RDFS_LITERAL.getIRI().equals(datatypeURI))
@@ -790,17 +815,20 @@ public class OWLClausification {
             }
             return datatype;
         }
+        @Override
         public Object visit(OWLDataComplementOf object) {
             return convertDataRange(object.getDataRange()).getNegation();
         }
+        @Override
         public Object visit(OWLDataOneOf object) {
-            Set<Constant> constants=new HashSet<Constant>();
+            Set<Constant> constants=new HashSet<>();
             for (OWLLiteral literal : object.getValues())
                 constants.add((Constant)literal.accept(this));
             Constant[] constantsArray=new Constant[constants.size()];
             constants.toArray(constantsArray);
             return ConstantEnumeration.create(constantsArray);
         }
+        @Override
         public Object visit(OWLDatatypeRestriction object) {
             if (!(object.getDatatype().isOWLDatatype()))
                 throw new IllegalArgumentException("Datatype restrictions are supported only on OWL datatypes.");
@@ -822,9 +850,11 @@ public class OWLClausification {
             DatatypeRegistry.validateDatatypeRestriction(datatype);
             return datatype;
         }
+        @Override
         public Object visit(OWLFacetRestriction object) {
             throw new IllegalStateException("Internal error: should not get in here.");
         }
+        @Override
         public Object visit(OWLLiteral object) {
             try {
                 if (object.isRDFPlainLiteral()) {
@@ -846,9 +876,11 @@ public class OWLClausification {
                     throw e;
             }
         }
+        @Override
         public Object visit(OWLDataIntersectionOf node) {
             throw new IllegalStateException("Internal error: invalid normal form.");
         }
+        @Override
         public Object visit(OWLDataUnionOf node) {
             throw new IllegalStateException("Internal error: invalid normal form.");
         }
@@ -864,12 +896,14 @@ public class OWLClausification {
             m_positiveFacts=positiveFacts;
             m_negativeFacts=negativeFacts;
         }
+        @Override
         public void visit(OWLSameIndividualAxiom object) {
             OWLIndividual[] individuals=new OWLIndividual[object.getIndividuals().size()];
             object.getIndividuals().toArray(individuals);
             for (int i=0;i<individuals.length-1;i++)
                 m_positiveFacts.add(Atom.create(Equality.create(),getIndividual(individuals[i]),getIndividual(individuals[i+1])));
         }
+        @Override
         public void visit(OWLDifferentIndividualsAxiom object) {
             OWLIndividual[] individuals=new OWLIndividual[object.getIndividuals().size()];
             object.getIndividuals().toArray(individuals);
@@ -877,6 +911,7 @@ public class OWLClausification {
                 for (int j=i+1;j<individuals.length;j++)
                     m_positiveFacts.add(Atom.create(Inequality.create(),getIndividual(individuals[i]),getIndividual(individuals[j])));
         }
+        @Override
         public void visit(OWLClassAssertionAxiom object) {
             OWLClassExpression description=object.getClassExpression();
             if (description instanceof OWLClass) {
@@ -898,16 +933,20 @@ public class OWLClausification {
             else
                 throw new IllegalStateException("Internal error: invalid normal form.");
         }
+        @Override
         public void visit(OWLObjectPropertyAssertionAxiom object) {
             m_positiveFacts.add(getRoleAtom(object.getProperty(),getIndividual(object.getSubject()),getIndividual(object.getObject())));
         }
+        @Override
         public void visit(OWLNegativeObjectPropertyAssertionAxiom object) {
             m_negativeFacts.add(getRoleAtom(object.getProperty(),getIndividual(object.getSubject()),getIndividual(object.getObject())));
         }
+        @Override
         public void visit(OWLDataPropertyAssertionAxiom object) {
             Constant targetValue=(Constant)object.getObject().accept(m_dataRangeConverter);
             m_positiveFacts.add(getRoleAtom(object.getProperty(),getIndividual(object.getSubject()),targetValue));
         }
+        @Override
         public void visit(OWLNegativeDataPropertyAssertionAxiom object) {
             Constant targetValue=(Constant)object.getObject().accept(m_dataRangeConverter);
             m_negativeFacts.add(getRoleAtom(object.getProperty(),getIndividual(object.getSubject()),targetValue));
@@ -921,7 +960,7 @@ public class OWLClausification {
         protected final List<Atom> m_headAtoms;
         protected final List<Atom> m_bodyAtoms;
         protected final Set<Variable> m_abstractVariables;
-        protected final Set<OWLObjectProperty> m_graphObjectProperties=new HashSet<OWLObjectProperty>();
+        protected final Set<OWLObjectProperty> m_graphObjectProperties=new HashSet<>();
         protected boolean m_containsObjectProperties;
         protected boolean m_containsGraphObjectProperties;
         protected boolean m_containsNonGraphObjectProperties;
@@ -931,9 +970,9 @@ public class OWLClausification {
             m_objectPropertiesOccurringInOWLAxioms=objectPropertiesOccurringInOWLAxioms;
             m_dataRangeConverter=dataRangeConverter;
             m_dlClauses=dlClauses;
-            m_headAtoms=new ArrayList<Atom>();
-            m_bodyAtoms=new ArrayList<Atom>();
-            m_abstractVariables=new HashSet<Variable>();
+            m_headAtoms=new ArrayList<>();
+            m_bodyAtoms=new ArrayList<>();
+            m_abstractVariables=new HashSet<>();
             OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
             for (DescriptionGraph descriptionGraph : descriptionGraphs)
                 for (int i=0;i<descriptionGraph.getNumberOfEdges();i++)
@@ -943,7 +982,7 @@ public class OWLClausification {
                     throw new IllegalArgumentException("Mixing graph and non-graph object properties is not supported.");
         }
         public void processRules(Collection<OWLAxioms.DisjunctiveRule> rules) {
-            List<OWLAxioms.DisjunctiveRule> unprocessedRules=new ArrayList<OWLAxioms.DisjunctiveRule>(rules);
+            List<OWLAxioms.DisjunctiveRule> unprocessedRules=new ArrayList<>(rules);
             boolean changed=true;
             while (!unprocessedRules.isEmpty() && changed) {
                 changed=false;
@@ -1042,6 +1081,7 @@ public class OWLClausification {
             m_bodyAtoms.clear();
             m_abstractVariables.clear();
         }
+        @Override
         public Atom visit(SWRLClassAtom atom) {
             if (atom.getPredicate().isAnonymous())
                 throw new IllegalStateException("Internal error: SWRL rule class atoms should be normalized to contain only named classes, but this class atom has a complex concept: "+atom.getPredicate());
@@ -1049,11 +1089,13 @@ public class OWLClausification {
             m_abstractVariables.add(variable);
             return Atom.create(AtomicConcept.create(atom.getPredicate().asOWLClass().getIRI().toString()),variable);
         }
+        @Override
         public Atom visit(SWRLDataRangeAtom atom) {
             Variable variable=toVariable(atom.getArgument());
             LiteralDataRange literalRange=m_dataRangeConverter.convertDataRange(atom.getPredicate());
             return Atom.create((DLPredicate)literalRange,variable);
         }
+        @Override
         public Atom visit(SWRLObjectPropertyAtom atom) {
             Variable variable1=toVariable(atom.getFirstArgument());
             Variable variable2=toVariable(atom.getSecondArgument());
@@ -1061,34 +1103,42 @@ public class OWLClausification {
             m_abstractVariables.add(variable2);
             return getRoleAtom(atom.getPredicate().asOWLObjectProperty(),variable1,variable2);
         }
+        @Override
         public Atom visit(SWRLDataPropertyAtom atom) {
             Variable variable1=toVariable(atom.getFirstArgument());
             Variable variable2=toVariable(atom.getSecondArgument());
             m_abstractVariables.add(variable1);
             return getRoleAtom(atom.getPredicate().asOWLDataProperty(),variable1,variable2);
         }
+        @Override
         public Atom visit(SWRLSameIndividualAtom atom) {
             Variable variable1=toVariable(atom.getFirstArgument());
             Variable variable2=toVariable(atom.getSecondArgument());
             return Atom.create(Equality.INSTANCE,variable1,variable2);
         }
+        @Override
         public Atom visit(SWRLDifferentIndividualsAtom atom) {
             Variable variable1=toVariable(atom.getFirstArgument());
             Variable variable2=toVariable(atom.getSecondArgument());
             return Atom.create(Inequality.INSTANCE,variable1,variable2);
         }
+        @Override
         public Atom visit(SWRLBuiltInAtom node) {
             throw new UnsupportedOperationException("Rules with SWRL built-in atoms are not yet supported. ");
         }
+        @Override
         public Atom visit(SWRLRule rule) {
             throw new IllegalStateException("Internal error: this part of the code is unused.");
         }
+        @Override
         public Atom visit(SWRLVariable node) {
             throw new IllegalStateException("Internal error: this part of the code is unused.");
         }
+        @Override
         public Atom visit(SWRLIndividualArgument atom) {
             throw new IllegalStateException("Internal error: this part of the code is unused.");
         }
+        @Override
         public Atom visit(SWRLLiteralArgument arg) {
             throw new IllegalStateException("Internal error: this part of the code is unused.");
         }

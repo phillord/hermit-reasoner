@@ -39,8 +39,8 @@ package rationals;
 /**
  * An interface for objects running automatons
  * <p>
- * This interface essentially provide a way to communicate with {@link AutomatonRunListener}
- * objects for notifying run events
+ * This interface essentially provide a way to communicate with
+ * {@link AutomatonRunListener} objects for notifying run events
  * 
  * @author nono
  * @version $Id: AutomatonRunner.java 2 2006-08-24 14:41:48Z oqube $
@@ -50,21 +50,22 @@ public interface AutomatonRunner {
     /**
      * Adds a listener to this runner
      * 
-     * @param l the listener to add - may no be null
+     * @param l
+     *            the listener to add - may no be null
      */
     public void addRunListener(AutomatonRunListener l);
-    
+
     /**
      * Remove a listener from this runner
      * 
-     * @param l the listener to remove
+     * @param l
+     *            the listener to remove
      */
     public void removeRunListener(AutomatonRunListener l);
 }
 
-/* 
- * $Log: AutomatonRunner.java,v $
- * Revision 1.1  2004/07/23 11:59:17  bailly
- * added listener interfaces
+/*
+ * $Log: AutomatonRunner.java,v $ Revision 1.1 2004/07/23 11:59:17 bailly added
+ * listener interfaces
  *
-*/
+ */

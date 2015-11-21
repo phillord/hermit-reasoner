@@ -28,16 +28,20 @@ public class ShowDescriptionGraphCommand extends AbstractCommand {
     public ShowDescriptionGraphCommand(Debugger debugger) {
         super(debugger);
     }
+    @Override
     public String getCommandName() {
         return "showDGraph";
     }
+    @Override
     public String[] getDescription() {
         return new String[] { "graphName","prints a text representation of the description graph graphName" };
     }
+    @Override
     public void printHelp(PrintWriter writer) {
         writer.println("usage: showDGraph graphName");
         writer.println("    Prints information about the description graph with the given name.");
     }
+    @Override
     public void execute(String[] args) {
         if (args.length<2) {
             m_debugger.getOutput().println("Graph name is missing.");

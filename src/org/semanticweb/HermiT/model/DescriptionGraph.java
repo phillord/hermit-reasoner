@@ -39,6 +39,7 @@ public class DescriptionGraph implements DLPredicate,Serializable {
     public String getName() {
         return m_name;
     }
+    @Override
     public int getArity() {
         return m_atomicConceptsByVertices.length;
     }
@@ -73,9 +74,11 @@ public class DescriptionGraph implements DLPredicate,Serializable {
             resultingDLClauses.add(DLClause.create(consequent,antecedent));
         }
     }
+    @Override
     public String toString(Prefixes ns) {
         return ns.abbreviateIRI(m_name);
     }
+    @Override
     public String toString() {
         return toString(Prefixes.STANDARD_PREFIXES);
     }
@@ -132,9 +135,11 @@ public class DescriptionGraph implements DLPredicate,Serializable {
         public int getToVertex() {
             return m_toVertex;
         }
+        @Override
         public int hashCode() {
             return m_fromVertex+7*m_toVertex+11*m_atomicRole.hashCode();
         }
+        @Override
         public boolean equals(Object that) {
             if (this==that)
                 return true;

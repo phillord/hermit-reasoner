@@ -35,7 +35,6 @@
  */
 package rationals.algebra;
 
-import java.util.Iterator;
 import java.util.Set;
 
 import rationals.Rational;
@@ -62,60 +61,60 @@ public class RationalMatrix  {
     private Matrix transitions;
     
     /**
-	 * @return Returns the fini.
-	 */
-	public Matrix getFini() {
-		return fini;
-	}
+     * @return Returns the fini.
+     */
+    public Matrix getFini() {
+        return fini;
+    }
 
-	/**
-	 * @param fini The fini to set.
-	 */
-	public void setFini(Matrix fini) {
-		this.fini = fini;
-	}
+    /**
+     * @param fini The fini to set.
+     */
+    public void setFini(Matrix fini) {
+        this.fini = fini;
+    }
 
-	/**
-	 * @return Returns the init.
-	 */
-	public Matrix getInit() {
-		return init;
-	}
+    /**
+     * @return Returns the init.
+     */
+    public Matrix getInit() {
+        return init;
+    }
 
-	/**
-	 * @param init The init to set.
-	 */
-	public void setInit(Matrix init) {
-		this.init = init;
-	}
+    /**
+     * @param init The init to set.
+     */
+    public void setInit(Matrix init) {
+        this.init = init;
+    }
 
-	/**
-	 * @return Returns the transitions.
-	 */
-	public Matrix getTransitions() {
-		return transitions;
-	}
+    /**
+     * @return Returns the transitions.
+     */
+    public Matrix getTransitions() {
+        return transitions;
+    }
 
-	/**
-	 * @param transitions The transitions to set.
-	 */
-	public void setTransitions(Matrix transitions) {
-		this.transitions = transitions;
-	}
+    /**
+     * @param transitions The transitions to set.
+     */
+    public void setTransitions(Matrix transitions) {
+        this.transitions = transitions;
+    }
 
-	/**
+    /**
      * Construct the matrix of a rational language.
      * 
      * @param rat
      *            a Rational language.
      */
     public RationalMatrix(Rational rat) {
-        Set st = rat.states();
+        Set<State> st = rat.states();
         int n = st.size();
         init = Matrix.zero(1,n,RationalExpr.zero);
         fini = Matrix.zero(n,1,RationalExpr.zero);
         transitions = Matrix.zero(n,n,RationalExpr.zero);
-        State[] sta = (State[]) rat.states().toArray(new State[n]);
+        State[] sta = rat.states().toArray(new State[n]);
         /* fill matrices */
         for (int i = 0; i < sta.length; i++) {
             if (sta[i].isInitial())
@@ -128,10 +127,9 @@ public class RationalMatrix  {
                 fini.matrix[i][0] = RationalExpr.zero;
             /* transitions */
             for (int j = 0; j < n; j++) {
-                Set trs = rat.deltaFrom(sta[i], (State) sta[j]);
+                Set<Transition> trs = rat.deltaFrom(sta[i], sta[j]);
                 RationalExpr re = null;
-                for (Iterator it = trs.iterator(); it.hasNext();) {
-                    Transition tr = (Transition) it.next();
+                for (Transition tr :trs) {
                     Object o = tr.label();
                     Letter l = (o == null) ? Letter.epsilon : new Letter(o);
                     if (re == null)
@@ -158,6 +156,7 @@ public class RationalMatrix  {
         return (Matrix)in.mult(fini);
     }
 
+    @Override
     public String toString() {
         return init.toString() + '\n'+ transitions.toString() + '\n'+fini.toString();
     }

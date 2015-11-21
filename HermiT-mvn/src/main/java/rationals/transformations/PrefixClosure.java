@@ -37,7 +37,6 @@
 package rationals.transformations;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import rationals.Automaton;
@@ -63,27 +62,18 @@ import rationals.Transition;
  */
 public class PrefixClosure implements UnaryTransformation {
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see rationals.transformations.UnaryTransformation#transform(rationals.Automaton)
-     */
+    @Override
     public Automaton transform(Automaton a) {
         Automaton ret = new Automaton();
-        Map sm = new HashMap();
-        for (Iterator it = a.states().iterator(); it.hasNext();) {
-            State st = (State) it.next();
+        Map<State, State> sm = new HashMap<>();
+        for (State st : a.states()) {
             State sr = ret.addState(st.isInitial(), true);
             sm.put(st, sr);
         }
         /* add all transitions */
-        for (Iterator it = a.delta().iterator(); it.hasNext();) {
-            Transition tr = (Transition) it.next();
-            try {
-                ret.addTransition(new Transition((State) sm.get(tr.start()), tr
-                        .label(), (State) sm.get(tr.end())));
-            } catch (NoSuchStateException e) {
-            }
+        for (Transition tr : a.delta()) {
+                ret.addTransition(new Transition(sm.get(tr.start()), tr
+                        .label(), sm.get(tr.end())),null);
         }
         return ret;
     }

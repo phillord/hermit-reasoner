@@ -58,17 +58,17 @@ public final class ExistentialExpansionManager implements Serializable {
         m_extensionManager=m_tableau.m_extensionManager;
         m_expandedExistentials=new TupleTable(2);
         m_auxiliaryTuple=new Object[2];
-        m_auxiliaryNodes=new ArrayList<Node>();
+        m_auxiliaryNodes=new ArrayList<>();
         m_ternaryExtensionTableSearch01Bound=m_extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,true,false },ExtensionTable.View.TOTAL);
         m_ternaryExtensionTableSearch02Bound=m_extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,false,true },ExtensionTable.View.TOTAL);
-        m_functionalRoles=new HashMap<Role,Role[]>();
+        m_functionalRoles=new HashMap<>();
         updateFunctionalRoles();
         m_binaryUnionDependencySet=new UnionDependencySet(2);
         m_indicesByBranchingPoint=new int[2];
     }
     protected void updateFunctionalRoles() {
-        Graph<Role> superRoleGraph=new Graph<Role>();
-        Set<Role> functionalRoles=new HashSet<Role>();
+        Graph<Role> superRoleGraph=new Graph<>();
+        Set<Role> functionalRoles=new HashSet<>();
         loadDLClausesIntoGraph(m_tableau.m_permanentDLOntology.getDLClauses(),superRoleGraph,functionalRoles);
         for (Role role : superRoleGraph.getElements()) {
             superRoleGraph.addEdge(role,role);
@@ -78,7 +78,7 @@ public final class ExistentialExpansionManager implements Serializable {
         Graph<Role> subRoleGraph=superRoleGraph.getInverse();
         m_functionalRoles.clear();
         for (Role role : superRoleGraph.getElements()) {
-            Set<Role> relevantRoles=new HashSet<Role>();
+            Set<Role> relevantRoles=new HashSet<>();
             Set<Role> allSuperroles=superRoleGraph.getSuccessors(role);
             for (Role superrole : allSuperroles)
                 if (functionalRoles.contains(superrole))

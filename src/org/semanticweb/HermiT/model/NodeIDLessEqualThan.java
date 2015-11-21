@@ -30,12 +30,15 @@ public class NodeIDLessEqualThan implements DLPredicate,Serializable {
     
     protected NodeIDLessEqualThan () {
     }
+    @Override
     public int getArity() {
         return 2;
     }
+    @Override
     public String toString(Prefixes prefixes) {
         return "<=";
     }
+    @Override
     public String toString() {
         return toString(Prefixes.STANDARD_PREFIXES);
     }

@@ -32,58 +32,41 @@
  */
 package rationals;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 public class StatesTuple {
-    public final Set[] sets;
+    public final List<Set<State>> sets;
 
     final int hash;
 
-    public StatesTuple(Set[] sets) {
-        this.sets = new Set[sets.length];
-        System.arraycopy(sets,0,this.sets,0,sets.length);
-        int h = 0;
-        for (int i = 0; i < sets.length; i++)
-            h ^= sets[i].hashCode() << i;
-        this.hash = h;
+    public StatesTuple(List<Set<State>> sets) {
+        this.sets = new ArrayList<>(sets);
+        this.hash = sets.hashCode();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
+    @Override
     public boolean equals(Object obj) {
-        StatesTuple sc = (StatesTuple) obj;
-        for (int i = 0; i < sc.sets.length; i++)
-            if (!sets[i].equals(sc.sets[i]))
-                return false;
-        return true;
+        if (obj == this) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (obj instanceof StatesTuple) {
+            return sets.equals(((StatesTuple) obj).sets);
+        }
+        return false;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#hashCode()
-     */
+    @Override
     public int hashCode() {
         return hash;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#toString()
-     */
+    @Override
     public String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("( ");
-        for(int i=0;i<sets.length;i++){
-            sb.append(sets[i]);
-            if(i != sets.length-1)
-                sb.append(",");
-        }
-        sb.append(")");
-        return sb.toString();
+        return sets.toString();
     }
 }

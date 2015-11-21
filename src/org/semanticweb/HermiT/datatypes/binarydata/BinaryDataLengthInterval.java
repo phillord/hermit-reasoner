@@ -98,6 +98,7 @@ public class BinaryDataLengthInterval {
             }
         }
     }
+    @Override
     public String toString() {
         StringBuffer buffer=new StringBuffer();
         buffer.append(m_binaryDataType.toString());
