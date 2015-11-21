@@ -480,7 +480,7 @@ public class InstanceManager {
                     // nothing has been read-off yet
                     initializeSameAs();
                 }
-                completedSteps=readOffClassInstancesByIndividual(monitor, completedSteps, steps);
+                readOffClassInstancesByIndividual(monitor, completedSteps, steps);
                 if (!m_readingOffFoundPossibleConceptInstance && m_usesClassifiedConceptHierarchy)
                     m_realizationCompleted=true;
                 m_classesInitialised=true;

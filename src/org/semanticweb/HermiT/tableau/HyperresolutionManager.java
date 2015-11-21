@@ -47,8 +47,8 @@ public final class HyperresolutionManager implements Serializable {
     protected final ExtensionTable.Retrieval m_binaryTableRetrieval;
     protected final Map<DLPredicate,CompiledDLClauseInfo> m_tupleConsumersByDeltaPredicate;
     protected final Map<AtomicRole,CompiledDLClauseInfo> m_atomicRoleTupleConsumersUnguarded;
-    protected final HashMap<AtomicRole,Map<AtomicConcept,CompiledDLClauseInfo>> m_atomicRoleTupleConsumersByGuardConcept1;
-    protected final HashMap<AtomicRole,Map<AtomicConcept,CompiledDLClauseInfo>> m_atomicRoleTupleConsumersByGuardConcept2;
+    protected final Map<AtomicRole,Map<AtomicConcept,CompiledDLClauseInfo>> m_atomicRoleTupleConsumersByGuardConcept1;
+    protected final Map<AtomicRole,Map<AtomicConcept,CompiledDLClauseInfo>> m_atomicRoleTupleConsumersByGuardConcept2;
     protected final Object[][] m_buffersToClear;
     protected final UnionDependencySet[] m_unionDependencySetsToClear;
     protected final Object[] m_valuesBuffer;

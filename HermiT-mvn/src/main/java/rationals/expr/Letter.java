@@ -35,8 +35,6 @@
  */
 package rationals.expr;
 
-import rationals.algebra.SemiRing;
-
 /**
  * A letter expression is simply a wrapper over any object. Note that the
  * semantics of equals and hashcode must be properly implemented by the wrapped

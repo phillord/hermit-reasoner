@@ -341,10 +341,10 @@ public class OWLNormalization {
                 other=descriptions[0];
                 nominal=(OWLObjectOneOf)((OWLObjectComplementOf)descriptions[1]).getOperand();
             }
-            assert other!=null;
             if (nominal!=null && 
                     (other instanceof OWLClass || 
                             (other instanceof OWLObjectComplementOf && ((OWLObjectComplementOf)other).getOperand() instanceof OWLClass))) {
+                assert other!=null;
                 for (OWLIndividual individual : nominal.getIndividuals())
                     facts.add(m_factory.getOWLClassAssertionAxiom(other,individual));
                 return true;
