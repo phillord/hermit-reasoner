@@ -1,6 +1,7 @@
 package org.semanticweb.HermiT.reasoner;
 
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -203,14 +204,15 @@ public class DateTimeTest extends AbstractReasonerTest {
 
     protected static DateTime[] loadDateTimes(String resourceName) throws Exception {
         List<DateTime> dateTimes = new ArrayList<>();
-        BufferedReader reader = new BufferedReader(
-                new InputStreamReader(DateTimeTest.class.getResourceAsStream(resourceName)));
-        String line = reader.readLine();
-        while (line != null) {
-            dateTimes.add(DateTime.parse(line));
-            line = reader.readLine();
+        try (InputStream in = DateTimeTest.class.getResourceAsStream(resourceName);
+        InputStreamReader in2 = new InputStreamReader(in);
+        BufferedReader reader = new BufferedReader(in2);){
+            String line = reader.readLine();
+            while (line != null) {
+                dateTimes.add(DateTime.parse(line));
+                line = reader.readLine();
+            }
         }
-        reader.close();
         DateTime[] dateTimesArray = new DateTime[dateTimes.size()];
         dateTimes.toArray(dateTimesArray);
         return dateTimesArray;

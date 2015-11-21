@@ -20,6 +20,7 @@ import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.Individual;
+import org.semanticweb.owlapi.model.IRI;
 
 public abstract class AbstractStructuralTest extends AbstractOntologyTest {
 
@@ -31,21 +32,17 @@ public abstract class AbstractStructuralTest extends AbstractOntologyTest {
         try {
             assertEquals(control.length, actual.size());
             boolean isOK = false;
-            if (control != null) {
                 isOK = true;
                 for (int i = 0; isOK && i < control.length; i++)
                     isOK = actual.contains(control[i]);
-            }
             assertTrue(isOK);
         } catch (AssertionFailedError e) {
             System.out.println("Test " + testName + " failed!");
-            if (control != null) {
                 System.out.println("Control set (" + control.length + " elements):");
                 System.out.println("------------------------------------------");
                 for (String object : control)
                     System.out.println(object.toString());
                 System.out.println("------------------------------------------");
-            }
             System.out.println("Actual set (" + actual.size() + " elements):");
             System.out.println("------------------------------------------");
             for (Object object : actual)
@@ -91,8 +88,7 @@ public abstract class AbstractStructuralTest extends AbstractOntologyTest {
         OWLClausification clausifier = new OWLClausification(new Configuration());
         Set<DescriptionGraph> noDescriptionGraphs = Collections.emptySet();
         DLOntology dlOntology = (DLOntology) clausifier.preprocessAndClausify(m_ontology, noDescriptionGraphs)[1];
-        String ontologyIRI = m_ontology.getOntologyID().getDefaultDocumentIRI() == null ? "urn:hermit:kb"
-                : m_ontology.getOntologyID().getDefaultDocumentIRI().toString();
+        String ontologyIRI = m_ontology.getOntologyID().getDefaultDocumentIRI().or(IRI.create( "urn:hermit:kb")).toString();
         List<String> actualStrings = new ArrayList<>();
         Prefixes prefixes = new Prefixes();
         prefixes.declareSemanticWebPrefixes();

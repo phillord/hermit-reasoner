@@ -161,7 +161,7 @@ public class Hierarchy<E> {
             }
             public void printNode(int level,HierarchyNode<E> node,HierarchyNode<E> parentNode,boolean firstVisit) {
                 Set<E> equivalences=node.getEquivalentElements();
-                boolean printSubClasOf=(parentNode!=null);
+                boolean printSubClasOf=parentNode!=null;
                 boolean printEquivalences=firstVisit && equivalences.size()>1;
                 if (printSubClasOf || printEquivalences) {
                     for (int i=4*level;i>0;--i)
@@ -182,6 +182,7 @@ public class Hierarchy<E> {
                         output.print(']');
                     }
                     if (printSubClasOf) {
+                        assert parentNode!=null;
                         output.print(" -> ");
                         output.print(parentNode.getRepresentative().toString());
                     }

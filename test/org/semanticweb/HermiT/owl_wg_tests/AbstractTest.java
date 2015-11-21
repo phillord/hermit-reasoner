@@ -97,11 +97,11 @@ public abstract class AbstractTest extends TestCase {
         try {
             doTest();
         } catch (ReasonerInterruptedException e) {
-            fail("Test timed out.");
+            fail("Test timed out. "+e.getMessage());
         } catch (OutOfMemoryError e) {
             m_reasoner = null;
             Runtime.getRuntime().gc();
-            fail("Test ran out of memory.");
+            fail("Test ran out of memory. "+e.getMessage());
         } catch (AssertionFailedError e) {
             fail("Test failed: " + e.getMessage());
         } catch (Throwable e) {
@@ -114,7 +114,7 @@ public abstract class AbstractTest extends TestCase {
 
     protected void dumpTestData() throws Exception {
         if (m_dumpTestDataDirectory != null)
-            saveOntology(m_ontologyManager, m_premiseOntology, new File(m_dumpTestDataDirectory, "premise.owl"));
+            saveOntology(m_premiseOntology, new File(m_dumpTestDataDirectory, "premise.owl"));
     }
 
     protected Configuration getConfiguration() {
@@ -124,11 +124,12 @@ public abstract class AbstractTest extends TestCase {
         return c;
     }
 
-    protected void saveOntology(OWLOntologyManager manager, OWLOntology ontology, File file) throws Exception {
-        BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-        OWLFunctionalSyntaxRenderer renderer = new OWLFunctionalSyntaxRenderer();
-        renderer.render(ontology, writer);
-        writer.close();
+    protected void saveOntology(OWLOntology ontology, File file) throws Exception {
+        try (FileWriter out = new FileWriter(file);
+        BufferedWriter writer = new BufferedWriter(out);) {
+            OWLFunctionalSyntaxRenderer renderer = new OWLFunctionalSyntaxRenderer();
+            renderer.render(ontology, writer);
+        }
     }
 
     protected abstract void doTest() throws Exception;
@@ -154,7 +155,7 @@ public abstract class AbstractTest extends TestCase {
                     if (!m_timingStopped)
                         m_reasoner.interrupt();
                 }
-            } catch (InterruptedException stopped) {
+            } catch (@SuppressWarnings("unused") InterruptedException stopped) {
             }
         }
 

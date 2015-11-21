@@ -364,13 +364,13 @@ public final class DatatypeManager implements Serializable {
         if (explicitDataValues.isEmpty())
             setClashFor(variable);
     }
-    protected boolean containsDataValue(ConstantEnumeration constantEnumeration,Object dataValue) {
+    protected static boolean containsDataValue(ConstantEnumeration constantEnumeration,Object dataValue) {
         for (int index=constantEnumeration.getNumberOfConstants()-1;index>=0;--index)
             if (constantEnumeration.getConstant(index).getDataValue().equals(dataValue))
                 return true;
         return false;
     }
-    protected void eliminateDataValuesUsingValueSpaceSubset(ValueSpaceSubset valueSpaceSubset,List<Object> explicitDataValues,boolean eliminateWhenValue) {
+    protected static void eliminateDataValuesUsingValueSpaceSubset(ValueSpaceSubset valueSpaceSubset,List<Object> explicitDataValues,boolean eliminateWhenValue) {
         for (int valueIndex=explicitDataValues.size()-1;valueIndex>=0;--valueIndex) {
             Object dataValue=explicitDataValues.get(valueIndex);
             if (valueSpaceSubset.containsDataValue(dataValue)==eliminateWhenValue)
@@ -487,7 +487,7 @@ public final class DatatypeManager implements Serializable {
             return false;
         }
     }
-    protected boolean satisfiesNeighbors(DVariable variable,Object dataValue) {
+    protected static boolean satisfiesNeighbors(DVariable variable,Object dataValue) {
         for (int neighborIndex=variable.m_unequalTo.size()-1;neighborIndex>=0;--neighborIndex) {
             Object neighborDataValue=variable.m_unequalTo.get(neighborIndex).m_dataValue;
             if (neighborDataValue!=null && neighborDataValue.equals(dataValue))

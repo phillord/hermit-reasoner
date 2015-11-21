@@ -108,7 +108,7 @@ public class RandomAutomaton extends Automaton {
 
     private void makeNFA() {
         /* create initial state and other states */
-        State init = addState(true, false);
+        addState(true, false);
         for (int i = 0; i < fstate; i++)
             addState(false, true);
         for (int i = fstate; i < nstate; i++)
@@ -144,7 +144,6 @@ public class RandomAutomaton extends Automaton {
             done.add(from);
             /* list for alph */
             List<Object> l = new ArrayList<>(Arrays.asList(alph));
-            int c = alph.length * nstate;
             /* number of transitions from this state to other state */
             int nt = (int) (deviation * rand.nextGaussian() + density);
             for (int i = 0; i < nt && !l.isEmpty(); i++) {

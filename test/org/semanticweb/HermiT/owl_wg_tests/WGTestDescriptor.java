@@ -278,7 +278,7 @@ public class WGTestDescriptor {
         try {
             return manager.createOntology(IRI.create("uri:urn:opaque"));
         } catch (OWLOntologyCreationException e) {
-            throw new InvalidWGTestException("Cannot create empty ontology");
+            throw new InvalidWGTestException("Cannot create empty ontology", e);
         }
     }
 

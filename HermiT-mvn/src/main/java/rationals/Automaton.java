@@ -491,15 +491,13 @@ public class Automaton implements Acceptor, StateMachine, Rational, Cloneable {
 
         @Override
         public boolean equals(Object o) {
-            if (o == null)
-                return false;
-            try {
-                Key t = (Key) o;
-                boolean ret = (l == null ? t.l == null : l.equals(t.l)) && (s == null ? t.s == null : s.equals(t.s));
-                return ret;
-            } catch (ClassCastException x) {
-                return false;
+            if (o == this) {
+                return true;
             }
+            if (o == null || !(o instanceof Key))
+                return false;
+            Key t = (Key) o;
+            return (l == null ? t.l == null : l.equals(t.l)) && (s == null ? t.s == null : s.equals(t.s));
         }
 
         @Override

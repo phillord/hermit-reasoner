@@ -95,7 +95,7 @@ public class AnyURIValueSpaceSubset implements ValueSpaceSubset {
             new RegExp(pattern);
             return true;
         }
-        catch (IllegalArgumentException e) {
+        catch (@SuppressWarnings("unused") IllegalArgumentException e) {
             return false;
         }
     }

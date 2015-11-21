@@ -80,7 +80,7 @@ public class MixTest extends TestCase {
         assertTrue("automata should not accept word", !c.accept(makeList("abbe")));
     }
 
-    private List<Object> makeList(String string) {
+    private static List<Object> makeList(String string) {
         List<Object> l = new ArrayList<>();
         for (int i = 0; i < string.length(); i++)
             l.add(string.charAt(i) + "");

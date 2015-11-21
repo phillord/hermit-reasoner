@@ -54,7 +54,7 @@ public class ReuseNodeForCommand extends AbstractCommand {
             nodeID=Integer.parseInt(args[1]);
         }
         catch (NumberFormatException e) {
-            m_debugger.getOutput().println("Invalid ID of the node.");
+            m_debugger.getOutput().println("Invalid ID of the node. "+e.getMessage());
             return;
         }
         Node node=m_debugger.getTableau().getNode(nodeID);

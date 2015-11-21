@@ -69,8 +69,7 @@ public class EntailmentTest extends AbstractTest {
     protected void dumpTestData() throws Exception {
         super.dumpTestData();
         if (m_dumpTestDataDirectory != null)
-            saveOntology(m_ontologyManager, m_conclusionOntology,
-                    new File(m_dumpTestDataDirectory, m_positive ? "conclusion.owl" : "nonconclusion.owl"));
+            saveOntology(m_conclusionOntology, new File(m_dumpTestDataDirectory, m_positive ? "conclusion.owl" : "nonconclusion.owl"));
     }
 
     // junit 4 stuff...

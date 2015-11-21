@@ -116,7 +116,7 @@ public class BinaryData {
             }
             return new BinaryData(BinaryDataType.HEX_BINARY,result.toByteArray());
         }
-        catch (IndexOutOfBoundsException e) {
+        catch (@SuppressWarnings("unused") IndexOutOfBoundsException e) {
             return null;
         }
     }
@@ -126,10 +126,7 @@ public class BinaryData {
             byte[] data=Base64.decodeBase64(lexicalForm);
             return new BinaryData(BinaryDataType.HEX_BINARY,data);
         }
-        catch (IllegalArgumentException error) {
-            return null;
-        }
-        catch (IndexOutOfBoundsException error) {
+        catch (@SuppressWarnings("unused") IllegalArgumentException|IndexOutOfBoundsException error) {
             return null;
         }
     }

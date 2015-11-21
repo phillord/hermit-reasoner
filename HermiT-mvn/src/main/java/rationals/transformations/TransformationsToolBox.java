@@ -22,10 +22,8 @@ public class TransformationsToolBox {
   public static boolean containsATerminalState(Set<State> s) {
     Iterator<State> i = s.iterator() ;
     while(i.hasNext()) {
-      try {
         State e = i.next() ;
         if (e.isTerminal()) return true ;
-      } catch(ClassCastException x) {}
     }
     return false ;
   } 
@@ -33,10 +31,8 @@ public class TransformationsToolBox {
   public static boolean containsAnInitialState(Set<State> s) {
     Iterator<State> i = s.iterator() ;
     while(i.hasNext()) {
-      try {
         State e = i.next() ;
         if (e.isInitial()) return true ;
-      } catch(ClassCastException x) {}
     }
     return false ;
   } 

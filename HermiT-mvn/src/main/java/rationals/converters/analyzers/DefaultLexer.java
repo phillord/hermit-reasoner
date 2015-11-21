@@ -75,7 +75,7 @@ public class DefaultLexer implements Lexer {
         try {
             tk = tokenizer.nextToken();
         } catch (IOException e) {
-            throw new ConverterException("Unexpected character");
+            throw new ConverterException("Unexpected character", e);
         }
         if (tk == StreamTokenizer.TT_EOF) {
             end = true;
@@ -99,7 +99,7 @@ public class DefaultLexer implements Lexer {
                             current = INT;
                     }
                     return;
-                } catch (Exception e) {
+                } catch (@SuppressWarnings("unused") Exception e) {
                     current = UNKNOWN;
                     return;
                 }

@@ -11,7 +11,7 @@ import org.semanticweb.HermiT.datatypes.MalformedLiteralException;
 import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
 import org.semanticweb.HermiT.model.Constant;
 import org.semanticweb.HermiT.model.DatatypeRestriction;
-
+@SuppressWarnings("javadoc")
 public class AnyURITest extends AbstractReasonerTest {
     protected static final String XSD_ANY_URI = Prefixes.s_semanticWebPrefixes.get("xsd:") + "anyURI";
 
@@ -25,7 +25,7 @@ public class AnyURITest extends AbstractReasonerTest {
         try {
             DatatypeRegistry.parseLiteral("abc 123", XSD_ANY_URI);
             fail();
-        } catch (MalformedLiteralException expected) {
+        } catch (@SuppressWarnings("unused") MalformedLiteralException expected) {
         }
     }
 
@@ -111,7 +111,7 @@ public class AnyURITest extends AbstractReasonerTest {
         try {
             subset.enumerateDataValues(new ArrayList<>());
             fail();
-        } catch (Exception expected) {
+        } catch (@SuppressWarnings("unused") Exception expected) {
         }
         assertFalse(subset.containsDataValue(URI.create("ab")));
         assertTrue(subset.containsDataValue(URI.create("abccccccccccc")));

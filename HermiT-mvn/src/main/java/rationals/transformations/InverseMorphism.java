@@ -75,7 +75,7 @@ public class InverseMorphism implements UnaryTransformation {
      * create inverse mapping from given map. The key are letters (Object) and
      * the values are sets of letters (Set).
      */
-    private <K, V> Map<V, Set<K>> inverse(Map<K, V> m) {
+    private static <K, V> Map<V, Set<K>> inverse(Map<K, V> m) {
         Map<V, Set<K>> inv = new HashMap<>();
         for (Map.Entry<K, V> e : m.entrySet()) {
             V v = e.getValue();

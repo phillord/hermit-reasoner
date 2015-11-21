@@ -25,7 +25,7 @@ public class BinaryDataLengthInterval {
     protected final int m_maxLength;
 
     public BinaryDataLengthInterval(BinaryDataType binaryDataType,int minLength,int maxLength) {
-        assert !isIntervalEmpty(binaryDataType,minLength,maxLength);
+        assert !isIntervalEmpty(minLength,maxLength);
         m_binaryDataType=binaryDataType;
         m_minLength=minLength;
         m_maxLength=maxLength;
@@ -38,7 +38,7 @@ public class BinaryDataLengthInterval {
             return null;
         int newMinLength=Math.max(m_minLength,that.m_minLength);
         int newMaxLength=Math.min(m_maxLength,that.m_maxLength);
-        if (isIntervalEmpty(m_binaryDataType,newMinLength,newMaxLength))
+        if (isIntervalEmpty(newMinLength,newMaxLength))
             return null;
         else if (isEqual(m_binaryDataType,newMinLength,newMaxLength))
             return this;
@@ -112,7 +112,7 @@ public class BinaryDataLengthInterval {
         buffer.append(']');
         return buffer.toString();
     }
-    protected static boolean isIntervalEmpty(BinaryDataType binaryDataType,int minLength,int maxLength) {
+    protected static boolean isIntervalEmpty(int minLength,int maxLength) {
         return minLength>maxLength;
     }
 }

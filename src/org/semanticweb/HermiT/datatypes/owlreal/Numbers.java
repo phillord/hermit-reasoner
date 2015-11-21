@@ -55,12 +55,12 @@ public class Numbers {
         try {
             return Integer.parseInt(string);
         }
-        catch (NumberFormatException e) {
+        catch (@SuppressWarnings("unused") NumberFormatException e) {
         }
         try {
             return Long.parseLong(string);
         }
-        catch (NumberFormatException e) {
+        catch (@SuppressWarnings("unused") NumberFormatException e) {
         }
         return new BigInteger(string);
     }
@@ -73,17 +73,17 @@ public class Numbers {
         try {
             return decimal.intValueExact();
         }
-        catch (ArithmeticException e) {
+        catch (@SuppressWarnings("unused") ArithmeticException e) {
         }
         try {
             return decimal.longValueExact();
         }
-        catch (ArithmeticException e) {
+        catch (@SuppressWarnings("unused") ArithmeticException e) {
         }
         try {
             return decimal.toBigIntegerExact();
         }
-        catch (ArithmeticException e) {
+        catch (@SuppressWarnings("unused") ArithmeticException e) {
         }
         return decimal.stripTrailingZeros();
     }
@@ -117,7 +117,7 @@ public class Numbers {
         try {
             return new BigDecimal(numerator).divide(new BigDecimal(denominator));
         }
-        catch (ArithmeticException e) {
+        catch (@SuppressWarnings("unused") ArithmeticException e) {
         }
         return new BigRational(numerator,denominator);
     }
@@ -170,6 +170,8 @@ public class Numbers {
             return BigInteger.valueOf(n.longValue());
         case BIG_INTEGER:
             return (BigInteger)n;
+        case BIG_DECIMAL:
+        case BIG_RATIONAL:
         default:
             throw new IllegalArgumentException();
         }
@@ -187,6 +189,7 @@ public class Numbers {
             return new BigDecimal((BigInteger)n);
         case BIG_DECIMAL:
             return (BigDecimal)n;
+        case BIG_RATIONAL:
         default:
             throw new IllegalArgumentException();
         }

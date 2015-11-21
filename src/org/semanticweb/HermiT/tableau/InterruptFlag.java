@@ -75,6 +75,7 @@ public final class InterruptFlag implements Serializable {
             m_timeout=timeout;
             start();
         }
+        @SuppressWarnings("unused")
         @Override
         public synchronized void run() {
             while (m_timerState!=TimerState.DISPOSED) {
@@ -100,6 +101,7 @@ public final class InterruptFlag implements Serializable {
                 }
             }
         }
+        @SuppressWarnings("unused")
         public synchronized void startTiming() {
             while (m_timerState!=TimerState.WAIT_FOR_TASK && m_timerState!=TimerState.DISPOSED) {
                 try {
@@ -121,7 +123,7 @@ public final class InterruptFlag implements Serializable {
                     try {
                         wait();
                     }
-                    catch (InterruptedException stopped) {
+                    catch (@SuppressWarnings("unused") InterruptedException stopped) {
                         return;
                     }
                 }
@@ -133,7 +135,7 @@ public final class InterruptFlag implements Serializable {
             try {
                 join();
             }
-            catch (InterruptedException e) {
+            catch (@SuppressWarnings("unused") InterruptedException e) {
             }
         }
     }

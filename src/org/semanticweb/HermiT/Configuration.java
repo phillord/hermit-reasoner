@@ -268,17 +268,15 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
     }
     protected Set<AtomicConcept> loadConceptsFromFile(File file) throws IOException {
         Set<AtomicConcept> result=new HashSet<>();
-        BufferedReader reader=new BufferedReader(new FileReader(file));
-        try {
+        
+        try (FileReader in = new FileReader(file);
+        BufferedReader reader=new BufferedReader(in);) {
             String line=reader.readLine();
             while (line!=null) {
                 result.add(AtomicConcept.create(line));
                 line=reader.readLine();
             }
             return result;
-        }
-        finally {
-            reader.close();
         }
     }
     @Override
@@ -288,7 +286,7 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
             result.parameters=new HashMap<>(parameters);
             return result;
         }
-        catch (CloneNotSupportedException cantHappen) {
+        catch (@SuppressWarnings("unused") CloneNotSupportedException cantHappen) {
             return null;
         }
     }

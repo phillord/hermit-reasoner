@@ -58,9 +58,7 @@ public class ComplementTest extends TestCase {
     public void testComp() throws ConverterException {
         Automaton a = new Pruner().transform(new Expression().fromString("a(bb)*e"));
         Automaton c = new ToDFA().transform(new Complement().transform(a));
-        System.out.println(c);
-        String re;
-        System.out.println(re = new ToRExpression().toString(c));
+        new ToRExpression().toString(c);
     }
 
 }

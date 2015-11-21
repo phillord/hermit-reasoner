@@ -66,12 +66,14 @@ public class DefaultStateFactory implements StateFactory, Cloneable {
 
         @Override
         public boolean equals(Object o) {
-            try {
-                DefaultState ds = (DefaultState) o;
-                return (ds.i == i) && (a == ds.a);
-            } catch (ClassCastException e) {
+            if(this==o) {
+                return true;
+            }
+            if(!(o instanceof DefaultState)) {
                 return false;
             }
+                DefaultState ds = (DefaultState) o;
+                return (ds.i == i) && (a == ds.a);
         }
 
         @Override

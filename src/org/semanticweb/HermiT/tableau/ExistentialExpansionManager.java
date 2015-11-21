@@ -90,7 +90,7 @@ public final class ExistentialExpansionManager implements Serializable {
             }
         }
     }
-    protected void loadDLClausesIntoGraph(Set<DLClause> dlClauses,Graph<Role> superRoleGraph,Set<Role> functionalRoles) {
+    protected static void loadDLClausesIntoGraph(Set<DLClause> dlClauses,Graph<Role> superRoleGraph,Set<Role> functionalRoles) {
         for (DLClause dlClause : dlClauses) {
             if (dlClause.isAtomicRoleInclusion()) {
                 AtomicRole subrole=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();

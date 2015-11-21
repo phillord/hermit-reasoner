@@ -67,7 +67,6 @@ import org.semanticweb.owlapi.model.OWLEquivalentObjectPropertiesAxiom;
 import org.semanticweb.owlapi.model.OWLFunctionalDataPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLFunctionalObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLHasKeyAxiom;
-import org.semanticweb.owlapi.model.OWLImportsDeclaration;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLInverseFunctionalObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLInverseObjectPropertiesAxiom;
@@ -172,9 +171,6 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
     }
     @Override
     public Boolean visit(OWLDeclarationAxiom axiom) {
-        return Boolean.TRUE;
-    }
-    public Boolean visit(OWLImportsDeclaration axiom) {
         return Boolean.TRUE;
     }
 

@@ -24,10 +24,6 @@ public final class PlusInfinity extends Number {
     private PlusInfinity() {
     }
     @Override
-    public boolean equals(Object that) {
-        return this==that;
-    }
-    @Override
     public String toString() {
         return "+INF";
     }
@@ -47,7 +43,7 @@ public final class PlusInfinity extends Number {
     public long longValue() {
         throw new UnsupportedOperationException();
     }
-    protected Object readResolve() {
+    protected static Object readResolve() {
         return INSTANCE;
     }
 }

@@ -53,7 +53,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         boolean errorThrown = false;
         try {
             loadReasonerFromResource("res/only1.owl");
-        } catch (IllegalArgumentException e) {
+        } catch (@SuppressWarnings("unused") IllegalArgumentException e) {
             errorThrown = true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -73,7 +73,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         IRI physicalIRI = IRI.create(getClass().getResource("res/iso19112-D-different.owl.xml").toURI());
         manager.loadOntologyFromOntologyDocument(physicalIRI);
         for (OWLOntology ontology : manager.getOntologies()) {
-            m.addAxioms(m.getOntology(testOntologyIRI), ontology.getAxioms());
+            m.addAxioms(o, ontology.getAxioms());
         }
         hermit.flush();
         OWLClass rs_identifier = m_dataFactory.getOWLClass(
@@ -1172,7 +1172,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         try {
             loadReasonerWithAxioms(axioms);
             fail();
-        } catch (Exception e) {
+        } catch (@SuppressWarnings("unused") Exception e) {
         }
     }
 
@@ -1181,7 +1181,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         try {
             loadReasonerWithAxioms(axioms);
             fail();
-        } catch (Exception e) {
+        } catch (@SuppressWarnings("unused") Exception e) {
         }
     }
 
@@ -1190,7 +1190,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         try {
             loadReasonerWithAxioms(axioms);
             fail();
-        } catch (Exception e) {
+        } catch (@SuppressWarnings("unused") Exception e) {
         }
     }
 
@@ -1199,7 +1199,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         try {
             loadReasonerWithAxioms(axioms);
             fail();
-        } catch (Exception e) {
+        } catch (@SuppressWarnings("unused") Exception e) {
         }
     }
 

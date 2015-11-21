@@ -83,7 +83,7 @@ public class DerivationTreeCommand extends AbstractCommand {
                 nodeID=Integer.parseInt(args[index+1]);
             }
             catch (NumberFormatException e) {
-                m_debugger.getOutput().println("Invalid ID of the node at argument "+index+".");
+                m_debugger.getOutput().println("Invalid ID of the node at argument "+index+". "+e.getMessage());
                 return;
             }
             Node node=m_debugger.getTableau().getNode(nodeID);

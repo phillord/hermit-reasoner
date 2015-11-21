@@ -722,7 +722,7 @@ public class BlockingValidator {
                             var1=var2;
                             var2=tmp;
                         }
-                        assert var2.getName().startsWith("Z");
+                        assert var2!=null &&  var2.getName().startsWith("Z");
                         int var2Index=getIndexFor(m_zVariables, var2);
                         assert var1==X && var2Index!=-1;
                         m_consequencesForBlockedX[i]=new SimpleConsequenceAtom(predicate,new ArgumentType[] { ArgumentType.XVAR,ArgumentType.ZVAR },new int[] { 0,var2Index });

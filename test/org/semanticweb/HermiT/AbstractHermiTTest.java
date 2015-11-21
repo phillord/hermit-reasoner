@@ -2,6 +2,7 @@ package org.semanticweb.HermiT;
 
 import java.io.BufferedReader;
 import java.io.CharArrayWriter;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.Collection;
@@ -23,16 +24,15 @@ public abstract class AbstractHermiTTest extends TestCase {
 
     protected Set<String> getStrings(String resourceName) throws Exception {
         Set<String> strings = new HashSet<>();
-        BufferedReader reader = new BufferedReader(
-                new InputStreamReader(getClass().getResource(resourceName).openStream()));
-        try {
+        
+        try (InputStream in = getClass().getResourceAsStream(resourceName);
+        InputStreamReader in2 = new InputStreamReader(in);
+        BufferedReader reader = new BufferedReader(in2);) {
             String line = reader.readLine();
             while (line != null) {
                 strings.add(line);
                 line = reader.readLine();
             }
-        } finally {
-            reader.close();
         }
         return strings;
     }
@@ -42,16 +42,15 @@ public abstract class AbstractHermiTTest extends TestCase {
             return null;
         CharArrayWriter buffer = new CharArrayWriter();
         PrintWriter output = new PrintWriter(buffer);
-        BufferedReader reader = new BufferedReader(
-                new InputStreamReader(getClass().getResource(resourceName).openStream()));
-        try {
+        
+        try (InputStream in = getClass().getResourceAsStream(resourceName);
+                InputStreamReader in2 = new InputStreamReader(in);
+                BufferedReader reader = new BufferedReader(in2);) {
             String line = reader.readLine();
             while (line != null) {
                 output.println(line);
                 line = reader.readLine();
             }
-        } finally {
-            reader.close();
         }
         output.flush();
         return buffer.toString();

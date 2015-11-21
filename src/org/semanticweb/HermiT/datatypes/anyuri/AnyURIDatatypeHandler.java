@@ -51,7 +51,7 @@ public class AnyURIDatatypeHandler implements DatatypeHandler {
             return new URI(lexicalForm);
         }
         catch (URISyntaxException error) {
-            throw new MalformedLiteralException(lexicalForm,datatypeURI);
+            throw new MalformedLiteralException(lexicalForm,datatypeURI, error);
         }
     }
     @Override

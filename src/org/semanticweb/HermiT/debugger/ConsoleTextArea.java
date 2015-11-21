@@ -80,7 +80,7 @@ public class ConsoleTextArea extends JTextArea {
             try {
                 text=getDocument().getText(m_userTypedTextStart,textEnd-m_userTypedTextStart);
             }
-            catch (BadLocationException error) {
+            catch (@SuppressWarnings("unused") BadLocationException error) {
                 text="";
             }
             m_reader.addToBuffer(text);
@@ -206,7 +206,7 @@ public class ConsoleTextArea extends JTextArea {
                         lock.wait();
                     }
                     catch (InterruptedException error) {
-                        throw new IOException("Read interruipted.");
+                        throw new IOException("Read interrupted.",error);
                     }
                 int toCopy=Math.min(m_firstFreeChar-m_nextCharToRead,length);
                 System.arraycopy(m_buffer,m_nextCharToRead,buffer,offset,toCopy);

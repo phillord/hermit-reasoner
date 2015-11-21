@@ -51,7 +51,7 @@ public class BreakpointTimeCommand extends AbstractCommand {
             breakpointTimeSeconds=Integer.parseInt(args[1]);
         }
         catch (NumberFormatException e) {
-            m_debugger.getOutput().println("Invalid time.");
+            m_debugger.getOutput().println("Invalid time. "+e.getMessage());
             return;
         }
         m_debugger.getOutput().println("Breakpoint time is "+breakpointTimeSeconds+" seconds.");

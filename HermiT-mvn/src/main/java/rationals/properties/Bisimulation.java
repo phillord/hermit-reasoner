@@ -136,6 +136,7 @@ public class Bisimulation implements Relation {
        return true;
     }
     
+    @Override
     public List<Object> getErrorTrace() {
         return Collections.emptyList();
     }

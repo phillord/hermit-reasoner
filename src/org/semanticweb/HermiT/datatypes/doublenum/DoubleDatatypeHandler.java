@@ -57,7 +57,7 @@ public class DoubleDatatypeHandler implements DatatypeHandler {
         catch (NumberFormatException error) {
             if (lexicalForm.equals("INF")) return Double.POSITIVE_INFINITY;
             if (lexicalForm.equals("-INF")) return Double.NEGATIVE_INFINITY;
-            throw new MalformedLiteralException(lexicalForm,datatypeURI);
+            throw new MalformedLiteralException(lexicalForm,datatypeURI, error);
         }
     }
     @Override

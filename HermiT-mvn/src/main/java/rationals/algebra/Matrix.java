@@ -119,16 +119,6 @@ public final class Matrix implements SemiRing {
         return res;
     }
 
-
-    /**
-     * Returns the star of this matrix.
-     * 
-     * @return
-     */
-    public Matrix star() {
-        return null;
-    }
-
     public int getLine() {
         return line;
     }
@@ -137,7 +127,6 @@ public final class Matrix implements SemiRing {
     public String toString() {
         final String ln = System.getProperty("line.separator");
         StringBuffer sb = new StringBuffer();
-        int n = matrix.length;
         for (int i = 0; i < line; i++) {
             sb.append("[ ");
             for (int j = 0; j < col; j++) {

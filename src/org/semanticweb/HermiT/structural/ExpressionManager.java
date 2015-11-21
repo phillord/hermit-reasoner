@@ -208,10 +208,12 @@ public class ExpressionManager {
         public OWLDataRange visit(OWLDatatypeRestriction o) {
             return o;
         }
+        @SuppressWarnings("null")
         @Override
         public OWLDataRange visit(OWLFacetRestriction node) {
             return null;
         }
+        @SuppressWarnings("null")
         @Override
         public OWLDataRange visit(OWLLiteral o) {
             return null;
@@ -370,10 +372,12 @@ public class ExpressionManager {
         public OWLDataRange visit(OWLDatatypeRestriction o) {
             return m_factory.getOWLDataComplementOf(o);
         }
+        @SuppressWarnings("null")
         @Override
         public OWLDataRange visit(OWLFacetRestriction o) {
             return null;
         }
+        @SuppressWarnings("null")
         @Override
         public OWLDataRange visit(OWLLiteral o) {
             return null;
@@ -597,10 +601,12 @@ public class ExpressionManager {
         public OWLDataRange visit(OWLDatatypeRestriction o) {
             return o;
         }
+        @SuppressWarnings("null")
         @Override
         public OWLDataRange visit(OWLFacetRestriction o) {
             return null;
         }
+        @SuppressWarnings("null")
         @Override
         public OWLDataRange visit(OWLLiteral o) {
             return null;

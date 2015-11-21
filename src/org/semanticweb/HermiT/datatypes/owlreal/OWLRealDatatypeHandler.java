@@ -124,7 +124,7 @@ public class OWLRealDatatypeHandler implements DatatypeHandler {
                 return Numbers.parseInteger(lexicalForm);
         }
         catch (NumberFormatException error) {
-            throw new MalformedLiteralException(lexicalForm,datatypeURI);
+            throw new MalformedLiteralException(lexicalForm,datatypeURI,error);
         }
     }
     @Override

@@ -42,7 +42,6 @@ import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 
 import rationals.Automaton;
-import rationals.NoSuchStateException;
 import rationals.State;
 import rationals.Transition;
 
@@ -223,7 +222,7 @@ public class ObjectPropertyInclusionManager {
             }
         automataByProperty.putAll(individualAutomataForEquivRoles);
     }
-    private Set<OWLObjectPropertyExpression> findSymmetricProperties(Collection<OWLObjectPropertyExpression[]> simpleObjectPropertyInclusions) {
+    private static Set<OWLObjectPropertyExpression> findSymmetricProperties(Collection<OWLObjectPropertyExpression[]> simpleObjectPropertyInclusions) {
         Set<OWLObjectPropertyExpression> symmetricProperties = new HashSet<>();
         for (OWLObjectPropertyExpression[] inclusion : simpleObjectPropertyInclusions)
             if (inclusion[1].getInverseProperty().equals(inclusion[0]) || inclusion[1].equals(inclusion[0].getInverseProperty())){

@@ -145,7 +145,7 @@ public final class HyperresolutionManager implements Serializable {
         m_valuesBuffer=valuesBufferManager.m_valuesBuffer;
         m_maxNumberOfVariables=valuesBufferManager.m_maxNumberOfVariables;
     }
-    protected void getAtomicRoleClauseGuards(DLClause swappedDLClause,List<Atom> guardingAtomicConceptAtoms1,List<Atom> guardingAtomicConceptAtoms2) {
+    protected static void getAtomicRoleClauseGuards(DLClause swappedDLClause,List<Atom> guardingAtomicConceptAtoms1,List<Atom> guardingAtomicConceptAtoms2) {
         guardingAtomicConceptAtoms1.clear();
         guardingAtomicConceptAtoms2.clear();
         Atom deltaOldAtom=swappedDLClause.getBodyAtom(0);
@@ -165,7 +165,7 @@ public final class HyperresolutionManager implements Serializable {
             bodyIndex++;
         }
     }
-    protected boolean isPredicateWithExtension(DLPredicate dlPredicate) {
+    protected static boolean isPredicateWithExtension(DLPredicate dlPredicate) {
         return !NodeIDLessEqualThan.INSTANCE.equals(dlPredicate) && !(dlPredicate instanceof NodeIDsAscendingOrEqual);
     }
     public void clear() {
@@ -310,6 +310,7 @@ public final class HyperresolutionManager implements Serializable {
                             bestAtomIndex=index;
                         }
                     }
+                assert bestAtom!=null;
                 m_reorderedAtoms.add(bestAtom);
                 m_usedAtoms[bestAtomIndex]=true;
                 bestAtom.getVariables(m_boundVariables);

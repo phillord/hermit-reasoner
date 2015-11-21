@@ -51,7 +51,7 @@ public class BigRational extends Number implements Comparable<BigRational> {
             new BigDecimal(m_numerator).divide(new BigDecimal(m_denominator)).doubleValue();
             return true;
         }
-        catch (ArithmeticException e) {
+        catch (@SuppressWarnings("unused") ArithmeticException e) {
             return false;
         }
     }
@@ -63,7 +63,7 @@ public class BigRational extends Number implements Comparable<BigRational> {
     public boolean equals(Object that) {
         if (that==this)
             return true;
-        if (!(that instanceof BigRational) || that==null)
+        if (!(that instanceof BigRational))
             return false;
         BigRational thatRational=(BigRational)that;
         return m_numerator.equals(thatRational.m_numerator) && m_denominator.equals(thatRational.m_denominator);

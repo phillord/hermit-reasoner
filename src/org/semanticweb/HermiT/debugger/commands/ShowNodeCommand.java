@@ -53,7 +53,7 @@ public class ShowNodeCommand extends AbstractCommand {
             nodeID=Integer.parseInt(args[1]);
         }
         catch (NumberFormatException e) {
-            m_debugger.getOutput().println("Invalid ID of the first node.");
+            m_debugger.getOutput().println("Invalid ID of the first node. "+e.getMessage());
             return;
         }
         Node node=m_debugger.getTableau().getNode(nodeID);

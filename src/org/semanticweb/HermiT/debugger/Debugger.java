@@ -220,7 +220,7 @@ public class Debugger extends TableauMonitorForwarder {
             }
             m_output.flush();
         }
-        catch (IOException e) {
+        catch (@SuppressWarnings("unused") IOException e) {
         }
         m_lastStatusMark=System.currentTimeMillis();
     }

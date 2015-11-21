@@ -249,8 +249,8 @@ public final class ExtensionManager implements Serializable {
         m_fouraryAuxiliaryTupleContains[3]=node2;
         return containsTuple(m_fouraryAuxiliaryTupleContains);
     }
-    public boolean containsAnnotatedEquality(AnnotatedEquality annotatedEquality,Node node0,Node node1,Node node2) {
-        return m_tableau.m_nominalIntroductionManager.canForgetAnnotation(annotatedEquality,node0,node1,node2) && node0==node1;
+    public static boolean containsAnnotatedEquality(Node node0,Node node1,Node node2) {
+        return NominalIntroductionManager.canForgetAnnotation(node0,node1,node2) && node0==node1;
     }
     public boolean containsTuple(Object[] tuple) {
         if (tuple.length==0)
@@ -260,7 +260,7 @@ public final class ExtensionManager implements Serializable {
         else if (Equality.INSTANCE.equals(tuple[0]))
             return tuple[1]==tuple[2];
         else if (tuple[0] instanceof AnnotatedEquality)
-            return m_tableau.m_nominalIntroductionManager.canForgetAnnotation((AnnotatedEquality)tuple[0],(Node)tuple[1],(Node)tuple[2],(Node)tuple[3]) && tuple[1]==tuple[2];
+            return NominalIntroductionManager.canForgetAnnotation((Node)tuple[1],(Node)tuple[2],(Node)tuple[3]) && tuple[1]==tuple[2];
         else
             return getExtensionTable(tuple.length).containsTuple(tuple);
     }

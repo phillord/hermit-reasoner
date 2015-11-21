@@ -101,7 +101,7 @@ public class DatatypesTest extends AbstractReasonerTest {
         try {
             loadReasonerWithAxioms(axioms);
             fail();
-        } catch (RuntimeException e) {
+        } catch (@SuppressWarnings("unused") RuntimeException e) {
         }
     }
 
@@ -133,7 +133,7 @@ public class DatatypesTest extends AbstractReasonerTest {
         try {
             loadReasonerWithAxioms(axioms);
             fail();
-        } catch (RuntimeException e) {
+        } catch (@SuppressWarnings("unused") RuntimeException e) {
         }
     }
 

@@ -51,7 +51,7 @@ public class EntailmentTest extends AbstractReasonerTest {
         try {
             new EntailmentChecker(m_reasoner, m_dataFactory).entails(conlusions.getLogicalAxioms());
             fail();
-        } catch (Exception e) {
+        } catch (@SuppressWarnings("unused") Exception e) {
             // blank nodes in the conclusion ontology should not contain cycles
         }
     }

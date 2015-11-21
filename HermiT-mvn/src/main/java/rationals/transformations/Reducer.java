@@ -24,7 +24,7 @@ public class Reducer implements UnaryTransformation {
     /*
      * equivalence on DFA
      */
-    private boolean same(State e1, State e2, Automaton a, Map<State, Set<State>> m) {
+    private static boolean same(State e1, State e2, Automaton a, Map<State, Set<State>> m) {
         if (!m.get(e1).equals(m.get(e2)))
             return false;
         /* iterate over all transitions */

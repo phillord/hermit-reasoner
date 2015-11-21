@@ -1,6 +1,7 @@
 package org.semanticweb.HermiT.structural;
 
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -95,15 +96,15 @@ public class ClausificationTest extends AbstractStructuralTest {
         if (resource == null)
             return null;
         List<String> control = new ArrayList<>();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream(resource)));
-        try {
+        
+        try (InputStream in = getClass().getResourceAsStream(resource);
+        InputStreamReader in2 = new InputStreamReader(in);
+        BufferedReader reader = new BufferedReader(in2);){
             String line = reader.readLine();
             while (line != null) {
                 control.add(line);
                 line = reader.readLine();
             }
-        } finally {
-            reader.close();
         }
         String[] controlArray = new String[control.size()];
         control.toArray(controlArray);

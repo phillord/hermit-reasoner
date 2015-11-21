@@ -90,7 +90,7 @@ public class QueryCommand extends AbstractCommand {
                         nodeID=Integer.parseInt(nodeIDString);
                     }
                     catch (NumberFormatException e) {
-                        m_debugger.getOutput().println("Invalid node ID.");
+                        m_debugger.getOutput().println("Invalid node ID. "+e.getMessage());
                         return;
                     }
                     tuple[index]=m_debugger.getTableau().getNode(nodeID);

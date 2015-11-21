@@ -66,7 +66,7 @@ public class EpsilonTransitionRemover implements UnaryTransformation {
         return ret;
     }
 
-    private Map<Object, Set<State>> instructions(Set<Transition> s,Automaton a) {
+    private static Map<Object, Set<State>> instructions(Set<Transition> s,Automaton a) {
         Map<Object, Set<State>> m = new HashMap<>();
         Iterator<Transition> it = s.iterator();
         while (it.hasNext()) {

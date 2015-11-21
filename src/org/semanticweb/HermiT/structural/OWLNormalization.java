@@ -71,7 +71,6 @@ import org.semanticweb.owlapi.model.OWLFacetRestriction;
 import org.semanticweb.owlapi.model.OWLFunctionalDataPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLFunctionalObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLHasKeyAxiom;
-import org.semanticweb.owlapi.model.OWLImportsDeclaration;
 import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLIndividualAxiom;
 import org.semanticweb.owlapi.model.OWLInverseFunctionalObjectPropertyAxiom;
@@ -342,7 +341,10 @@ public class OWLNormalization {
                 other=descriptions[0];
                 nominal=(OWLObjectOneOf)((OWLObjectComplementOf)descriptions[1]).getOperand();
             }
-            if (nominal!=null && (other instanceof OWLClass || (other instanceof OWLObjectComplementOf && ((OWLObjectComplementOf)other).getOperand() instanceof OWLClass))) {
+            assert other!=null;
+            if (nominal!=null && 
+                    (other instanceof OWLClass || 
+                            (other instanceof OWLObjectComplementOf && ((OWLObjectComplementOf)other).getOperand() instanceof OWLClass))) {
                 for (OWLIndividual individual : nominal.getIndividuals())
                     facts.add(m_factory.getOWLClassAssertionAxiom(other,individual));
                 return true;
@@ -418,10 +420,6 @@ public class OWLNormalization {
             m_alreadyExists=new boolean[1];
         }
 
-        // Semantics-less axioms
-
-        public void visit(OWLImportsDeclaration axiom) {
-        }
         @Override
         public void visit(OWLDeclarationAxiom axiom) {
 //            if (axiom.getEntity().isOWLClass()) {

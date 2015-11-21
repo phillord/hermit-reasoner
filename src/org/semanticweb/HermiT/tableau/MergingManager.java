@@ -184,7 +184,7 @@ public final class MergingManager implements Serializable {
                 m_ternaryExtensionTableSearch2Bound.next();
             }
             // Now merge the description graphs
-            m_tableau.m_descriptionGraphManager.mergeGraphs(mergeFrom,mergeInto,m_binaryUnionDependencySet);
+            m_tableau.m_descriptionGraphManager.mergeGraphs(mergeFrom,mergeInto);
             // Now finally merge the nodes
             m_tableau.mergeNode(mergeFrom,mergeInto,dependencySet);
             // Inform the monitor
@@ -193,7 +193,7 @@ public final class MergingManager implements Serializable {
             return true;
         }
     }
-    protected boolean isDescendantOfAtMostThreeLevels(Node descendant,Node ancestor) {
+    protected static boolean isDescendantOfAtMostThreeLevels(Node descendant,Node ancestor) {
         // The method tests ancestry, but only up to three levels.
         // Merges over more levels should not happen.
         if (descendant!=null) {

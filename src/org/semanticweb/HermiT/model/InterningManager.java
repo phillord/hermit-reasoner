@@ -85,7 +85,7 @@ public abstract class InterningManager<E> {
         m_size++;
         return object;
     }
-    protected final int getIndexFor(int hashCode,int entriesLength) {
+    protected static final int getIndexFor(int hashCode,int entriesLength) {
         return hashCode & (entriesLength-1);
     }
     protected void removeEntry(Entry<E> entry) {

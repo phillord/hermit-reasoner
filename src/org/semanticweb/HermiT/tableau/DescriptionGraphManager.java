@@ -171,7 +171,7 @@ public final class DescriptionGraphManager implements Serializable {
         }
         return false;
     }
-    public void mergeGraphs(Node mergeFrom,Node mergeInto,UnionDependencySet binaryUnionDependencySet) {
+    public void mergeGraphs(Node mergeFrom,Node mergeInto) {
         int listNode=mergeFrom.m_firstGraphOccurrenceNode;
         while (listNode!=-1) {
             int graphIndex=m_occurrenceManager.getListNodeComponent(listNode,OccurrenceManager.GRAPH_INDEX);
@@ -254,7 +254,7 @@ public final class DescriptionGraphManager implements Serializable {
         if (m_tableau.m_tableauMonitor!=null)
             m_tableau.m_tableauMonitor.existentialExpansionFinished(existsDescriptionGraph,forNode);
     }
-    public void intializeNode(Node node) {
+    public static void intializeNode(Node node) {
         node.m_firstGraphOccurrenceNode=-1;
     }
     public void destroyNode(Node node) {

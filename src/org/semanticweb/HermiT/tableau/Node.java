@@ -83,7 +83,7 @@ public final class Node implements Serializable {
         m_mergedIntoDependencySet=null;
         m_blocker=null;
         m_directlyBlocked=false;
-        m_tableau.m_descriptionGraphManager.intializeNode(this);
+        DescriptionGraphManager.intializeNode(this);
     }
     protected void destroy() {
         m_nodeID=-1;

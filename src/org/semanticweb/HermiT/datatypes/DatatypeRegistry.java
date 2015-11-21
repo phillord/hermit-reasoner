@@ -93,7 +93,7 @@ public class DatatypeRegistry {
                 "http://www.w3.org/TR/owl2-syntax/#Datatype_Maps. "+CRLF+
                 "The datatype '"+datatypeURI+"' is not part of the OWL 2 datatype map and "+CRLF+
                 "HermiT cannot parse this literal.";
-            throw new UnsupportedDatatypeException(message);
+            throw new UnsupportedDatatypeException(message, e);
         }
         return handler.parseLiteral(lexicalForm,datatypeURI);
     }

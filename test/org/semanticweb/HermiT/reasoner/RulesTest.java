@@ -353,7 +353,7 @@ public class RulesTest extends AbstractReasonerTest {
         try {
             createReasoner();
             fail();
-        } catch (IllegalArgumentException e) {
+        } catch (@SuppressWarnings("unused") IllegalArgumentException e) {
         }
     }
 

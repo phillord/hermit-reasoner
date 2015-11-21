@@ -57,7 +57,7 @@ public class FloatDatatypeHandler implements DatatypeHandler {
         catch (NumberFormatException error) {
             if (lexicalForm.equals("INF")) return Float.POSITIVE_INFINITY;
             if (lexicalForm.equals("-INF")) return Float.NEGATIVE_INFINITY;
-            throw new MalformedLiteralException(lexicalForm,datatypeURI);
+            throw new MalformedLiteralException(lexicalForm,datatypeURI,error);
         }
     }
     @Override

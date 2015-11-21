@@ -238,7 +238,8 @@ public class MixPlay implements AutomatonRunner {
      * @param states
      * @return
      */
-    private boolean checkAccessibleWith(Object object, StatesTuple states) {
+    @SuppressWarnings("unused")
+    private static boolean checkAccessibleWith(Object object, StatesTuple states) {
         return true;
     }
 

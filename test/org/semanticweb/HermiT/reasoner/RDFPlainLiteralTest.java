@@ -30,22 +30,22 @@ public class RDFPlainLiteralTest extends AbstractReasonerTest {
         try {
             DatatypeRegistry.parseLiteral("abc@123", RDF_PLAIN_LITERAL);
             fail();
-        } catch (MalformedLiteralException expected) {
+        } catch (@SuppressWarnings("unused") MalformedLiteralException expected) {
         }
         try {
             DatatypeRegistry.parseLiteral("\u0002blah@en", RDF_PLAIN_LITERAL);
             fail();
-        } catch (MalformedLiteralException expected) {
+        } catch (@SuppressWarnings("unused") MalformedLiteralException expected) {
         }
         try {
             DatatypeRegistry.parseLiteral(" blah@en", XSD_NS + "token");
             fail();
-        } catch (MalformedLiteralException expected) {
+        } catch (@SuppressWarnings("unused") MalformedLiteralException expected) {
         }
         try {
             DatatypeRegistry.parseLiteral("blah  blah@en", XSD_NS + "token");
             fail();
-        } catch (MalformedLiteralException expected) {
+        } catch (@SuppressWarnings("unused") MalformedLiteralException expected) {
         }
     }
 
@@ -157,7 +157,7 @@ public class RDFPlainLiteralTest extends AbstractReasonerTest {
         try {
             subset.enumerateDataValues(new ArrayList<>());
             fail();
-        } catch (Exception expected) {
+        } catch (@SuppressWarnings("unused") Exception expected) {
         }
         assertFalse(subset.containsDataValue("ab"));
         assertTrue(subset.containsDataValue("abccccccccccc"));

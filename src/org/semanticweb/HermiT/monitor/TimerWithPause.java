@@ -37,7 +37,7 @@ public class TimerWithPause extends Timer {
         try {
             m_in.readLine();
         }
-        catch (IOException ignored) {
+        catch (@SuppressWarnings("unused") IOException ignored) {
         }
     }
 }

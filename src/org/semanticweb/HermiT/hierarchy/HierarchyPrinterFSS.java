@@ -138,6 +138,7 @@ public class HierarchyPrinterFSS {
                     m_out.print("SubClassOf( ");
                     print(node.getRepresentative());
                     m_out.print(' ');
+                    assert parentNode!=null;
                     print(parentNode.getRepresentative());
                     m_out.print(" )");
                     afterWS=false;
@@ -207,6 +208,7 @@ public class HierarchyPrinterFSS {
                     m_out.print(' ');
                 boolean afterWS=true;
                 if (printSubPropertyOf) {
+                    assert parentNode!=null;
                     if (m_objectProperties)
                         m_out.print("SubObjectPropertyOf( ");
                     else

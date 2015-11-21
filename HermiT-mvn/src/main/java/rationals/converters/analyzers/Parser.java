@@ -44,7 +44,7 @@ public class Parser {
   
   private ConverterException error(String message) {
       return new ConverterException(
-      "line " + lexico.lineNumber() + " , " + lexico.label() + " : " + message) ;
+      "line " + lexico.lineNumber() + " , " + lexico.label() + " : " + message, null);
   }
   
   public Automaton analyze() throws ConverterException {

@@ -113,7 +113,7 @@ public class SubtreeViewer extends JFrame {
                     nodeID=Integer.parseInt(nodeIDText);
                 }
                 catch (NumberFormatException error) {
-                    JOptionPane.showMessageDialog(SubtreeViewer.this,"Invalid node ID '"+nodeIDText+"'.");
+                    JOptionPane.showMessageDialog(SubtreeViewer.this,"Invalid node ID '"+nodeIDText+"'. "+error.getMessage());
                     return;
                 }
                 Node node=m_debugger.getTableau().getNode(nodeID);

@@ -45,7 +45,7 @@ public class XMLLiteralDatatypeHandler implements DatatypeHandler {
             return XMLLiteral.parse(lexicalForm);
         }
         catch (Exception e) {
-            throw new MalformedLiteralException(lexicalForm,datatypeURI);
+            throw new MalformedLiteralException(lexicalForm,datatypeURI, e);
         }
     }
     @Override

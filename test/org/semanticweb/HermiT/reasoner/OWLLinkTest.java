@@ -334,10 +334,12 @@ public class OWLLinkTest extends AbstractReasonerTest {
             if (!testInconsistency) {
                 physicalIRI = IRI.create(getClass().getResource("res/OWLLink/" + testName + "-conclusion.owl").toURI());
                 c = m_ontologyManager.loadOntology(physicalIRI);
+                boolean result = m_reasoner.isEntailed(c.getLogicalAxioms());
+                assertTrue("Test " + testName + " failed! ", result);
+            } else {
+                boolean result = !m_reasoner.isConsistent();
+                assertTrue("Test " + testName + " failed! ", result);
             }
-            boolean result = testInconsistency ? !m_reasoner.isConsistent()
-                    : m_reasoner.isEntailed(c.getLogicalAxioms());
-            assertTrue("Test " + testName + " failed! ", result);
         }
 
         // Test 19 is for non-simple properties in number restrictions

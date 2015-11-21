@@ -76,7 +76,7 @@ public class Substitution implements UnaryTransformation {
      * @param b
      * @param automaton
      */
-    private void insert(State nss, State nse, Automaton b, Automaton automaton) {
+    private static void insert(State nss, State nse, Automaton b, Automaton automaton) {
         /* map states */
         Map<State, State> map = new HashMap<>();
         for (Iterator<State> i = automaton.states().iterator(); i.hasNext();) {

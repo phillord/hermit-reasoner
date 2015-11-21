@@ -249,7 +249,7 @@ public class Reasoner implements OWLReasoner {
                     try {
                         m_prefixes.declarePrefix(prefixName,prefix);
                     }
-                    catch (IllegalArgumentException e) {
+                    catch (@SuppressWarnings("unused") IllegalArgumentException e) {
                         // ignore
                     }
             }
@@ -2014,7 +2014,6 @@ public class Reasoner implements OWLReasoner {
         TableauMonitor wellKnownTableauMonitor=null;
         switch (configuration.tableauMonitorType) {
         case NONE:
-            wellKnownTableauMonitor=null;
             break;
         case TIMING:
             wellKnownTableauMonitor=new Timer();
@@ -2073,7 +2072,6 @@ public class Reasoner implements OWLReasoner {
                 blockingSignatureCache=new BlockingSignatureCache(directBlockingChecker);
                 break;
             case NOT_CACHED:
-                blockingSignatureCache=null;
                 break;
             default:
                 throw new IllegalArgumentException("Unknown blocking cache type.");
@@ -2397,7 +2395,7 @@ public class Reasoner implements OWLReasoner {
         }
         @Override
         public OWLReasoner createReasoner(OWLOntology ontology) {
-            return createReasoner(ontology,null);
+            return createReasoner(ontology,getProtegeConfiguration(null));
         }
         @Override
         public OWLReasoner createReasoner(OWLOntology ontology,OWLReasonerConfiguration config) {
@@ -2405,7 +2403,7 @@ public class Reasoner implements OWLReasoner {
         }
         @Override
         public OWLReasoner createNonBufferingReasoner(OWLOntology ontology) {
-            return createNonBufferingReasoner(ontology,null);
+            return createNonBufferingReasoner(ontology,getProtegeConfiguration(null));
         }
         @Override
         public OWLReasoner createNonBufferingReasoner(OWLOntology ontology,OWLReasonerConfiguration owlAPIConfiguration) {

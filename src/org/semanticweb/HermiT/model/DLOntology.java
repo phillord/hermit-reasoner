@@ -435,12 +435,9 @@ public class DLOntology implements Serializable {
         return toString(Prefixes.STANDARD_PREFIXES);
     }
     public void save(File file) throws IOException {
-        OutputStream outputStream=new BufferedOutputStream(new FileOutputStream(file));
-        try {
+        try (FileOutputStream out = new FileOutputStream(file);
+                OutputStream outputStream=new BufferedOutputStream(out);) {
             save(outputStream);
-        }
-        finally {
-            outputStream.close();
         }
     }
     public void save(OutputStream outputStream) throws IOException {
@@ -460,12 +457,9 @@ public class DLOntology implements Serializable {
         }
     }
     public static DLOntology load(File file) throws IOException {
-        InputStream inputStream=new BufferedInputStream(new FileInputStream(file));
-        try {
+        try (FileInputStream in = new FileInputStream(file);
+            InputStream inputStream=new BufferedInputStream(in);){
             return load(inputStream);
-        }
-        finally {
-            inputStream.close();
         }
     }
 

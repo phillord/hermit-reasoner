@@ -183,7 +183,7 @@ public class BinaryDataDatatypeHandler implements DatatypeHandler {
                 throw new IllegalStateException("Internal error: facet '"+facetURI+"' is not supported by "+Prefixes.STANDARD_PREFIXES.abbreviateIRI(datatypeURI)+".");
         }
         BinaryDataType binaryDataType=(XSD_HEX_BINARY.equals(datatypeURI) ? BinaryDataType.HEX_BINARY : BinaryDataType.BASE_64_BINARY);
-        if (BinaryDataLengthInterval.isIntervalEmpty(binaryDataType,minLength,maxLength))
+        if (BinaryDataLengthInterval.isIntervalEmpty(minLength,maxLength))
             return null;
         else
             return new BinaryDataLengthInterval(binaryDataType,minLength,maxLength);
