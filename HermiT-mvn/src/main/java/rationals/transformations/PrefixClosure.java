@@ -40,7 +40,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import rationals.Automaton;
-import rationals.NoSuchStateException;
 import rationals.State;
 import rationals.Transition;
 

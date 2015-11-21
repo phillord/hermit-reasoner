@@ -43,7 +43,6 @@ import java.util.Set;
 
 import rationals.Automaton;
 import rationals.Couple;
-import rationals.NoSuchStateException;
 import rationals.State;
 import rationals.Transition;
 import rationals.properties.isNormalized;

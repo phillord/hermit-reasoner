@@ -37,7 +37,6 @@ package rationals.properties;
 
 import junit.framework.TestCase;
 import rationals.Automaton;
-import rationals.NoSuchStateException;
 import rationals.State;
 import rationals.Transition;
 import rationals.converters.ConverterException;
@@ -73,7 +72,7 @@ public class IsDeterministicTest extends TestCase {
         assertTrue(new IsDeterministic().test(a));
     }
 
-    public void testFalse1() throws NoSuchStateException {
+    public void testFalse1() {
         Automaton a = new Automaton();
         State s1 = a.addState(true, false);
         State s2 = a.addState(true, false);
@@ -86,7 +85,7 @@ public class IsDeterministicTest extends TestCase {
 
     }
 
-    public void testFalse2() throws NoSuchStateException {
+    public void testFalse2() {
         Automaton a = new Automaton();
         State s1 = a.addState(true, false);
         State s2 = a.addState(false, false);

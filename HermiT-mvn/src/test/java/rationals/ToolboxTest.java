@@ -56,7 +56,7 @@ public class ToolboxTest extends TestCase {
         super(arg0);
     }
 
-    public void testClosure1() throws NoSuchStateException {
+    public void testClosure1() {
         Automaton a = new Automaton();
         State s1 = a.addState(true, false);
         State s2 = a.addState(false, false);

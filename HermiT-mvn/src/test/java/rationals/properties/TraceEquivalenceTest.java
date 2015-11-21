@@ -59,7 +59,7 @@ public class TraceEquivalenceTest extends TestCase {
     /*
      * simple trace equivalence test
      */
-    public void testTraceEq() throws Throwable {
+    public void testTraceEq() {
         Automaton a = new Automaton();
         State a1 = a.addState(true, false);
         State a2 = a.addState(false, true);

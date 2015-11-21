@@ -11,7 +11,6 @@ import java.util.Set;
 
 import rationals.Automaton;
 import rationals.DefaultSynchronization;
-import rationals.NoSuchStateException;
 import rationals.State;
 import rationals.Synchronization;
 import rationals.Transition;

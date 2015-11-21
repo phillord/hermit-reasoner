@@ -57,7 +57,7 @@ public class EpsilonRemoverTest extends TestCase {
         super(arg0);
     }
 
-    public void testEpsilon() throws NoSuchStateException {
+    public void testEpsilon() {
         Automaton a = new Automaton();
         State s1 = a.addState(true, false);
         State s2 = a.addState(false, false);
@@ -77,7 +77,7 @@ public class EpsilonRemoverTest extends TestCase {
         System.err.println(b);
     }
 
-    public void testEpsilon2() throws NoSuchStateException {
+    public void testEpsilon2() {
         Automaton a = new Automaton();
         State s1 = a.addState(true, false);
         State s2 = a.addState(false, false);
@@ -96,7 +96,7 @@ public class EpsilonRemoverTest extends TestCase {
         System.err.println(b);
     }
 
-    public void testEpsilon3() throws NoSuchStateException {
+    public void testEpsilon3() {
         Automaton a = new Automaton();
         State s1 = a.addState(true, false);
         State s2 = a.addState(false, false);

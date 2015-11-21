@@ -41,7 +41,6 @@ import java.util.Map;
 import java.util.Set;
 
 import rationals.Automaton;
-import rationals.NoSuchStateException;
 import rationals.State;
 import rationals.Transition;
 

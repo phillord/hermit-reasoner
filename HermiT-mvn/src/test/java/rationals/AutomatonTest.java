@@ -92,7 +92,7 @@ public class AutomatonTest extends TestCase {
         assertTrue(!automaton.terminals().contains(s));
     }
 
-    public void testAlphabet() throws NoSuchStateException {
+    public void testAlphabet() {
         Set<String> alph = new HashSet<>();
         alph.add("a");
         alph.add("b");
@@ -123,7 +123,7 @@ public class AutomatonTest extends TestCase {
     /*
      * Class under test for Set accessibleStates()
      */
-    public void testAccessibleStates() throws NoSuchStateException {
+    public void testAccessibleStates() {
         State s5 = automaton.addState(false, false);
         State s6 = automaton.addState(false, false);
         automaton.addTransition(new Transition(ss[0], "c", s5), null);
@@ -136,7 +136,7 @@ public class AutomatonTest extends TestCase {
     /*
      * Class under test for Set coAccessibleStates()
      */
-    public void testCoAccessibleStates() throws NoSuchStateException {
+    public void testCoAccessibleStates() {
         State s5 = automaton.addState(false, false);
         State s6 = automaton.addState(false, false);
         automaton.addTransition(new Transition(s5, "c", ss[4]), null);
@@ -146,7 +146,7 @@ public class AutomatonTest extends TestCase {
         assertTrue(acc.contains(s5) && acc.contains(s6));
     }
 
-    public void testAccessibleAndCoAccessibleStates() throws NoSuchStateException {
+    public void testAccessibleAndCoAccessibleStates() {
         Set<State> acc = automaton.accessibleAndCoAccessibleStates();
         State s5 = automaton.addState(false, false);
         State s6 = automaton.addState(false, false);
@@ -168,7 +168,7 @@ public class AutomatonTest extends TestCase {
         // TODO Implement addTransition().
     }
 
-    public void testAcceptDFA() throws NoSuchStateException {
+    public void testAcceptDFA() {
         Automaton t = new Automaton();
         State s1 = t.addState(true, true);
         State s2 = t.addState(false, false);
@@ -183,7 +183,7 @@ public class AutomatonTest extends TestCase {
         assertTrue("Automaton does accept 'abcbc'", !t.accept(exp));
     }
 
-    public void testAcceptNFA1() throws NoSuchStateException {
+    public void testAcceptNFA1() {
         Automaton t = new Automaton();
         State s1 = t.addState(true, true);
         State s2 = t.addState(false, false);

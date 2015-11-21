@@ -38,7 +38,6 @@ package rationals.properties;
 
 import junit.framework.TestCase;
 import rationals.Automaton;
-import rationals.NoSuchStateException;
 import rationals.State;
 import rationals.Transition;
 
@@ -63,7 +62,7 @@ public class EquivalentTest extends TestCase {
     /*
      * Canonical example of NOT a bisimulation
      */
-    public void testBisim() throws NoSuchStateException {
+    public void testBisim() {
         Automaton a = new Automaton();
         State a1 = a.addState(true, false);
         State a2 = a.addState(false, false);
@@ -87,7 +86,7 @@ public class EquivalentTest extends TestCase {
     /*
      * Canonical example of NOT a bisimulation
      */
-    public void testWeakBisim() throws NoSuchStateException {
+    public void testWeakBisim() {
         Automaton a = new Automaton();
         State a1 = a.addState(true, false);
         State a2 = a.addState(false, false);

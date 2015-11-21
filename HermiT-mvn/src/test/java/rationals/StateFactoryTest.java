@@ -85,7 +85,7 @@ public abstract class StateFactoryTest extends TestCase {
         for (Iterator<State> it = s.iterator(); it.hasNext(); i++) {
             try {
                 it.next();
-            } catch (ConcurrentModificationException ccm) {
+            } catch (@SuppressWarnings("unused") ConcurrentModificationException ccm) {
                 return;
             }
             if (i == 5)
@@ -103,7 +103,7 @@ public abstract class StateFactoryTest extends TestCase {
         try {
             it.next();
             fail("Should have thrown no such element exception");
-        } catch (NoSuchElementException nse) {
+        } catch (@SuppressWarnings("unused") NoSuchElementException nse) {
         }
     }
 
