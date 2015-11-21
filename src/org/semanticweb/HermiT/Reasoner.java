@@ -521,8 +521,8 @@ public class Reasoner implements OWLReasoner {
         AtomicRole atomicRole=AtomicRole.create(owlObjectProperty.getIRI().toString());
         return
             m_dlOntology.containsObjectRole(atomicRole) ||
-            AtomicRole.TOP_OBJECT_ROLE.equals(owlObjectProperty) ||
-            AtomicRole.BOTTOM_OBJECT_ROLE.equals(owlObjectProperty);
+            AtomicRole.TOP_OBJECT_ROLE.equals(atomicRole) ||
+            AtomicRole.BOTTOM_OBJECT_ROLE.equals(atomicRole);
     }
     public boolean isDefined(OWLDataProperty owlDataProperty) {
         AtomicRole atomicRole=AtomicRole.create(owlDataProperty.getIRI().toString());

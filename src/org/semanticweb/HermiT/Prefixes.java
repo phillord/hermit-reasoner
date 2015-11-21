@@ -129,7 +129,7 @@ public class Prefixes implements Serializable {
                 String prefixIRI=m_prefixIRIsByPrefixName.get(prefix);
                 if (prefixIRI==null) {
                     // Catch the common error of not quoting IRIs starting with http:
-                    if (prefix=="http:")
+                    if ("http:".equals(prefix))
                         throw new IllegalArgumentException("The IRI '"+abbreviation+"' must be enclosed in '<' and '>' to be used as an abbreviation.");
                     throw new IllegalArgumentException("The string '"+prefix+"' is not a registered prefix name.");
                 }
