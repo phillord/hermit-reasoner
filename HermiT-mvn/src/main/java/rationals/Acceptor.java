@@ -44,29 +44,9 @@ import java.util.Set;
  */
 public interface Acceptor {
     /**
-     * Checks this automaton accepts the given "word". A word is a list of
-     * objects. This method checks that reading <code>word</code> starting from
-     * initials state leads to at least one terminal state.
-     * 
-     * @param word
-     * @return
+     * @param word words
+     * @return State steps for the input words
      */
-    boolean accept(List<?> word);
-
-    /**
-     * Return a trace of states reading word from start state. If start state is
-     * null, assume reading from initials(). This method returns a List of Set
-     * objects showing all the states reached by this run while reading
-     * <code>word</code> starting from <code>start</code>.
-     * 
-     * @param word
-     *            a List of objects in this automaton's alphabet
-     * @param start
-     *            a starting State. Maybe null
-     * @return a List of Set of State objects
-     */
-    List<Set<State>> traceStates(List<?> word, State start);
-
     Set<State> steps(List<?> word);
 
 }

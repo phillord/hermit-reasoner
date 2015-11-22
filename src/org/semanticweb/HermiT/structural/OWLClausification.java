@@ -213,14 +213,14 @@ public class OWLClausification {
                     dlClauses.add(dlClause);
                 }
         DataRangeConverter dataRangeConverter=new DataRangeConverter(m_configuration.warningMonitor,axioms.m_definedDatatypesIRIs,allUnknownDatatypeRestrictions,m_configuration.ignoreUnsupportedDatatypes);
-        NormalizedAxiomClausifier clausifier=new NormalizedAxiomClausifier(dataRangeConverter,positiveFacts,factory);
+        NormalizedAxiomClausifier clausifier=new NormalizedAxiomClausifier(dataRangeConverter,positiveFacts);
         for (OWLClassExpression[] inclusion : axioms.m_conceptInclusions) {
             for (OWLClassExpression description : inclusion)
                 description.accept(clausifier);
             DLClause dlClause=clausifier.getDLClause();
             dlClauses.add(dlClause.getSafeVersion(AtomicConcept.THING));
         }
-        NormalizedDataRangeAxiomClausifier normalizedDataRangeAxiomClausifier=new NormalizedDataRangeAxiomClausifier(dataRangeConverter,factory,axioms.m_definedDatatypesIRIs);
+        NormalizedDataRangeAxiomClausifier normalizedDataRangeAxiomClausifier=new NormalizedDataRangeAxiomClausifier(dataRangeConverter,axioms.m_definedDatatypesIRIs);
         for (OWLDataRange[] inclusion : axioms.m_dataRangeInclusions) {
             for (OWLDataRange description : inclusion)
                 description.accept(normalizedDataRangeAxiomClausifier);
@@ -324,7 +324,7 @@ public class OWLClausification {
         bodyAtoms.toArray(bAtoms);
         return DLClause.create(hAtoms,bAtoms);
     }
-    private boolean contains(OWLAxioms axioms, OWLDataProperty p) {
+    private static boolean contains(OWLAxioms axioms, OWLDataProperty p) {
         for(OWLDataPropertyExpression[] e: axioms.m_dataPropertyInclusions) {
             for(OWLDataPropertyExpression candidate:e) {
                 if(candidate.equals(p)) {
@@ -396,16 +396,14 @@ public class OWLClausification {
         protected final List<Atom> m_headAtoms;
         protected final List<Atom> m_bodyAtoms;
         protected final Set<Atom> m_positiveFacts;
-        protected final OWLDataFactory m_factory;
         protected int m_yIndex;
         protected int m_zIndex;
 
-        public NormalizedAxiomClausifier(DataRangeConverter dataRangeConverter,Set<Atom> positiveFacts,OWLDataFactory factory) {
+        public NormalizedAxiomClausifier(DataRangeConverter dataRangeConverter,Set<Atom> positiveFacts) {
             m_dataRangeConverter=dataRangeConverter;
             m_headAtoms=new ArrayList<>();
             m_bodyAtoms=new ArrayList<>();
             m_positiveFacts=positiveFacts;
-            m_factory=factory;
         }
         protected DLClause getDLClause() {
             Atom[] headAtoms=new Atom[m_headAtoms.size()];
@@ -695,15 +693,12 @@ public class OWLClausification {
         protected final Set<String> m_definedDatatypeIRIs;
         protected final List<Atom> m_headAtoms;
         protected final List<Atom> m_bodyAtoms;
-        protected final OWLDataFactory m_factory;
-        protected int m_yIndex;
 
-        public NormalizedDataRangeAxiomClausifier(DataRangeConverter dataRangeConverter,OWLDataFactory factory,Set<String> definedDatatypeIRIs) {
+        public NormalizedDataRangeAxiomClausifier(DataRangeConverter dataRangeConverter,Set<String> definedDatatypeIRIs) {
             m_dataRangeConverter=dataRangeConverter;
             m_definedDatatypeIRIs=definedDatatypeIRIs;
             m_headAtoms=new ArrayList<>();
             m_bodyAtoms=new ArrayList<>();
-            m_factory=factory;
         }
         protected DLClause getDLClause() {
             Atom[] headAtoms=new Atom[m_headAtoms.size()];
@@ -713,21 +708,7 @@ public class OWLClausification {
             DLClause dlClause=DLClause.create(headAtoms,bodyAtoms);
             m_headAtoms.clear();
             m_bodyAtoms.clear();
-            m_yIndex=0;
             return dlClause;
-        }
-        protected void ensureYNotZero() {
-            if (m_yIndex==0)
-                m_yIndex++;
-        }
-        protected Variable nextY() {
-            Variable result;
-            if (m_yIndex==0)
-                result=Y;
-            else
-                result=Variable.create("Y"+m_yIndex);
-            m_yIndex++;
-            return result;
         }
 
         // Various types of descriptions
@@ -745,7 +726,7 @@ public class OWLClausification {
         public void visit(OWLDataUnionOf dr) {
             throw new IllegalStateException("Internal error: invalid normal form.");
         }
-        private String datatypeIRI(OWLDataRange r) {
+        private static String datatypeIRI(OWLDataRange r) {
             if(r.isDatatype()) {
                 return r.asOWLDatatype().getIRI().toString();
             }

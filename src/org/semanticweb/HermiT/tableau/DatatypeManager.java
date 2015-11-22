@@ -573,16 +573,6 @@ public final class DatatypeManager implements Serializable {
         public List<DVariable> getActiveVariables() {
             return Collections.unmodifiableList(m_activeVariables);
         }
-        public DVariable getVariableFor(Node node) {
-            int index=getIndexFor(node.hashCode(),m_buckets.length);
-            DVariable entry=m_buckets[index];
-            while (entry!=null) {
-                if (entry.m_node==node)
-                    return entry;
-                entry=entry.m_nextEntry;
-            }
-            return null;
-        }
         protected DVariable getVariableForEx(Node node,boolean[] newVariableAdded) {
             int index=getIndexFor(node.hashCode(),m_buckets.length);
             DVariable entry=m_buckets[index];

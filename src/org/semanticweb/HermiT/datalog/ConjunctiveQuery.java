@@ -13,7 +13,6 @@ import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
 import org.semanticweb.HermiT.tableau.DLClauseEvaluator.Worker;
 import org.semanticweb.HermiT.tableau.DependencySet;
 import org.semanticweb.HermiT.tableau.ExtensionTable;
-import org.semanticweb.HermiT.tableau.ExtensionTable.View;
 import org.semanticweb.HermiT.tableau.HyperresolutionManager;
 import org.semanticweb.HermiT.tableau.Node;
 
@@ -47,14 +46,8 @@ public class ConjunctiveQuery {
     public int getNumberOfQUeryAtoms() {
         return m_queryAtoms.length;
     }
-    public Atom getQueryAtom(int atomIndex) {
-        return m_queryAtoms[atomIndex];
-    }
     public int getNumberOfAnswerTerms() {
         return m_answerTerms.length;
-    }
-    public Term getAnswerTerm(int termIndex) {
-        return m_answerTerms[termIndex];
     }
     public void evaluate(QueryResultCollector queryResultCollector) {
         try {
@@ -81,10 +74,6 @@ public class ConjunctiveQuery {
         @Override
         public ExtensionTable getExtensionTable() {
             throw new UnsupportedOperationException();
-        }
-        @Override
-        public View getExtensionView() {
-            return View.TOTAL;
         }
         @Override
         public void clear() {

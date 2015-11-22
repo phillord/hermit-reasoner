@@ -194,9 +194,5 @@ public final class TupleTableFullIndex implements Serializable {
                 m_firstFreeEntry=nextFreeEntry;
             return result;
         }
-        public void deleteEntry(int entry) {
-            m_entries[entry+ENTRY_NEXT]=m_firstFreeEntry;
-            m_firstFreeEntry=entry;
-        }
     }
 }

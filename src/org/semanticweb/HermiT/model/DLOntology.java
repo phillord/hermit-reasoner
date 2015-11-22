@@ -17,11 +17,6 @@
 */
 package org.semanticweb.HermiT.model;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -201,9 +196,6 @@ public class DLOntology implements Serializable {
     public Set<Role> getAllComplexObjectRoles() {
         return m_allComplexObjectRoles;
     }
-    public boolean isComplexObjectRole(Role role) {
-        return m_allComplexObjectRoles.contains(role);
-    }
     public Set<AtomicRole> getAllAtomicDataRoles() {
         return m_allAtomicDataRoles;
     }
@@ -254,63 +246,6 @@ public class DLOntology implements Serializable {
     }
     public Set<String> getDefinedDatatypeIRIs() {
         return m_definedDatatypeIRIs;
-    }
-    protected Set<AtomicConcept> getBodyOnlyAtomicConcepts() {
-        Set<AtomicConcept> bodyOnlyAtomicConcepts=new HashSet<>(m_allAtomicConcepts);
-        for (DLClause dlClause : m_dlClauses)
-            for (int headIndex=0;headIndex<dlClause.getHeadLength();headIndex++) {
-                DLPredicate dlPredicate=dlClause.getHeadAtom(headIndex).getDLPredicate();
-                bodyOnlyAtomicConcepts.remove(dlPredicate);
-                if (dlPredicate instanceof AtLeastConcept)
-                    bodyOnlyAtomicConcepts.remove(((AtLeastConcept)dlPredicate).getToConcept());
-            }
-        return bodyOnlyAtomicConcepts;
-    }
-    protected Set<AtomicRole> computeGraphAtomicRoles() {
-        Set<AtomicRole> graphAtomicRoles=new HashSet<>();
-        for (DescriptionGraph descriptionGraph : m_allDescriptionGraphs)
-            for (int edgeIndex=0;edgeIndex<descriptionGraph.getNumberOfEdges();edgeIndex++) {
-                DescriptionGraph.Edge edge=descriptionGraph.getEdge(edgeIndex);
-                graphAtomicRoles.add(edge.getAtomicRole());
-            }
-        boolean change=true;
-        while (change) {
-            change=false;
-            for (DLClause dlClause : m_dlClauses)
-                if (containsAtomicRoles(dlClause,graphAtomicRoles))
-                    if (addAtomicRoles(dlClause,graphAtomicRoles))
-                        change=true;
-        }
-        return graphAtomicRoles;
-    }
-    protected boolean containsAtomicRoles(DLClause dlClause,Set<AtomicRole> roles) {
-        for (int atomIndex=0;atomIndex<dlClause.getBodyLength();atomIndex++) {
-            DLPredicate dlPredicate=dlClause.getBodyAtom(atomIndex).getDLPredicate();
-            if (dlPredicate instanceof AtomicRole && roles.contains(dlPredicate))
-                return true;
-        }
-        for (int atomIndex=0;atomIndex<dlClause.getHeadLength();atomIndex++) {
-            DLPredicate dlPredicate=dlClause.getHeadAtom(atomIndex).getDLPredicate();
-            if (dlPredicate instanceof AtomicRole && roles.contains(dlPredicate))
-                return true;
-        }
-        return false;
-    }
-    protected boolean addAtomicRoles(DLClause dlClause,Set<AtomicRole> roles) {
-        boolean change=false;
-        for (int atomIndex=0;atomIndex<dlClause.getBodyLength();atomIndex++) {
-            DLPredicate dlPredicate=dlClause.getBodyAtom(atomIndex).getDLPredicate();
-            if (dlPredicate instanceof AtomicRole)
-                if (roles.add((AtomicRole)dlPredicate))
-                    change=true;
-        }
-        for (int atomIndex=0;atomIndex<dlClause.getHeadLength();atomIndex++) {
-            DLPredicate dlPredicate=dlClause.getHeadAtom(atomIndex).getDLPredicate();
-            if (dlPredicate instanceof AtomicRole)
-                if (roles.add((AtomicRole)dlPredicate))
-                    change=true;
-        }
-        return change;
     }
     public String toString(Prefixes prefixes) {
         StringBuilder stringBuffer=new StringBuilder("Prefixes: [").append(CRLF);
@@ -385,12 +320,6 @@ public class DLOntology implements Serializable {
     public String toString() {
         return toString(Prefixes.STANDARD_PREFIXES);
     }
-    public void save(File file) throws IOException {
-        try (FileOutputStream out = new FileOutputStream(file);
-                OutputStream outputStream=new BufferedOutputStream(out);) {
-            save(outputStream);
-        }
-    }
     public void save(OutputStream outputStream) throws IOException {
         ObjectOutputStream objectOutputStream=new ObjectOutputStream(outputStream);
         objectOutputStream.writeObject(this);
@@ -405,12 +334,6 @@ public class DLOntology implements Serializable {
             IOException error=new IOException();
             error.initCause(e);
             throw error;
-        }
-    }
-    public static DLOntology load(File file) throws IOException {
-        try (FileInputStream in = new FileInputStream(file);
-            InputStream inputStream=new BufferedInputStream(in);){
-            return load(inputStream);
         }
     }
 

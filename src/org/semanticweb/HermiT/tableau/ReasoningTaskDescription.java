@@ -113,12 +113,6 @@ public class ReasoningTaskDescription {
     public static ReasoningTaskDescription isInstanceOf(Object atomicConcept,Object individual) {
         return new ReasoningTaskDescription(true,StandardTestType.INSTANCE_OF,atomicConcept,individual);
     }
-    public static ReasoningTaskDescription isObjectRoleInstanceOf(Object atomicRole,Object individual1,Object individual2) {
-        return new ReasoningTaskDescription(true,StandardTestType.OBJECT_ROLE_INSTANCE_OF,atomicRole,individual1,individual2);
-    }
-    public static ReasoningTaskDescription isDataRoleInstanceOf(Object atomicRole,Object individual1,Object individual2) {
-        return new ReasoningTaskDescription(true,StandardTestType.DATA_ROLE_INSTANCE_OF,atomicRole,individual1,individual2);
-    }
     public static ReasoningTaskDescription isAxiomEntailed(Object axiom) {
         return new ReasoningTaskDescription(true,StandardTestType.ENTAILMENT,axiom);
     }

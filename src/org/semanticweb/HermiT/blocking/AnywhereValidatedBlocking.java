@@ -30,7 +30,6 @@ import org.semanticweb.HermiT.model.DataRange;
 import org.semanticweb.HermiT.model.Variable;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
 import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
-import org.semanticweb.HermiT.tableau.ExtensionManager;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.NodeType;
 import org.semanticweb.HermiT.tableau.Tableau;
@@ -41,23 +40,19 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
     protected BlockingValidator m_permanentBlockingValidator;
     protected BlockingValidator m_additionalBlockingValidator;
     protected Tableau m_tableau;
-    protected ExtensionManager m_extensionManager;
     protected Node m_firstChangedNode;
     protected Node m_lastValidatedUnchangedNode;
-    protected boolean m_useSimpleCore;
-    protected final boolean m_hasInverses;
+    protected final boolean m_useSimpleCore;
 
-    public AnywhereValidatedBlocking(DirectBlockingChecker directBlockingChecker,boolean hasInverses,boolean useSimpleCore) {
+    public AnywhereValidatedBlocking(DirectBlockingChecker directBlockingChecker,boolean useSimpleCore) {
         m_directBlockingChecker=directBlockingChecker;
         m_currentBlockersCache=new ValidatedBlockersCache(m_directBlockingChecker);
-        m_hasInverses=hasInverses;
         m_useSimpleCore=useSimpleCore;
     }
     @Override
     public void initialize(Tableau tableau) {
         m_tableau=tableau;
         m_directBlockingChecker.initialize(tableau);
-        m_extensionManager=m_tableau.getExtensionManager();
         m_permanentBlockingValidator=new BlockingValidator(m_tableau,m_tableau.getPermanentDLOntology().getDLClauses());
         updateAdditionalBlockingValidator();
     }
@@ -343,29 +338,6 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
     public void modelFound() {
     }
 
-    protected final class ViolationStatistic implements Comparable<ViolationStatistic> {
-        public final String m_violatedConstraint;
-        public final int m_numberOfViolations;
-        public ViolationStatistic(String violatedConstraint,int numberOfViolations) {
-            m_violatedConstraint=violatedConstraint;
-            m_numberOfViolations=numberOfViolations;
-        }
-        @Override
-        public int compareTo(ViolationStatistic that) {
-            if (this==that)
-                return 0;
-            if (that==null)
-                throw new NullPointerException("Comparing to a null object is illegal. ");
-            if (this.m_numberOfViolations==that.m_numberOfViolations)
-                return m_violatedConstraint.compareTo(that.m_violatedConstraint);
-            else
-                return that.m_numberOfViolations-this.m_numberOfViolations;
-        }
-        @Override
-        public String toString() {
-            return m_numberOfViolations+": "+m_violatedConstraint.replaceAll("http://www.co-ode.org/ontologies/galen#","");
-        }
-    }
     @Override
     public boolean isExact() {
         return false;
@@ -390,7 +362,7 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
                     coreVariables[i]=false;
                 }
                 if (dlClause.isAtomicConceptInclusion() && variables.size()>1) {
-                    workers.add(new ComputeCoreVariables(dlClause,variables,valuesBuffer,coreVariables));
+                    workers.add(new ComputeCoreVariables(valuesBuffer,coreVariables));
                 }
             }
         }
@@ -399,14 +371,10 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
     protected static final class ComputeCoreVariables implements DLClauseEvaluator.Worker,Serializable {
         private static final long serialVersionUID=899293772370136783L;
 
-        protected final DLClause m_dlClause;
-        protected final List<Variable> m_variables;
         protected final Object[] m_valuesBuffer;
         protected final boolean[] m_coreVariables;
 
-        public ComputeCoreVariables(DLClause dlClause,List<Variable> variables,Object[] valuesBuffer,boolean[] coreVariables) {
-            m_dlClause=dlClause;
-            m_variables=variables;
+        public ComputeCoreVariables(Object[] valuesBuffer,boolean[] coreVariables) {
             m_valuesBuffer=valuesBuffer;
             m_coreVariables=coreVariables;
         }
@@ -439,7 +407,6 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
 }
 
 class ValidatedBlockersCache {
-    protected Tableau m_tableau;
     protected final DirectBlockingChecker m_directBlockingChecker;
     protected CacheEntry[] m_buckets;
     protected int m_numberOfElements;

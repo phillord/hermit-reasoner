@@ -78,7 +78,7 @@ public class Constant extends Term {
         return s_interningManager.intern(this);
     }
 
-    protected static InterningManager<Constant> s_interningManager=new InterningManager<Constant>() {
+    protected final static InterningManager<Constant> s_interningManager=new InterningManager<Constant>() {
         @Override
         protected boolean equal(Constant object1,Constant object2) {
             return object1.m_lexicalForm.equals(object2.m_lexicalForm) && object1.m_datatypeURI.equals(object2.m_datatypeURI);

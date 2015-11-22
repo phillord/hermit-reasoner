@@ -33,41 +33,4 @@ public interface Builder<T extends Builder<T>> {
      * @return this builder.
      */
     T build(State label, Automaton auto);
-
-    /**
-     * Sets the label of the transition.
-     * 
-     * @param label
-     * @return this transition builder.
-     */
-    T on(Object label);
-
-    /**
-     * Sets the end state and terminates transition construction. This method
-     * effectively adds the transition to the automaton.
-     * 
-     * @param o
-     *            the label of the end state.
-     * @return this builder.
-     */
-    T go(Object o);
-
-    /**
-     * Adds a new transition in the automaton that loops on current label and
-     * from state.
-     * 
-     * @return this builder.
-     */
-    T loop();
-
-    /**
-     * Resets this builder to another starting state. Note that the state is
-     * created if needed.
-     * 
-     * @param label
-     *            the state to start from.
-     * @return this builder.
-     */
-    T from(Object label);
-
 }

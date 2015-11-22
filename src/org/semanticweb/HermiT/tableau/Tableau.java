@@ -777,30 +777,4 @@ public final class Tableau implements Serializable {
         assert buffer.isEmpty();
         m_existentialConceptsBuffers.add(buffer);
     }
-    public void checkTableauList() {
-        Node node=m_firstTableauNode;
-        int numberOfNodesInTableau=0;
-        while (node!=null) {
-            if (node.m_previousTableauNode==null) {
-                if (m_firstTableauNode!=node)
-                    throw new IllegalStateException("First tableau node is pointing wrongly.");
-            }
-            else {
-                if (node.m_previousTableauNode.m_nextTableauNode!=node)
-                    throw new IllegalStateException("Previous tableau node is pointing wrongly.");
-            }
-            if (node.m_nextTableauNode==null) {
-                if (m_lastTableauNode!=node)
-                    throw new IllegalStateException("Last tableau node is pointing wrongly.");
-            }
-            else {
-                if (node.m_nextTableauNode.m_previousTableauNode!=node)
-                    throw new IllegalStateException("Next tableau node is pointing wrongly.");
-            }
-            numberOfNodesInTableau++;
-            node=node.m_nextTableauNode;
-        }
-        if (numberOfNodesInTableau!=m_numberOfNodesInTableau)
-            throw new IllegalStateException("Invalid number of nodes in the tableau.");
-    }
 }

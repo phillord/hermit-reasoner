@@ -688,8 +688,6 @@ public class DLClauseEvaluator implements Serializable {
             m_copyIsCore=copyIsCore;
             m_copyValuesToArguments=copyValuesToArguments;
         }
-        public void clear() {
-        }
         @Override
         public int execute(int programCounter) {
             Node[] arguments=new Node[m_copyValuesToArguments.length];

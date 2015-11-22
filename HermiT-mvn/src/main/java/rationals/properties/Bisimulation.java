@@ -35,10 +35,8 @@
  */
 package rationals.properties;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import rationals.Automaton;
@@ -134,10 +132,5 @@ public class Bisimulation implements Relation {
            }
        }
        return true;
-    }
-    
-    @Override
-    public List<Object> getErrorTrace() {
-        return Collections.emptyList();
     }
 }

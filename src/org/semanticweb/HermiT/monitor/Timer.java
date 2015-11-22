@@ -17,6 +17,7 @@
 */
 package org.semanticweb.HermiT.monitor;
 
+import java.io.OutputStream;
 import java.io.PrintWriter;
 
 import org.semanticweb.HermiT.Prefixes;
@@ -32,11 +33,8 @@ public class Timer extends TableauMonitorAdapter {
     protected int m_numberOfBacktrackings;
     protected int m_testNumber=0;
 
-    public Timer() {
-        m_output=new PrintWriter(System.out);
-    }
-    public Timer(PrintWriter inOutput) {
-        m_output=inOutput;
+    public Timer(OutputStream out) {
+        m_output=new PrintWriter(out);
     }
     protected Object readResolve() {
         m_output=new PrintWriter(System.out);

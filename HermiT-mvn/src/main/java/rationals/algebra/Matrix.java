@@ -50,25 +50,14 @@ public final class Matrix implements SemiRing {
     /* matrices for transitions, initial and terminal states */
     protected final SemiRing[][] matrix;
 
-    private int line;
+    private final int line;
     
-    private int col;
+    private final int col;
     
 
     public Matrix(int ns) {
         this.line = this.col = ns;
         this.matrix = new SemiRing[ns][ns];
-    }
-
-    /**
-     * @param matrix
-     */
-    public Matrix(Matrix matrix) {
-        this(matrix.line);
-        for (int i = 0; i < line; i++) 
-            for (int j = 0; j < col; j++) 
-                this.matrix[i][j] = matrix.matrix[i][j];
-        
     }
 
     /**

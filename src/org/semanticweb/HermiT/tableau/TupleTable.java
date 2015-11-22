@@ -97,7 +97,7 @@ public final class TupleTable implements Serializable {
         private static final long serialVersionUID=2239482172592108644L;
 
         public final int m_arity;
-        public Object[] m_objects;
+        public final Object[] m_objects;
 
         public Page(int arity) {
             m_arity=arity;

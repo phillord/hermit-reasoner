@@ -25,14 +25,4 @@ public interface State {
      * @return true iff this state is terminal.
      */
     boolean isTerminal();
-
-    /**
-     * Sets the initial status of this state.
-     * 
-     * @param initial
-     * @return
-     */
-    State setInitial(boolean initial);
-
-    State setTerminal(boolean terminal);
 }

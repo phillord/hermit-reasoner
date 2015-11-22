@@ -107,27 +107,6 @@ public interface Rational {
     Set<State> accessibleStates();
 
     /**
-     * Returns the set of states that can be accessed in this automaton starting
-     * from given set of states
-     * 
-     * @param states
-     *            a non null set of starting states
-     * @return a - possibly empty - set of accessible states
-     */
-    Set<State> accessibleStates(Set<State> states);
-
-    /**
-     * Returns the set of co-accesible states for a given set of states, that is
-     * the set of states from this automaton from which there exists a path to a
-     * state in <code>states</code>.
-     * 
-     * @param states
-     *            a non null set of ending states
-     * @return a - possibly empty - set of coaccessible states
-     */
-    Set<State> coAccessibleStates(Set<State> states);
-
-    /**
      * Returns the set of all co-accessible states in this automaton.
      * 
      * @return the set of all co-accessible states in this automaton. A state
@@ -239,10 +218,4 @@ public interface Rational {
      * @return
      */
     Set<Transition> deltaMinusOne(State st);
-
-    /**
-     * @param st
-     * @return
-     */
-    Set<State> accessibleStates(State st);
 }

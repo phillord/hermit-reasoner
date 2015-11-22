@@ -82,7 +82,7 @@ public class DatatypeRestriction extends AtomicDataRange {
         return s_interningManager.intern(this);
     }
 
-    protected static InterningManager<DatatypeRestriction> s_interningManager=new InterningManager<DatatypeRestriction>() {
+    protected final static InterningManager<DatatypeRestriction> s_interningManager=new InterningManager<DatatypeRestriction>() {
         @Override
         protected boolean equal(DatatypeRestriction object1,DatatypeRestriction object2) {
             if (!object1.m_datatypeURI.equals(object2.m_datatypeURI) || object1.m_facetURIs.length!=object2.m_facetURIs.length)

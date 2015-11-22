@@ -31,7 +31,7 @@ import org.semanticweb.HermiT.model.ExistentialConcept;
  */
 public final class Node implements Serializable {
     private static final long serialVersionUID=-2549229429321484690L;
-    private static List<ExistentialConcept> NO_EXISTENTIALS=Collections.emptyList();
+    private final static List<ExistentialConcept> NO_EXISTENTIALS=Collections.emptyList();
     public static final Node SIGNATURE_CACHE_BLOCKER=new Node(null);
 
     public static enum NodeState { ACTIVE,MERGED,PRUNED }

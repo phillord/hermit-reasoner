@@ -20,33 +20,13 @@ public class DefaultStateFactory implements StateFactory, Cloneable {
 
         boolean terminal;
 
-        Automaton a;
+        final Automaton a;
 
         DefaultState(int i, boolean initial, boolean terminal) {
             this.i = i;
             this.a = automaton;
             this.initial = initial;
             this.terminal = terminal;
-        }
-
-        @Override
-        public State setInitial(boolean initial) {
-            this.initial = initial;
-            if (initial)
-                a.initials().add(this);
-            else
-                a.initials().remove(this);
-            return this;
-        }
-
-        @Override
-        public State setTerminal(boolean terminal) {
-            this.terminal = terminal;
-            if (terminal)
-                a.terminals().add(this);
-            else
-                a.terminals().remove(this);
-            return this;
         }
 
         @Override
@@ -87,14 +67,6 @@ public class DefaultStateFactory implements StateFactory, Cloneable {
         private final DefaultStateFactory df;
 
         /**
-         * @param set
-         */
-        public DefaultStateSet(DefaultStateSet set, DefaultStateFactory df) {
-            this.bits = (BitSet) set.bits.clone();
-            this.df = df;
-        }
-
-        /**
          * 
          */
         public DefaultStateSet(DefaultStateFactory df) {
@@ -128,9 +100,9 @@ public class DefaultStateFactory implements StateFactory, Cloneable {
 
         int bit = -1;
 
-        BitSet bits = new BitSet();
+        final BitSet bits = new BitSet();
 
-        Iterator<State> it = new Iterator<State>() {
+        final Iterator<State> it = new Iterator<State>() {
 
             @Override
             public void remove() {
@@ -295,19 +267,9 @@ public class DefaultStateFactory implements StateFactory, Cloneable {
     }
 
     @Override
-    public Set<State> stateSet(Set<State> s) {
-        return new DefaultStateSet((DefaultStateSet) s, this);
-    }
-
-    @Override
     public Object clone() throws CloneNotSupportedException {
         DefaultStateFactory cl = (DefaultStateFactory) super.clone();
         cl.id = 0;
         return cl;
-    }
-
-    @Override
-    public void setAutomaton(Automaton automaton) {
-        this.automaton = automaton;
     }
 }

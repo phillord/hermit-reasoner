@@ -56,10 +56,10 @@ public class BlockingValidator {
     protected final List<DLClauseInfo> m_dlClauseInfos;
     protected final Map<AtomicConcept,List<DLClauseInfo>> m_dlClauseInfosByXConcepts;
     protected final List<DLClauseInfo> m_dlClauseInfosWithoutXConcepts;
-    public Map<AtLeastConcept,Node> inValidAtleastForBlockedParent=new HashMap<>();
-    public Map<DLClauseInfo,Node> inValidClausesForBlockedParent=new HashMap<>();
-    public Map<AtLeastConcept,Node> inValidAtleastForBlocker=new HashMap<>();
-    public Map<DLClauseInfo,Node> inValidClausesForBlocker=new HashMap<>();
+    public final Map<AtLeastConcept,Node> inValidAtleastForBlockedParent=new HashMap<>();
+    public final Map<DLClauseInfo,Node> inValidClausesForBlockedParent=new HashMap<>();
+    public final Map<AtLeastConcept,Node> inValidAtleastForBlocker=new HashMap<>();
+    public final Map<DLClauseInfo,Node> inValidClausesForBlocker=new HashMap<>();
     protected final boolean debuggingMode=false;
 
 
@@ -103,17 +103,6 @@ public class BlockingValidator {
         m_ternaryRetrieval2Bound.clear();
         for (int index=m_dlClauseInfos.size()-1;index>=0;--index)
             m_dlClauseInfos.get(index).clear();
-    }
-    public void clearInvalids() {
-        if (debuggingMode) {
-            inValidAtleastForBlockedParent.clear();
-            inValidAtleastForBlocker.clear();
-            inValidClausesForBlockedParent.clear();
-            inValidClausesForBlocker.clear();
-        }
-    }
-    public boolean hasViolation() {
-        return (!inValidAtleastForBlocker.isEmpty() || !inValidClausesForBlocker.isEmpty() || !inValidAtleastForBlockedParent.isEmpty() || !inValidClausesForBlockedParent.isEmpty());
     }
     public void blockerChanged(Node node) {
         Node parent=node.getParent();
@@ -540,10 +529,10 @@ public class BlockingValidator {
         protected final ConsequenceAtom[] m_consequencesForNonblockedX;
         protected final DLClause m_dlClause; // for debugging
         protected Node m_xNode;
-        protected Node[] m_yNodes;
-        protected Variable[] m_yVariables;
-        protected Node[] m_zNodes;
-        protected Variable[] m_zVariables;
+        protected final Node[] m_yNodes;
+        protected final Variable[] m_yVariables;
+        protected final Node[] m_zNodes;
+        protected final Variable[] m_zVariables;
 
 
         @SuppressWarnings("null")

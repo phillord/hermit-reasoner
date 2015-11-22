@@ -61,7 +61,7 @@ public class InternalDatatype extends AtomicDataRange implements DLPredicate {
         return s_interningManager.intern(this);
     }
 
-    protected static InterningManager<InternalDatatype> s_interningManager=new InterningManager<InternalDatatype>() {
+    protected final static InterningManager<InternalDatatype> s_interningManager=new InterningManager<InternalDatatype>() {
         @Override
         protected boolean equal(InternalDatatype object1,InternalDatatype object2) {
             return object1.m_iri.equals(object2.m_iri);

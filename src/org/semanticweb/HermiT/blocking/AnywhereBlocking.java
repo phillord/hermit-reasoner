@@ -203,7 +203,6 @@ public class AnywhereBlocking implements BlockingStrategy,Serializable {
 class BlockersCache implements Serializable {
     private static final long serialVersionUID=-7692825443489644667L;
 
-    protected Tableau m_tableau;
     protected final DirectBlockingChecker m_directBlockingChecker;
     protected CacheEntry[] m_buckets;
     protected int m_numberOfElements;
@@ -305,7 +304,8 @@ class BlockersCache implements Serializable {
         }
         return null;
     }
-    protected static int getIndexFor(int hashCode,int tableLength) {
+    protected static int getIndexFor(int _hashCode,int tableLength) {
+        int hashCode=_hashCode;
         hashCode+=~(hashCode << 9);
         hashCode^=(hashCode >>> 14);
         hashCode+=(hashCode << 4);

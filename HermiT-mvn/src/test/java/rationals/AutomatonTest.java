@@ -35,9 +35,7 @@
  */
 package rationals;
 
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import junit.framework.TestCase;
@@ -155,48 +153,5 @@ public class AutomatonTest extends TestCase {
         automaton.addTransition(new Transition(s6, "a", s5), null);
         assertTrue(automaton.states().containsAll(acc));
         assertTrue(!acc.contains(s5) && !acc.contains(s6));
-    }
-
-    /*
-     * Class under test for Set delta()
-     */
-    public void testDelta() {
-        // TODO Implement delta().
-    }
-
-    public void testAddTransition() {
-        // TODO Implement addTransition().
-    }
-
-    public void testAcceptDFA() {
-        Automaton t = new Automaton();
-        State s1 = t.addState(true, true);
-        State s2 = t.addState(false, false);
-        State s3 = t.addState(false, false);
-        t.addTransition(new Transition(s1, "a", s2), null);
-        t.addTransition(new Transition(s2, "b", s3), null);
-        t.addTransition(new Transition(s3, "c", s1), null);
-        // check accept words
-        List<String> exp = Arrays.asList("a", "b", "c", "a", "b", "c");
-        assertTrue("Automaton does not accept 'abcabc'", t.accept(exp));
-        exp = Arrays.asList("a", "b", "c", "b", "c");
-        assertTrue("Automaton does accept 'abcbc'", !t.accept(exp));
-    }
-
-    public void testAcceptNFA1() {
-        Automaton t = new Automaton();
-        State s1 = t.addState(true, true);
-        State s2 = t.addState(false, false);
-        State s3 = t.addState(false, false);
-        State s4 = t.addState(false, false);
-        t.addTransition(new Transition(s1, "a", s2), null);
-        t.addTransition(new Transition(s2, "b", s3), null);
-        t.addTransition(new Transition(s3, "c", s4), null);
-        t.addTransition(new Transition(s4, null, s1), null);
-        // check accept words
-        List<String> exp = Arrays.asList("a", "b", "c", "a", "b", "c");
-        assertTrue("Automaton does not accept 'abcabc'", t.accept(exp));
-        exp = Arrays.asList("a", "b", "c", "b", "c");
-        assertTrue("Automaton does accept 'abcbc'", !t.accept(exp));
     }
 }

@@ -35,7 +35,6 @@
  */
 package rationals.properties;
 
-import java.util.List;
 import java.util.Set;
 
 import rationals.Automaton;
@@ -83,12 +82,4 @@ public interface Relation {
      * @return true if nsa is equivalent to nsb
      */
     boolean equivalence(Set<State> nsa, Set<State> nsb);
-    
-    /**
-     * Returns the trace of labels that lead to an error.
-     * 
-     * @return a List of objects or null.
-     */
-    List<Object> getErrorTrace();
-
 }

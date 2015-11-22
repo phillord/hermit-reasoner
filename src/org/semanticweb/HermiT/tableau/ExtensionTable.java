@@ -202,7 +202,6 @@ public abstract class ExtensionTable implements Serializable {
 
     public interface Retrieval {
         ExtensionTable getExtensionTable();
-        View getExtensionView();
         void clear();
         int[] getBindingPositions();
         Object[] getBindingsBuffer();
@@ -242,10 +241,6 @@ public abstract class ExtensionTable implements Serializable {
         @Override
         public ExtensionTable getExtensionTable() {
             return ExtensionTable.this;
-        }
-        @Override
-        public ExtensionTable.View getExtensionView() {
-            return m_extensionView;
         }
         @Override
         public void clear() {

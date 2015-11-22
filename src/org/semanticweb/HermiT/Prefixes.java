@@ -139,22 +139,6 @@ public class Prefixes implements Serializable {
                 throw new IllegalArgumentException("The abbreviation '"+abbreviation+"' is not valid (it does not start with a colon).");
         }
     }
-    /**
-     * Checks whether the given IRI can be expanded
-     */
-    public boolean canBeExpanded(String iri) {
-        if (iri.length()>0 && iri.charAt(0)=='<')
-            return false;
-        else {
-            int pos=iri.indexOf(':');
-            if (pos!=-1) {
-                String prefix=iri.substring(0,pos+1);
-                return m_prefixIRIsByPrefixName.get(prefix)!=null;
-            }
-            else
-                return false;
-        }
-    }
     public boolean declarePrefix(String prefixName,String prefixIRI) {
         boolean containsPrefix=declarePrefixRaw(prefixName,prefixIRI);
         buildPrefixIRIMatchingPattern();
@@ -174,9 +158,6 @@ public class Prefixes implements Serializable {
     }
     public Map<String,String> getPrefixIRIsByPrefixName() {
         return java.util.Collections.unmodifiableMap(m_prefixIRIsByPrefixName);
-    }
-    public String getPrefixIRI(String prefixName) {
-        return m_prefixIRIsByPrefixName.get(prefixName);
     }
     public String getPrefixName(String prefixIRI) {
         return m_prefixNamesByPrefixIRI.get(prefixIRI);
@@ -226,20 +207,6 @@ public class Prefixes implements Serializable {
     public boolean declareSemanticWebPrefixes() {
         boolean containsPrefix=false;
         for (Map.Entry<String,String> entry : s_semanticWebPrefixes.entrySet())
-            if (declarePrefixRaw(entry.getKey(),entry.getValue()))
-                containsPrefix=true;
-        buildPrefixIRIMatchingPattern();
-        return containsPrefix;
-    }
-    /**
-     * Registers all the prefixes from the supplied object.
-     *
-     * @param prefixes          the object from which the prefixes are taken
-     * @return                  'true' if this object already contained one of the prefixes from the supplied object
-     */
-    public boolean addPrefixes(Prefixes prefixes) {
-        boolean containsPrefix=false;
-        for (Map.Entry<String,String> entry : prefixes.m_prefixIRIsByPrefixName.entrySet())
             if (declarePrefixRaw(entry.getKey(),entry.getValue()))
                 containsPrefix=true;
         buildPrefixIRIMatchingPattern();

@@ -56,7 +56,7 @@ public class AtomicRole extends Role implements DLPredicate {
         return s_interningManager.intern(this);
     }
 
-    protected static InterningManager<AtomicRole> s_interningManager=new InterningManager<AtomicRole>() {
+    protected final static InterningManager<AtomicRole> s_interningManager=new InterningManager<AtomicRole>() {
         @Override
         protected boolean equal(AtomicRole object1,AtomicRole object2) {
             return object1.m_iri.equals(object2.m_iri);

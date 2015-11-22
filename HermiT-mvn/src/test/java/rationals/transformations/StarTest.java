@@ -35,8 +35,6 @@
  */
 package rationals.transformations;
 
-import java.util.Arrays;
-
 import junit.framework.TestCase;
 import rationals.Automaton;
 import rationals.State;
@@ -76,10 +74,6 @@ public class StarTest extends TestCase {
         Star star = new Star();
         Automaton b = star.transform(automaton);
         assertTrue(new ContainsEpsilon().test(b));
-        Object[] word = new Object[] { "a", "b", "a", "b" };
-        Object[] word1 = new Object[] { "a", "b", "a", "b", "a" };
-        assertTrue(b.accept(Arrays.asList(word)));
-        assertTrue(!b.accept(Arrays.asList(word1)));
     }
 
 }

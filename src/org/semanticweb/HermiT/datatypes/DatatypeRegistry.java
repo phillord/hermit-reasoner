@@ -184,9 +184,6 @@ public class DatatypeRegistry {
                 return false;
             return ((AnonymousConstantValue)that).m_name.equals(m_name);
         }
-        public static AnonymousConstantValue create(String name) {
-            return new AnonymousConstantValue(name);
-        }
     }
 
 }

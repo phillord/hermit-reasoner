@@ -35,7 +35,6 @@ public class SingleDirectBlockingChecker implements DirectBlockingChecker,Serial
 
     protected final SetFactory<AtomicConcept> m_atomicConceptsSetFactory;
     protected final Set<AtomicConcept> m_atomicConceptsBuffer;
-    protected Tableau m_tableau;
     protected ExtensionTable.Retrieval m_binaryTableSearch1Bound;
 
     public SingleDirectBlockingChecker() {
@@ -44,7 +43,6 @@ public class SingleDirectBlockingChecker implements DirectBlockingChecker,Serial
     }
     @Override
     public void initialize(Tableau tableau) {
-        m_tableau=tableau;
         m_binaryTableSearch1Bound=tableau.getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
     }
     @Override

@@ -48,7 +48,7 @@ public class Individual extends Term {
         return prefixes.abbreviateIRI(m_uri);
     }
 
-    protected static InterningManager<Individual> s_interningManager=new InterningManager<Individual>() {
+    protected final static InterningManager<Individual> s_interningManager=new InterningManager<Individual>() {
         @Override
         protected boolean equal(Individual object1,Individual object2) {
             return object1.m_uri.equals(object2.m_uri);

@@ -370,7 +370,7 @@ public class Debugger extends TableauMonitorForwarder {
     @Override
     public void nodeCreated(Node node) {
         super.nodeCreated(node);
-        m_nodeCreationInfos.put(node,new NodeCreationInfo(node,m_lastExistentialNode,m_lastExistentialConcept));
+        m_nodeCreationInfos.put(node,new NodeCreationInfo(m_lastExistentialNode,m_lastExistentialConcept));
         if (m_lastExistentialNode!=null)
             m_nodeCreationInfos.get(m_lastExistentialNode).m_children.add(node);
     }
@@ -410,13 +410,11 @@ public class Debugger extends TableauMonitorForwarder {
     }
 
     public static class NodeCreationInfo {
-        public final Node m_node;
         public final Node m_createdByNode;
         public final ExistentialConcept m_createdByExistential;
         public final List<Node> m_children;
 
-        public NodeCreationInfo(Node node,Node createdByNode,ExistentialConcept createdByExistential) {
-            m_node=node;
+        public NodeCreationInfo(Node createdByNode,ExistentialConcept createdByExistential) {
             m_createdByNode=createdByNode;
             m_createdByExistential=createdByExistential;
             m_children=new ArrayList<>(4);

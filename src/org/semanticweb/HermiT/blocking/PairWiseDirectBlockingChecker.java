@@ -37,7 +37,6 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
     protected final SetFactory<AtomicRole> m_atomicRolesSetFactory;
     protected final Set<AtomicConcept> m_atomicConceptsBuffer;
     protected final Set<AtomicRole> m_atomicRolesBuffer;
-    protected Tableau m_tableau;
     protected ExtensionTable.Retrieval m_binaryTableSearch1Bound;
     protected ExtensionTable.Retrieval m_ternaryTableSearch12Bound;
 
@@ -49,7 +48,6 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
     }
     @Override
     public void initialize(Tableau tableau) {
-        m_tableau=tableau;
         m_binaryTableSearch1Bound=tableau.getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
         m_ternaryTableSearch12Bound=tableau.getExtensionManager().getTernaryExtensionTable().createRetrieval(new boolean[] { false,true,true },ExtensionTable.View.TOTAL);
     }

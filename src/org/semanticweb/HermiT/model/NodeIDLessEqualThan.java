@@ -45,7 +45,4 @@ public class NodeIDLessEqualThan implements DLPredicate,Serializable {
     protected Object readResolve() {
         return INSTANCE;
     }
-    public static NodeIDLessEqualThan create() {
-        return INSTANCE;
-    }
 }

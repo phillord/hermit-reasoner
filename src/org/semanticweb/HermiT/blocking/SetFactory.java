@@ -20,7 +20,6 @@ package org.semanticweb.HermiT.blocking;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
@@ -55,24 +54,6 @@ public class SetFactory<E> implements Serializable {
                 entry=nextEntry;
             }
         }
-    }
-    public int sizeInMemory() {
-        int size=m_unusedEntries.length*4+m_entries.length*4;
-        for (int i=m_unusedEntries.length-1;i>=0;--i) {
-            Entry entry=m_unusedEntries[i];
-            while (entry!=null) {
-                size+=entry.m_table.length*4+6*4;
-                entry=entry.m_nextEntry;
-            }
-        }
-        for (int i=m_entries.length-1;i>=0;--i) {
-            Entry entry=m_entries[i];
-            while (entry!=null) {
-                size+=entry.m_table.length*4+6*4;
-                entry=entry.m_nextEntry;
-            }
-        }
-        return size;
     }
     public void addReference(Set<E> set) {
         ((Entry)set).m_referenceCount++;
@@ -168,7 +149,7 @@ public class SetFactory<E> implements Serializable {
     protected static class Entry<T> implements Serializable,Set<T> {
         private static final long serialVersionUID=-3850593656120645350L;
 
-        protected T[] m_table;
+        protected final T[] m_table;
         protected int m_hashCode;
         protected Entry<T> m_previousEntry;
         protected Entry<T> m_nextEntry;
@@ -190,14 +171,6 @@ public class SetFactory<E> implements Serializable {
         @Override
         public boolean add(T object) {
             throw new UnsupportedOperationException();
-        }
-        public boolean equalsTo(List<T> elements) {
-            if (m_table.length!=elements.size())
-                return false;
-            for (int index=m_table.length-1;index>=0;--index)
-                if (!elements.contains(m_table[index]))
-                    return false;
-            return true;
         }
         public boolean equalsTo(Set<T> elements) {
             if (m_table.length!=elements.size())

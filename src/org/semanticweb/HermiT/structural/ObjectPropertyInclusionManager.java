@@ -569,15 +569,6 @@ public class ObjectPropertyInclusionManager {
     protected void automataConnector(Automaton biggerPropertyAutomaton,Automaton smallerPropertyAutomaton,Transition transition) {
         useStandardAutomataConnector(biggerPropertyAutomaton,smallerPropertyAutomaton,transition);
     }
-    protected Set<Transition> deltaToState(Automaton smallerPropertyAutomaton,State state) {
-        Set<Transition> incommingTrans=new HashSet<>();
-        for (Object transitionObject : smallerPropertyAutomaton.delta()) {
-            Transition transition=(Transition)transitionObject;
-            if (transition.end().equals(state))
-                incommingTrans.add(transition);
-        }
-        return incommingTrans;
-    }
     protected Graph<OWLObjectPropertyExpression> buildPropertyOrdering(Collection<OWLObjectPropertyExpression[]> simpleObjectPropertyInclusions,Collection<ComplexObjectPropertyInclusion> complexObjectPropertyInclusions,Map<OWLObjectPropertyExpression,Set<OWLObjectPropertyExpression>> equivalentPropertiesMap) {
         Graph<OWLObjectPropertyExpression> propertyDependencyGraph=new Graph<>();
         for (OWLObjectPropertyExpression[] inclusion : simpleObjectPropertyInclusions)

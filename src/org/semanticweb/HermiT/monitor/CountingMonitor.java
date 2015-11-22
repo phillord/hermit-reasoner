@@ -19,7 +19,6 @@ package org.semanticweb.HermiT.monitor;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +28,6 @@ import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.tableau.BranchingPoint;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.ReasoningTaskDescription;
-import org.semanticweb.HermiT.tableau.ReasoningTaskDescription.StandardTestType;
 
 public class CountingMonitor extends TableauMonitorAdapter {
     private static final long serialVersionUID=-8144444618897251350L;
@@ -74,42 +72,6 @@ public class CountingMonitor extends TableauMonitorAdapter {
     // datatye checking
     protected int m_overallDatatypeCheckingTime=0;
     protected int m_overallNumberDatatypesChecked;
-
-
-    public void reset() {
-        m_problemStartTime=0;
-        m_validationStartTime=0;
-        m_datatypeCheckingStartTime=0;
-        m_time=0;
-        m_numberOfBacktrackings=0;
-        m_numberOfNodes=0;
-        m_numberOfBlockedNodes=0;
-        m_reasoningTaskDescription=null;
-        m_testResult=false;
-        m_initialModelSize=0;
-        m_initiallyBlocked=0;
-        m_initiallyInvalid=0;
-        m_noValidations=0;
-        m_validationTime=0;
-        m_numberDatatypesChecked=0;
-        m_datatypeCheckingTime=0;
-        m_testRecords.clear();
-        m_overallTime=0;
-        m_overallNumberOfBacktrackings=0;
-        m_overallNumberOfNodes=0;
-        m_overallNumberOfBlockedNodes=0;
-        m_overallNumberOfTests=0;
-        m_overallNumberOfClashes=0;
-        m_possibleInstancesTested=0;
-        m_possibleInstancesInstances=0;
-        m_overallInitialModelSize=0;
-        m_overallInitiallyBlocked=0;
-        m_overallInitiallyInvalid=0;
-        m_overallNoValidations=0;
-        m_overallValidationTime=0;
-        m_overallNumberDatatypesChecked=0;
-        m_overallDatatypeCheckingTime=0;
-    }
 
     @Override
     public void isSatisfiableStarted(ReasoningTaskDescription reasoningTaskDescription) {
@@ -213,27 +175,6 @@ public class CountingMonitor extends TableauMonitorAdapter {
     public Set<String> getUsedMessagePatterns() {
         return m_testRecords.keySet();
     }
-    public List<TestRecord> getTimeSortedTestRecords(int limit) {
-        return getTimeSortedTestRecords(limit,(String)null);
-    }
-    public List<TestRecord> getTimeSortedTestRecords(int limit, StandardTestType standardTestType) {
-        return getTimeSortedTestRecords(limit, standardTestType.messagePattern);
-    }
-    public List<TestRecord> getTimeSortedTestRecords(int limit, String messagePattern) {
-        List<TestRecord> filteredRecords=new ArrayList<>();
-        if (messagePattern==null) {
-            for (List<TestRecord> records : m_testRecords.values())
-                filteredRecords.addAll(records);
-        }
-        else {
-            List<TestRecord> filtered=m_testRecords.get(messagePattern);
-            if (filtered != null)
-                filteredRecords=filtered;
-        }
-        Collections.sort(filteredRecords);
-        if (limit>filteredRecords.size()) limit=filteredRecords.size();
-        return filteredRecords.subList(0, limit);
-    }
     // getters for current test measurements
     public long getTime() {
         return m_time;
@@ -291,9 +232,6 @@ public class CountingMonitor extends TableauMonitorAdapter {
     }
     public int getOverallNumberOfTests() {
         return m_overallNumberOfTests;
-    }
-    public int getOverallNumberOfTests(StandardTestType testType) {
-        return m_testRecords.containsKey(testType.messagePattern) ? m_testRecords.get(testType.messagePattern).size() : 0;
     }
     public int getOverallNumberOfClashes() {
         return m_overallNumberOfClashes;

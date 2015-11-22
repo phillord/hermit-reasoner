@@ -25,8 +25,6 @@ import org.semanticweb.HermiT.model.Individual;
 
 public class AtomicConceptElement {
     
-    public static final String LB=System.getProperty("line.separator");
-    
     protected final Set<Individual> m_knownInstances;
     protected final Set<Individual> m_possibleInstances;
     

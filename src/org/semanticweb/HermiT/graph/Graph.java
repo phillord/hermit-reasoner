@@ -108,22 +108,6 @@ public class Graph<T> implements Serializable, Cloneable {
             m_successorsByNodes.remove( element );
         }
     }
-    public boolean isReachableSuccessor(T fromNode,T toNode) {
-        if (fromNode.equals(toNode))
-            return true;
-        Set<T> result=new HashSet<>();
-        Queue<T> toVisit=new LinkedList<>();
-        toVisit.add(fromNode);
-        while (!toVisit.isEmpty()) {
-            T current=toVisit.poll();
-            Set<T> successors = getSuccessors(current);
-            if (successors.contains(toNode))
-                return true;
-            if (result.add(current))
-                toVisit.addAll(successors);
-        }
-        return false;
-    }
     public Set<T> getReachableSuccessors(T fromNode) {
         Set<T> result = new HashSet<>();
         Queue<T> toVisit=new LinkedList<>();

@@ -47,7 +47,6 @@ import org.semanticweb.HermiT.existentials.IndividualReuseStrategy;
 import org.semanticweb.HermiT.hierarchy.ClassificationProgressMonitor;
 import org.semanticweb.HermiT.hierarchy.DeterministicClassification;
 import org.semanticweb.HermiT.hierarchy.Hierarchy;
-import org.semanticweb.HermiT.hierarchy.HierarchyDumperFSS;
 import org.semanticweb.HermiT.hierarchy.HierarchyNode;
 import org.semanticweb.HermiT.hierarchy.HierarchyPrinterFSS;
 import org.semanticweb.HermiT.hierarchy.HierarchySearch;
@@ -84,7 +83,6 @@ import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.AddOntologyAnnotation;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLAnonymousIndividual;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
@@ -126,8 +124,6 @@ import org.semanticweb.owlapi.reasoner.InferenceType;
 import org.semanticweb.owlapi.reasoner.Node;
 import org.semanticweb.owlapi.reasoner.NodeSet;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
-import org.semanticweb.owlapi.reasoner.OWLReasonerConfiguration;
-import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 import org.semanticweb.owlapi.reasoner.ReasonerInterruptedException;
 import org.semanticweb.owlapi.reasoner.TimeOutException;
 import org.semanticweb.owlapi.reasoner.impl.OWLClassNode;
@@ -164,16 +160,6 @@ public class Reasoner implements OWLReasoner {
     protected Map<AtomicRole,Set<HierarchyNode<AtomicConcept>>> m_directDataRoleDomains;
     protected Map<HierarchyNode<AtomicConcept>,Set<HierarchyNode<AtomicConcept>>> m_directDisjointClasses;
     protected InstanceManager m_instanceManager;
-
-    /**
-     * Creates a new reasoner object with standard parameters for blocking, expansion strategy etc. Then the given manager is used to find all required imports for the given ontology and the ontology with the imports is loaded into the reasoner and the data factory of the manager is used to create fresh concepts during the preprocessing phase if necessary.
-     *
-     * @param rootOntology
-     *            - the ontology that should be loaded by the reasoner
-     */
-    public Reasoner(OWLOntology rootOntology) {
-        this(new Configuration(),rootOntology,(Set<DescriptionGraph>)null);
-    }
 
     /**
      * Creates a new reasoner object with the parameters for blocking, expansion strategy etc as specified in the given configuration object. A default configuration can be obtained by just passing new Configuration(). Then the given manager is used to find all required imports for the given ontology and the ontology with the imports is loaded into the reasoner and the data factory of the manager is used to create fresh concepts during the preprocessing phase if necessary.
@@ -398,7 +384,7 @@ public class Reasoner implements OWLReasoner {
                 Set<AtomicConcept> allAtomicConcepts=m_dlOntology.getAllAtomicConcepts();
                 Set<AtomicRole> allAtomicObjectRoles=m_dlOntology.getAllAtomicObjectRoles();
                 Set<AtomicRole> allAtomicDataRoles=m_dlOntology.getAllAtomicDataRoles();
-                ReducedABoxOnlyClausification aboxFactClausifier=new ReducedABoxOnlyClausification(m_configuration,getDataFactory(),allAtomicConcepts,allAtomicObjectRoles,allAtomicDataRoles);
+                ReducedABoxOnlyClausification aboxFactClausifier=new ReducedABoxOnlyClausification(m_configuration,allAtomicConcepts,allAtomicObjectRoles,allAtomicDataRoles);
                 for (OWLOntologyChange change : m_pendingChanges) {
                     if (rootOntologyImportsClosure.contains(change.getOntology())) {
                         OWLAxiom axiom=change.getAxiom();
@@ -727,13 +713,6 @@ public class Reasoner implements OWLReasoner {
 
     // Concept inferences
 
-    /**
-     * @deprecated As of release 1.3, replaced by {@link #precomputeInferences(InferenceType... inferenceTypes)} with inference type CLASS_HIERARCHY
-     */
-    @Deprecated
-    public void classify() {
-        classifyClasses();
-    }
     public void classifyClasses() {
         checkPreConditions();
         if (m_atomicConceptHierarchy==null) {
@@ -921,29 +900,6 @@ public class Reasoner implements OWLReasoner {
             result=equivalentToComplement.getChildNodes();
             m_directDisjointClasses.put(node,result);
             return result;
-        }
-    }
-    public void precomputeDisjointClasses() {
-        checkPreConditions();
-        if (!m_isConsistent)
-            return;
-        if (m_atomicConceptHierarchy==null || m_directDisjointClasses.keySet().size()<m_atomicConceptHierarchy.getAllNodesSet().size()-2) {
-            classifyClasses();
-            Set<HierarchyNode<AtomicConcept>> nodes=new HashSet<>(m_atomicConceptHierarchy.getAllNodes());
-            nodes.remove(m_atomicConceptHierarchy.getTopNode());
-            nodes.remove(m_atomicConceptHierarchy.getBottomNode());
-            nodes.removeAll(m_directDisjointClasses.keySet());
-            int steps=nodes.size();
-            int step=0;
-            if (m_configuration.reasonerProgressMonitor!=null)
-                m_configuration.reasonerProgressMonitor.reasonerTaskStarted("Compute disjoint classes");
-            for (HierarchyNode<AtomicConcept> node : nodes) {
-                getDisjointConceptNodes(node);
-                if (m_configuration.reasonerProgressMonitor!=null)
-                    m_configuration.reasonerProgressMonitor.reasonerTaskProgressChanged(++step,steps);
-            }
-            if (m_configuration.reasonerProgressMonitor!=null)
-                m_configuration.reasonerProgressMonitor.reasonerTaskStopped();
         }
     }
     protected HierarchyNode<AtomicConcept> getHierarchyNode(OWLClassExpression classExpression) {
@@ -1915,38 +1871,6 @@ public class Reasoner implements OWLReasoner {
         }
         return result;
     }
-    public boolean hasDataPropertyRelationship(OWLNamedIndividual subject,OWLDataProperty property,OWLLiteral object) {
-        checkPreConditions(subject,property);
-        if (!m_isConsistent)
-            return true;
-        OWLDataFactory factory=getDataFactory();
-        OWLAxiom notAssertion=factory.getOWLNegativeDataPropertyAssertionAxiom(property,subject,object);
-        Tableau tableau=getTableau(notAssertion);
-        boolean result=tableau.isSatisfiable(true,true,null,null,null,null,null,new ReasoningTaskDescription(true,"is {0} connected to {1} via {2}",H(subject),object,H(property)));
-        tableau.clearAdditionalDLOntology();
-        return !result;
-    }
-    protected Set<HierarchyNode<AtomicConcept>> getDirectSuperConceptNodes(final Individual individual) {
-        HierarchySearch.SearchPredicate<HierarchyNode<AtomicConcept>> predicate=new HierarchySearch.SearchPredicate<HierarchyNode<AtomicConcept>>() {
-            @Override
-            public Set<HierarchyNode<AtomicConcept>> getSuccessorElements(HierarchyNode<AtomicConcept> u) {
-                return u.getChildNodes();
-            }
-            @Override
-            public Set<HierarchyNode<AtomicConcept>> getPredecessorElements(HierarchyNode<AtomicConcept> u) {
-                return u.getParentNodes();
-            }
-            @Override
-            public boolean trueOf(HierarchyNode<AtomicConcept> u) {
-                AtomicConcept atomicConcept=u.getRepresentative();
-                if (AtomicConcept.THING.equals(atomicConcept))
-                    return true;
-                else
-                    return !getTableau().isSatisfiable(true,true,null,Collections.singleton(Atom.create(atomicConcept,individual)),null,null,null,ReasoningTaskDescription.isInstanceOf(atomicConcept,individual));
-            }
-        };
-        return HierarchySearch.search(predicate,Collections.singleton(m_atomicConceptHierarchy.getTopNode()),null);
-    }
     protected NodeSet<OWLNamedIndividual> sortBySameAsIfNecessary(Set<Individual> individuals) {
         OWLDataFactory factory=getDataFactory();
         Set<Node<OWLNamedIndividual>> result=new HashSet<>();
@@ -2019,10 +1943,10 @@ public class Reasoner implements OWLReasoner {
         case NONE:
             break;
         case TIMING:
-            wellKnownTableauMonitor=new Timer();
+            wellKnownTableauMonitor=new Timer(System.out);
             break;
         case TIMING_WITH_PAUSE:
-            wellKnownTableauMonitor=new TimerWithPause();
+            wellKnownTableauMonitor=new TimerWithPause(System.out);
             break;
         case DEBUGGER_HISTORY_ON:
             wellKnownTableauMonitor=new Debugger(prefixes,true);
@@ -2090,10 +2014,10 @@ public class Reasoner implements OWLReasoner {
             blockingStrategy=new AnywhereBlocking(directBlockingChecker,blockingSignatureCache);
             break;
         case SIMPLE_CORE:
-            blockingStrategy=new AnywhereValidatedBlocking(directBlockingChecker,hasInverseRoles,true);
+            blockingStrategy=new AnywhereValidatedBlocking(directBlockingChecker,true);
             break;
         case COMPLEX_CORE:
-            blockingStrategy=new AnywhereValidatedBlocking(directBlockingChecker,hasInverseRoles,false);
+            blockingStrategy=new AnywhereValidatedBlocking(directBlockingChecker,false);
             break;
         case OPTIMAL:
             blockingStrategy=new AnywhereBlocking(directBlockingChecker,blockingSignatureCache);
@@ -2168,34 +2092,6 @@ public class Reasoner implements OWLReasoner {
     }
 
     // Hierarchy printing
-
-    /**
-     * Writes out the hierarchies quickly
-     *
-     * @param out
-     *            - the printwriter that is used to output the hierarchies
-     * @param classes
-     *            - if true, the class hierarchy is printed
-     * @param objectProperties
-     *            - if true, the object property hierarchy is printed
-     * @param dataProperties
-     *            - if true, the data property hierarchy is printed
-     */
-    public void dumpHierarchies(PrintWriter out,boolean classes,boolean objectProperties,boolean dataProperties) {
-        HierarchyDumperFSS printer=new HierarchyDumperFSS(out);
-        if (classes) {
-            classifyClasses();
-            printer.printAtomicConceptHierarchy(m_atomicConceptHierarchy);
-        }
-        if (objectProperties) {
-            classifyObjectProperties();
-            printer.printObjectPropertyHierarchy(m_objectRoleHierarchy);
-        }
-        if (dataProperties) {
-            classifyDataProperties();
-            printer.printDataPropertyHierarchy(m_dataRoleHierarchy);
-        }
-    }
 
     /**
      * Prints the hierarchies into a functional style syntax ontology all nicely sorted alphabetically.
@@ -2320,20 +2216,8 @@ public class Reasoner implements OWLReasoner {
     protected static AtomicRole H(OWLDataProperty dataProperty) {
         return AtomicRole.create(dataProperty.getIRI().toString());
     }
-    protected static Role H(OWLDataPropertyExpression dataPropertyExpression) {
-        return H((OWLDataProperty)dataPropertyExpression);
-    }
     protected static Individual H(OWLNamedIndividual namedIndividual) {
         return Individual.create(namedIndividual.getIRI().toString());
-    }
-    protected static Individual H(OWLAnonymousIndividual anonymousIndividual) {
-        return Individual.createAnonymous(anonymousIndividual.getID().toString());
-    }
-    protected static Individual H(OWLIndividual individual) {
-        if (individual.isAnonymous())
-            return H((OWLAnonymousIndividual)individual);
-        else
-            return H((OWLNamedIndividual)individual);
     }
 
     // Extended methods for conversion from HermiT's API to OWL API
@@ -2390,51 +2274,11 @@ public class Reasoner implements OWLReasoner {
     }
 
     // The factory for OWL API reasoners
-
-    public static class ReasonerFactory implements OWLReasonerFactory {
-        @Override
-        public String getReasonerName() {
-            return getClass().getPackage().getImplementationTitle();
-        }
-        @Override
-        public OWLReasoner createReasoner(OWLOntology ontology) {
-            return createReasoner(ontology,getProtegeConfiguration(null));
-        }
-        @Override
-        public OWLReasoner createReasoner(OWLOntology ontology,OWLReasonerConfiguration config) {
-            return createHermiTOWLReasoner(getProtegeConfiguration(config),ontology);
-        }
-        @Override
-        public OWLReasoner createNonBufferingReasoner(OWLOntology ontology) {
-            return createNonBufferingReasoner(ontology,getProtegeConfiguration(null));
-        }
-        @Override
-        public OWLReasoner createNonBufferingReasoner(OWLOntology ontology,OWLReasonerConfiguration owlAPIConfiguration) {
-            Configuration configuration=getProtegeConfiguration(owlAPIConfiguration);
-            configuration.bufferChanges=false;
-            return createHermiTOWLReasoner(configuration,ontology);
-        }
-        protected Configuration getProtegeConfiguration(OWLReasonerConfiguration owlAPIConfiguration) {
-            Configuration configuration;
-            if (owlAPIConfiguration!=null) {
-                if (owlAPIConfiguration instanceof Configuration)
-                    configuration=(Configuration)owlAPIConfiguration;
-                else {
-                    configuration=new Configuration();
-                    configuration.freshEntityPolicy=owlAPIConfiguration.getFreshEntityPolicy();
-                    configuration.individualNodeSetPolicy=owlAPIConfiguration.getIndividualNodeSetPolicy();
-                    configuration.reasonerProgressMonitor=owlAPIConfiguration.getProgressMonitor();
-                    configuration.individualTaskTimeout=owlAPIConfiguration.getTimeOut();
-                }
-            }
-            else {
-                configuration=new Configuration();
-                configuration.ignoreUnsupportedDatatypes=true;
-            }
-            return configuration;
-        }
-        protected OWLReasoner createHermiTOWLReasoner(Configuration configuration,OWLOntology ontology) {
-            return new Reasoner(configuration,ontology);
-        }
+/**
+ * Compatibility class: extends org.semanticweb.HermiT.ReasonerFactory so exisitng clients do not have to change.
+ * Problem with inner factory is that it cannot be used easily through reflection.
+ * @deprecated use org.semanticweb.HermiT.ReasonerFactory
+ */@Deprecated
+    public static class ReasonerFactory extends org.semanticweb.HermiT.ReasonerFactory {
     }
 }

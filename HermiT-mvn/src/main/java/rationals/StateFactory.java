@@ -31,28 +31,11 @@ public interface StateFactory {
     Set<State> stateSet();
 
     /**
-     * Returns a new Set which is a copy of <code>s</code>. The given set s must
-     * have been created through <strong>this</strong> StateFactory object to
-     * ensure consistent behavior.
-     * 
-     * @param s
-     *            a Set
-     * @return a shallow copy of <code>s</code>
-     */
-    Set<State> stateSet(Set<State> s);
-
-    /**
      * Returns a new StateFactory object which is the same as this StateFactory.
      * 
      * @return an initialized StateFactory.
      */
     Object clone() throws CloneNotSupportedException;
-
-    /**
-     * @param automaton
-     */
-    void setAutomaton(Automaton automaton);
-
 }
 // /*
 // * $Log: StateFactory.java,v $

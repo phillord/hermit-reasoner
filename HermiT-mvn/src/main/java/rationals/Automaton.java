@@ -1,10 +1,8 @@
 package rationals;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -41,69 +39,44 @@ import rationals.transformations.TransformationsToolBox;
  * @see Transition State
  */
 public class Automaton implements Acceptor, StateMachine, Rational, Cloneable {
-    /* the identification of this automaton */
-    private Object id;
 
     protected Builder<?> builder;
 
-    /**
-     * @return Returns the id.
-     */
-    @Override
-    public Object getId() {
-        return id == null ? "automaton" : id;
-    }
-
-    /**
-     * @param id
-     *            The id to set.
-     */
-    @Override
-    public void setId(Object id) {
-        this.id = id;
-    }
-
     // The set of all objects which are labels of
     // transitions of this automaton.
-    protected Set<Object> alphabet;
+    protected final Set<Object> alphabet;
 
     // The set of all states of this automaton.
-    private Set<State> states;
+    private final Set<State> states;
 
     // the set of initial states
-    private Set<State> initials;
+    private final Set<State> initials;
 
     // the set of terminale states
-    private Set<State> terminals;
+    private final Set<State> terminals;
 
     // Allows acces to transitions of this automaton
     // starting from a given state and labelled by
     // a given object. The keys of this map are instances
     // of class Key and
     // values are sets of transitions.
-    private Map<Key, Set<Transition>> transitions;
+    private final Map<Key, Set<Transition>> transitions;
 
     // Allows acces to transitions of this automaton
     // arriving to a given state and labelled by
     // a given object. The keys of this map are instances
     // of class Key and
     // values are sets of transitions.
-    private Map<Key, Set<Transition>> reverse;
+    private final Map<Key, Set<Transition>> reverse;
 
     // bonte
-    private StateFactory stateFactory = new DefaultStateFactory(this);
+    private final StateFactory stateFactory;
 
     private final Map<Object, State> labels = new HashMap<>();
 
     @Override
     public StateFactory getStateFactory() {
         return this.stateFactory;
-    }
-
-    @Override
-    public void setStateFactory(StateFactory factory) {
-        this.stateFactory = factory;
-        factory.setAutomaton(this);
     }
 
     /**
@@ -133,32 +106,6 @@ public class Automaton implements Acceptor, StateMachine, Rational, Cloneable {
         State start = v.addState(true, false);
         State end = v.addState(false, true);
         v.addTransition(new Transition(start, label, end), null);
-        return v;
-    }
-
-    /**
-     * Returns an automaton which recognizes the regular language associated
-     * with the regular expression <em>u</em>, where <em>u</em> is a given word.
-     * 
-     * @param word
-     *            a List of Object interpreted as a word
-     * @return an automaton which recognizes <em>label</em>
-     */
-    public static Automaton labelAutomaton(List<Object> word) {
-        Automaton v = new Automaton();
-        State start = null;
-        if (word.isEmpty()) {
-            v.addState(true, true);
-            return v;
-        } else
-            start = v.addState(true, false);
-        State end = null;
-        for (Iterator<Object> i = word.iterator(); i.hasNext();) {
-            Object o = i.next();
-            end = v.addState(false, !i.hasNext());
-            v.addTransition(new Transition(start, o, end), null);
-            start = end;
-        }
         return v;
     }
 
@@ -250,23 +197,6 @@ public class Automaton implements Acceptor, StateMachine, Rational, Cloneable {
     }
 
     @Override
-    public Set<State> accessibleStates(Set<State> s) {
-        return access(s, transitions);
-    }
-
-    @Override
-    public Set<State> accessibleStates(State state) {
-        Set<State> s = stateFactory.stateSet();
-        s.add(state);
-        return access(s, transitions);
-    }
-
-    @Override
-    public Set<State> coAccessibleStates(Set<State> s) {
-        return access(s, reverse);
-    }
-
-    @Override
     public Set<State> coAccessibleStates() {
         return access(terminals, reverse);
     }
@@ -341,35 +271,6 @@ public class Automaton implements Acceptor, StateMachine, Rational, Cloneable {
     }
 
     /**
-     * Return a mapping from couples (q,q') of states to all (q,l,q')
-     * transitions from q to q'
-     * 
-     * @return a Map
-     */
-    public Map<Couple, Set<Transition>> couples() {
-        // loop on transition map keys
-        Iterator<Map.Entry<Key, Set<Transition>>> it = transitions.entrySet().iterator();
-        Map<Couple, Set<Transition>> ret = new HashMap<>();
-        while (it.hasNext()) {
-            Map.Entry<Key, Set<Transition>> e = it.next();
-            // get start and end state
-            State st = e.getKey().s;
-            Iterator<Transition> trans = e.getValue().iterator();
-            while (trans.hasNext()) {
-                Transition tr = trans.next();
-                State nd = tr.end();
-                Couple cpl = new Couple(st, nd);
-                Set<Transition> s = ret.get(cpl);
-                if (s == null)
-                    s = new HashSet<>();
-                s.add(tr);
-                ret.put(cpl, s);
-            }
-        }
-        return ret;
-    }
-
-    /**
      * Returns the set of all transitions of the reverse of this automaton
      * 
      * @return the set of all transitions of the reverse of this automaton. A
@@ -409,43 +310,6 @@ public class Automaton implements Acceptor, StateMachine, Rational, Cloneable {
             throw new IllegalArgumentException(ifInvalid);
         }
         return false;
-    }
-
-    /**
-     * the project method keeps from the Automaton only the transitions labelled
-     * with the letters contained in the set alph, effectively computing a
-     * projection on this alphabet.
-     * 
-     * @param alph
-     *            the alphabet to project on
-     */
-    public void projectOn(Set<Object> alph) {
-        // remove unwanted transitions from ret
-        Iterator<Map.Entry<Key, Set<Transition>>> trans = transitions.entrySet().iterator();
-        Set<Transition> newtrans = new HashSet<>();
-        while (trans.hasNext()) {
-            Map.Entry<Key, Set<Transition>> entry = trans.next();
-            Key k = entry.getKey();
-            Iterator<Transition> tit = entry.getValue().iterator();
-            while (tit.hasNext()) {
-                Transition tr = tit.next();
-                if (!alph.contains(k.l)) {
-                    // create epsilon transition
-                    newtrans.add(new Transition(k.s, null, tr.end()));
-                    // remove transtion
-                    tit.remove();
-                }
-            }
-        }
-        // add newly created transitions
-        if (!newtrans.isEmpty()) {
-            for (Transition tr : newtrans) {
-                add(transitions, tr);
-                add(reverse, new Transition(tr.end(), tr.label(), tr.start()));
-            }
-        }
-        // remove alphabet
-        alphabet.retainAll(alph);
     }
 
     /**
@@ -514,69 +378,6 @@ public class Automaton implements Acceptor, StateMachine, Rational, Cloneable {
         }
     }
 
-    /**
-     * Returns true if this automaton accepts given word -- ie. sequence of
-     * letters. Note that this method accepts words with letters not in this
-     * automaton's alphabet, effectively recognizing all words from any alphabet
-     * projected to this alphabet.
-     * <p>
-     * If you need standard recognition, use
-     * 
-     * @param word
-     * @see{accept(java.util.List)}. @param word
-     * @return
-     */
-    public boolean prefixProjection(List<Object> word) {
-        Set<State> s = stepsProject(word);
-        return !s.isEmpty();
-    }
-
-    /**
-     * Return the set of steps this automaton will be in after reading word.
-     * Note this method skips letters not in alphabet instead of rejecting them.
-     * 
-     * @param word
-     * @return
-     */
-    public Set<State> stepsProject(List<Object> word) {
-        Set<State> s = initials();
-        Iterator<Object> it = word.iterator();
-        while (it.hasNext()) {
-            Object o = it.next();
-            if (!alphabet.contains(o))
-                continue;
-            s = step(s, o);
-            if (s.isEmpty())
-                return s;
-        }
-        return s;
-    }
-
-    @Override
-    public boolean accept(List<?> word) {
-        Set<State> s = TransformationsToolBox.epsilonClosure(steps(word), this);
-        s.retainAll(terminals());
-        return !s.isEmpty();
-    }
-
-    /**
-     * Return true if this automaton can accept the given word starting from
-     * given set. <em>Note</em> The ending state(s) need not be terminal for
-     * this method to return true.
-     * 
-     * @param state
-     *            a starting state
-     * @param word
-     *            a List of objects in this automaton's alphabet
-     * @return true if there exists a path labelled by word from s to at least
-     *         one other state in this automaton.
-     */
-    public boolean accept(State state, List<Object> word) {
-        Set<State> s = stateFactory.stateSet();
-        s.add(state);
-        return !steps(s, word).isEmpty();
-    }
-
     @Override
     public Set<State> steps(List<?> word) {
         Set<State> s = TransformationsToolBox.epsilonClosure(initials(), this);
@@ -596,67 +397,6 @@ public class Automaton implements Acceptor, StateMachine, Rational, Cloneable {
     }
 
     @Override
-    public Set<State> steps(State st, List<?> word) {
-        Set<State> s = stateFactory.stateSet();
-        s.add(st);
-        Iterator<?> it = word.iterator();
-        while (it.hasNext()) {
-            Object o = it.next();
-            s = step(s, o);
-            if (s.isEmpty())
-                return s;
-        }
-        return s;
-    }
-
-    @Override
-    public List<Set<State>> traceStates(List<?> word, State start) {
-        List<Set<State>> ret = new ArrayList<>();
-        Set<State> s = null;
-        if (start != null) {
-            s = stateFactory.stateSet();
-            s.add(start);
-        } else {
-            s = initials();
-        }
-        Iterator<?> it = word.iterator();
-        while (it.hasNext()) {
-            Object o = it.next();
-            if (!alphabet.contains(o))
-                continue;
-            s = step(s, o);
-            ret.add(s);
-            if (s.isEmpty())
-                return null;
-        }
-        return ret;
-    }
-
-    /**
-     * Returns the size of the longest word recognized by this automaton where
-     * letters not belonging to its alphabet are ignored.
-     * 
-     * 
-     * @param word
-     * @return
-     */
-    public int longestPrefixWithProjection(List<?> word) {
-        int lret = 0;
-        Set<State> s = initials();
-        for (Object o : word) {
-            if ((o == null) || !alphabet.contains(o)) {
-                lret++;
-                continue;
-            }
-            s = step(s, o);
-            if (s.isEmpty())
-                break;
-            lret++;
-        }
-        return lret;
-    }
-
-    @Override
     public Set<State> step(Set<State> s, Object o) {
         Set<State> ns = stateFactory.stateSet();
         Set<State> ec = TransformationsToolBox.epsilonClosure(s, this);
@@ -673,27 +413,6 @@ public class Automaton implements Acceptor, StateMachine, Rational, Cloneable {
         return ns;
     }
 
-    /**
-     * @param tr
-     * @param msg
-     */
-    public void updateTransitionWith(Transition tr, Object msg) {
-        Object lbl = tr.label();
-        alphabet.remove(lbl);
-        alphabet.add(msg);
-        /* update transition map */
-        Key k = new Key(tr.start(), lbl);
-        Set<Transition> s = transitions.remove(k);
-        if (s != null)
-            transitions.put(new Key(tr.start(), msg), s);
-        /* update reverse map */
-        k = new Key(tr.end(), lbl);
-        s = reverse.remove(k);
-        if (s != null)
-            reverse.put(new Key(tr.end(), msg), s);
-        tr.setLabel(msg);
-    }
-
     @Override
     public Set<Transition> deltaMinusOne(State st) {
         Set<Transition> s = new HashSet<>();
@@ -702,55 +421,6 @@ public class Automaton implements Acceptor, StateMachine, Rational, Cloneable {
             s.addAll(deltaMinusOne(st, alphit.next()));
         }
         return s;
-    }
-
-    /**
-     * Enumerate all prefix of words of length lower or equal than i in this
-     * automaton. This method takes exponential time and space to execute: <em>
-     * use with care !</em>.
-     * 
-     * @param ln
-     *            maximal length of words.
-     * @return a Set of List of Object
-     */
-    public Set<List<Object>> enumerate(int ln) {
-        Set<List<Object>> ret = new HashSet<>();
-        class EnumState {
-            public EnumState(State s, List<Object> list) {
-                st = s;
-                word = new ArrayList<>(list);
-            }
-
-            State st;
-
-            List<Object> word;
-        }
-
-        LinkedList<EnumState> ll = new LinkedList<>();
-        List<Object> cur = new ArrayList<>();
-        for (Iterator<State> i = initials.iterator(); i.hasNext();) {
-            State s = i.next();
-            if (s.isTerminal())
-                ret.add(new ArrayList<>());
-            ll.add(new EnumState(s, cur));
-        }
-
-        do {
-            EnumState st = ll.removeFirst();
-            Set<Transition> trs = delta(st.st);
-            List<Object> word = st.word;
-            for (Iterator<Transition> k = trs.iterator(); k.hasNext();) {
-                Transition tr = k.next();
-                word.add(tr.label());
-                if (word.size() <= ln) {
-                    EnumState en = new EnumState(tr.end(), word);
-                    ll.add(en);
-                    ret.add(en.word);
-                }
-                word.remove(word.size() - 1);
-            }
-        } while (!ll.isEmpty());
-        return ret;
     }
 
     /**
@@ -769,19 +439,6 @@ public class Automaton implements Acceptor, StateMachine, Rational, Cloneable {
             labels.put(label, s);
         }
         return s;
-    }
-
-    /**
-     * Starts creation of a new transition from the given state. Note that the
-     * state is created with given label if it does not exists.
-     * 
-     * @param o
-     *            the label of state to create transition from. may not be null.
-     * @return a TransitionBuilder that can be used to create a new transition.
-     */
-    @SuppressWarnings("unchecked")
-    public <T extends Builder<T>> T from(Object o) {
-        return (T) builder.build(state(o), this);
     }
 
     public <T extends Builder<T>> void setBuilder(T t) {

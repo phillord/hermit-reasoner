@@ -46,7 +46,7 @@ public class AtLeastConcept extends AtLeast {
         return s_interningManager.intern(this);
     }
 
-    protected static InterningManager<AtLeastConcept> s_interningManager=new InterningManager<AtLeastConcept>() {
+    protected final static InterningManager<AtLeastConcept> s_interningManager=new InterningManager<AtLeastConcept>() {
         @Override
         protected boolean equal(AtLeastConcept object1,AtLeastConcept object2) {
             return object1.m_number==object2.m_number && object1.m_onRole==object2.m_onRole && object1.m_toConcept==object2.m_toConcept;

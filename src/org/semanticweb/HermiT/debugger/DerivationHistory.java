@@ -330,12 +330,6 @@ public class DerivationHistory extends TableauMonitorAdapter {
         public int getNumberOfDisjuncts() {
             return m_atoms.length;
         }
-        public Object getDLPredicate(int disjunctIndex) {
-            return m_atoms[disjunctIndex][0];
-        }
-        public Node getArgument(int disjunctIndex,int argumentIndex) {
-            return (Node)m_atoms[disjunctIndex][argumentIndex+1];
-        }
         @Override
         public Derivation getDerivation() {
             return m_derivedBy;
@@ -598,7 +592,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
     public static class BaseFact extends Derivation {
         private static final long serialVersionUID=-5998349862414502218L;
 
-        public static Derivation INSTANCE=new BaseFact();
+        public final static Derivation INSTANCE=new BaseFact();
 
         @Override
         public int getNumberOfPremises() {

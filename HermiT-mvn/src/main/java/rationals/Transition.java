@@ -21,7 +21,7 @@ public class Transition {
 
     private Object label;
 
-    private State end;
+    private final State end;
 
     /**
      * Creates a new transition <em>(q , l , q')</em>.
@@ -39,17 +39,6 @@ public class Transition {
         this.start = start;
         this.label = label;
         this.end = end;
-    }
-
-    /**
-     * Creates a new (invalid) transition. This transition is meant to be
-     * updated internally by an automaton.
-     * 
-     * @param start
-     *            the starting state.
-     */
-    Transition(State start) {
-        this.start = start;
     }
 
     /**
@@ -146,18 +135,4 @@ public class Transition {
         int t = new java.awt.Point(x, y).hashCode();
         return hash = new java.awt.Point(t, z).hashCode();
     }
-
-    /**
-     * Replaces the label for this transition
-     * <p>
-     * WARNING: this method is extremely dangerous as it does not update the
-     * alphabet of the automaton this transition is part of. Be sure you know
-     * what you are doing or else everything could break down
-     * 
-     * @param msg
-     */
-    void setLabel(Object obj) {
-        this.label = obj;
-    }
-
 }

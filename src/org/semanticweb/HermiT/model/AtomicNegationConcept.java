@@ -53,7 +53,7 @@ public class AtomicNegationConcept extends LiteralConcept {
         return s_interningManager.intern(this);
     }
 
-    protected static InterningManager<AtomicNegationConcept> s_interningManager=new InterningManager<AtomicNegationConcept>() {
+    protected final static InterningManager<AtomicNegationConcept> s_interningManager=new InterningManager<AtomicNegationConcept>() {
         @Override
         protected boolean equal(AtomicNegationConcept object1,AtomicNegationConcept object2) {
             return object1.m_negatedAtomicConcept==object2.m_negatedAtomicConcept;

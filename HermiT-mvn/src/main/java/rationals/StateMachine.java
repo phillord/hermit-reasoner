@@ -70,30 +70,11 @@ public interface StateMachine {
     Set<Object> alphabet();
 
     /**
-     * @return Returns the id.
-     */
-    Object getId();
-
-    /**
-     * @param id
-     *            The id to set.
-     */
-    void setId(Object id);
-
-    /**
      * Retrieves the state factory associated to this SM.
      * 
      * @return a StateFactory instance
      */
     StateFactory getStateFactory();
-
-    /**
-     * Defines the state factory to use for this SM.
-     * 
-     * @param factory
-     *            a StateFactory instance.
-     */
-    void setStateFactory(StateFactory factory);
 
     /**
      * Returns the set of all transitions of this machine starting from a given
@@ -139,18 +120,6 @@ public interface StateMachine {
      * @return the set of reached states. Maybe empty or <code>null</code>.
      */
     Set<State> steps(Set<State> s, List<?> word);
-
-    /**
-     * Return the set of states this SM will be in after reading the word from
-     * single start state s.
-     * 
-     * @param st
-     *            the starting state
-     * @param word
-     *            the word to read.
-     * @return the set of reached states. Maybe empty or <code>null</code>
-     */
-    Set<State> steps(State st, List<?> word);
 
     /**
      * Return the set of states accessible in one transition from given set of

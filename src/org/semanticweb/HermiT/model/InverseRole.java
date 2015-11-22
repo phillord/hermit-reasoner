@@ -49,7 +49,7 @@ public class InverseRole extends Role {
         return s_interningManager.intern(this);
     }
 
-    protected static InterningManager<InverseRole> s_interningManager=new InterningManager<InverseRole>() {
+    protected final static InterningManager<InverseRole> s_interningManager=new InterningManager<InverseRole>() {
         @Override
         protected boolean equal(InverseRole object1,InverseRole object2) {
             return object1.m_inverseOf==object2.m_inverseOf;

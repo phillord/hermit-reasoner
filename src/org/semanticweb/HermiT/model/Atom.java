@@ -79,9 +79,6 @@ public class Atom implements Serializable {
                 return true;
         return false;
     }
-    public Atom replaceDLPredicate(DLPredicate newDLPredicate) {
-        return create(newDLPredicate,m_arguments);
-    }
     public String toString(Prefixes prefixes) {
         StringBuffer buffer=new StringBuffer();
         if (s_infixPredicates.contains(m_dlPredicate)) {
@@ -129,7 +126,7 @@ public class Atom implements Serializable {
         return s_interningManager.intern(this);
     }
 
-    protected static InterningManager<Atom> s_interningManager=new InterningManager<Atom>() {
+    protected final static InterningManager<Atom> s_interningManager=new InterningManager<Atom>() {
         @Override
         protected boolean equal(Atom object1,Atom object2) {
             if (object1.m_dlPredicate!=object2.m_dlPredicate)

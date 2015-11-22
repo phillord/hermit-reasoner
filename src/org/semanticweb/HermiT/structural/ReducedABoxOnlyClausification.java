@@ -34,7 +34,6 @@ import org.semanticweb.HermiT.model.Term;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLClassExpression;
-import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLDataPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLDataPropertyExpression;
@@ -57,7 +56,6 @@ public class ReducedABoxOnlyClausification extends OWLAxiomVisitorAdapter {
 
     protected final Configuration.WarningMonitor m_warningMonitor;
     protected final boolean m_ignoreUnsupportedDatatypes;
-    protected final OWLDataFactory m_factory;
     protected final Set<AtomicConcept> m_allAtomicConcepts;
     protected final Set<AtomicRole> m_allAtomicObjectRoles;
     protected final Set<AtomicRole> m_allAtomicDataRoles;
@@ -65,10 +63,9 @@ public class ReducedABoxOnlyClausification extends OWLAxiomVisitorAdapter {
     protected final Set<Atom> m_negativeFacts;
     protected final Set<Individual> m_allIndividuals;
 
-    public ReducedABoxOnlyClausification(Configuration configuration, OWLDataFactory factory, Set<AtomicConcept> allAtomicConcepts, Set<AtomicRole> allAtomicObjectRoles, Set<AtomicRole> allAtomicDataRoles) {
+    public ReducedABoxOnlyClausification(Configuration configuration, Set<AtomicConcept> allAtomicConcepts, Set<AtomicRole> allAtomicObjectRoles, Set<AtomicRole> allAtomicDataRoles) {
         m_warningMonitor=configuration.warningMonitor;
         m_ignoreUnsupportedDatatypes=configuration.ignoreUnsupportedDatatypes;
-        m_factory=factory;
         m_allAtomicConcepts=allAtomicConcepts;
         m_allAtomicObjectRoles=allAtomicObjectRoles;
         m_allAtomicDataRoles=allAtomicDataRoles;

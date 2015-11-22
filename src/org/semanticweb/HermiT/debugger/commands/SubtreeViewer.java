@@ -338,9 +338,6 @@ public class SubtreeViewer extends JFrame {
     }
 
     protected static class MyTreePath extends TreePath {
-        public MyTreePath(Object object) {
-            super(object);
-        }
         public MyTreePath(TreePath treePath,Object object) {
             super(treePath,object);
         }

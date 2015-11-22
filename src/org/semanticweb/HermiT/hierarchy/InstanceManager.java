@@ -86,7 +86,6 @@ public class InstanceManager {
     protected boolean m_realizationCompleted;
     protected boolean m_roleRealizationCompleted;
     protected boolean m_usesClassifiedConceptHierarchy;
-    protected boolean m_usesClassifiedObjectRoleHierarchy;
     protected boolean m_classesInitialised;
     protected boolean m_propertiesInitialised;
     protected boolean m_readingOffFoundPossibleConceptInstance;
@@ -96,8 +95,6 @@ public class InstanceManager {
     protected final ExtensionTable.Retrieval m_binaryRetrieval0Bound;
     protected final ExtensionTable.Retrieval m_binaryRetrieval1Bound;
     protected final ExtensionTable.Retrieval m_ternaryRetrieval1Bound;
-    protected final ExtensionTable.Retrieval m_ternaryRetrieval0Bound;
-    protected final ExtensionTable.Retrieval m_ternaryRetrieval012Bound;
     protected int m_currentIndividualIndex=0;
 
     public InstanceManager(InterruptFlag interruptFlag,Reasoner reasoner,Hierarchy<AtomicConcept> atomicConceptHierarchy,Hierarchy<Role> objectRoleHierarchy) {
@@ -188,8 +185,6 @@ public class InstanceManager {
             m_binaryRetrieval0Bound=extensionManager.getBinaryExtensionTable().createRetrieval(new boolean[] { true, false }, ExtensionTable.View.TOTAL);
             m_binaryRetrieval1Bound=extensionManager.getBinaryExtensionTable().createRetrieval(new boolean[] { false, true }, ExtensionTable.View.TOTAL);
             m_ternaryRetrieval1Bound=extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { false,true,false }, ExtensionTable.View.TOTAL);
-            m_ternaryRetrieval0Bound=extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,false,false }, ExtensionTable.View.TOTAL);
-            m_ternaryRetrieval012Bound=extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,true,true }, ExtensionTable.View.TOTAL);
         }
         finally {
             m_interruptFlag.endTask();
@@ -420,7 +415,6 @@ public class InstanceManager {
                 m_interruptFlag.checkInterrupt();
             }
         }
-        m_usesClassifiedObjectRoleHierarchy=true;
     }
     protected void findNextHierarchyNodeWithAtomic(Set<AtomicRole> atomicRepresentatives, HierarchyNode<Role> current) {
         for (HierarchyNode<Role> successor : current.getParentNodes()) {
@@ -835,7 +829,6 @@ public class InstanceManager {
         m_realizationCompleted=true;
         m_roleRealizationCompleted=true;
         m_usesClassifiedConceptHierarchy=true;
-        m_usesClassifiedObjectRoleHierarchy=true;
         m_currentConceptHierarchy=null;
         m_currentRoleHierarchy=null;
     }

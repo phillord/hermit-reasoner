@@ -95,7 +95,7 @@ import org.semanticweb.owlapi.model.SWRLRule;
 public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
     protected final OWLDataFactory factory;
     private final Reasoner reasoner;
-    protected Set<OWLAxiom> anonymousIndividualAxioms=new HashSet<>();
+    protected final Set<OWLAxiom> anonymousIndividualAxioms=new HashSet<>();
 
     public EntailmentChecker(Reasoner reasoner,OWLDataFactory factory) {
         this.reasoner=reasoner;

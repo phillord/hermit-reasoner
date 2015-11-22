@@ -232,7 +232,7 @@ public class DLClause implements Serializable {
         return toString(Prefixes.STANDARD_PREFIXES);
     }
 
-    protected static InterningManager<DLClause> s_interningManager=new InterningManager<DLClause>() {
+    protected final static InterningManager<DLClause> s_interningManager=new InterningManager<DLClause>() {
         @Override
         protected boolean equal(DLClause object1,DLClause object2) {
             if (object1.m_headAtoms.length!=object2.m_headAtoms.length || object1.m_bodyAtoms.length!=object2.m_bodyAtoms.length)

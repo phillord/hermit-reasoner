@@ -59,8 +59,8 @@ public class RoleElementManager {
     
     public class RoleElement {
         protected final AtomicRole m_role;
-        protected Map<Individual,Set<Individual>> m_knownRelations;
-        protected Map<Individual,Set<Individual>> m_possibleRelations;
+        protected final Map<Individual,Set<Individual>> m_knownRelations;
+        protected final Map<Individual,Set<Individual>> m_possibleRelations;
         
         protected RoleElement(AtomicRole role) {
             m_role=role;
@@ -99,14 +99,6 @@ public class RoleElementManager {
                 m_knownRelations.put(individual1, successors);
             }
             return successors.add(individual2);
-        }
-        public boolean addKnowns(Individual individual, Set<Individual> individuals) {
-            Set<Individual> successors=m_knownRelations.get(individual);
-            if (successors==null) {
-                successors=new HashSet<>();
-                m_knownRelations.put(individual, successors);
-            }
-            return successors.addAll(individuals);
         }
         public boolean removeKnown(Individual individual1, Individual individual2) {
             Set<Individual> successors=m_knownRelations.get(individual1);
