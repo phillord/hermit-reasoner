@@ -199,7 +199,7 @@ public class OWLClausification {
                     DLClause dlClause=DLClause.create(new Atom[] {},new Atom[] { atom_i,atom_j });
                     dlClauses.add(dlClause);
                 }
-        if (axioms.m_dataPropertyInclusions.contains(factory.getOWLDataProperty(IRI.create(AtomicRole.BOTTOM_DATA_ROLE.getIRI())))) {
+        if (contains(axioms, factory.getOWLBottomDataProperty())) {
             Atom bodyAtom=Atom.create(AtomicRole.BOTTOM_DATA_ROLE,X,Y);
             dlClauses.add(DLClause.create(new Atom[] {},new Atom[] { bodyAtom }));
         }
@@ -325,6 +325,17 @@ public class OWLClausification {
         DLClause clause=DLClause.create(hAtoms,bAtoms);
         return clause;
     }
+    private boolean contains(OWLAxioms axioms, OWLDataProperty p) {
+        for(OWLDataPropertyExpression[] e: axioms.m_dataPropertyInclusions) {
+            for(OWLDataPropertyExpression candidate:e) {
+                if(candidate.equals(p)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
     protected static LiteralConcept getLiteralConcept(OWLClassExpression description) {
         if (description instanceof OWLClass) {
             return AtomicConcept.create(((OWLClass)description).getIRI().toString());
@@ -735,11 +746,17 @@ public class OWLClausification {
         public void visit(OWLDataUnionOf dr) {
             throw new IllegalStateException("Internal error: invalid normal form.");
         }
+        private String datatypeIRI(OWLDataRange r) {
+            if(r.isDatatype()) {
+                return r.asOWLDatatype().getIRI().toString();
+            }
+            return null;
+        }
         @Override
         public void visit(OWLDataComplementOf dr) {
-            OWLDataRange description=dr.getDataRange();
-            if (description.isDatatype() && (Prefixes.isInternalIRI(description.asOWLDatatype().getIRI().toString()) || m_definedDatatypeIRIs.contains(description.asOWLDatatype()))) {
-                m_bodyAtoms.add(Atom.create(InternalDatatype.create(description.asOWLDatatype().getIRI().toString()),X));
+            String iri=datatypeIRI(dr.getDataRange());
+            if (iri!=null && (Prefixes.isInternalIRI(iri) || m_definedDatatypeIRIs.contains(iri))) {
+                m_bodyAtoms.add(Atom.create(InternalDatatype.create(iri),X));
             }
             else {
                 LiteralDataRange literalRange=m_dataRangeConverter.convertDataRange(dr);
