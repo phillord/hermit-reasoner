@@ -49,7 +49,7 @@ import junit.framework.TestCase;
 @SuppressWarnings("javadoc")
 public abstract class StateFactoryTest extends TestCase {
 
-    private Automaton a;
+    private final Automaton a;
 
     /**
      * Constructor for DefaultStateFactoryTest.
@@ -142,7 +142,7 @@ public abstract class StateFactoryTest extends TestCase {
         Set<State> s = a.getStateFactory().stateSet();
         Set<State> i = a.initials();
         s.addAll(i);
-        assertTrue(s.equals(i));
+        assertEquals(s,i);
     }
 
     public void testRemove() {
@@ -169,7 +169,7 @@ public abstract class StateFactoryTest extends TestCase {
         Set<State> s = a.initials();
         s.retainAll(a.terminals());
         /* should contain state 0 and 3000 */
-        assertTrue(s.size() == 2);
+        assertEquals(2,s.size());
     }
 
 }

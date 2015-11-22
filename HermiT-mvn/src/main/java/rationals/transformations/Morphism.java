@@ -56,7 +56,7 @@ import rationals.Transition;
  */
 public class Morphism implements UnaryTransformation {
 
-    private Map<Object, Object> morph;
+    private final Map<Object, Object> morph;
 
     public Morphism(Map<Object, Object> m) {
         this.morph = m;

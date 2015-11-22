@@ -25,7 +25,7 @@ import rationals.Transition;
  */
 public class Substitution implements UnaryTransformation {
 
-    private Map<Object, Object> morph;
+    private final Map<Object, Object> morph;
 
     public Substitution(Map<Object, Object> m) {
         this.morph = m;

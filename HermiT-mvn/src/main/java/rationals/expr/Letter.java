@@ -45,7 +45,7 @@ package rationals.expr;
  */
 public class Letter extends RationalExpr {
 
-    private Object label;
+    private final Object label;
 
     /**
      * Construct a new letter expression.

@@ -436,7 +436,7 @@ public class InstanceManager {
         }
     }
     public OWLAxiom[] getAxiomsForReadingOffCompexProperties(OWLDataFactory factory, ReasonerProgressMonitor monitor, int completedSteps, int steps) {
-        if (m_complexRoles.size()>0) {
+        if (!m_complexRoles.isEmpty()) {
             int noAdditionalAxioms=0;
             List<OWLAxiom> additionalAxioms=new ArrayList<>();
             m_interruptFlag.startTask();

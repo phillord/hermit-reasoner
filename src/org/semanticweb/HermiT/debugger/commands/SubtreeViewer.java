@@ -279,9 +279,9 @@ public class SubtreeViewer extends JFrame {
                 buffer.append(atLeastConcept.getToConcept().toString(m_debugger.getPrefixes()));
                 buffer.append("]");
             }
-            else {
-                // Do nothing for now.
-            }
+            //else {
+            // Do nothing for now.
+            //}
             super.getTreeCellRendererComponent(tree,buffer.toString(),s,expanded,leaf,row,focus);
             if (!node.isActive())
                 setIcon(NOT_ACTIVE_ICON);

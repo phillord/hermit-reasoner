@@ -4,5 +4,5 @@ import rationals.Automaton;
 
 
 public interface FromString {
-  public Automaton fromString(String s) throws ConverterException ;
+    Automaton fromString(String s) throws ConverterException ;
 }

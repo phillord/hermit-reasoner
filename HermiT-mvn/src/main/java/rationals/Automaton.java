@@ -93,7 +93,7 @@ public class Automaton implements Acceptor, StateMachine, Rational, Cloneable {
     // bonte
     private StateFactory stateFactory = new DefaultStateFactory(this);
 
-    private Map<Object, State> labels = new HashMap<>();
+    private final Map<Object, State> labels = new HashMap<>();
 
     @Override
     public StateFactory getStateFactory() {

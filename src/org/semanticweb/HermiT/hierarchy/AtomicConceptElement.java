@@ -67,14 +67,13 @@ public class AtomicConceptElement {
     }
     @Override
     public String toString() {
-        StringBuffer buffer=new StringBuffer();
-        buffer.append(" (known instances: ");
+        StringBuilder buffer=new StringBuilder(" (known instances: ");
         boolean notfirst=false;
         for (Individual individual : m_knownInstances) {
             if (notfirst) 
                 buffer.append(", ");
             notfirst=true;
-            buffer.append(individual.toString());
+            buffer.append(individual);
         }
         buffer.append(" | possible instances: ");
         notfirst=false;
@@ -82,7 +81,7 @@ public class AtomicConceptElement {
             if (notfirst) 
                 buffer.append(", ");
             notfirst=true;
-            buffer.append(individual.toString());
+            buffer.append(individual);
         }
         buffer.append(") ");
         return buffer.toString();

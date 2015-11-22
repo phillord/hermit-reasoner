@@ -36,13 +36,13 @@ public class MixPlay implements AutomatonRunner {
 
     private Object target;
 
-    private List<Automaton> autos;
+    private final List<Automaton> autos;
 
     private Synchronization sync;
 
     private Set<?> syncAlphabet;
 
-    private Set<AutomatonRunListener> listeners = new HashSet<>();
+    private final Set<AutomatonRunListener> listeners = new HashSet<>();
 
     /*
      * current set of states
@@ -131,7 +131,7 @@ public class MixPlay implements AutomatonRunner {
             return;
         Iterator<Object> wit = word.iterator();
         Iterator<StatesTuple> sit = states.iterator();
-        for (; sit.hasNext();) {
+        while (sit.hasNext()) {
             StatesTuple tup = sit.next();
             Object lt = wit.next();
             int ln = tup.sets.size();

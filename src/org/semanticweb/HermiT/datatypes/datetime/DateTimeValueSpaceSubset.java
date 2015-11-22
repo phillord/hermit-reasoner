@@ -64,8 +64,7 @@ public class DateTimeValueSpaceSubset implements ValueSpaceSubset {
     }
     @Override
     public String toString() {
-        StringBuffer buffer=new StringBuffer();
-        buffer.append("xsd:dateTime{");
+        StringBuilder buffer=new StringBuilder("xsd:dateTime{");
         for (int index=0;index<m_intervals.size();index++) {
             if (index!=0)
                 buffer.append(" + ");

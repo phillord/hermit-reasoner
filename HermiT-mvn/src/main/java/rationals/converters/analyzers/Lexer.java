@@ -48,43 +48,43 @@ import rationals.converters.ConverterException;
  * @see Parser
  */
 public interface Lexer {
-    public static final int LABEL = 0;
+    int LABEL = 0;
 
-    public static final int INT = 1;
+    int INT = 1;
 
-    public static final int EPSILON = 2;
+    int EPSILON = 2;
 
-    public static final int EMPTY = 3;
+    int EMPTY = 3;
 
-    public static final int ITERATION = 4;
+    int ITERATION = 4;
 
-    public static final int UNION = 5;
+    int UNION = 5;
 
-    public static final int STAR = 6;
+    int STAR = 6;
 
-    public static final int OPEN = 7;
+    int OPEN = 7;
 
-    public static final int CLOSE = 8;
+    int CLOSE = 8;
 
-    public static final int END = 9;
+    int END = 9;
 
-    public static final int UNKNOWN = 10;
+    int UNKNOWN = 10;
 
     // AB
-    public static final int SHUFFLE = 11;
+    int SHUFFLE = 11;
 
-    public static final int MIX = 12;
+    int MIX = 12;
 
-    public static final int OBRACE = 13;
+    int OBRACE = 13;
 
-    public static final int CBRACE = 14;
+    int CBRACE = 14;
 
     /**
      * Read more data from the underying input.
      * 
      * @throws ConverterException if some characters cannot be converted
      */
-    public abstract void read() throws ConverterException;
+    void read() throws ConverterException;
 
     /**
      * Return the current line number in the underlying character
@@ -93,7 +93,7 @@ public interface Lexer {
      * 
      * @return number of current line, starting from 1
      */
-    public abstract int lineNumber();
+    int lineNumber();
 
     /**
      * Return the image of current token.
@@ -102,14 +102,14 @@ public interface Lexer {
      * 
      * @return an Object which is a label for a transition.
      */
-    public abstract Object label();
+    Object label();
 
     /**
      * Return the value of a number.
      * 
      * @return value of a number.
      */
-    public abstract int value();
+    int value();
 
     /**
      * Returns the current token value.
@@ -117,5 +117,5 @@ public interface Lexer {
      * 
      * @return a constant denoting the kind of token.
      */
-    public abstract int current();
+    int current();
 }

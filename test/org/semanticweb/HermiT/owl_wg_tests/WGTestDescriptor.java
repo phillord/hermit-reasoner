@@ -294,8 +294,7 @@ public class WGTestDescriptor {
                             + (positive ? "" : "non") + "conclusions.");
                 StringDocumentSource source = new StringDocumentSource(conclusions.iterator().next().getLiteral());
                 try {
-                    OWLOntology concl = manager.loadOntologyFromOntologyDocument(source);
-                    return concl;
+                    return manager.loadOntologyFromOntologyDocument(source);
                 } catch (OWLOntologyCreationException e) {
                     throw new InvalidWGTestException("Invalid conclusion ontology.", e);
                 }

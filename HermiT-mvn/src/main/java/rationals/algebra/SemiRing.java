@@ -61,7 +61,7 @@ public interface SemiRing {
      * @param s2
      * @return
      */
-    public SemiRing plus(SemiRing s2);
+    SemiRing plus(SemiRing s2);
     
     /**
      * Multiplication of semiring element with another element.
@@ -70,20 +70,20 @@ public interface SemiRing {
      * @param s2
      * @return
      */
-    public SemiRing mult(SemiRing s2);
+    SemiRing mult(SemiRing s2);
     
     /**
      * Neutral element for multiplication.
      * 
      * @return
      */
-    public SemiRing one();
+    SemiRing one();
     
     /**
      * Neutral element for addition.
      * 
      * @return
      */
-    public SemiRing zero();
+    SemiRing zero();
     
 }

@@ -53,7 +53,7 @@ public interface BinaryTest {
    * @param b
    * @return
    */
-  public boolean test(Automaton a, Automaton b);
+    boolean test(Automaton a, Automaton b);
   
 }
 

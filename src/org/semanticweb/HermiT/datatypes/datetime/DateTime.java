@@ -21,22 +21,23 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class DateTime {
+    private static final String TWO_DIGITS = "([0-9]{2})";
     public static final int NO_TIMEZONE=Integer.MAX_VALUE;
     public static final long MAX_TIME_ZONE_CORRECTION=14L*60L*60L*1000L;
     
     protected static final Pattern s_dateTimePattern=Pattern.compile(
         "(-?[0-9]{4,})"+
         "-"+
-        "([0-9]{2})"+
+        TWO_DIGITS+
         "-"+
-        "([0-9]{2})"+
+        TWO_DIGITS+
         "T"+
-        "([0-9]{2})"+
+        TWO_DIGITS+
         ":"+
-        "([0-9]{2})"+
+        TWO_DIGITS+
         ":"+
-        "([0-9]{2})([.]([0-9]{1,3}))?"+
-        "((Z)|(([+]|-)([0-9]{2}):([0-9]{2})))?"
+        TWO_DIGITS+"([.]([0-9]{1,3}))?"+
+        "((Z)|(([+]|-)"+TWO_DIGITS+":"+TWO_DIGITS+"))?"
     );
     // according to XML Schema 1.1 spec (http://www.w3.org/TR/xmlschema11-2/#dateTime) the reg exp is as follows:
 //    -?([1-9][0-9]{3,}|0[0-9]{3})

@@ -33,7 +33,7 @@ import rationals.Transition;
  */
 public class Accessible implements UnaryTransformation {
 
-    private State state;
+    private final State state;
 
     /**
      * The state we must start exploration from

@@ -21,7 +21,7 @@ package rationals;
  * An interface for easier creation of automata.
  * 
  * @author nono
- * 
+ * @param <T> builder type
  */
 public interface Builder<T extends Builder<T>> {
 
@@ -30,7 +30,7 @@ public interface Builder<T extends Builder<T>> {
      * 
      * @param label
      * @param auto
-     * @return
+     * @return this builder.
      */
     T build(State label, Automaton auto);
 
@@ -40,7 +40,7 @@ public interface Builder<T extends Builder<T>> {
      * @param label
      * @return this transition builder.
      */
-    public T on(Object label);
+    T on(Object label);
 
     /**
      * Sets the end state and terminates transition construction. This method
@@ -48,16 +48,17 @@ public interface Builder<T extends Builder<T>> {
      * 
      * @param o
      *            the label of the end state.
+     * @return this builder.
      */
-    public T go(Object o);
+    T go(Object o);
 
     /**
      * Adds a new transition in the automaton that loops on current label and
      * from state.
      * 
-     * @return
+     * @return this builder.
      */
-    public T loop();
+    T loop();
 
     /**
      * Resets this builder to another starting state. Note that the state is
@@ -67,6 +68,6 @@ public interface Builder<T extends Builder<T>> {
      *            the state to start from.
      * @return this builder.
      */
-    public T from(Object label);
+    T from(Object label);
 
 }

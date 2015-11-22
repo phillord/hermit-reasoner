@@ -322,8 +322,7 @@ public class OWLClausification {
         headAtoms.toArray(hAtoms);
         Atom[] bAtoms=new Atom[bodyAtoms.size()];
         bodyAtoms.toArray(bAtoms);
-        DLClause clause=DLClause.create(hAtoms,bAtoms);
-        return clause;
+        return DLClause.create(hAtoms,bAtoms);
     }
     private boolean contains(OWLAxioms axioms, OWLDataProperty p) {
         for(OWLDataPropertyExpression[] e: axioms.m_dataPropertyInclusions) {

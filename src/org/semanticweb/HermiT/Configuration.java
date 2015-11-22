@@ -290,7 +290,7 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
             return null;
         }
     }
-    public static interface WarningMonitor {
+    public interface WarningMonitor {
         void warning(String warning);
     }
     @Override

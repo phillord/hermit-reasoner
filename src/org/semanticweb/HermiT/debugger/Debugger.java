@@ -183,8 +183,7 @@ public class Debugger extends TableauMonitorForwarder {
         return m_derivationHistory;
     }
     public NodeCreationInfo getNodeCreationInfo(Node node) {
-        NodeCreationInfo nodeCreationInfo=m_nodeCreationInfos.get(node);
-        return nodeCreationInfo;
+        return m_nodeCreationInfos.get(node);
     }
     public void setBreakpointTime(int time) {
         m_breakpointTime=time;

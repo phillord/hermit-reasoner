@@ -209,12 +209,12 @@ public class Hierarchy<E> {
         bottomNode.m_parentNodes.add(topNode);
         return new Hierarchy<>(topNode,bottomNode);
     }
-    protected static interface HierarchyNodeVisitor<E> {
+    protected interface HierarchyNodeVisitor<E> {
         boolean redirect(HierarchyNode<E>[] nodes);
         void visit(int level,HierarchyNode<E> node,HierarchyNode<E> parentNode,boolean firstVisit);
     }
 
-    public static interface Transformer<E,T> {
+    public interface Transformer<E,T> {
         T transform(E element);
         T determineRepresentative(E oldRepresentative,Set<T> newEquivalentElements);
     }

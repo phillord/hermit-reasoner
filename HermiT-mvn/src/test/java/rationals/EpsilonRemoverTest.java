@@ -35,6 +35,8 @@
  */
 package rationals;
 
+import static org.junit.Assert.assertNotEquals;
+
 import java.util.Set;
 
 import junit.framework.TestCase;
@@ -117,7 +119,7 @@ public class EpsilonRemoverTest extends TestCase {
      */
     private static void assertNoEpsilon(Set<Transition> s) {
         for (Transition tr : s) {
-            assertTrue("Transition " + tr + " labelled with epsilon", tr.label() != null);
+            assertNotNull("Transition " + tr + " labelled with epsilon", tr.label());
         }
     }
 

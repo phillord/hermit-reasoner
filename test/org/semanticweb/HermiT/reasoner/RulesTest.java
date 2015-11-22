@@ -17,18 +17,18 @@ public class RulesTest extends AbstractReasonerTest {
     }
 
     public void testSameAsInBody1() throws Exception {
-        String axioms = "Declaration(ObjectProperty(:r))" + LB + "Declaration(ObjectProperty(:s))" + LB
-                + "Declaration(ObjectProperty(:t))" + LB + "Declaration(Class(:u))" + LB
-                + "ObjectPropertyAssertion(:r :a :b)" + LB + "ObjectPropertyAssertion(:s :a :c)" + LB
-                + "ObjectPropertyAssertion(:t :a :d)" + LB + "ClassAssertion(ObjectComplementOf(:u) :a)" + LB
+        String axioms = "Declaration(ObjectProperty(:r))\n" + "Declaration(ObjectProperty(:s))\n"
+                + "Declaration(ObjectProperty(:t))\n" + "Declaration(Class(:u))\n"
+                + "ObjectPropertyAssertion(:r :a :b)\n" + "ObjectPropertyAssertion(:s :a :c)\n"
+                + "ObjectPropertyAssertion(:t :a :d)\n" + "ClassAssertion(ObjectComplementOf(:u) :a)\n"
                 // r(x1, y1) /\ s(x2, y2) /\ t(x3, y3) x1 = x2 /\ x1 = x3 ->
                 // u(x3)
-                + "DLSafeRule(" + LB + "  Body(" + LB + "     ObjectPropertyAtom(:r Variable(:x1) Variable(:y1))" + LB
-                + "     ObjectPropertyAtom(:s Variable(:x2) Variable(:y2))" + LB
-                + "     ObjectPropertyAtom(:t Variable(:x3) Variable(:y3))" + LB
-                + "     SameIndividualAtom(Variable(:x1) Variable(:x2))" + LB
-                + "     SameIndividualAtom(Variable(:x1) Variable(:x3))" + LB + "  )" + LB
-                + "  Head(ClassAtom(:u Variable(:x3)))" + LB + ")";
+                + "DLSafeRule(\n" + "  Body(\n" + "     ObjectPropertyAtom(:r Variable(:x1) Variable(:y1))\n"
+                + "     ObjectPropertyAtom(:s Variable(:x2) Variable(:y2))\n"
+                + "     ObjectPropertyAtom(:t Variable(:x3) Variable(:y3))\n"
+                + "     SameIndividualAtom(Variable(:x1) Variable(:x2))\n"
+                + "     SameIndividualAtom(Variable(:x1) Variable(:x3))\n" + "  )\n"
+                + "  Head(ClassAtom(:u Variable(:x3)))\n" + ")";
         loadOntologyWithAxioms(axioms);
         createReasoner();
 
@@ -36,18 +36,18 @@ public class RulesTest extends AbstractReasonerTest {
     }
 
     public void testSameAsInBody2() throws Exception {
-        String axioms = "Declaration(ObjectProperty(:r))" + LB + "Declaration(ObjectProperty(:s))" + LB
-                + "Declaration(ObjectProperty(:t))" + LB + "Declaration(Class(:u))" + LB
-                + "ObjectPropertyAssertion(:r :a1 :b)" + LB + "ObjectPropertyAssertion(:s :a2 :c)" + LB
-                + "ObjectPropertyAssertion(:t :a3 :d)" + LB + "ClassAssertion(ObjectComplementOf(:u) :a1)" + LB
+        String axioms = "Declaration(ObjectProperty(:r))\n" + "Declaration(ObjectProperty(:s))\n"
+                + "Declaration(ObjectProperty(:t))\n" + "Declaration(Class(:u))\n"
+                + "ObjectPropertyAssertion(:r :a1 :b)\n" + "ObjectPropertyAssertion(:s :a2 :c)\n"
+                + "ObjectPropertyAssertion(:t :a3 :d)\n" + "ClassAssertion(ObjectComplementOf(:u) :a1)\n"
                 // r(x1, y1) /\ s(x2, y2) /\ t(x3, y3) x1 = x2 /\ x1 = x3 ->
                 // u(x3)
-                + "DLSafeRule(" + LB + "  Body(" + LB + "     ObjectPropertyAtom(:r Variable(:x1) Variable(:y1))" + LB
-                + "     ObjectPropertyAtom(:s Variable(:x2) Variable(:y2))" + LB
-                + "     ObjectPropertyAtom(:t Variable(:x3) Variable(:y3))" + LB
-                + "     SameIndividualAtom(Variable(:x1) Variable(:x2))" + LB
-                + "     SameIndividualAtom(Variable(:x1) Variable(:x3))" + LB + "  )" + LB
-                + "  Head(ClassAtom(:u Variable(:x3)))" + LB + ")";
+                + "DLSafeRule(\n" + "  Body(\n" + "     ObjectPropertyAtom(:r Variable(:x1) Variable(:y1))\n"
+                + "     ObjectPropertyAtom(:s Variable(:x2) Variable(:y2))\n"
+                + "     ObjectPropertyAtom(:t Variable(:x3) Variable(:y3))\n"
+                + "     SameIndividualAtom(Variable(:x1) Variable(:x2))\n"
+                + "     SameIndividualAtom(Variable(:x1) Variable(:x3))\n" + "  )\n"
+                + "  Head(ClassAtom(:u Variable(:x3)))\n" + ")";
         loadOntologyWithAxioms(axioms);
         createReasoner();
 
@@ -55,15 +55,15 @@ public class RulesTest extends AbstractReasonerTest {
     }
 
     public void testSameAsInBodyWithDataProperties() throws Exception {
-        String axioms = "Declaration(DataProperty(:r))" + LB + "Declaration(DataProperty(:s))" + LB
-                + "Declaration(Class(:u))" + LB + "DataPropertyAssertion(:r :a \"2\"^^xsd:integer)" + LB
+        String axioms = "Declaration(DataProperty(:r))\n" + "Declaration(DataProperty(:s))\n"
+                + "Declaration(Class(:u))\n" + "DataPropertyAssertion(:r :a \"2\"^^xsd:integer)\n"
                 + "ClassAssertion(DataSomeValuesFrom(:s DatatypeRestriction(xsd:integer xsd:minInclusive \"2\"^^xsd:integer xsd:maxInclusive \"2\"^^xsd:integer)) :a)"
-                + LB + "ClassAssertion(ObjectComplementOf(:u) :a)" + LB
+                + "\n" + "ClassAssertion(ObjectComplementOf(:u) :a)\n"
                 // r(x,y1) /\ s(x,y2) /\ y1==y2 -> u(x)
-                + "DLSafeRule(" + LB + "  Body(" + LB + "     DataPropertyAtom(:r Variable(:x) Variable(:y1))" + LB
-                + "     DataPropertyAtom(:s Variable(:x) Variable(:y2))" + LB
-                + "     SameIndividualAtom(Variable(:y1) Variable(:y2))" + LB + "  )" + LB
-                + "  Head(ClassAtom(:u Variable(:x)))" + LB + ")";
+                + "DLSafeRule(\n" + "  Body(\n" + "     DataPropertyAtom(:r Variable(:x) Variable(:y1))\n"
+                + "     DataPropertyAtom(:s Variable(:x) Variable(:y2))\n"
+                + "     SameIndividualAtom(Variable(:y1) Variable(:y2))\n" + "  )\n"
+                + "  Head(ClassAtom(:u Variable(:x)))\n" + ")";
         loadOntologyWithAxioms(axioms);
         createReasoner();
 
@@ -71,14 +71,14 @@ public class RulesTest extends AbstractReasonerTest {
     }
 
     public void testDataPropertiesInBody() throws Exception {
-        String axioms = "Declaration(DataProperty(:r))" + LB + "Declaration(DataProperty(:s))" + LB
-                + "Declaration(Class(:u))" + LB + "DataPropertyAssertion(:r :a \"2\"^^xsd:integer)" + LB
+        String axioms = "Declaration(DataProperty(:r))\n" + "Declaration(DataProperty(:s))\n"
+                + "Declaration(Class(:u))\n" + "DataPropertyAssertion(:r :a \"2\"^^xsd:integer)\n"
                 + "ClassAssertion(DataSomeValuesFrom(:s DatatypeRestriction(xsd:integer xsd:minInclusive \"2\"^^xsd:integer xsd:maxInclusive \"2\"^^xsd:integer)) :a)"
-                + LB + "ClassAssertion(ObjectComplementOf(:u) :a)" + LB
+                + "\n" + "ClassAssertion(ObjectComplementOf(:u) :a)\n"
                 // r(x,y) /\ s(x,y) -> u(x)
-                + "DLSafeRule(" + LB + "  Body(" + LB + "     DataPropertyAtom(:r Variable(:x) Variable(:y))" + LB
-                + "     DataPropertyAtom(:s Variable(:x) Variable(:y))" + LB + "  )" + LB
-                + "  Head(ClassAtom(:u Variable(:x)))" + LB + ")";
+                + "DLSafeRule(\n" + "  Body(\n" + "     DataPropertyAtom(:r Variable(:x) Variable(:y))\n"
+                + "     DataPropertyAtom(:s Variable(:x) Variable(:y))\n" + "  )\n"
+                + "  Head(ClassAtom(:u Variable(:x)))\n" + ")";
         loadOntologyWithAxioms(axioms);
         createReasoner();
 
@@ -86,11 +86,11 @@ public class RulesTest extends AbstractReasonerTest {
     }
 
     public void testIndividualsInRules() throws Exception {
-        String axioms = "Declaration(NamedIndividual(:a))" + LB + "Declaration(NamedIndividual(:b))" + LB
-                + "Declaration(Class(:c))" + LB + "Declaration(Class(:d))" + LB + "ClassAssertion(:c :a)" + LB
-                + "ClassAssertion(ObjectComplementOf(:d) :b)" + LB
+        String axioms = "Declaration(NamedIndividual(:a))\n" + "Declaration(NamedIndividual(:b))\n"
+                + "Declaration(Class(:c))\n" + "Declaration(Class(:d))\n" + "ClassAssertion(:c :a)\n"
+                + "ClassAssertion(ObjectComplementOf(:d) :b)\n"
                 // c(a) -> d(b)
-                + "DLSafeRule(" + LB + "  Body(ClassAtom(:c :a))" + LB + "  Head(ClassAtom(:d :b))" + LB + ")";
+                + "DLSafeRule(\n" + "  Body(ClassAtom(:c :a))\n" + "  Head(ClassAtom(:d :b))\n" + ")";
         loadOntologyWithAxioms(axioms);
         createReasoner();
 
@@ -98,13 +98,13 @@ public class RulesTest extends AbstractReasonerTest {
     }
 
     public void testRuleNonSimple() throws Exception {
-        String axioms = "Declaration(NamedIndividual(:a))" + LB + "Declaration(NamedIndividual(:b))" + LB
-                + "Declaration(ObjectProperty(:t))" + LB + "Declaration(ObjectProperty(:s))" + LB
-                + "TransitiveObjectProperty(:t)" + LB
-                + "ClassAssertion(ObjectSomeValuesFrom(:t ObjectSomeValuesFrom(:t ObjectOneOf(:b))) :a)" + LB
+        String axioms = "Declaration(NamedIndividual(:a))\n" + "Declaration(NamedIndividual(:b))\n"
+                + "Declaration(ObjectProperty(:t))\n" + "Declaration(ObjectProperty(:s))\n"
+                + "TransitiveObjectProperty(:t)\n"
+                + "ClassAssertion(ObjectSomeValuesFrom(:t ObjectSomeValuesFrom(:t ObjectOneOf(:b))) :a)\n"
                 // t(x, y) -> s(x, y)
-                + "DLSafeRule(" + LB + "  Body(ObjectPropertyAtom(:t Variable(:x) Variable(:y)))" + LB
-                + "  Head(ObjectPropertyAtom(:s Variable(:x) Variable(:y)))" + LB + ")";
+                + "DLSafeRule(\n" + "  Body(ObjectPropertyAtom(:t Variable(:x) Variable(:y)))\n"
+                + "  Head(ObjectPropertyAtom(:s Variable(:x) Variable(:y)))\n" + ")";
         loadOntologyWithAxioms(axioms);
         createReasoner();
 
@@ -121,12 +121,12 @@ public class RulesTest extends AbstractReasonerTest {
     }
 
     public void testRuleNotAxiom() throws Exception {
-        String axioms = "Declaration(NamedIndividual(:a))" + LB + "Declaration(NamedIndividual(:b))" + LB
-                + "Declaration(Class(:A))" + LB + "Declaration(Class(:B))" + LB + "ClassAssertion(:A :a)" + LB
-                + "ClassAssertion(:A :b)" + LB
+        String axioms = "Declaration(NamedIndividual(:a))\n" + "Declaration(NamedIndividual(:b))\n"
+                + "Declaration(Class(:A))\n" + "Declaration(Class(:B))\n" + "ClassAssertion(:A :a)\n"
+                + "ClassAssertion(:A :b)\n"
                 // A(x) -> B(x)
-                + "DLSafeRule(" + LB + "  Body(ClassAtom(:A Variable(:x)))" + LB + "  Head(ClassAtom(:B Variable(:x)))"
-                + LB + ")";
+                + "DLSafeRule(\n" + "  Body(ClassAtom(:A Variable(:x)))\n" + "  Head(ClassAtom(:B Variable(:x)))"
+                + "\n" + ")";
         loadOntologyWithAxioms(axioms);
         createReasoner();
 
@@ -147,9 +147,9 @@ public class RulesTest extends AbstractReasonerTest {
                 + "Declaration(NamedIndividual(:pda))" + "Declaration(Class(:BluetoothSensor))"
                 + "Declaration(Class(:Location))" + "Declaration(Class(:BluetoothDevice))"
                 + "Declaration(ObjectProperty(:hasLocation))" + "Declaration(ObjectProperty(:detects))"
-                + "ClassAssertion(:BluetoothDevice :pda)" + LB + "ClassAssertion(:BluetoothSensor :sensor)" + LB
-                + "ClassAssertion(:Location :kitchen)" + LB + "ObjectPropertyAssertion(:detects :sensor :pda)" + LB
-                + "ObjectPropertyAssertion(:hasLocation :sensor :kitchen)" + LB
+                + "ClassAssertion(:BluetoothDevice :pda)\n" + "ClassAssertion(:BluetoothSensor :sensor)\n"
+                + "ClassAssertion(:Location :kitchen)\n" + "ObjectPropertyAssertion(:detects :sensor :pda)\n"
+                + "ObjectPropertyAssertion(:hasLocation :sensor :kitchen)\n"
                 // BluetoothDevice(vbd) /\ BluetoothSensor(vbs) /\ Location(vl)
                 // /\ detects(vbs, vl) /\ hasLocation(vbs, vl) ->
                 // hasLocation(vbd, vl)
@@ -170,7 +170,7 @@ public class RulesTest extends AbstractReasonerTest {
     }
 
     public void testSimpleRule() throws Exception {
-        String axioms = "SubClassOf(:A :B)" + LB + "ClassAssertion(:A :a)" + LB + "ClassAssertion(:D :b)" + LB
+        String axioms = "SubClassOf(:A :B)\n" + "ClassAssertion(:A :a)\n" + "ClassAssertion(:D :b)\n"
         // B(x) -> C(x)
                 + "DLSafeRule(Body(ClassAtom(:B Variable(:x))) Head(ClassAtom(:C Variable(:x))))";
         loadOntologyWithAxioms(axioms);

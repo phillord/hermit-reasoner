@@ -52,9 +52,6 @@ public class ConcatenationTest extends TestCase {
     private Automaton a;
     private Automaton b;
 
-    /*
-     * @see TestCase#setUp()
-     */
     @Override
     protected void setUp() throws Exception {
         super.setUp();

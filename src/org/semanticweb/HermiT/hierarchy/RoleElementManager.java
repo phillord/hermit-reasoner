@@ -146,9 +146,7 @@ public class RoleElementManager {
         }
         @Override
         public String toString() {
-            StringBuffer buffer=new StringBuffer();
-            buffer.append(m_role);
-            buffer.append(" (known instances: ");
+            StringBuilder buffer=new StringBuilder(m_role.toString()).append(" (known instances: ");
             boolean notfirst=false;
             for (Individual individual : m_knownRelations.keySet()) {
                 for (Individual successor : m_knownRelations.get(individual)) {
@@ -156,11 +154,7 @@ public class RoleElementManager {
                         buffer.append(", ");
                         notfirst=true;
                     }
-                    buffer.append("(");
-                    buffer.append(individual.toString());
-                    buffer.append(", ");
-                    buffer.append(successor.toString());
-                    buffer.append(")");
+                    buffer.append("(").append(individual).append(", ").append(successor).append(")");
                 }
             }
             buffer.append(" | possible instances: ");
@@ -171,11 +165,7 @@ public class RoleElementManager {
                         buffer.append(", ");
                         notfirst=true;
                     }
-                    buffer.append("(");
-                    buffer.append(individual.toString());
-                    buffer.append(", ");
-                    buffer.append(successor.toString());
-                    buffer.append(")");
+                    buffer.append("(").append(individual).append(", ").append(successor).append(")");
                 }
             }
             buffer.append(") ");

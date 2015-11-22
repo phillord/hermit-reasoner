@@ -64,7 +64,7 @@ import rationals.Transition;
  */
 public class CompleteNop implements UnaryTransformation {
 
-    private Set<Object> alphabet;
+    private final Set<Object> alphabet;
 
     public CompleteNop(Set<Object> alphabet) {
         this.alphabet = alphabet;

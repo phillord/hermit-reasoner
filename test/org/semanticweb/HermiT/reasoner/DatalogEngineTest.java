@@ -15,6 +15,7 @@ import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.HermiT.model.Term;
 import org.semanticweb.HermiT.model.Variable;
+
 @SuppressWarnings("javadoc")
 public class DatalogEngineTest extends AbstractReasonerTest {
 
@@ -24,15 +25,14 @@ public class DatalogEngineTest extends AbstractReasonerTest {
 
     public void testBasic() throws Exception {
         loadOntologyWithAxioms(
-                "SubClassOf( ObjectSomeValuesFrom( :R :A ) :A )" + LB + "SubClassOf( ObjectSomeValuesFrom( :R :B ) :B )"
-                        + LB + "SubClassOf( ObjectIntersectionOf( :A :B ) :C )" + LB +
+                "SubClassOf( ObjectSomeValuesFrom( :R :A ) :A )\n" + "SubClassOf( ObjectSomeValuesFrom( :R :B ) :B )\n"
+                        + "SubClassOf( ObjectIntersectionOf( :A :B ) :C )\n" +
 
-        "ClassAssertion( :A :a )" + LB + "ObjectPropertyAssertion( :R :b :a )" + LB
-                        + "ObjectPropertyAssertion( :R :c :b )" + LB + "ObjectPropertyAssertion( :R :d :c )" + LB +
+        "ClassAssertion( :A :a )\n" + "ObjectPropertyAssertion( :R :b :a )\n" + "ObjectPropertyAssertion( :R :c :b )\n"
+                        + "ObjectPropertyAssertion( :R :d :c )\n" +
 
-        "ClassAssertion( :B :k )" + LB + "ObjectPropertyAssertion( :R :l :k )" + LB
-                        + "ObjectPropertyAssertion( :R :m :l )" + LB + "ObjectPropertyAssertion( :R :c :m )" + LB
-                        + "ObjectPropertyAssertion( :R :n :c )");
+        "ClassAssertion( :B :k )\n" + "ObjectPropertyAssertion( :R :l :k )\n" + "ObjectPropertyAssertion( :R :m :l )\n"
+                        + "ObjectPropertyAssertion( :R :c :m )\n" + "ObjectPropertyAssertion( :R :n :c )");
         createReasoner();
         DatalogEngine datalogEngine = new DatalogEngine(m_reasoner.getDLOntology());
         QueryChecker queryChecker = new QueryChecker();
@@ -48,11 +48,11 @@ public class DatalogEngineTest extends AbstractReasonerTest {
     }
 
     public void testEquality() throws Exception {
-        loadOntologyWithAxioms("FunctionalObjectProperty( :R )" + LB +
+        loadOntologyWithAxioms("FunctionalObjectProperty( :R )\n" +
 
-        "ObjectPropertyAssertion( :R :b :a )" + LB + "ObjectPropertyAssertion( :R :b :c )" + LB
-                + "ObjectPropertyAssertion( :R :d :c )" + LB + "ObjectPropertyAssertion( :R :d :e )" + LB
-                + "ObjectPropertyAssertion( :R :f :e )" + LB + "ObjectPropertyAssertion( :R :f :g )");
+        "ObjectPropertyAssertion( :R :b :a )\n" + "ObjectPropertyAssertion( :R :b :c )\n"
+                + "ObjectPropertyAssertion( :R :d :c )\n" + "ObjectPropertyAssertion( :R :d :e )\n"
+                + "ObjectPropertyAssertion( :R :f :e )\n" + "ObjectPropertyAssertion( :R :f :g )");
         createReasoner();
         DatalogEngine datalogEngine = new DatalogEngine(m_reasoner.getDLOntology());
         datalogEngine.materialize();
@@ -66,10 +66,10 @@ public class DatalogEngineTest extends AbstractReasonerTest {
     }
 
     public void testQueryWithIndividualsAndEquality() throws Exception {
-        loadOntologyWithAxioms("ObjectPropertyAssertion( :R :c :b )" + LB + "ObjectPropertyAssertion( :S :c :a )" + LB
-                + "SameIndividual( :a :b )" + LB +
+        loadOntologyWithAxioms("ObjectPropertyAssertion( :R :c :b )\n" + "ObjectPropertyAssertion( :S :c :a )\n"
+                + "SameIndividual( :a :b )\n" +
 
-        "ObjectPropertyAssertion( :R :d :e )" + LB + "ObjectPropertyAssertion( :S :d :f )");
+        "ObjectPropertyAssertion( :R :d :e )\n" + "ObjectPropertyAssertion( :S :d :f )");
         createReasoner();
         DatalogEngine datalogEngine = new DatalogEngine(m_reasoner.getDLOntology());
         datalogEngine.materialize();
@@ -82,12 +82,11 @@ public class DatalogEngineTest extends AbstractReasonerTest {
     }
 
     public void testQueryWithIndividuals() throws Exception {
-        loadOntologyWithAxioms("DLSafeRule(Body(ClassAtom(:D0 Variable(:X))) Head(ClassAtom(:A Variable(:X))))" + LB
-                + "DLSafeRule(Body(ClassAtom(:D0 Variable(:X))) Head(ClassAtom(:B Variable(:X))))" + LB
-                + "DLSafeRule(Body(ClassAtom(:A Variable(:X))ClassAtom(:RD0 Variable(:Z))) Head(ClassAtom(:D0 Variable(:Z))))"
-                + LB
-                + "DLSafeRule(Body(ClassAtom(:A Variable(:X))ClassAtom(:RD0 Variable(:Z))) Head(ObjectPropertyAtom(:R Variable(:X) Variable(:Z))))"
-                + LB + "ClassAssertion( owl:Thing :a )" + LB + "ClassAssertion( :RD0 :rd0 )" + LB
+        loadOntologyWithAxioms("DLSafeRule(Body(ClassAtom(:D0 Variable(:X))) Head(ClassAtom(:A Variable(:X))))\n"
+                + "DLSafeRule(Body(ClassAtom(:D0 Variable(:X))) Head(ClassAtom(:B Variable(:X))))\n"
+                + "DLSafeRule(Body(ClassAtom(:A Variable(:X))ClassAtom(:RD0 Variable(:Z))) Head(ClassAtom(:D0 Variable(:Z))))\n"
+                + "DLSafeRule(Body(ClassAtom(:A Variable(:X))ClassAtom(:RD0 Variable(:Z))) Head(ObjectPropertyAtom(:R Variable(:X) Variable(:Z))))\n" 
+                + "ClassAssertion( owl:Thing :a )\n" + "ClassAssertion( :RD0 :rd0 )\n"
                 + "ClassAssertion( :A :a )");
         createReasoner();
         DatalogEngine datalogEngine = new DatalogEngine(m_reasoner.getDLOntology());

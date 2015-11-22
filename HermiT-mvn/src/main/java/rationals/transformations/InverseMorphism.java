@@ -64,7 +64,7 @@ import rationals.Transition;
  */
 public class InverseMorphism implements UnaryTransformation {
 
-    private Map<Object, Set<Object>> morph;
+    private final Map<Object, Set<Object>> morph;
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public InverseMorphism(Map m) {

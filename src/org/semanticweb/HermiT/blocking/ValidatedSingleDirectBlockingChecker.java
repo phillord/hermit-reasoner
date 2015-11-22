@@ -364,17 +364,17 @@ public class ValidatedSingleDirectBlockingChecker implements DirectBlockingCheck
         }
     }
     public static interface ValidatedBlockingObject {
-        public void initialize();
-        public void destroy();
-        public Set<AtomicConcept> getAtomicConceptsLabel();
-        public void addConcept(Concept concept, boolean isCore);
-        public void removeConcept(Concept concept, boolean isCore);
-        public Set<AtomicConcept> getFullAtomicConceptsLabel();
-        public Set<AtomicRole> getFullFromParentLabel();
-        public Set<AtomicRole> getFullToParentLabel();
-        public void setBlockViolatesParentConstraints(boolean violates);
-        public void setHasAlreadyBeenChecked(boolean hasBeenChecked);
-        public boolean hasAlreadyBeenChecked();
-        public boolean blockViolatesParentConstraints();
+        void initialize();
+        void destroy();
+        Set<AtomicConcept> getAtomicConceptsLabel();
+        void addConcept(Concept concept, boolean isCore);
+        void removeConcept(Concept concept, boolean isCore);
+        Set<AtomicConcept> getFullAtomicConceptsLabel();
+        Set<AtomicRole> getFullFromParentLabel();
+        Set<AtomicRole> getFullToParentLabel();
+        void setBlockViolatesParentConstraints(boolean violates);
+        void setHasAlreadyBeenChecked(boolean hasBeenChecked);
+        boolean hasAlreadyBeenChecked();
+        boolean blockViolatesParentConstraints();
     }
 }

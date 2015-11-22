@@ -3,5 +3,5 @@ import rationals.Automaton;
 
 
 public interface ToString {
-  public String toString(Automaton a) ;
+    String toString(Automaton a) ;
 }

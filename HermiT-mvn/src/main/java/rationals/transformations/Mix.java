@@ -34,7 +34,7 @@ import rationals.Transition;
  */
 public class Mix implements BinaryTransformation {
 
-    private Synchronization synchronization;
+    private final Synchronization synchronization;
 
     /**
      * Compute mix of two automata using default synchronization scheme which is

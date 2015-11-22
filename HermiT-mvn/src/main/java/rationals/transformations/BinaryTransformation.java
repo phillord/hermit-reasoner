@@ -9,5 +9,5 @@ import rationals.Automaton;
  * @version $Id: BinaryTransformation.java 2 2006-08-24 14:41:48Z oqube $
  */
 public interface BinaryTransformation {
-  public Automaton transform(Automaton a , Automaton b) ;
+    Automaton transform(Automaton a , Automaton b) ;
 }

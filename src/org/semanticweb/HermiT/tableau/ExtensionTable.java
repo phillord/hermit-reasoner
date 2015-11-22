@@ -200,7 +200,7 @@ public abstract class ExtensionTable implements Serializable {
         return true;
     }
 
-    public static interface Retrieval {
+    public interface Retrieval {
         ExtensionTable getExtensionTable();
         View getExtensionView();
         void clear();
@@ -336,7 +336,7 @@ public abstract class ExtensionTable implements Serializable {
         }
     }
 
-    protected static interface DependencySetManager {
+    protected interface DependencySetManager {
         DependencySet getDependencySet(int tupleIndex);
         void setDependencySet(int tupleIndex,DependencySet dependencySet);
         void forgetDependencySet(int tupleIndex);
@@ -387,7 +387,7 @@ public abstract class ExtensionTable implements Serializable {
         }
     }
 
-    protected static interface CoreManager {
+    protected interface CoreManager {
         boolean isCore(int tupleIndex);
         void addCore(int tupleIndex);
         void setCore(int tupleIndex,boolean isCore);

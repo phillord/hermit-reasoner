@@ -53,46 +53,45 @@ import rationals.transformations.Normalizer;
  * expression.
  * <p>
  * This conversion applies classical conversion algorithm based on state
- * removal. 
- * cf. Algorithm BMC (Brozowski et  al.) from J.sakarovitch "Elements de theorie
- * des automates", sec. 2
+ * removal. cf. Algorithm BMC (Brozowski et al.) from J.sakarovitch "Elements de
+ * theorie des automates", sec. 2
  * 
  * @author nono
  * @version $Id: ToRExpression.java 2 2006-08-24 14:41:48Z oqube $
  */
 public class ToRExpression implements ToString {
 
-    private Map  < Couple, String > keys = new HashMap<>();
+    private final Map<Couple, String> keys = new HashMap<>();
 
     @Override
     public String toString(Automaton a) {
-        if(a == null)
+        if (a == null)
             return "0";
-        Automaton ret = (Automaton)a.clone();
+        Automaton ret = (Automaton) a.clone();
         if (!new isNormalized().test(a))
             ret = new Normalizer().transform(a);
         /* special case for empty automaton */
         if (ret.initials().isEmpty())
-            return "0";        
+            return "0";
         /* add all transitions from start to end state */
-        State init  = ret.initials().iterator().next();
-        State fini  = ret.terminals().iterator().next();
+        State init = ret.initials().iterator().next();
+        State fini = ret.terminals().iterator().next();
         String re = "";
-        for(Iterator<Transition> i = ret.deltaFrom(init,fini).iterator();i.hasNext();) {
+        for (Iterator<Transition> i = ret.deltaFrom(init, fini).iterator(); i.hasNext();) {
             Transition tr = i.next();
-            if("".equals(re)) {
+            if ("".equals(re)) {
                 re = (tr.label() == null) ? "1" : tr.label().toString();
-            }else
+            } else
                 re += "+" + ((tr.label() == null) ? "1" : tr.label().toString());
         }
-        if(!"".equals(re))
-            keys.put(new Couple(init,fini), re);
+        if (!"".equals(re))
+            keys.put(new Couple(init, fini), re);
         Iterator<State> it = ret.states().iterator();
         while (it.hasNext()) {
             State st = it.next();
             if (st.isInitial() || st.isTerminal())
                 continue;
-          
+
             re = "";
             /* first handle self transitions */
             Iterator<Transition> it2 = ret.delta(st).iterator();
@@ -134,13 +133,13 @@ public class ToRExpression implements ToString {
                     } else {
                         oldre += "+" + nre;
                     }
-                        keys.put(k, oldre);
-                        ret.addTransition(new Transition(s1, oldre, s2),null);
+                    keys.put(k, oldre);
+                    ret.addTransition(new Transition(s1, oldre, s2), null);
                 }
             }
         }
         /* returns the transition from stat to end */
-        re = keys.get(new Couple(init,fini));
+        re = keys.get(new Couple(init, fini));
         return re;
     }
 
@@ -156,5 +155,5 @@ public class ToRExpression implements ToString {
  * Revision 1.1 2004/09/21 11:50:28 bailly added interface BinaryTest added
  * class for testing automaton equivalence (isomorphism of normalized automata)
  * added computation of RE from Automaton
- *  
+ * 
  */

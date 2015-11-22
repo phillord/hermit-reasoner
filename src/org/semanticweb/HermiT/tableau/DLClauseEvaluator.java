@@ -239,11 +239,11 @@ public class DLClauseEvaluator implements Serializable {
         }
     }
 
-    public static interface Worker {
+    public interface Worker {
         int execute(int programCounter);
     }
 
-    protected static interface BranchingWorker extends Worker {
+    protected interface BranchingWorker extends Worker {
         int getBranchingAddress();
         void setBranchingAddress(int branchingAddress);
     }

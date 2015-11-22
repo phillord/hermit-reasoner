@@ -61,7 +61,7 @@ public interface AutomatonRunListener {
      * @param o
      *            the object effectively "read" for firing transitions
      */
-    public void fire(Automaton automaton, Set<Transition> transitions, Object o);
+    void fire(Automaton automaton, Set<Transition> transitions, Object o);
 
 }
 

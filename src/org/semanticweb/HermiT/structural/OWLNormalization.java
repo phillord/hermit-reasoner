@@ -524,8 +524,8 @@ public class OWLNormalization {
                     addInclusion(subPropertyChain.get(0),superObjectPropertyExpression);
                 else if (subPropertyChain.size()==2 && subPropertyChain.get(0).equals(superObjectPropertyExpression) && subPropertyChain.get(1).equals(superObjectPropertyExpression))
                     makeTransitive(axiom.getSuperProperty());
-                else if (subPropertyChain.size()==0)
-                    throw new IllegalArgumentException("Error: In OWL 2 DL, an empty property chain in property chain axioms is not allowd, but the ontology contains an axiom that the empty chain is a subproperty of "+superObjectPropertyExpression+".");
+                else if (subPropertyChain.isEmpty())
+                    throw new IllegalArgumentException("Error: In OWL 2 DL, an empty property chain in property chain axioms is not allowed, but the ontology contains an axiom that the empty chain is a subproperty of "+superObjectPropertyExpression+".");
                 else {
                     OWLObjectPropertyExpression[] subObjectProperties=new OWLObjectPropertyExpression[subPropertyChain.size()];
                     subPropertyChain.toArray(subObjectProperties);

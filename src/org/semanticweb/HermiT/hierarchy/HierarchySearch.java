@@ -137,11 +137,11 @@ public class HierarchySearch {
         return result;
     }
 
-    public static interface Relation<U> {
+    public interface Relation<U> {
         boolean doesSubsume(U parent,U child);
     }
 
-    public static interface SearchPredicate<U> {
+    public interface SearchPredicate<U> {
         Set<U> getSuccessorElements(U u);
         Set<U> getPredecessorElements(U u);
         boolean trueOf(U u);

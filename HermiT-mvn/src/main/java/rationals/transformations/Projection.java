@@ -58,7 +58,7 @@ import rationals.Transition;
  */
 public class Projection implements UnaryTransformation {
 
-    private Set<Object> alphabet;
+    private final Set<Object> alphabet;
 
     public Projection(Set<Object> alphabet) {
         this.alphabet = alphabet;

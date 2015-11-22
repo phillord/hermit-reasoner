@@ -20,7 +20,7 @@ import rationals.transformations.Union;
 // B -> letter | 1 | 0 | ( E )
 public class Parser {
     
-  private Lexer lexico ;
+  private final Lexer lexico ;
   
   /**
    * Parse given string using standard grammar and lexical analyzer.
@@ -205,8 +205,7 @@ public class Parser {
       case Lexer.EMPTY :
       case Lexer.OPEN :
       case Lexer.LABEL : {
-        Automaton a = BP(B()) ; 
-        return a ;
+        return BP(B()) ;
       }       
       case Lexer.CLOSE :
       case Lexer.END :

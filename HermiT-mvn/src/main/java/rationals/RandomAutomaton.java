@@ -68,15 +68,15 @@ public class RandomAutomaton extends Automaton {
 
     private static final Random rand = new Random();
 
-    private int nstate;
+    private final int nstate;
 
-    private int fstate;
+    private final int fstate;
 
-    private Object[] alph;
+    private final Object[] alph;
 
-    private double density;
+    private final double density;
 
-    private double deviation;
+    private final double deviation;
 
     /**
      * Construct a RandomAutomaton according to the given parameters.

@@ -141,11 +141,7 @@ public class RDFPlainLiteralPatternValueSpaceSubset implements ValueSpaceSubset 
     }
     @Override
     public String toString() {
-        StringBuffer buffer=new StringBuffer();
-        buffer.append("rdf:PlainLiteral{");
-        buffer.append(m_automaton.toString());
-        buffer.append('}');
-        return buffer.toString();
+        return "rdf:PlainLiteral{"+m_automaton+"}";
     }
     public static Automaton toAutomaton(RDFPlainLiteralLengthValueSpaceSubset valueSpaceSubset) {
         List<RDFPlainLiteralLengthInterval> intervals=valueSpaceSubset.m_intervals;

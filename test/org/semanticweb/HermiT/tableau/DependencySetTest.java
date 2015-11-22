@@ -1,5 +1,7 @@
 package org.semanticweb.HermiT.tableau;
 
+import static org.junit.Assert.assertNotEquals;
+
 import junit.framework.TestCase;
 @SuppressWarnings("javadoc")
 public class DependencySetTest extends TestCase {
@@ -24,7 +26,7 @@ public class DependencySetTest extends TestCase {
         set = m_factory.addBranchingPoint(set, 0);
         assertDSEquals(set, 0, 32);
         PermanentDependencySet set2 = m_factory.addBranchingPoint(m_factory.emptySet(), 0);
-        assertTrue(set != set2);
+        assertNotEquals(set, set2);
         assertSame(set, m_factory.addBranchingPoint(set2, 32));
         set = m_factory.unionWith(set, m_factory.addBranchingPoint(m_factory.addBranchingPoint(set2, 15), 17));
         assertDSEquals(set, 0, 15, 17, 32);

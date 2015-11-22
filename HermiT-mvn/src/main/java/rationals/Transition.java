@@ -17,7 +17,7 @@ public class Transition {
 
     private int hash = Integer.MIN_VALUE;
 
-    private State start;
+    private final State start;
 
     private Object label;
 

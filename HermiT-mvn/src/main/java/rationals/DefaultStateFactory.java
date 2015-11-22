@@ -84,7 +84,7 @@ public class DefaultStateFactory implements StateFactory, Cloneable {
 
     class DefaultStateSet implements Set<State> {
 
-        private DefaultStateFactory df;
+        private final DefaultStateFactory df;
 
         /**
          * @param set

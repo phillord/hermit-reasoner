@@ -13,11 +13,6 @@ import rationals.converters.Expression;
 @SuppressWarnings("javadoc")
 public class InverseMorphismTest extends TestCase {
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
     public void test01SimpleMap() throws ConverterException {
         Automaton a = new Expression().fromString("(abc)*");
         Map<String, String> m = new HashMap<>();

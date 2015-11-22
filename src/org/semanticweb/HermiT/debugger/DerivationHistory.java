@@ -243,7 +243,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
         }
     }
 
-    protected static interface Fact extends Serializable {
+    protected interface Fact extends Serializable {
         String toString(Prefixes prefixes);
         Derivation getDerivation();
     }
@@ -435,7 +435,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
         }
         @Override
         public String toString(Prefixes prefixes) {
-            return "  |  "+String.valueOf(m_disjunctIndex);
+            return "  |  "+m_disjunctIndex;
         }
     }
 

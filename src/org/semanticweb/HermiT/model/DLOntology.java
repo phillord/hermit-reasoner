@@ -313,72 +313,39 @@ public class DLOntology implements Serializable {
         return change;
     }
     public String toString(Prefixes prefixes) {
-        StringBuffer stringBuffer=new StringBuffer();
-        stringBuffer.append("Prefixes: [");
-        stringBuffer.append(CRLF);
+        StringBuilder stringBuffer=new StringBuilder("Prefixes: [").append(CRLF);
         for (Map.Entry<String,String> entry : prefixes.getPrefixIRIsByPrefixName().entrySet()) {
-            stringBuffer.append("  ");
-            stringBuffer.append(entry.getKey());
-            stringBuffer.append(" = <");
-            stringBuffer.append(entry.getValue());
-            stringBuffer.append('>');
-            stringBuffer.append(CRLF);
+            stringBuffer.append("  ").append(entry.getKey()).append(" = <").append(entry.getValue()).append('>').append(CRLF);
         }
-        stringBuffer.append("]");
-        stringBuffer.append(CRLF);
-        stringBuffer.append("Deterministic DL-clauses: [");
-        stringBuffer.append(CRLF);
+        stringBuffer.append("]").append(CRLF).append("Deterministic DL-clauses: [").append(CRLF);
         int numDeterministicClauses=0;
         for (DLClause dlClause : m_dlClauses)
             if (dlClause.getHeadLength()<=1) {
                 numDeterministicClauses++;
-                stringBuffer.append("  ");
-                stringBuffer.append(dlClause.toString(prefixes));
-                stringBuffer.append(CRLF);
+                stringBuffer.append("  ").append(dlClause.toString(prefixes)).append(CRLF);
             }
-        stringBuffer.append("]");
-        stringBuffer.append(CRLF);
-        stringBuffer.append("Disjunctive DL-clauses: [");
-        stringBuffer.append(CRLF);
+        stringBuffer.append("]").append(CRLF).append("Disjunctive DL-clauses: [").append(CRLF);
         int numNondeterministicClauses=0;
         int numDisjunctions=0;
         for (DLClause dlClause : m_dlClauses)
             if (dlClause.getHeadLength()>1) {
                 numNondeterministicClauses++;
                 numDisjunctions+=dlClause.getHeadLength();
-                stringBuffer.append("  ");
-                stringBuffer.append(dlClause.toString(prefixes));
-                stringBuffer.append(CRLF);
+                stringBuffer.append("  ").append(dlClause.toString(prefixes)).append(CRLF);
             }
-        stringBuffer.append("]");
-        stringBuffer.append(CRLF);
-        stringBuffer.append("ABox: [");
-        stringBuffer.append(CRLF);
+        stringBuffer.append("]").append(CRLF).append("ABox: [").append(CRLF);
         for (Atom atom : m_positiveFacts) {
-            stringBuffer.append("  ");
-            stringBuffer.append(atom.toString(prefixes));
-            stringBuffer.append(CRLF);
+            stringBuffer.append("  ").append(atom.toString(prefixes)).append(CRLF);
         }
         for (Atom atom : m_negativeFacts) {
-            stringBuffer.append("  !");
-            stringBuffer.append(atom.toString(prefixes));
-            stringBuffer.append(CRLF);
+            stringBuffer.append("  !").append(atom.toString(prefixes)).append(CRLF);
         }
-        stringBuffer.append("]");
-        stringBuffer.append(CRLF);
-        stringBuffer.append("Statistics: [");
-        stringBuffer.append(CRLF);
-        stringBuffer.append("  Number of deterministic clauses: " + numDeterministicClauses);
-        stringBuffer.append(CRLF);
-        stringBuffer.append("  Number of nondeterministic clauses: " + numNondeterministicClauses);
-        stringBuffer.append(CRLF);
-        stringBuffer.append("  Number of disjunctions: " + numDisjunctions);
-        stringBuffer.append(CRLF);
-        stringBuffer.append("  Number of positive facts: " + m_positiveFacts.size());
-        stringBuffer.append(CRLF);
-        stringBuffer.append("  Number of negative facts: " + m_negativeFacts.size());
-        stringBuffer.append(CRLF);
-        stringBuffer.append("]");
+        stringBuffer.append("]").append(CRLF).append("Statistics: [").append(CRLF)
+        .append("  Number of deterministic clauses: " + numDeterministicClauses).append(CRLF)
+        .append("  Number of nondeterministic clauses: " + numNondeterministicClauses).append(CRLF)
+        .append("  Number of disjunctions: " + numDisjunctions).append(CRLF)
+        .append("  Number of positive facts: " + m_positiveFacts.size()).append(CRLF)
+        .append("  Number of negative facts: " + m_negativeFacts.size()).append(CRLF).append("]");
         return stringBuffer.toString();
     }
     public String getStatistics() {
@@ -398,36 +365,20 @@ public class DLOntology implements Serializable {
                 }
             }
         }
-        StringBuffer stringBuffer=new StringBuffer();
-        stringBuffer.append("DL clauses statistics: [");
-        stringBuffer.append(CRLF);
-        stringBuffer.append("  Number of deterministic clauses: " + numDeterministicClauses);
-        stringBuffer.append(CRLF);
-        stringBuffer.append("  Number of nondeterministic clauses: " + numNondeterministicClauses);
-        stringBuffer.append(CRLF);
-        stringBuffer.append("  Overall number of disjunctions: " + numDisjunctions);
-        stringBuffer.append(CRLF);
-        stringBuffer.append("  Number of positive facts: " + m_positiveFacts.size());
-        stringBuffer.append(CRLF);
-        stringBuffer.append("  Number of negative facts: " + m_negativeFacts.size());
-        stringBuffer.append(CRLF);
-        stringBuffer.append("  Inverses: " + this.hasInverseRoles());
-        stringBuffer.append(CRLF);
-        stringBuffer.append("  At-Mosts: " + this.hasAtMostRestrictions());
-        stringBuffer.append(CRLF);
-        stringBuffer.append("  Datatypes: " + this.hasDatatypes());
-        stringBuffer.append(CRLF);
-        stringBuffer.append("  Nominals: " + this.hasNominals());
-        stringBuffer.append(CRLF);
-        stringBuffer.append("  Number of atomic concepts: " + m_allAtomicConcepts.size());
-        stringBuffer.append(CRLF);
-        stringBuffer.append("  Number of object properties: " + m_allAtomicObjectRoles.size());
-        stringBuffer.append(CRLF);
-        stringBuffer.append("  Number of data properties: " + m_allAtomicDataRoles.size());
-        stringBuffer.append(CRLF);
-        stringBuffer.append("  Number of individuals: " + m_allIndividuals.size());
-        stringBuffer.append(CRLF);
-        stringBuffer.append("]");
+        StringBuilder stringBuffer=new StringBuilder("DL clauses statistics: [").append(CRLF)
+                .append("  Number of deterministic clauses: " ).append( numDeterministicClauses).append(CRLF)
+                .append("  Number of nondeterministic clauses: " ).append( numNondeterministicClauses).append(CRLF)
+                .append("  Overall number of disjunctions: " ).append( numDisjunctions).append(CRLF)
+                .append("  Number of positive facts: " ).append( m_positiveFacts.size()).append(CRLF)
+                .append("  Number of negative facts: " ).append( m_negativeFacts.size()).append(CRLF)
+                .append("  Inverses: " ).append( this.hasInverseRoles()).append(CRLF)
+                .append("  At-Mosts: " ).append( this.hasAtMostRestrictions()).append(CRLF)
+                .append("  Datatypes: " ).append( this.hasDatatypes()).append(CRLF)
+                .append("  Nominals: " ).append( this.hasNominals()).append(CRLF)
+                .append("  Number of atomic concepts: " ).append( m_allAtomicConcepts.size()).append(CRLF)
+                .append("  Number of object properties: ").append( m_allAtomicObjectRoles.size()).append(CRLF)
+                .append("  Number of data properties: ").append( m_allAtomicDataRoles.size()).append(CRLF)
+                .append("  Number of individuals: " ).append( m_allIndividuals.size()).append(CRLF).append("]");
         return stringBuffer.toString();
     }
     @Override

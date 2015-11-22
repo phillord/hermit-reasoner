@@ -118,13 +118,13 @@ public class Timer extends TableauMonitorAdapter {
             m_output.print(' ');
     }
     protected void printPaddedMS(long number,int padding) {
-        String numberString=String.valueOf(number)+" ms";
+        String numberString=number+" ms";
         m_output.print(numberString);
         for (int index=numberString.length();index<padding;index++)
             m_output.print(' ');
     }
     protected void printPaddedKB(int number,int padding) {
-        String numberString=String.valueOf(number)+" kb";
+        String numberString=number+" kb";
         m_output.print(numberString);
         for (int index=numberString.length();index<padding;index++)
             m_output.print(' ');

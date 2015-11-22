@@ -50,14 +50,6 @@ import rationals.transformations.ToDFA;
 @SuppressWarnings("javadoc")
 public class IsDeterministicTest extends TestCase {
 
-    /*
-     * @see TestCase#setUp()
-     */
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
     /**
      * Constructor for IsDeterministicTest.
      * 

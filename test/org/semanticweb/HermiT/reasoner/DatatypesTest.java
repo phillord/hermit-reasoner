@@ -58,9 +58,9 @@ public class DatatypesTest extends AbstractReasonerTest {
     }
 
     public void testdateTimeTimezones() throws Exception {
-        String axioms = "Declaration(DataProperty(:birthDate))" + LB + "Declaration(NamedIndividual(:Peter))" + LB
-                + "FunctionalDataProperty(:birthDate)" + LB
-                + "DataPropertyAssertion(:birthDate :Peter \"1956-06-25T04:00:00-05:00\"^^xsd:dateTime)" + LB
+        String axioms = "Declaration(DataProperty(:birthDate))\n" + "Declaration(NamedIndividual(:Peter))\n"
+                + "FunctionalDataProperty(:birthDate)\n"
+                + "DataPropertyAssertion(:birthDate :Peter \"1956-06-25T04:00:00-05:00\"^^xsd:dateTime)\n"
                 + "DataPropertyAssertion(:birthDate :Peter \"1956-06-25T10:00:00+01:00\"^^xsd:dateTime)";
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(false);
@@ -76,10 +76,10 @@ public class DatatypesTest extends AbstractReasonerTest {
     }
 
     public void testNominalsAndDatatypesFromAlan() throws Exception {
-        String axioms = "Declaration(DataProperty(:dp))" + LB + "Declaration(NamedIndividual(:a))" + LB
-                + "Declaration(NamedIndividual(:b))" + LB + "EquivalentClasses(owl:Thing ObjectOneOf(:b :a))" + LB
-                + "DataPropertyAssertion(:dp :b \"42\"^^xsd:integer)" + LB
-                + "DataPropertyAssertion(:dp :b \"44\"^^xsd:integer)" + LB
+        String axioms = "Declaration(DataProperty(:dp))\n" + "Declaration(NamedIndividual(:a))\n"
+                + "Declaration(NamedIndividual(:b))\n" + "EquivalentClasses(owl:Thing ObjectOneOf(:b :a))\n"
+                + "DataPropertyAssertion(:dp :b \"42\"^^xsd:integer)\n"
+                + "DataPropertyAssertion(:dp :b \"44\"^^xsd:integer)\n"
                 + "DataPropertyAssertion(:dp :b \"43\"^^xsd:integer)";
         loadReasonerWithAxioms(axioms);
         assertTrue(m_reasoner.isConsistent());

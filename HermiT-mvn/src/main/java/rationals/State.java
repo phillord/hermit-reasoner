@@ -17,22 +17,14 @@ public interface State {
      * 
      * @return true iff this state is initial.
      */
-    public boolean isInitial();
+    boolean isInitial();
 
     /**
      * Determines if this state is terminal.
      * 
      * @return true iff this state is terminal.
      */
-    public boolean isTerminal();
-
-    /**
-     * returns a textual representation of this state.
-     * 
-     * @return a textual representation of this state.
-     */
-    @Override
-    public String toString();
+    boolean isTerminal();
 
     /**
      * Sets the initial status of this state.
@@ -40,7 +32,7 @@ public interface State {
      * @param initial
      * @return
      */
-    public State setInitial(boolean initial);
+    State setInitial(boolean initial);
 
-    public State setTerminal(boolean terminal);
+    State setTerminal(boolean terminal);
 }
