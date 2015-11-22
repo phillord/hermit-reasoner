@@ -345,8 +345,8 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
 
     protected final class ViolationStatistic implements Comparable<ViolationStatistic> {
         public final String m_violatedConstraint;
-        public final Integer m_numberOfViolations;
-        public ViolationStatistic(String violatedConstraint,Integer numberOfViolations) {
+        public final int m_numberOfViolations;
+        public ViolationStatistic(String violatedConstraint,int numberOfViolations) {
             m_violatedConstraint=violatedConstraint;
             m_numberOfViolations=numberOfViolations;
         }
