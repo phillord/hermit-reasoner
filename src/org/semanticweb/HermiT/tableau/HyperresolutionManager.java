@@ -388,8 +388,14 @@ public final class HyperresolutionManager implements Serializable {
         }
         @Override
         public boolean equals(Object that) {
+            if(that ==null) {
+                return false;
+            }
             if (this==that)
                 return true;
+            if(!(that instanceof DLClauseBodyKey)) {
+                return false;
+            }
             DLClause thatDLClause=((DLClauseBodyKey)that).m_dlClause;
             if (m_dlClause.getBodyLength()!=thatDLClause.getBodyLength())
                 return false;
