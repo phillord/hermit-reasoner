@@ -35,8 +35,6 @@
  */
 package rationals;
 
-import static org.junit.Assert.assertNotEquals;
-
 import java.util.Set;
 
 import junit.framework.TestCase;

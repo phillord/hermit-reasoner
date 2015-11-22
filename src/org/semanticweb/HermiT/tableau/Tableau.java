@@ -705,7 +705,7 @@ public final class Tableau implements Serializable {
     }
     protected void backtrackLastMergedOrPrunedNode() {
         Node node=m_lastMergedOrPrunedNode;
-        assert (node.m_nodeState==Node.NodeState.MERGED && node.m_mergedInto!=null && node.m_mergedInto!=null) || (node.m_nodeState==Node.NodeState.PRUNED && node.m_mergedInto==null && node.m_mergedInto==null);
+        assert (node.m_nodeState==Node.NodeState.MERGED && node.m_mergedInto!=null) || (node.m_nodeState==Node.NodeState.PRUNED && node.m_mergedInto==null);
         Node savedMergedInfo=null;
         if (node.m_nodeState==Node.NodeState.MERGED) {
             m_dependencySetFactory.removeUsage(node.m_mergedIntoDependencySet);

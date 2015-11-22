@@ -118,11 +118,11 @@ public class RationalMatrix  {
         /* fill matrices */
         for (int i = 0; i < sta.length; i++) {
             if (sta[i].isInitial())
-                init.matrix[0][i] = Letter.epsilon;
+                init.matrix[0][i] = RationalExpr.epsilon;
             else 
                 init.matrix[0][i] = RationalExpr.zero;
             if (sta[i].isTerminal())
-                fini.matrix[i][0] = Letter.epsilon;
+                fini.matrix[i][0] = RationalExpr.epsilon;
             else 
                 fini.matrix[i][0] = RationalExpr.zero;
             /* transitions */
@@ -131,7 +131,7 @@ public class RationalMatrix  {
                 RationalExpr re = null;
                 for (Transition tr :trs) {
                     Object o = tr.label();
-                    RationalExpr l = (o == null) ? Letter.epsilon : new Letter(o);
+                    RationalExpr l = (o == null) ? RationalExpr.epsilon : new Letter(o);
                     if (re == null)
                         re = l;
                     else

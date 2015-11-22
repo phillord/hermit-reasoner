@@ -95,7 +95,7 @@ public abstract class RationalExpr implements SemiRing {
         }
     };
 
-    public static final RationalExpr one = Letter.epsilon;
+    public static final RationalExpr one = RationalExpr.epsilon;
     
     @Override
     public final SemiRing one() {
@@ -111,7 +111,7 @@ public abstract class RationalExpr implements SemiRing {
     public SemiRing mult(SemiRing s2) {
         if(s2 == zero)
             return zero;
-        if(s2 == Letter.epsilon)
+        if(s2 == RationalExpr.epsilon)
             return this;
         RationalExpr re = (RationalExpr)s2;
         return new Product(this,re);

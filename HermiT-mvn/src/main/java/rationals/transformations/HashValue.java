@@ -59,6 +59,15 @@ public class HashValue {
 
     @Override
     public boolean equals(Object obj) {
+        if(obj==null) {
+            return false;
+        }
+        if(this==obj) {
+            return true;
+        }
+        if(!(obj instanceof HashValue)) {
+            return false;
+        }
         return ((HashValue) obj).hash == hash;
     }
 

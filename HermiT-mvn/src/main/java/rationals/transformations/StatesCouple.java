@@ -55,6 +55,15 @@ public class StatesCouple {
 
     @Override
     public boolean equals(Object obj) {
+        if(obj==null) {
+            return false;
+        }
+        if(obj==this) {
+            return true;
+        }
+        if(!(obj instanceof StatesCouple)) {
+            return false;
+        }
         StatesCouple sc = (StatesCouple) obj;
         return sc.sa.equals(sa) && sc.sb.equals(sb);
     }

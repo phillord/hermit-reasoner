@@ -468,8 +468,7 @@ public class Automaton implements Acceptor, StateMachine, Rational, Cloneable {
      */
     @Override
     public Object clone() {
-        Automaton b;
-        b = new Automaton();
+        Automaton b = new Automaton();
         Map<State, State> map = new HashMap<>();
         for (State e : states)
             map.put(e, b.addState(e.isInitial(), e.isTerminal()));
