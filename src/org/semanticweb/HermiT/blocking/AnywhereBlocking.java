@@ -29,7 +29,7 @@ import org.semanticweb.HermiT.model.Variable;
 import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.Tableau;
-
+/**Anywhere blocking strategy.*/
 public class AnywhereBlocking implements BlockingStrategy,Serializable {
     private static final long serialVersionUID=-2959900333817197464L;
 
@@ -40,6 +40,10 @@ public class AnywhereBlocking implements BlockingStrategy,Serializable {
     protected boolean m_useBlockingSignatureCache;
     protected Node m_firstChangedNode;
 
+    /**
+     * @param directBlockingChecker directBlockingChecker
+     * @param blockingSignatureCache blockingSignatureCache
+     */
     public AnywhereBlocking(DirectBlockingChecker directBlockingChecker,BlockingSignatureCache blockingSignatureCache) {
         m_directBlockingChecker=directBlockingChecker;
         m_currentBlockersCache=new BlockersCache(m_directBlockingChecker);

@@ -30,6 +30,9 @@ public class AtomicRole extends Role implements DLPredicate {
     protected AtomicRole(String iri) {
         m_iri=iri;
     }
+    /**
+     * @return iri
+     */
     public String getIRI() {
         return m_iri;
     }
@@ -67,12 +70,28 @@ public class AtomicRole extends Role implements DLPredicate {
         }
     };
 
+    /**
+     * @param iri iri
+     * @return role
+     */
     public static AtomicRole create(String iri) {
         return s_interningManager.intern(new AtomicRole(iri));
     }
 
+    /**
+     * Top oject role.
+     */
     public static final AtomicRole TOP_OBJECT_ROLE=create("http://www.w3.org/2002/07/owl#topObjectProperty");
+    /**
+     * Bottom object role.
+     */
     public static final AtomicRole BOTTOM_OBJECT_ROLE=create("http://www.w3.org/2002/07/owl#bottomObjectProperty");
+    /**
+     * Top data role.
+     */
     public static final AtomicRole TOP_DATA_ROLE=create("http://www.w3.org/2002/07/owl#topDataProperty");
+    /**
+     * Bottom data role.
+     */
     public static final AtomicRole BOTTOM_DATA_ROLE=create("http://www.w3.org/2002/07/owl#bottomDataProperty");
 }

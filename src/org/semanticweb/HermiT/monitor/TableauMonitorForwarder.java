@@ -29,19 +29,28 @@ import org.semanticweb.HermiT.tableau.GroundDisjunction;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.ReasoningTaskDescription;
 import org.semanticweb.HermiT.tableau.Tableau;
-
+/**TableauMonitorForwarder.*/
 public class TableauMonitorForwarder implements TableauMonitor,Serializable {
     private static final long serialVersionUID=-371801782567741632L;
 
     protected final TableauMonitor m_forwardingTargetMonitor;
     protected boolean m_forwardingOn;
 
+    /**
+     * @param forwardingTargetMontior forwardingTargetMontior
+     */
     public TableauMonitorForwarder(TableauMonitor forwardingTargetMontior) {
         m_forwardingTargetMonitor=forwardingTargetMontior;
     }
+    /**
+     * @return true if forwarding on
+     */
     public boolean isForwardingOn() {
         return m_forwardingOn;
     }
+    /**
+     * @param forwardingOn forwardingOn
+     */
     public void setForwardingOn(boolean forwardingOn) {
         m_forwardingOn=forwardingOn;
     }

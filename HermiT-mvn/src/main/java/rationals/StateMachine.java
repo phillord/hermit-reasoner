@@ -50,12 +50,12 @@ import java.util.Set;
  * <li><code>d</code> is a transition relation in <code>Q x S x Q</code>.
  * </ul>
  * This definition is slightly modified for this interface as the initials is
- * defined as a {@see java.util.Set} instead of a single state.
+ * defined as a set instead of a single state.
  * <code>null</code> may be used to denote <em>silent transitions</em>, that is
  * unobservable internal behavior of the machine, which can lead to non
  * determinism.
  * <p>
- * The {@see rationals.Automaton} is the main implementation for this interface.
+ * The rationals.Automaton is the main implementation for this interface.
  * 
  * @author nono
  * @version $Id: StateMachine.java 10 2007-05-30 17:25:00Z oqube $

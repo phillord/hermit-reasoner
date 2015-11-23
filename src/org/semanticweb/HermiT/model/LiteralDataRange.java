@@ -23,10 +23,19 @@ package org.semanticweb.HermiT.model;
 public abstract class LiteralDataRange extends DataRange implements DLPredicate {
     private static final long serialVersionUID=-2302452747339289424L;
     
+    /**
+     * @return negation
+     */
     public abstract LiteralDataRange getNegation();
+    /**
+     * @return true if internal
+     */
     public boolean isInternalDatatype() {
         return false;
     }
+    /**
+     * @return true if negated internal
+     */
     public boolean isNegatedInternalDatatype() {
         return false;
     }

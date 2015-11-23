@@ -24,8 +24,16 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
-
+/**HelpCommand.*/
 public class HierarchySearch {
+    /**
+     * @param hierarchyRelation hierarchyRelation
+     * @param element element
+     * @param topNode topNode
+     * @param bottomNode bottomNode
+     * @param <E> type
+     * @return node
+     */
     public static <E> HierarchyNode<E> findPosition(Relation<E> hierarchyRelation,E element,HierarchyNode<E> topNode,HierarchyNode<E> bottomNode) {
         Set<HierarchyNode<E>> parentNodes=findParents(hierarchyRelation,element,topNode);
         Set<HierarchyNode<E>> childNodes=findChildren(hierarchyRelation,element,bottomNode,parentNodes);
@@ -116,6 +124,13 @@ public class HierarchySearch {
         }
     }
 
+    /**
+     * @param searchPredicate searchPredicate
+     * @param startSearch startSearch
+     * @param possibilities possibilities
+     * @param <U> type
+     * @return results
+     */
     public static <U> Set<U> search(SearchPredicate<U> searchPredicate,Collection<U> startSearch,Set<U> possibilities) {
         SearchCache<U> cache=new SearchCache<>(searchPredicate,possibilities);
         Set<U> result=new HashSet<>();
@@ -137,13 +152,36 @@ public class HierarchySearch {
         return result;
     }
 
+    /**Relation.
+     * @param <U> type*/
     public interface Relation<U> {
+        /**
+         * @param parent parent
+         * @param child child
+         * @return true if subsumed
+         */
         boolean doesSubsume(U parent,U child);
     }
 
+    /**
+     * Search predicate.
+     * @param <U> type
+     */
     public interface SearchPredicate<U> {
+        /**
+         * @param u u
+         * @return successors
+         */
         Set<U> getSuccessorElements(U u);
+        /**
+         * @param u u
+         * @return predecessors
+         */
         Set<U> getPredecessorElements(U u);
+        /**
+         * @param u u
+         * @return true  if true
+         */
         boolean trueOf(U u);
     }
 

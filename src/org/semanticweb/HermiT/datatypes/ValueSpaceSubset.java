@@ -19,8 +19,22 @@ package org.semanticweb.HermiT.datatypes;
 
 import java.util.Collection;
 
+/**
+ * Value space subset.
+ */
 public interface ValueSpaceSubset {
+    /**
+     * @param number number
+     * @return true if has cardinality at least
+     */
     boolean hasCardinalityAtLeast(int number);
+    /**
+     * @param dataValue dataValue
+     * @return true if it has data value
+     */
     boolean containsDataValue(Object dataValue);
+    /**
+     * @param dataValues dataValues
+     */
     void enumerateDataValues(Collection<Object> dataValues);
 }

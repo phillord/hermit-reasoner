@@ -57,7 +57,7 @@ import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
 import org.semanticweb.owlapi.model.OWLObjectUnionOf;
 import org.semanticweb.owlapi.model.OWLSameIndividualAxiom;
 import org.semanticweb.owlapi.util.OWLAxiomVisitorAdapter;
-
+/**BuiltInPropertyManager.*/
 public class BuiltInPropertyManager {
     protected final OWLDataFactory m_factory;
     protected final OWLObjectProperty m_topObjectProperty;
@@ -65,6 +65,9 @@ public class BuiltInPropertyManager {
     protected final OWLDataProperty m_topDataProperty;
     protected final OWLDataProperty m_bottomDataProperty;
 
+    /**
+     * @param factory factory
+     */
     public BuiltInPropertyManager(OWLDataFactory factory) {
         m_factory=factory;
         m_topObjectProperty=m_factory.getOWLObjectProperty(IRI.create(AtomicRole.TOP_OBJECT_ROLE.getIRI()));
@@ -72,6 +75,13 @@ public class BuiltInPropertyManager {
         m_topDataProperty=m_factory.getOWLDataProperty(IRI.create(AtomicRole.TOP_DATA_ROLE.getIRI()));
         m_bottomDataProperty=m_factory.getOWLDataProperty(IRI.create(AtomicRole.BOTTOM_DATA_ROLE.getIRI()));
     }
+    /**
+     * @param axioms axioms
+     * @param skipTopObjectProperty skipTopObjectProperty
+     * @param skipBottomObjectProperty skipBottomObjectProperty
+     * @param skipTopDataProperty skipTopDataProperty
+     * @param skipBottomDataProperty skipBottomDataProperty
+     */
     public void axiomatizeBuiltInPropertiesAsNeeded(OWLAxioms axioms,boolean skipTopObjectProperty,boolean skipBottomObjectProperty,boolean skipTopDataProperty,boolean skipBottomDataProperty) {
         Checker checker=new Checker(axioms);
         if (checker.m_usesTopObjectProperty && !skipTopObjectProperty)
@@ -83,6 +93,9 @@ public class BuiltInPropertyManager {
         if (checker.m_usesBottomDataProperty && !skipBottomDataProperty)
             axiomatizeBottomDataProperty(axioms);
     }
+    /**
+     * @param axioms axioms
+     */
     public void axiomatizeBuiltInPropertiesAsNeeded(OWLAxioms axioms) {
         axiomatizeBuiltInPropertiesAsNeeded(axioms,false,false,false,false);
     }

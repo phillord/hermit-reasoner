@@ -56,13 +56,16 @@ public class BlockingValidator {
     protected final List<DLClauseInfo> m_dlClauseInfos;
     protected final Map<AtomicConcept,List<DLClauseInfo>> m_dlClauseInfosByXConcepts;
     protected final List<DLClauseInfo> m_dlClauseInfosWithoutXConcepts;
-    public final Map<AtLeastConcept,Node> inValidAtleastForBlockedParent=new HashMap<>();
-    public final Map<DLClauseInfo,Node> inValidClausesForBlockedParent=new HashMap<>();
-    public final Map<AtLeastConcept,Node> inValidAtleastForBlocker=new HashMap<>();
-    public final Map<DLClauseInfo,Node> inValidClausesForBlocker=new HashMap<>();
+    protected final Map<AtLeastConcept,Node> inValidAtleastForBlockedParent=new HashMap<>();
+    protected final Map<DLClauseInfo,Node> inValidClausesForBlockedParent=new HashMap<>();
+    protected final Map<AtLeastConcept,Node> inValidAtleastForBlocker=new HashMap<>();
+    protected final Map<DLClauseInfo,Node> inValidClausesForBlocker=new HashMap<>();
     protected final boolean debuggingMode=false;
 
-
+    /**
+     * @param tableau tableau
+     * @param dlClauses dlClauses
+     */
     public BlockingValidator(Tableau tableau,Set<DLClause> dlClauses) {
         m_extensionManager=tableau.getExtensionManager();
         m_binaryRetrieval1Bound=m_extensionManager.getBinaryExtensionTable().createRetrieval(new boolean[] { false, true }, ExtensionTable.View.TOTAL);
@@ -95,6 +98,7 @@ public class BlockingValidator {
             }
         }
     }
+    /**Clear.*/
     public void clear() {
         m_binaryRetrieval1Bound.clear();
         m_ternaryRetrieval01Bound.clear();
@@ -104,10 +108,17 @@ public class BlockingValidator {
         for (int index=m_dlClauseInfos.size()-1;index>=0;--index)
             m_dlClauseInfos.get(index).clear();
     }
+    /**
+     * @param node node
+     */
     public void blockerChanged(Node node) {
         Node parent=node.getParent();
         ((ValidatedBlockingObject)parent.getBlockingObject()).setHasAlreadyBeenChecked(false);
     }
+    /**
+     * @param blocked blocked
+     * @return true if valid
+     */
     public boolean isBlockValid(Node blocked) {
         Node blockedParent=blocked.getParent();
         if (!((ValidatedBlockingObject)blockedParent.getBlockingObject()).hasAlreadyBeenChecked()) {

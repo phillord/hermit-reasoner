@@ -137,6 +137,11 @@ public class OWLNormalization {
     protected final PLVisitor m_plVisitor;
     protected final Map<OWLDataRange,OWLDatatype> m_dataRangeDefinitions; // contains custom datatype definitions from DatatypeDefinition axioms
 
+    /**
+     * @param factory factory
+     * @param axioms axioms
+     * @param firstReplacementIndex firstReplacementIndex
+     */
     public OWLNormalization(OWLDataFactory factory,OWLAxioms axioms,int firstReplacementIndex) {
         m_factory=factory;
         m_axioms=axioms;
@@ -147,6 +152,9 @@ public class OWLNormalization {
         m_plVisitor=new PLVisitor();
         m_dataRangeDefinitions=new HashMap<>();
     }
+    /**
+     * @param ontology ontology
+     */
     public void processOntology(OWLOntology ontology) {
         // Each entry in the inclusions list represents a disjunction of
         // concepts -- that is, each OWLClassExpression in an entry contributes a
@@ -158,6 +166,9 @@ public class OWLNormalization {
         m_axioms.m_namedIndividuals.addAll(ontology.getIndividualsInSignature(Imports.INCLUDED));
         processAxioms(ontology.getLogicalAxioms());
     }
+    /**
+     * @param axioms axioms
+     */
     public void processAxioms(Collection<? extends OWLAxiom> axioms) {
         AxiomVisitor axiomVisitor=new AxiomVisitor();
         for (OWLAxiom axiom : axioms)

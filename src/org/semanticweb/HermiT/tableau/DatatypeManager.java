@@ -38,7 +38,7 @@ import org.semanticweb.HermiT.model.Inequality;
 import org.semanticweb.HermiT.model.InternalDatatype;
 import org.semanticweb.HermiT.model.LiteralDataRange;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
-
+/**DatatypeManager.*/
 public final class DatatypeManager implements Serializable {
     private static final long serialVersionUID=-5304869484553471737L;
 
@@ -58,6 +58,9 @@ public final class DatatypeManager implements Serializable {
     protected final Set<DatatypeRestriction> m_unknownDatatypeRestrictionsPermanent;
     protected Set<DatatypeRestriction> m_unknownDatatypeRestrictionsAdditional;
 
+    /**
+     * @param tableau tableau
+     */
     public DatatypeManager(Tableau tableau) {
         m_interruptFlag=tableau.m_interruptFlag;
         m_tableauMonitor=tableau.m_tableauMonitor;
@@ -82,12 +85,21 @@ public final class DatatypeManager implements Serializable {
         if (tableau.m_additionalDLOntology!=null)
             additionalDLOntologySet(tableau.m_additionalDLOntology);
     }
+    /**
+     * @param additionalDLOntology additionalDLOntology
+     */
     public void additionalDLOntologySet(DLOntology additionalDLOntology) {
         m_unknownDatatypeRestrictionsAdditional=additionalDLOntology.getAllUnknownDatatypeRestrictions();
     }
+    /**
+     * Clear additional ontology.
+     */
     public void additionalDLOntologyCleared() {
         m_unknownDatatypeRestrictionsAdditional=null;
     }
+    /**
+     * Clear.
+     */
     public void clear() {
         m_assertionsDeltaOldRetrieval.clear();
         m_inequalityDeltaOldRetrieval.clear();
@@ -99,6 +111,9 @@ public final class DatatypeManager implements Serializable {
         m_auxiliaryVariableList.clear();
         m_unionDependencySet.clearConstituents();
     }
+    /**
+     * Apply unknown datatypes.
+     */
     public void applyUnknownDatatypeRestrictionSemantics() {
         Object[] tupleBuffer=m_assertionsDeltaOldRetrieval.getTupleBuffer();
         m_assertionsDeltaOldRetrieval.open();
@@ -139,6 +154,9 @@ public final class DatatypeManager implements Serializable {
             m_assertions0Retrieval.next();
         }
     }
+    /**
+     * Check datatype constraints.
+     */
     public void checkDatatypeConstraints() {
         if (m_tableauMonitor!=null)
             m_tableauMonitor.datatypeCheckingStarted();
@@ -537,23 +555,16 @@ public final class DatatypeManager implements Serializable {
         }
     }
 
+    /**DConjunction.*/
     public static class DConjunction implements Serializable {
         private static final long serialVersionUID = 3597740301361593691L;
-        protected final List<DVariable> m_unusedVariables;
-        protected final List<DVariable> m_usedVariables;
-        protected final List<DVariable> m_activeVariables;
-        protected DVariable[] m_buckets;
-        protected int m_numberOfEntries;
-        protected int m_resizeThreshold;
+        protected final List<DVariable> m_unusedVariables=new ArrayList<>();
+        protected final List<DVariable> m_usedVariables=new ArrayList<>();
+        protected final List<DVariable> m_activeVariables=new ArrayList<>();
+        protected DVariable[] m_buckets=new DVariable[16];
+        protected int m_numberOfEntries=0;
+        protected int m_resizeThreshold=12;
 
-        public DConjunction() {
-            m_unusedVariables=new ArrayList<>();
-            m_usedVariables=new ArrayList<>();
-            m_activeVariables=new ArrayList<>();
-            m_buckets=new DVariable[16];
-            m_resizeThreshold=(int)(m_buckets.length*0.75);
-            m_numberOfEntries=0;
-        }
         protected void clear() {
             for (int index=m_usedVariables.size()-1;index>=0;--index) {
                 DVariable variable=m_usedVariables.get(index);
@@ -570,6 +581,9 @@ public final class DatatypeManager implements Serializable {
                 m_activeVariables.get(index).clearEqualities();
             m_activeVariables.clear();
         }
+        /**
+         * @return active variables
+         */
         public List<DVariable> getActiveVariables() {
             return Collections.unmodifiableList(m_activeVariables);
         }
@@ -623,7 +637,7 @@ public final class DatatypeManager implements Serializable {
                 node1.m_unequalToDirect.add(node2);
             }
         }
-        public boolean isSymmetricClique() {
+        boolean isSymmetricClique() {
             // This method depends on the fact that there are no self-links.
             int numberOfVariables=m_activeVariables.size();
             if (numberOfVariables>0) {
@@ -640,6 +654,10 @@ public final class DatatypeManager implements Serializable {
         public String toString() {
             return toString(Prefixes.STANDARD_PREFIXES);
         }
+        /**
+         * @param prefixes prefixes
+         * @return tostring
+         */
         public String toString(Prefixes prefixes) {
             StringBuffer buffer=new StringBuffer();
             boolean first=true;
@@ -664,16 +682,17 @@ public final class DatatypeManager implements Serializable {
         }
     }
 
+    /**DVariable.*/
     public static class DVariable implements Serializable {
         private static final long serialVersionUID = -2490195841140286089L;
-        protected final List<ConstantEnumeration> m_positiveConstantEnumerations;
-        protected final List<ConstantEnumeration> m_negativeConstantEnumerations;
-        protected final List<DatatypeRestriction> m_positiveDatatypeRestrictions;
-        protected final List<DatatypeRestriction> m_negativeDatatypeRestrictions;
-        protected final List<DVariable> m_unequalTo;
-        protected final List<DVariable> m_unequalToDirect;
-        protected final List<Object> m_forbiddenDataValues;
-        protected final List<Object> m_explicitDataValues;
+        protected final List<ConstantEnumeration> m_positiveConstantEnumerations=new ArrayList<>();
+        protected final List<ConstantEnumeration> m_negativeConstantEnumerations=new ArrayList<>();
+        protected final List<DatatypeRestriction> m_positiveDatatypeRestrictions=new ArrayList<>();
+        protected final List<DatatypeRestriction> m_negativeDatatypeRestrictions=new ArrayList<>();
+        protected final List<DVariable> m_unequalTo=new ArrayList<>();
+        protected final List<DVariable> m_unequalToDirect=new ArrayList<>();
+        protected final List<Object> m_forbiddenDataValues=new ArrayList<>();
+        protected final List<Object> m_explicitDataValues=new ArrayList<>();
         protected boolean m_hasExplicitDataValues;
         protected DatatypeRestriction m_mostSpecificRestriction;
         protected Node m_node;
@@ -681,16 +700,6 @@ public final class DatatypeManager implements Serializable {
         protected ValueSpaceSubset m_valueSpaceSubset;
         protected Object m_dataValue;
 
-        protected DVariable() {
-            m_positiveConstantEnumerations=new ArrayList<>();
-            m_negativeConstantEnumerations=new ArrayList<>();
-            m_positiveDatatypeRestrictions=new ArrayList<>();
-            m_negativeDatatypeRestrictions=new ArrayList<>();
-            m_unequalTo=new ArrayList<>();
-            m_unequalToDirect=new ArrayList<>();
-            m_forbiddenDataValues=new ArrayList<>();
-            m_explicitDataValues=new ArrayList<>();
-        }
         protected void dispose() {
             m_positiveConstantEnumerations.clear();
             m_negativeConstantEnumerations.clear();
@@ -715,7 +724,7 @@ public final class DatatypeManager implements Serializable {
             if (!m_forbiddenDataValues.contains(forbiddenDataValue))
                 m_forbiddenDataValues.add(forbiddenDataValue);
         }
-        public boolean hasCardinalityAtLeast(int number) {
+        boolean hasCardinalityAtLeast(int number) {
             if (m_hasExplicitDataValues)
                 return m_explicitDataValues.size()>=number;
             else if (m_valueSpaceSubset!=null)
@@ -723,24 +732,46 @@ public final class DatatypeManager implements Serializable {
             else
                 return true;
         }
+        /**
+         * @return node
+         */
         public Node getNode() {
             return m_node;
         }
+        /**
+         * @return positive enumerations
+         */
         public List<ConstantEnumeration> getPositiveDataValueEnumerations() {
             return Collections.unmodifiableList(m_positiveConstantEnumerations);
         }
+        /**
+         * @return negative enumerations
+         */
         public List<ConstantEnumeration> getNegativeDataValueEnumerations() {
             return Collections.unmodifiableList(m_negativeConstantEnumerations);
         }
+        /**
+         * @return positive restrictions
+         */
         public List<DatatypeRestriction> getPositiveDatatypeRestrictions() {
             return Collections.unmodifiableList(m_positiveDatatypeRestrictions);
         }
+        /**
+         * @return negative restrictions
+         */
         public List<DatatypeRestriction> getNegativeDatatypeRestrictions() {
             return Collections.unmodifiableList(m_negativeDatatypeRestrictions);
         }
+        /**
+         * @return unequal to direct
+         */
         public List<DVariable> getUnequalToDirect() {
             return Collections.unmodifiableList(m_unequalToDirect);
         }
+        /**
+         * @param that that
+         * @return true if same restrictions
+         */
         public boolean hasSameRestrictions(DVariable that) {
             return this==that || (
                 equals(m_positiveConstantEnumerations,that.m_positiveConstantEnumerations) &&
@@ -763,6 +794,10 @@ public final class DatatypeManager implements Serializable {
         public String toString() {
             return toString(Prefixes.STANDARD_PREFIXES);
         }
+        /**
+         * @param prefixes prefixes
+         * @return toString
+         */
         public String toString(Prefixes prefixes) {
             StringBuffer buffer=new StringBuffer();
             boolean first=true;
@@ -800,7 +835,8 @@ public final class DatatypeManager implements Serializable {
         }
     }
 
-    protected static int getIndexFor(int hashCode,int tableLength) {
+    protected static int getIndexFor(int _hashCode,int tableLength) {
+        int hashCode=_hashCode;
         hashCode+=~(hashCode << 9);
         hashCode^=(hashCode >>> 14);
         hashCode+=(hashCode << 4);

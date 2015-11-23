@@ -33,7 +33,7 @@ import org.semanticweb.owlapi.reasoner.FreshEntityPolicy;
 import org.semanticweb.owlapi.reasoner.IndividualNodeSetPolicy;
 import org.semanticweb.owlapi.reasoner.OWLReasonerConfiguration;
 import org.semanticweb.owlapi.reasoner.ReasonerProgressMonitor;
-
+/**Configuration for the reasoner.*/
 public class Configuration implements Serializable,Cloneable,OWLReasonerConfiguration {
     private static final long serialVersionUID=7741510316249774519L;
 
@@ -177,10 +177,15 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
      * example by Protege.
      */
     public ReasonerProgressMonitor reasonerProgressMonitor;
+    /**tableau monitor type*/
     public final TableauMonitorType tableauMonitorType;
+    /**direct blocking type*/
     public DirectBlockingType directBlockingType;
+    /**blocking strategy type*/
     public BlockingStrategyType blockingStrategyType;
+    /**blocking signature cache type*/
     public BlockingSignatureCacheType blockingSignatureCacheType;
+    /**existential strategy type*/
     public ExistentialStrategyType existentialStrategyType;
     /**
      * If HermiT encounters a non-OWL2 datatype, it normally throws an error. If set to true, axioms containing unsupported
@@ -200,7 +205,9 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
      * individualTaskTimeout ms.
      */
     public long individualTaskTimeout;
+    /**individual node set policy*/
     public IndividualNodeSetPolicy individualNodeSetPolicy;
+    /**fresh entity policy*/
     public FreshEntityPolicy freshEntityPolicy;
     /**
      * If set to true, then each disjunct of a disjunction is associated with a punish factor and whenever a disjunct causes
@@ -223,7 +230,7 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
      * etc. Use with care, e.g., only when trying to get explanations of inconsistencies, where throwing an error might not be helpful.
      */
     public boolean throwInconsistentOntologyException;
-
+    /**prepare reasoner inferences*/
     public final PrepareReasonerInferences prepareReasonerInferences;
 
     /**
@@ -232,6 +239,7 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
      */
     public final boolean forceQuasiOrderClassification;
 
+    /**Create configuration.*/
     public Configuration() {
         warningMonitor=null;
         reasonerProgressMonitor=null;
@@ -282,7 +290,9 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
             return null;
         }
     }
+    /**Warning monitor.*/
     public interface WarningMonitor {
+        /**@param warning warning*/
         void warning(String warning);
     }
     @Override
@@ -301,15 +311,25 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
     public FreshEntityPolicy getFreshEntityPolicy() {
         return freshEntityPolicy;
     }
+    /**Prepare reasoner inferences.*/
     public static class PrepareReasonerInferences {
+        /**class classification required*/
         public boolean classClassificationRequired=true;
+        /**object property classification required*/
         public boolean objectPropertyClassificationRequired=true;
+        /**data property classification required*/
         public boolean dataPropertyClassificationRequired=true;
+        /**object property domains required*/
         public boolean objectPropertyDomainsRequired=true;
+        /**object property ranges required*/
         public boolean objectPropertyRangesRequired=true;
+        /**realisation required*/
         public boolean realisationRequired=true;
+        /**object property realisation required*/
         public boolean objectPropertyRealisationRequired=true;
+        /**data property realisation required*/
         public boolean dataPropertyRealisationRequired=true;
+        /**individual same as required*/
         public boolean sameAs=true;
     }
 }

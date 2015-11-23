@@ -30,6 +30,9 @@ public class AtomicConcept extends LiteralConcept implements DLPredicate {
     protected AtomicConcept(String iri) {
         m_iri=iri;
     }
+    /**
+     * @return iri
+     */
     public String getIRI() {
         return m_iri;
     }
@@ -73,11 +76,24 @@ public class AtomicConcept extends LiteralConcept implements DLPredicate {
         }
     };
     
+    /**
+     * @param uri iri
+     * @return concept
+     */
     public static AtomicConcept create(String uri) {
         return s_interningManager.intern(new AtomicConcept(uri));
     }
 
+    /**
+     * Thing.
+     */
     public static final AtomicConcept THING=create("http://www.w3.org/2002/07/owl#Thing");
+    /**
+     * Nothing.
+     */
     public static final AtomicConcept NOTHING=create("http://www.w3.org/2002/07/owl#Nothing");
+    /**
+     * Internal.
+     */
     public static final AtomicConcept INTERNAL_NAMED=create("internal:nam#Named");
 }

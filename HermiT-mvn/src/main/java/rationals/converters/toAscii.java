@@ -4,7 +4,7 @@ import java.util.Iterator;
 
 import rationals.Automaton;
 import rationals.Transition;
-
+/**toAscii*/
 public class toAscii implements ToString {
     @Override
     public String toString(Automaton a) {

@@ -20,9 +20,12 @@ package org.semanticweb.HermiT.debugger.commands;
 import java.io.PrintWriter;
 
 import org.semanticweb.HermiT.debugger.Debugger;
-
+/**WaitForCommand.*/
 public class WaitForCommand extends AbstractCommand implements DebuggerCommand {
 
+    /**
+     * @param debugger debugger
+     */
     public WaitForCommand(Debugger debugger) {
         super(debugger);
     }

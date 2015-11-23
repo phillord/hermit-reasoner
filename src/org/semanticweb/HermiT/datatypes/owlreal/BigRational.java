@@ -36,16 +36,29 @@ public class BigRational extends Number implements Comparable<BigRational> {
     private final BigInteger m_numerator;
     private final BigInteger m_denominator;
 
+    /**
+     * @param numerator numerator
+     * @param denominator denominator
+     */
     public BigRational(BigInteger numerator,BigInteger denominator) {
         m_numerator=numerator;
         m_denominator=denominator;
     }
+    /**
+     * @return numerator
+     */
     public BigInteger getNumerator() {
         return m_numerator;
     }
+    /**
+     * @return denominator
+     */
     public BigInteger getDenominator() {
         return m_denominator;
     }
+    /**
+     * @return true if finitely representable
+     */
     public boolean isFinitelyRepresentable() {
         try {
             new BigDecimal(m_numerator).divide(new BigDecimal(m_denominator)).doubleValue();

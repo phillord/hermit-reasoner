@@ -21,9 +21,12 @@ import java.io.PrintWriter;
 
 import org.semanticweb.HermiT.debugger.Debugger;
 import org.semanticweb.HermiT.tableau.Node;
-
+/**IsAncestorOfCommand.*/
 public class IsAncestorOfCommand extends AbstractCommand {
 
+    /**
+     * @param debugger debugger
+     */
     public IsAncestorOfCommand(Debugger debugger) {
         super(debugger);
     }

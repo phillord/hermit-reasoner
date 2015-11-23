@@ -30,6 +30,9 @@ public class Variable extends Term {
     protected Variable(String name) {
         m_name=name;
     }
+    /**
+     * @return name
+     */
     public String getName() {
         return m_name;
     }
@@ -56,6 +59,10 @@ public class Variable extends Term {
         }
     };
     
+    /**
+     * @param name name
+     * @return variable
+     */
     public static Variable create(String name) {
         return s_interningManager.intern(new Variable(name));
     }

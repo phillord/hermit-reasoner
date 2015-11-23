@@ -44,8 +44,8 @@ package rationals.expr;
 public class Plus extends BinaryExpr {
 
     /**
-     * @param e
-     * @param f
+     * @param e e
+     * @param f f
      */
     public Plus(RationalExpr e, RationalExpr f) {
         super(e, f);

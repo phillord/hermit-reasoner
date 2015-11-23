@@ -21,6 +21,9 @@ import org.semanticweb.HermiT.tableau.InterruptFlag;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.Tableau;
 
+/**
+ * Datalog engine.
+ */
 public final class DatalogEngine {
     protected final InterruptFlag m_interruptFlag;
     protected final DLOntology m_dlOntology;
@@ -30,6 +33,9 @@ public final class DatalogEngine {
     protected final Map<Term,Term> m_termsToRepresentatives;
     protected ExtensionManager m_extensionManager;
     
+    /**
+     * @param dlOntology dlOntology
+     */
     public DatalogEngine(DLOntology dlOntology) {
         for (DLClause dlClause : dlOntology.getDLClauses())
             if (dlClause.getHeadLength()>1)
@@ -41,6 +47,9 @@ public final class DatalogEngine {
         m_termsToEquivalenceClasses=new HashMap<>();
         m_termsToRepresentatives=new HashMap<>();
     }
+    /**
+     * @return true if no clashes
+     */
     public boolean materialize() {
         if (m_extensionManager==null) {
             m_termsToNodes.clear();
@@ -71,12 +80,23 @@ public final class DatalogEngine {
         }
         return !m_extensionManager.containsClash();
     }
+    /**
+     * @return ontology
+     */
     public DLOntology getDLOntology() {
         return m_dlOntology;
     }
+    /**
+     * @param term term
+     * @return equivalence classes
+     */
     public Set<Term> getEquivalenceClass(Term term) {
         return m_termsToEquivalenceClasses.get(term);
     }
+    /**
+     * @param term term
+     * @return representative
+     */
     public Term getRepresentative(Term term) {
         return m_termsToRepresentatives.get(term);
     }

@@ -37,7 +37,7 @@ import org.semanticweb.HermiT.Prefixes;
  */
 public class DLOntology implements Serializable {
     private static final long serialVersionUID=3189937959595369812L;
-    protected static final String CRLF=System.getProperty("line.separator");
+    protected static final String CRLF="\n";
 
     protected final String m_ontologyIRI;
     protected final Set<DLClause> m_dlClauses;
@@ -59,6 +59,23 @@ public class DLOntology implements Serializable {
     protected final Set<DescriptionGraph> m_allDescriptionGraphs;
     protected final Map<AtomicRole,Map<Individual,Set<Constant>>> m_dataPropertyAssertions;
 
+    /**
+     * @param ontologyIRI ontologyIRI
+     * @param dlClauses dlClauses
+     * @param positiveFacts positiveFacts
+     * @param negativeFacts negativeFacts
+     * @param atomicConcepts atomicConcepts
+     * @param atomicObjectRoles atomicObjectRoles
+     * @param allComplexObjectRoles allComplexObjectRoles
+     * @param atomicDataRoles atomicDataRoles
+     * @param allUnknownDatatypeRestrictions allUnknownDatatypeRestrictions
+     * @param definedDatatypeIRIs definedDatatypeIRIs
+     * @param individuals individuals
+     * @param hasInverseRoles hasInverseRoles
+     * @param hasAtMostRestrictions hasAtMostRestrictions
+     * @param hasNominals hasNominals
+     * @param hasDatatypes hasDatatypes
+     */
     public DLOntology(String ontologyIRI,Set<DLClause> dlClauses,Set<Atom> positiveFacts,Set<Atom> negativeFacts, Set<AtomicConcept> atomicConcepts,
             Set<AtomicRole> atomicObjectRoles,Set<Role> allComplexObjectRoles,Set<AtomicRole> atomicDataRoles,
             Set<DatatypeRestriction> allUnknownDatatypeRestrictions,Set<String> definedDatatypeIRIs,Set<Individual> individuals,
@@ -175,78 +192,158 @@ public class DLOntology implements Serializable {
             m_allDescriptionGraphs.add(((ExistsDescriptionGraph)dlPredicate).getDescriptionGraph());
     }
 
+    /**
+     * @return ontology iri
+     */
     public String getOntologyIRI() {
         return m_ontologyIRI;
     }
+    /**
+     * @return all atomic concepts
+     */
     public Set<AtomicConcept> getAllAtomicConcepts() {
         return m_allAtomicConcepts;
     }
+    /**
+     * @param concept concept
+     * @return true if contains atomic concept
+     */
     public boolean containsAtomicConcept(AtomicConcept concept) {
         return m_allAtomicConcepts.contains(concept);
     }
+    /**
+     * @return umber of external concepts
+     */
     public int getNumberOfExternalConcepts() {
         return m_numberOfExternalConcepts;
     }
+    /**
+     * @return all atomic object roles
+     */
     public Set<AtomicRole> getAllAtomicObjectRoles() {
         return m_allAtomicObjectRoles;
     }
+    /**
+     * @param role role
+     * @return true if object role contained
+     */
     public boolean containsObjectRole(AtomicRole role) {
         return m_allAtomicObjectRoles.contains(role);
     }
+    /**
+     * @return all complex object roles
+     */
     public Set<Role> getAllComplexObjectRoles() {
         return m_allComplexObjectRoles;
     }
+    /**
+     * @return all atomic data roles
+     */
     public Set<AtomicRole> getAllAtomicDataRoles() {
         return m_allAtomicDataRoles;
     }
+    /**
+     * @param role role
+     * @return true if contains data role
+     */
     public boolean containsDataRole(AtomicRole role) {
         return m_allAtomicDataRoles.contains(role);
     }
+    /**
+     * @return all unknown data restrictions
+     */
     public Set<DatatypeRestriction> getAllUnknownDatatypeRestrictions() {
         return m_allUnknownDatatypeRestrictions;
     }
+    /**
+     * @return all individuals
+     */
     public Set<Individual> getAllIndividuals() {
         return m_allIndividuals;
     }
+    /**
+     * @param individual individual
+     * @return true if contains individual
+     */
     public boolean containsIndividual(Individual individual) {
         return m_allIndividuals.contains(individual);
     }
+    /**
+     * @return description graphs
+     */
     public Set<DescriptionGraph> getAllDescriptionGraphs() {
         return m_allDescriptionGraphs;
     }
+    /**
+     * @return dl clauses
+     */
     public Set<DLClause> getDLClauses() {
         return m_dlClauses;
     }
+    /**
+     * @return positive facts
+     */
     public Set<Atom> getPositiveFacts() {
         return m_positiveFacts;
     }
+    /**
+     * @return data assertions
+     */
     public Map<AtomicRole,Map<Individual,Set<Constant>>> getDataPropertyAssertions() {
         return m_dataPropertyAssertions;
     }
+    /**
+     * @return negative facts
+     */
     public Set<Atom> getNegativeFacts() {
         return m_negativeFacts;
     }
+    /**
+     * @return true if inverse roles
+     */
     public boolean hasInverseRoles() {
         return m_hasInverseRoles;
     }
+    /**
+     * @return true if at most restrictions
+     */
     public boolean hasAtMostRestrictions() {
         return m_hasAtMostRestrictions;
     }
+    /**
+     * @return true if has nominals
+     */
     public boolean hasNominals() {
         return m_hasNominals;
     }
+    /**
+     * @return true if has datatypes
+     */
     public boolean hasDatatypes() {
         return m_hasDatatypes;
     }
+    /**
+     * @return true if has unknown datatypes restrictions
+     */
     public boolean hasUnknownDatatypeRestrictions() {
         return !m_allUnknownDatatypeRestrictions.isEmpty();
     }
+    /**
+     * @return true if Horn ontology
+     */
     public boolean isHorn() {
         return m_isHorn;
     }
+    /**
+     * @return datatypes
+     */
     public Set<String> getDefinedDatatypeIRIs() {
         return m_definedDatatypeIRIs;
     }
+    /**
+     * @param prefixes prefixes
+     * @return toString
+     */
     public String toString(Prefixes prefixes) {
         StringBuilder stringBuffer=new StringBuilder("Prefixes: [").append(CRLF);
         for (Map.Entry<String,String> entry : prefixes.getPrefixIRIsByPrefixName().entrySet()) {
@@ -283,6 +380,9 @@ public class DLOntology implements Serializable {
         .append("  Number of negative facts: " + m_negativeFacts.size()).append(CRLF).append("]");
         return stringBuffer.toString();
     }
+    /**
+     * @return statistics
+     */
     public String getStatistics() {
         return getStatistics(null,null,null);
     }
@@ -320,24 +420,31 @@ public class DLOntology implements Serializable {
     public String toString() {
         return toString(Prefixes.STANDARD_PREFIXES);
     }
+    /**
+     * @param outputStream outputStream
+     * @throws IOException if reading fails
+     */
     public void save(OutputStream outputStream) throws IOException {
         ObjectOutputStream objectOutputStream=new ObjectOutputStream(outputStream);
         objectOutputStream.writeObject(this);
         objectOutputStream.flush();
     }
+    /**
+     * @param inputStream inputStream
+     * @return ontology
+     * @throws IOException if class not found
+     */
     public static DLOntology load(InputStream inputStream) throws IOException {
         try {
             ObjectInputStream objectInputStream=new ObjectInputStream(inputStream);
             return (DLOntology)objectInputStream.readObject();
         }
         catch (ClassNotFoundException e) {
-            IOException error=new IOException();
-            error.initCause(e);
-            throw error;
+            throw new IOException(e);
         }
     }
 
-    public static class AtomicConceptComparator implements Serializable,Comparator<AtomicConcept> {
+    static class AtomicConceptComparator implements Serializable,Comparator<AtomicConcept> {
         private static final long serialVersionUID=2386841732225838685L;
         public static final Comparator<AtomicConcept> INSTANCE=new AtomicConceptComparator();
 
@@ -351,7 +458,7 @@ public class DLOntology implements Serializable {
         }
     }
 
-    public static class AtomicRoleComparator implements Serializable,Comparator<AtomicRole> {
+    static class AtomicRoleComparator implements Serializable,Comparator<AtomicRole> {
         private static final long serialVersionUID=3483541702854959793L;
         public static final Comparator<AtomicRole> INSTANCE=new AtomicRoleComparator();
 
@@ -365,7 +472,7 @@ public class DLOntology implements Serializable {
         }
     }
 
-    public static class IndividualComparator implements Serializable,Comparator<Individual> {
+    static class IndividualComparator implements Serializable,Comparator<Individual> {
         private static final long serialVersionUID=2386841732225838685L;
         public static final Comparator<Individual> INSTANCE=new IndividualComparator();
 

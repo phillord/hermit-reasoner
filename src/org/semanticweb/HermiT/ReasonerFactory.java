@@ -4,7 +4,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerConfiguration;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
-
+/**Reasoner factory.*/
 public class ReasonerFactory implements OWLReasonerFactory {
     @Override
     public String getReasonerName() {

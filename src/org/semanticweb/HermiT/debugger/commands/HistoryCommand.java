@@ -20,9 +20,12 @@ package org.semanticweb.HermiT.debugger.commands;
 import java.io.PrintWriter;
 
 import org.semanticweb.HermiT.debugger.Debugger;
-
+/**HistoryCommand.*/
 public class HistoryCommand extends AbstractCommand {
 
+    /**
+     * @param debugger debugger
+     */
     public HistoryCommand(Debugger debugger) {
         super(debugger);
     }

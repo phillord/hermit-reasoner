@@ -30,6 +30,9 @@ public class AtomicNegationDataRange extends LiteralDataRange {
     protected AtomicNegationDataRange(AtomicDataRange negatedDataRange) {
         m_negatedDataRange=negatedDataRange;
     }
+    /**
+     * @return negated data range
+     */
     public AtomicDataRange getNegatedDataRange() {
         return m_negatedDataRange;
     }
@@ -68,6 +71,10 @@ public class AtomicNegationDataRange extends LiteralDataRange {
         }
     };
     
+    /**
+     * @param negatedDataRange negatedDataRange
+     * @return data range
+     */
     public static AtomicNegationDataRange create(AtomicDataRange negatedDataRange) {
         return s_interningManager.intern(new AtomicNegationDataRange(negatedDataRange));
     }

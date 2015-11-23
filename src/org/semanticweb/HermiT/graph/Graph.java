@@ -27,17 +27,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
-
+/**Graph.
+ * @param <T> type*/
 public class Graph<T> implements Serializable, Cloneable {
     private static final long serialVersionUID = 5372948202031042380L;
 
-    protected final Set<T> m_elements;
-    protected final Map<T,Set<T>> m_successorsByNodes;
+    protected final Set<T> m_elements=new HashSet<>();
+    protected final Map<T,Set<T>> m_successorsByNodes=new HashMap<>();
 
-    public Graph() {
-        m_elements=new HashSet<>();
-        m_successorsByNodes=new HashMap<>();
-    }
+    /**
+     * @param from from
+     * @param to to
+     */
     public void addEdge(T from,T to) {
         Set<T> successors=m_successorsByNodes.get(from);
         if (successors==null) {
@@ -48,6 +49,10 @@ public class Graph<T> implements Serializable, Cloneable {
         m_elements.add(from);
         m_elements.add(to);
     }
+    /**
+     * @param from from
+     * @param to to
+     */
     public void addEdges(T from,Set<T> to) {
         Set<T> successors=m_successorsByNodes.get(from);
         if (successors==null) {
@@ -58,15 +63,25 @@ public class Graph<T> implements Serializable, Cloneable {
         m_elements.add(from);
         m_elements.addAll(to);
     }
+    /**
+     * @return elements
+     */
     public Set<T> getElements() {
         return m_elements;
     }
+    /**
+     * @param node node
+     * @return successors
+     */
     public Set<T> getSuccessors(T node) {
         Set<T> result=m_successorsByNodes.get(node);
         if (result==null)
             result=Collections.emptySet();
         return result;
     }
+    /**
+     * Transitive close.
+     */
     public void transitivelyClose() {
         List<T> toProcess=new ArrayList<>();
         for (Set<T> reachable : m_successorsByNodes.values()) {
@@ -82,6 +97,9 @@ public class Graph<T> implements Serializable, Cloneable {
             }
         }
     }
+    /**
+     * @return graph
+     */
     public Graph<T> getInverse() {
         Graph<T> result=new Graph<>();
         for (Map.Entry<T,Set<T>> entry : m_successorsByNodes.entrySet()) {
@@ -102,12 +120,19 @@ public class Graph<T> implements Serializable, Cloneable {
         }
         return result;
     }
+    /**
+     * @param elements elements
+     */
     public void removeElements(Set<T> elements) {
         for(T element : elements){
             m_elements.remove( element );
             m_successorsByNodes.remove( element );
         }
     }
+    /**
+     * @param fromNode fromNode
+     * @return reachable successors
+     */
     public Set<T> getReachableSuccessors(T fromNode) {
         Set<T> result = new HashSet<>();
         Queue<T> toVisit=new LinkedList<>();
@@ -136,8 +161,7 @@ public class Graph<T> implements Serializable, Cloneable {
                     buffer.append(successor.toString());
                 }
             }
-            buffer.append(" }");
-            buffer.append(System.getProperty("line.separator"));
+            buffer.append(" }\n");
         }
         return buffer.toString();
     }

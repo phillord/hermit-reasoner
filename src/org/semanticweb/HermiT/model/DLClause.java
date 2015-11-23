@@ -36,24 +36,48 @@ public class DLClause implements Serializable {
         m_headAtoms=headAtoms;
         m_bodyAtoms=bodyAtoms;
     }
+    /**
+     * @return head length
+     */
     public int getHeadLength() {
         return m_headAtoms.length;
     }
+    /**
+     * @param atomIndex atomIndex
+     * @return head atom
+     */
     public Atom getHeadAtom(int atomIndex) {
         return m_headAtoms[atomIndex];
     }
+    /**
+     * @return atoms
+     */
     public Atom[] getHeadAtoms() {
         return m_headAtoms.clone();
     }
+    /**
+     * @return body length
+     */
     public int getBodyLength() {
         return m_bodyAtoms.length;
     }
+    /**
+     * @param atomIndex atomIndex
+     * @return body atom
+     */
     public Atom getBodyAtom(int atomIndex) {
         return m_bodyAtoms[atomIndex];
     }
+    /**
+     * @return body atoms
+     */
     public Atom[] getBodyAtoms() {
         return m_bodyAtoms.clone();
     }
+    /**
+     * @param safeMakingPredicate safeMakingPredicate
+     * @return safe dl clause
+     */
     public DLClause getSafeVersion(DLPredicate safeMakingPredicate) {
         Set<Variable> variables=new HashSet<>();
         // collect all the variables that occur in the head into the set variables
@@ -90,6 +114,11 @@ public class DLClause implements Serializable {
             return DLClause.create(m_headAtoms,newBodyAtoms);
         }
     }
+    /**
+     * @param headAtoms headAtoms
+     * @param bodyAtoms bodyAtoms
+     * @return changed dl clause
+     */
     public DLClause getChangedDLClause(Atom[] headAtoms,Atom[] bodyAtoms) {
         if (headAtoms==null)
             headAtoms=m_headAtoms;
@@ -97,6 +126,9 @@ public class DLClause implements Serializable {
             bodyAtoms=m_bodyAtoms;
         return DLClause.create(headAtoms,bodyAtoms);
     }
+    /**
+     * @return true if gci
+     */
     public boolean isGeneralConceptInclusion() {
         if (m_headAtoms.length==0) {
             // not a GCI if all body atoms are data ranges
@@ -139,6 +171,9 @@ public class DLClause implements Serializable {
         }
         return false;
     }
+    /**
+     * @return true if atomic concept inclusion
+     */
     public boolean isAtomicConceptInclusion() {
         if (m_bodyAtoms.length==1 && m_headAtoms.length==1) {
             Atom bodyAtom=m_bodyAtoms[0];
@@ -150,6 +185,9 @@ public class DLClause implements Serializable {
         }
         return false;
     }
+    /**
+     * @return true if atomic role inclusion
+     */
     public boolean isAtomicRoleInclusion() {
         if (m_bodyAtoms.length==1 && m_headAtoms.length==1) {
             Atom bodyAtom=m_bodyAtoms[0];
@@ -162,6 +200,9 @@ public class DLClause implements Serializable {
         }
         return false;
     }
+    /**
+     * @return true if atomic role inverse inclusion
+     */
     public boolean isAtomicRoleInverseInclusion() {
         if (m_bodyAtoms.length==1 && m_headAtoms.length==1) {
             Atom bodyAtom=m_bodyAtoms[0];
@@ -174,6 +215,9 @@ public class DLClause implements Serializable {
         }
         return false;
     }
+    /**
+     * @return true if functional
+     */
     public boolean isFunctionalityAxiom() {
         if (m_bodyAtoms.length==2 && m_headAtoms.length==1) {
             DLPredicate atomicRole=getBodyAtom(0).getDLPredicate();
@@ -193,6 +237,9 @@ public class DLClause implements Serializable {
         }
         return false;
     }
+    /**
+     * @return true if inverse functional
+     */
     public boolean isInverseFunctionalityAxiom() {
         if (getBodyLength()==2 && getHeadLength()==1) {
             DLPredicate atomicRole=getBodyAtom(0).getDLPredicate();
@@ -212,6 +259,10 @@ public class DLClause implements Serializable {
         }
         return false;
     }
+    /**
+     * @param prefixes prefixes
+     * @return toString
+     */
     public String toString(Prefixes prefixes) {
         StringBuffer buffer=new StringBuffer();
         for (int headIndex=0;headIndex<m_headAtoms.length;headIndex++) {
@@ -256,6 +307,11 @@ public class DLClause implements Serializable {
         }
     };
 
+    /**
+     * @param headAtoms headAtoms
+     * @param bodyAtoms bodyAtoms
+     * @return dl clause
+     */
     public static DLClause create(Atom[] headAtoms,Atom[] bodyAtoms) {
         return s_interningManager.intern(new DLClause(headAtoms,bodyAtoms));
     }

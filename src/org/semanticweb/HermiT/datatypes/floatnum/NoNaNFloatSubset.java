@@ -23,7 +23,7 @@ import java.util.List;
 
 import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
 
-public class NoNaNFloatSubset implements ValueSpaceSubset {
+class NoNaNFloatSubset implements ValueSpaceSubset {
     protected final List<FloatInterval> m_intervals;
     
     public NoNaNFloatSubset() {

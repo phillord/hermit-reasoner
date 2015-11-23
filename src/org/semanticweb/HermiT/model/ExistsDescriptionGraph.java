@@ -18,7 +18,7 @@
 package org.semanticweb.HermiT.model;
 
 import org.semanticweb.HermiT.Prefixes;
-
+/**ExistsDescriptionGraph.*/
 public class ExistsDescriptionGraph extends ExistentialConcept implements DLPredicate {
     private static final long serialVersionUID=7433430510725260994L;
 
@@ -29,9 +29,15 @@ public class ExistsDescriptionGraph extends ExistentialConcept implements DLPred
         m_descriptionGraph=descriptionGraph;
         m_vertex=vertex;
     }
+    /**
+     * @return description graph
+     */
     public DescriptionGraph getDescriptionGraph() {
         return m_descriptionGraph;
     }
+    /**
+     * @return vertex
+     */
     public int getVertex() {
         return m_vertex;
     }
@@ -70,6 +76,11 @@ public class ExistsDescriptionGraph extends ExistentialConcept implements DLPred
         }
     };
     
+    /**
+     * @param descriptionGraph descriptionGraph
+     * @param vertex vertex
+     * @return description graph
+     */
     public static ExistsDescriptionGraph create(DescriptionGraph descriptionGraph,int vertex) {
         return s_interningManager.intern(new ExistsDescriptionGraph(descriptionGraph,vertex));
     }

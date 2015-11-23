@@ -40,8 +40,6 @@ import rationals.transformations.TransformationsToolBox;
  */
 public class Automaton implements Acceptor, StateMachine, Rational, Cloneable {
 
-    protected Builder<?> builder;
-
     // The set of all objects which are labels of
     // transitions of this automaton.
     protected final Set<Object> alphabet;
@@ -439,9 +437,5 @@ public class Automaton implements Acceptor, StateMachine, Rational, Cloneable {
             labels.put(label, s);
         }
         return s;
-    }
-
-    public <T extends Builder<T>> void setBuilder(T t) {
-        this.builder = t;
     }
 }

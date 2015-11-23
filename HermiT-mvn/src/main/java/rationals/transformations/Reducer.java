@@ -12,7 +12,7 @@ import rationals.Transition;
 
 /**
  * Computes the minimal automaton from a deterministic automaton.
- * <p />
+ * <br>
  * This class first determinizes the transformed automaton, then compute
  * states equivalence classes to create new states and transitions.
  * 

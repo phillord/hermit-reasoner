@@ -26,9 +26,12 @@ import org.semanticweb.HermiT.model.AtLeastConcept;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.tableau.Node;
-
+/**NodesForCommand.*/
 public class NodesForCommand extends AbstractCommand {
 
+    /**
+     * @param debugger debugger
+     */
     public NodesForCommand(Debugger debugger) {
         super(debugger);
     }

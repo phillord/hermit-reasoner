@@ -91,12 +91,15 @@ import org.semanticweb.owlapi.model.OWLSubPropertyChainOfAxiom;
 import org.semanticweb.owlapi.model.OWLSymmetricObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLTransitiveObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.SWRLRule;
-
+/**Entailment checker.*/
 public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
     protected final OWLDataFactory factory;
     private final Reasoner reasoner;
     protected final Set<OWLAxiom> anonymousIndividualAxioms=new HashSet<>();
-
+    /**
+     * @param reasoner reasoner
+     * @param factory factory
+     */
     public EntailmentChecker(Reasoner reasoner,OWLDataFactory factory) {
         this.reasoner=reasoner;
         this.factory=factory;
@@ -120,7 +123,11 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
     }
 
     /**
-     * Use this method only if you really want to check just one axiom or if the axioms you want to check do not contain blind nodes/anonymous individuals. Otherwise use entails(Set<OWLAxiom> axioms) because only then concepts for the anonymous individuals can be obtained by rolling-up as required.
+     * Use this method only if you really want to check just one axiom or 
+     * if the axioms you want to check do not contain blind nodes/anonymous 
+     * individuals. Otherwise use {@code entails(Set<OWLAxiom> axioms)} 
+     * because only then concepts for the anonymous individuals can be 
+     * obtained by rolling-up as required.
      *
      * @param axiom
      *            an axiom for which entailment is to be checked

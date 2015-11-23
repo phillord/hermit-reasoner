@@ -20,7 +20,7 @@ package org.semanticweb.HermiT.tableau;
 import java.io.Serializable;
 import java.util.Arrays;
 
-public final class UnionDependencySet implements DependencySet,Serializable{
+final class UnionDependencySet implements DependencySet,Serializable{
     private static final long serialVersionUID=8296150535316233960L;
 
     protected int m_numberOfConstituents;

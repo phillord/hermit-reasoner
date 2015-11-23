@@ -83,13 +83,6 @@ This fork exists to allow HermiT users to use newer OWLAPI versions than the one
              <!-- structural tests don't work and it's known -->
              <exclude>**/structural/*java</exclude>
              <exclude>**/BlockingValidatorTest.java</exclude> 
-
-             <!-- This skips
-             the tests for the rationals library which is a fork and we do not
-             expect to change. There are 67 tests in total - so the maven
-             build should have these many more tests than the ant build
-             -->
-             <exclude>rationals/**</exclude>
            </excludes>
            
          </configuration>

@@ -36,15 +36,27 @@ public class Constant extends Term {
         m_datatypeURI=datatypeURI;
         m_dataValue=dataValue;
     }
+    /**
+     * @return lexical form
+     */
     public String getLexicalForm() {
         return m_lexicalForm;
     }
+    /**
+     * @return datatype iri
+     */
     public String getDatatypeURI() {
         return m_datatypeURI;
     }
+    /**
+     * @return data value
+     */
     public Object getDataValue() {
         return m_dataValue;
     }
+    /**
+     * @return true if anonymous
+     */
     public boolean isAnonymous() {
         return "internal:anonymous-constants".equals(m_datatypeURI);
     }
@@ -89,10 +101,20 @@ public class Constant extends Term {
         }
     };
 
+    /**
+     * @param lexicalForm lexicalForm
+     * @param datatypeURI datatypeURI
+     * @return constant
+     * @throws MalformedLiteralException if literal is malformed
+     */
     public static Constant create(String lexicalForm,String datatypeURI) throws MalformedLiteralException {
         Object dataValue=DatatypeRegistry.parseLiteral(lexicalForm,datatypeURI);
         return s_interningManager.intern(new Constant(lexicalForm,datatypeURI,dataValue));
     }
+    /**
+     * @param id id
+     * @return anonymous constant
+     */
     public static Constant createAnonymous(String id) {
         return create(id,"internal:anonymous-constants");
     }

@@ -24,9 +24,12 @@ import org.semanticweb.HermiT.debugger.Debugger;
 import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.model.Equality;
 import org.semanticweb.HermiT.tableau.GroundDisjunction;
-
+/**UnprocessedDisjunctionsCommand.*/
 public class UnprocessedDisjunctionsCommand extends AbstractCommand {
 
+    /**
+     * @param debugger debugger
+     */
     public UnprocessedDisjunctionsCommand(Debugger debugger) {
         super(debugger);
     }

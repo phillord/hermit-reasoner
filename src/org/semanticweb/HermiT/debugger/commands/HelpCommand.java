@@ -20,9 +20,12 @@ package org.semanticweb.HermiT.debugger.commands;
 import java.io.PrintWriter;
 
 import org.semanticweb.HermiT.debugger.Debugger;
-
+/**HelpCommand.*/
 public class HelpCommand extends AbstractCommand {
 
+    /**
+     * @param debugger debugger
+     */
     public HelpCommand(Debugger debugger) {
         super(debugger);
     }

@@ -34,7 +34,7 @@ import org.semanticweb.HermiT.tableau.DependencySet;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.Tableau;
 import org.semanticweb.HermiT.tableau.TupleTable;
-
+/**IndividualReuseStrategy.*/
 public class IndividualReuseStrategy extends AbstractExpansionStrategy implements Serializable {
     private static final long serialVersionUID=-7373787507623860081L;
 
@@ -47,6 +47,10 @@ public class IndividualReuseStrategy extends AbstractExpansionStrategy implement
     protected final Object[] m_auxiliaryBuffer;
     protected int[] m_indicesByBranchingPoint;
 
+    /**
+     * @param strategy strategy
+     * @param isDeterministic isDeterministic
+     */
     public IndividualReuseStrategy(BlockingStrategy strategy,boolean isDeterministic) {
         super(strategy,true);
         m_isDeterministic=isDeterministic;
@@ -111,12 +115,19 @@ public class IndividualReuseStrategy extends AbstractExpansionStrategy implement
     public boolean isDeterministic() {
         return m_isDeterministic;
     }
+    /**
+     * @param node node
+     * @return concept
+     */
     public AtomicConcept getConceptForNode(Node node) {
         for (Map.Entry<AtomicConcept,NodeBranchingPointPair> entry : m_reusedNodes.entrySet())
             if (entry.getValue().m_node==node)
                 return entry.getKey();
         return null;
     }
+    /**
+     * @return concept to not reuse
+     */
     public Set<AtomicConcept> getDontReuseConceptsEver() {
         return m_dontReuseConceptsEver;
     }

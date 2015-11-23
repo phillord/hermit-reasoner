@@ -28,9 +28,12 @@ import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.Node;
-
+/**QueryCommand.*/
 public class QueryCommand extends AbstractCommand {
 
+    /**
+     * @param debugger debugger
+     */
     public QueryCommand(Debugger debugger) {
         super(debugger);
     }

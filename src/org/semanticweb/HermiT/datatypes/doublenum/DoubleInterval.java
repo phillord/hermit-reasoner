@@ -18,11 +18,15 @@
 package org.semanticweb.HermiT.datatypes.doublenum;
 
 import java.util.Collection;
-
+/**DoubleInterval.*/
 public class DoubleInterval {
     protected final double m_lowerBoundInclusive;
     protected final double m_upperBoundInclusive;
 
+    /**
+     * @param lowerBoundInclusive lowerBoundInclusive
+     * @param upperBoundInclusive upperBoundInclusive
+     */
     public DoubleInterval(double lowerBoundInclusive,double upperBoundInclusive) {
         assert !isIntervalEmpty(lowerBoundInclusive,upperBoundInclusive);
         m_lowerBoundInclusive=lowerBoundInclusive;
@@ -30,6 +34,8 @@ public class DoubleInterval {
     }
     /**
      * Computes the intersection of this interval with the supplied one. If the two intervals do not intersect, the result is null.
+     * @param that that 
+     * @return intersection
      */
     public DoubleInterval intersectWith(DoubleInterval that) {
         // This code uses the assumption no bound in either interval contains NaN.
@@ -55,12 +61,23 @@ public class DoubleInterval {
     protected boolean isEqual(double lowerBoundInclusive,double upperBoundInclusive) {
         return areIdentical(m_lowerBoundInclusive,lowerBoundInclusive) && areIdentical(m_upperBoundInclusive,upperBoundInclusive);
     }
+    /**
+     * @param argument argument
+     * @return subtracted size
+     */
     public int subtractSizeFrom(int argument) {
         return subtractIntervalSizeFrom(m_lowerBoundInclusive,m_upperBoundInclusive,argument);
     }
+    /**
+     * @param value value
+     * @return true if contains
+     */
     public boolean contains(double value) {
         return contains(m_lowerBoundInclusive,m_upperBoundInclusive,value);
     }
+    /**
+     * @param numbers numbers
+     */
     public void enumerateNumbers(Collection<Object> numbers) {
         // We know that the interval is not empty; hence, neither bound is NaN.
         double number=m_lowerBoundInclusive;
@@ -80,15 +97,28 @@ public class DoubleInterval {
         buffer.append(']');
         return buffer.toString();
     }
+    /**
+     * @param bits bits
+     * @return true if NaN
+     */
     public static boolean isNaN(long bits) {
         return ((bits & 0x7ff0000000000000L)==0x7ff0000000000000L) && ((bits & 0x000fffffffffffffL)!=0);
     }
     protected static boolean isIntervalEmpty(double lowerBoundInclusive,double upperBoundInclusive) {
         return !isSmallerEqual(lowerBoundInclusive,upperBoundInclusive);
     }
+    /**
+     * @param value1 value1
+     * @param value2 value2
+     * @return true if identical
+     */
     public static boolean areIdentical(double value1,double value2) {
         return Double.doubleToLongBits(value1)==Double.doubleToLongBits(value2);
     }
+    /**
+     * @param value value
+     * @return next double
+     */
     public static double nextDouble(double value) {
         long bits=Double.doubleToRawLongBits(value);
         long magnitude=(bits & 0x7fffffffffffffffL);
@@ -116,6 +146,10 @@ public class DoubleInterval {
             return Double.longBitsToDouble(newBits);
         }
     }
+    /**
+     * @param value value
+     * @return previous double
+     */
     public static double previousDouble(double value) {
         long bits=Double.doubleToRawLongBits(value);
         long magnitude=(bits & 0x7fffffffffffffffL);
@@ -143,6 +177,12 @@ public class DoubleInterval {
             return Double.longBitsToDouble(newBits);
         }
     }
+    /**
+     * @param lowerBoundInclusive lowerBoundInclusive
+     * @param upperBoundInclusive upperBoundInclusive
+     * @param argument argument
+     * @return subtracted size
+     */
     public static int subtractIntervalSizeFrom(double lowerBoundInclusive,double upperBoundInclusive,int argument) {
         if (argument<=0)
             return 0;
@@ -183,6 +223,12 @@ public class DoubleInterval {
         else // if (positiveLowerBoundInclusive && !positiveUpperBoundInclusiev) is impossible at this point
             throw new IllegalStateException();
     }
+    /**
+     * @param startInclusive startInclusive
+     * @param endInclusive endInclusive
+     * @param value value
+     * @return true if contains
+     */
     public static boolean contains(double startInclusive,double endInclusive,double value) {
         long bitsStart=Double.doubleToRawLongBits(startInclusive);
         long bitsEnd=Double.doubleToRawLongBits(endInclusive);
@@ -197,6 +243,11 @@ public class DoubleInterval {
         long magnitudeValue=(bitsValue & 0x7fffffffffffffffL);
         return isSmallerEqual(positiveStart,magnitudeStart,positiveValue,magnitudeValue) && isSmallerEqual(positiveValue,magnitudeValue,positiveEnd,magnitudeEnd);
     }
+    /**
+     * @param value1 value1
+     * @param value2 value2
+     * @return true if smaller or equal
+     */
     public static boolean isSmallerEqual(double value1,double value2) {
         long bitsValue1=Double.doubleToRawLongBits(value1);
         long bitsValue2=Double.doubleToRawLongBits(value2);
@@ -208,6 +259,13 @@ public class DoubleInterval {
         long magnitudeValue2=(bitsValue2 & 0x7fffffffffffffffL);
         return isSmallerEqual(positiveValue1,magnitudeValue1,positiveValue2,magnitudeValue2);
     }
+    /**
+     * @param positive1 positive1
+     * @param magnitude1 magnitude1
+     * @param positive2 positive2
+     * @param magnitude2 magnitude2
+     * @return true if smaller or equal
+     */
     public static boolean isSmallerEqual(boolean positive1,long magnitude1,boolean positive2,long magnitude2) {
         if (positive1 && positive2)
             return magnitude1<=magnitude2;

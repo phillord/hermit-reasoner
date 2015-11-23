@@ -23,13 +23,17 @@ import java.util.Collections;
 import java.util.List;
 
 import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
-
+/**DateTimeValueSpaceSubset*/
 public class DateTimeValueSpaceSubset implements ValueSpaceSubset {
     protected final List<DateTimeInterval> m_intervals;
-    
+    /**Empty interval.*/
     public DateTimeValueSpaceSubset() {
         m_intervals=Collections.emptyList();
     }
+    /**
+     * @param interval1 interval1
+     * @param interval2 interval2
+     */
     public DateTimeValueSpaceSubset(DateTimeInterval interval1,DateTimeInterval interval2) {
         m_intervals=new ArrayList<>(2);
         if (interval1!=null)
@@ -37,6 +41,9 @@ public class DateTimeValueSpaceSubset implements ValueSpaceSubset {
         if (interval2!=null)
             m_intervals.add(interval2);
     }
+    /**
+     * @param intervals intervals
+     */
     public DateTimeValueSpaceSubset(List<DateTimeInterval> intervals) {
         m_intervals=intervals;
     }

@@ -31,6 +31,9 @@ public class AtLeastConcept extends AtLeast {
         super(number,onRole);
         m_toConcept=toConcept;
     }
+    /**
+     * @return literal
+     */
     public LiteralConcept getToConcept() {
         return m_toConcept;
     }
@@ -57,6 +60,12 @@ public class AtLeastConcept extends AtLeast {
         }
     };
     
+    /**
+     * @param number number
+     * @param onRole onRole
+     * @param toConcept toConcept
+     * @return at least concept
+     */
     public static AtLeastConcept create(int number,Role onRole,LiteralConcept toConcept) {
         return s_interningManager.intern(new AtLeastConcept(number,onRole,toConcept));
     }

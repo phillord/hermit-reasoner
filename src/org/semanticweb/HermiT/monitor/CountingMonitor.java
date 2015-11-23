@@ -28,7 +28,7 @@ import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.tableau.BranchingPoint;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.ReasoningTaskDescription;
-
+/**Counting monitor.*/
 public class CountingMonitor extends TableauMonitorAdapter {
     private static final long serialVersionUID=-8144444618897251350L;
 
@@ -171,106 +171,192 @@ public class CountingMonitor extends TableauMonitorAdapter {
     public void datatypeCheckingFinished(boolean result) {
         m_datatypeCheckingTime+=(System.currentTimeMillis()-m_datatypeCheckingStartTime);
     }
-    // getters for test records
+    /**
+     * @return getters for test records
+     */ 
     public Set<String> getUsedMessagePatterns() {
         return m_testRecords.keySet();
     }
-    // getters for current test measurements
+    /** @return getters for current test measurements*/
     public long getTime() {
         return m_time;
     }
+    /**
+     * @return backtrakcing
+     */
     public int getNumberOfBacktrackings() {
         return m_numberOfBacktrackings;
     }
+    /**
+     * @return nodes
+     */
     public int getNumberOfNodes() {
         return m_numberOfNodes;
     }
+    /**
+     * @return blocked nodes
+     */
     public int getNumberOfBlockedNodes() {
         return m_numberOfBlockedNodes;
     }
+    /**
+     * @return test description
+     */
     public String getTestDescription() {
         return m_reasoningTaskDescription.getTaskDescription(Prefixes.STANDARD_PREFIXES);
     }
+    /**
+     * @return test result
+     */
     public boolean getTestResult() {
         return m_testResult;
     }
-    // getters for current test blocking validation measurements
+    /** @return getters for current test blocking validation measurements*/
     public int getInitialModelSize() {
         return m_initialModelSize;
     }
+    /**
+     * @return initially blocked
+     */
     public int getInitiallyBlocked() {
         return m_initiallyBlocked;
     }
+    /**
+     * @return initially invalid
+     */
     public int getInitiallyInvalid() {
         return m_initiallyInvalid;
     }
+    /**
+     * @return no validations
+     */
     public int getNoValidations() {
         return m_noValidations;
     }
+    /**
+     * @return validation time
+     */
     public long getValidationTime() {
         return m_validationTime;
     }
+    /**
+     * @return datatypes checked
+     */
     public int getNumberDatatypesChecked() {
         return m_numberDatatypesChecked;
     }
+    /**
+     * @return checking time
+     */
     public long getDatatypeCheckingTime() {
         return m_datatypeCheckingTime;
     }
 
     // getters for overall measurements
+    /**
+     * @return overall time
+     */
     public long getOverallTime() {
         return m_overallTime;
     }
+    /**
+     * @return number of backtracking
+     */
     public int getOverallNumberOfBacktrackings() {
         return m_overallNumberOfBacktrackings;
     }
+    /**
+     * @return number of nodes
+     */
     public int getOverallNumberOfNodes() {
         return m_overallNumberOfNodes;
     }
+    /**
+     * @return number of blocked nodes
+     */
     public int getOverallNumberOfBlockedNodes() {
         return m_overallNumberOfBlockedNodes;
     }
+    /**
+     * @return number of tests
+     */
     public int getOverallNumberOfTests() {
         return m_overallNumberOfTests;
     }
+    /**
+     * @return number of clashes
+     */
     public int getOverallNumberOfClashes() {
         return m_overallNumberOfClashes;
     }
+    /**
+     * @return pssible instances
+     */
     public int getNumberOfPossibleInstancesTested() {
         return m_possibleInstancesTested;
     }
+    /**
+     * @return number of possible instances
+     */
     public int getNumberOfPossibleInstancesInstances() {
         return m_possibleInstancesInstances;
     }
     // getters for overall blocking validation measurements
+    /**
+     * @return initial model size
+     */
     public int getOverallInitialModelSize() {
         return m_overallInitialModelSize;
     }
+    /**
+     * @return initially blocked
+     */
     public int getOverallInitiallyBlocked() {
         return m_overallInitiallyBlocked;
     }
+    /**
+     * @return initially invalid
+     */
     public int getOverallInitiallyInvalid() {
         return m_overallInitiallyInvalid;
     }
+    /**
+     * @return no validation
+     */
     public int getOverallNoValidations() {
         return m_overallNoValidations;
     }
+    /**
+     * @return overall validation time
+     */
     public long getOverallValidationTime() {
         return m_overallValidationTime;
     }
+    /**
+     * @return number datatypes checked
+     */
     public int getOverallNumberDatatypesChecked() {
         return m_overallNumberDatatypesChecked;
     }
+    /**
+     * @return datatype checking time
+     */
     public long getOverallDatatypeCheckingTime() {
         return m_overallDatatypeCheckingTime;
     }
 
     // getters for average measurements
+    /**
+     * @return average time
+     */
     public long getAverageTime() {
         if (m_testNo==0)
             return m_testNo;
         return m_overallTime/m_testNo;
     }
+    /**
+     * @return number of backtrackings
+     */
     public double getAverageNumberOfBacktrackings() {
         if (m_testNo==0)
             return m_testNo;
@@ -284,63 +370,100 @@ public class CountingMonitor extends TableauMonitorAdapter {
         int tmp=(int)((number*Math.pow(10,noDecimalPlaces)));
         return (tmp/Math.pow(10,noDecimalPlaces));
     }
+    /**
+     * @return number of nodes
+     */
     public double getAverageNumberOfNodes() {
         if (m_testNo==0)
             return m_testNo;
         return getRounded(m_overallNumberOfNodes, m_testNo);
     }
+    /**
+     * @return number of blockend nodes
+     */
     public double getAverageNumberOfBlockedNodes() {
         if (m_testNo==0)
             return m_testNo;
         return getRounded(m_overallNumberOfBlockedNodes, m_testNo);
     }
+    /**
+     * @return number of clashes
+     */
     public double getAverageNumberOfClashes() {
         if (m_testNo==0)
             return m_testNo;
         return getRounded(m_overallNumberOfClashes, m_testNo);
     }
+    /**
+     * @return possible to instance
+     */
     public double getPossiblesToInstances() {
         if (m_possibleInstancesTested==0)
             return 0;
         return getRounded(m_possibleInstancesInstances,m_possibleInstancesTested);
     }
     // getters for average blocking validation measurements
+    /**
+     * @return initial model size
+     */
     public double getAverageInitialModelSize() {
         if (m_testNo==0)
             return m_testNo;
         return getRounded(m_overallInitialModelSize, m_testNo);
     }
+    /**
+     * @return initially blocked
+     */
     public double getAverageInitiallyBlocked() {
         if (m_testNo==0)
             return m_testNo;
         return getRounded(m_overallInitiallyBlocked, m_testNo);
     }
+    /**
+     * @return initially invalid
+     */
     public double getAverageInitiallyInvalid() {
         if (m_testNo==0)
             return m_testNo;
         return getRounded(m_overallInitiallyInvalid, m_testNo);
     }
+    /**
+     * @return no validation
+     */
     public double getAverageNoValidations() {
         if (m_testNo==0)
             return m_testNo;
         return getRounded(m_overallNoValidations, m_testNo);
     }
+    /**
+     * @return validaion time
+     */
     public long getAverageValidationTime() {
         if (m_testNo==0)
             return m_testNo;
         return m_overallValidationTime/m_testNo;
     }
+    /**
+     * @return number datatypes checked
+     */
     public long getAverageNumberDatatypesChecked() {
         if (m_testNo==0)
             return m_testNo;
         return m_overallNumberDatatypesChecked/m_testNo;
     }
+    /**
+     * @return avg datatype checking time
+     */
     public long getAverageDatatypeCheckingTime() {
         if (m_testNo==0)
             return m_testNo;
         return m_overallDatatypeCheckingTime/m_testNo;
     }
 
+    /**
+     * @param millis millis
+     * @return formatted time
+     */
     public static String millisToHoursMinutesSecondsString(long millis) {
         long time=millis/1000;
         long ms=time%1000;
@@ -355,7 +478,7 @@ public class CountingMonitor extends TableauMonitorAdapter {
         return timeStr;
     }
 
-    public static class TestRecord implements Comparable<TestRecord>, Serializable {
+    private static class TestRecord implements Comparable<TestRecord>, Serializable {
         private static final long serialVersionUID = -3815493500625020183L;
         protected final long m_testTime;
         protected final String m_testDescription;
@@ -372,15 +495,6 @@ public class CountingMonitor extends TableauMonitorAdapter {
             int result=((Long)that.m_testTime).compareTo(m_testTime);
             if (result!=0) return result;
             else return this.m_testDescription.compareToIgnoreCase(that.m_testDescription);
-        }
-        public long getTestTime() {
-            return m_testTime;
-        }
-        public String getTestDescription() {
-            return m_testDescription;
-        }
-        public boolean getTestResult() {
-            return m_testResult;
         }
         @Override
         public String toString() {

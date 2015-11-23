@@ -123,7 +123,7 @@ import org.semanticweb.owlapi.model.SWRLVariable;
 import org.semanticweb.owlapi.util.OWLAxiomVisitorAdapter;
 
 import com.google.common.base.Optional;
-
+/**OWLClausification.*/
 public class OWLClausification {
     protected static final Variable X=Variable.create("X");
     protected static final Variable Y=Variable.create("Y");
@@ -131,9 +131,17 @@ public class OWLClausification {
 
     protected final Configuration m_configuration;
 
+    /**
+     * @param configuration configuration
+     */
     public OWLClausification(Configuration configuration) {
         m_configuration=configuration;
     }
+    /**
+     * @param rootOntology rootOntology
+     * @param descriptionGraphs descriptionGraphs
+     * @return clausifications
+     */
     public Object[] preprocessAndClausify(OWLOntology rootOntology,Collection<DescriptionGraph> descriptionGraphs) {
         OWLDataFactory factory=rootOntology.getOWLOntologyManager().getOWLDataFactory();
         Optional<IRI> defaultDocumentIRI = rootOntology.getOntologyID().getDefaultDocumentIRI();
@@ -157,6 +165,14 @@ public class OWLClausification {
         DLOntology dlOntology=clausify(factory,ontologyIRI,axioms,axiomsExpressivity,descriptionGraphs);
         return new Object[] { objectPropertyInclusionManager,dlOntology };
     }
+    /**
+     * @param factory factory
+     * @param ontologyIRI ontologyIRI
+     * @param axioms axioms
+     * @param axiomsExpressivity axiomsExpressivity
+     * @param descriptionGraphs descriptionGraphs
+     * @return dl ontology
+     */
     public DLOntology clausify(OWLDataFactory factory,String ontologyIRI,OWLAxioms axioms,OWLAxiomsExpressivity axiomsExpressivity,Collection<DescriptionGraph> descriptionGraphs) {
         Set<DLClause> dlClauses=new LinkedHashSet<>();
         Set<Atom> positiveFacts=new HashSet<>();

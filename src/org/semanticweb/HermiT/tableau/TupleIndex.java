@@ -19,7 +19,7 @@ package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
 
-public final class TupleIndex implements Serializable {
+final class TupleIndex implements Serializable {
     private static final long serialVersionUID=-4284072092430590904L;
 
     protected static final float LOAD_FACTOR=0.7f;

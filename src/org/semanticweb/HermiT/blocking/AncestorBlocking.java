@@ -31,6 +31,7 @@ import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.Tableau;
 
+/**Ancestor blocking strategy.*/
 public class AncestorBlocking implements BlockingStrategy,Serializable {
     private static final long serialVersionUID=1075850000309773283L;
 
@@ -39,6 +40,10 @@ public class AncestorBlocking implements BlockingStrategy,Serializable {
     protected Tableau m_tableau;
     protected boolean m_useBlockingSignatureCache;
 
+    /**
+     * @param directBlockingChecker directBlockingChecker
+     * @param blockingSignatureCache blockingSignatureCache
+     */
     public AncestorBlocking(DirectBlockingChecker directBlockingChecker,BlockingSignatureCache blockingSignatureCache) {
         m_directBlockingChecker=directBlockingChecker;
         m_blockingSignatureCache=blockingSignatureCache;

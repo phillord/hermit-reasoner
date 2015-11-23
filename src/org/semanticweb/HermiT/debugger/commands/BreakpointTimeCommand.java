@@ -20,9 +20,12 @@ package org.semanticweb.HermiT.debugger.commands;
 import java.io.PrintWriter;
 
 import org.semanticweb.HermiT.debugger.Debugger;
-
+/**BreakpointTimeCommand.*/
 public class BreakpointTimeCommand extends AbstractCommand {
 
+    /**
+     * @param debugger debugger
+     */
     public BreakpointTimeCommand(Debugger debugger) {
         super(debugger);
     }

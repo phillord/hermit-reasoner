@@ -38,7 +38,7 @@ import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.ReasoningTaskDescription;
 import org.semanticweb.HermiT.tableau.Tableau;
-
+/**QuasiOrderClassification*/
 public class QuasiOrderClassification {
     protected final Tableau m_tableau;
     protected final ClassificationProgressMonitor m_progressMonitor;
@@ -48,6 +48,13 @@ public class QuasiOrderClassification {
     protected final Graph<AtomicConcept> m_knownSubsumptions;
     protected final Graph<AtomicConcept> m_possibleSubsumptions;
 
+    /**
+     * @param tableau tableau
+     * @param progressMonitor progressMonitor
+     * @param topElement topElement
+     * @param bottomElement bottomElement
+     * @param elements elements
+     */
     public QuasiOrderClassification(Tableau tableau,ClassificationProgressMonitor progressMonitor,AtomicConcept topElement,AtomicConcept bottomElement,Set<AtomicConcept> elements) {
         m_tableau=tableau;
         m_progressMonitor=progressMonitor;
@@ -57,6 +64,9 @@ public class QuasiOrderClassification {
         m_knownSubsumptions=new Graph<>();
         m_possibleSubsumptions=new Graph<>();
     }
+    /**
+     * @return classified hierarchy
+     */
     public Hierarchy<AtomicConcept> classify() {
         Relation<AtomicConcept> relation=new Relation<AtomicConcept>() {
             @Override

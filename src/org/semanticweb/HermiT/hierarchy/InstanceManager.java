@@ -60,8 +60,9 @@ import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.reasoner.ReasonerProgressMonitor;
-
+/**InstanceManager.*/
 public class InstanceManager {
+    /**threshold*/
     public static final int thresholdForAdditionalAxioms=10000;
 
     protected final InterruptFlag m_interruptFlag;
@@ -97,6 +98,12 @@ public class InstanceManager {
     protected final ExtensionTable.Retrieval m_ternaryRetrieval1Bound;
     protected int m_currentIndividualIndex=0;
 
+    /**
+     * @param interruptFlag interruptFlag
+     * @param reasoner reasoner
+     * @param atomicConceptHierarchy atomicConceptHierarchy
+     * @param objectRoleHierarchy objectRoleHierarchy
+     */
     public InstanceManager(InterruptFlag interruptFlag,Reasoner reasoner,Hierarchy<AtomicConcept> atomicConceptHierarchy,Hierarchy<Role> objectRoleHierarchy) {
         m_interruptFlag=interruptFlag;
         m_interruptFlag.startTask();
@@ -236,6 +243,9 @@ public class InstanceManager {
         m_interruptFlag.checkInterrupt();
         return DeterministicClassification.buildHierarchy(m_topConcept,m_bottomConcept,allSubsumers);
     }
+    /**
+     * @param atomicConceptHierarchy atomicConceptHierarchy
+     */
     public void setToClassifiedConceptHierarchy(Hierarchy<AtomicConcept> atomicConceptHierarchy) {
         if (atomicConceptHierarchy!=m_currentConceptHierarchy) {
             m_currentConceptHierarchy=atomicConceptHierarchy;
@@ -301,7 +311,7 @@ public class InstanceManager {
     /**
      * Removes the inverses from the given hierarchy and then converts Role hierarchy nodes to RoleElement hierarchy nodes, which can store
      * known and possible instances.
-     * @param roleHierarchy
+     * @param roleHierarchy roleHierarchy
      * @return a hierarchy containing role element nodes and no inverses
      */
     protected Hierarchy<RoleElement> transformRoleHierarchy(final Hierarchy<Role> roleHierarchy) {
@@ -371,6 +381,9 @@ public class InstanceManager {
         }
         return newHierarchy;
     }
+    /**
+     * @param roleHierarchy roleHierarchy
+     */
     public void setToClassifiedRoleHierarchy(final Hierarchy<Role> roleHierarchy) {
         m_currentRoleHierarchy=transformRoleHierarchy(roleHierarchy);
         // clean up known and possibles
@@ -429,6 +442,13 @@ public class InstanceManager {
                 findNextHierarchyNodeWithAtomic(atomicRepresentatives, successor);
         }
     }
+    /**
+     * @param factory factory
+     * @param monitor monitor
+     * @param completedSteps completedSteps
+     * @param steps steps
+     * @return axioms
+     */
     public OWLAxiom[] getAxiomsForReadingOffCompexProperties(OWLDataFactory factory, ReasonerProgressMonitor monitor, int completedSteps, int steps) {
         if (!m_complexRoles.isEmpty()) {
             int noAdditionalAxioms=0;
@@ -465,6 +485,11 @@ public class InstanceManager {
             return new OWLAxiom[0];
         }
     }
+    /**
+     * @param monitor monitor
+     * @param completedSteps completedSteps
+     * @param steps steps
+     */
     public void initializeKnowAndPossibleClassInstances(ReasonerProgressMonitor monitor, int completedSteps, int steps) {
         if (!m_classesInitialised) {
             m_interruptFlag.startTask();
@@ -506,6 +531,13 @@ public class InstanceManager {
         }
         return completedSteps;
     }
+    /**
+     * @param monitor monitor
+     * @param startIndividualIndex startIndividualIndex
+     * @param completedSteps completedSteps
+     * @param steps steps
+     * @return completed steps
+     */
     public int initializeKnowAndPossiblePropertyInstances(ReasonerProgressMonitor monitor, int startIndividualIndex, int completedSteps, int steps) {
         if (!m_propertiesInitialised) {
             m_interruptFlag.startTask();
@@ -824,6 +856,9 @@ public class InstanceManager {
             }
         }
     }
+    /**
+     * Set inconsistent.
+     */
     public void setInconsistent() {
         m_isInconsistent=true;
         m_realizationCompleted=true;
@@ -832,6 +867,9 @@ public class InstanceManager {
         m_currentConceptHierarchy=null;
         m_currentRoleHierarchy=null;
     }
+    /**
+     * @param monitor monitor
+     */
     public void realize(ReasonerProgressMonitor monitor) {
         assert m_usesClassifiedConceptHierarchy==true;
         if (m_readingOffFoundPossibleConceptInstance && !m_realizationCompleted) {
@@ -886,6 +924,9 @@ public class InstanceManager {
         }
         m_realizationCompleted=true;
     }
+    /**
+     * @param monitor monitor
+     */
     public void realizeObjectRoles(ReasonerProgressMonitor monitor) {
         if (m_readingOffFoundPossiblePropertyInstance && !m_roleRealizationCompleted) {
             if (monitor!=null)
@@ -932,6 +973,11 @@ public class InstanceManager {
         }
         m_roleRealizationCompleted=true;
     }
+    /**
+     * @param individual individual
+     * @param direct direct
+     * @return types
+     */
     public Set<HierarchyNode<AtomicConcept>> getTypes(Individual individual,boolean direct) {
         if (m_isInconsistent)
             return Collections.singleton(m_currentConceptHierarchy.m_bottomNode);
@@ -992,12 +1038,24 @@ public class InstanceManager {
         }
         return result;
     }
+    /**
+     * @param individual individual
+     * @param atomicConcept atomicConcept
+     * @param direct direct
+     * @return true if has type
+     */
     public boolean hasType(Individual individual,AtomicConcept atomicConcept,boolean direct) {
         HierarchyNode<AtomicConcept> node=m_currentConceptHierarchy.getNodeForElement(atomicConcept);
         if (node==null)
             return false;
         return hasType(individual, node, direct);
     }
+    /**
+     * @param individual individual
+     * @param node node
+     * @param direct direct
+     * @return true if has type
+     */
     public boolean hasType(Individual individual,HierarchyNode<AtomicConcept> node,boolean direct) {
         assert !direct || m_usesClassifiedConceptHierarchy;
         AtomicConcept representative=node.getRepresentative();
@@ -1032,6 +1090,11 @@ public class InstanceManager {
                     return true;
         return false;
     }
+    /**
+     * @param atomicConcept atomicConcept
+     * @param direct direct
+     * @return instances
+     */
     public Set<Individual> getInstances(AtomicConcept atomicConcept, boolean direct) {
         Set<Individual> result=new HashSet<>();
         HierarchyNode<AtomicConcept> node=m_currentConceptHierarchy.getNodeForElement(atomicConcept);
@@ -1039,6 +1102,11 @@ public class InstanceManager {
         getInstancesForNode(node,result,direct);
         return result;
     }
+    /**
+     * @param node node
+     * @param direct direct
+     * @return instances
+     */
     public Set<Individual> getInstances(HierarchyNode<AtomicConcept> node,boolean direct) {
         Set<Individual> result=new HashSet<>();
         HierarchyNode<AtomicConcept> nodeFromCurrentHierarchy=m_currentConceptHierarchy.getNodeForElement(node.m_representative);
@@ -1108,6 +1176,12 @@ public class InstanceManager {
                     getInstancesForNode(child, result, false);
     }
 
+    /**
+     * @param role role
+     * @param individual1 individual1
+     * @param individual2 individual2
+     * @return true if has object role
+     */
     public boolean hasObjectRoleRelationship(AtomicRole role, Individual individual1, Individual individual2) {
         RoleElement element=m_roleElementManager.getRoleElement(role);
         HierarchyNode<RoleElement> currentNode=m_currentRoleHierarchy.getNodeForElement(element);
@@ -1115,6 +1189,12 @@ public class InstanceManager {
             return false;
         return hasObjectRoleRelationship(currentNode, individual1, individual2);
     }
+    /**
+     * @param node node
+     * @param individual1 individual1
+     * @param individual2 individual2
+     * @return true if has object role
+     */
     public boolean hasObjectRoleRelationship(HierarchyNode<RoleElement> node,Individual individual1,Individual individual2) {
         RoleElement representativeElement=node.getRepresentative();
         if (representativeElement.isKnown(individual1, individual2) || representativeElement.equals(m_topRoleElement))
@@ -1137,6 +1217,10 @@ public class InstanceManager {
                     return true;
         return false;
     }
+    /**
+     * @param role role
+     * @return object property instances
+     */
     public Map<Individual,Set<Individual>> getObjectPropertyInstances(AtomicRole role) {
         Map<Individual,Set<Individual>> result=new HashMap<>();
         HierarchyNode<RoleElement> node=m_currentRoleHierarchy.getNodeForElement(m_roleElementManager.getRoleElement(role));
@@ -1187,12 +1271,22 @@ public class InstanceManager {
         for (HierarchyNode<RoleElement> child : node.getChildNodes())
             getObjectPropertyInstances(child, result);
     }
+    /**
+     * @param role role
+     * @param individual individual
+     * @return object property values
+     */
     public Set<Individual> getObjectPropertyValues(AtomicRole role,Individual individual) {
         Set<Individual> result=new HashSet<>();
         HierarchyNode<RoleElement> node=m_currentRoleHierarchy.getNodeForElement(m_roleElementManager.getRoleElement(role));
         getObjectPropertyValues(node,individual, result);
         return result;
     }
+    /**
+     * @param role role
+     * @param individual individual
+     * @return object property subjects
+     */
     public Set<Individual> getObjectPropertySubjects(AtomicRole role,Individual individual) {
         Set<Individual> result=new HashSet<>();
         HierarchyNode<RoleElement> node=m_currentRoleHierarchy.getNodeForElement(m_roleElementManager.getRoleElement(role));
@@ -1252,6 +1346,10 @@ public class InstanceManager {
         for (HierarchyNode<RoleElement> child : node.getChildNodes())
             getObjectPropertyValues(child, subject, result);
     }
+    /**
+     * @param individual individual
+     * @return same individuals
+     */
     public Set<Individual> getSameAsIndividuals(Individual individual) {
         Set<Individual> equivalenceClass=m_individualToEquivalenceClass.get(individual);
         Set<Set<Individual>> possiblySameEquivalenceClasses=m_individualToPossibleEquivalenceClass.get(equivalenceClass);
@@ -1292,9 +1390,17 @@ public class InstanceManager {
         }
         return equivalenceClass;
     }
+    /**
+     * @param individual1 individual1
+     * @param individual2 individual2
+     * @return true if same
+     */
     public boolean isSameIndividual(Individual individual1, Individual individual2) {
         return (!m_reasoner.getTableau().isSatisfiable(true,false,Collections.singleton(Atom.create(Inequality.INSTANCE,individual1,individual2)),null,null,null,null,new ReasoningTaskDescription(true,"is {0} same as {1}",individual1,individual2)));
     }
+    /**
+     * @param progressMonitor progressMonitor
+     */
     public void computeSameAsEquivalenceClasses(ReasonerProgressMonitor progressMonitor) {
         if (!m_individualToPossibleEquivalenceClass.isEmpty()) {
             int steps=m_individualToPossibleEquivalenceClass.keySet().size();
@@ -1351,24 +1457,45 @@ public class InstanceManager {
     protected static boolean isResultRelevantIndividual(Individual individual) {
         return !individual.isAnonymous() && !Prefixes.isInternalIRI(individual.getIRI());
     }
+    /**
+     * @return true if realisation completed
+     */
     public boolean realizationCompleted() {
         return m_realizationCompleted;
     }
+    /**
+     * @return true if object property realisation complete
+     */
     public boolean objectPropertyRealizationCompleted() {
         return m_roleRealizationCompleted;
     }
+    /**
+     * @return true if sameas computed
+     */
     public boolean sameAsIndividualsComputed() {
         return m_individualToPossibleEquivalenceClass.isEmpty();
     }
+    /**
+     * @return true if classes initialised
+     */
     public boolean areClassesInitialised() {
         return m_classesInitialised;
     }
+    /**
+     * @return true if proeprties initialised
+     */
     public boolean arePropertiesInitialised() {
         return m_propertiesInitialised;
     }
+    /**
+     * @return current inex
+     */
     public int getCurrentIndividualIndex() {
         return m_currentIndividualIndex;
     }
+    /**
+     * @return nodes for individuals
+     */
     public Map<Individual, Node> getNodesForIndividuals() {
         return m_nodesForIndividuals;
     }

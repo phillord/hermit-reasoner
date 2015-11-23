@@ -20,7 +20,7 @@ package org.semanticweb.HermiT.datatypes.rdfplainliteral;
 /**
  * Implements a string with a language tag -- that is, a data value from the value space of rdf:PlainLiteral.
  */
-public class RDFPlainLiteralDataValue {
+class RDFPlainLiteralDataValue {
     protected final String m_string;
     protected final String m_languageTag;
     

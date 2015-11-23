@@ -31,6 +31,9 @@ public class BranchingPoint implements Serializable {
     protected final GroundDisjunction m_firstGroundDisjunction;
     protected final GroundDisjunction m_firstUnprocessedGroundDisjunction;
 
+    /**
+     * @param tableau tableau
+     */
     public BranchingPoint(Tableau tableau) {
         m_level=tableau.m_currentBranchingPoint+1;
         m_lastTableauNode=tableau.m_lastTableauNode;
@@ -38,12 +41,15 @@ public class BranchingPoint implements Serializable {
         m_firstGroundDisjunction=tableau.m_firstGroundDisjunction;
         m_firstUnprocessedGroundDisjunction=tableau.m_firstUnprocessedGroundDisjunction;
     }
+    /**
+     * @return level
+     */
     public int getLevel() {
         return m_level;
     }
     /**
-     * @param tableau
-     * @param clashDepdendencySet
+     * @param tableau tableau
+     * @param clashDepdendencySet clashDepdendencySet
      */
     @SuppressWarnings("unused")
     public void startNextChoice(Tableau tableau,DependencySet clashDepdendencySet) {

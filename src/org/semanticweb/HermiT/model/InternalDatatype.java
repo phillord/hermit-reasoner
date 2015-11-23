@@ -30,6 +30,9 @@ public class InternalDatatype extends AtomicDataRange implements DLPredicate {
     protected InternalDatatype(String iri) {
         m_iri=iri;
     }
+    /**
+     * @return iri
+     */
     public String getIRI() {
         return m_iri;
     }
@@ -72,9 +75,14 @@ public class InternalDatatype extends AtomicDataRange implements DLPredicate {
         }
     };
 
+    /**
+     * @param uri iri
+     * @return datatype
+     */
     public static InternalDatatype create(String uri) {
         return s_interningManager.intern(new InternalDatatype(uri));
     }
 
+    /**Literal.*/
     public static final InternalDatatype RDFS_LITERAL=create("http://www.w3.org/2000/01/rdf-schema#Literal");
 }

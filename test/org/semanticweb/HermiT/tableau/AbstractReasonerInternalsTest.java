@@ -21,7 +21,7 @@ import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
 import org.semanticweb.HermiT.reasoner.AbstractReasonerTest;
 import org.semanticweb.HermiT.structural.OWLClausification;
-
+@SuppressWarnings("javadoc")
 public abstract class AbstractReasonerInternalsTest extends AbstractReasonerTest {
 
     public AbstractReasonerInternalsTest(String name) {

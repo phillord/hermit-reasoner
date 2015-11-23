@@ -2,7 +2,7 @@ package org.semanticweb.HermiT.graph;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
+@SuppressWarnings("javadoc")
 public class AllTests {
 
     public static Test suite() {

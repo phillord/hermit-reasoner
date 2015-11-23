@@ -26,22 +26,20 @@ import java.util.Set;
 /**
  * This class is used to create sets of various types. It ensures that each distinct set exists only once,
  * thus allowing sets to be compared with ==. Instances of this class are used to create various labels in blocking.
+ * @param <E> created type
  */
 @SuppressWarnings({ "unchecked", "rawtypes"})
 public class SetFactory<E> implements Serializable {
     private static final long serialVersionUID=7071071962187693657L;
 
-    protected Entry[] m_unusedEntries;
-    protected Entry[] m_entries;
-    protected int m_size;
-    protected int m_resizeThreshold;
+    protected Entry[] m_unusedEntries=new Entry[32];
+    protected Entry[] m_entries=new Entry[16];
+    protected int m_size=0;
+    protected int m_resizeThreshold=12;
 
-    public SetFactory() {
-        m_unusedEntries=new Entry[32];
-        m_entries=new Entry[16];
-        m_size=0;
-        m_resizeThreshold=(int)(0.75*m_entries.length);
-    }
+    /**
+     * Clear non permanent.
+     */
     public void clearNonpermanent() {
         for (int i=m_entries.length-1;i>=0;--i) {
             Entry entry=m_entries[i];
@@ -55,9 +53,15 @@ public class SetFactory<E> implements Serializable {
             }
         }
     }
+    /**
+     * @param set set
+     */
     public void addReference(Set<E> set) {
         ((Entry)set).m_referenceCount++;
     }
+    /**
+     * @param set set
+     */
     public void removeReference(Set<E> set) {
         Entry entry=(Entry)set;
         entry.m_referenceCount--;
@@ -66,9 +70,16 @@ public class SetFactory<E> implements Serializable {
             leaveEntry(entry);
         }
     }
+    /**
+     * @param set set
+     */
     public void makePermanent(Set<E> set) {
         ((Entry)set).m_permanent=true;
     }
+    /**
+     * @param elements elements
+     * @return set
+     */
     public Set<E> getSet(Set<E> elements) {
         int hashCode=elements.hashCode();
         int index=getIndexFor(hashCode,m_entries.length);

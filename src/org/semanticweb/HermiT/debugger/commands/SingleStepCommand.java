@@ -20,9 +20,12 @@ package org.semanticweb.HermiT.debugger.commands;
 import java.io.PrintWriter;
 
 import org.semanticweb.HermiT.debugger.Debugger;
-
+/**SingleStepCommand*/
 public class SingleStepCommand extends AbstractCommand {
 
+    /**
+     * @param debugger debugger
+     */
     public SingleStepCommand(Debugger debugger) {
         super(debugger);
     }

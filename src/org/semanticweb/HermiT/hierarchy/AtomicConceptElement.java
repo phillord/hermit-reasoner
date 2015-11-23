@@ -22,12 +22,16 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.semanticweb.HermiT.model.Individual;
-
+/**AtomicConceptElement.*/
 public class AtomicConceptElement {
     
     protected final Set<Individual> m_knownInstances;
     protected final Set<Individual> m_possibleInstances;
     
+    /**
+     * @param known known
+     * @param possible possible
+     */
     public AtomicConceptElement(Set<Individual> known, Set<Individual> possible) {
         if (known==null)
             m_knownInstances=new HashSet<>();
@@ -38,28 +42,56 @@ public class AtomicConceptElement {
         else 
             m_possibleInstances=possible;
     }
+    /**
+     * @param individual individual
+     * @return true if known
+     */
     public boolean isKnown(Individual individual) {
         return m_knownInstances.contains(individual);
     }
+    /**
+     * @param individual individual
+     * @return true if possible
+     */
     public boolean isPossible(Individual individual) {
         return m_possibleInstances.contains(individual);
     }
+    /**
+     * @return known instances
+     */
     public Set<Individual> getKnownInstances() {
         return m_knownInstances;
     }
+    /**
+     * @return possible instances
+     */
     public Set<Individual> getPossibleInstances() {
         return m_possibleInstances;
     }
+    /**
+     * @return true if has possibles
+     */
     public boolean hasPossibles() {
         return !m_possibleInstances.isEmpty();
     }
+    /**
+     * @param individual individual
+     */
     public void setToKnown(Individual individual) {
         m_possibleInstances.remove(individual);
         m_knownInstances.add(individual);
     }
+    /**
+     * @param individual individual
+     * @return true if added
+     */
     public boolean addPossible(Individual individual) {
         return m_possibleInstances.add(individual);
     }
+    /**
+     * @param individuals individuals
+     * @return true if added
+     */
     public boolean addPossibles(Set<Individual> individuals) {
         return m_possibleInstances.addAll(individuals);
     }

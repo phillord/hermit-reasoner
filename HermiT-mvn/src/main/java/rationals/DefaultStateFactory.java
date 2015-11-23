@@ -12,7 +12,7 @@ import java.util.*;
  */
 public class DefaultStateFactory implements StateFactory, Cloneable {
 
-    public class DefaultState implements State {
+    class DefaultState implements State {
 
         public final int i;
 
@@ -67,7 +67,7 @@ public class DefaultStateFactory implements StateFactory, Cloneable {
         private final DefaultStateFactory df;
 
         /**
-         * 
+         * @param df df
          */
         public DefaultStateSet(DefaultStateFactory df) {
             this.df = df;

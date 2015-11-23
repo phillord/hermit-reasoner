@@ -45,8 +45,8 @@ package rationals.expr;
 public class Product extends BinaryExpr {
 
     /**
-     * @param e
-     * @param f
+     * @param e e
+     * @param f f
      */
     public Product(RationalExpr e, RationalExpr f) {
         super(e, f);

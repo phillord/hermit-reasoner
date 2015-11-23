@@ -22,9 +22,12 @@ import java.io.PrintWriter;
 
 import org.semanticweb.HermiT.debugger.Debugger;
 import org.semanticweb.HermiT.model.DLClause;
-
+/**ShowDLClausesCommand.*/
 public class ShowDLClausesCommand extends AbstractCommand {
 
+    /**
+     * @param debugger debugger
+     */
     public ShowDLClausesCommand(Debugger debugger) {
         super(debugger);
     }

@@ -22,13 +22,17 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
-
+/**HierarchyNode.
+ * @param <E> type*/
 public class HierarchyNode<E> {
     protected final E m_representative;
     protected final Set<E> m_equivalentElements;
     protected final Set<HierarchyNode<E>> m_parentNodes;
     protected final Set<HierarchyNode<E>> m_childNodes;
 
+    /**
+     * @param representative representative
+     */
     public HierarchyNode(E representative) {
         m_representative=representative;
         m_equivalentElements=new HashSet<>();
@@ -36,42 +40,78 @@ public class HierarchyNode<E> {
         m_parentNodes=new HashSet<>();
         m_childNodes=new HashSet<>();
     }
+    /**
+     * @param element element
+     * @param equivalentElements equivalentElements
+     * @param parentNodes parentNodes
+     * @param childNodes childNodes
+     */
     public HierarchyNode(E element,Set<E> equivalentElements,Set<HierarchyNode<E>> parentNodes,Set<HierarchyNode<E>> childNodes) {
         m_representative=element;
         m_equivalentElements=equivalentElements;
         m_parentNodes=parentNodes;
         m_childNodes=childNodes;
     }
+    /**
+     * @return representative
+     */
     public E getRepresentative() {
         return m_representative;
     }
+    /**
+     * @param element element
+     * @return true if equivalent
+     */
     public boolean isEquivalentElement(E element) {
         return m_equivalentElements.contains(element);
     }
+    /**
+     * @param ancestor ancestor
+     * @return true if ancestor
+     */
     public boolean isAncestorElement(E ancestor) {
         for (HierarchyNode<E> node : getAncestorNodes())
             if (node.isEquivalentElement(ancestor))
                 return true;
         return false;
     }
+    /**
+     * @param descendant descendant
+     * @return descendant element
+     */
     public boolean isDescendantElement(E descendant) {
         for (HierarchyNode<E> node : getDescendantNodes())
             if (node.isEquivalentElement(descendant))
                 return true;
         return false;
     }
+    /**
+     * @return equivalent
+     */
     public Set<E> getEquivalentElements() {
         return Collections.unmodifiableSet(m_equivalentElements);
     }
+    /**
+     * @return parents
+     */
     public Set<HierarchyNode<E>> getParentNodes() {
         return Collections.unmodifiableSet(m_parentNodes);
     }
+    /**
+     * @return children
+     */
     public Set<HierarchyNode<E>> getChildNodes() {
         return Collections.unmodifiableSet(m_childNodes);
     }
+    /**
+     * @return ancestors
+     */
     public Set<HierarchyNode<E>> getAncestorNodes() {
         return getAncestorNodes(Collections.singleton(this));
     }
+    /**
+     * @return descendants
+     */
     public Set<HierarchyNode<E>> getDescendantNodes() {
         return getDescendantNodes(Collections.singleton(this));
     }
@@ -79,6 +119,11 @@ public class HierarchyNode<E> {
     public String toString() {
         return m_equivalentElements.toString();
     }
+    /**
+     * @param inputNodes inputNodes
+     * @param <T> type
+     * @return ancestors
+     */
     public static <T> Set<HierarchyNode<T>> getAncestorNodes(Set<HierarchyNode<T>> inputNodes) {
         Set<HierarchyNode<T>> result=new HashSet<>();
         Queue<HierarchyNode<T>> toVisit=new LinkedList<>(inputNodes);
@@ -89,6 +134,11 @@ public class HierarchyNode<E> {
         }
         return result;
     }
+    /**
+     * @param inputNodes inputNodes
+     * @param <T> type
+     * @return descendants
+     */
     public static <T> Set<HierarchyNode<T>> getDescendantNodes(Set<HierarchyNode<T>> inputNodes) {
         Set<HierarchyNode<T>> result=new HashSet<>();
         Queue<HierarchyNode<T>> toVisit=new LinkedList<>(inputNodes);

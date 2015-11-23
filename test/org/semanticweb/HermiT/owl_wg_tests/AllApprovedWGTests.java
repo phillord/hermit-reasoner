@@ -19,7 +19,7 @@ package org.semanticweb.HermiT.owl_wg_tests;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
+@SuppressWarnings("javadoc")
 public class AllApprovedWGTests {
     public static Test suite() throws Exception {
         WGTestRegistry wgTestRegistry = new WGTestRegistry();

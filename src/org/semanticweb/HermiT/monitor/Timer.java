@@ -23,7 +23,7 @@ import java.io.PrintWriter;
 import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.tableau.BranchingPoint;
 import org.semanticweb.HermiT.tableau.ReasoningTaskDescription;
-
+/**Timer.*/
 public class Timer extends TableauMonitorAdapter {
     private static final long serialVersionUID=-8144444618897251350L;
 
@@ -33,6 +33,9 @@ public class Timer extends TableauMonitorAdapter {
     protected int m_numberOfBacktrackings;
     protected int m_testNumber=0;
 
+    /**
+     * @param out out
+     */
     public Timer(OutputStream out) {
         m_output=new PrintWriter(out);
     }

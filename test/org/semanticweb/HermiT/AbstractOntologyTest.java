@@ -27,7 +27,7 @@ import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-
+@SuppressWarnings("javadoc")
 public abstract class AbstractOntologyTest extends AbstractHermiTTest {
     protected static final IRI ONTOLOGY_IRI = IRI.create("file:/c/test.owl");
     protected static final String NS = ONTOLOGY_IRI + "#";

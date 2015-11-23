@@ -30,13 +30,17 @@ import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.InverseRole;
 import org.semanticweb.HermiT.model.Role;
-
+/**HierarchyPrinterFSS.*/
 public class HierarchyPrinterFSS {
     protected final PrintWriter m_out;
     protected final String m_defaultPrefixIRI;
     protected final Set<String> m_prefixIRIs;
     protected Prefixes m_prefixes;
 
+    /**
+     * @param out out
+     * @param defaultPrefixIRI defaultPrefixIRI
+     */
     public HierarchyPrinterFSS(PrintWriter out,String defaultPrefixIRI) {
         m_out=out;
         m_defaultPrefixIRI=defaultPrefixIRI;
@@ -44,6 +48,9 @@ public class HierarchyPrinterFSS {
         m_prefixIRIs.add(defaultPrefixIRI);
         m_prefixIRIs.add(Prefixes.s_semanticWebPrefixes.get("owl:"));
     }
+    /**
+     * @param atomicConcepts atomicConcepts
+     */
     public void loadAtomicConceptPrefixIRIs(Collection<AtomicConcept> atomicConcepts) {
         for (AtomicConcept atomicConcept : atomicConcepts) {
             String uri=atomicConcept.getIRI();
@@ -56,6 +63,9 @@ public class HierarchyPrinterFSS {
             }
         }
     }
+    /**
+     * @param atomicRoles atomicRoles
+     */
     public void loadAtomicRolePrefixIRIs(Collection<AtomicRole> atomicRoles) {
         for (AtomicRole atomicRole : atomicRoles) {
             String uri=atomicRole.getIRI();
@@ -68,6 +78,9 @@ public class HierarchyPrinterFSS {
             }
         }
     }
+    /**
+     * Start printing.
+     */
     public void startPrinting() {
         String owlPrefixIRI=Prefixes.s_semanticWebPrefixes.get("owl:");
         m_prefixes=new Prefixes();
@@ -86,18 +99,28 @@ public class HierarchyPrinterFSS {
         m_out.println("Ontology(<"+m_prefixes.getPrefixIRIsByPrefixName().get(":")+">");
         m_out.println();
     }
+    /**
+     * @param atomicConceptHierarchy atomicConceptHierarchy
+     */
     public void printAtomicConceptHierarchy(Hierarchy<AtomicConcept> atomicConceptHierarchy) {
         Hierarchy<AtomicConcept> sortedAtomicConceptHierarchy=atomicConceptHierarchy.transform(new IdentityTransformer<AtomicConcept>(),AtomicConceptComparator.INSTANCE);
         AtomicConceptPrinter atomicConceptPrinter=new AtomicConceptPrinter(sortedAtomicConceptHierarchy.getBottomNode());
         sortedAtomicConceptHierarchy.traverseDepthFirst(atomicConceptPrinter);
         atomicConceptPrinter.printNode(0,sortedAtomicConceptHierarchy.getBottomNode(),null,true);
     }
+    /**
+     * @param roleHierarchy roleHierarchy
+     * @param objectProperties objectProperties
+     */
     public void printRoleHierarchy(Hierarchy<? extends Role> roleHierarchy,boolean objectProperties) {
         Hierarchy<Role> sortedRoleHierarchy=roleHierarchy.transform(new IdentityTransformer<Role>(),RoleComparator.INSTANCE);
         RolePrinter rolePrinter=new RolePrinter(sortedRoleHierarchy,objectProperties);
         sortedRoleHierarchy.traverseDepthFirst(rolePrinter);
         rolePrinter.printNode(0,sortedRoleHierarchy.getBottomNode(),null,true);
     }
+    /**
+     * End printing.
+     */
     public void endPrinting() {
         m_out.println();
         m_out.println(")");

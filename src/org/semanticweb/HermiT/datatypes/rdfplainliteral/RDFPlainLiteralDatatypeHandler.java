@@ -33,7 +33,7 @@ import org.semanticweb.HermiT.model.Constant;
 import org.semanticweb.HermiT.model.DatatypeRestriction;
 
 import dk.brics.automaton.Automaton;
-
+/**RDFPlainLiteralDatatypeHandler.*/
 public class RDFPlainLiteralDatatypeHandler implements DatatypeHandler {
     protected static final String XSD_NS=Prefixes.s_semanticWebPrefixes.get("xsd:");
     protected static final String RDF_NS=Prefixes.s_semanticWebPrefixes.get("rdf:");

@@ -32,10 +32,13 @@ import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.Equality;
 import org.semanticweb.HermiT.model.Inequality;
-
+/**AbstractCommand.*/
 public abstract class AbstractCommand implements DebuggerCommand {
     protected final Debugger m_debugger;
 
+    /**
+     * @param debugger debugger
+     */
     public AbstractCommand(Debugger debugger) {
         m_debugger=debugger;
     }

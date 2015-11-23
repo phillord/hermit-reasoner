@@ -36,12 +36,21 @@ public class AnnotatedEquality implements DLPredicate,Serializable {
         m_onRole=onRole;
         m_toConcept=toConcept;
     }
+    /**
+     * @return cardinality
+     */
     public int getCaridnality() {
         return m_cardinality;
     }
+    /**
+     * @return role
+     */
     public Role getOnRole() {
         return m_onRole;
     }
+    /**
+     * @return concept
+     */
     public LiteralConcept getToConcept() {
         return m_toConcept;
     }
@@ -71,6 +80,12 @@ public class AnnotatedEquality implements DLPredicate,Serializable {
         }
     };
     
+    /**
+     * @param cardinality cardinality
+     * @param onRole onRole
+     * @param toConcept toConcept
+     * @return annotated equality
+     */
     public static AnnotatedEquality create(int cardinality,Role onRole,LiteralConcept toConcept) {
         return s_interningManager.intern(new AnnotatedEquality(cardinality,onRole,toConcept));
     }

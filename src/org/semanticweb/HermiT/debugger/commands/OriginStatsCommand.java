@@ -32,9 +32,12 @@ import org.semanticweb.HermiT.model.AtLeastConcept;
 import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.tableau.Node;
-
+/**OriginStatsCommand.*/
 public class OriginStatsCommand extends AbstractCommand {
 
+    /**
+     * @param debugger debugger
+     */
     public OriginStatsCommand(Debugger debugger) {
         super(debugger);
     }

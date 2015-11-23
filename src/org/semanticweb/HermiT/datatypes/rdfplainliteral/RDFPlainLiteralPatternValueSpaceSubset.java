@@ -31,7 +31,7 @@ import dk.brics.automaton.BasicOperations;
 import dk.brics.automaton.Datatypes;
 import dk.brics.automaton.RegExp;
 
-public class RDFPlainLiteralPatternValueSpaceSubset implements ValueSpaceSubset {
+class RDFPlainLiteralPatternValueSpaceSubset implements ValueSpaceSubset {
     public static final char SEPARATOR='\u0001';
     protected static final Automaton s_separator;
     protected static final Automaton s_languagePatternEnd;

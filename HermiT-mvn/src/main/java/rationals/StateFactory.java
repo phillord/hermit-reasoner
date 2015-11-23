@@ -13,10 +13,9 @@ import java.util.Set;
 public interface StateFactory {
 
     /**
-     * 
-     * @param initial
-     * @param terminal
-     * @return
+     * @param initial initial
+     * @param terminal terminal
+     * @return state
      */
     State create(boolean initial, boolean terminal);
 
@@ -34,6 +33,7 @@ public interface StateFactory {
      * Returns a new StateFactory object which is the same as this StateFactory.
      * 
      * @return an initialized StateFactory.
+     * @throws CloneNotSupportedException if clone not supported
      */
     Object clone() throws CloneNotSupportedException;
 }

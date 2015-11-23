@@ -26,9 +26,7 @@ import java.util.Set;
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Individual;
 
-public class RoleElementManager {
-    
-    public static final String LB=System.getProperty("line.separator");
+class RoleElementManager {
     
     protected final Map<AtomicRole,RoleElement> m_roleToElement;
 
@@ -47,12 +45,9 @@ public class RoleElementManager {
     }
     @Override
     public String toString() {
-        StringBuffer buffer=new StringBuffer();
-        for (AtomicRole role : m_roleToElement.keySet()) {
-            buffer.append(role);
-            buffer.append(" -> ");
-            buffer.append(m_roleToElement.get(role).toString());
-            buffer.append(LB);
+        StringBuilder buffer=new StringBuilder();
+        for (Map.Entry<AtomicRole, RoleElement> e : m_roleToElement.entrySet()) {
+            buffer.append(e.getKey()).append(" -> ").append(e.getValue()).append('\n');
         }
         return buffer.toString();
     }

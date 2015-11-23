@@ -35,6 +35,11 @@ public class ExtensionTableWithFullIndex extends ExtensionTable {
     protected final TupleTableFullIndex m_tupleTableFullIndex;
     protected final Object[] m_auxiliaryTuple;
 
+    /**
+     * @param tableau tableau
+     * @param tupleArity tupleArity
+     * @param needsDependencySets needsDependencySets
+     */
     public ExtensionTableWithFullIndex(Tableau tableau,int tupleArity,boolean needsDependencySets) {
         super(tableau,tupleArity,needsDependencySets);
         m_tupleTableFullIndex=new TupleTableFullIndex(m_tupleTable,m_tupleArity);

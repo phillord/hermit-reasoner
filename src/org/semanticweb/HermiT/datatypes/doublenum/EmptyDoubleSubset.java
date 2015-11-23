@@ -21,7 +21,7 @@ import java.util.Collection;
 
 import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
 
-public class EmptyDoubleSubset implements ValueSpaceSubset {
+class EmptyDoubleSubset implements ValueSpaceSubset {
 
     @Override
     public boolean hasCardinalityAtLeast(int number) {

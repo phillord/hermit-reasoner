@@ -17,9 +17,15 @@
 */
 package org.semanticweb.HermiT.datatypes;
 
+/**
+ * Unsupported facet exception.
+ */
 @SuppressWarnings("serial")
 public class UnsupportedFacetException extends RuntimeException {
 
+    /**
+     * @param message message
+     */
     public UnsupportedFacetException(String message) {
         super(message);
     }

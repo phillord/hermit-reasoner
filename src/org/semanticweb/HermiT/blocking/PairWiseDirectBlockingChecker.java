@@ -29,23 +29,17 @@ import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.NodeType;
 import org.semanticweb.HermiT.tableau.Tableau;
-
+/**Pairwise direct blocking checker.*/
 public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Serializable {
     private static final long serialVersionUID=-8296420442452625109L;
 
-    protected final SetFactory<AtomicConcept> m_atomicConceptsSetFactory;
-    protected final SetFactory<AtomicRole> m_atomicRolesSetFactory;
-    protected final Set<AtomicConcept> m_atomicConceptsBuffer;
-    protected final Set<AtomicRole> m_atomicRolesBuffer;
+    protected final SetFactory<AtomicConcept> m_atomicConceptsSetFactory=new SetFactory<>();
+    protected final SetFactory<AtomicRole> m_atomicRolesSetFactory=new SetFactory<>();
+    protected final Set<AtomicConcept> m_atomicConceptsBuffer=new LinkedHashSet<>();
+    protected final Set<AtomicRole> m_atomicRolesBuffer=new LinkedHashSet<>();
     protected ExtensionTable.Retrieval m_binaryTableSearch1Bound;
     protected ExtensionTable.Retrieval m_ternaryTableSearch12Bound;
 
-    public PairWiseDirectBlockingChecker() {
-        m_atomicConceptsSetFactory=new SetFactory<>();
-        m_atomicRolesSetFactory=new SetFactory<>();
-        m_atomicConceptsBuffer=new LinkedHashSet<>();
-        m_atomicRolesBuffer=new LinkedHashSet<>();
-    }
     @Override
     public void initialize(Tableau tableau) {
         m_binaryTableSearch1Bound=tableau.getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
@@ -195,6 +189,11 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
         m_atomicConceptsBuffer.clear();
         return result;
     }
+    /**
+     * @param nodeFrom nodeFrom
+     * @param nodeTo nodeTo
+     * @return edge labels
+     */
     public Set<AtomicRole> fetchEdgeLabel(Node nodeFrom,Node nodeTo) {
         m_atomicRolesBuffer.clear();
         m_ternaryTableSearch12Bound.getBindingsBuffer()[1]=nodeFrom;

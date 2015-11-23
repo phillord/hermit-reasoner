@@ -16,7 +16,10 @@
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
 package org.semanticweb.HermiT.datatypes.datetime;
-
+/**IntervalType.*/
 public enum IntervalType {
-    WITH_TIMEZONE,WITHOUT_TIMEZONE
+    /**WITH_TIMEZONE*/
+    WITH_TIMEZONE,
+    /**WITHOUT_TIMEZONE*/
+    WITHOUT_TIMEZONE
 }

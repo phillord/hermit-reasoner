@@ -17,12 +17,24 @@
 */
 package org.semanticweb.HermiT.datatypes;
 
+/**
+ * Malformed literal exception.
+ */
 @SuppressWarnings("serial")
 public class MalformedLiteralException extends RuntimeException {
 
+    /**
+     * @param lexicalForm lexicalForm
+     * @param datatypeURI datatypeURI
+     */
     public MalformedLiteralException(String lexicalForm,String datatypeURI) {
         this(lexicalForm,datatypeURI,null);
     }
+    /**
+     * @param lexicalForm lexicalForm
+     * @param datatypeURI datatypeURI
+     * @param cause cause
+     */
     public MalformedLiteralException(String lexicalForm,String datatypeURI,Throwable cause) {
         super("Literal \""+lexicalForm+"\"^^<"+datatypeURI+"> is malformed",cause);
     }

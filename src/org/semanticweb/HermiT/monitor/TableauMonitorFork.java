@@ -29,13 +29,17 @@ import org.semanticweb.HermiT.tableau.GroundDisjunction;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.ReasoningTaskDescription;
 import org.semanticweb.HermiT.tableau.Tableau;
-
+/**TableauMonitorFork.*/
 public class TableauMonitorFork implements TableauMonitor,Serializable  {
     private static final long serialVersionUID=8321902665477431455L;
 
     protected final TableauMonitor m_first;
     protected final TableauMonitor m_second;
 
+    /**
+     * @param first first
+     * @param second second
+     */
     public TableauMonitorFork(TableauMonitor first,TableauMonitor second) {
         m_first=first;
         m_second=second;

@@ -22,21 +22,20 @@ import java.lang.ref.WeakReference;
 
 /**
  * The manager for the internable objects.
+ * @param <E> type
  */
 public abstract class InterningManager<E> {
     protected static final double LOAD_FACTOR=0.75;
 
-    protected final ReferenceQueue<E> m_referenceQueue;
-    protected Entry<E>[] m_entries;
-    protected int m_size;
-    protected int m_resizeThreshold;
+    protected final ReferenceQueue<E> m_referenceQueue=new ReferenceQueue<>();
+    protected Entry<E>[] m_entries=createEntries(16);
+    protected int m_size=0;
+    protected int m_resizeThreshold=12;
     
-    public InterningManager() {
-        m_referenceQueue=new ReferenceQueue<>();
-        m_entries=createEntries(16);
-        m_size=0;
-        m_resizeThreshold=(int)(m_entries.length*LOAD_FACTOR);
-    }
+    /**
+     * @param object object
+     * @return interned object
+     */
     public synchronized E intern(E object) {
         processQueue();
         int hashCode=getHashCode(object);

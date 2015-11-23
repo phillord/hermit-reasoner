@@ -44,14 +44,23 @@ import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import rationals.Automaton;
 import rationals.State;
 import rationals.Transition;
-
+/**ObjectPropertyInclusionManager.*/
 public class ObjectPropertyInclusionManager {
     protected final Map<OWLObjectPropertyExpression,Automaton> m_automataByProperty;
 
+    /**
+     * @param axioms axioms
+     */
     public ObjectPropertyInclusionManager(OWLAxioms axioms) {
         m_automataByProperty=new HashMap<>();
         createAutomata(m_automataByProperty,axioms.m_complexObjectPropertyExpressions,axioms.m_simpleObjectPropertyInclusions,axioms.m_complexObjectPropertyInclusions);
     }
+    /**
+     * @param factory factory
+     * @param axioms axioms
+     * @param replacementIndex replacementIndex
+     * @return replacement index
+     */
     public int rewriteNegativeObjectPropertyAssertions(OWLDataFactory factory,OWLAxioms axioms,int replacementIndex) {
         // now object property inclusion manager added all non-simple properties to axioms.m_complexObjectPropertyExpressions
         // now that we know which roles are non-simple, we can decide which negative object property assertions have to be
@@ -83,6 +92,11 @@ public class ObjectPropertyInclusionManager {
         axioms.m_facts.removeAll(redundantFacts);
         return replacementIndex;
     }
+    /**
+     * @param dataFactory dataFactory
+     * @param axioms axioms
+     * @param firstReplacementIndex firstReplacementIndex
+     */
     public void rewriteAxioms(OWLDataFactory dataFactory,OWLAxioms axioms,int firstReplacementIndex) {
         // Check the asymmetric object properties for simplicity
         for (OWLObjectPropertyExpression objectPropertyExpression : axioms.m_asymmetricObjectProperties)

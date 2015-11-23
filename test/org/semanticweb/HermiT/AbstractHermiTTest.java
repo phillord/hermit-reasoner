@@ -11,7 +11,7 @@ import java.util.Set;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
-
+@SuppressWarnings("javadoc")
 public abstract class AbstractHermiTTest extends TestCase {
 
     public AbstractHermiTTest() {

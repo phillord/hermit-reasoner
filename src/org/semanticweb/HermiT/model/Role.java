@@ -27,8 +27,20 @@ import org.semanticweb.HermiT.Prefixes;
 public abstract class Role implements Serializable {
     private static final long serialVersionUID=-6487260817445541931L;
 
+    /**
+     * @return inverse role
+     */
     public abstract Role getInverse();
+    /**
+     * @param term0 term0
+     * @param term1 term1
+     * @return atom
+     */
     public abstract Atom getRoleAssertion(Term term0,Term term1);
+    /**
+     * @param prefixes prefixes
+     * @return toString
+     */
     public abstract String toString(Prefixes prefixes);
     @Override
     public String toString() {

@@ -19,7 +19,7 @@ package org.semanticweb.HermiT.datatypes.rdfplainliteral;
 
 import java.util.Collection;
 
-public class RDFPlainLiteralLengthInterval {
+class RDFPlainLiteralLengthInterval {
     public static final int CHARACTER_COUNT=1112033;
     public static enum LanguageTagMode { PRESENT,ABSENT }
     
@@ -35,6 +35,8 @@ public class RDFPlainLiteralLengthInterval {
     }
     /**
      * Computes the intersection of this interval with the supplied one. If the two intervals do not intersect, the result is null.
+     * @param that that
+     * @return interval
      */
     public RDFPlainLiteralLengthInterval intersectWith(RDFPlainLiteralLengthInterval that) {
         if (m_languageTagMode!=that.m_languageTagMode)

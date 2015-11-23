@@ -54,6 +54,10 @@ public class NodeIDsAscendingOrEqual implements DLPredicate,Serializable {
         }
     };
     
+    /**
+     * @param arity arity
+     * @return node
+     */
     public static NodeIDsAscendingOrEqual create(int arity) {
         return s_interningManager.intern(new NodeIDsAscendingOrEqual(arity));
     }

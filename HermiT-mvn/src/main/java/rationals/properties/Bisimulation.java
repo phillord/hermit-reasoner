@@ -60,10 +60,10 @@ public class Bisimulation implements Relation {
 
     /**
      * Constructor with two automataon.
-     * This constructor effectively calls {@link setAutomata(Automaton,Automaton)}.
+     * This constructor effectively calls {@link #setAutomata(Automaton,Automaton)}.
      * 
-     * @param automaton
-     * @param automaton2
+     * @param automaton automaton
+     * @param automaton2 automaton2
      */
     public Bisimulation(Automaton automaton, Automaton automaton2) {
         setAutomata(automaton,automaton2);
@@ -71,7 +71,7 @@ public class Bisimulation implements Relation {
 
     /**
      * Argument-less constructor.
-     * Note that this implies the method {@link setAutomata(Automaton,Automaton)} 
+     * Note that this implies the method {@link #setAutomata(Automaton,Automaton)} 
      * <strong>must</strong> be called before using this relation.
      */
     public Bisimulation() {

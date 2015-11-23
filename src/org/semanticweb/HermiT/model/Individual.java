@@ -30,9 +30,15 @@ public class Individual extends Term {
     protected Individual(String uri) {
         m_uri=uri;
     }
+    /**
+     * @return iri
+     */
     public String getIRI() {
         return m_uri;
     }
+    /**
+     * @return true if anonymous
+     */
     public boolean isAnonymous() {
         return m_uri.startsWith("internal:anonymous#");
     }
@@ -63,13 +69,23 @@ public class Individual extends Term {
         is called multiple times with the same identifier, then the same object
         will be returned on each call (allowing for fast equality testing).
         It is the caller's responsibility to normalize the given URI---this
-        function treats the argument as a raw string. */
+        function treats the argument as a raw string. 
+     * @param uri uri 
+     * @return individual*/
     public static Individual create(String uri) {
         return s_interningManager.intern(new Individual(uri));
     }
+    /**
+     * @param id id
+     * @return individual
+     */
     public static Individual createAnonymous(String id) {
         return create(getAnonymousURI(id));
     }
+    /**
+     * @param id id
+     * @return anon id
+     */
     public static String getAnonymousURI(String id) {
         return "internal:anonymous#"+id;
     }

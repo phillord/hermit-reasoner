@@ -16,7 +16,7 @@
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
 package org.semanticweb.HermiT.model;
-
+/**ExistentialConcept.*/
 public abstract class ExistentialConcept extends Concept {
     private static final long serialVersionUID=-1578295401143709109L;
 }

@@ -40,7 +40,7 @@ import java.util.Arrays;
 /**
  * Matrix representation of an automaton.
  * <p>
- * The elements of a the matrix are {@see SemiRing}objects.
+ * The elements of a the matrix are SemiRing objects.
  * 
  * @author nono
  * @version $Id: Matrix.java 6 2006-08-30 08:56:44Z oqube $
@@ -55,14 +55,17 @@ public final class Matrix implements SemiRing {
     private final int col;
     
 
+    /**
+     * @param ns line and column number
+     */
     public Matrix(int ns) {
         this.line = this.col = ns;
         this.matrix = new SemiRing[ns][ns];
     }
 
     /**
-     * @param l
-     * @param c
+     * @param l l
+     * @param c c
      */
     public Matrix(int l, int c) {
         this.line = l;
@@ -108,13 +111,15 @@ public final class Matrix implements SemiRing {
         return res;
     }
 
+    /**
+     * @return line number
+     */
     public int getLine() {
         return line;
     }
     
     @Override
     public String toString() {
-        final String ln = System.getProperty("line.separator");
         StringBuffer sb = new StringBuffer();
         for (int i = 0; i < line; i++) {
             sb.append("[ ");
@@ -122,7 +127,7 @@ public final class Matrix implements SemiRing {
                 String s = matrix[i][j].toString();
                 sb.append(s).append(' ');
             }
-            sb.append("]").append(ln);
+            sb.append("]\n");
         }
         return sb.toString();
     }
@@ -178,6 +183,9 @@ public final class Matrix implements SemiRing {
         return zero(line,col,matrix[0][0]);
     }
     
+    /**
+     * @return column number
+     */
     public int getCol() {
         return col;
     }
@@ -185,6 +193,8 @@ public final class Matrix implements SemiRing {
     /**
      * Factory method for creating Matrix instances with coefficients
      * in a certain SemiRing.
+     * @param line line 
+     * @param col col 
      * 
      * @param sr a SemiRing instance. Used to get one and zero.
      * @return a new zero matrix.
@@ -200,6 +210,7 @@ public final class Matrix implements SemiRing {
     /**
      * Factory method for creating unit Matrix instances with coefficients
      * in a certain SemiRing.
+     * @param dim dim 
      * 
      * @param sr a SemiRing instance. Used to get one and zero.
      * @return a new unit square matrix.

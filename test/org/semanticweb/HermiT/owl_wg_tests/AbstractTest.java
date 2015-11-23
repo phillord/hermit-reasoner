@@ -35,7 +35,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.ReasonerInterruptedException;
 import org.semanticweb.owlapi.util.SimpleIRIMapper;
-
+@SuppressWarnings("javadoc")
 public abstract class AbstractTest extends TestCase {
     public static int TIMEOUT = 300000;
 
@@ -68,7 +68,7 @@ public abstract class AbstractTest extends TestCase {
     protected void registerMappingToResource(String ontologyIRI, String physicalResource) throws Exception {
         IRI physicalIRI = IRI.create(getClass().getResource(physicalResource).toURI());
         IRI logicalIRI = IRI.create(ontologyIRI);
-        m_ontologyManager.addIRIMapper(new SimpleIRIMapper(logicalIRI, physicalIRI));
+        m_ontologyManager.getIRIMappers().add(new SimpleIRIMapper(logicalIRI, physicalIRI));
     }
 
     protected void registerImportedReosurces() throws Exception {

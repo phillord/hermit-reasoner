@@ -29,14 +29,12 @@ import org.semanticweb.HermiT.tableau.GroundDisjunction;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.ReasoningTaskDescription;
 import org.semanticweb.HermiT.tableau.Tableau;
-
+/**TableauMonitorAdapter.*/
 public class TableauMonitorAdapter implements TableauMonitor,Serializable  {
     private static final long serialVersionUID=6336033031431260208L;
 
     protected Tableau m_tableau;
 
-    public TableauMonitorAdapter() {
-    }
     @Override
     public void setTableau(Tableau tableau) {
         m_tableau=tableau;

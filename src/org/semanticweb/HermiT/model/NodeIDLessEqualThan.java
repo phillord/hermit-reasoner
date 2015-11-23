@@ -26,6 +26,7 @@ import org.semanticweb.HermiT.Prefixes;
  */
 public class NodeIDLessEqualThan implements DLPredicate,Serializable {
     private static final long serialVersionUID=5572346926189452451L;
+    /**Instance.*/
     public static final NodeIDLessEqualThan INSTANCE=new NodeIDLessEqualThan();
     
     protected NodeIDLessEqualThan () {

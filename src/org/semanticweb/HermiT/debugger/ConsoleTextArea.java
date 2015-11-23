@@ -32,24 +32,37 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.PlainDocument;
 
-@SuppressWarnings("serial")
+/**
+ * ConsoleTextArea.
+ */
+ @SuppressWarnings("serial")
 public class ConsoleTextArea extends JTextArea {
-    protected final ConsoleWriter m_writer;
-    protected final ConsoleReader m_reader;
+    protected final ConsoleWriter m_writer=new ConsoleWriter();
+    protected final ConsoleReader m_reader=new ConsoleReader();
     protected int m_userTypedTextStart;
 
+    /**
+     * Init class.
+     */
     public ConsoleTextArea() {
         setDocument(new ConsoleDocument());
-        m_writer=new ConsoleWriter();
-        m_reader=new ConsoleReader();
         enableEvents(AWTEvent.KEY_EVENT_MASK);
     }
+    /**
+     * @return writer
+     */
     public Writer getWriter() {
         return m_writer;
     }
+    /**
+     * @return reader
+     */
     public Reader getReader() {
         return m_reader;
     }
+    /**
+     * Clear.
+     */
     public void clear() {
         m_userTypedTextStart=0;
         setText("");

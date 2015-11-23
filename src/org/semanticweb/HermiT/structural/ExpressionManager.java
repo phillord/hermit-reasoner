@@ -52,7 +52,7 @@ import org.semanticweb.owlapi.model.OWLObjectOneOf;
 import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
 import org.semanticweb.owlapi.model.OWLObjectUnionOf;
 
-public class ExpressionManager {
+class ExpressionManager {
     protected final OWLDataFactory m_factory;
     protected final DescriptionNNFVisitor m_descriptionNNFVisitor;
     protected final DataRangeNNFVisitor m_dataRangeNNFVisitor;

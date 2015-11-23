@@ -34,7 +34,7 @@ import org.semanticweb.HermiT.model.NodeIDsAscendingOrEqual;
 import org.semanticweb.HermiT.model.Term;
 import org.semanticweb.HermiT.model.Variable;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
-
+/**DLClauseEvaluator*/
 public class DLClauseEvaluator implements Serializable {
     private static final long serialVersionUID=4639844159658590456L;
     protected static final String CRLF=System.getProperty("line.separator");
@@ -46,6 +46,16 @@ public class DLClauseEvaluator implements Serializable {
     protected final DLClause m_bodyDLClause;
     protected final List<DLClause> m_headDLClauses;
 
+    /**
+     * @param tableau tableau
+     * @param bodyDLClause bodyDLClause
+     * @param headDLClauses headDLClauses
+     * @param firstAtomRetrieval firstAtomRetrieval
+     * @param bufferSupply bufferSupply
+     * @param valuesBufferManager valuesBufferManager
+     * @param groundDisjunctionHeaderManager groundDisjunctionHeaderManager
+     * @param unionDependencySetsBySize unionDependencySetsBySize
+     */
     public DLClauseEvaluator(Tableau tableau,DLClause bodyDLClause,List<DLClause> headDLClauses,ExtensionTable.Retrieval firstAtomRetrieval,BufferSupply bufferSupply,ValuesBufferManager valuesBufferManager,GroundDisjunctionHeaderManager groundDisjunctionHeaderManager,Map<Integer,UnionDependencySet> unionDependencySetsBySize) {
         m_interruptFlag=tableau.m_interruptFlag;
         m_extensionManager=tableau.m_extensionManager;
@@ -57,27 +67,57 @@ public class DLClauseEvaluator implements Serializable {
         m_bodyDLClause=bodyDLClause;
         m_headDLClauses=headDLClauses;
     }
+    /**
+     * @return body length
+     */
     public int getBodyLength() {
         return m_bodyDLClause.getBodyLength();
     }
+    /**
+     * @param atomIndex atomIndex
+     * @return body atom
+     */
     public Atom getBodyAtom(int atomIndex) {
         return m_bodyDLClause.getBodyAtom(atomIndex);
     }
+    /**
+     * @return number of clauses
+     */
     public int getNumberOfDLClauses() {
         return m_headDLClauses.size();
     }
+    /**
+     * @param dlClauseIndex dlClauseIndex
+     * @return dl clause
+     */
     public DLClause getDLClause(int dlClauseIndex) {
         return m_headDLClauses.get(dlClauseIndex);
     }
+    /**
+     * @param dlClauseIndex dlClauseIndex
+     * @return head length
+     */
     public int getHeadLength(int dlClauseIndex) {
         return m_headDLClauses.get(dlClauseIndex).getHeadLength();
     }
+    /**
+     * @param dlClauseIndex dlClauseIndex
+     * @param atomIndex atomIndex
+     * @return head atom
+     */
     public Atom getHeadAtom(int dlClauseIndex,int atomIndex) {
         return m_headDLClauses.get(dlClauseIndex).getHeadAtom(atomIndex);
     }
+    /**
+     * @param atomIndex atomIndex
+     * @return tuple matched to body
+     */
     public Object[] getTupleMatchedToBody(int atomIndex) {
         return m_retrievals[atomIndex].getTupleBuffer();
     }
+    /**
+     * Evaluate.
+     */
     public void evaluate() {
         int programCounter=0;
         while (programCounter<m_workers.length && !m_extensionManager.containsClash()) {
@@ -100,16 +140,12 @@ public class DLClauseEvaluator implements Serializable {
         }
         return buffer.toString();
     }
-
+    /**BufferSupply.*/
     public static class BufferSupply {
-        protected final List<Object[]> m_allBuffers;
-        protected final Map<Integer,List<Object[]>> m_availableBuffersByArity;
+        protected final List<Object[]> m_allBuffers=new ArrayList<>();
+        protected final Map<Integer,List<Object[]>> m_availableBuffersByArity=new HashMap<>();
 
-        public BufferSupply() {
-            m_allBuffers=new ArrayList<>();
-            m_availableBuffersByArity=new HashMap<>();
-        }
-        public void reuseBuffers() {
+        void reuseBuffers() {
             m_availableBuffersByArity.clear();
             for (Object[] buffer : m_allBuffers) {
                 Integer arityInteger=Integer.valueOf(buffer.length);
@@ -121,7 +157,7 @@ public class DLClauseEvaluator implements Serializable {
                 buffers.add(buffer);
             }
         }
-        public Object[] getBuffer(int arity) {
+        Object[] getBuffer(int arity) {
             Object[] buffer;
             Integer arityInteger=Integer.valueOf(arity);
             List<Object[]> buffers=m_availableBuffersByArity.get(arityInteger);
@@ -133,19 +169,26 @@ public class DLClauseEvaluator implements Serializable {
                 buffer=buffers.remove(buffers.size()-1);
             return buffer;
         }
-        public Object[][] getAllBuffers() {
+        Object[][] getAllBuffers() {
             Object[][] result=new Object[m_allBuffers.size()][];
             m_allBuffers.toArray(result);
             return result;
         }
     }
 
+    /**ValuesBufferManager.*/
     public static class ValuesBufferManager {
+        /**Values buffer.*/
         public final Object[] m_valuesBuffer;
-        public final Map<DLPredicate,Integer> m_bodyDLPredicatesToIndexes;
+        final Map<DLPredicate,Integer> m_bodyDLPredicatesToIndexes;
+        /**Max number of variables*/
         public final int m_maxNumberOfVariables;
-        public final Map<Term,Integer> m_bodyNonvariableTermsToIndexes;
+        final Map<Term,Integer> m_bodyNonvariableTermsToIndexes;
 
+        /**
+         * @param dlClauses dlClauses
+         * @param termsToNodes termsToNodes
+         */
         public ValuesBufferManager(Set<DLClause> dlClauses,Map<Term,Node> termsToNodes) {
             Set<DLPredicate> bodyDLPredicates=new HashSet<>();
             Set<Variable> variables=new HashSet<>();
@@ -187,7 +230,7 @@ public class DLClauseEvaluator implements Serializable {
         }
     }
 
-    public static class GroundDisjunctionHeaderManager {
+    static class GroundDisjunctionHeaderManager {
         protected GroundDisjunctionHeader[] m_buckets;
         protected int m_numberOfElements;
         protected int m_threshold;
@@ -230,7 +273,8 @@ public class DLClauseEvaluator implements Serializable {
             m_buckets=newBuckets;
             m_threshold=(int)(newCapacity*0.75);
         }
-        protected static int getIndexFor(int hashCode,int tableLength) {
+        protected static int getIndexFor(int _hashCode,int tableLength) {
+            int hashCode=_hashCode;
             hashCode+=~(hashCode << 9);
             hashCode^=(hashCode >>> 14);
             hashCode+=(hashCode << 4);
@@ -239,7 +283,12 @@ public class DLClauseEvaluator implements Serializable {
         }
     }
 
+    /**Worker.*/
     public interface Worker {
+        /**
+         * @param programCounter programCounter
+         * @return counter
+         */
         int execute(int programCounter);
     }
 
@@ -809,7 +858,7 @@ public class DLClauseEvaluator implements Serializable {
             return result;
         }
     }
-    
+    /**ConjunctionCompiler.*/
     public static abstract class ConjunctionCompiler {
         protected final BufferSupply m_bufferSupply;
         protected final ValuesBufferManager m_valuesBufferManager;
@@ -819,9 +868,18 @@ public class DLClauseEvaluator implements Serializable {
         protected final Set<Variable> m_boundSoFar;
         protected final UnionDependencySet m_unionDependencySet;
         protected final List<ExtensionTable.Retrieval> m_retrievals;
+        /**Workers.*/
         public final List<Worker> m_workers;
         protected final List<Integer> m_labels;
 
+        /**
+         * @param bufferSupply bufferSupply
+         * @param valuesBufferManager valuesBufferManager
+         * @param unionDependencySetsBySize unionDependencySetsBySize
+         * @param extensionManager extensionManager
+         * @param bodyAtoms bodyAtoms
+         * @param headVariables headVariables
+         */
         public ConjunctionCompiler(BufferSupply bufferSupply,ValuesBufferManager valuesBufferManager,Map<Integer,UnionDependencySet> unionDependencySetsBySize,ExtensionManager extensionManager,Atom[] bodyAtoms,List<Variable> headVariables) {
             m_bufferSupply=bufferSupply;
             m_valuesBufferManager=valuesBufferManager;

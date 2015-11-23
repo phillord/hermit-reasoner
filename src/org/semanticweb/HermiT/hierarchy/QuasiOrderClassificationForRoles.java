@@ -27,12 +27,22 @@ import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.tableau.ReasoningTaskDescription;
 import org.semanticweb.HermiT.tableau.Tableau;
-
+/**QuasiOrderClassificationForRoles.*/
 public class QuasiOrderClassificationForRoles extends QuasiOrderClassification {
     protected final boolean m_hasInverses;
     protected final Map<Role,AtomicConcept> m_conceptsForRoles;
     protected final Map<AtomicConcept,Role> m_rolesForConcepts;
 
+    /**
+     * @param tableau tableau
+     * @param progressMonitor progressMonitor
+     * @param topElement topElement
+     * @param bottomElement bottomElement
+     * @param elements elements
+     * @param hasInverses hasInverses
+     * @param conceptsForRoles conceptsForRoles
+     * @param rolesForConcepts rolesForConcepts
+     */
     public QuasiOrderClassificationForRoles(Tableau tableau,ClassificationProgressMonitor progressMonitor,AtomicConcept topElement,AtomicConcept bottomElement,Set<AtomicConcept> elements,boolean hasInverses,Map<Role,AtomicConcept> conceptsForRoles,Map<AtomicConcept,Role> rolesForConcepts) {
         super(tableau,progressMonitor,topElement,bottomElement,elements);
         m_hasInverses=hasInverses;

@@ -18,12 +18,17 @@
 package org.semanticweb.HermiT.datatypes.binarydata;
 
 import java.util.Collection;
-
+/**BinaryDataLengthInterval*/
 public class BinaryDataLengthInterval {
     protected final BinaryDataType m_binaryDataType;
     protected final int m_minLength;
     protected final int m_maxLength;
 
+    /**
+     * @param binaryDataType binaryDataType
+     * @param minLength minLength
+     * @param maxLength maxLength
+     */
     public BinaryDataLengthInterval(BinaryDataType binaryDataType,int minLength,int maxLength) {
         assert !isIntervalEmpty(minLength,maxLength);
         m_binaryDataType=binaryDataType;
@@ -32,6 +37,8 @@ public class BinaryDataLengthInterval {
     }
     /**
      * Computes the intersection of this interval with the supplied one. If the two intervals do not intersect, the result is null.
+     * @param that that 
+     * @return intersection
      */
     public BinaryDataLengthInterval intersectWith(BinaryDataLengthInterval that) {
         if (m_binaryDataType!=that.m_binaryDataType)
@@ -50,6 +57,10 @@ public class BinaryDataLengthInterval {
     protected boolean isEqual(BinaryDataType binaryDataType,int minLength,int maxLength) {
         return m_binaryDataType==binaryDataType && m_minLength==minLength && m_maxLength==maxLength;
     }
+    /**
+     * @param argument argument
+     * @return input minus size
+     */
     public int subtractSizeFrom(int argument) {
         if (argument<=0 || m_maxLength==Integer.MAX_VALUE)
             return 0;
@@ -74,9 +85,16 @@ public class BinaryDataLengthInterval {
             return total;
         }
     }
+    /**
+     * @param value value
+     * @return true if contained
+     */
     public boolean contains(BinaryData value) {
         return m_binaryDataType==value.getBinaryDataType() && m_minLength<=value.getNumberOfBytes() && value.getNumberOfBytes()<=m_maxLength;
     }
+    /**
+     * @param values values
+     */
     public void enumerateValues(Collection<Object> values) {
         if (m_maxLength==Integer.MAX_VALUE)
             throw new IllegalStateException("Internal error: the data range is infinite!");

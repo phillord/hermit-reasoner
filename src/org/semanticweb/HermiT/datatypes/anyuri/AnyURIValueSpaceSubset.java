@@ -29,6 +29,9 @@ import dk.brics.automaton.BasicOperations;
 import dk.brics.automaton.Datatypes;
 import dk.brics.automaton.RegExp;
 
+/**
+ * AnyURI value subset.
+ */
 public class AnyURIValueSpaceSubset implements ValueSpaceSubset {
     protected static final Automaton s_anyChar;
     protected static final Automaton s_anyString;
@@ -43,6 +46,9 @@ public class AnyURIValueSpaceSubset implements ValueSpaceSubset {
 
     protected final Automaton m_automaton;
     
+    /**
+     * @param automaton automaton
+     */
     public AnyURIValueSpaceSubset(Automaton automaton) {
         m_automaton=automaton;
     }
@@ -79,7 +85,7 @@ public class AnyURIValueSpaceSubset implements ValueSpaceSubset {
         buffer.append('}');
         return buffer.toString();
     }
-    public static Automaton toAutomaton(int minLength,int maxLength) {
+    static Automaton toAutomaton(int minLength,int maxLength) {
         assert minLength<=maxLength;
         if (maxLength==Integer.MAX_VALUE) {
             if (minLength==0)
@@ -91,7 +97,7 @@ public class AnyURIValueSpaceSubset implements ValueSpaceSubset {
             return s_anyString.intersection(BasicOperations.repeat(s_anyChar,minLength,maxLength));
     }
     @SuppressWarnings("unused")
-    public static boolean isValidPattern(String pattern) {
+    static boolean isValidPattern(String pattern) {
         try {
             new RegExp(pattern);
             return true;
@@ -100,7 +106,7 @@ public class AnyURIValueSpaceSubset implements ValueSpaceSubset {
             return false;
         }
     }
-    public static Automaton getPatternAutomaton(String pattern) {
+    static Automaton getPatternAutomaton(String pattern) {
         return new RegExp(pattern).toAutomaton();
     }
 }

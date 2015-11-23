@@ -21,7 +21,7 @@ import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.model.AtLeastConcept;
 import org.semanticweb.HermiT.model.AtomicNegationConcept;
 import org.semanticweb.HermiT.model.DLPredicate;
-
+/**GroundDisjunctionHeader.*/
 public final class GroundDisjunctionHeader {
     protected final DLPredicate[] m_dlPredicates;
     protected final int[] m_disjunctStart;
@@ -83,12 +83,18 @@ public final class GroundDisjunctionHeader {
                 return false;
         return true;
     }
+    /**
+     * @return sorted disjunction indexes
+     */
     public int[] getSortedDisjunctIndexes() {
         int[] sortedDisjunctIndexes=new int[m_disjunctIndexesWithBacktrackings.length];
         for (int index=m_disjunctIndexesWithBacktrackings.length-1;index>=0;--index)
             sortedDisjunctIndexes[index]=m_disjunctIndexesWithBacktrackings[index].m_disjunctIndex;
         return sortedDisjunctIndexes;
     }
+    /**
+     * @param disjunctIndex disjunctIndex
+     */
     public void increaseNumberOfBacktrackings(int disjunctIndex) {
         for (int index=0;index<m_disjunctIndexesWithBacktrackings.length;index++) {
             DisjunctIndexWithBacktrackings disjunctIndexWithBacktrackings=m_disjunctIndexesWithBacktrackings[index];
@@ -112,6 +118,10 @@ public final class GroundDisjunctionHeader {
             }
         }
     }
+    /**
+     * @param prefixes prefixes
+     * @return toString
+     */
     public String toString(Prefixes prefixes) {
         StringBuffer buffer=new StringBuffer();
         for (int disjunctIndex=0;disjunctIndex<m_dlPredicates.length;disjunctIndex++) {

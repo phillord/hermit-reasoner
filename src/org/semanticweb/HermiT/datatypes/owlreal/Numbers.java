@@ -20,7 +20,7 @@ package org.semanticweb.HermiT.datatypes.owlreal;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-public class Numbers {
+class Numbers {
     protected enum NumberType {
         INTEGER, LONG, BIG_INTEGER, BIG_DECIMAL, BIG_RATIONAL;
         
@@ -50,6 +50,9 @@ public class Numbers {
     /**
      * Parses the given string into a Java Number object representing an integer.
      * The Java object is chosen such that .equals() works correctly across all Number-derived objects.
+     * @param string string
+     * @return number
+     * @throws NumberFormatException if number is malformed
      */
     public static Number parseInteger(String string) throws NumberFormatException {
         try {
@@ -67,6 +70,9 @@ public class Numbers {
     /**
      * Parses the given string into a Java Number object representing an decimal.
      * The Java object is chosen such that .equals() works correctly across all Number-derived objects.
+     * @param string string
+     * @return number
+     * @throws NumberFormatException if number is malformed
      */
     public static Number parseDecimal(String string) throws NumberFormatException {
         BigDecimal decimal=new BigDecimal(string);
@@ -90,6 +96,9 @@ public class Numbers {
     /**
      * Parses the given string into a Java Number object representing a rational.
      * The Java object is chosen such that .equals() works correctly across all Number-derived objects.
+     * @param string string
+     * @return number
+     * @throws NumberFormatException if number is malformed
      */
     public static Number parseRational(String string) throws NumberFormatException {
         int divideIndex=string.indexOf('/');

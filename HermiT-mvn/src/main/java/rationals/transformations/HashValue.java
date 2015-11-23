@@ -48,11 +48,11 @@ import rationals.State;
  */
 public class HashValue {
     
-    public final int hash;
+    private final int hash;
 
-    public final Set<State> s;
+    final Set<State> s;
 
-    public HashValue(Set<State> s) {
+    HashValue(Set<State> s) {
         this.s = s;
         this.hash = s.hashCode();
     }

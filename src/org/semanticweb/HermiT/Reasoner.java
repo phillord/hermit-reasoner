@@ -279,6 +279,9 @@ public class Reasoner implements OWLReasoner {
     public void interrupt() {
         m_interruptFlag.interrupt();
     }
+    /**
+     * @return data factory
+     */
     public OWLDataFactory getDataFactory() {
         return df;
     }
@@ -327,12 +330,21 @@ public class Reasoner implements OWLReasoner {
 
     // HermiT's accessor methods
 
+    /**
+     * @return prefixes
+     */
     public Prefixes getPrefixes() {
         return m_prefixes;
     }
+    /**
+     * @return DL ontology
+     */
     public DLOntology getDLOntology() {
         return m_dlOntology;
     }
+    /**
+     * @return configuration
+     */
     public Configuration getConfiguration() {
         return m_configuration.clone();
     }
@@ -415,6 +427,9 @@ public class Reasoner implements OWLReasoner {
             m_pendingChanges.clear();
         }
     }
+    /**
+     * @return true if incremental
+     */
     public boolean canProcessPendingChangesIncrementally() {
         Set<OWLOntology> rootOntologyImportsClosure=m_rootOntology.getImportsClosure();
         for (OWLOntologyChange change : m_pendingChanges) {
@@ -488,6 +503,10 @@ public class Reasoner implements OWLReasoner {
 
     // General inferences
 
+    /**
+     * @param owlClass owlClass
+     * @return true if defined
+     */
     public boolean isDefined(OWLClass owlClass) {
         AtomicConcept atomicConcept=AtomicConcept.create(owlClass.getIRI().toString());
         return
@@ -495,6 +514,10 @@ public class Reasoner implements OWLReasoner {
             AtomicConcept.THING.equals(atomicConcept) ||
             AtomicConcept.NOTHING.equals(atomicConcept);
     }
+    /**
+     * @param owlIndividual owlIndividual
+     * @return true if defined
+     */
     public boolean isDefined(OWLIndividual owlIndividual) {
         Individual individual;
         if (owlIndividual.isAnonymous())
@@ -503,6 +526,10 @@ public class Reasoner implements OWLReasoner {
             individual=Individual.create(owlIndividual.asOWLNamedIndividual().getIRI().toString());
         return m_dlOntology.containsIndividual(individual);
     }
+    /**
+     * @param owlObjectProperty owlObjectProperty
+     * @return true if defined
+     */
     public boolean isDefined(OWLObjectProperty owlObjectProperty) {
         AtomicRole atomicRole=AtomicRole.create(owlObjectProperty.getIRI().toString());
         return
@@ -510,6 +537,10 @@ public class Reasoner implements OWLReasoner {
             AtomicRole.TOP_OBJECT_ROLE.equals(atomicRole) ||
             AtomicRole.BOTTOM_OBJECT_ROLE.equals(atomicRole);
     }
+    /**
+     * @param owlDataProperty owlDataProperty
+     * @return true if defined
+     */
     public boolean isDefined(OWLDataProperty owlDataProperty) {
         AtomicRole atomicRole=AtomicRole.create(owlDataProperty.getIRI().toString());
         return
@@ -549,10 +580,8 @@ public class Reasoner implements OWLReasoner {
             return m_instanceManager!=null && m_instanceManager.sameAsIndividualsComputed();
         case DATA_PROPERTY_ASSERTIONS:
         case DIFFERENT_INDIVIDUALS:
-        case DISJOINT_CLASSES:
-            // case DIFFERENT_INDIVIDUALS:
             // return false;
-            // case DISJOINT_CLASSES:
+        case DISJOINT_CLASSES:
             // return m_atomicConceptHierarchy!=null && m_directDisjointClasses.keySet().size()==m_atomicConceptHierarchy.getAllElements().size()-2;
         default:
             break;
@@ -713,6 +742,9 @@ public class Reasoner implements OWLReasoner {
 
     // Concept inferences
 
+    /**
+     * Classify classes.
+     */
     public void classifyClasses() {
         checkPreConditions();
         if (m_atomicConceptHierarchy==null) {
@@ -934,6 +966,9 @@ public class Reasoner implements OWLReasoner {
 
     // Object property inferences
 
+    /**
+     * Classify object Properties.
+     */
     public void classifyObjectProperties() {
         checkPreConditions();
         if (m_objectRoleHierarchy==null) {
@@ -1364,6 +1399,9 @@ public class Reasoner implements OWLReasoner {
 
     // Data property inferences
 
+    /**
+     * Classify data properties.
+     */
     public void classifyDataProperties() {
         checkPreConditions();
         if (m_dataRoleHierarchy==null) {
@@ -1627,6 +1665,9 @@ public class Reasoner implements OWLReasoner {
             m_instanceManager.realize(m_configuration.reasonerProgressMonitor);
         }
     }
+    /**
+     * Realise object properties.
+     */
     public void realiseObjectProperties() {
         checkPreConditions();
         if (m_dlOntology.getAllIndividuals().size()>0) {
@@ -1635,6 +1676,9 @@ public class Reasoner implements OWLReasoner {
             m_instanceManager.realizeObjectRoles(m_configuration.reasonerProgressMonitor);
         }
     }
+    /**
+     * Precompute.
+     */
     public void precomputeSameAsEquivalenceClasses() {
         checkPreConditions();
         if (m_dlOntology.getAllIndividuals().size()>0) {
@@ -1661,6 +1705,12 @@ public class Reasoner implements OWLReasoner {
         }
         return atomicConceptHierarchyNodesToNodeSet(result);
     }
+    /**
+     * @param namedIndividual namedIndividual
+     * @param type type
+     * @param direct direct
+     * @return true if as type
+     */
     public boolean hasType(OWLNamedIndividual namedIndividual,OWLClassExpression type,boolean direct) {
         checkPreConditions(namedIndividual,type);
         if (!m_isConsistent)
@@ -1730,6 +1780,11 @@ public class Reasoner implements OWLReasoner {
         else
             return new OWLNamedIndividualNodeSet(new HashSet<Node<OWLNamedIndividual>>());
     }
+    /**
+     * @param namedIndividual1 namedIndividual1
+     * @param namedIndividual2 namedIndividual2
+     * @return true if same individual
+     */
     public boolean isSameIndividual(OWLNamedIndividual namedIndividual1,OWLNamedIndividual namedIndividual2) {
         checkPreConditions(namedIndividual1,namedIndividual2);
         if (!m_isConsistent)
@@ -1797,6 +1852,10 @@ public class Reasoner implements OWLReasoner {
         }
         return sortBySameAsIfNecessary(result);
     }
+    /**
+     * @param property property
+     * @return object property instances
+     */
     public Map<OWLNamedIndividual,Set<OWLNamedIndividual>> getObjectPropertyInstances(OWLObjectProperty property) {
         checkPreConditions(property);
         Map<OWLNamedIndividual,Set<OWLNamedIndividual>> result=new HashMap<>();
@@ -1818,6 +1877,12 @@ public class Reasoner implements OWLReasoner {
         }
         return result;
     }
+    /**
+     * @param subject subject
+     * @param propertyExpression propertyExpression
+     * @param object object
+     * @return true if has object property relationships
+     */
     public boolean hasObjectPropertyRelationship(OWLNamedIndividual subject,OWLObjectPropertyExpression propertyExpression,OWLNamedIndividual object) {
         checkPreConditions(subject,propertyExpression,object);
         if (!m_isConsistent)
@@ -1907,6 +1972,9 @@ public class Reasoner implements OWLReasoner {
 
     // Various creation methods
 
+    /**
+     * @return tableau
+     */
     public Tableau getTableau() {
         m_tableau.clearAdditionalDLOntology();
         return m_tableau;

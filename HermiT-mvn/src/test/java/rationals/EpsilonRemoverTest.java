@@ -74,7 +74,6 @@ public class EpsilonRemoverTest extends TestCase {
         assertNoEpsilon(s);
 
         b = new Reducer().transform(b);
-        System.err.println(b);
     }
 
     public void testEpsilon2() {
@@ -93,7 +92,6 @@ public class EpsilonRemoverTest extends TestCase {
         assertNoEpsilon(s);
 
         b = new Reducer().transform(b);
-        System.err.println(b);
     }
 
     public void testEpsilon3() {
@@ -109,7 +107,6 @@ public class EpsilonRemoverTest extends TestCase {
         Set<Transition> s = b.delta();
         assertNoEpsilon(s);
         b = new Reducer().transform(b);
-        System.err.println(b);
     }
 
     /**

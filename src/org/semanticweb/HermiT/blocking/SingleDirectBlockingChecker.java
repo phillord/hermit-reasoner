@@ -29,18 +29,14 @@ import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.NodeType;
 import org.semanticweb.HermiT.tableau.Tableau;
-
+/**Single direct blocking checker.*/
 public class SingleDirectBlockingChecker implements DirectBlockingChecker,Serializable {
     private static final long serialVersionUID=9093753046859877016L;
 
-    protected final SetFactory<AtomicConcept> m_atomicConceptsSetFactory;
-    protected final Set<AtomicConcept> m_atomicConceptsBuffer;
+    protected final SetFactory<AtomicConcept> m_atomicConceptsSetFactory=new SetFactory<>();
+    protected final Set<AtomicConcept> m_atomicConceptsBuffer=new LinkedHashSet<>();
     protected ExtensionTable.Retrieval m_binaryTableSearch1Bound;
 
-    public SingleDirectBlockingChecker() {
-        m_atomicConceptsSetFactory=new SetFactory<>();
-        m_atomicConceptsBuffer=new LinkedHashSet<>();
-    }
     @Override
     public void initialize(Tableau tableau) {
         m_binaryTableSearch1Bound=tableau.getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);

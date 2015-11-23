@@ -22,16 +22,23 @@ import java.util.Collections;
 import java.util.List;
 
 import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
-
+/**OWLRealValueSpaceSubset.*/
 public class OWLRealValueSpaceSubset implements ValueSpaceSubset {
     protected final List<NumberInterval> m_intervals;
     
+    /**Empty constructor.*/
     public OWLRealValueSpaceSubset() {
         m_intervals=Collections.emptyList();
     }
+    /**
+     * @param interval interval
+     */
     public OWLRealValueSpaceSubset(NumberInterval interval) {
         m_intervals=Collections.singletonList(interval);
     }
+    /**
+     * @param intervals intervals
+     */
     public OWLRealValueSpaceSubset(List<NumberInterval> intervals) {
         m_intervals=intervals;
     }

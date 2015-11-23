@@ -22,16 +22,25 @@ import java.util.Collections;
 import java.util.List;
 
 import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
-
+/**BinaryDataValueSpaceSubset.*/
 public class BinaryDataValueSpaceSubset implements ValueSpaceSubset {
     protected final List<BinaryDataLengthInterval> m_intervals;
     
+    /**
+     * Empty constructor.
+     */
     public BinaryDataValueSpaceSubset() {
         m_intervals=Collections.emptyList();
     }
+    /**
+     * @param interval interval
+     */
     public BinaryDataValueSpaceSubset(BinaryDataLengthInterval interval) {
         m_intervals=Collections.singletonList(interval);
     }
+    /**
+     * @param intervals intervals
+     */
     public BinaryDataValueSpaceSubset(List<BinaryDataLengthInterval> intervals) {
         m_intervals=intervals;
     }

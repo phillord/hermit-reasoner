@@ -41,8 +41,7 @@ import java.util.Set;
 
 /**
  * Default synchronization scheme for standard automaton. This class
- * synchronizes the labels of two transitions if they are equal as returned by
- * {@see java.lang.Object#equals(java.lang.Object)}.
+ * synchronizes the labels of two transitions if they are equal.
  * 
  * @author nono
  * @version $Id: DefaultSynchronization.java 2 2006-08-24 14:41:48Z oqube $

@@ -27,12 +27,19 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-
+/**
+ * Hierarchy.
+ * @param <E> type
+ */
 public class Hierarchy<E> {
     protected final HierarchyNode<E> m_topNode;
     protected final HierarchyNode<E> m_bottomNode;
     protected final Map<E,HierarchyNode<E>> m_nodesByElements;
 
+    /**
+     * @param topNode topNode
+     * @param bottomNode bottomNode
+     */
     public Hierarchy(HierarchyNode<E> topNode,HierarchyNode<E> bottomNode) {
         m_topNode=topNode;
         m_bottomNode=bottomNode;
@@ -42,27 +49,52 @@ public class Hierarchy<E> {
         for (E element : m_bottomNode.m_equivalentElements)
             m_nodesByElements.put(element,m_bottomNode);
     }
+    /**
+     * @return top node
+     */
     public HierarchyNode<E> getTopNode() {
         return m_topNode;
     }
+    /**
+     * @return bottom node
+     */
     public HierarchyNode<E> getBottomNode() {
         return m_bottomNode;
     }
+    /**
+     * @return true if empty
+     */
     public boolean isEmpty() {
         return m_nodesByElements.size()==2 && m_topNode.m_equivalentElements.size()==1 && m_bottomNode.m_equivalentElements.size()==1;
     }
+    /**
+     * @param element element
+     * @return node for element
+     */
     public HierarchyNode<E> getNodeForElement(E element) {
         return m_nodesByElements.get(element);
     }
+    /**
+     * @return all nodes
+     */
     public Collection<HierarchyNode<E>> getAllNodes() {
         return Collections.unmodifiableCollection(m_nodesByElements.values());
     }
+    /**
+     * @return all node set
+     */
     public Set<HierarchyNode<E>> getAllNodesSet() {
         return Collections.unmodifiableSet(new HashSet<>(m_nodesByElements.values()));
     }
+    /**
+     * @return all elements
+     */
     public Set<E> getAllElements() {
         return Collections.unmodifiableSet(m_nodesByElements.keySet());
     }
+    /**
+     * @return depth
+     */
     public int getDepth() {
         HierarchyDepthFinder<E> depthFinder=new HierarchyDepthFinder<>(m_bottomNode);
         traverseDepthFirst(depthFinder);
@@ -85,6 +117,12 @@ public class Hierarchy<E> {
                 depth=level;
         }
     }
+    /**
+     * @param transformer transformer
+     * @param comparator comparator
+     * @param <T> type
+     * @return transformed hierarchy
+     */
     public <T> Hierarchy<T> transform(Transformer<? super E,T> transformer,Comparator<T> comparator) {
         HierarchyNodeComparator<T> newNodeComparator=new HierarchyNodeComparator<>(comparator);
         Map<HierarchyNode<E>,HierarchyNode<T>> oldToNew=new HashMap<>();
@@ -126,6 +164,9 @@ public class Hierarchy<E> {
                 newHierarchy.m_nodesByElements.put(newElement,newNode);
         return newHierarchy;
     }
+    /**
+     * @param visitor visitor
+     */
     @SuppressWarnings("unchecked")
     public void traverseDepthFirst(HierarchyNodeVisitor<E> visitor) {
         HierarchyNode<E>[] redirectBuffer=new HierarchyNode[2];
@@ -193,6 +234,13 @@ public class Hierarchy<E> {
         output.flush();
         return buffer.toString();
     }
+    /**
+     * @param elements elements
+     * @param topElement topElement
+     * @param bottomElement bottomElement
+     * @param <T> type
+     * @return empty hierarchy
+     */
     public static <T> Hierarchy<T> emptyHierarchy(Collection<T> elements,T topElement,T bottomElement) {
         HierarchyNode<T> topBottomNode=new HierarchyNode<>(topElement);
         topBottomNode.m_equivalentElements.add(topElement);
@@ -200,6 +248,12 @@ public class Hierarchy<E> {
         topBottomNode.m_equivalentElements.addAll(elements);
         return new Hierarchy<>(topBottomNode,topBottomNode);
     }
+    /**
+     * @param topElement topElement
+     * @param bottomElement bottomElement
+     * @param <T> type
+     * @return trivial hierarchy
+     */
     public static <T> Hierarchy<T> trivialHierarchy(T topElement,T bottomElement) {
         HierarchyNode<T> topNode=new HierarchyNode<>(topElement);
         topNode.m_equivalentElements.add(topElement);
@@ -214,8 +268,20 @@ public class Hierarchy<E> {
         void visit(int level,HierarchyNode<E> node,HierarchyNode<E> parentNode,boolean firstVisit);
     }
 
+    /**Transformer.
+     * @param <E> input type
+     * @param <T> return type*/
     public interface Transformer<E,T> {
+        /**
+         * @param element element
+         * @return transformed element
+         */
         T transform(E element);
+        /**
+         * @param oldRepresentative oldRepresentative
+         * @param newEquivalentElements newEquivalentElements
+         * @return representative
+         */
         T determineRepresentative(E oldRepresentative,Set<T> newEquivalentElements);
     }
 

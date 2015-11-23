@@ -44,13 +44,20 @@ import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
 import org.semanticweb.owlapi.model.OWLObjectUnionOf;
 import org.semanticweb.owlapi.util.OWLAxiomVisitorAdapter;
-
+/**OWLAxiomsExpressivity.*/
 public class OWLAxiomsExpressivity extends OWLAxiomVisitorAdapter implements OWLClassExpressionVisitor {
+    /**has at most*/
     public boolean m_hasAtMostRestrictions;
+    /**has inverse*/
     public boolean m_hasInverseRoles;
+    /** has nominals*/
     public boolean m_hasNominals;
+    /**has datatypes*/
     public boolean m_hasDatatypes;
 
+    /**
+     * @param axioms axioms
+     */
     public OWLAxiomsExpressivity(OWLAxioms axioms) {
         for (OWLClassExpression[] inclusion : axioms.m_conceptInclusions)
             for (OWLClassExpression description : inclusion)

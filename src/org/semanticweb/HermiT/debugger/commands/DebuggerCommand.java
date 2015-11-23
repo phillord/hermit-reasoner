@@ -18,10 +18,22 @@
 package org.semanticweb.HermiT.debugger.commands;
 
 import java.io.PrintWriter;
-
+/**DebuggerCommand.*/
 public interface DebuggerCommand {
+    /**
+     * @return command name
+     */
     String getCommandName();
+    /**
+     * @return description
+     */
     String[] getDescription();
+    /**
+     * @param writer writer
+     */
     void printHelp(PrintWriter writer);
+    /**
+     * @param args args
+     */
     void execute(String[] args);
 }

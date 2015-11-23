@@ -27,9 +27,15 @@ public class InverseRole extends Role {
 
     protected final AtomicRole m_inverseOf;
 
+    /**
+     * @param inverseOf inverseOf
+     */
     public InverseRole(AtomicRole inverseOf) {
         m_inverseOf=inverseOf;
     }
+    /**
+     * @return role
+     */
     public AtomicRole getInverseOf() {
         return m_inverseOf;
     }
@@ -60,6 +66,10 @@ public class InverseRole extends Role {
         }
     };
 
+    /**
+     * @param inverseOf inverseOf
+     * @return inverse role
+     */
     public static InverseRole create(AtomicRole inverseOf) {
         return s_interningManager.intern(new InverseRole(inverseOf));
     }

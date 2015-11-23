@@ -54,6 +54,10 @@ public final class HyperresolutionManager implements Serializable {
     protected final Object[] m_valuesBuffer;
     protected final int m_maxNumberOfVariables;
 
+    /**
+     * @param tableau tableau
+     * @param dlClauses dlClauses
+     */
     public HyperresolutionManager(Tableau tableau,Set<DLClause> dlClauses) {
         InterruptFlag interruptFlag=tableau.m_interruptFlag;
         m_extensionManager=tableau.m_extensionManager;
@@ -168,6 +172,7 @@ public final class HyperresolutionManager implements Serializable {
     protected static boolean isPredicateWithExtension(DLPredicate dlPredicate) {
         return !NodeIDLessEqualThan.INSTANCE.equals(dlPredicate) && !(dlPredicate instanceof NodeIDsAscendingOrEqual);
     }
+    /**Clear.*/
     public void clear() {
         for (int retrievalIndex=m_deltaOldRetrievals.length-1;retrievalIndex>=0;--retrievalIndex)
             m_deltaOldRetrievals[retrievalIndex].clear();
@@ -185,6 +190,9 @@ public final class HyperresolutionManager implements Serializable {
         for (int variableIndex=0;variableIndex<m_maxNumberOfVariables;variableIndex++)
             m_valuesBuffer[variableIndex]=null;
     }
+    /**
+     * Apply dl clause.
+     */
     public void applyDLClauses() {
         for (int index=0;index<m_deltaOldRetrievals.length;index++) {
             ExtensionTable.Retrieval deltaOldRetrieval=m_deltaOldRetrievals[index];
@@ -268,6 +276,7 @@ public final class HyperresolutionManager implements Serializable {
         }
     }
 
+    /**BodyAtomsSwapper.*/
     public static final class BodyAtomsSwapper {
         protected final DLClause m_dlClause;
         protected final List<Atom> m_nodeIDComparisonAtoms;
@@ -275,6 +284,9 @@ public final class HyperresolutionManager implements Serializable {
         protected final List<Atom> m_reorderedAtoms;
         protected final Set<Variable> m_boundVariables;
 
+        /**
+         * @param dlClause dl clause
+         */
         public BodyAtomsSwapper(DLClause dlClause) {
             m_dlClause=dlClause;
             m_nodeIDComparisonAtoms=new ArrayList<>(m_dlClause.getBodyLength());
@@ -282,6 +294,10 @@ public final class HyperresolutionManager implements Serializable {
             m_reorderedAtoms=new ArrayList<>(m_dlClause.getBodyLength());
             m_boundVariables=new HashSet<>();
         }
+        /**
+         * @param bodyIndex bodyIndex
+         * @return swapped dl clause
+         */
         public DLClause getSwappedDLClause(int bodyIndex) {
             m_nodeIDComparisonAtoms.clear();
             for (int index=m_usedAtoms.length-1;index>=0;--index) {

@@ -27,6 +27,7 @@ import org.semanticweb.HermiT.Prefixes;
 public class Inequality implements DLPredicate,Serializable {
     private static final long serialVersionUID=296924110684230279L;
 
+    /**Instance.*/
     public static final Inequality INSTANCE=new Inequality();
     
     protected Inequality () {
@@ -46,6 +47,9 @@ public class Inequality implements DLPredicate,Serializable {
     protected Object readResolve() {
         return INSTANCE;
     }
+    /**
+     * @return instance
+     */
     public static Inequality create() {
         return INSTANCE;
     }

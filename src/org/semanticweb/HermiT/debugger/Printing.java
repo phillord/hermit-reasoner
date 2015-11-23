@@ -44,16 +44,31 @@ import org.semanticweb.HermiT.model.InverseRole;
 import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.Node;
-
+/**Printing.*/
 public class Printing {
+    /**
+     * @param writer writer
+     * @param number number
+     * @param size size
+     */
     public static void printPadded(PrintWriter writer,int number,int size) {
         printPadded(writer,String.valueOf(number),size);
     }
+    /**
+     * @param writer writer
+     * @param string string
+     * @param size size
+     */
     public static void printPadded(PrintWriter writer,String string,int size) {
         for (int i=size-string.length();i>=0;--i)
             writer.print(' ');
         writer.print(string);
     }
+    /**
+     * @param debugger debugger
+     * @param node node
+     * @param writer writer
+     */
     public static void printNodeData(Debugger debugger,Node node,PrintWriter writer) {
         writer.print("Node ID:    ");
         writer.println(node.getNodeID());
@@ -242,7 +257,9 @@ public class Printing {
         }
     }
 
+    /**ConceptComparator*/
     public static class ConceptComparator implements Comparator<Concept> {
+        /**instance*/
         public static final ConceptComparator INSTANCE=new ConceptComparator();
 
         @Override
@@ -303,7 +320,7 @@ public class Printing {
         }
     }
     
-    public static class DataRangeComparator implements Comparator<DataRange> {
+    static class DataRangeComparator implements Comparator<DataRange> {
         public static final DataRangeComparator INSTANCE=new DataRangeComparator();
 
         @Override
@@ -422,7 +439,9 @@ public class Printing {
         }
     }
 
+    /**FactComparator.*/
     public static class FactComparator implements Comparator<Object[]> {
+        /**instance*/
         public static final FactComparator INSTANCE=new FactComparator();
 
         @Override

@@ -30,9 +30,16 @@ public class ConstantEnumeration extends AtomicDataRange {
     protected ConstantEnumeration(Constant[] constants) {
         m_constants=constants;
     }
+    /**
+     * @return number of constants
+     */
     public int getNumberOfConstants() {
         return m_constants.length;
     }
+    /**
+     * @param index index
+     * @return constant
+     */
     public Constant getConstant(int index) {
         return m_constants[index];
     }
@@ -89,6 +96,10 @@ public class ConstantEnumeration extends AtomicDataRange {
         }
     };
 
+    /**
+     * @param constants constants
+     * @return enumeration
+     */
     public static ConstantEnumeration create(Constant[] constants) {
         return s_interningManager.intern(new ConstantEnumeration(constants));
     }

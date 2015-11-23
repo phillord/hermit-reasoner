@@ -30,7 +30,7 @@ import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.NodeType;
 import org.semanticweb.HermiT.tableau.Tableau;
-
+/**Validate pairwise direct blocking checker.*/
 public class ValidatedPairwiseDirectBlockingChecker implements DirectBlockingChecker,Serializable {
     private static final long serialVersionUID=9093753046859877016L;
 
@@ -42,6 +42,9 @@ public class ValidatedPairwiseDirectBlockingChecker implements DirectBlockingChe
     protected ExtensionTable.Retrieval m_binaryTableSearch1Bound;
     protected ExtensionTable.Retrieval m_ternaryTableSearch12Bound;
 
+    /**
+     * @param hasInverses hasInverses
+     */
     public ValidatedPairwiseDirectBlockingChecker(boolean hasInverses) {
         m_hasInverses=hasInverses;
     }

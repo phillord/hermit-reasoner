@@ -3,7 +3,7 @@ package org.semanticweb.HermiT.reasoner;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
+@SuppressWarnings("javadoc")
 public class AllHeavyTests extends TestCase {
 
     public static Test suite() {

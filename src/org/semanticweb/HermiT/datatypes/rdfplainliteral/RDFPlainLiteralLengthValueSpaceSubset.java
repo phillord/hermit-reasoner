@@ -24,7 +24,7 @@ import java.util.List;
 
 import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
 
-public class RDFPlainLiteralLengthValueSpaceSubset implements ValueSpaceSubset {
+class RDFPlainLiteralLengthValueSpaceSubset implements ValueSpaceSubset {
     protected final List<RDFPlainLiteralLengthInterval> m_intervals;
     
     public RDFPlainLiteralLengthValueSpaceSubset() {

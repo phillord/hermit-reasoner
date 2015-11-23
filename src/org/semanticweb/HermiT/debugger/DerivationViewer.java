@@ -37,13 +37,17 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
 import org.semanticweb.HermiT.Prefixes;
-
+/**DerivationViewer.*/
 @SuppressWarnings("serial")
 public class DerivationViewer extends JFrame {
     protected final Prefixes m_prefixes;
     protected final DerivationTreeTreeModel m_derivationTreeTreeModel;
     protected final JTree m_derivationTree;
 
+    /**
+     * @param prefixes prefixes
+     * @param root root
+     */
     public DerivationViewer(Prefixes prefixes,DerivationHistory.Fact root) {
         super("Derivation tree for "+root.toString(prefixes));
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -71,6 +75,7 @@ public class DerivationViewer extends JFrame {
         setLocation(150,150);
         setVisible(true);
     }
+    /**Refresh.*/
     public void refresh() {
         m_derivationTreeTreeModel.refresh();
     }

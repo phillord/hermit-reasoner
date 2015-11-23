@@ -51,7 +51,7 @@ import org.semanticweb.owlapi.model.OWLObjectPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.OWLSameIndividualAxiom;
 import org.semanticweb.owlapi.util.OWLAxiomVisitorAdapter;
-
+/**ReducedABoxOnlyClausification.*/
 public class ReducedABoxOnlyClausification extends OWLAxiomVisitorAdapter {
 
     protected final Configuration.WarningMonitor m_warningMonitor;
@@ -63,6 +63,12 @@ public class ReducedABoxOnlyClausification extends OWLAxiomVisitorAdapter {
     protected final Set<Atom> m_negativeFacts;
     protected final Set<Individual> m_allIndividuals;
 
+    /**
+     * @param configuration configuration
+     * @param allAtomicConcepts allAtomicConcepts
+     * @param allAtomicObjectRoles allAtomicObjectRoles
+     * @param allAtomicDataRoles allAtomicDataRoles
+     */
     public ReducedABoxOnlyClausification(Configuration configuration, Set<AtomicConcept> allAtomicConcepts, Set<AtomicRole> allAtomicObjectRoles, Set<AtomicRole> allAtomicDataRoles) {
         m_warningMonitor=configuration.warningMonitor;
         m_ignoreUnsupportedDatatypes=configuration.ignoreUnsupportedDatatypes;
@@ -73,18 +79,30 @@ public class ReducedABoxOnlyClausification extends OWLAxiomVisitorAdapter {
         m_negativeFacts=new HashSet<>();
         m_allIndividuals=new HashSet<>();
     }
+    /**
+     * @param axioms axioms
+     */
     public void clausify(OWLIndividualAxiom... axioms) {
         m_positiveFacts.clear();
         m_negativeFacts.clear();
         for (OWLIndividualAxiom fact : axioms)
             fact.accept(this);
     }
+    /**
+     * @return positive facts
+     */
     public Set<Atom> getPositiveFacts() {
         return m_positiveFacts;
     }
+    /**
+     * @return negative facts
+     */
     public Set<Atom> getNegativeFacts() {
         return m_negativeFacts;
     }
+    /**
+     * @return all individuals
+     */
     public Set<Individual> getAllIndividuals() {
         return m_allIndividuals;
     }

@@ -21,7 +21,7 @@ import java.io.Serializable;
 
 import org.semanticweb.owlapi.reasoner.ReasonerInterruptedException;
 import org.semanticweb.owlapi.reasoner.TimeOutException;
-
+/**InterruptFlag.*/
 public final class InterruptFlag implements Serializable {
     private static final long serialVersionUID=-6983680374511847003L;
 
@@ -30,12 +30,16 @@ public final class InterruptFlag implements Serializable {
     protected final InterruptTimer m_interruptTimer;
     protected volatile InterruptType m_interruptType;
 
+    /**
+     * @param individualTaskTimeout individualTaskTimeout
+     */
     public InterruptFlag(long individualTaskTimeout) {
         if (individualTaskTimeout>0)
             m_interruptTimer=new InterruptTimer(individualTaskTimeout);
         else
             m_interruptTimer=null;
     }
+    /**Check interrupt.*/
     public void checkInterrupt() {
         InterruptType interruptType=m_interruptType;
         if (interruptType!=null) {
@@ -45,19 +49,23 @@ public final class InterruptFlag implements Serializable {
                 throw new ReasonerInterruptedException();
         }
     }
+    /**Interrupt.*/
     public void interrupt() {
         m_interruptType=InterruptType.INTERRUPTED;
     }
+    /**Start task. */
     public void startTask() {
         m_interruptType=null;
         if (m_interruptTimer!=null)
             m_interruptTimer.startTiming();
     }
+    /**End task. */
     public void endTask() {
         if (m_interruptTimer!=null)
             m_interruptTimer.stopTiming();
         m_interruptType=null;
     }
+    /**Dispose.*/
     public void dispose() {
         if (m_interruptTimer!=null)
             m_interruptTimer.dispose();

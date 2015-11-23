@@ -29,9 +29,12 @@ import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.model.NegatedAtomicRole;
 import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.Node;
-
+/**ShowModelCommand.*/
 public class ShowModelCommand extends AbstractCommand {
 
+    /**
+     * @param debugger debugger
+     */
     public ShowModelCommand(Debugger debugger) {
         super(debugger);
     }

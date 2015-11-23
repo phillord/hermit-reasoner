@@ -19,10 +19,12 @@ package org.semanticweb.HermiT.datatypes.datetime;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+/**DateTime.*/
 public class DateTime {
     private static final String TWO_DIGITS = "([0-9]{2})";
+    /**No timezone.*/
     public static final int NO_TIMEZONE=Integer.MAX_VALUE;
+    /**Max time zone.*/
     public static final long MAX_TIME_ZONE_CORRECTION=14L*60L*60L*1000L;
     
     protected static final Pattern s_dateTimePattern=Pattern.compile(
@@ -62,11 +64,26 @@ public class DateTime {
     protected final boolean m_lastDayInstant;
     protected final int m_timeZoneOffset;
     
+    /**
+     * @param year year
+     * @param month month
+     * @param day day
+     * @param hour hour
+     * @param minute minute
+     * @param second second
+     * @param millisecond millisecond
+     * @param timeZoneOffset timeZoneOffset
+     */
     public DateTime(int year,int month,int day,int hour,int minute,int second,int millisecond,int timeZoneOffset) {
         m_timeOnTimeline=getTimeOnTimelineRaw(year,month,day,hour,minute,second,millisecond)-(timeZoneOffset==NO_TIMEZONE ? 0 : timeZoneOffset*60L*1000L);
         m_lastDayInstant=(hour==24 && minute==0 && second==0 && millisecond==0);
         m_timeZoneOffset=timeZoneOffset;
     }
+    /**
+     * @param timeOnTimeline timeOnTimeline
+     * @param lastDayInstant lastDayInstant
+     * @param timeZoneOffset timeZoneOffset
+     */
     public DateTime(long timeOnTimeline,boolean lastDayInstant,int timeZoneOffset) {
         m_timeOnTimeline=timeOnTimeline;
         m_lastDayInstant=lastDayInstant;
@@ -169,12 +186,21 @@ public class DateTime {
             }
         return buffer.toString();
     }
+    /**
+     * @return timeline
+     */
     public long getTimeOnTimeline() {
         return m_timeOnTimeline;
     }
+    /**
+     * @return true if offset
+     */
     public boolean hasTimeZoneOffset() {
         return m_timeZoneOffset!=NO_TIMEZONE;
     }
+    /**
+     * @return offset
+     */
     public int getTimeZoneOffset() {
         return m_timeZoneOffset;
     }
@@ -186,6 +212,10 @@ public class DateTime {
             buffer.append('0');
         buffer.append(stringAbsValue);
     }
+    /**
+     * @param lexicalForm lexicalForm
+     * @return datetime
+     */
     public static DateTime parse(String lexicalForm) {
         Matcher matcher=s_dateTimePattern.matcher(lexicalForm.trim());
         if (!matcher.matches())
@@ -279,12 +309,24 @@ public class DateTime {
         else
             return 31;
     }
+    /**
+     * @param timeOnTimeline timeOnTimeline
+     * @return true if last instant
+     */
     public static boolean isLastDayInstant(long timeOnTimeline) {
         return (timeOnTimeline % (1000L*60L*60L*24L))==0;
     }
+    /**
+     * @param timeOnTimeline timeOnTimeline
+     * @return true if no seconds
+     */
     public static boolean secondsAreZero(long timeOnTimeline) {
         return (timeOnTimeline % (1000L*60L))==0;
     }
+    /**
+     * @param timeOnTimeline timeOnTimeline
+     * @return minutes
+     */
     public static int getMinutesInDay(long timeOnTimeline) {
         return (int)((timeOnTimeline/(1000L*60L)) % (24L*60L));
     }

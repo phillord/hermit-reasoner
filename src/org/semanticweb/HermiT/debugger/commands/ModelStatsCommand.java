@@ -22,9 +22,12 @@ import java.io.PrintWriter;
 
 import org.semanticweb.HermiT.debugger.Debugger;
 import org.semanticweb.HermiT.tableau.Node;
-
+/**ModelStatsCommand.*/
 public class ModelStatsCommand extends AbstractCommand {
 
+    /**
+     * @param debugger debugger
+     */
     public ModelStatsCommand(Debugger debugger) {
         super(debugger);
     }

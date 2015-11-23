@@ -30,6 +30,9 @@ public class AtomicNegationConcept extends LiteralConcept {
     protected AtomicNegationConcept(AtomicConcept negatedAtomicConcept) {
         m_negatedAtomicConcept=negatedAtomicConcept;
     }
+    /**
+     * @return negated concept
+     */
     public AtomicConcept getNegatedAtomicConcept() {
         return m_negatedAtomicConcept;
     }
@@ -64,6 +67,10 @@ public class AtomicNegationConcept extends LiteralConcept {
         }
     };
     
+    /**
+     * @param negatedAtomicConcept negatedAtomicConcept
+     * @return concept
+     */
     public static AtomicNegationConcept create(AtomicConcept negatedAtomicConcept) {
         return s_interningManager.intern(new AtomicNegationConcept(negatedAtomicConcept));
     }

@@ -18,7 +18,7 @@
 package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
-
+/**PermanentDependencySet.*/
 public final class PermanentDependencySet implements DependencySet,Serializable {
     private static final long serialVersionUID=353039301123337446L;
 

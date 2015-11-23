@@ -1,7 +1,7 @@
 package org.semanticweb.HermiT.reasoner;
 
 import org.semanticweb.HermiT.AbstractOntologyTest;
-import org.semanticweb.HermiT.Reasoner.ReasonerFactory;
+import org.semanticweb.HermiT.ReasonerFactory;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;

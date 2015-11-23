@@ -43,8 +43,16 @@ import org.semanticweb.HermiT.monitor.TableauMonitor;
  */
 public abstract class ExtensionTable implements Serializable {
     private static final long serialVersionUID=-5029938218056017193L;
-
-    public static enum View { EXTENSION_THIS,EXTENSION_OLD,DELTA_OLD,TOTAL }
+    /**View.*/
+    public static enum View { 
+        /**EXTENSION_THIS*/
+        EXTENSION_THIS,
+        /**EXTENSION_OLD*/
+        EXTENSION_OLD,
+        /**DELTA_OLD*/
+        DELTA_OLD,
+        /**TOTAL*/
+        TOTAL }
 
     protected final Tableau m_tableau;
     protected final TableauMonitor m_tableauMonitor;
@@ -57,6 +65,11 @@ public abstract class ExtensionTable implements Serializable {
     protected int m_afterDeltaNewTupleIndex;
     protected int[] m_indicesByBranchingPoint;
 
+    /**
+     * @param tableau tableau
+     * @param tupleArity tupleArity
+     * @param needsDependencySets needsDependencySets
+     */
     public ExtensionTable(Tableau tableau,int tupleArity,boolean needsDependencySets) {
         m_tableau=tableau;
         m_tableauMonitor=m_tableau.m_tableauMonitor;
@@ -69,22 +82,51 @@ public abstract class ExtensionTable implements Serializable {
             m_coreManager=new NoCoreManager();
         m_indicesByBranchingPoint=new int[2*3];
     }
+    /**
+     * @return size in memory
+     */
     public abstract int sizeInMemory();
+    /**
+     * @return arity
+     */
     public int getArity() {
         return m_tupleArity;
     }
+    /**
+     * @param tupleBuffer tupleBuffer
+     * @param tupleIndex tupleIndex
+     */
     public void retrieveTuple(Object[] tupleBuffer,int tupleIndex) {
         m_tupleTable.retrieveTuple(tupleBuffer,tupleIndex);
     }
+    /**
+     * @param tupleIndex tupleIndex
+     * @param objectIndex objectIndex
+     * @return tuple
+     */
     public Object getTupleObject(int tupleIndex,int objectIndex) {
         return m_tupleTable.getTupleObject(tupleIndex,objectIndex);
     }
+    /**
+     * @param tupleIndex tupleIndex
+     * @return dependency set
+     */
     public DependencySet getDependencySet(int tupleIndex) {
         return m_dependencySetManager.getDependencySet(tupleIndex);
     }
+    /**
+     * @param tupleIndex tupleIndex
+     * @return true if core
+     */
     public boolean isCore(int tupleIndex) {
         return m_coreManager.isCore(tupleIndex);
     }
+    /**
+     * @param tuple tuple
+     * @param dependencySet dependencySet
+     * @param isCore isCore
+     * @return true if tuple added
+     */
     public abstract boolean addTuple(Object[] tuple,DependencySet dependencySet,boolean isCore);
     /**
      * This method is called each time a fresh tuple is added. The method is not called if the tuple
@@ -111,7 +153,16 @@ public abstract class ExtensionTable implements Serializable {
             m_tableau.m_descriptionGraphManager.descriptionGraphTupleAdded(tupleIndex,tuple);
         m_tableau.m_clashManager.tupleAdded(this,tuple,dependencySet);
     }
+    /**
+     * @param tuple tuple
+     * @return true if contained
+     */
     public abstract boolean containsTuple(Object[] tuple);
+    /**
+     * @param bindingPattern bindingPattern
+     * @param extensionView extensionView
+     * @return retrieval
+     */
     public Retrieval createRetrieval(boolean[] bindingPattern,View extensionView) {
         int[] bindingPositions=new int[bindingPattern.length];
         for (int index=0;index<bindingPattern.length;index++)
@@ -121,9 +172,28 @@ public abstract class ExtensionTable implements Serializable {
                 bindingPositions[index]=-1;
         return createRetrieval(bindingPositions,new Object[bindingPattern.length],new Object[bindingPattern.length],true,extensionView);
     }
+    /**
+     * @param bindingPositions bindingPositions
+     * @param bindingsBuffer bindingsBuffer
+     * @param tupleBuffer tupleBuffer
+     * @param ownsBuffers ownsBuffers
+     * @param extensionView extensionView
+     * @return retrieval
+     */
     public abstract Retrieval createRetrieval(int[] bindingPositions,Object[] bindingsBuffer,Object[] tupleBuffer,boolean ownsBuffers,View extensionView);
+    /**
+     * @param tuple tuple
+     * @return dependency set
+     */
     public abstract DependencySet getDependencySet(Object[] tuple);
+    /**
+     * @param tuple tuple
+     * @return true if core
+     */
     public abstract boolean isCore(Object[] tuple);
+    /**
+     * @return true if delta was present
+     */
     public boolean propagateDeltaNew() {
         boolean deltaNewNotEmpty=(m_afterExtensionThisTupleIndex!=m_afterDeltaNewTupleIndex);
         m_afterExtensionOldTupleIndex=m_afterExtensionThisTupleIndex;
@@ -131,6 +201,9 @@ public abstract class ExtensionTable implements Serializable {
         m_afterDeltaNewTupleIndex=m_tupleTable.getFirstFreeTupleIndex();
         return deltaNewNotEmpty;
     }
+    /**
+     * Branching point pushed.
+     */
     public void branchingPointPushed() {
         int start=m_tableau.getCurrentBranchingPoint().m_level*3;
         int requiredSize=start+3;
@@ -146,6 +219,9 @@ public abstract class ExtensionTable implements Serializable {
         m_indicesByBranchingPoint[start+1]=m_afterExtensionThisTupleIndex;
         m_indicesByBranchingPoint[start+2]=m_afterDeltaNewTupleIndex;
     }
+    /**
+     * Backtrack.
+     */
     public void backtrack() {
         int start=m_tableau.getCurrentBranchingPoint().m_level*3;
         int newAfterDeltaNewTupleIndex=m_indicesByBranchingPoint[start+2];
@@ -181,18 +257,29 @@ public abstract class ExtensionTable implements Serializable {
         if (m_tableauMonitor!=null)
             m_tableauMonitor.tupleRemoved(tuple);
     }
+    /**
+     * Clear.
+     */
     public void clear() {
         m_tupleTable.clear();
         m_afterExtensionOldTupleIndex=0;
         m_afterExtensionThisTupleIndex=0;
         m_afterDeltaNewTupleIndex=0;
     }
+    /**
+     * @param tuple tuple
+     * @return true if tuple active
+     */
     public boolean isTupleActive(Object[] tuple) {
         for (int objectIndex=m_tupleArity-1;objectIndex>0;--objectIndex)
             if (!((Node)tuple[objectIndex]).isActive())
                 return false;
         return true;
     }
+    /**
+     * @param tupleIndex tupleIndex
+     * @return true if tuple active
+     */
     public boolean isTupleActive(int tupleIndex) {
         for (int objectIndex=m_tupleArity-1;objectIndex>0;--objectIndex)
             if (!((Node)m_tupleTable.getTupleObject(tupleIndex,objectIndex)).isActive())
@@ -200,17 +287,53 @@ public abstract class ExtensionTable implements Serializable {
         return true;
     }
 
+    /**
+     * Retrieval.
+     */
     public interface Retrieval {
+        /**
+         * @return extension table
+         */
         ExtensionTable getExtensionTable();
+        /**
+         * Clear.
+         */
         void clear();
+        /**
+         * @return binding positions
+         */
         int[] getBindingPositions();
+        /**
+         * @return bindings buffers
+         */
         Object[] getBindingsBuffer();
+        /**
+         * @return tuple buffers
+         */
         Object[] getTupleBuffer();
+        /**
+         * @return dependency set
+         */
         DependencySet getDependencySet();
+        /**
+         * @return is core
+         */
         boolean isCore();
+        /**
+         * Open.
+         */
         void open();
+        /**
+         * @return after last
+         */
         boolean afterLast();
+        /**
+         * @return current tuple index
+         */
         int getCurrentTupleIndex();
+        /**
+         * Next.
+         */
         void next();
     }
 

@@ -22,9 +22,12 @@ import java.io.PrintWriter;
 
 import org.semanticweb.HermiT.debugger.Debugger;
 import org.semanticweb.HermiT.model.DescriptionGraph;
-
+/**ShowDescriptionGraphCommand.*/
 public class ShowDescriptionGraphCommand extends AbstractCommand {
 
+    /**
+     * @param debugger debugger
+     */
     public ShowDescriptionGraphCommand(Debugger debugger) {
         super(debugger);
     }

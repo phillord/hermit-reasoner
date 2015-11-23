@@ -48,6 +48,7 @@ public class Prefixes implements Serializable {
     protected static final String PN_CHARS_BASE="[A-Za-z\\u00C0-\\u00D6\\u00D8-\\u00F6\\u00F8-\\u02FF\\u0370-\\u037D\\u037F-\\u1FFF\\u200C-\\u200D\\u2070-\\u218F\\u2C00-\\u2FEF\\u3001-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFFD]";
     protected static final String PN_CHARS="[A-Za-z0-9_\\u002D\\u00B7\\u00C0-\\u00D6\\u00D8-\\u00F6\\u00F8-\\u02FF\\u0300-\\u036F\\u0370-\\u037D\\u037F-\\u1FFF\\u200C-\\u200D\\u203F-\\u2040\\u2070-\\u218F\\u2C00-\\u2FEF\\u3001-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFFD]";
     protected static final Pattern s_localNameChecker=Pattern.compile("("+PN_CHARS_BASE+"|_|[0-9])(("+PN_CHARS+"|[.])*("+PN_CHARS+"))?");
+    /**semantic prefixes*/
     public static final Map<String,String> s_semanticWebPrefixes;
     static {
         s_semanticWebPrefixes=new HashMap<>();
@@ -60,12 +61,14 @@ public class Prefixes implements Serializable {
         s_semanticWebPrefixes.put("swrlx:","http://www.w3.org/2003/11/swrlx#");
         s_semanticWebPrefixes.put("ruleml:","http://www.w3.org/2003/11/ruleml#");
     }
+    /**standard prefixes*/
     public static final Prefixes STANDARD_PREFIXES=new ImmutablePrefixes(s_semanticWebPrefixes);
 
     protected final Map<String,String> m_prefixIRIsByPrefixName;
     protected final Map<String,String> m_prefixNamesByPrefixIRI;
     protected Pattern m_prefixIRIMatchingPattern;
 
+    /**Prefixes*/
     public Prefixes() {
         m_prefixIRIsByPrefixName=new TreeMap<>();
         m_prefixNamesByPrefixIRI=new TreeMap<>();
@@ -98,6 +101,10 @@ public class Prefixes implements Serializable {
         else
             m_prefixIRIMatchingPattern=null;
     }
+    /**
+     * @param iri iri
+     * @return abbreviated iri
+     */
     public String abbreviateIRI(String iri) {
         if (m_prefixIRIMatchingPattern!=null) {
             Matcher matcher=m_prefixIRIMatchingPattern.matcher(iri);
@@ -115,6 +122,8 @@ public class Prefixes implements Serializable {
      * Expands a full IRI from the abbreviated one, which is of one of the following forms:
      * 'prefix:name', where 'prefix' is a registered prefix name (can be empty), or
      * '&lt;iri&gt;', where 'iri' is an IRI.
+     * @param abbreviation input
+     * @return expanded string
      */
     public String expandAbbreviatedIRI(String abbreviation) {
         if (abbreviation.length()>0 && abbreviation.charAt(0)=='<') {
@@ -139,6 +148,11 @@ public class Prefixes implements Serializable {
                 throw new IllegalArgumentException("The abbreviation '"+abbreviation+"' is not valid (it does not start with a colon).");
         }
     }
+    /**
+     * @param prefixName prefixName
+     * @param prefixIRI prefixIRI
+     * @return true if modification happened
+     */
     public boolean declarePrefix(String prefixName,String prefixIRI) {
         boolean containsPrefix=declarePrefixRaw(prefixName,prefixIRI);
         buildPrefixIRIMatchingPattern();
@@ -153,12 +167,23 @@ public class Prefixes implements Serializable {
         m_prefixNamesByPrefixIRI.put(prefixIRI,prefixName);
         return m_prefixIRIsByPrefixName.put(prefixName,prefixIRI)==null;
     }
+    /**
+     * @param defaultPrefixIRI defaultPrefixIRI
+     * @return true if modification happened
+     */
     public boolean declareDefaultPrefix(String defaultPrefixIRI) {
         return declarePrefix(":",defaultPrefixIRI);
     }
+    /**
+     * @return iris by name
+     */
     public Map<String,String> getPrefixIRIsByPrefixName() {
         return java.util.Collections.unmodifiableMap(m_prefixIRIsByPrefixName);
     }
+    /**
+     * @param prefixIRI prefixIRI
+     * @return prefix name
+     */
     public String getPrefixName(String prefixIRI) {
         return m_prefixNamesByPrefixIRI.get(prefixIRI);
     }
@@ -166,6 +191,7 @@ public class Prefixes implements Serializable {
      * Registers HermiT's internal prefixes with this object.
      *
      * @param individualIRIs    the collection of IRIs used in individuals (used for registering nominal prefix names)
+     * @param anonIndividualIRIs anonIndividualIRIs 
      * @return                  'true' if this object already contained one of the internal prefix names
      */
     public boolean declareInternalPrefixes(Collection<String> individualIRIs, Collection<String> anonIndividualIRIs) {
@@ -212,27 +238,28 @@ public class Prefixes implements Serializable {
         buildPrefixIRIMatchingPattern();
         return containsPrefix;
     }
-    /**
-     * Converts this object to a string.
-     */
     @Override
     public String toString() {
         return m_prefixIRIsByPrefixName.toString();
     }
     /**
      * Determines whether the supplied IRI is used internally by HermiT.
+     * @param iri iri 
+     * @return true if internal
      */
     public static boolean isInternalIRI(String iri) {
         return iri.startsWith("internal:");
     }
     /**
      * Determines whether the supplied string is a valid local name.
+     * @param localName localName 
+     * @return true if valid
      */
     public static boolean isValidLocalName(String localName) {
         return s_localNameChecker.matcher(localName).matches();
     }
 
-    public static class ImmutablePrefixes extends Prefixes {
+    private static class ImmutablePrefixes extends Prefixes {
         private static final long serialVersionUID=8517988865445255837L;
 
         public ImmutablePrefixes(Map<String,String> initialPrefixes) {

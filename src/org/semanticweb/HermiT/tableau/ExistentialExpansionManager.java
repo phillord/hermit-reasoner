@@ -53,6 +53,9 @@ public final class ExistentialExpansionManager implements Serializable {
     protected final UnionDependencySet m_binaryUnionDependencySet;
     protected int[] m_indicesByBranchingPoint;
 
+    /**
+     * @param tableau tableau
+     */
     public ExistentialExpansionManager(Tableau tableau) {
         m_tableau=tableau;
         m_extensionManager=m_tableau.m_extensionManager;
@@ -114,12 +117,19 @@ public final class ExistentialExpansionManager implements Serializable {
             }
         }
     }
+    /**
+     * @param existentialConcept existentialConcept
+     * @param forNode forNode
+     */
     public void markExistentialProcessed(ExistentialConcept existentialConcept,Node forNode) {
         m_auxiliaryTuple[0]=existentialConcept;
         m_auxiliaryTuple[1]=forNode;
         m_expandedExistentials.addTuple(m_auxiliaryTuple);
         forNode.removeFromUnprocessedExistentials(existentialConcept);
     }
+    /**
+     * Branching point pushed.
+     */
     public void branchingPointPushed() {
         int start=m_tableau.getCurrentBranchingPoint().m_level;
         int requiredSize=start+1;
@@ -133,6 +143,9 @@ public final class ExistentialExpansionManager implements Serializable {
         }
         m_indicesByBranchingPoint[start]=m_expandedExistentials.getFirstFreeTupleIndex();
     }
+    /**
+     * Backtrack.
+     */
     public void backtrack() {
         int newFirstFreeTupleIndex=m_indicesByBranchingPoint[m_tableau.getCurrentBranchingPoint().m_level];
         for (int tupleIndex=m_expandedExistentials.getFirstFreeTupleIndex()-1;tupleIndex>=newFirstFreeTupleIndex;--tupleIndex) {
@@ -143,6 +156,9 @@ public final class ExistentialExpansionManager implements Serializable {
         }
         m_expandedExistentials.truncate(newFirstFreeTupleIndex);
     }
+    /**
+     * Clear.
+     */
     public void clear() {
         m_expandedExistentials.clear();
         m_auxiliaryTuple[0]=null;
@@ -154,6 +170,8 @@ public final class ExistentialExpansionManager implements Serializable {
     }
     /**
      * Creates a new node in the tableau if the at least concept that caused the expansion is for cardinality 1. If it is not of cardinality 1 and the role in the at least concept is a functional role, it sets a clash in the extension manager.
+     * @param atLeast atLeast 
+     * @param forNode forNode 
      *
      * @return true if the at least cardinality is 1 (causes an expansion) or it is greater than one but the role is functional (causes a clash) and false otherwise.
      */
@@ -214,6 +232,10 @@ public final class ExistentialExpansionManager implements Serializable {
         }
         return false;
     }
+    /**
+     * @param atLeastConcept atLeastConcept
+     * @param forNode forNode
+     */
     public void doNormalExpansion(AtLeastConcept atLeastConcept,Node forNode) {
         if (m_tableau.m_tableauMonitor!=null)
             m_tableau.m_tableauMonitor.existentialExpansionStarted(atLeastConcept,forNode);
@@ -242,6 +264,10 @@ public final class ExistentialExpansionManager implements Serializable {
         if (m_tableau.m_tableauMonitor!=null)
             m_tableau.m_tableauMonitor.existentialExpansionFinished(atLeastConcept,forNode);
     }
+    /**
+     * @param atLeastDataRange atLeastDataRange
+     * @param forNode forNode
+     */
     public void doNormalExpansion(AtLeastDataRange atLeastDataRange,Node forNode) {
         if (m_tableau.m_tableauMonitor!=null)
             m_tableau.m_tableauMonitor.existentialExpansionStarted(atLeastDataRange,forNode);
@@ -270,6 +296,10 @@ public final class ExistentialExpansionManager implements Serializable {
         if (m_tableau.m_tableauMonitor!=null)
             m_tableau.m_tableauMonitor.existentialExpansionFinished(atLeastDataRange,forNode);
     }
+    /**
+     * @param atLeast atLeast
+     * @param forNode forNode
+     */
     public void expand(AtLeast atLeast,Node forNode) {
         if (!tryFunctionalExpansion(atLeast,forNode))
             if (atLeast instanceof AtLeastConcept)

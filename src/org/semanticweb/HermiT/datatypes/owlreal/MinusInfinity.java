@@ -17,7 +17,7 @@
 */
 package org.semanticweb.HermiT.datatypes.owlreal;
 
-public final class MinusInfinity extends Number {
+final class MinusInfinity extends Number {
     private static final long serialVersionUID=-205551124673073593L;
     public static final MinusInfinity INSTANCE=new MinusInfinity();
 

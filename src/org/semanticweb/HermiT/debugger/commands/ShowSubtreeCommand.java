@@ -21,9 +21,12 @@ import java.io.PrintWriter;
 
 import org.semanticweb.HermiT.debugger.Debugger;
 import org.semanticweb.HermiT.tableau.Node;
-
+/**ShowSubtreeCommand.*/
 public class ShowSubtreeCommand extends AbstractCommand {
 
+    /**
+     * @param debugger debugger
+     */
     public ShowSubtreeCommand(Debugger debugger) {
         super(debugger);
     }

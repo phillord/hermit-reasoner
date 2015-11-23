@@ -23,9 +23,12 @@ import org.semanticweb.HermiT.debugger.Debugger;
 import org.semanticweb.HermiT.debugger.DerivationHistory;
 import org.semanticweb.HermiT.debugger.DerivationViewer;
 import org.semanticweb.HermiT.tableau.Node;
-
+/**DerivationTreeCommand.*/
 public class DerivationTreeCommand extends AbstractCommand {
 
+    /**
+     * @param debugger debugger
+     */
     public DerivationTreeCommand(Debugger debugger) {
         super(debugger);
     }
@@ -94,7 +97,7 @@ public class DerivationTreeCommand extends AbstractCommand {
             }
             tuple[index]=node;
         }
-        DerivationHistory.Atom atom=m_debugger.getDerivationHistory().getAtom(tuple);
+        DerivationHistory.Fact atom=m_debugger.getDerivationHistory().getAtom(tuple);
         if (atom!=null) {
             new DerivationViewer(m_debugger.getPrefixes(),atom);
             selectConsoleWindow();

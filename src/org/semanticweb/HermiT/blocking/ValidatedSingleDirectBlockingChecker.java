@@ -29,7 +29,7 @@ import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.NodeType;
 import org.semanticweb.HermiT.tableau.Tableau;
-
+/**Validated single direct bocking checker.*/
 public class ValidatedSingleDirectBlockingChecker implements DirectBlockingChecker,Serializable {
     private static final long serialVersionUID=9093753046859877016L;
 
@@ -41,6 +41,9 @@ public class ValidatedSingleDirectBlockingChecker implements DirectBlockingCheck
     protected ExtensionTable.Retrieval m_binaryTableSearch1Bound;
     protected ExtensionTable.Retrieval m_ternaryTableSearch12Bound;
 
+    /**
+     * @param hasInverses hasInverses
+     */
     public ValidatedSingleDirectBlockingChecker(boolean hasInverses) {
         m_hasInverses=hasInverses;
     }
@@ -178,7 +181,7 @@ public class ValidatedSingleDirectBlockingChecker implements DirectBlockingCheck
     public BlockingSignature getBlockingSignatureFor(Node node) {
         return new ValidatedBlockingSignature(this,node);
     }
-    public class ValidatedSingleBlockingObject implements ValidatedBlockingObject {
+    private class ValidatedSingleBlockingObject implements ValidatedBlockingObject {
         protected final Node m_node;
         protected boolean m_hasChangedForBlocking;
         protected boolean m_hasChangedForValidation;
@@ -361,18 +364,59 @@ public class ValidatedSingleDirectBlockingChecker implements DirectBlockingCheck
                 m_toParentLabel==thatSignature.m_toParentLabel;
         }
     }
+    /**
+     * Validated blocking object.
+     */
     public static interface ValidatedBlockingObject {
+        /**
+         * Initialize.
+         */
         void initialize();
+        /**
+         * Destroy.
+         */
         void destroy();
+        /**
+         * @return atomic concepts label
+         */
         Set<AtomicConcept> getAtomicConceptsLabel();
+        /**
+         * @param concept concept
+         * @param isCore isCore
+         */
         void addConcept(Concept concept, boolean isCore);
+        /**
+         * @param concept concept
+         * @param isCore isCore
+         */
         void removeConcept(Concept concept, boolean isCore);
+        /**
+         * @return full atomic concepts label
+         */
         Set<AtomicConcept> getFullAtomicConceptsLabel();
+        /**
+         * @return full from parent label
+         */
         Set<AtomicRole> getFullFromParentLabel();
+        /**
+         * @return full to parent label
+         */
         Set<AtomicRole> getFullToParentLabel();
+        /**
+         * @param violates violates
+         */
         void setBlockViolatesParentConstraints(boolean violates);
+        /**
+         * @param hasBeenChecked hasBeenChecked
+         */
         void setHasAlreadyBeenChecked(boolean hasBeenChecked);
+        /**
+         * @return true if already checked
+         */
         boolean hasAlreadyBeenChecked();
+        /**
+         * @return true if block violates parent constraints
+         */
         boolean blockViolatesParentConstraints();
     }
 }

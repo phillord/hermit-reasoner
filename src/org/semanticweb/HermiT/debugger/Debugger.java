@@ -69,14 +69,28 @@ import org.semanticweb.HermiT.monitor.TableauMonitorForwarder;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.ReasoningTaskDescription;
 import org.semanticweb.HermiT.tableau.Tableau;
-
+/**Debugger*/
 public class Debugger extends TableauMonitorForwarder {
     private static final long serialVersionUID=-1061073966460686069L;
 
+    /**Monospaced font.*/
     public static final Font s_monospacedFont=new Font("Monospaced",Font.PLAIN,12);
-
+    /**WaitOption.*/
     public static enum WaitOption {
-        GRAPH_EXPANSION,EXISTENTIAL_EXPANSION,CLASH,MERGE,DATATYPE_CHECKING,BLOCKING_VALIDATION_STARTED,BLOCKING_VALIDATION_FINISHED
+        /**GRAPH_EXPANSION*/
+        GRAPH_EXPANSION,
+        /**EXISTENTIAL_EXPANSION*/
+        EXISTENTIAL_EXPANSION,
+        /**CLASH*/
+        CLASH,
+        /**MERGE*/
+        MERGE,
+        /**DATATYPE_CHECKING*/
+        DATATYPE_CHECKING,
+        /**BLOCKING_VALIDATION_STARTED*/
+        BLOCKING_VALIDATION_STARTED,
+        /**BLOCKING_VALIDATION_FINISHED*/
+        BLOCKING_VALIDATION_FINISHED
     }
 
     protected final Map<String,DebuggerCommand> m_commandsByName;
@@ -99,6 +113,10 @@ public class Debugger extends TableauMonitorForwarder {
     protected int m_breakpointTime;
     protected int m_currentIteration;
 
+    /**
+     * @param prefixes prefixes
+     * @param historyOn historyOn
+     */
     public Debugger(Prefixes prefixes,boolean historyOn) {
         super(new DerivationHistory());
         m_commandsByName=new TreeMap<>();
@@ -158,54 +176,109 @@ public class Debugger extends TableauMonitorForwarder {
     protected void registerCommand(DebuggerCommand command) {
         m_commandsByName.put(command.getCommandName().toLowerCase(),command);
     }
+    /**
+     * @return debugger commands
+     */
     public Map<String,DebuggerCommand> getDebuggerCommands() {
         return Collections.unmodifiableMap(m_commandsByName);
     }
+    /**
+     * @return tableau
+     */
     public Tableau getTableau() {
         return m_tableau;
     }
+    /**
+     * @return output
+     */
     public PrintWriter getOutput() {
         return m_output;
     }
+    /**
+     * @return mainframe
+     */
     public JFrame getMainFrame() {
         return m_mainFrame;
     }
+    /**
+     * @return last command
+     */
     public String getLastCommand() {
         return m_lastCommand;
     }
+    /**
+     * @return text area
+     */
     public ConsoleTextArea getConsoleTextArea() {
         return m_consoleTextArea;
     }
+    /**
+     * @return prefixes
+     */
     public Prefixes getPrefixes() {
         return m_prefixes;
     }
+    /**
+     * @return derivation history
+     */
     public DerivationHistory getDerivationHistory() {
         return m_derivationHistory;
     }
+    /**
+     * @param node node
+     * @return creation info
+     */
     public NodeCreationInfo getNodeCreationInfo(Node node) {
         return m_nodeCreationInfos.get(node);
     }
+    /**
+     * @param time time
+     */
     public void setBreakpointTime(int time) {
         m_breakpointTime=time;
     }
+    /**
+     * @param inMainLoop inMainLoop
+     */
     public void setInMainLoop(boolean inMainLoop) {
         m_inMainLoop=inMainLoop;
     }
+    /**
+     * @param forever forever
+     */
     public void setForever(boolean forever) {
         m_forever=forever;
     }
+    /**
+     * @param singlestep singlestep
+     */
     public void setSinglestep(boolean singlestep) {
         m_singlestep=singlestep;
     }
+    /**
+     * @param option option
+     * @return true if option added
+     */
     public boolean addWaitOption(WaitOption option) {
         return m_waitOptions.add(option);
     }
+    /**
+     * @param option option
+     * @return true if option removed
+     */
     public boolean removeWaitOption(WaitOption option) {
         return m_waitOptions.remove(option);
     }
+    /**
+     * @param commandName commandName
+     * @return debugger command
+     */
     public DebuggerCommand getCommand(String commandName) {
         return m_commandsByName.get(commandName.toLowerCase());
     }
+    /**
+     * Main loop.
+     */
     public void mainLoop() {
         try {
             m_inMainLoop=true;
@@ -223,6 +296,9 @@ public class Debugger extends TableauMonitorForwarder {
         }
         m_lastStatusMark=System.currentTimeMillis();
     }
+    /**
+     * @param commandLine commandLine
+     */
     public void processCommandLine(String commandLine) {
         String[] parsedCommand=parse(commandLine);
         String commandName=parsedCommand[0];
@@ -409,11 +485,19 @@ public class Debugger extends TableauMonitorForwarder {
         }
     }
 
+    /**NodeCreationInfo.*/
     public static class NodeCreationInfo {
+        /**created by*/
         public final Node m_createdByNode;
+        /**created by existential*/
         public final ExistentialConcept m_createdByExistential;
+        /**children*/
         public final List<Node> m_children;
 
+        /**
+         * @param createdByNode createdByNode
+         * @param createdByExistential createdByExistential
+         */
         public NodeCreationInfo(Node createdByNode,ExistentialConcept createdByExistential) {
             m_createdByNode=createdByNode;
             m_createdByExistential=createdByExistential;

@@ -23,9 +23,12 @@ import java.io.PrintWriter;
 import org.semanticweb.HermiT.debugger.Debugger;
 import org.semanticweb.HermiT.debugger.Printing;
 import org.semanticweb.HermiT.tableau.Node;
-
+/**ShowNodeCommand*/
 public class ShowNodeCommand extends AbstractCommand {
 
+    /**
+     * @param debugger debugger
+     */
     public ShowNodeCommand(Debugger debugger) {
         super(debugger);
     }

@@ -42,23 +42,16 @@ import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
 import org.semanticweb.HermiT.tableau.DatatypeManager;
 import org.semanticweb.HermiT.tableau.GroundDisjunction;
 import org.semanticweb.HermiT.tableau.Node;
-
+/**DerivationHistory.*/
 public class DerivationHistory extends TableauMonitorAdapter {
     private static final long serialVersionUID=-3963478091986772947L;
 
     protected static final Object[] EMPTY_TUPLE=new Object[0];
 
-    protected final Map<AtomKey,Atom> m_derivedAtoms;
-    protected final Map<GroundDisjunction,Disjunction> m_derivedDisjunctions;
-    protected final Stack<Derivation> m_derivations;
-    protected final Stack<Atom> m_mergeAtoms;
-
-    public DerivationHistory() {
-        m_derivedAtoms=new HashMap<>();
-        m_derivedDisjunctions=new HashMap<>();
-        m_derivations=new Stack<>();
-        m_mergeAtoms=new Stack<>();
-    }
+    protected final Map<AtomKey,Atom> m_derivedAtoms=new HashMap<>();
+    protected final Map<GroundDisjunction,Disjunction> m_derivedDisjunctions=new HashMap<>();
+    protected final Stack<Derivation> m_derivations=new Stack<>();
+    protected final Stack<Atom> m_mergeAtoms=new Stack<>();
     @Override
     public void tableauCleared() {
         m_derivedAtoms.clear();
@@ -197,9 +190,17 @@ public class DerivationHistory extends TableauMonitorAdapter {
     public void datatypeConjunctionCheckingFinished(DatatypeManager.DConjunction conjunction,boolean result) {
         m_derivations.pop();
     }
+    /**
+     * @param tuple tuple
+     * @return atom
+     */
     public Atom getAtom(Object[] tuple) {
         return m_derivedAtoms.get(new AtomKey(tuple));
     }
+    /**
+     * @param groundDisjunction groundDisjunction
+     * @return disjunction
+     */
     public Disjunction getDisjunction(GroundDisjunction groundDisjunction) {
         return m_derivedDisjunctions.get(groundDisjunction);
     }
@@ -243,12 +244,20 @@ public class DerivationHistory extends TableauMonitorAdapter {
         }
     }
 
-    protected interface Fact extends Serializable {
+    /**Fact*/
+    public interface Fact extends Serializable {
+        /**
+         * @param prefixes prefixes
+         * @return toString
+         */
         String toString(Prefixes prefixes);
+        /**
+         * @return derivation
+         */
         Derivation getDerivation();
     }
 
-    public static class Atom implements Fact {
+    static class Atom implements Fact {
         private static final long serialVersionUID=-6136317748590721560L;
 
         protected final Object[] m_tuple;
@@ -309,7 +318,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
         }
     }
 
-    public static class Disjunction implements Fact {
+    static class Disjunction implements Fact {
         private static final long serialVersionUID=-6645342875287836609L;
 
         protected final Object[][] m_atoms;
@@ -364,7 +373,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
     }
 
     @SuppressWarnings("serial")
-    public abstract static class Derivation implements Serializable {
+    abstract static class Derivation implements Serializable {
         public abstract String toString(Prefixes prefixes);
         @Override
         public String toString() {
@@ -374,7 +383,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
         public abstract Fact getPremise(int premiseIndex);
     }
 
-    public static class DLClauseApplication extends Derivation {
+    static class DLClauseApplication extends Derivation {
         private static final long serialVersionUID=5841561027229354512L;
 
         protected final DLClause m_dlClause;
@@ -401,7 +410,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
         }
     }
 
-    public static class DisjunctApplication extends Derivation {
+    static class DisjunctApplication extends Derivation {
         private static final long serialVersionUID=6657356873675430986L;
 
         protected final Disjunction m_disjunction;
@@ -433,7 +442,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
         }
     }
 
-    public static class Merging extends Derivation {
+    static class Merging extends Derivation {
         private static final long serialVersionUID=6815119442652251306L;
 
         protected final Atom m_equality;
@@ -464,7 +473,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
         }
     }
 
-    public static class GraphChecking extends Derivation {
+    static class GraphChecking extends Derivation {
         private static final long serialVersionUID=-3671522413313454739L;
 
         protected final Atom m_graph1;
@@ -499,7 +508,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
         }
     }
 
-    public static class ExistentialExpansion extends Derivation {
+    static class ExistentialExpansion extends Derivation {
         private static final long serialVersionUID=-1266097745277870260L;
 
         protected final Atom m_existentialAtom;
@@ -526,7 +535,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
         }
     }
 
-    public static class ClashDetection extends Derivation {
+    static class ClashDetection extends Derivation {
         private static final long serialVersionUID=-1046733682276190587L;
         protected final Atom[] m_causes;
 
@@ -547,7 +556,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
         }
     }
 
-    public static class DatatypeChecking extends Derivation {
+    static class DatatypeChecking extends Derivation {
         private static final long serialVersionUID=-7833124370362424190L;
         protected final Atom[] m_causes;
 
@@ -568,7 +577,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
         }
     }
 
-    public static class UnknownDatatypeRestrictionDetection extends Derivation {
+    static class UnknownDatatypeRestrictionDetection extends Derivation {
         private static final long serialVersionUID=-7824360133765453948L;
         protected final Atom[] m_causes;
 
@@ -589,7 +598,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
         }
     }
 
-    public static class BaseFact extends Derivation {
+    static class BaseFact extends Derivation {
         private static final long serialVersionUID=-5998349862414502218L;
 
         public final static Derivation INSTANCE=new BaseFact();

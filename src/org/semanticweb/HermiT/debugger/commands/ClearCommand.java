@@ -20,9 +20,12 @@ package org.semanticweb.HermiT.debugger.commands;
 import java.io.PrintWriter;
 
 import org.semanticweb.HermiT.debugger.Debugger;
-
+/**ClearCommand.*/
 public class ClearCommand extends AbstractCommand {
 
+    /**
+     * @param debugger debugger
+     */
     public ClearCommand(Debugger debugger) {
         super(debugger);
     }

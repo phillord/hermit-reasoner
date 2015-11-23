@@ -31,6 +31,9 @@ public class AtLeastDataRange extends AtLeast {
         super(number, onRole);
         m_toDataRange=toConcept;
     }
+    /**
+     * @return top data range
+     */
     public LiteralDataRange getToDataRange() {
         return m_toDataRange;
     }
@@ -57,6 +60,12 @@ public class AtLeastDataRange extends AtLeast {
         }
     };
     
+    /**
+     * @param number number
+     * @param onRole onRole
+     * @param toDataRange toDataRange
+     * @return at least data range
+     */
     public static AtLeastDataRange create(int number,Role onRole,LiteralDataRange toDataRange) {
         return s_interningManager.intern(new AtLeastDataRange(number,onRole,toDataRange));
     }

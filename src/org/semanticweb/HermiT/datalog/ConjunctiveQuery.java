@@ -16,6 +16,9 @@ import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.HyperresolutionManager;
 import org.semanticweb.HermiT.tableau.Node;
 
+/**
+ * Conjunctinve query.
+ */
 public class ConjunctiveQuery {
     protected final DatalogEngine m_datalogEngine;
     protected final Atom[] m_queryAtoms;
@@ -25,6 +28,11 @@ public class ConjunctiveQuery {
     protected final QueryResultCollector[] m_queryResultCollector;
     protected final Worker[] m_workers;
 
+    /**
+     * @param datalogEngine datalog engine
+     * @param queryAtoms query atoms
+     * @param answerTerms answer terms
+     */
     public ConjunctiveQuery(DatalogEngine datalogEngine,Atom[] queryAtoms,Term[] answerTerms) {
         if (!datalogEngine.materialize())
             throw new IllegalStateException("The supplied DL ontology is unsatisfiable.");
@@ -40,15 +48,27 @@ public class ConjunctiveQuery {
         m_workers=new Worker[queryCompiler.m_workers.size()];
         queryCompiler.m_workers.toArray(m_workers);
     }
+    /**
+     * @return datalog engine
+     */
     public DatalogEngine getDatalogEngine() {
         return m_datalogEngine;
     }
+    /**
+     * @return number of query atoms
+     */
     public int getNumberOfQUeryAtoms() {
         return m_queryAtoms.length;
     }
+    /**
+     * @return number of anser terms
+     */
     public int getNumberOfAnswerTerms() {
         return m_answerTerms.length;
     }
+    /**
+     * @param queryResultCollector queryResultCollector
+     */
     public void evaluate(QueryResultCollector queryResultCollector) {
         try {
             m_queryResultCollector[0]=queryResultCollector;
@@ -117,7 +137,7 @@ public class ConjunctiveQuery {
         }
     }
     
-    public static class QueryAnswerCallback implements Worker {
+    private static class QueryAnswerCallback implements Worker {
         protected final ConjunctiveQuery m_conjunctiveQuery;
         protected final Map<Node,Term> m_nodesToTerms;
         protected final Term[] m_resultBuffer;

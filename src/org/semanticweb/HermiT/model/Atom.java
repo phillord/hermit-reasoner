@@ -28,6 +28,7 @@ import org.semanticweb.HermiT.Prefixes;
  */
 public class Atom implements Serializable {
     private static final long serialVersionUID=7884900540178779422L;
+    /**Infix predicates.*/
     public static final Set<DLPredicate> s_infixPredicates=new HashSet<>();
     static {
         s_infixPredicates.add(Equality.INSTANCE);
@@ -44,21 +45,38 @@ public class Atom implements Serializable {
         if (m_dlPredicate.getArity()!=m_arguments.length)
             throw new IllegalArgumentException("The arity of the predicate must be equal to the number of arguments.");
     }
+    /**
+     * @return dl predicate
+     */
     public DLPredicate getDLPredicate() {
         return m_dlPredicate;
     }
+    /**
+     * @return arity
+     */
     public int getArity() {
         return m_arguments.length;
     }
+    /**
+     * @param argumentIndex argumentIndex
+     * @return argument
+     */
     public Term getArgument(int argumentIndex) {
         return m_arguments[argumentIndex];
     }
+    /**
+     * @param argumentIndex argumentIndex
+     * @return argument variable
+     */
     public Variable getArgumentVariable(int argumentIndex) {
         if (m_arguments[argumentIndex] instanceof Variable)
             return (Variable)m_arguments[argumentIndex];
         else
             return null;
     }
+    /**
+     * @param variables variables
+     */
     public void getVariables(Set<Variable> variables) {
         for (int argumentIndex=m_arguments.length-1;argumentIndex>=0;--argumentIndex) {
             Term argument=m_arguments[argumentIndex];
@@ -66,6 +84,9 @@ public class Atom implements Serializable {
                 variables.add((Variable)argument);
         }
     }
+    /**
+     * @param individuals individuals
+     */
     public void getIndividuals(Set<Individual> individuals) {
         for (int argumentIndex=m_arguments.length-1;argumentIndex>=0;--argumentIndex) {
             Term argument=m_arguments[argumentIndex];
@@ -73,12 +94,20 @@ public class Atom implements Serializable {
                 individuals.add((Individual)argument);
         }
     }
+    /**
+     * @param variable variable
+     * @return true if contains variable
+     */
     public boolean containsVariable(Variable variable) {
         for (int argumentIndex=m_arguments.length-1;argumentIndex>=0;--argumentIndex)
             if (m_arguments[argumentIndex].equals(variable))
                 return true;
         return false;
     }
+    /**
+     * @param prefixes prefixes
+     * @return toString
+     */
     public String toString(Prefixes prefixes) {
         StringBuffer buffer=new StringBuffer();
         if (s_infixPredicates.contains(m_dlPredicate)) {
@@ -145,6 +174,11 @@ public class Atom implements Serializable {
         }
     };
 
+    /**
+     * @param dlPredicate dlPredicate
+     * @param arguments arguments
+     * @return atom
+     */
     public static Atom create(DLPredicate dlPredicate,Term... arguments) {
         return s_interningManager.intern(new Atom(dlPredicate,arguments));
     }

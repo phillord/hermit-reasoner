@@ -67,6 +67,10 @@ public abstract class AbstractExpansionStrategy implements ExistentialExpansionS
     protected ExistentialExpansionManager m_existentialExpansionManager;
     protected DescriptionGraphManager m_descriptionGraphManager;
 
+    /**
+     * @param blockingStrategy blockingStrategy
+     * @param expandNodeAtATime expandNodeAtATime
+     */
     public AbstractExpansionStrategy(BlockingStrategy blockingStrategy,boolean expandNodeAtATime) {
         m_blockingStrategy=blockingStrategy;
         m_expandNodeAtATime=expandNodeAtATime;

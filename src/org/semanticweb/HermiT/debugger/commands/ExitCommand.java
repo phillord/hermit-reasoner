@@ -20,9 +20,12 @@ package org.semanticweb.HermiT.debugger.commands;
 import java.io.PrintWriter;
 
 import org.semanticweb.HermiT.debugger.Debugger;
-
+/**ExitCommand*/
 public class ExitCommand extends AbstractCommand {
 
+    /**
+     * @param debugger debugger
+     */
     public ExitCommand(Debugger debugger) {
         super(debugger);
     }

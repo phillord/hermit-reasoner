@@ -17,8 +17,21 @@
 */
 package org.semanticweb.HermiT.tableau;
 
+/**
+ * Dependency set.
+ */
 public interface DependencySet {
+    /**
+     * @param branchingPoint branchingPoint
+     * @return true if branching point contained
+     */
     boolean containsBranchingPoint(int branchingPoint);
+    /**
+     * @return true if empty
+     */
     boolean isEmpty();
+    /**
+     * @return max branching point
+     */
     int getMaximumBranchingPoint();
 }

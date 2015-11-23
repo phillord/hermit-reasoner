@@ -18,7 +18,7 @@
 package org.semanticweb.HermiT.datatypes.datetime;
 
 import java.util.Collection;
-
+/**DateTimeInterval*/
 public class DateTimeInterval {
     protected final IntervalType m_intervalType;
     protected final long m_lowerBound;
@@ -26,6 +26,13 @@ public class DateTimeInterval {
     protected final long m_upperBound;
     protected final BoundType m_upperBoundType;
     
+    /**
+     * @param intervalType intervalType
+     * @param lowerBound lowerBound
+     * @param lowerBoundType lowerBoundType
+     * @param upperBound upperBound
+     * @param upperBoundType upperBoundType
+     */
     public DateTimeInterval(IntervalType intervalType,long lowerBound,BoundType lowerBoundType,long upperBound,BoundType upperBoundType) {
         assert !isIntervalEmpty(lowerBound,lowerBoundType,upperBound,upperBoundType);
         m_intervalType=intervalType;
@@ -37,6 +44,8 @@ public class DateTimeInterval {
     /**
      * Computes the intersection of this interval with the supplied one. If the two intervals
      * do not intersect, the result is null.
+     * @param that that 
+     * @return intersection
      */
     public DateTimeInterval intersectWith(DateTimeInterval that) {
         if (m_intervalType!=that.m_intervalType)
@@ -85,6 +94,8 @@ public class DateTimeInterval {
     /**
      * Subtracts from the given argument the number of distinct objects that are contained in this interval.
      * If the interval contains more objects than argument, the result is zero.
+     * @param argument argument 
+     * @return  subtracted size
      */
     public int subtractSizeFrom(int argument) {
         if (argument<=0)
@@ -133,6 +144,10 @@ public class DateTimeInterval {
             }
         }
     }
+    /**
+     * @param dateTime dateTime
+     * @return true if contained
+     */
     public boolean containsDateTime(DateTime dateTime) {
         if (dateTime.hasTimeZoneOffset()) {
             if (m_intervalType==IntervalType.WITHOUT_TIMEZONE)
@@ -149,6 +164,9 @@ public class DateTimeInterval {
             return false;
         return true;
     }
+    /**
+     * @param dateTimes dateTimes
+     */
     public void enumerateDateTimes(Collection<Object> dateTimes) {
         if (m_lowerBound==m_upperBound) {
             // Since the interval is not empty, both bounds must be inclusive.

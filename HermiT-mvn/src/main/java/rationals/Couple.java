@@ -3,25 +3,35 @@
  *  
  */
 package rationals;
-
+/**Couple.*/
 public class Couple {
 
     private final int hash;
 
-    public final State from;
+    private final State from;
 
-    public final State to;
+    private final State to;
 
+    /**
+     * @param from from
+     * @param to to
+     */
     public Couple(State from, State to) {
         this.from = from;
         this.to = to;
         this.hash = (from.hashCode() << 16) ^ to.hashCode();
     }
 
+    /**
+     * @return from
+     */
     public State getFrom() {
         return from;
     }
 
+    /**
+     * @return to
+     */
     public State getTo() {
         return to;
     }

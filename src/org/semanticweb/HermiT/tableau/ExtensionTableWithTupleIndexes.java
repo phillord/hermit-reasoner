@@ -35,6 +35,12 @@ public class ExtensionTableWithTupleIndexes extends ExtensionTable {
     protected final TupleIndex[] m_tupleIndexes;
     protected final Object[] m_auxiliaryTuple;
 
+    /**
+     * @param tableau tableau
+     * @param tupleArity tupleArity
+     * @param needsDependencySets needsDependencySets
+     * @param tupleIndexes tupleIndexes
+     */
     public ExtensionTableWithTupleIndexes(Tableau tableau,int tupleArity,boolean needsDependencySets,TupleIndex[] tupleIndexes) {
         super(tableau,tupleArity,needsDependencySets);
         m_tupleIndexes=tupleIndexes;

@@ -43,15 +43,22 @@ public final class DependencySetFactory implements Serializable {
     protected int m_size;
     protected int m_resizeThreshold;
 
+    /**Empty constructor.*/
     public DependencySetFactory() {
         m_mergeArray=new IntegerArray();
         m_mergeSets=new ArrayList<>();
         m_unprocessedSets=new ArrayList<>();
         clear();
     }
+    /**
+     * @return size
+     */
     public int sizeInMemory() {
         return m_entries.length*4+m_size*20;
     }
+    /**
+     * Clear.
+     */
     public void clear() {
         m_mergeArray.clear();
         m_mergeSets.clear();
@@ -68,19 +75,31 @@ public final class DependencySetFactory implements Serializable {
         m_resizeThreshold=(int)(m_entries.length*0.75);
         m_size=0;
     }
+    /**
+     * @return empty set
+     */
     public PermanentDependencySet emptySet() {
         return m_emptySet;
     }
+    /**
+     * Remove unused set.
+     */
     public void removeUnusedSets() {
         while (m_firstUnusedSet!=null)
             destroyDependencySet(m_firstUnusedSet);
     }
+    /**
+     * @param dependencySet dependencySet
+     */
     public void addUsage(PermanentDependencySet dependencySet) {
         assert dependencySet.m_branchingPoint>=0 || dependencySet==m_emptySet;
         if (dependencySet.m_usageCounter==0)
             removeFromUnusedList(dependencySet);
         dependencySet.m_usageCounter++;
     }
+    /**
+     * @param dependencySet dependencySet
+     */
     public void removeUsage(PermanentDependencySet dependencySet) {
         assert dependencySet.m_branchingPoint>=0 || dependencySet==m_emptySet;
         assert dependencySet.m_usageCounter>0;
@@ -90,6 +109,11 @@ public final class DependencySetFactory implements Serializable {
         if (dependencySet.m_usageCounter==0)
             addToUnusedList(dependencySet);
     }
+    /**
+     * @param dependencySet dependencySet
+     * @param branchingPoint branchingPoint
+     * @return modified dep set
+     */
     public PermanentDependencySet addBranchingPoint(DependencySet dependencySet,int branchingPoint) {
         PermanentDependencySet permanentDependencySet=getPermanent(dependencySet);
         if (branchingPoint>permanentDependencySet.m_branchingPoint)
@@ -208,6 +232,11 @@ public final class DependencySetFactory implements Serializable {
         m_entries=newEntries;
         m_resizeThreshold=(int)(m_entries.length*0.75);
     }
+    /**
+     * @param dependencySet dependencySet
+     * @param branchingPoint branchingPoint
+     * @return dep set
+     */
     public PermanentDependencySet removeBranchingPoint(DependencySet dependencySet,int branchingPoint) {
         PermanentDependencySet permanentDependencySet=getPermanent(dependencySet);
         if (branchingPoint==permanentDependencySet.m_branchingPoint)
@@ -231,6 +260,11 @@ public final class DependencySetFactory implements Serializable {
             }
         }
     }
+    /**
+     * @param set1 set1
+     * @param set2 set2
+     * @return union
+     */
     public PermanentDependencySet unionWith(DependencySet set1,DependencySet set2) {
         PermanentDependencySet permanentSet1=getPermanent(set1);
         PermanentDependencySet permanentSet2=getPermanent(set2);
@@ -257,6 +291,10 @@ public final class DependencySetFactory implements Serializable {
             result=getDepdendencySet(result,m_mergeArray.get(index));
         return result;
     }
+    /**
+     * @param dependencySet dependencySet
+     * @return permanent
+     */
     public PermanentDependencySet getPermanent(DependencySet dependencySet) {
         if (dependencySet instanceof PermanentDependencySet)
             return (PermanentDependencySet)dependencySet;

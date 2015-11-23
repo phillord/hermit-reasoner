@@ -27,8 +27,18 @@ import org.semanticweb.HermiT.Prefixes;
 public abstract class Concept implements Serializable {
     private static final long serialVersionUID=-8685976675539160944L;
 
+    /**
+     * @return true if always true
+     */
     public abstract boolean isAlwaysTrue();
+    /**
+     * @return true if always false
+     */
     public abstract boolean isAlwaysFalse();
+    /**
+     * @param prefixes prefixes
+     * @return toString
+     */
     public abstract String toString(Prefixes prefixes);
     @Override
     public String toString() {

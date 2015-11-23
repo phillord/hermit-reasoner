@@ -24,7 +24,7 @@ import org.semanticweb.HermiT.model.AnnotatedEquality;
 /**
  * Implements the nominal introduction rule.
  */
-public final class NominalIntroductionManager implements Serializable {
+final class NominalIntroductionManager implements Serializable {
     private static final long serialVersionUID=5863617010809297861L;
 
     protected final Tableau m_tableau;

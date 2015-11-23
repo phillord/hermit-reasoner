@@ -21,7 +21,7 @@ import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.owlapi.model.IRI;
-
+@SuppressWarnings("javadoc")
 public abstract class AbstractStructuralTest extends AbstractOntologyTest {
 
     public AbstractStructuralTest(String name) {

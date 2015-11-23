@@ -65,7 +65,7 @@ import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.tableau.Node;
 
 @SuppressWarnings("serial")
-public class SubtreeViewer extends JFrame {
+class SubtreeViewer extends JFrame {
     protected final Debugger m_debugger;
     protected final SubtreeTreeModel m_subtreeTreeModel;
     protected final JTextArea m_nodeInfoTextArea;

@@ -51,7 +51,7 @@ public class DatatypeRegistry {
         registerDatatypeHandler(new XMLLiteralDatatypeHandler());
     }
 
-    public static void registerDatatypeHandler(DatatypeHandler datatypeHandler) {
+    static void registerDatatypeHandler(DatatypeHandler datatypeHandler) {
         synchronized (s_handlersByDatatypeURI) {
             for (String datatypeURI : datatypeHandler.getManagedDatatypeURIs())
                 if (s_handlersByDatatypeURI.containsKey(datatypeURI))
@@ -81,6 +81,13 @@ public class DatatypeRegistry {
     protected static DatatypeHandler getDatatypeHandlerFor(DatatypeRestriction datatypeRestriction) throws UnsupportedDatatypeException {
         return getDatatypeHandlerFor(datatypeRestriction.getDatatypeURI());
     }
+    /**
+     * @param lexicalForm lexicalForm
+     * @param datatypeURI datatypeURI
+     * @return literal
+     * @throws MalformedLiteralException if literal is malformed
+     * @throws UnsupportedDatatypeException if literal is unsupported
+     */
     public static Object parseLiteral(String lexicalForm,String datatypeURI) throws MalformedLiteralException,UnsupportedDatatypeException {
         DatatypeHandler handler;
         try {
@@ -97,18 +104,42 @@ public class DatatypeRegistry {
         }
         return handler.parseLiteral(lexicalForm,datatypeURI);
     }
+    /**
+     * @param datatypeRestriction datatypeRestriction
+     * @throws UnsupportedDatatypeException if datatype is unsupported
+     * @throws UnsupportedFacetException if facet is unsupported
+     */
     public static void validateDatatypeRestriction(DatatypeRestriction datatypeRestriction) throws UnsupportedDatatypeException,UnsupportedFacetException {
         getDatatypeHandlerFor(datatypeRestriction).validateDatatypeRestriction(datatypeRestriction);
     }
+    /**
+     * @param datatypeRestriction datatypeRestriction
+     * @return subset
+     */
     public static ValueSpaceSubset createValueSpaceSubset(DatatypeRestriction datatypeRestriction) {
         return getDatatypeHandlerFor(datatypeRestriction).createValueSpaceSubset(datatypeRestriction);
     }
+    /**
+     * @param valueSpaceSubset valueSpaceSubset
+     * @param datatypeRestriction datatypeRestriction
+     * @return conjunction
+     */
     public static ValueSpaceSubset conjoinWithDR(ValueSpaceSubset valueSpaceSubset,DatatypeRestriction datatypeRestriction) {
         return getDatatypeHandlerFor(datatypeRestriction).conjoinWithDR(valueSpaceSubset,datatypeRestriction);
     }
+    /**
+     * @param valueSpaceSubset valueSpaceSubset
+     * @param datatypeRestriction datatypeRestriction
+     * @return conjunction
+     */
     public static ValueSpaceSubset conjoinWithDRNegation(ValueSpaceSubset valueSpaceSubset,DatatypeRestriction datatypeRestriction) {
         return getDatatypeHandlerFor(datatypeRestriction).conjoinWithDRNegation(valueSpaceSubset,datatypeRestriction);
     }
+    /**
+     * @param subsetDatatypeURI subsetDatatypeURI
+     * @param supersetDatatypeURI supersetDatatypeURI
+     * @return true if subset
+     */
     public static boolean isSubsetOf(String subsetDatatypeURI,String supersetDatatypeURI) {
         DatatypeHandler datatypeHandler=getDatatypeHandlerFor(subsetDatatypeURI);
         if (datatypeHandler.getManagedDatatypeURIs().contains(supersetDatatypeURI))
@@ -116,6 +147,11 @@ public class DatatypeRegistry {
         else
             return false;
     }
+    /**
+     * @param datatypeURI1 datatypeURI1
+     * @param datatypeURI2 datatypeURI2
+     * @return true if disjoint with
+     */
     public static boolean isDisjointWith(String datatypeURI1,String datatypeURI2) {
         DatatypeHandler datatypeHandler=getDatatypeHandlerFor(datatypeURI1);
         if (datatypeHandler.getManagedDatatypeURIs().contains(datatypeURI2))
@@ -163,7 +199,7 @@ public class DatatypeRegistry {
         }
     }
 
-    public static class AnonymousConstantValue {
+    static class AnonymousConstantValue {
         protected final String m_name;
 
         public AnonymousConstantValue(String name) {

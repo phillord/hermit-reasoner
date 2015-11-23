@@ -10,7 +10,7 @@ import java.util.Set;
 
 import org.semanticweb.HermiT.AbstractOntologyTest;
 import org.semanticweb.HermiT.Configuration;
-import org.semanticweb.HermiT.Reasoner;
+import org.semanticweb.HermiT.ReasonerFactory;
 import org.semanticweb.HermiT.monitor.CountingMonitor;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.OWLOntologyDocumentSource;
@@ -52,7 +52,7 @@ public class ReasonerTest extends AbstractReasonerTest {
     public void testEmptyChain() {
         boolean errorThrown = false;
         try {
-            loadReasonerFromResource("res/only1.owl");
+            loadReasonerFromResource("/org/semanticweb/HermiT/reasoner/res/only1.owl");
         } catch (@SuppressWarnings("unused") IllegalArgumentException e) {
             errorThrown = true;
         } catch (Exception e) {
@@ -66,7 +66,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         OWLOntologyManager m = OWLManager.createOWLOntologyManager();
         OWLOntology o = m.createOntology(testOntologyIRI);
 
-        Reasoner.ReasonerFactory reasonerFactory = new Reasoner.ReasonerFactory();
+        ReasonerFactory reasonerFactory = new ReasonerFactory();
         OWLReasoner hermit = reasonerFactory.createNonBufferingReasoner(o);
 
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();

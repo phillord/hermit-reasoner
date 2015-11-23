@@ -34,7 +34,7 @@ import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.ReasoningTaskDescription;
 import org.semanticweb.HermiT.tableau.Tableau;
-
+/**DeterministicClassification.*/
 public class DeterministicClassification {
     protected final Tableau m_tableau;
     protected final ClassificationProgressMonitor m_progressMonitor;
@@ -42,6 +42,13 @@ public class DeterministicClassification {
     protected final AtomicConcept m_bottomElement;
     protected final Set<AtomicConcept> m_elements;
 
+    /**
+     * @param tableau tableau
+     * @param progressMonitor progressMonitor
+     * @param topElement topElement
+     * @param bottomElement bottomElement
+     * @param elements elements
+     */
     public DeterministicClassification(Tableau tableau,ClassificationProgressMonitor progressMonitor,AtomicConcept topElement,AtomicConcept bottomElement,Set<AtomicConcept> elements) {
         m_tableau=tableau;
         m_progressMonitor=progressMonitor;
@@ -49,6 +56,9 @@ public class DeterministicClassification {
         m_bottomElement=bottomElement;
         m_elements=elements;
     }
+    /**
+     * @return hierarchy
+     */
     public Hierarchy<AtomicConcept> classify() {
         if (!m_tableau.isDeterministic())
             throw new IllegalStateException("Internal error: DeterministicClassificationManager can be used only with a deterministic tableau.");
@@ -80,6 +90,13 @@ public class DeterministicClassification {
         }
         return buildHierarchy(m_topElement,m_bottomElement,allSubsumers);
     }
+    /**
+     * @param topElement topElement
+     * @param bottomElement bottomElement
+     * @param graphNodes graphNodes
+     * @param <T> type
+     * @return hierarchy
+     */
     public static <T> Hierarchy<T> buildHierarchy(T topElement,T bottomElement,Map<T,GraphNode<T>> graphNodes) {
         HierarchyNode<T> topNode=new HierarchyNode<>(topElement);
         HierarchyNode<T> bottomNode=new HierarchyNode<>(bottomElement);
@@ -156,7 +173,7 @@ public class DeterministicClassification {
         }
     }
 
-    public static class GraphNode<T> {
+    static class GraphNode<T> {
         public final T m_element;
         public final Set<T> m_successors;
         public int m_dfsIndex;

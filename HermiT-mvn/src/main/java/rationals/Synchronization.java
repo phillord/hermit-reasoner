@@ -39,8 +39,7 @@ import java.util.Collection;
 import java.util.Set;
 
 /**
- * An interface for defining various synchronization schemes. This interface is
- * used in {@see rationals.transformations.Synchronize} for and allows various
+ * An interface for defining various synchronization schemes. This interface allows various
  * strategies of synchronization between transitions of two automata.
  * 
  * @author nono
@@ -71,6 +70,7 @@ public interface Synchronization {
      *            an alphabet
      * @param b
      *            another alphabet
+     * @param <T> type
      * @return a new Set of letters (may be empty) from a and b that can be
      *         synchronized.
      */
@@ -79,7 +79,8 @@ public interface Synchronization {
     /**
      * Construct the synchronization alphabet from a collection of alphabets.
      * 
-     * @param alphl
+     * @param alphl alphl
+     * @param <T> type
      * @return a Set implementation containing all letters of all alphabets in
      *         <code>alphl</code> that could be synchronized.
      */

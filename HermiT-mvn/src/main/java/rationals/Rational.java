@@ -164,10 +164,17 @@ public interface Rational {
      */
     Set<Transition> delta(State state);
 
+    /**
+     * @param from start
+     * @param to end
+     * @return delta from start to end
+     */
     Set<Transition> deltaFrom(State from, State to);
 
     /**
      * Returns the set of all transitions of the reverse of this automaton
+     * @param state state
+     * @param label label
      * 
      * @return the set of all transitions of the reverse of this automaton. A
      *         reverse of an automaton <em>A = (X , Q , I , T , D)</em> is the
@@ -196,8 +203,8 @@ public interface Rational {
      *            transition to check
      * @return true if the transition is valid and will not cause a
      *         NoSuchStateException to be thrown. A NoSuchStateException is
-     *         thrown if if <tt>transition</tt> is <tt>null</<tt> or if
-     *         <tt>transition</tt> = <em>(q , l , q')</em> and <em>q</em> or
+     *         thrown if if {@code transition} is null or if
+     *         {@code transition} = <em>(q , l , q')</em> and <em>q</em> or
      *         <em>q'</em> does not belong to <em>Q</em> the set of the states
      *         of this automaton.
      */
@@ -214,8 +221,8 @@ public interface Rational {
     boolean addTransition(Transition transition, String ifInvalid);
 
     /**
-     * @param st
-     * @return
+     * @param st st
+     * @return delta minus one
      */
     Set<Transition> deltaMinusOne(State st);
 }

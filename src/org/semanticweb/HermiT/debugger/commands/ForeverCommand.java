@@ -20,9 +20,12 @@ package org.semanticweb.HermiT.debugger.commands;
 import java.io.PrintWriter;
 
 import org.semanticweb.HermiT.debugger.Debugger;
-
+/**ForeverCommand.*/
 public class ForeverCommand extends AbstractCommand {
     
+    /**
+     * @param debugger debugger
+     */
     public ForeverCommand(Debugger debugger) {
         super(debugger);
     }

@@ -39,11 +39,10 @@ import java.util.Set;
 
 import rationals.State;
 
+class StatesCouple {
+    final Set<State> sa;
 
-public class StatesCouple {
-    public final Set<State> sa;
-
-    public final Set<State> sb;
+    final Set<State> sb;
 
     final int hash;
 

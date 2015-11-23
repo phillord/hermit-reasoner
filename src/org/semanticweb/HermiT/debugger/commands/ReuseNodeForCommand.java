@@ -24,9 +24,12 @@ import org.semanticweb.HermiT.existentials.ExistentialExpansionStrategy;
 import org.semanticweb.HermiT.existentials.IndividualReuseStrategy;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.tableau.Node;
-
+/**ReuseNodeForCommand.*/
 public class ReuseNodeForCommand extends AbstractCommand {
 
+    /**
+     * @param debugger debugger
+     */
     public ReuseNodeForCommand(Debugger debugger) {
         super(debugger);
     }

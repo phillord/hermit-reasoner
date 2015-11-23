@@ -33,7 +33,7 @@ import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.NodeType;
 import org.semanticweb.HermiT.tableau.Tableau;
-
+/**Anywhere validated blocking strategy.*/
 public class AnywhereValidatedBlocking implements BlockingStrategy {
     protected final DirectBlockingChecker m_directBlockingChecker;
     protected final ValidatedBlockersCache m_currentBlockersCache;
@@ -44,6 +44,10 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
     protected Node m_lastValidatedUnchangedNode;
     protected final boolean m_useSimpleCore;
 
+    /**
+     * @param directBlockingChecker directBlockingChecker
+     * @param useSimpleCore useSimpleCore
+     */
     public AnywhereValidatedBlocking(DirectBlockingChecker directBlockingChecker,boolean useSimpleCore) {
         m_directBlockingChecker=directBlockingChecker;
         m_currentBlockersCache=new ValidatedBlockersCache(m_directBlockingChecker);
@@ -89,6 +93,9 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
             computePreBlocking();
         }
     }
+    /**
+     * Compute preblocking.
+     */
     public void computePreBlocking() {
         if (m_firstChangedNode!=null) {
             Node node=m_firstChangedNode;
@@ -132,6 +139,9 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
             m_firstChangedNode=null;
         }
     }
+    /**
+     * Validate blocks.
+     */
     public void validateBlocks() {
         // statistics for debugging:
         boolean debuggingMode=false;
@@ -555,7 +565,8 @@ class ValidatedBlockersCache {
         }
         return new ArrayList<>();
     }
-    protected static int getIndexFor(int hashCode,int tableLength) {
+    protected static int getIndexFor(int _hashCode,int tableLength) {
+        int hashCode=_hashCode;
         hashCode+=~(hashCode<<9);
         hashCode^=(hashCode>>>14);
         hashCode+=(hashCode<<4);
