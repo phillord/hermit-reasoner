@@ -18,6 +18,8 @@
 // An update for the tests (all.rdf) should regularly be downloaded to the ontologies folder from http://wiki.webont.org/exports/
 package org.semanticweb.HermiT.owl_wg_tests;
 
+import static org.semanticweb.owlapi.util.OWLAPIStreamUtils.asList;
+
 import java.io.File;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -175,7 +177,7 @@ public class WGTestDescriptor {
 
     protected EnumSet<TestType> getTestType() throws InvalidWGTestException {
         EnumSet<TestType> testTypesEnum = EnumSet.noneOf(TestType.class);
-        Collection<OWLClassExpression> types = EntitySearcher.getTypes(testIndividual, testContainer);
+        Collection<OWLClassExpression> types = asList(EntitySearcher.getTypes(testIndividual, testContainer));
         nextItem: for (OWLClassExpression type : types) {
             if (type instanceof OWLClass) {
                 IRI testTypeIRI = ((OWLClass) type).getIRI();

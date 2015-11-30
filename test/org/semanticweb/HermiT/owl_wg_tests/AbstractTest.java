@@ -22,6 +22,7 @@ package org.semanticweb.HermiT.owl_wg_tests;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.PrintWriter;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
@@ -126,7 +127,8 @@ public abstract class AbstractTest extends TestCase {
 
     protected void saveOntology(OWLOntology ontology, File file) throws Exception {
         try (FileWriter out = new FileWriter(file);
-        BufferedWriter writer = new BufferedWriter(out);) {
+                BufferedWriter out2 = new BufferedWriter(out);
+                PrintWriter writer = new PrintWriter(out2);) {
             OWLFunctionalSyntaxRenderer renderer = new OWLFunctionalSyntaxRenderer();
             renderer.render(ontology, writer);
         }

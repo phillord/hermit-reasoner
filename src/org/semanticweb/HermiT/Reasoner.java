@@ -2314,7 +2314,7 @@ public class Reasoner implements OWLReasoner {
             if (role instanceof AtomicRole)
                 result.add(factory.getOWLObjectProperty(IRI.create(((AtomicRole)role).getIRI())));
             else {
-                OWLObjectPropertyExpression ope=factory.getOWLObjectProperty(IRI.create(((InverseRole)role).getInverseOf().getIRI()));
+                OWLObjectProperty ope=factory.getOWLObjectProperty(IRI.create(((InverseRole)role).getInverseOf().getIRI()));
                 result.add(factory.getOWLObjectInverseOf(ope));
             }
         }

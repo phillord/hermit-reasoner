@@ -88,7 +88,7 @@ public abstract class AbstractStructuralTest extends AbstractOntologyTest {
         OWLClausification clausifier = new OWLClausification(new Configuration());
         Set<DescriptionGraph> noDescriptionGraphs = Collections.emptySet();
         DLOntology dlOntology = (DLOntology) clausifier.preprocessAndClausify(m_ontology, noDescriptionGraphs)[1];
-        String ontologyIRI = m_ontology.getOntologyID().getDefaultDocumentIRI().or(IRI.create( "urn:hermit:kb")).toString();
+        String ontologyIRI = m_ontology.getOntologyID().getDefaultDocumentIRI().orElse(IRI.create( "urn:hermit:kb")).toString();
         List<String> actualStrings = new ArrayList<>();
         Prefixes prefixes = new Prefixes();
         prefixes.declareSemanticWebPrefixes();
