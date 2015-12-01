@@ -1,5 +1,7 @@
 package org.semanticweb.HermiT.reasoner;
 
+import static org.semanticweb.owlapi.util.OWLAPIStreamUtils.asSet;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -54,10 +56,10 @@ public class OWLLinkTest extends AbstractReasonerTest {
         createReasoner();
         OWLObjectProperty knows = m_dataFactory.getOWLObjectProperty(IRI.create(mainOntology + "#knows"));
         NodeSet<OWLObjectPropertyExpression> peers = m_reasoner.getSubObjectProperties(knows, true);
-        assertTrue(peers.getFlattened().size() == 20); // Test A from the Bob
+        assertTrue(peers.entities().count() == 20L); // Test A from the Bob
                                                        // paper
         peers = m_reasoner.getSubObjectProperties(knows, false);
-        assertTrue(peers.getFlattened().size() == 101); // Test B from the Bob
+        assertTrue(peers.entities().count() == 101L); // Test B from the Bob
                                                         // paper
     }
 
@@ -167,11 +169,7 @@ public class OWLLinkTest extends AbstractReasonerTest {
         }
         // m_reasoner.prepareReasoner();
         NodeSet<OWLNamedIndividual> peers = m_reasoner.getObjectPropertyValues(e1079, colleague);
-        assertTrue(expected.length == peers.getFlattened().size());
-        for (Node<OWLNamedIndividual> i : peers.getNodes())
-            for (OWLNamedIndividual ni : i.getEntities()) {
-                assertTrue(expectedValues.contains(ni));
-            }
+        assertEquals(expectedValues, asSet(peers.entities()));
     }
 
     public void testDisjointProperties() throws Exception {
@@ -213,10 +211,8 @@ public class OWLLinkTest extends AbstractReasonerTest {
         node = new OWLObjectPropertyNode(m_dataFactory.getOWLBottomObjectProperty());
         expectedSet.add(node);
         NodeSet<OWLObjectPropertyExpression> expected = new OWLObjectPropertyNodeSet(expectedSet);
-        assertTrue(expected.getFlattened().size() == result.getFlattened().size());
-        assertTrue(expected.getNodes().size() == result.getNodes().size());
-        for (OWLObjectPropertyExpression o : expected.getFlattened())
-            assertTrue(result.containsEntity(o));
+        assertEquals(asSet(expected.entities()), asSet(result.entities()));
+        assertEquals(expected.nodes().count(), result.nodes().count());
 
         result = m_reasoner.getDisjointObjectProperties(
                 m_ontologyManager.getOWLDataFactory().getOWLObjectProperty(iri("hasParent")));
@@ -247,10 +243,8 @@ public class OWLLinkTest extends AbstractReasonerTest {
         node = new OWLObjectPropertyNode(m_dataFactory.getOWLBottomObjectProperty());
         expectedSet.add(node);
         expected = new OWLObjectPropertyNodeSet(expectedSet);
-        assertTrue(expected.getFlattened().size() == result.getFlattened().size());
-        assertTrue(expected.getNodes().size() == result.getNodes().size());
-        for (OWLObjectPropertyExpression o : expected.getFlattened())
-            assertTrue(result.containsEntity(o));
+        assertEquals(asSet(expected.entities()), asSet(result.entities()));
+        assertEquals(expected.nodes().count(), result.nodes().count());
     }
 
     public void testDisjointClasses() throws Exception {
@@ -270,10 +264,9 @@ public class OWLLinkTest extends AbstractReasonerTest {
         expectedSet.add(node);
         NodeSet<OWLClass> expected = new OWLClassNodeSet(expectedSet);
         NodeSet<OWLClass> result = m_reasoner.getDisjointClasses(families);
-        assertTrue(expected.getFlattened().size() == result.getFlattened().size());
-        assertTrue(expected.getNodes().size() == result.getNodes().size());
-        for (OWLClass c : expected.getFlattened())
-            assertTrue(result.containsEntity(c));
+        assertEquals(asSet(expected.entities()), asSet(result.entities()));
+        assertEquals(expected.nodes().count(), result.nodes().count());
+        
     }
 
     public void testBobTests() throws Exception {
@@ -334,7 +327,7 @@ public class OWLLinkTest extends AbstractReasonerTest {
             if (!testInconsistency) {
                 physicalIRI = IRI.create(getClass().getResource("res/OWLLink/" + testName + "-conclusion.owl").toURI());
                 c = m_ontologyManager.loadOntology(physicalIRI);
-                boolean result = m_reasoner.isEntailed(c.getLogicalAxioms());
+                boolean result = m_reasoner.isEntailed(asSet(c.logicalAxioms()));
                 assertTrue("Test " + testName + " failed! ", result);
             } else {
                 boolean result = !m_reasoner.isConsistent();

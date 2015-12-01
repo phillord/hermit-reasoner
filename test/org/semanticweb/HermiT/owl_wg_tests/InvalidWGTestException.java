@@ -18,7 +18,7 @@
 package org.semanticweb.HermiT.owl_wg_tests;
 
 @SuppressWarnings({"serial","javadoc"})
-public class InvalidWGTestException extends Exception {
+public class InvalidWGTestException extends RuntimeException {
 
     public InvalidWGTestException(String message) {
         super(message);

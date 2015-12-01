@@ -25,7 +25,6 @@ import java.util.List;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 @SuppressWarnings("javadoc")
@@ -45,11 +44,9 @@ public class WGTestRegistry {
                 IRI.create(WGTestRegistry.class.getResource("ontologies/all.rdf").toURI()));
         m_testDescriptors = new ArrayList<>();
         OWLClass testCaseClass = m_ontologyManager.getOWLDataFactory().getOWLClass(IRI.create(URI_BASE + "TestCase"));
-        for (OWLClassAssertionAxiom ax : m_testContainer.getClassAssertionAxioms(testCaseClass)) {
-            WGTestDescriptor wgTestDescriptor = new WGTestDescriptor(m_ontologyManager, m_testContainer,
-                    ax.getIndividual());
-            m_testDescriptors.add(wgTestDescriptor);
-        }
+        m_testContainer.classAssertionAxioms(testCaseClass).forEach(ax->
+            m_testDescriptors.add(new WGTestDescriptor(m_ontologyManager, m_testContainer,
+                    ax.getIndividual())));
     }
 
     public List<WGTestDescriptor> getTestDescriptors() {

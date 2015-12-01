@@ -1,6 +1,9 @@
 package org.semanticweb.HermiT.structural;
 
+import static org.semanticweb.owlapi.util.OWLAPIStreamUtils.asList;
+
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.semanticweb.owlapi.model.OWLAxiom;
@@ -191,21 +194,21 @@ public class NormalizationTest extends AbstractStructuralTest {
         OWLAxioms axiomHolder = new OWLAxioms();
         OWLNormalization normalization = new OWLNormalization(m_ontologyManager.getOWLDataFactory(), axiomHolder, 0);
         normalization.processOntology(m_ontology);
-        for (OWLClassExpression[] inclusion : axiomHolder.m_conceptInclusions) {
+        for (List<OWLClassExpression> inclusion : axiomHolder.m_conceptInclusions) {
             OWLClassExpression superDescription;
-            if (inclusion.length == 1)
-                superDescription = inclusion[0];
+            if (inclusion.size() == 1)
+                superDescription = inclusion.get(0);
             else
                 superDescription = m_dataFactory.getOWLObjectUnionOf(inclusion);
             axioms.add(m_dataFactory.getOWLSubClassOfAxiom(m_ontologyManager.getOWLDataFactory().getOWLThing(),
                     superDescription));
         }
-        for (OWLObjectPropertyExpression[] inclusion : axiomHolder.m_simpleObjectPropertyInclusions)
-            axioms.add(m_dataFactory.getOWLSubObjectPropertyOfAxiom(inclusion[0], inclusion[1]));
-        for (OWLDataPropertyExpression[] inclusion : axiomHolder.m_dataPropertyInclusions)
-            axioms.add(m_dataFactory.getOWLSubDataPropertyOfAxiom(inclusion[0], inclusion[1]));
+        for (List<OWLObjectPropertyExpression> inclusion : axiomHolder.m_simpleObjectPropertyInclusions)
+            axioms.add(m_dataFactory.getOWLSubObjectPropertyOfAxiom(inclusion.get(0), inclusion.get(1)));
+        for (List<OWLDataPropertyExpression> inclusion : axiomHolder.m_dataPropertyInclusions)
+            axioms.add(m_dataFactory.getOWLSubDataPropertyOfAxiom(inclusion.get(0), inclusion.get(1)));
         for (OWLHasKeyAxiom axiom : axiomHolder.m_hasKeys)
-            axioms.add(m_dataFactory.getOWLHasKeyAxiom(axiom.getClassExpression(), axiom.getPropertyExpressions()));
+            axioms.add(m_dataFactory.getOWLHasKeyAxiom(axiom.getClassExpression(),asList(axiom.propertyExpressions())));
         axioms.addAll(axiomHolder.m_facts);
         return axioms;
     }

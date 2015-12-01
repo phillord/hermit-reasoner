@@ -17,7 +17,10 @@
  */
 package org.semanticweb.HermiT.structural;
 
+import static org.semanticweb.owlapi.util.OWLAPIStreamUtils.asList;
+
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.semanticweb.HermiT.Configuration;
@@ -132,18 +135,16 @@ public class ReducedABoxOnlyClausification implements OWLAxiomVisitor {
     }
     @Override
     public void visit(OWLSameIndividualAxiom object) {
-        OWLIndividual[] individuals=new OWLIndividual[object.getIndividuals().size()];
-        object.getIndividuals().toArray(individuals);
-        for (int i=0;i<individuals.length-1;i++)
-            m_positiveFacts.add(Atom.create(Equality.create(),getIndividual(individuals[i]),getIndividual(individuals[i+1])));
+        List<OWLIndividual> individuals=asList(object.individuals());
+        for (int i=0;i<individuals.size()-1;i++)
+            m_positiveFacts.add(Atom.create(Equality.create(),getIndividual(individuals.get(i)),getIndividual(individuals.get(i+1))));
     }
     @Override
     public void visit(OWLDifferentIndividualsAxiom object) {
-        OWLIndividual[] individuals=new OWLIndividual[object.getIndividuals().size()];
-        object.getIndividuals().toArray(individuals);
-        for (int i=0;i<individuals.length;i++)
-            for (int j=i+1;j<individuals.length;j++)
-                m_positiveFacts.add(Atom.create(Inequality.create(),getIndividual(individuals[i]),getIndividual(individuals[j])));
+        List<OWLIndividual> individuals=asList(object.individuals());
+        for (int i=0;i<individuals.size()-1;i++)
+            for (int j=i+1;j<individuals.size();j++)
+                m_positiveFacts.add(Atom.create(Inequality.create(),getIndividual(individuals.get(i)),getIndividual(individuals.get(j))));
     }
     @Override
     public void visit(OWLClassAssertionAxiom object) {

@@ -1,5 +1,7 @@
 package org.semanticweb.HermiT.reasoner;
 
+import static org.semanticweb.owlapi.util.OWLAPIStreamUtils.asSet;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -37,8 +39,8 @@ public class OWLReasonerTest extends AbstractReasonerTest {
         invr_inverses_expected.add(m_dataFactory.getOWLObjectInverseOf(OP(IRI("s"))));
         invr_inverses_expected.add(OP(IRI("r")));
         invr_inverses_expected.add(OP(IRI("t")));
-        assertEquals(r_inverses.getEntities(), r_inverses_expected);
-        assertEquals(invr_inverses.getEntities(), invr_inverses_expected);
+        assertEquals(asSet(r_inverses.entities()), r_inverses_expected);
+        assertEquals(asSet(invr_inverses.entities()), invr_inverses_expected);
     }
 
     public void testBottomObjectPropertySubs() throws Exception {
@@ -71,16 +73,16 @@ public class OWLReasonerTest extends AbstractReasonerTest {
         assertTrue(!aSuper.containsEntity(a));
         assertTrue(aSuper.containsEntity(b));
         assertTrue(aSuper.containsEntity(m_dataFactory.getOWLThing()));
-        assertTrue(aSuper.getFlattened().size() == 2);
+        assertTrue(aSuper.entities().count() == 2L);
         assertTrue(!bSuper.containsEntity(b));
         assertTrue(bSuper.containsEntity(m_dataFactory.getOWLThing()));
-        assertTrue(bSuper.getFlattened().size() == 1);
+        assertTrue(bSuper.entities().count() == 1L);
 
         assertTrue(aDirect.containsEntity(b));
         assertTrue(!aDirect.containsEntity(m_dataFactory.getOWLThing()));
-        assertTrue(aDirect.getFlattened().size() == 1);
+        assertTrue(aDirect.entities().count() == 1L);
         assertTrue(bDirect.containsEntity(m_dataFactory.getOWLThing()));
-        assertTrue(bDirect.getFlattened().size() == 1);
+        assertTrue(bDirect.entities().count() == 1L);
 
         OWLClass c = m_dataFactory.getOWLClass(IRI.create(AbstractOntologyTest.NS + "C"));
         OWLAxiom bImpliesC = m_dataFactory.getOWLSubClassOfAxiom(b, c);
@@ -98,34 +100,34 @@ public class OWLReasonerTest extends AbstractReasonerTest {
         assertTrue(aSuper.containsEntity(b));
         assertTrue(aSuper.containsEntity(c));
         assertTrue(aSuper.containsEntity(m_dataFactory.getOWLThing()));
-        assertTrue(aSuper.getFlattened().size() == 3);
+        assertTrue(aSuper.entities().count() == 3L);
         assertTrue(!bSuper.containsEntity(b));
         assertTrue(bSuper.containsEntity(c));
         assertTrue(bSuper.containsEntity(m_dataFactory.getOWLThing()));
-        assertTrue(bSuper.getFlattened().size() == 2);
+        assertTrue(bSuper.entities().count() == 2L);
         assertTrue(!cSuper.containsEntity(a));
         assertTrue(!cSuper.containsEntity(b));
         assertTrue(!cSuper.containsEntity(c));
         assertTrue(cSuper.containsEntity(m_dataFactory.getOWLThing()));
-        assertTrue(cSuper.getFlattened().size() == 1);
+        assertTrue(cSuper.entities().count() == 1L);
 
         assertTrue(!aDirect.containsEntity(a));
         assertTrue(aDirect.containsEntity(b));
         assertTrue(!aDirect.containsEntity(c));
         assertTrue(!aDirect.containsEntity(m_dataFactory.getOWLThing()));
-        assertTrue(aDirect.getFlattened().size() == 1);
+        assertTrue(aDirect.entities().count() == 1L);
         assertTrue(!bDirect.containsEntity(a));
         assertTrue(!bDirect.containsEntity(b));
         assertTrue(bDirect.containsEntity(c));
         assertTrue(!bDirect.containsEntity(m_dataFactory.getOWLThing()));
-        assertTrue(bDirect.getFlattened().size() == 1);
+        assertTrue(bDirect.entities().count() == 1L);
         assertTrue(!cDirect.containsEntity(a));
         assertTrue(!cDirect.containsEntity(b));
         assertTrue(!cDirect.containsEntity(c));
         assertTrue(cDirect.containsEntity(m_dataFactory.getOWLThing()));
-        assertTrue(cDirect.getFlattened().size() == 1);
+        assertTrue(cDirect.entities().count() == 1L);
 
-        m_ontologyManager.removeAxiom(m_ontology, bImpliesC);
+        m_ontology.remove(bImpliesC);
         m_reasoner.flush();
         aSuper = m_reasoner.getSuperClasses(a, false);
         bSuper = m_reasoner.getSuperClasses(b, false);
@@ -138,32 +140,32 @@ public class OWLReasonerTest extends AbstractReasonerTest {
         assertTrue(aSuper.containsEntity(b));
         assertTrue(!aSuper.containsEntity(c));
         assertTrue(aSuper.containsEntity(m_dataFactory.getOWLThing()));
-        assertTrue(aSuper.getFlattened().size() == 2);
+        assertTrue(aSuper.entities().count() == 2L);
         assertTrue(!bSuper.containsEntity(b));
         assertTrue(!bSuper.containsEntity(c));
         assertTrue(bSuper.containsEntity(m_dataFactory.getOWLThing()));
-        assertTrue(bSuper.getFlattened().size() == 1);
+        assertTrue(bSuper.entities().count() == 1L);
         assertTrue(!cSuper.containsEntity(a));
         assertTrue(!cSuper.containsEntity(b));
         assertTrue(!cSuper.containsEntity(c));
         assertTrue(cSuper.containsEntity(m_dataFactory.getOWLThing()));
-        assertTrue(cSuper.getFlattened().size() == 1);
+        assertTrue(cSuper.entities().count() == 1L);
 
         assertTrue(!aDirect.containsEntity(a));
         assertTrue(aDirect.containsEntity(b));
         assertTrue(!aDirect.containsEntity(c));
         assertTrue(!aDirect.containsEntity(m_dataFactory.getOWLThing()));
-        assertTrue(aDirect.getFlattened().size() == 1);
+        assertTrue(aDirect.entities().count() == 1L);
         assertTrue(!bDirect.containsEntity(a));
         assertTrue(!bDirect.containsEntity(b));
         assertTrue(!bDirect.containsEntity(c));
         assertTrue(bDirect.containsEntity(m_dataFactory.getOWLThing()));
-        assertTrue(bDirect.getFlattened().size() == 1);
+        assertTrue(bDirect.entities().count() == 1L);
         assertTrue(!cDirect.containsEntity(a));
         assertTrue(!cDirect.containsEntity(b));
         assertTrue(!cDirect.containsEntity(c));
         assertTrue(cDirect.containsEntity(m_dataFactory.getOWLThing()));
-        assertTrue(cDirect.getFlattened().size() == 1);
+        assertTrue(cDirect.entities().count() == 1L);
     }
 
     public void testIncrementalAddition2() throws Exception {
@@ -186,7 +188,7 @@ public class OWLReasonerTest extends AbstractReasonerTest {
         assertTrue(m_reasoner.isConsistent());
         m_reasoner.flush();
         assertFalse(m_reasoner.isConsistent());
-        m_ontologyManager.removeAxiom(m_ontology, fac);
+        m_ontology.remove(fac);
         assertFalse(m_reasoner.isConsistent());
         m_reasoner.flush();
         assertTrue(m_reasoner.isConsistent());
@@ -234,15 +236,15 @@ public class OWLReasonerTest extends AbstractReasonerTest {
         NodeSet<OWLNamedIndividual> Bs = m_reasoner.getInstances(B, false);
         NodeSet<OWLNamedIndividual> directBs = m_reasoner.getInstances(B, true);
         NodeSet<OWLNamedIndividual> Cs = m_reasoner.getInstances(C, false);
-        assertTrue(As.getNodes().size() == 2);
-        assertTrue(As.getFlattened().size() == 3);
-        assertTrue(Bs.getNodes().size() == 2);
-        assertTrue(Bs.getFlattened().size() == 3);
-        assertTrue(directBs.getNodes().size() == 1);
-        assertTrue(directBs.getFlattened().size() == 1);
-        assertTrue(Cs.getNodes().size() == 1);
-        assertTrue(Cs.getFlattened().size() == 2);
-        for (Node<OWLNamedIndividual> ANode : As.getNodes()) {
+        assertTrue(As.nodes().count() == 2L);
+        assertTrue(As.entities().count() == 3L);
+        assertTrue(Bs.nodes().count() == 2L);
+        assertTrue(Bs.entities().count() == 3L);
+        assertTrue(directBs.nodes().count() == 1L);
+        assertTrue(directBs.entities().count() == 1L);
+        assertTrue(Cs.nodes().count() == 1L);
+        assertTrue(Cs.entities().count() == 2L);
+        As.nodes().forEach(ANode-> {
             if (ANode.getSize() == 1)
                 assertTrue(ANode.contains(a1));
             else if (ANode.getSize() == 2) {
@@ -250,8 +252,8 @@ public class OWLReasonerTest extends AbstractReasonerTest {
                 assertTrue(ANode.contains(a2_2));
             } else
                 assertTrue(false);
-        }
-        for (Node<OWLNamedIndividual> BNode : Bs.getNodes()) {
+        });
+        Bs.nodes().forEach(BNode-> {
             if (BNode.getSize() == 1)
                 assertTrue(BNode.contains(b2));
             else if (BNode.getSize() == 2) {
@@ -259,20 +261,20 @@ public class OWLReasonerTest extends AbstractReasonerTest {
                 assertTrue(BNode.contains(b1_2));
             } else
                 assertTrue(false);
-        }
-        for (Node<OWLNamedIndividual> directBNode : directBs.getNodes()) {
+        });
+        directBs.nodes().forEach(directBNode-> {
             if (directBNode.getSize() == 1)
                 assertTrue(directBNode.contains(b2));
             else
                 assertTrue(false);
-        }
-        for (Node<OWLNamedIndividual> CNode : Cs.getNodes()) {
+        });
+        Cs.nodes().forEach(CNode-> {
             if (CNode.getSize() == 2) {
                 assertTrue(CNode.contains(b1_1));
                 assertTrue(CNode.contains(b1_2));
             } else
                 assertTrue(false);
-        }
+        });
     }
 
     public void testNonEquivalenceClasses() throws Exception {
@@ -294,26 +296,18 @@ public class OWLReasonerTest extends AbstractReasonerTest {
         NodeSet<OWLNamedIndividual> Bs = m_reasoner.getInstances(B, false);
         NodeSet<OWLNamedIndividual> directBs = m_reasoner.getInstances(B, true);
         NodeSet<OWLNamedIndividual> Cs = m_reasoner.getInstances(C, false);
-        assertTrue(As.getNodes().size() == 3);
-        assertTrue(As.getFlattened().size() == 3);
-        assertTrue(Bs.getNodes().size() == 3);
-        assertTrue(Bs.getFlattened().size() == 3);
-        assertTrue(directBs.getNodes().size() == 1);
-        assertTrue(directBs.getFlattened().size() == 1);
-        assertTrue(Cs.getNodes().size() == 2);
-        assertTrue(Cs.getFlattened().size() == 2);
-        for (Node<OWLNamedIndividual> ANode : As.getNodes()) {
-            assertTrue(ANode.getSize() == 1);
-        }
-        for (Node<OWLNamedIndividual> BNode : Bs.getNodes()) {
-            assertTrue(BNode.getSize() == 1);
-        }
-        for (Node<OWLNamedIndividual> directBNode : directBs.getNodes()) {
-            assertTrue(directBNode.getSize() == 1);
-        }
-        for (Node<OWLNamedIndividual> CNode : Cs.getNodes()) {
-            assertTrue(CNode.getSize() == 1);
-        }
+        assertTrue(As.nodes().count() == 3L);
+        assertTrue(As.entities().count() == 3L);
+        assertTrue(Bs.nodes().count() == 3L);
+        assertTrue(Bs.entities().count() == 3L);
+        assertTrue(directBs.nodes().count() == 1L);
+        assertTrue(directBs.entities().count() == 1L);
+        assertTrue(Cs.nodes().count() == 2L);
+        assertTrue(Cs.entities().count() == 2L);
+        As.nodes().forEach(ANode->assertTrue(ANode.getSize() == 1));
+        Bs.nodes().forEach(BNode->assertTrue(BNode.getSize() == 1));
+        directBs.nodes().forEach(directBNode->assertTrue(directBNode.getSize() == 1));
+        Cs.nodes().forEach(CNode->assertTrue(CNode.getSize() == 1));
         assertTrue(As.containsEntity(a1));
         assertTrue(As.containsEntity(a2_1));
         assertTrue(As.containsEntity(a2_2));

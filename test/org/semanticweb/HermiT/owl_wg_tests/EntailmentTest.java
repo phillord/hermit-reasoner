@@ -17,6 +17,8 @@
  */
 package org.semanticweb.HermiT.owl_wg_tests;
 
+import static org.semanticweb.owlapi.util.OWLAPIStreamUtils.asSet;
+
 import java.io.File;
 
 import org.semanticweb.HermiT.EntailmentChecker;
@@ -58,7 +60,7 @@ public class EntailmentTest extends AbstractTest {
     @Override
     protected void doTest() {
         EntailmentChecker checker = new EntailmentChecker(m_reasoner, m_ontologyManager.getOWLDataFactory());
-        boolean isEntailed = checker.entails(m_conclusionOntology.getLogicalAxioms());
+        boolean isEntailed = checker.entails(asSet(m_conclusionOntology.logicalAxioms()));
         if (m_positive)
             assertTrue("Axioms should be entailed.", isEntailed);
         else

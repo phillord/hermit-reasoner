@@ -17,6 +17,9 @@
 */
 package org.semanticweb.HermiT.structural;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.owlapi.model.*;
 /**BuiltInPropertyManager.*/
@@ -65,25 +68,25 @@ public class BuiltInPropertyManager {
         // TransitiveObjectProperty( owl:topObjectProperty )
         axioms.m_complexObjectPropertyInclusions.add(new OWLAxioms.ComplexObjectPropertyInclusion(m_topObjectProperty));
         // SymmetricObjectProperty( owl:topObjectProperty )
-        axioms.m_simpleObjectPropertyInclusions.add(new OWLObjectPropertyExpression[] { m_topObjectProperty,m_topObjectProperty.getInverseProperty() });
+        axioms.m_simpleObjectPropertyInclusions.add(Arrays.asList(m_topObjectProperty,m_topObjectProperty.getInverseProperty()));
         // SubClassOf( owl:Thing ObjectSomeValuesFrom( owl:topObjectProperty ObjectOneOf( <internal:nam#topIndividual> ) ) )
         OWLIndividual newIndividual=m_factory.getOWLNamedIndividual(IRI.create("internal:nam#topIndividual"));
         OWLObjectOneOf oneOfNewIndividual=m_factory.getOWLObjectOneOf(newIndividual);
         OWLObjectSomeValuesFrom hasTopNewIndividual=m_factory.getOWLObjectSomeValuesFrom(m_topObjectProperty,oneOfNewIndividual);
-        axioms.m_conceptInclusions.add(new OWLClassExpression[] { hasTopNewIndividual });
+        axioms.m_conceptInclusions.add(Arrays.asList(hasTopNewIndividual));
     }
     protected void axiomatizeBottomObjectProperty(OWLAxioms axioms) {
-        axioms.m_conceptInclusions.add(new OWLClassExpression[] { m_factory.getOWLObjectAllValuesFrom(m_bottomObjectProperty,m_factory.getOWLNothing()) });
+        axioms.m_conceptInclusions.add(Arrays.asList(m_factory.getOWLObjectAllValuesFrom(m_bottomObjectProperty,m_factory.getOWLNothing())));
     }
     protected void axiomatizeTopDataProperty(OWLAxioms axioms) {
         OWLDatatype anonymousConstantsDatatype=m_factory.getOWLDatatype(IRI.create("internal:anonymous-constants"));
         OWLLiteral newConstant=m_factory.getOWLLiteral("internal:constant",anonymousConstantsDatatype);
         OWLDataOneOf oneOfNewConstant=m_factory.getOWLDataOneOf(newConstant);
         OWLDataSomeValuesFrom hasTopNewConstant=m_factory.getOWLDataSomeValuesFrom(m_topDataProperty,oneOfNewConstant);
-        axioms.m_conceptInclusions.add(new OWLClassExpression[] { hasTopNewConstant });
+        axioms.m_conceptInclusions.add(Arrays.asList(hasTopNewConstant));
     }
     protected void axiomatizeBottomDataProperty(OWLAxioms axioms) {
-        axioms.m_conceptInclusions.add(new OWLClassExpression[] { m_factory.getOWLDataAllValuesFrom(m_bottomDataProperty,m_factory.getOWLDataComplementOf(m_factory.getTopDatatype())) });
+        axioms.m_conceptInclusions.add(Arrays.asList(m_factory.getOWLDataAllValuesFrom(m_bottomDataProperty,m_factory.getOWLDataComplementOf(m_factory.getTopDatatype()))));
     }
 
     protected class Checker implements OWLClassExpressionVisitor {
@@ -93,34 +96,30 @@ public class BuiltInPropertyManager {
         public boolean m_usesBottomDataProperty;
 
         public Checker(OWLAxioms axioms) {
-            for (OWLClassExpression[] inclusion : axioms.m_conceptInclusions)
-                for (OWLClassExpression description : inclusion)
-                    description.accept(this);
-            for (OWLObjectPropertyExpression[] inclusion : axioms.m_simpleObjectPropertyInclusions) {
-                visitProperty(inclusion[0]);
-                visitProperty(inclusion[1]);
+            axioms.m_conceptInclusions.forEach(c->c.forEach(d->d.accept(this)));
+            for (List<OWLObjectPropertyExpression> inclusion : axioms.m_simpleObjectPropertyInclusions) {
+                visitProperty(inclusion.get(0));
+                visitProperty(inclusion.get(1));
             }
             for (OWLAxioms.ComplexObjectPropertyInclusion inclusion : axioms.m_complexObjectPropertyInclusions) {
                 for (OWLObjectPropertyExpression subObjectProperty : inclusion.m_subObjectProperties)
                     visitProperty(subObjectProperty);
                 visitProperty(inclusion.m_superObjectProperty);
             }
-            for (OWLObjectPropertyExpression[] disjoint : axioms.m_disjointObjectProperties)
-                for (int index=0;index<disjoint.length;index++)
-                    visitProperty(disjoint[index]);
+            axioms.m_disjointObjectProperties.forEach(c->c.forEach(d->visitProperty(d)));
             for (OWLObjectPropertyExpression property : axioms.m_reflexiveObjectProperties)
                 visitProperty(property);
             for (OWLObjectPropertyExpression property : axioms.m_irreflexiveObjectProperties)
                 visitProperty(property);
             for (OWLObjectPropertyExpression property : axioms.m_asymmetricObjectProperties)
                 visitProperty(property);
-            for (OWLDataPropertyExpression[] inclusion : axioms.m_dataPropertyInclusions) {
-                visitProperty(inclusion[0]);
-                visitProperty(inclusion[1]);
+            for (List<OWLDataPropertyExpression> inclusion : axioms.m_dataPropertyInclusions) {
+                visitProperty(inclusion.get(0));
+                visitProperty(inclusion.get(1));
             }
-            for (OWLDataPropertyExpression[] disjoint : axioms.m_disjointDataProperties)
-                for (int index=0;index<disjoint.length;index++)
-                    visitProperty(disjoint[index]);
+            for (List<OWLDataPropertyExpression> disjoint : axioms.m_disjointDataProperties)
+                for (int index=0;index<disjoint.size();index++)
+                    visitProperty(disjoint.get(index));
             FactVisitor factVisitor=new FactVisitor();
             for (OWLIndividualAxiom fact : axioms.m_facts)
                 fact.accept(factVisitor);
@@ -150,14 +149,12 @@ public class BuiltInPropertyManager {
 
         @Override
         public void visit(OWLObjectIntersectionOf object) {
-            for (OWLClassExpression description : object.getOperands())
-                description.accept(this);
+            object.operands().forEach(d->d.accept(this));
         }
 
         @Override
         public void visit(OWLObjectUnionOf object) {
-            for (OWLClassExpression description : object.getOperands())
-                description.accept(this);
+            object.operands().forEach(d->d.accept(this));
         }
 
         @Override

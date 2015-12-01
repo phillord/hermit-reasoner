@@ -1,5 +1,7 @@
 package org.semanticweb.HermiT.reasoner;
 
+import static org.semanticweb.owlapi.util.OWLAPIStreamUtils.asSet;
+
 import org.semanticweb.HermiT.EntailmentChecker;
 import org.semanticweb.owlapi.io.OWLOntologyDocumentSource;
 import org.semanticweb.owlapi.io.StringDocumentSource;
@@ -18,7 +20,7 @@ public class EntailmentTest extends AbstractReasonerTest {
         loadReasonerWithAxioms(axioms);
         axioms = "DataPropertyAssertion(:dp :a \"0010\"^^xsd:integer)";
         OWLOntology conlusions = getOntologyWithAxioms(axioms);
-        assertEntails(conlusions.getLogicalAxioms(), true);
+        assertEntails(asSet(conlusions.logicalAxioms()), true);
     }
 
     public void testHasKey() throws Exception {
@@ -27,7 +29,7 @@ public class EntailmentTest extends AbstractReasonerTest {
         loadReasonerWithAxioms(axioms);
         axioms = "HasKey(owl:Thing () (:dp))";
         OWLOntology conlusions = getOntologyWithAxioms(axioms);
-        assertEntails(conlusions.getLogicalAxioms(), true);
+        assertEntails(asSet(conlusions.logicalAxioms()), true);
     }
 
     public void testBlankNodes1() throws Exception {
@@ -37,7 +39,7 @@ public class EntailmentTest extends AbstractReasonerTest {
         m_ontologyManager.removeOntology(m_ontology);
         axioms = "ClassAssertion(ObjectSomeValuesFrom(:p owl:Thing) :a)";
         OWLOntology conlusions = getOntologyWithAxioms(axioms);
-        assertEntails(conlusions.getLogicalAxioms(), true);
+        assertEntails(asSet(conlusions.logicalAxioms()), true);
     }
 
     public void testInvalidBlankNodes() throws Exception {
@@ -49,7 +51,7 @@ public class EntailmentTest extends AbstractReasonerTest {
                 + "ObjectPropertyAssertion(:r _:anon2 _:anon1)";
         OWLOntology conlusions = getOntologyWithAxioms(axioms);
         try {
-            new EntailmentChecker(m_reasoner, m_dataFactory).entails(conlusions.getLogicalAxioms());
+            new EntailmentChecker(m_reasoner, m_dataFactory).entails(asSet(conlusions.logicalAxioms()));
             fail();
         } catch (@SuppressWarnings("unused") Exception e) {
             // blank nodes in the conclusion ontology should not contain cycles
@@ -63,7 +65,7 @@ public class EntailmentTest extends AbstractReasonerTest {
         m_ontologyManager.removeOntology(m_ontology);
         axioms = "ObjectPropertyAssertion(:p :a _:anon1)" + "ObjectPropertyAssertion(:r _:anon1 :b)";
         OWLOntology conlusions = getOntologyWithAxioms(axioms);
-        assertEntails(conlusions.getLogicalAxioms(), true);
+        assertEntails(asSet(conlusions.logicalAxioms()), true);
     }
 
     public void testValidBlankNodesInPremise() throws Exception {
@@ -72,7 +74,7 @@ public class EntailmentTest extends AbstractReasonerTest {
         m_ontologyManager.removeOntology(m_ontology);
         axioms = "ObjectPropertyAssertion(:r _:anon1 _:anon2)";
         OWLOntology conlusions = getOntologyWithAxioms(axioms);
-        assertEntails(conlusions.getLogicalAxioms(), true);
+        assertEntails(asSet(conlusions.logicalAxioms()), true);
     }
 
     public void testValidBlankNodes() throws Exception {
@@ -81,7 +83,7 @@ public class EntailmentTest extends AbstractReasonerTest {
         m_ontologyManager.removeOntology(m_ontology);
         axioms = "ObjectPropertyAssertion(:r _:anon1 _:anon2)";
         OWLOntology conlusions = getOntologyWithAxioms(axioms);
-        assertEntails(conlusions.getLogicalAxioms(), true);
+        assertEntails(asSet(conlusions.logicalAxioms()), true);
     }
 
     public void testBlankWithDTs() throws Exception {
@@ -90,7 +92,7 @@ public class EntailmentTest extends AbstractReasonerTest {
         m_ontologyManager.removeOntology(m_ontology);
         axioms = "DataPropertyAssertion(:dp _:anon1 \"test\")";
         OWLOntology conlusions = getOntologyWithAxioms(axioms);
-        assertEntails(conlusions.getLogicalAxioms(), false);
+        assertEntails(asSet(conlusions.logicalAxioms()), false);
     }
 
     public void testBlankWithDTs2() throws Exception {
@@ -99,7 +101,7 @@ public class EntailmentTest extends AbstractReasonerTest {
         m_ontologyManager.removeOntology(m_ontology);
         axioms = "DataPropertyAssertion(:dp _:anon1 \"test\")";
         OWLOntology conlusions = getOntologyWithAxioms(axioms);
-        assertEntails(conlusions.getLogicalAxioms(), true);
+        assertEntails(asSet(conlusions.logicalAxioms()), true);
     }
 
     public void testBlankWithDTs3() throws Exception {
@@ -108,7 +110,7 @@ public class EntailmentTest extends AbstractReasonerTest {
         m_ontologyManager.removeOntology(m_ontology);
         axioms = "DataPropertyAssertion(:dp _:anon1 \"test\"^^xsd:string)";
         OWLOntology conlusions = getOntologyWithAxioms(axioms);
-        assertEntails(conlusions.getLogicalAxioms(), true);
+        assertEntails(asSet(conlusions.logicalAxioms()), true);
     }
 
     protected OWLOntology getOntologyFromRessource(String resourceName) throws Exception {

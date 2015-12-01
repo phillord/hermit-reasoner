@@ -17,6 +17,8 @@
  */
 package org.semanticweb.HermiT.structural;
 
+import static org.semanticweb.owlapi.util.OWLAPIStreamUtils.asList;
+
 import java.util.*;
 
 import org.semanticweb.HermiT.Configuration;
@@ -73,11 +75,9 @@ public class OWLClausification {
         OWLDataFactory factory=rootOntology.getOWLOntologyManager().getOWLDataFactory();
         Optional<IRI> defaultDocumentIRI = rootOntology.getOntologyID().getDefaultDocumentIRI();
         String ontologyIRI=defaultDocumentIRI.isPresent()?defaultDocumentIRI.get().toString(): "urn:hermit:kb" ;
-        Collection<OWLOntology> importClosure=rootOntology.getImportsClosure();
         OWLAxioms axioms=new OWLAxioms();
         OWLNormalization normalization=new OWLNormalization(factory,axioms,0);
-        for (OWLOntology ontology : importClosure)
-            normalization.processOntology(ontology);
+        rootOntology.importsClosure().forEach(o->normalization.processOntology(o));
         BuiltInPropertyManager builtInPropertyManager=new BuiltInPropertyManager(factory);
         builtInPropertyManager.axiomatizeBuiltInPropertiesAsNeeded(axioms);
         ObjectPropertyInclusionManager objectPropertyInclusionManager=new ObjectPropertyInclusionManager(axioms);
@@ -239,7 +239,7 @@ public class OWLClausification {
             throw new IllegalStateException("Internal error: invalid normal form.");
         int yIndex=1;
         // object properties always go to the body
-        for (OWLObjectPropertyExpression p : object.getObjectPropertyExpressions()) {
+        for (OWLObjectPropertyExpression p : asList(object.objectPropertyExpressions())) {
             Variable y;
             y=Variable.create("Y"+yIndex);
             yIndex++;
@@ -250,7 +250,7 @@ public class OWLClausification {
         }
         // data properties go to the body, but with different variables
         // the head gets an atom asserting inequality between that data values
-        for (OWLDataPropertyExpression d : object.getDataPropertyExpressions()) {
+        for (OWLDataPropertyExpression d : asList(object.dataPropertyExpressions())) {
             Variable y;
             y=Variable.create("Y"+yIndex);
             yIndex++;
@@ -416,8 +416,8 @@ public class OWLClausification {
                 Atom roleAtom=getRoleAtom(objectProperty,X,X);
                 m_bodyAtoms.add(roleAtom);
             }
-            else if (description instanceof OWLObjectOneOf && ((OWLObjectOneOf)description).getIndividuals().size()==1) {
-                OWLIndividual individual=((OWLObjectOneOf)description).getIndividuals().iterator().next();
+            else if (description instanceof OWLObjectOneOf && ((OWLObjectOneOf)description).individuals().count()==1) {
+                OWLIndividual individual=((OWLObjectOneOf)description).individuals().iterator().next();
                 m_bodyAtoms.add(Atom.create(getConceptForNominal(individual),X));
             }
             else if (!(description instanceof OWLClass))
@@ -427,22 +427,22 @@ public class OWLClausification {
         }
         @Override
         public void visit(OWLObjectOneOf object) {
-            for (OWLIndividual individual : object.getIndividuals()) {
+            object.individuals().forEach(i-> {
                 Variable z=nextZ();
-                AtomicConcept conceptForNominal=getConceptForNominal(individual);
+                AtomicConcept conceptForNominal=getConceptForNominal(i);
                 m_headAtoms.add(Atom.create(Equality.INSTANCE,X,z));
                 m_bodyAtoms.add(Atom.create(conceptForNominal,z));
-            }
+            });
         }
         @Override
         public void visit(OWLObjectSomeValuesFrom object) {
             OWLClassExpression filler=object.getFiller();
             if (filler instanceof OWLObjectOneOf) {
-                for (OWLIndividual individual : ((OWLObjectOneOf)filler).getIndividuals()) {
+                ((OWLObjectOneOf)filler).individuals().forEach(i-> {
                     Variable z=nextZ();
-                    m_bodyAtoms.add(Atom.create(getConceptForNominal(individual),z));
+                    m_bodyAtoms.add(Atom.create(getConceptForNominal(i),z));
                     m_headAtoms.add(getRoleAtom(object.getProperty(),X,z));
-                }
+                });
             }
             else {
                 LiteralConcept toConcept=getLiteralConcept(filler);
@@ -463,11 +463,11 @@ public class OWLClausification {
                     m_headAtoms.add(Atom.create(atomicConcept,y));
             }
             else if (filler instanceof OWLObjectOneOf) {
-                for (OWLIndividual individual : ((OWLObjectOneOf)filler).getIndividuals()) {
+                ((OWLObjectOneOf)filler).individuals().forEach(i-> {
                     Variable zInd=nextZ();
-                    m_bodyAtoms.add(Atom.create(getConceptForNominal(individual),zInd));
+                    m_bodyAtoms.add(Atom.create(getConceptForNominal(i),zInd));
                     m_headAtoms.add(Atom.create(Equality.INSTANCE,y,zInd));
-                }
+                });
             }
             else if (filler instanceof OWLObjectComplementOf) {
                 OWLClassExpression operand=((OWLObjectComplementOf)filler).getOperand();
@@ -476,8 +476,8 @@ public class OWLClausification {
                     if (!internalAtomicConcept.isAlwaysTrue())
                         m_bodyAtoms.add(Atom.create(internalAtomicConcept,y));
                 }
-                else if (operand instanceof OWLObjectOneOf && ((OWLObjectOneOf)operand).getIndividuals().size()==1) {
-                    OWLIndividual individual=((OWLObjectOneOf)operand).getIndividuals().iterator().next();
+                else if (operand instanceof OWLObjectOneOf && ((OWLObjectOneOf)operand).individuals().count()==1) {
+                    OWLIndividual individual=((OWLObjectOneOf)operand).individuals().iterator().next();
                     m_bodyAtoms.add(Atom.create(getConceptForNominal(individual),y));
                 }
                 else
@@ -773,14 +773,15 @@ public class OWLClausification {
                 throw new IllegalArgumentException("Datatype restrictions are supported only on OWL datatypes.");
             String datatypeURI=object.getDatatype().getIRI().toString();
             if (InternalDatatype.RDFS_LITERAL.getIRI().equals(datatypeURI)) {
-                if (!object.getFacetRestrictions().isEmpty())
+                if (object.facetRestrictions().count()>0)
                     throw new IllegalArgumentException("rdfs:Literal does not support any facets.");
                 return InternalDatatype.RDFS_LITERAL;
             }
-            String[] facetURIs=new String[object.getFacetRestrictions().size()];
-            Constant[] facetValues=new Constant[object.getFacetRestrictions().size()];
+            List<OWLFacetRestriction> list=asList(object.facetRestrictions());
+            String[] facetURIs=new String[list.size()];
+            Constant[] facetValues=new Constant[list.size()];
             int index=0;
-            for (OWLFacetRestriction facet : object.getFacetRestrictions()) {
+            for (OWLFacetRestriction facet : list) {
                 facetURIs[index]=facet.getFacet().getIRI().toURI().toString();
                 facetValues[index]=(Constant)facet.getFacetValue().accept(this);
                 index++;
@@ -837,18 +838,16 @@ public class OWLClausification {
         }
         @Override
         public void visit(OWLSameIndividualAxiom object) {
-            OWLIndividual[] individuals=new OWLIndividual[object.getIndividuals().size()];
-            object.getIndividuals().toArray(individuals);
-            for (int i=0;i<individuals.length-1;i++)
-                m_positiveFacts.add(Atom.create(Equality.create(),getIndividual(individuals[i]),getIndividual(individuals[i+1])));
+            List<OWLIndividual> individuals= asList(object.individuals());
+            for (int i=0;i<individuals.size()-1;i++)
+                m_positiveFacts.add(Atom.create(Equality.create(),getIndividual(individuals.get(i)),getIndividual(individuals.get(i+1))));
         }
         @Override
         public void visit(OWLDifferentIndividualsAxiom object) {
-            OWLIndividual[] individuals=new OWLIndividual[object.getIndividuals().size()];
-            object.getIndividuals().toArray(individuals);
-            for (int i=0;i<individuals.length;i++)
-                for (int j=i+1;j<individuals.length;j++)
-                    m_positiveFacts.add(Atom.create(Inequality.create(),getIndividual(individuals[i]),getIndividual(individuals[j])));
+            List<OWLIndividual> individuals=asList(object.individuals());
+            for (int i=0;i<individuals.size()-1;i++)
+                for (int j=i+1;j<individuals.size();j++)
+                    m_positiveFacts.add(Atom.create(Inequality.create(),getIndividual(individuals.get(i)),getIndividual(individuals.get(j))));
         }
         @Override
         public void visit(OWLClassAssertionAxiom object) {

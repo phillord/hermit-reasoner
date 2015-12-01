@@ -18,6 +18,8 @@
 
 package org.semanticweb.HermiT;
 
+import static org.semanticweb.owlapi.util.OWLAPIStreamUtils.*;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -389,7 +391,7 @@ public class Reasoner implements OWLReasoner {
         if (!m_pendingChanges.isEmpty()) {
             // check if we can only reload the ABox
             if (canProcessPendingChangesIncrementally()) {
-                Set<OWLOntology> rootOntologyImportsClosure=m_rootOntology.getImportsClosure();
+                Set<OWLOntology> rootOntologyImportsClosure=asSet(m_rootOntology.importsClosure());
                 Set<Atom> positiveFacts=m_dlOntology.getPositiveFacts();
                 Set<Atom> negativeFacts=m_dlOntology.getNegativeFacts();
                 Set<Individual> allIndividuals=new HashSet<>();
@@ -431,7 +433,7 @@ public class Reasoner implements OWLReasoner {
      * @return true if incremental
      */
     public boolean canProcessPendingChangesIncrementally() {
-        Set<OWLOntology> rootOntologyImportsClosure=m_rootOntology.getImportsClosure();
+        Set<OWLOntology> rootOntologyImportsClosure=asSet(m_rootOntology.importsClosure());
         for (OWLOntologyChange change : m_pendingChanges) {
             if (rootOntologyImportsClosure.contains(change.getOntology())) {
                 if (m_dlOntology.hasNominals() || !m_dlOntology.getAllDescriptionGraphs().isEmpty())
@@ -909,7 +911,7 @@ public class Reasoner implements OWLReasoner {
             Set<Node<OWLClass>> result=new HashSet<>();
             if (equivalentToComplement.getSize()>0)
                 result.add(equivalentToComplement);
-            result.addAll(subsDisjoint.getNodes());
+            add(result, subsDisjoint.nodes());
             return new OWLClassNodeSet(result);
         }
     }
@@ -1905,9 +1907,9 @@ public class Reasoner implements OWLReasoner {
         Set<OWLLiteral> result=new HashSet<>();
         if (m_dlOntology.hasDatatypes()) {
             OWLDataFactory factory=getDataFactory();
-            Set<OWLDataProperty> relevantDataProperties=getSubDataProperties(property,false).getFlattened();
+            Set<OWLDataProperty> relevantDataProperties=asSet(getSubDataProperties(property,false).entities());
             relevantDataProperties.add(property);
-            Set<OWLNamedIndividual> relevantIndividuals=getSameIndividuals(namedIndividual).getEntities();
+            List<OWLNamedIndividual> relevantIndividuals=asList(getSameIndividuals(namedIndividual).entities());
             for (OWLDataProperty dataProperty : relevantDataProperties) {
                 if (!dataProperty.isBottomEntity()) {
                     AtomicRole atomicRole=H(dataProperty);
@@ -2134,7 +2136,7 @@ public class Reasoner implements OWLReasoner {
         OWLAxioms axioms=new OWLAxioms();
         axioms.m_definedDatatypesIRIs.addAll(originalDLOntology.getDefinedDatatypeIRIs());
         OWLNormalization normalization=new OWLNormalization(dataFactory,axioms,originalDLOntology.getAllAtomicConcepts().size());
-        normalization.processAxioms(additionalAxiomsSet);
+        normalization.processAxioms(additionalAxiomsSet.stream());
         BuiltInPropertyManager builtInPropertyManager=new BuiltInPropertyManager(dataFactory);
         builtInPropertyManager.axiomatizeBuiltInPropertiesAsNeeded(axioms,originalDLOntology.getAllAtomicObjectRoles().contains(AtomicRole.TOP_OBJECT_ROLE),originalDLOntology.getAllAtomicObjectRoles().contains(AtomicRole.BOTTOM_OBJECT_ROLE),originalDLOntology.getAllAtomicObjectRoles().contains(AtomicRole.TOP_DATA_ROLE),originalDLOntology.getAllAtomicObjectRoles().contains(AtomicRole.BOTTOM_DATA_ROLE));
 
@@ -2224,44 +2226,49 @@ public class Reasoner implements OWLReasoner {
         if (!isConsistent() && m_configuration.throwInconsistentOntologyException)
             throw new InconsistentOntologyException();
     }
+
     protected void throwFreshEntityExceptionIfNecessary(OWLObject... objects) {
         if (m_configuration.freshEntityPolicy==FreshEntityPolicy.DISALLOW) {
             Set<OWLEntity> undeclaredEntities=new HashSet<>();
             for (OWLObject object : objects) {
                 if (!(object instanceof OWLEntity) || !((OWLEntity)object).isBuiltIn()) {
-                    for (OWLDataProperty dp : object.getDataPropertiesInSignature())
-                        if (!isDefined(dp) && !Prefixes.isInternalIRI(dp.getIRI().toString()))
-                            undeclaredEntities.add(dp);
-                    for (OWLObjectProperty op : object.getObjectPropertiesInSignature())
-                        if (!isDefined(op) && !Prefixes.isInternalIRI(op.getIRI().toString()))
-                            undeclaredEntities.add(op);
-                    for (OWLNamedIndividual individual : object.getIndividualsInSignature())
-                        if (!isDefined(individual) && !Prefixes.isInternalIRI(individual.getIRI().toString()))
-                            undeclaredEntities.add(individual);
-                    for (OWLClass owlClass : object.getClassesInSignature())
-                        if (!isDefined(owlClass) && !Prefixes.isInternalIRI(owlClass.getIRI().toString()))
-                            undeclaredEntities.add(owlClass);
+                    object.dataPropertiesInSignature()
+                        .filter(dp->!isDefined(dp) && notInternal(dp))
+                        .forEach(dp->undeclaredEntities.add(dp));
+                    object.objectPropertiesInSignature()
+                        .filter(op->!isDefined(op) && notInternal(op))
+                        .forEach(op->undeclaredEntities.add(op));
+                    object.individualsInSignature()
+                        .filter(i->!isDefined(i) && notInternal(i))
+                        .forEach(i->undeclaredEntities.add(i));
+                    object.classesInSignature()
+                        .filter(c->!isDefined(c) && notInternal(c))
+                        .forEach(c->undeclaredEntities.add(c));
                 }
             }
             if (!undeclaredEntities.isEmpty())
                 throw new FreshEntitiesException(undeclaredEntities);
         }
     }
+
+    protected boolean notInternal(OWLEntity dp) {
+        return !Prefixes.isInternalIRI(dp.getIRI().toString());
+    }
     protected boolean containsFreshEntities(OWLObject... objects) {
         for (OWLObject object : objects) {
             if (!(object instanceof OWLEntity) || !((OWLEntity)object).isBuiltIn()) {
-                for (OWLDataProperty dp : object.getDataPropertiesInSignature())
-                    if (!isDefined(dp) && !Prefixes.isInternalIRI(dp.getIRI().toString()))
-                        return true;
-                for (OWLObjectProperty op : object.getObjectPropertiesInSignature())
-                    if (!isDefined(op) && !Prefixes.isInternalIRI(op.getIRI().toString()))
-                        return true;
-                for (OWLNamedIndividual individual : object.getIndividualsInSignature())
-                    if (!isDefined(individual) && !Prefixes.isInternalIRI(individual.getIRI().toString()))
-                        return true;
-                for (OWLClass owlClass : object.getClassesInSignature())
-                    if (!isDefined(owlClass) && !Prefixes.isInternalIRI(owlClass.getIRI().toString()))
-                        return true;
+                if (object.dataPropertiesInSignature()
+                    .anyMatch(dp->!isDefined(dp) && notInternal(dp)))
+                    return true;
+                if (object.objectPropertiesInSignature()
+                    .anyMatch(op->!isDefined(op) && notInternal(op)))
+                    return true;
+                if (object.individualsInSignature()
+                    .anyMatch(i->!isDefined(i) && notInternal(i)))
+                    return true;
+                if (object.classesInSignature()
+                    .anyMatch(c->!isDefined(c) && notInternal(c)))
+                    return true;
             }
         }
         return false;

@@ -17,6 +17,8 @@
 */
 package org.semanticweb.HermiT.structural;
 
+import java.util.List;
+
 import org.semanticweb.owlapi.model.*;
 /**OWLAxiomsExpressivity.*/
 public class OWLAxiomsExpressivity implements OWLClassExpressionVisitor, OWLAxiomVisitor {
@@ -33,21 +35,17 @@ public class OWLAxiomsExpressivity implements OWLClassExpressionVisitor, OWLAxio
      * @param axioms axioms
      */
     public OWLAxiomsExpressivity(OWLAxioms axioms) {
-        for (OWLClassExpression[] inclusion : axioms.m_conceptInclusions)
-            for (OWLClassExpression description : inclusion)
-                description.accept(this);
-        for (OWLObjectPropertyExpression[] inclusion : axioms.m_simpleObjectPropertyInclusions) {
-            visitProperty(inclusion[0]);
-            visitProperty(inclusion[1]);
+        axioms.m_conceptInclusions.forEach(c->c.forEach(d->d.accept(this)));
+        for (List<OWLObjectPropertyExpression> inclusion : axioms.m_simpleObjectPropertyInclusions) {
+            visitProperty(inclusion.get(0));
+            visitProperty(inclusion.get(1));
         }
         for (OWLAxioms.ComplexObjectPropertyInclusion inclusion : axioms.m_complexObjectPropertyInclusions) {
             for (OWLObjectPropertyExpression subObjectProperty : inclusion.m_subObjectProperties)
                 visitProperty(subObjectProperty);
             visitProperty(inclusion.m_superObjectProperty);
         }
-        for (OWLObjectPropertyExpression[] disjoint : axioms.m_disjointObjectProperties)
-            for (int index=0;index<disjoint.length;index++)
-                visitProperty(disjoint[index]);
+        axioms.m_disjointObjectProperties.forEach(c->c.forEach(d->visitProperty(d)));
         for (OWLObjectPropertyExpression property : axioms.m_reflexiveObjectProperties)
             visitProperty(property);
         for (OWLObjectPropertyExpression property : axioms.m_irreflexiveObjectProperties)
@@ -80,14 +78,12 @@ public class OWLAxiomsExpressivity implements OWLClassExpressionVisitor, OWLAxio
 
     @Override
     public void visit(OWLObjectIntersectionOf object) {
-        for (OWLClassExpression description : object.getOperands())
-            description.accept(this);
+        object.operands().forEach(d->d.accept(this));
     }
 
     @Override
     public void visit(OWLObjectUnionOf object) {
-        for (OWLClassExpression description : object.getOperands())
-            description.accept(this);
+        object.operands().forEach(d->d.accept(this));
     }
 
     @Override

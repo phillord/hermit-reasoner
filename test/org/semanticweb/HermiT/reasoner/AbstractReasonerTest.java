@@ -1,5 +1,7 @@
 package org.semanticweb.HermiT.reasoner;
 
+import static org.semanticweb.owlapi.util.OWLAPIStreamUtils.asSet;
+
 import java.io.CharArrayWriter;
 import java.io.PrintWriter;
 import java.util.Collections;
@@ -19,7 +21,6 @@ import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataProperty;
-import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLLogicalAxiom;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
@@ -181,11 +182,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
      */
     protected void assertInstancesOf(OWLClassExpression concept, boolean direct, String... expectedIndividuals) {
         NodeSet<OWLNamedIndividual> actual = m_reasoner.getInstances(concept, direct);
-        Set<String> actualIndividualIRIs = new HashSet<>();
-        for (OWLIndividual individual : actual.getFlattened()) {
-            if (!individual.isAnonymous())
-                actualIndividualIRIs.add(individual.asOWLNamedIndividual().getIRI().toString());
-        }
+        Set<String> actualIndividualIRIs = asSet(actual.entities().map(i->i.getIRI().toString()));
         String[] expectedModified = expectedIndividuals.clone();
         assertContainsAll(actualIndividualIRIs, expectedModified);
     }
@@ -370,22 +367,18 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     }
 
     protected static Set<Set<String>> nodeSetOfOPEsToStrings(NodeSet<OWLObjectPropertyExpression> nodeSet) {
-        Set<Set<String>> result = new HashSet<>();
-        for (Node<OWLObjectPropertyExpression> node : nodeSet.getNodes()) {
-            result.add(nodeOfOPEs(node));
-        }
-        return result;
+        return asSet(nodeSet.nodes().map(n->nodeOfOPEs(n)));
     }
 
     protected static Set<String> nodeOfOPEs(Node<OWLObjectPropertyExpression> node) {
         Set<String> translatedSet = new HashSet<>();
-        for (OWLObjectPropertyExpression ope : node.getEntities()) {
+        node.entities().forEach(ope-> {
             if (ope.isAnonymous()) {
                 // inverse
                 translatedSet.add("InverseOf(" + ope.getNamedProperty().getIRI().toString() + ")");
             } else
                 translatedSet.add(ope.asOWLObjectProperty().getIRI().toString());
-        }
+        });
         return translatedSet;
     }
 

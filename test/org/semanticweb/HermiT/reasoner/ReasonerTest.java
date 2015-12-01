@@ -1,5 +1,7 @@
 package org.semanticweb.HermiT.reasoner;
 
+import static org.semanticweb.owlapi.util.OWLAPIStreamUtils.*;
+
 import java.io.CharArrayWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -72,9 +74,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         IRI physicalIRI = IRI.create(getClass().getResource("res/iso19112-D-different.owl.xml").toURI());
         manager.loadOntologyFromOntologyDocument(physicalIRI);
-        for (OWLOntology ontology : manager.getOntologies()) {
-            m.addAxioms(o, ontology.getAxioms());
-        }
+        o.addAxioms(asSet(manager.ontologies().flatMap(ont->ont.axioms())));
         hermit.flush();
         OWLClass rs_identifier = m_dataFactory.getOWLClass(
                 IRI.create("http://www.laits.gmu.edu/geo/ontology/domain/iso/v2/iso19112.owl#RS_Identifier"));
@@ -87,7 +87,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         // }
         assertTrue(result.containsEntity(rs_identifier));
         assertTrue(result.containsEntity(md_identifier));
-        assertTrue(result.getFlattened().size() == 2);
+        assertTrue(result.entities().count() == 2L);
     }
 
     public void testIsEntailed() throws Exception {
@@ -121,10 +121,8 @@ public class ReasonerTest extends AbstractReasonerTest {
                 + "ClassAssertion(:A :a)";
         loadOntologyWithAxioms(axioms);
         createReasoner();
-        Set<OWLAxiom> assertions = new HashSet<>();
         OWLNamedIndividual b = NS_NI("b");
-        assertions.add(m_dataFactory.getOWLClassAssertionAxiom(NS_C("A"), b));
-        m_ontologyManager.addAxioms(m_ontology, assertions);
+        m_ontology.add(m_dataFactory.getOWLClassAssertionAxiom(NS_C("A"), b));
         Node<OWLNamedIndividual> result = m_reasoner.getSameIndividuals(b);
         assertTrue(result.contains(b));
         assertFalse(result.contains(NS_NI("a")));
@@ -153,11 +151,9 @@ public class ReasonerTest extends AbstractReasonerTest {
         assertFalse(m_reasoner.hasType(NS_NI("b"), NS_C("A"), false));
         assertFalse(m_reasoner.hasType(NS_NI("b"), NS_C("B"), false));
         assertFalse(m_reasoner.hasObjectPropertyRelationship(NS_NI("a"), NS_OP("r"), NS_NI("b")));
-        Set<OWLAxiom> assertions = new HashSet<>();
-        assertions.add(m_dataFactory.getOWLClassAssertionAxiom(
+        m_ontology.add(m_dataFactory.getOWLClassAssertionAxiom(
                 m_dataFactory.getOWLObjectComplementOf(m_dataFactory.getOWLObjectHasValue(NS_OP("r"), NS_NI("b"))),
                 NS_NI("a")));
-        m_ontologyManager.addAxioms(m_ontology, assertions);
         assertTrue(m_reasoner.canProcessPendingChangesIncrementally());
         m_reasoner.flush();
         assertFalse(m_reasoner.hasObjectPropertyRelationship(NS_NI("a"), NS_OP("r"), NS_NI("b")));
@@ -165,27 +161,21 @@ public class ReasonerTest extends AbstractReasonerTest {
         assertFalse(m_reasoner.hasType(NS_NI("a"), NS_C("B"), false));
         assertFalse(m_reasoner.hasType(NS_NI("b"), NS_C("A"), false));
         assertFalse(m_reasoner.hasType(NS_NI("b"), NS_C("B"), false));
-        assertions.clear();
-        assertions.add(m_dataFactory.getOWLDeclarationAxiom(NS_OP("s")));
-        assertions.add(m_dataFactory.getOWLClassAssertionAxiom(
+        m_ontology.add(m_dataFactory.getOWLDeclarationAxiom(NS_OP("s")));
+        m_ontology.add(m_dataFactory.getOWLClassAssertionAxiom(
                 m_dataFactory.getOWLObjectComplementOf(m_dataFactory.getOWLObjectHasValue(NS_OP("s"), NS_NI("b"))),
                 NS_NI("a")));
-        m_ontologyManager.addAxioms(m_ontology, assertions);
         assertFalse(m_reasoner.canProcessPendingChangesIncrementally());
         m_reasoner.flush();
         assertFalse(m_reasoner.hasObjectPropertyRelationship(NS_NI("a"), NS_OP("s"), NS_NI("b")));
-        assertions.clear();
-        assertions.add(m_dataFactory.getOWLDeclarationAxiom(NS_NI("c")));
-        assertions.add(m_dataFactory.getOWLClassAssertionAxiom(
+        m_ontology.add(m_dataFactory.getOWLDeclarationAxiom(NS_NI("c")));
+        m_ontology.add(m_dataFactory.getOWLClassAssertionAxiom(
                 m_dataFactory.getOWLObjectComplementOf(m_dataFactory.getOWLObjectHasValue(NS_OP("s"), NS_NI("c"))),
                 NS_NI("a")));
-        m_ontologyManager.addAxioms(m_ontology, assertions);
         assertFalse(m_reasoner.canProcessPendingChangesIncrementally());
         m_reasoner.flush();
         assertFalse(m_reasoner.hasObjectPropertyRelationship(NS_NI("a"), NS_OP("s"), NS_NI("c")));
-        assertions.clear();
-        assertions.add(m_dataFactory.getOWLObjectPropertyAssertionAxiom(NS_OP("s"), NS_NI("a"), NS_NI("c")));
-        m_ontologyManager.addAxioms(m_ontology, assertions);
+        m_ontology.add(m_dataFactory.getOWLObjectPropertyAssertionAxiom(NS_OP("s"), NS_NI("a"), NS_NI("c")));
         m_reasoner.flush();
         assertFalse(m_reasoner.isConsistent());
     }
@@ -200,26 +190,20 @@ public class ReasonerTest extends AbstractReasonerTest {
         m_reasoner.precomputeInferences(InferenceType.CLASS_HIERARCHY, InferenceType.CLASS_ASSERTIONS);
         assertTrue(m_reasoner.hasType(NS_NI("a"), NS_C("A"), false));
         assertFalse(m_reasoner.hasType(NS_NI("a"), NS_C("B"), false));
-        Set<OWLAxiom> assertions = new HashSet<>();
-        assertions.add(m_dataFactory
+        m_ontology.add(m_dataFactory
                 .getOWLClassAssertionAxiom(m_dataFactory.getOWLObjectHasValue(NS_OP("r"), NS_NI("b")), NS_NI("a")));
-        m_ontologyManager.addAxioms(m_ontology, assertions);
         assertTrue(m_reasoner.canProcessPendingChangesIncrementally());
         m_reasoner.flush();
         assertTrue(m_reasoner.hasObjectPropertyRelationship(NS_NI("a"), NS_OP("r"), NS_NI("b")));
-        assertions.clear();
-        assertions.add(m_dataFactory.getOWLDeclarationAxiom(NS_OP("s")));
-        assertions.add(m_dataFactory
+        m_ontology.add(m_dataFactory.getOWLDeclarationAxiom(NS_OP("s")));
+        m_ontology.add(m_dataFactory
                 .getOWLClassAssertionAxiom(m_dataFactory.getOWLObjectHasValue(NS_OP("s"), NS_NI("b")), NS_NI("a")));
-        m_ontologyManager.addAxioms(m_ontology, assertions);
         assertFalse(m_reasoner.canProcessPendingChangesIncrementally());
         m_reasoner.flush();
         assertTrue(m_reasoner.hasObjectPropertyRelationship(NS_NI("a"), NS_OP("s"), NS_NI("b")));
-        assertions.clear();
-        assertions.add(m_dataFactory.getOWLDeclarationAxiom(NS_NI("c")));
-        assertions.add(m_dataFactory
+        m_ontology.add(m_dataFactory.getOWLDeclarationAxiom(NS_NI("c")));
+        m_ontology.add(m_dataFactory
                 .getOWLClassAssertionAxiom(m_dataFactory.getOWLObjectHasValue(NS_OP("r"), NS_NI("c")), NS_NI("a")));
-        m_ontologyManager.addAxioms(m_ontology, assertions);
         assertFalse(m_reasoner.canProcessPendingChangesIncrementally());
         m_reasoner.flush();
         assertTrue(m_reasoner.hasObjectPropertyRelationship(NS_NI("a"), NS_OP("r"), NS_NI("c")));
@@ -234,27 +218,21 @@ public class ReasonerTest extends AbstractReasonerTest {
         m_reasoner.precomputeInferences(InferenceType.CLASS_HIERARCHY, InferenceType.CLASS_ASSERTIONS);
         assertTrue(m_reasoner.hasType(NS_NI("a"), NS_C("A"), false));
         assertFalse(m_reasoner.hasType(NS_NI("a"), NS_C("B"), false));
-        Set<OWLAxiom> assertions = new HashSet<>();
-        assertions.add(
+        m_ontology.add(
                 m_dataFactory.getOWLClassAssertionAxiom(m_dataFactory.getOWLObjectComplementOf(NS_C("C")), NS_NI("a")));
-        m_ontologyManager.addAxioms(m_ontology, assertions);
         assertFalse(m_reasoner.canProcessPendingChangesIncrementally());
         m_reasoner.flush();
         assertTrue(m_reasoner.hasType(NS_NI("a"), NS_C("A"), false));
         assertFalse(m_reasoner.hasType(NS_NI("a"), NS_C("B"), false));
         assertFalse(m_reasoner.hasType(NS_NI("a"), NS_C("C"), false));
-        assertions.clear();
-        assertions.add(
+        m_ontology.add(
                 m_dataFactory.getOWLClassAssertionAxiom(m_dataFactory.getOWLObjectComplementOf(NS_C("B")), NS_NI("a")));
-        m_ontologyManager.addAxioms(m_ontology, assertions);
         assertTrue(m_reasoner.canProcessPendingChangesIncrementally());
         m_reasoner.flush();
         assertTrue(m_reasoner.hasType(NS_NI("a"), NS_C("A"), false));
         assertFalse(m_reasoner.hasType(NS_NI("a"), NS_C("B"), false));
         assertFalse(m_reasoner.hasType(NS_NI("a"), NS_C("C"), false));
-        assertions.clear();
-        assertions.add(m_dataFactory.getOWLClassAssertionAxiom(NS_C("C"), NS_NI("a")));
-        m_ontologyManager.addAxioms(m_ontology, assertions);
+        m_ontology.add(m_dataFactory.getOWLClassAssertionAxiom(NS_C("C"), NS_NI("a")));
         assertTrue(m_reasoner.canProcessPendingChangesIncrementally());
         m_reasoner.flush();
         assertFalse(m_reasoner.isConsistent());
@@ -269,25 +247,19 @@ public class ReasonerTest extends AbstractReasonerTest {
         m_reasoner.precomputeInferences(InferenceType.CLASS_HIERARCHY, InferenceType.CLASS_ASSERTIONS);
         assertTrue(m_reasoner.hasType(NS_NI("a"), NS_C("A"), false));
         assertFalse(m_reasoner.hasType(NS_NI("a"), NS_C("B"), false));
-        Set<OWLAxiom> assertions = new HashSet<>();
-        assertions.add(m_dataFactory.getOWLClassAssertionAxiom(NS_C("C"), NS_NI("a")));
-        m_ontologyManager.addAxioms(m_ontology, assertions);
+        m_ontology.add(m_dataFactory.getOWLClassAssertionAxiom(NS_C("C"), NS_NI("a")));
         assertFalse(m_reasoner.canProcessPendingChangesIncrementally());
         m_reasoner.flush();
         assertTrue(m_reasoner.hasType(NS_NI("a"), NS_C("A"), false));
         assertFalse(m_reasoner.hasType(NS_NI("a"), NS_C("B"), false));
         assertTrue(m_reasoner.hasType(NS_NI("a"), NS_C("C"), false));
-        assertions.clear();
-        assertions.add(m_dataFactory.getOWLSubClassOfAxiom(NS_C("A"), NS_C("C")));
-        m_ontologyManager.addAxioms(m_ontology, assertions);
+        m_ontology.add(m_dataFactory.getOWLSubClassOfAxiom(NS_C("A"), NS_C("C")));
         assertFalse(m_reasoner.canProcessPendingChangesIncrementally());
         m_reasoner.flush();
         assertTrue(m_reasoner.hasType(NS_NI("a"), NS_C("A"), false));
         assertFalse(m_reasoner.hasType(NS_NI("a"), NS_C("B"), false));
         assertTrue(m_reasoner.hasType(NS_NI("a"), NS_C("C"), false));
-        assertions.clear();
-        assertions.add(m_dataFactory.getOWLClassAssertionAxiom(NS_C("B"), NS_NI("a")));
-        m_ontologyManager.addAxioms(m_ontology, assertions);
+        m_ontology.add(m_dataFactory.getOWLClassAssertionAxiom(NS_C("B"), NS_NI("a")));
         assertTrue(m_reasoner.canProcessPendingChangesIncrementally());
         m_reasoner.flush();
         assertTrue(m_reasoner.hasType(NS_NI("a"), NS_C("A"), false));
@@ -304,16 +276,12 @@ public class ReasonerTest extends AbstractReasonerTest {
         m_reasoner.precomputeInferences(InferenceType.CLASS_HIERARCHY, InferenceType.CLASS_ASSERTIONS);
         assertTrue(m_reasoner.hasType(NS_NI("a"), NS_C("A"), false));
         assertFalse(m_reasoner.hasType(NS_NI("a"), NS_C("B"), false));
-        Set<OWLAxiom> assertions = new HashSet<>();
-        assertions.add(m_dataFactory.getOWLClassAssertionAxiom(
+        m_ontology.add(m_dataFactory.getOWLClassAssertionAxiom(
                 m_dataFactory.getOWLObjectComplementOf(m_dataFactory.getOWLObjectHasSelf(NS_OP("r"))), NS_NI("a")));
-        m_ontologyManager.addAxioms(m_ontology, assertions);
         assertTrue(m_reasoner.canProcessPendingChangesIncrementally());
         m_reasoner.flush();
         assertFalse(m_reasoner.hasObjectPropertyRelationship(NS_NI("a"), NS_OP("r"), NS_NI("a")));
-        assertions.clear();
-        assertions.add(m_dataFactory.getOWLObjectPropertyAssertionAxiom(NS_OP("r"), NS_NI("a"), NS_NI("a")));
-        m_ontologyManager.addAxioms(m_ontology, assertions);
+        m_ontology.add(m_dataFactory.getOWLObjectPropertyAssertionAxiom(NS_OP("r"), NS_NI("a"), NS_NI("a")));
         assertTrue(m_reasoner.canProcessPendingChangesIncrementally());
         m_reasoner.flush();
         assertFalse(m_reasoner.isConsistent());
@@ -328,49 +296,38 @@ public class ReasonerTest extends AbstractReasonerTest {
         m_reasoner.precomputeInferences(InferenceType.CLASS_HIERARCHY, InferenceType.CLASS_ASSERTIONS);
         assertTrue(m_reasoner.hasType(NS_NI("a"), NS_C("A"), false));
         assertFalse(m_reasoner.hasType(NS_NI("a"), NS_C("B"), false));
-        Set<OWLAxiom> assertions = new HashSet<>();
-        assertions.add(
+        m_ontology.add(
                 m_dataFactory.getOWLClassAssertionAxiom(m_dataFactory.getOWLObjectHasSelf(NS_OP("r")), NS_NI("a")));
-        m_ontologyManager.addAxioms(m_ontology, assertions);
         assertTrue(m_reasoner.canProcessPendingChangesIncrementally());
         m_reasoner.flush();
         assertTrue(m_reasoner.hasObjectPropertyRelationship(NS_NI("a"), NS_OP("r"), NS_NI("a")));
-        assertions.clear();
-        assertions.add(m_dataFactory.getOWLDeclarationAxiom(NS_OP("s")));
-        assertions.add(
+        m_ontology.add(m_dataFactory.getOWLDeclarationAxiom(NS_OP("s")));
+        m_ontology.add(
                 m_dataFactory.getOWLClassAssertionAxiom(m_dataFactory.getOWLObjectHasSelf(NS_OP("s")), NS_NI("a")));
-        m_ontologyManager.addAxioms(m_ontology, assertions);
         assertFalse(m_reasoner.canProcessPendingChangesIncrementally());
         m_reasoner.flush();
         assertTrue(m_reasoner.hasObjectPropertyRelationship(NS_NI("a"), NS_OP("s"), NS_NI("a")));
-        assertions.clear();
-        assertions.add(m_dataFactory.getOWLDeclarationAxiom(NS_NI("b")));
-        assertions.add(
+        m_ontology.add(m_dataFactory.getOWLDeclarationAxiom(NS_NI("b")));
+        m_ontology.add(
                 m_dataFactory.getOWLClassAssertionAxiom(m_dataFactory.getOWLObjectHasSelf(NS_OP("r")), NS_NI("b")));
-        m_ontologyManager.addAxioms(m_ontology, assertions);
         assertFalse(m_reasoner.canProcessPendingChangesIncrementally());
         m_reasoner.flush();
         assertTrue(m_reasoner.hasObjectPropertyRelationship(NS_NI("b"), NS_OP("r"), NS_NI("b")));
-        assertions.clear();
         OWLOntology empty = getEmptyOntology("_:testEmpty" + System.currentTimeMillis());
         OWLOntologyChange change = new AddAxiom(empty, m_dataFactory.getOWLClassAssertionAxiom(NS_C("B"), NS_NI("a")));
         m_ontologyManager.applyChange(change);
         assertTrue(m_reasoner.canProcessPendingChangesIncrementally());
         m_reasoner.flush();
         assertFalse(m_reasoner.hasType(NS_NI("a"), NS_C("B"), false));
-        assertions.clear();
-        assertions.add(m_dataFactory.getOWLSubClassOfAxiom(
+        m_ontology.add(m_dataFactory.getOWLSubClassOfAxiom(
                 m_dataFactory.getOWLObjectSomeValuesFrom(NS_OP("r"), m_dataFactory.getOWLObjectOneOf(NS_NI("b"))),
                 NS_C("B")));
-        m_ontologyManager.addAxioms(m_ontology, assertions);
         assertFalse(m_reasoner.canProcessPendingChangesIncrementally());
         m_reasoner.flush();
         assertTrue(m_reasoner.hasType(NS_NI("b"), NS_C("B"), false));
-        assertions.clear();
-        assertions.add(m_dataFactory.getOWLClassAssertionAxiom(NS_C("B"), NS_NI("a")));
-        assertions.add(m_dataFactory.getOWLDeclarationAxiom(NS_C("C")));
-        assertions.add(m_dataFactory.getOWLSubClassOfAxiom(NS_C("B"), NS_C("C")));
-        m_ontologyManager.addAxioms(m_ontology, assertions);
+        m_ontology.add(m_dataFactory.getOWLClassAssertionAxiom(NS_C("B"), NS_NI("a")));
+        m_ontology.add(m_dataFactory.getOWLDeclarationAxiom(NS_C("C")));
+        m_ontology.add(m_dataFactory.getOWLSubClassOfAxiom(NS_C("B"), NS_C("C")));
         assertFalse(m_reasoner.canProcessPendingChangesIncrementally());
         m_reasoner.flush();
         assertTrue(m_reasoner.hasType(NS_NI("a"), NS_C("B"), false));
@@ -402,10 +359,8 @@ public class ReasonerTest extends AbstractReasonerTest {
         m_reasoner.precomputeInferences(InferenceType.CLASS_HIERARCHY, InferenceType.CLASS_ASSERTIONS);
         assertTrue(m_reasoner.hasType(NS_NI("a"), NS_C("A"), false));
         assertTrue(m_reasoner.hasType(NS_NI("a"), NS_C("B"), false));
-        Set<OWLAxiom> assertions = new HashSet<>();
-        assertions.add(m_dataFactory.getOWLDeclarationAxiom(NS_C("D")));
-        assertions.add(m_dataFactory.getOWLClassAssertionAxiom(NS_C("D"), NS_NI("c")));
-        m_ontologyManager.addAxioms(m_ontology, assertions);
+        m_ontology.add(m_dataFactory.getOWLDeclarationAxiom(NS_C("D")));
+        m_ontology.add(m_dataFactory.getOWLClassAssertionAxiom(NS_C("D"), NS_NI("c")));
         m_reasoner.flush();
         assertTrue(m_reasoner.hasType(NS_NI("a"), NS_C("A"), false));
         assertTrue(m_reasoner.hasType(NS_NI("a"), NS_C("B"), false));
@@ -558,37 +513,37 @@ public class ReasonerTest extends AbstractReasonerTest {
         assertTrue(disjoints.containsEntity(f));
         assertTrue(disjoints.containsEntity(bot));
         assertTrue(disjoints.containsEntity(top));
-        assertTrue(disjoints.getFlattened().size() == 8);
-        assertTrue(disjoints.getNodes().size() == 7);
+        assertTrue(disjoints.entities().count() == 8L);
+        assertTrue(disjoints.nodes().count() == 7L);
         disjoints = m_reasoner.getDisjointClasses(b);
         assertTrue(disjoints.containsEntity(f));
         assertTrue(disjoints.containsEntity(a));
         assertTrue(disjoints.containsEntity(c));
         assertTrue(disjoints.containsEntity(bot));
-        assertTrue(disjoints.getFlattened().size() == 4);
+        assertTrue(disjoints.entities().count() == 4L);
         disjoints = m_reasoner.getDisjointClasses(c);
         assertTrue(disjoints.containsEntity(b));
         assertTrue(disjoints.containsEntity(f));
         assertTrue(disjoints.containsEntity(a));
         assertTrue(disjoints.containsEntity(bot));
-        assertTrue(disjoints.getFlattened().size() == 4);
+        assertTrue(disjoints.entities().count() == 4L);
         disjoints = m_reasoner.getDisjointClasses(d);
         assertTrue(disjoints.containsEntity(a));
         assertTrue(disjoints.containsEntity(bot));
-        assertTrue(disjoints.getFlattened().size() == 2);
+        assertTrue(disjoints.entities().count() == 2L);
         disjoints = m_reasoner.getDisjointClasses(e);
         assertTrue(disjoints.containsEntity(f));
         assertTrue(disjoints.containsEntity(a));
         assertTrue(disjoints.containsEntity(bot));
-        assertTrue(disjoints.getFlattened().size() == 3);
+        assertTrue(disjoints.entities().count() == 3L);
         disjoints = m_reasoner.getDisjointClasses(f);
         assertTrue(disjoints.containsEntity(e));
         assertTrue(disjoints.containsEntity(b));
         assertTrue(disjoints.containsEntity(c));
         assertTrue(disjoints.containsEntity(a));
         assertTrue(disjoints.containsEntity(bot));
-        assertTrue(disjoints.getNodes().size() == 4);
-        assertTrue(disjoints.getFlattened().size() == 5);
+        assertTrue(disjoints.nodes().count() == 4L);
+        assertTrue(disjoints.entities().count() == 5L);
     }
 
     public void testKeys3() throws Exception {
@@ -876,7 +831,7 @@ public class ReasonerTest extends AbstractReasonerTest {
                 + "SubObjectPropertyOf(ObjectPropertyChain(ObjectInverseOf(:r) :s) :s)" + "SubObjectPropertyOf(:s :t)"
                 + "SubObjectPropertyOf(:r :p)" + "TransitiveObjectProperty(:t)" + "SymmetricObjectProperty(:t)");
         createReasoner();
-        assertTrue(m_reasoner.getSuperObjectProperties(NS_OP("r"), true).getFlattened().contains(NS_OP("t")));
+        assertTrue(m_reasoner.getSuperObjectProperties(NS_OP("r"), true).containsEntity(NS_OP("t")));
     }
 
     @SuppressWarnings("unchecked")
@@ -1020,7 +975,7 @@ public class ReasonerTest extends AbstractReasonerTest {
             assertions.add(m_dataFactory.getOWLClassAssertionAxiom(A,
                     m_dataFactory.getOWLNamedIndividual(IRI.create(AbstractOntologyTest.NS + "a" + i))));
         }
-        m_ontologyManager.addAxioms(m_ontology, assertions);
+        m_ontology.add(assertions);
         Configuration c1 = new Configuration();
         c1.useDisjunctionLearning = false;
         CountingMonitor cm1 = new CountingMonitor();
@@ -1063,9 +1018,9 @@ public class ReasonerTest extends AbstractReasonerTest {
         assertTrue(result.containsEntity(A));
         assertTrue(result.containsEntity(B));
         assertTrue(result.containsEntity(m_dataFactory.getOWLThing()));
-        assertEquals(3, result.getFlattened().size());
+        assertEquals(3L, result.entities().count());
         assertTrue(resultDirect.containsEntity(B));
-        assertEquals(1, resultDirect.getFlattened().size());
+        assertEquals(1L, resultDirect.entities().count());
     }
 
     public void testDatatypeLiterals() throws Exception {
@@ -1106,8 +1061,8 @@ public class ReasonerTest extends AbstractReasonerTest {
         OWLNamedIndividual a = NS_NI("a");
         OWLClass c = NS_C("C");
         NodeSet<OWLClass> result = m_reasoner.getTypes(a, true);
-        assertTrue(result.getFlattened().size() == 1);
-        assertTrue(result.getFlattened().contains(c));
+        assertTrue(result.entities().count() == 1L);
+        assertTrue(contains(result.entities(), c));
     }
 
     public void testIndividualRetrieval() throws Exception {

@@ -117,7 +117,7 @@ public class WGTestDescriptor {
     public final EnumSet<Semantics> semantics;
     public final EnumSet<Semantics> notsemantics;
 
-    public WGTestDescriptor(OWLOntologyManager m, OWLOntology o, OWLIndividual i) throws InvalidWGTestException {
+    public WGTestDescriptor(OWLOntologyManager m, OWLOntology o, OWLIndividual i) {
         testContainer = o;
         testIndividual = i;
         if (i.isAnonymous())

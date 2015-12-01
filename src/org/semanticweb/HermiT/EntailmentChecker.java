@@ -17,6 +17,8 @@
  */
 package org.semanticweb.HermiT;
 
+import static org.semanticweb.owlapi.util.OWLAPIStreamUtils.*;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,6 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.InternalDatatype;
@@ -188,7 +191,7 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
         // see OWL 2 Syntax, Sec 11.2
         // No axiom in Ax of the following form contains anonymous individuals:
         // SameIndividual, DifferentIndividuals, NegativeObjectPropertyAssertion, and NegativeDataPropertyAssertion.
-        ArrayList<OWLIndividual> list=new ArrayList<>(axiom.getIndividuals());
+        List<OWLIndividual> list=asList(axiom.individuals());
         for (OWLIndividual i : list) {
             if (i.isAnonymous()) {
                 throw new IllegalArgumentException("OWLDifferentIndividualsAxiom axioms are not allowed to be used "+"with anonymous individuals (see OWL 2 Syntax Sec 11.2) but the axiom "+axiom+" cotains an anonymous individual. ");
@@ -209,12 +212,9 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
         // see OWL 2 Syntax, Sec 11.2
         // No axiom in Ax of the following form contains anonymous individuals:
         // SameIndividual, DifferentIndividuals, NegativeObjectPropertyAssertion, and NegativeDataPropertyAssertion.
-        for (OWLIndividual i : axiom.getIndividuals()) {
-            if (i.isAnonymous()) {
-                throw new IllegalArgumentException("OWLSameIndividualAxiom axioms are not allowed to be used "+"with anonymous individuals (see OWL 2 Syntax Sec 11.2) but the axiom "+axiom+" cotains an anonymous individual. ");
-            }
-        }
-        Iterator<OWLIndividual> i=axiom.getIndividuals().iterator();
+        axiom.individuals().filter(i->i.isAnonymous()).forEach(i->{
+                throw new IllegalArgumentException("OWLSameIndividualAxiom axioms are not allowed to be used "+"with anonymous individuals (see OWL 2 Syntax Sec 11.2) but the axiom "+axiom+" cotains an anonymous individual. ");});
+        Iterator<OWLIndividual> i=axiom.individuals().iterator();
         if (i.hasNext()) {
             OWLNamedIndividual first=i.next().asOWLNamedIndividual();
             while (i.hasNext()) {
@@ -318,8 +318,7 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
     }
     @Override
     public Boolean visit(OWLEquivalentObjectPropertiesAxiom axiom) {
-        Set<OWLObjectPropertyExpression> props=axiom.getProperties();
-        Iterator<OWLObjectPropertyExpression> it=props.iterator();
+        Iterator<OWLObjectPropertyExpression> it=axiom.properties().iterator();
         if (it.hasNext()) {
             OWLObjectPropertyExpression objectPropertyExpression1=it.next();
             while (it.hasNext()) {
@@ -340,11 +339,10 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
     }
     @Override
     public Boolean visit(OWLDisjointObjectPropertiesAxiom axiom) {
-        int n=axiom.getProperties().size();
-        OWLObjectPropertyExpression[] props=axiom.getProperties().toArray(new OWLObjectPropertyExpression[n]);
-        for (int i=0;i<n-1;i++)
-            for (int j=i+1;j<n;j++)
-                if (!reasoner.isDisjointObjectProperty(props[i],props[j])) return Boolean.FALSE;
+        List<OWLObjectPropertyExpression> props=asList(axiom.properties());
+        for (int i=0;i<props.size()-1;i++)
+            for (int j=i+1;j<props.size();j++)
+                if (!reasoner.isDisjointObjectProperty(props.get(i),props.get(j))) return Boolean.FALSE;
         return Boolean.TRUE;
     }
     @Override
@@ -368,8 +366,7 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
     }
     @Override
     public Boolean visit(OWLEquivalentDataPropertiesAxiom axiom) {
-        Set<OWLDataPropertyExpression> props=axiom.getProperties();
-        Iterator<OWLDataPropertyExpression> it=props.iterator();
+        Iterator<OWLDataPropertyExpression> it=axiom.properties().iterator();
         if (it.hasNext()) {
             OWLDataProperty prop1=it.next().asOWLDataProperty();
             while (it.hasNext()) {
@@ -387,12 +384,11 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
     }
     @Override
     public Boolean visit(OWLDisjointDataPropertiesAxiom axiom) {
-        int n=axiom.getProperties().size();
-        OWLDataPropertyExpression[] props=axiom.getProperties().toArray(new OWLDataPropertyExpression[n]);
-        for (int i=0;i<n-1;i++) {
-            for (int j=i+1;j<n;j++) {
-                OWLDataSomeValuesFrom some_i=factory.getOWLDataSomeValuesFrom(props[i],factory.getOWLDatatype(IRI.create(InternalDatatype.RDFS_LITERAL.getIRI())));
-                OWLDataSomeValuesFrom some_j=factory.getOWLDataSomeValuesFrom(props[j],factory.getOWLDatatype(IRI.create(InternalDatatype.RDFS_LITERAL.getIRI())));
+        List<OWLDataPropertyExpression> props=asList(axiom.properties());
+        for (int i=0;i<props.size()-1;i++) {
+            for (int j=i+1;j<props.size();j++) {
+                OWLDataSomeValuesFrom some_i=factory.getOWLDataSomeValuesFrom(props.get(i),factory.getOWLDatatype(IRI.create(InternalDatatype.RDFS_LITERAL.getIRI())));
+                OWLDataSomeValuesFrom some_j=factory.getOWLDataSomeValuesFrom(props.get(j),factory.getOWLDatatype(IRI.create(InternalDatatype.RDFS_LITERAL.getIRI())));
                 OWLDataMaxCardinality max1=factory.getOWLDataMaxCardinality(1,factory.getOWLDataProperty(IRI.create(AtomicRole.TOP_DATA_ROLE.getIRI())));
                 OWLClassExpression desc=factory.getOWLObjectIntersectionOf(some_i,some_j,max1);
                 if (reasoner.isSatisfiable(desc))
@@ -415,7 +411,7 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
     @Override
     public Boolean visit(OWLEquivalentClassesAxiom axiom) {
         boolean isEntailed=true;
-        Iterator<OWLClassExpression> i=axiom.getClassExpressions().iterator();
+        Iterator<OWLClassExpression> i=axiom.classExpressions().iterator();
         if (i.hasNext()) {
             OWLClassExpression first=i.next();
             while (i.hasNext()&&isEntailed) {
@@ -427,12 +423,11 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
     }
     @Override
     public Boolean visit(OWLDisjointClassesAxiom axiom) {
-        int n=axiom.getClassExpressions().size();
-        OWLClassExpression[] classes=axiom.getClassExpressions().toArray(new OWLClassExpression[n]);
-        for (int i=0;i<n-1;i++) {
-            for (int j=i+1;j<n;j++) {
-                OWLClassExpression notj=factory.getOWLObjectComplementOf(classes[j]);
-                if (!reasoner.isSubClassOf(classes[i],notj))
+        List<OWLClassExpression> classExpressions = asList(axiom.classExpressions());
+        for (int i=0;i<classExpressions.size()-1;i++) {
+            for (int j=i+1;j<classExpressions.size();j++) {
+                OWLClassExpression notj=factory.getOWLObjectComplementOf(classExpressions.get(j));
+                if (!reasoner.isSubClassOf(classExpressions.get(i),notj))
                     return Boolean.FALSE;
             }
         }
@@ -442,20 +437,19 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
     public Boolean visit(OWLDisjointUnionAxiom axiom) {
         // C = C1 or ... or Cn, for 1 <= i < j <= n: Ci and Cj -> bottom
         OWLClass c=axiom.getOWLClass();
-        Set<OWLClassExpression> cs=new HashSet<>(axiom.getClassExpressions());
-        cs.add(factory.getOWLObjectComplementOf(c));
-        OWLClassExpression incl1=factory.getOWLObjectUnionOf(cs);
-        OWLClassExpression incl2=factory.getOWLObjectUnionOf(factory.getOWLObjectComplementOf(factory.getOWLObjectUnionOf(axiom.getClassExpressions())),c);
+        OWLClassExpression incl1=factory.getOWLObjectUnionOf(Stream.concat( axiom.classExpressions(), Stream.of(factory.getOWLObjectComplementOf(c))));
+        OWLClassExpression incl2=factory.getOWLObjectUnionOf(factory.getOWLObjectComplementOf(factory.getOWLObjectUnionOf(axiom.classExpressions())),c);
         // incl1: not C or C1 or ... or Cn
         // incl2: not(C1 or ... or Cn) or C
         Set<OWLClassExpression> conjuncts=new HashSet<>();
         conjuncts.add(incl1);
         conjuncts.add(incl2);
-        int n=axiom.getClassExpressions().size();
-        OWLClassExpression[] descs=axiom.getClassExpressions().toArray(new OWLClassExpression[n]);
-        for (int i=0;i<n-1;i++) {
-            for (int j=i+1;j<n;j++) {
-                conjuncts.add(factory.getOWLObjectUnionOf(factory.getOWLObjectComplementOf(descs[i]),factory.getOWLObjectComplementOf(descs[j])));
+        List<? extends OWLClassExpression> list = asList(axiom.classExpressions());
+        for (int i=0;i<list.size()-1;i++) {
+            for (int j=i+1;j<list.size();j++) {
+                conjuncts.add(factory.getOWLObjectUnionOf(
+                        factory.getOWLObjectComplementOf(list.get(i)),
+                        factory.getOWLObjectComplementOf(list.get(j))));
             }
         }
         OWLClassExpression entailmentDesc=factory.getOWLObjectIntersectionOf(conjuncts);
@@ -510,14 +504,14 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
         axioms.add(df.getOWLClassAssertionAxiom(axiom.getClassExpression(),individualA));
         axioms.add(df.getOWLClassAssertionAxiom(axiom.getClassExpression(),individualB));
         int i=0;
-        for (OWLObjectPropertyExpression p : axiom.getObjectPropertyExpressions()) {
+        for (OWLObjectPropertyExpression p : asList(axiom.objectPropertyExpressions())) {
             OWLIndividual tmp=df.getOWLNamedIndividual(IRI.create("internal:named-fresh-individual-"+i));
             axioms.add(df.getOWLObjectPropertyAssertionAxiom(p,individualA,tmp));
             axioms.add(df.getOWLObjectPropertyAssertionAxiom(p,individualB,tmp));
             i++;
         }
-        for (OWLDataPropertyExpression p : axiom.getDataPropertyExpressions()) {
-            OWLDatatype anonymousConstantsDatatype=df.getOWLDatatype(IRI.create("internal:anonymous-constants"));
+        OWLDatatype anonymousConstantsDatatype=df.getOWLDatatype(IRI.create("internal:anonymous-constants"));
+        for (OWLDataPropertyExpression p : asList(axiom.dataPropertyExpressions())) {
             OWLLiteral constant=df.getOWLLiteral("internal:constant-"+i,anonymousConstantsDatatype);
             axioms.add(df.getOWLDataPropertyAssertionAxiom(p,individualA,constant));
             axioms.add(df.getOWLDataPropertyAssertionAxiom(p,individualB,constant));

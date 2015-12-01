@@ -17,6 +17,8 @@
 */
 package org.semanticweb.HermiT.structural;
 
+import static org.semanticweb.owlapi.util.OWLAPIStreamUtils.*;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -100,21 +102,11 @@ class ExpressionManager {
         }
         @Override
         public OWLClassExpression visit(OWLObjectIntersectionOf d) {
-            Set<OWLClassExpression> newConjuncts=new HashSet<>();
-            for (OWLClassExpression description : d.getOperands()) {
-                OWLClassExpression descriptionNNF=getNNF(description);
-                newConjuncts.add(descriptionNNF);
-            }
-            return m_factory.getOWLObjectIntersectionOf(newConjuncts);
+            return m_factory.getOWLObjectIntersectionOf(d.operands().map(c->getNNF(c)).distinct());
         }
         @Override
         public OWLClassExpression visit(OWLObjectUnionOf d) {
-            Set<OWLClassExpression> newDisjuncts=new HashSet<>();
-            for (OWLClassExpression description : d.getOperands()) {
-                OWLClassExpression descriptionNNF=getNNF(description);
-                newDisjuncts.add(descriptionNNF);
-            }
-            return m_factory.getOWLObjectUnionOf(newDisjuncts);
+            return m_factory.getOWLObjectUnionOf(d.operands().map(c->getNNF(c)).distinct());
         }
         @Override
         public OWLClassExpression visit(OWLObjectComplementOf d) {
@@ -220,17 +212,11 @@ class ExpressionManager {
         }
         @Override
         public OWLDataRange visit(OWLDataIntersectionOf range) {
-            Set<OWLDataRange> newConjuncts=new HashSet<>();
-            for (OWLDataRange dr : range.getOperands())
-                newConjuncts.add(getNNF(dr));
-            return m_factory.getOWLDataIntersectionOf(newConjuncts);
+            return m_factory.getOWLDataIntersectionOf(range.operands().map(dr->getNNF(dr)).distinct());
         }
         @Override
         public OWLDataRange visit(OWLDataUnionOf range) {
-            Set<OWLDataRange> newDisjuncts=new HashSet<>();
-            for (OWLDataRange dr : range.getOperands())
-                newDisjuncts.add(getNNF(dr));
-            return m_factory.getOWLDataUnionOf(newDisjuncts);
+            return m_factory.getOWLDataUnionOf(range.operands().map(dr->getNNF(dr)).distinct());
          }
     }
 
@@ -249,17 +235,11 @@ class ExpressionManager {
         }
         @Override
         public OWLClassExpression visit(OWLObjectIntersectionOf d) {
-            Set<OWLClassExpression> newDisjuncts=new HashSet<>();
-            for (OWLClassExpression description : d.getOperands())
-                newDisjuncts.add(getComplementNNF(description));
-            return m_factory.getOWLObjectUnionOf(newDisjuncts);
+            return m_factory.getOWLObjectUnionOf(d.operands().map(c->getComplementNNF(c)).distinct());
         }
         @Override
         public OWLClassExpression visit(OWLObjectUnionOf d) {
-            Set<OWLClassExpression> newConjuncts=new HashSet<>();
-            for (OWLClassExpression description : d.getOperands())
-                newConjuncts.add(getComplementNNF(description));
-            return m_factory.getOWLObjectIntersectionOf(newConjuncts);
+            return m_factory.getOWLObjectIntersectionOf(d.operands().map(c->getComplementNNF(c)).distinct());
         }
         @Override
         public OWLClassExpression visit(OWLObjectComplementOf d) {
@@ -384,17 +364,11 @@ class ExpressionManager {
         }
         @Override
         public OWLDataRange visit(OWLDataIntersectionOf range) {
-            Set<OWLDataRange> newDisjuncts=new HashSet<>();
-            for (OWLDataRange dr : range.getOperands())
-                newDisjuncts.add(getComplementNNF(dr));
-            return m_factory.getOWLDataUnionOf(newDisjuncts);
+            return m_factory.getOWLDataUnionOf(range.operands().map(dr->getComplementNNF(dr)).distinct());
         }
         @Override
         public OWLDataRange visit(OWLDataUnionOf range) {
-            Set<OWLDataRange> newConjuncts=new HashSet<>();
-            for (OWLDataRange dr : range.getOperands())
-                newConjuncts.add(getComplementNNF(dr));
-            return m_factory.getOWLDataIntersectionOf(newConjuncts);
+            return m_factory.getOWLDataIntersectionOf(range.operands().map(dr->getComplementNNF(dr)).distinct());
          }
     }
 
@@ -410,14 +384,14 @@ class ExpressionManager {
         @Override
         public OWLClassExpression visit(OWLObjectIntersectionOf d) {
             Set<OWLClassExpression> newConjuncts=new HashSet<>();
-            for (OWLClassExpression description : d.getOperands()) {
+            for (OWLClassExpression description : asList(d.operands())) {
                 OWLClassExpression descriptionSimplified=getSimplified(description);
                 if (descriptionSimplified.isOWLThing())
                     continue;
                 else if (descriptionSimplified.isOWLNothing())
                     return m_factory.getOWLNothing();
                 else if (descriptionSimplified instanceof OWLObjectIntersectionOf)
-                    newConjuncts.addAll(((OWLObjectIntersectionOf)descriptionSimplified).getOperands());
+                    add(newConjuncts,((OWLObjectIntersectionOf)descriptionSimplified).operands());
                 else
                     newConjuncts.add(descriptionSimplified);
             }
@@ -426,14 +400,14 @@ class ExpressionManager {
         @Override
         public OWLClassExpression visit(OWLObjectUnionOf d) {
             Set<OWLClassExpression> newDisjuncts=new HashSet<>();
-            for (OWLClassExpression description : d.getOperands()) {
+            for (OWLClassExpression description : asList(d.operands())) {
                 OWLClassExpression descriptionSimplified=getSimplified(description);
                 if (descriptionSimplified.isOWLThing())
                     return m_factory.getOWLThing();
                 else if (descriptionSimplified.isOWLNothing())
                     continue;
                 else if (descriptionSimplified instanceof OWLObjectUnionOf)
-                    newDisjuncts.addAll(((OWLObjectUnionOf)descriptionSimplified).getOperands());
+                    add(newDisjuncts,((OWLObjectUnionOf)descriptionSimplified).operands());
                 else
                     newDisjuncts.add(descriptionSimplified);
             }
@@ -614,12 +588,12 @@ class ExpressionManager {
         @Override
         public OWLDataRange visit(OWLDataIntersectionOf range) {
             Set<OWLDataRange> newConjuncts=new HashSet<>();
-            for (OWLDataRange dr : range.getOperands()) {
+            for (OWLDataRange dr : asList(range.operands())) {
                 OWLDataRange drSimplified=getSimplified(dr);
                 if (drSimplified.isTopDatatype())
                     continue;
                 else if (drSimplified instanceof OWLDataIntersectionOf)
-                    newConjuncts.addAll(((OWLDataIntersectionOf)drSimplified).getOperands());
+                    add(newConjuncts,((OWLDataIntersectionOf)drSimplified).operands());
                 else
                     newConjuncts.add(drSimplified);
             }
@@ -628,12 +602,12 @@ class ExpressionManager {
         @Override
         public OWLDataRange visit(OWLDataUnionOf range) {
             Set<OWLDataRange> newDisjuncts=new HashSet<>();
-            for (OWLDataRange dr : range.getOperands()) {
+            for (OWLDataRange dr : asList(range.operands())) {
                 OWLDataRange drSimplified=getSimplified(dr);
                 if (drSimplified.isTopDatatype())
                     return m_factory.getTopDatatype();
                 else if (drSimplified instanceof OWLDataUnionOf)
-                    newDisjuncts.addAll(((OWLDataUnionOf)drSimplified).getOperands());
+                    add(newDisjuncts,((OWLDataUnionOf)drSimplified).operands());
                 else
                     newDisjuncts.add(drSimplified);
             }

@@ -20,6 +20,7 @@ package org.semanticweb.HermiT.structural;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.semanticweb.owlapi.model.OWLClass;
@@ -41,16 +42,16 @@ public class OWLAxioms {
     final Set<OWLObjectPropertyExpression> m_complexObjectPropertyExpressions =new HashSet<>();
     final Set<OWLDataProperty> m_dataProperties =new HashSet<>();
     final Set<OWLNamedIndividual> m_namedIndividuals =new HashSet<>();
-    final Collection<OWLClassExpression[]> m_conceptInclusions =new ArrayList<>();
-    final Collection<OWLDataRange[]> m_dataRangeInclusions =new ArrayList<>();
-    final Collection<OWLObjectPropertyExpression[]> m_simpleObjectPropertyInclusions =new ArrayList<>();
+    final Collection<List<OWLClassExpression>> m_conceptInclusions =new ArrayList<>();
+    final Collection<List<OWLDataRange>> m_dataRangeInclusions =new ArrayList<>();
+    final Collection<List<OWLObjectPropertyExpression>> m_simpleObjectPropertyInclusions =new ArrayList<>();
     final Collection<ComplexObjectPropertyInclusion> m_complexObjectPropertyInclusions =new ArrayList<>();
-    final Collection<OWLObjectPropertyExpression[]> m_disjointObjectProperties =new ArrayList<>();
+    final Collection<List<OWLObjectPropertyExpression>> m_disjointObjectProperties =new ArrayList<>();
     final Set<OWLObjectPropertyExpression> m_reflexiveObjectProperties =new HashSet<>();
     final Set<OWLObjectPropertyExpression> m_irreflexiveObjectProperties =new HashSet<>();
     final Set<OWLObjectPropertyExpression> m_asymmetricObjectProperties =new HashSet<>();
-    final Collection<OWLDataPropertyExpression[]> m_dataPropertyInclusions =new ArrayList<>();
-    final Collection<OWLDataPropertyExpression[]> m_disjointDataProperties =new ArrayList<>();
+    final Collection<List<OWLDataPropertyExpression>> m_dataPropertyInclusions =new ArrayList<>();
+    final Collection<List<OWLDataPropertyExpression>> m_disjointDataProperties =new ArrayList<>();
     final Collection<OWLIndividualAxiom> m_facts =new HashSet<>();
     final Set<OWLHasKeyAxiom> m_hasKeys =new HashSet<>();
     /** contains custom datatypes from DatatypeDefinition axioms*/
