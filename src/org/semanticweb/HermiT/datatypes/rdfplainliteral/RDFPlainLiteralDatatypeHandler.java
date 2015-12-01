@@ -40,6 +40,7 @@ public class RDFPlainLiteralDatatypeHandler implements DatatypeHandler {
     protected static final Map<String,ValueSpaceSubset> s_subsetsByDatatype=new HashMap<>();
     static {
         s_subsetsByDatatype.put(RDF_NS+"PlainLiteral",new RDFPlainLiteralLengthValueSpaceSubset(new RDFPlainLiteralLengthInterval(RDFPlainLiteralLengthInterval.LanguageTagMode.ABSENT,0,Integer.MAX_VALUE),new RDFPlainLiteralLengthInterval(RDFPlainLiteralLengthInterval.LanguageTagMode.PRESENT,0,Integer.MAX_VALUE)));
+        s_subsetsByDatatype.put(RDF_NS+"langString",new RDFPlainLiteralLengthValueSpaceSubset(new RDFPlainLiteralLengthInterval(RDFPlainLiteralLengthInterval.LanguageTagMode.ABSENT,0,Integer.MAX_VALUE),new RDFPlainLiteralLengthInterval(RDFPlainLiteralLengthInterval.LanguageTagMode.PRESENT,0,Integer.MAX_VALUE)));
         s_subsetsByDatatype.put(XSD_NS+"string",new RDFPlainLiteralLengthValueSpaceSubset(new RDFPlainLiteralLengthInterval(RDFPlainLiteralLengthInterval.LanguageTagMode.ABSENT,0,Integer.MAX_VALUE)));
         registerPatternDatatype(XSD_NS+"normalizedString");
         registerPatternDatatype(XSD_NS+"token");
@@ -57,6 +58,7 @@ public class RDFPlainLiteralDatatypeHandler implements DatatypeHandler {
     static {
         String[][] initializer=new String[][] {
             { RDF_NS+"PlainLiteral",     RDF_NS+"PlainLiteral" },
+            { RDF_NS+"langString",       RDF_NS+"PlainLiteral" },
             { XSD_NS+"string",           RDF_NS+"PlainLiteral", XSD_NS+"string" },
             { XSD_NS+"normalizedString", RDF_NS+"PlainLiteral", XSD_NS+"string", XSD_NS+"normalizedString" },
             { XSD_NS+"token",            RDF_NS+"PlainLiteral", XSD_NS+"string", XSD_NS+"normalizedString", XSD_NS+"token" },

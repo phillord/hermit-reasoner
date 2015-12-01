@@ -49,6 +49,7 @@ import org.semanticweb.HermiT.model.Term;
 import org.semanticweb.HermiT.model.Variable;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.vocab.OWL2Datatype;
 /**OWLClausification.*/
 public class OWLClausification {
     protected static final Variable X=Variable.create("X");
@@ -104,15 +105,15 @@ public class OWLClausification {
         Set<Atom> positiveFacts=new HashSet<>();
         Set<Atom> negativeFacts=new HashSet<>();
         Set<DatatypeRestriction> allUnknownDatatypeRestrictions=new HashSet<>();
-        for (OWLObjectPropertyExpression[] inclusion : axioms.m_simpleObjectPropertyInclusions) {
-            Atom subRoleAtom=getRoleAtom(inclusion[0],X,Y);
-            Atom superRoleAtom=getRoleAtom(inclusion[1],X,Y);
+        for (List<OWLObjectPropertyExpression> inclusion : axioms.m_simpleObjectPropertyInclusions) {
+            Atom subRoleAtom=getRoleAtom(inclusion.get(0),X,Y);
+            Atom superRoleAtom=getRoleAtom(inclusion.get(1),X,Y);
             DLClause dlClause=DLClause.create(new Atom[] { superRoleAtom },new Atom[] { subRoleAtom });
             dlClauses.add(dlClause);
         }
-        for (OWLDataPropertyExpression[] inclusion : axioms.m_dataPropertyInclusions) {
-            Atom subProp=getRoleAtom(inclusion[0],X,Y);
-            Atom superProp=getRoleAtom(inclusion[1],X,Y);
+        for (List<OWLDataPropertyExpression> inclusion : axioms.m_dataPropertyInclusions) {
+            Atom subProp=getRoleAtom(inclusion.get(0),X,Y);
+            Atom superProp=getRoleAtom(inclusion.get(1),X,Y);
             DLClause dlClause=DLClause.create(new Atom[] { superProp },new Atom[] { subProp });
             dlClauses.add(dlClause);
         }
@@ -133,11 +134,11 @@ public class OWLClausification {
             DLClause dlClause=DLClause.create(new Atom[] {},new Atom[] { roleAtom });
             dlClauses.add(dlClause);
         }
-        for (OWLObjectPropertyExpression[] properties : axioms.m_disjointObjectProperties)
-            for (int i=0;i<properties.length;i++)
-                for (int j=i+1;j<properties.length;j++) {
-                    Atom atom_i=getRoleAtom(properties[i],X,Y);
-                    Atom atom_j=getRoleAtom(properties[j],X,Y);
+        for (List<OWLObjectPropertyExpression> properties : axioms.m_disjointObjectProperties)
+            for (int i=0;i<properties.size();i++)
+                for (int j=i+1;j<properties.size();j++) {
+                    Atom atom_i=getRoleAtom(properties.get(i),X,Y);
+                    Atom atom_j=getRoleAtom(properties.get(j),X,Y);
                     DLClause dlClause=DLClause.create(new Atom[] {},new Atom[] { atom_i,atom_j });
                     dlClauses.add(dlClause);
                 }
@@ -145,25 +146,25 @@ public class OWLClausification {
             Atom bodyAtom=Atom.create(AtomicRole.BOTTOM_DATA_ROLE,X,Y);
             dlClauses.add(DLClause.create(new Atom[] {},new Atom[] { bodyAtom }));
         }
-        for (OWLDataPropertyExpression[] properties : axioms.m_disjointDataProperties)
-            for (int i=0;i<properties.length;i++)
-                for (int j=i+1;j<properties.length;j++) {
-                    Atom atom_i=getRoleAtom(properties[i],X,Y);
-                    Atom atom_j=getRoleAtom(properties[j],X,Z);
+        for (List<OWLDataPropertyExpression> properties : axioms.m_disjointDataProperties)
+            for (int i=0;i<properties.size();i++)
+                for (int j=i+1;j<properties.size();j++) {
+                    Atom atom_i=getRoleAtom(properties.get(i),X,Y);
+                    Atom atom_j=getRoleAtom(properties.get(j),X,Z);
                     Atom atom_ij=Atom.create(Inequality.create(),Y,Z);
                     DLClause dlClause=DLClause.create(new Atom[] { atom_ij },new Atom[] { atom_i,atom_j });
                     dlClauses.add(dlClause);
                 }
         DataRangeConverter dataRangeConverter=new DataRangeConverter(m_configuration.warningMonitor,axioms.m_definedDatatypesIRIs,allUnknownDatatypeRestrictions,m_configuration.ignoreUnsupportedDatatypes);
         NormalizedAxiomClausifier clausifier=new NormalizedAxiomClausifier(dataRangeConverter,positiveFacts);
-        for (OWLClassExpression[] inclusion : axioms.m_conceptInclusions) {
+        for (List<OWLClassExpression> inclusion : axioms.m_conceptInclusions) {
             for (OWLClassExpression description : inclusion)
                 description.accept(clausifier);
             DLClause dlClause=clausifier.getDLClause();
             dlClauses.add(dlClause.getSafeVersion(AtomicConcept.THING));
         }
         NormalizedDataRangeAxiomClausifier normalizedDataRangeAxiomClausifier=new NormalizedDataRangeAxiomClausifier(dataRangeConverter,axioms.m_definedDatatypesIRIs);
-        for (OWLDataRange[] inclusion : axioms.m_dataRangeInclusions) {
+        for (List<OWLDataRange> inclusion : axioms.m_dataRangeInclusions) {
             for (OWLDataRange description : inclusion)
                 description.accept(normalizedDataRangeAxiomClausifier);
             DLClause dlClause=normalizedDataRangeAxiomClausifier.getDLClause();
@@ -267,7 +268,7 @@ public class OWLClausification {
         return DLClause.create(hAtoms,bAtoms);
     }
     private static boolean contains(OWLAxioms axioms, OWLDataProperty p) {
-        for(OWLDataPropertyExpression[] e: axioms.m_dataPropertyInclusions) {
+        for(List<OWLDataPropertyExpression> e: axioms.m_dataPropertyInclusions) {
             for(OWLDataPropertyExpression candidate:e) {
                 if(candidate.equals(p)) {
                     return true;
@@ -761,8 +762,7 @@ public class OWLClausification {
         @Override
         public Object visit(OWLDataOneOf object) {
             Set<Constant> constants=new HashSet<>();
-            for (OWLLiteral literal : object.getValues())
-                constants.add((Constant)literal.accept(this));
+            object.values().forEach(l-> constants.add((Constant)l.accept(this)));
             Constant[] constantsArray=new Constant[constants.size()];
             constants.toArray(constantsArray);
             return ConstantEnumeration.create(constantsArray);
@@ -796,7 +796,7 @@ public class OWLClausification {
         @Override
         public Object visit(OWLLiteral object) {
             try {
-                if (object.isRDFPlainLiteral()) {
+                if (object.isRDFPlainLiteral()||object.getDatatype().getIRI().equals(OWL2Datatype.RDF_LANG_STRING.getIRI())) {
                     if (object.hasLang())
                         return Constant.create(object.getLiteral()+"@"+object.getLang(),Prefixes.s_semanticWebPrefixes.get("rdf:")+"PlainLiteral");
                     else
@@ -912,7 +912,7 @@ public class OWLClausification {
             m_headAtoms=new ArrayList<>();
             m_bodyAtoms=new ArrayList<>();
             m_abstractVariables=new HashSet<>();
-            OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
+            OWLDataFactory factory=OWLManager.getOWLDataFactory();
             for (DescriptionGraph descriptionGraph : descriptionGraphs)
                 for (int i=0;i<descriptionGraph.getNumberOfEdges();i++)
                     m_graphObjectProperties.add(factory.getOWLObjectProperty(IRI.create(descriptionGraph.getEdge(i).getAtomicRole().getIRI())));
