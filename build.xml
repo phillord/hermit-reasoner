@@ -18,9 +18,9 @@
 	
     <!-- structure of output files -->
     <property name="projectroot" value="."/>
-    <property name="builddir" value="${projectroot}/build"/>
-    <property name="classdir" value="${builddir}/class"/>
-    <property name="testclassdir" value="${builddir}/testclass"/>
+    <property name="builddir" value="${projectroot}/antbuild"/>
+    <property name="classdir" value="${builddir}/classes"/>
+    <property name="testclassdir" value="${builddir}/testclasses"/>
 	<property name="reports" location="${builddir}/testreports"/>
 	
     <!-- structure of the release -->
@@ -33,6 +33,7 @@
     <!-- libraries -->
     <property name="libdir" value="${projectroot}/lib"/>
     <property name="owlapi" value="${libdir}/owlapi-3.4.10.jar"/>
+    <property name="getopt" value="${libdir}/java-getopt-1.0.14.jar"/>
     <property name="automaton" value="${libdir}/dk.brics.automaton-1.11-2.jar"/>
     <property name="jautomaton" value="${libdir}/jautomata-core-2.0-alpha-1.jar"/>
     <property name="junit" value="${libdir}/junit-4.4.jar"/>
@@ -45,19 +46,21 @@
     <!-- to generate a debug version, use -Ddebug=on argument when running ant -->
     <property name="debug" value="off"/>
 
+    <!-- FIXME: what about the seperated resources -->
+
     <!-- SOURCE PATHS -->
     <path id="sourcepath">
-        <pathelement path="${projectroot}/src"/>
-        <pathelement path="${projectroot}/getopt"/>
-    	<pathelement path="${projectroot}/examples"/>
+        <pathelement path="${projectroot}/src/main/java"/>
+    	<!-- <pathelement path="${projectroot}/examples"/> -->
     </path>
     <path id="testsourcepath">
-        <pathelement path="${projectroot}/test"/>
+        <pathelement path="${projectroot}/src/test/java"/>
     </path>
 
     <!-- CLASS PATHS -->
     <path id="classpath">
         <pathelement location="${owlapi}"/>
+        <pathelement location="${getopt}"/>
         <pathelement location="${automaton}"/>
         <pathelement location="${jautomaton}"/>
         <pathelement location="${protegeapp}"/>
@@ -87,10 +90,7 @@
             <src refid="sourcepath"/>
             <classpath refid="classpath"/>
         </javac>
-        <copy todir="${classdir}">
-            <fileset dir="${projectroot}/getopt" includes="**/*.properties"/>
-        </copy>
-        <copy todir="${classdir}" file="src/plugin.xml">
+        <copy todir="${classdir}" file="src/main/resources/plugin.xml">
             <filterset>
                 <filter token="VERSION" value="${version}"/>
             </filterset>
@@ -117,6 +117,11 @@
     <target name="unpack-owlapi">
         <unjar src="${owlapi}" dest="${classdir}"/>
     </target>
+
+    <target name="unpack-getopt">
+        <unjar src="${getopt}" dest="${classdir}"/>
+    </target>
+
 
     <target name="setRevisionNumberProperty">
         <exec executable="svnversion" outputproperty="revision.number"/>
@@ -161,14 +166,14 @@
                 <attribute name="Update-Url" value="${updatefile}"/>
             </manifest>
             <fileset dir="${classdir}"/>        	
-            <fileset file="readme.txt"/>
+            <fileset file="README.txt"/>
             <zipfileset dir="${builddir}/Licenses"  prefix="Licenses"/>
         </jar>
     </target>
 	
     <target name="HermiT-standalone-no-libraries" depends="clean,setRevisionNumberProperty,compile,javadoc">
         <mkdir dir="${releasedir}"/>
-        <copy file="${projectroot}/readme.txt" tofile="${releasedir}/readme.txt">
+        <copy file="${projectroot}/README.txt" tofile="${releasedir}/README.txt">
             <filterset>
                 <filter token="VERSION" value="${version}"/>
             </filterset>
@@ -195,17 +200,16 @@
             </manifest>
             <fileset dir="${classdir}"/>
             <zipfileset dir="${projectroot}/src" prefix="src"/>
-            <zipfileset dir="${projectroot}/getopt" prefix="src"/>
             <zipfileset dir="${javadocdir}" prefix="javadoc"/>
-            <fileset file="${releasedir}/readme.txt"/>
+            <fileset file="${releasedir}/README.txt"/>
             <fileset file="gpl.txt"/>
             <fileset file="lgpl-3.0.txt"/>
         </jar>
     </target>
     
-    <target name="HermiT-standalone" depends="clean,setRevisionNumberProperty,compile,unpack-libraries,unpack-owlapi,javadoc">
+    <target name="HermiT-standalone" depends="clean,setRevisionNumberProperty,compile,unpack-libraries,unpack-owlapi,unpack-getopt,javadoc">
         <mkdir dir="${releasedir}"/>
-        <copy file="${projectroot}/readme.txt" tofile="${releasedir}/readme.txt">
+        <copy file="${projectroot}/README.txt" tofile="${releasedir}/README.txt">
             <filterset>
                 <filter token="VERSION" value="${version}"/>
             </filterset>
@@ -232,19 +236,18 @@
             </manifest>
             <fileset dir="${classdir}"/>
             <zipfileset dir="${projectroot}/src" prefix="src"/>
-            <zipfileset dir="${projectroot}/getopt" prefix="src"/>
             <zipfileset dir="${javadocdir}" prefix="javadoc"/>
-            <fileset file="${releasedir}/readme.txt"/>
+            <fileset file="${releasedir}/README.txt"/>
             <fileset file="gpl.txt"/>
             <fileset file="lgpl-3.0.txt"/>
         </jar>
     </target>
     
+    <!-- FIXME: this does not reflect the changes with the Maven build.
     <target name="HermiT-project">
         <mkdir dir="${projectdir}"/>
         <copy todir="${projectdir}">
             <fileset dir="${projectroot}" includes="src/**/*"/>
-            <fileset dir="${projectroot}" includes="getopt/**/*"/>
         	<fileset dir="${projectroot}" includes="examples/**/*" excludes="examples/ontologies/pizza-inferred.owl,examples/ontologies/pizza-prettyPrint.owl,examples/ontologies/catalog.xml"/>
             <fileset dir="${projectroot}" includes="test/**/*"/>
             <fileset dir="${projectroot}" includes="lib/**/*"/>
@@ -252,14 +255,14 @@
         <copy file="build.xml" todir="${projectdir}"/>
         <copy file="gpl.txt" todir="${projectdir}"/>
         <copy file="lgpl-3.0.txt" todir="${projectdir}"/>
-        <copy file="readme.txt" todir="${projectdir}"/>
+        <copy file="README.txt" todir="${projectdir}"/>
         <copy file="update.properties" todir="${projectdir}"/>
         <copy file=".classpath" todir="${projectdir}"/>
         <copy file=".project" todir="${projectdir}"/>
         <zip destfile="${builddir}/${ant.project.name}-${version}.zip" basedir="${releasedir}"/>
-    </target>
+    </target> -->
     
-    <target name="combined" depends="clean,compile,javadoc,unpack-libraries,HermiT-protege-plugin,HermiT-standalone,HermiT-project"/>
+    <target name="combined" depends="clean,compile,javadoc,unpack-libraries,HermiT-protege-plugin,HermiT-standalone"/> <!--,HermiT-project-->
     
     <!-- TEST TARGETS -->
 
@@ -325,7 +328,7 @@
         <sshexec host="linux.cs.ox.ac.uk" username="${username}" password="${password}" command="mkdir /fs/website/research/themes/isg/tools/HermiT/download/${version}/" trust="yes"/>
         <scp file="${builddir}/${ant.project.name}-${version}.zip" localTofile="${ant.project.name}.zip" todir="${username}:${password}@linux.cs.ox.ac.uk:/fs/website/research/themes/isg/tools/HermiT/download/${version}/" trust="yes"/>
     	<scp file="${releasedir}/org.semanticweb.${ant.project.name}.jar" todir="${username}:${password}@linux.cs.ox.ac.uk:/fs/website/research/themes/isg/tools/HermiT/download/${version}/" trust="yes"/>
-    	<scp file="${releasedir}/readme.txt" todir="${username}:${password}@linux.cs.ox.ac.uk:/fs/website/research/themes/isg/tools/HermiT/download/${version}/" trust="yes"/>
+    	<scp file="${releasedir}/README.txt" todir="${username}:${password}@linux.cs.ox.ac.uk:/fs/website/research/themes/isg/tools/HermiT/download/${version}/" trust="yes"/>
         <scp file="${builddir}/update.properties" todir="${username}:${password}@linux.cs.ox.ac.uk:/fs/website/research/themes/isg/tools/HermiT/protege-4-1-beta-update/" trust="yes"/>
         <sshexec host="linux.cs.ox.ac.uk" username="${username}" password="${password}" command="rm /fs/website/research/themes/isg/tools/HermiT/download/current/HermiT.zip" trust="yes"/>
         <sshexec host="linux.cs.ox.ac.uk" username="${username}" password="${password}" command="ln -s  /fs/website/research/themes/isg/tools/HermiT/download/${version}/HermiT.zip /fs/website/research/themes/isg/tools/HermiT/download/current/HermiT.zip" trust="yes"/>

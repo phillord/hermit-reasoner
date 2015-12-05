@@ -46,6 +46,9 @@ HermiT uses the following libraries in unmodified form:
    released under The Apache Software License, Version 2.0, see 
    commons-logging.LICENSE in project/lib or in the Protege 
    plug-in jar file
+6) Java port of GNU getopt,
+   www.gnu.org/software/java-getopt/
+   released under GPL 2 (or, at your option, any later version).
 
 The release is organised as follows:
 HermiT.jar is a stand-alone version of HermiT that can be used from the command 
