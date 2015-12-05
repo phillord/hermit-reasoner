@@ -23,8 +23,13 @@ public final class PlusInfinity extends Number {
 
     private PlusInfinity() {
     }
+    @Override
     public boolean equals(Object that) {
         return this==that;
+    }
+    @Override
+    public int hashCode() {
+    	return System.identityHashCode(this);
     }
     public String toString() {
         return "+INF";
