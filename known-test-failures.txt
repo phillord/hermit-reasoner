@@ -1,0 +1,112 @@
+The following tests were known to fail for the following reasons before the
+migration to OWL API 4.x.
+---------------------------------------------------------------------------------------------
+org.semanticweb.HermiT.tableau
+org.semanticweb.HermiT.tableau.BlockingValidatorTest
+testOneInvalidBlock(org.semanticweb.HermiT.tableau.BlockingValidatorTest)
+junit.framework.AssertionFailedError
+testInvalidBlockWithAnnotatedEqualities(org.semanticweb.HermiT.tableau.BlockingValidatorTest)
+junit.framework.AssertionFailedError
+---------------------------------------------------------------------------------------------
+org.semanticweb.HermiT.owl_wg_tests
+OWL WG All DL Direct Semantics Tests
+WebOnt-I5.8-002-consistency(org.semanticweb.HermiT.owl_wg_tests.ConsistencyTest)
+junit.framework.AssertionFailedError: Test timed out.
+WebOnt-I5.8-005-consistency(org.semanticweb.HermiT.owl_wg_tests.ConsistencyTest)
+junit.framework.AssertionFailedError: Test timed out.
+WebOnt-I5.8-005-nonentailment(org.semanticweb.HermiT.owl_wg_tests.EntailmentTest)
+junit.framework.AssertionFailedError: Test timed out.
+WebOnt-description-logic-664-consistency(org.semanticweb.HermiT.owl_wg_tests.ConsistencyTest)
+junit.framework.AssertionFailedError: Test timed out.
+WebOnt-description-logic-664-entailment(org.semanticweb.HermiT.owl_wg_tests.EntailmentTest)
+junit.framework.AssertionFailedError: Test timed out.
+WebOnt-description-logic-208-consistency(org.semanticweb.HermiT.owl_wg_tests.ConsistencyTest)
+junit.framework.AssertionFailedError: Test timed out.
+WebOnt-description-logic-208-entailment(org.semanticweb.HermiT.owl_wg_tests.EntailmentTest)
+junit.framework.AssertionFailedError: Test timed out.
+WebOnt-description-logic-903-entailment(org.semanticweb.HermiT.owl_wg_tests.EntailmentTest)
+junit.framework.AssertionFailedError: Test timed out.
+WebOnt-description-logic-906-consistency(org.semanticweb.HermiT.owl_wg_tests.ConsistencyTest)
+junit.framework.AssertionFailedError: Test timed out.
+WebOnt-description-logic-662-consistency(org.semanticweb.HermiT.owl_wg_tests.ConsistencyTest)
+junit.framework.AssertionFailedError: Test timed out.
+WebOnt-description-logic-662-entailment(org.semanticweb.HermiT.owl_wg_tests.EntailmentTest)
+junit.framework.AssertionFailedError: Test timed out.
+WebOnt-I5.8-004-consistency(org.semanticweb.HermiT.owl_wg_tests.ConsistencyTest)
+junit.framework.AssertionFailedError: Test timed out.
+WebOnt-I5.8-004-entailment(org.semanticweb.HermiT.owl_wg_tests.EntailmentTest)
+junit.framework.AssertionFailedError: Test timed out.
+WebOnt-I5.8-001-inconsistency(org.semanticweb.HermiT.owl_wg_tests.ConsistencyTest)
+junit.framework.AssertionFailedError: Test timed out.
+WebOnt-description-logic-204-consistency(org.semanticweb.HermiT.owl_wg_tests.ConsistencyTest)
+junit.framework.AssertionFailedError: Test timed out.
+WebOnt-description-logic-204-entailment(org.semanticweb.HermiT.owl_wg_tests.EntailmentTest)
+junit.framework.AssertionFailedError: Test timed out.
+WebOnt-description-logic-909-inconsistency(org.semanticweb.HermiT.owl_wg_tests.ConsistencyTest)
+java.lang.OutOfMemoryError: Java heap space
+WebOnt-I5.8-003-inconsistency(org.semanticweb.HermiT.owl_wg_tests.ConsistencyTest)
+junit.framework.AssertionFailedError: Test timed out.
+WebOnt-description-logic-904-nonentailment(org.semanticweb.HermiT.owl_wg_tests.EntailmentTest)
+junit.framework.AssertionFailedError: Test timed out.
+WebOnt-description-logic-907-consistency(org.semanticweb.HermiT.owl_wg_tests.ConsistencyTest)
+java.lang.OutOfMemoryError: Java heap space
+WebOnt-description-logic-663-consistency(org.semanticweb.HermiT.owl_wg_tests.ConsistencyTest)
+junit.framework.AssertionFailedError: Test timed out.
+WebOnt-description-logic-663-entailment(org.semanticweb.HermiT.owl_wg_tests.EntailmentTest)
+junit.framework.AssertionFailedError: Test timed out.
+WebOnt-description-logic-209-consistency(org.semanticweb.HermiT.owl_wg_tests.ConsistencyTest)
+junit.framework.AssertionFailedError: Test timed out.
+WebOnt-description-logic-209-nonentailment(org.semanticweb.HermiT.owl_wg_tests.EntailmentTest)
+junit.framework.AssertionFailedError: Test timed out.
+WebOnt-description-logic-206-consistency(org.semanticweb.HermiT.owl_wg_tests.ConsistencyTest)
+junit.framework.AssertionFailedError: Test timed out.
+WebOnt-description-logic-206-entailment(org.semanticweb.HermiT.owl_wg_tests.EntailmentTest)
+junit.framework.AssertionFailedError: Test timed out.
+WebOnt-description-logic-910-inconsistency(org.semanticweb.HermiT.owl_wg_tests.ConsistencyTest)
+junit.framework.AssertionFailedError: Test timed out.
+WebOnt-description-logic-203-consistency(org.semanticweb.HermiT.owl_wg_tests.ConsistencyTest)
+junit.framework.AssertionFailedError: Test timed out.
+WebOnt-description-logic-203-entailment(org.semanticweb.HermiT.owl_wg_tests.EntailmentTest)
+junit.framework.AssertionFailedError: Test timed out.
+---------------------------------------------------------------------------------------------
+org.semanticweb.HermiT.structural
+Test for the normalization and clasification code used with the OWLAPI.
+org.semanticweb.HermiT.structural.ClausificationTest
+testBasic(org.semanticweb.HermiT.structural.ClausificationTest)
+junit.framework.AssertionFailedError: expected:<5> but was:<13>
+testHasKeys(org.semanticweb.HermiT.structural.ClausificationTest)
+junit.framework.AssertionFailedError
+testNominals1(org.semanticweb.HermiT.structural.ClausificationTest)
+junit.framework.AssertionFailedError
+testNominals2(org.semanticweb.HermiT.structural.ClausificationTest)
+junit.framework.AssertionFailedError
+testNominals3(org.semanticweb.HermiT.structural.ClausificationTest)
+junit.framework.AssertionFailedError
+testNominals4(org.semanticweb.HermiT.structural.ClausificationTest)
+junit.framework.AssertionFailedError
+testExistsSelf1(org.semanticweb.HermiT.structural.ClausificationTest)
+junit.framework.AssertionFailedError
+org.semanticweb.HermiT.structural.ClausificationDatatypesTest
+testDataComplementOf3(org.semanticweb.HermiT.structural.ClausificationDatatypesTest)
+junit.framework.AssertionFailedError
+testDataComplementOf4(org.semanticweb.HermiT.structural.ClausificationDatatypesTest)
+junit.framework.AssertionFailedError
+testDataPropertiesDataOneOf1(org.semanticweb.HermiT.structural.ClausificationDatatypesTest)
+junit.framework.AssertionFailedError
+testDataPropertiesDataOneOf2(org.semanticweb.HermiT.structural.ClausificationDatatypesTest)
+junit.framework.AssertionFailedError
+testDataPropertiesDataOneOf3(org.semanticweb.HermiT.structural.ClausificationDatatypesTest)
+junit.framework.AssertionFailedError
+testDataPropertiesDataOneOf4(org.semanticweb.HermiT.structural.ClausificationDatatypesTest)
+junit.framework.AssertionFailedError
+testDataPropertiesHasValue1(org.semanticweb.HermiT.structural.ClausificationDatatypesTest)
+junit.framework.AssertionFailedError
+testDataPropertiesHasValue2(org.semanticweb.HermiT.structural.ClausificationDatatypesTest)
+junit.framework.AssertionFailedError
+testDataPropertiesDataComplementOf1(org.semanticweb.HermiT.structural.ClausificationDatatypesTest)
+junit.framework.AssertionFailedError
+testDataPropertiesDataComplementOf2(org.semanticweb.HermiT.structural.ClausificationDatatypesTest)
+junit.framework.AssertionFailedError
+org.semanticweb.HermiT.structural.NormalizationTest
+testKeys2(org.semanticweb.HermiT.structural.NormalizationTest)
+junit.framework.AssertionFailedError
