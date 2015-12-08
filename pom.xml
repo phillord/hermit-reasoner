@@ -1,38 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2008, 2009, 2010, 2011, 2015 by the Department of Computer Science in the University of Oxford; see lgpl-3.0.txt and gpl.txt for details -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+
+    <!-- USAGE:
+         `mvn compile` to compile main sources.
+         `mvn test` to compile all tests and run AllQuickTests.
+         `mvn -PallTests test` to compile all tests and run AllTests.
+         `mvn install` to generate a standalone HermiT library without dependencies.
+           This will also generate the JUnit reports and attempt to SCP the build results to linux.cs.ox.ac.uk.
+
+    -->
+
     <groupId>com.hermit-reasoner</groupId>
     <artifactId>org.semanticweb.hermit</artifactId>
+    <!-- Note that on each released build, the ${updatefile} on the web site
+         should be replaced, and the new version of the plugin should be
+         posted at the (auto-generated) URL in that file. -->
     <version>1.3.8.5-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>HermiT</name>
     <url>http://hermit-reasoner.com/</url>
     <description>HermiT is reasoner for ontologies written using the Web
-  Ontology Language (OWL). Given an OWL file, HermiT can determine whether or
-  not the ontology is consistent, identify subsumption relationships between
-  classes, and much more.
+    Ontology Language (OWL). Given an OWL file, HermiT can determine whether or
+    not the ontology is consistent, identify subsumption relationships between
+    classes, and much more.
 
-  This is the maven build of HermiT and is designed for people who wish to use
-  HermiT from within the OWL API. It is now versioned in the main HermiT
-  version repository, although not officially supported by the HermiT
-  developers.
+    This is the maven build of HermiT and is designed for people who wish to use
+    HermiT from within the OWL API. It is now versioned in the main HermiT
+    version repository, although not officially supported by the HermiT
+    developers.
 
-  The version number of this package is a composite of the HermiT version and
-  an value representing releases of this packaged version. So, 1.3.7.1 is the
-  first release of the mavenized version of HermiT based on the 1.3.7 release
-  of HermiT.
-  </description>
+    The version number of this package is a composite of the HermiT version and
+    an value representing releases of this packaged version. So, 1.3.7.1 is the
+    first release of the mavenized version of HermiT based on the 1.3.7 release
+    of HermiT.
+    </description>
+
+    <scm>
+        <connection>scm:svn:svn://svn.cs.ox.ac.uk/krr/2008/HermiT/trunk/</connection>
+        <developerConnection>scm:svn:svn://svn.cs.ox.ac.uk/krr/2008/HermiT/trunk/</developerConnection>
+        <tag>HEAD</tag>
+        <url>svn://svn.cs.ox.ac.uk/krr/2008/HermiT/trunk/</url>
+    </scm>
 
     <licenses>
         <license>
             <name>LGPL</name>
+            <url>http://www.gnu.org/licenses/lgpl-3.0.txt</url>
         </license>
     </licenses>
-
+  
     <properties>
+        <!-- General info. -->
+        <homepage>http://hermit-reasoner.com/</homepage>
+        <updatefile>${homepage}protege-4-1-beta-update/update.properties</updatefile>
+        <mainClass>org.semanticweb.HermiT.cli.CommandLine</mainClass>
+        <!-- structure of output files -->
+        <reportsDirectory>${project.build.directory}/junit-reports</reportsDirectory>
+        <!-- To generate a debug version, use `mvn -DdebugHermiT=true` when running Maven. -->
+        <debugHermiT>false</debugHermiT>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -40,20 +70,36 @@
         <maven>2.2.1</maven>
     </prerequisites>
 
+    <!-- TODO: exclude protege from the command line, and exclude the command line from protege. -->
+
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.10</version>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.3</version>
                 <configuration>
+                    <compilerArgs>
+                        <arg value="-Xlint:all"/>
+                        <arg value="-Xlint:-path"/>
+                        <arg value="-Xlint:-options"/>
+                        <arg value="-Xlint:-rawtypes"/>
+                    </compilerArgs>
+                    <showDeprecation>true</showDeprecation>
+                    <debug>${debugHermiT}</debug>
+                    <debuglevel>lines,vars,source</debuglevel>
                     <source>1.8</source>
                     <target>1.8</target>
+                    <!-- FIXME remove these excludes -->
                     <excludes>
                         <!-- exclude the protege dependency and the command line because we 
-                            don't built a command line capable jar -->
+                             don't built a command line capable jar -->
                         <exclude>**/Protege*.java</exclude>
-                        <exclude>**/CommandLine.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>
@@ -61,13 +107,23 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.19</version>
+                <!-- test configuration goes here -->
                 <configuration>
-                    <excludes>
-                        <!-- structural tests don't work and it's known -->
-                        <exclude>**/structural/*</exclude>
-                        <exclude>**/BlockingValidatorTest*</exclude>
-                    </excludes>
+                    <!-- By default, run only AllQuickTests. -->
+                    <includes>
+                        <include>org/semanticweb/HermiT/AllQuickTests*</include>
+                    </includes>
+                    <failIfNoTests>true</failIfNoTests>
+                    <enableAssertions>true</enableAssertions>
+                    <argLine>-Xmx1G</argLine>
                 </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.maven.surefire</groupId>
+                        <artifactId>surefire-junit4</artifactId>
+                        <version>2.19</version>
+                    </dependency>
+                </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -83,29 +139,14 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>2.4</version>
-                <executions>
-                    <execution>
-                        <id>attach-source</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>attach-test-sources</id>
-                        <goals>
-                            <goal>test-jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>2.10.3</version>
                 <configuration>
                     <additionalparam>-Xdoclint:none</additionalparam>
+                    <show>protected</show>
+                    <author>false</author>
+                    <version>true</version>
+                    <use>true</use>
                 </configuration>
                 <executions>
                     <execution>
@@ -116,8 +157,272 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>buildnumber-maven-plugin</artifactId>
+                <version>1.4</version>
+                <executions>
+                    <execution>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>create</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <timestampFormat>{0,date,dd-MM-yyyy HH:mm:ss}</timestampFormat>
+                    <doCheck>false</doCheck>
+                    <doUpdate>false</doUpdate>
+                    <providerImplementations>
+                        <svn>javasvn</svn>
+                    </providerImplementations>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.google.code.maven-scm-provider-svnjava</groupId>
+                        <artifactId>maven-scm-provider-svnjava</artifactId>
+                        <version>2.1.1</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.tmatesoft.svnkit</groupId>
+                        <artifactId>svnkit</artifactId>
+                        <version>1.8.5</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.5</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                        </manifest>
+                        <manifestEntries>
+                            <Implementation-Title>${project.name}</Implementation-Title>
+                            <Implementation-Vendor>Oxford University</Implementation-Vendor>
+                            <Implementation-Version>${project.version}</Implementation-Version>
+                            <!-- Manifest includes the SVN version number. -->    
+                            <Implementation-Build>${buildNumber}</Implementation-Build>
+                            <SCM-Revision>${buildNumber}</SCM-Revision>
+                            <Built-By>${user.name}</Built-By>
+                            <Built-OS>${os.name}</Built-OS>
+                            <Build-Date>${timestamp}</Build-Date>
+                            <Bundle-ManifestVersion>2</Bundle-ManifestVersion>
+                            <Bundle-Name>HermiT Reasoner</Bundle-Name>
+                            <Bundle-Category>protege</Bundle-Category>
+                            <Bundle-Description>An OWL 2 reasoner</Bundle-Description>
+                            <Bundle-DocURL>${homepage}</Bundle-DocURL>
+                            <Bundle-Vendor>Boris Motik, Birte Glimm, Giorgos Stoilos, and Ian Horrocks</Bundle-Vendor>
+                            <Bundle-Version>${project.version}</Bundle-Version>
+                            <Update-Url>${updatefile}</Update-Url>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <!-- Maven Assembly Plugin for uber jars. -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                    <archive>
+                        <!-- MainClass in mainfest make a executable jar. -->
+                        <manifest>
+                            <mainClass>${mainClass}</mainClass>
+                        </manifest>
+                        <manifestEntries>
+                            <Implementation-Title>${project.name}</Implementation-Title>
+                            <Implementation-Vendor>Oxford University</Implementation-Vendor>
+                            <Implementation-Version>${project.version}</Implementation-Version>
+                            <!-- Manifest includes the SVN version number. -->    
+                            <Implementation-Build>${buildNumber}</Implementation-Build>
+                            <SCM-Revision>${buildNumber}</SCM-Revision>
+                            <Built-By>${user.name}</Built-By>
+                            <Built-OS>${os.name}</Built-OS>
+                            <Build-Date>${timestamp}</Build-Date>
+                            <Bundle-ManifestVersion>2</Bundle-ManifestVersion>
+                            <Bundle-Name>HermiT Reasoner</Bundle-Name>
+                            <Bundle-Description>An OWL 2 reasoner</Bundle-Description>
+                            <Bundle-DocURL>${homepage}</Bundle-DocURL>
+                            <Bundle-Vendor>Boris Motik, Birte Glimm, Giorgos Stoilos, and Ian Horrocks</Bundle-Vendor>
+                            <Bundle-Version>${project.version}</Bundle-Version>
+                            <Update-Url>${updatefile}</Update-Url>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+                <executions>
+                    <execution>
+                        <!-- Build the assembly jar for the CLI. -->
+                        <id>make-assembly-cli</id>
+                        <phase>package</phase> 
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>${basedir}/src/assembly/cli-assembly.xml</descriptor> 
+                            </descriptors>
+                            <archive>
+                                <manifest>
+                                    <mainClass>${mainClass}</mainClass>
+                                </manifest>
+                            </archive>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <!-- Build the assembly jar for the Protege plugin. -->
+                        <id>make-assembly-protege</id>
+                        <phase>package</phase> 
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>${basedir}/src/assembly/protege-assembly.xml</descriptor> 
+                            </descriptors>
+                            <archive>
+                                <manifestEntries>
+                                    <Bundle-Category>protege</Bundle-Category>
+                                    <Bundle-Activator>org.protege.editor.core.plugin.DefaultPluginActivator</Bundle-Activator>
+                                </manifestEntries>
+                            </archive>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <!-- Build the assembly of the source code project. -->
+                        <id>make-src-package</id>
+                        <phase>package</phase> 
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>${basedir}/src/assembly/source-assembly.xml</descriptor> 
+                            </descriptors>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.8</version>
+                <executions>
+                    <execution>
+                        <id>test-reports</id>
+                        <phase>install</phase>
+                        <configuration>
+                        <tasks>
+                            <junitreport todir="target/surefire-reports">
+                                <fileset dir="target/surefire-reports">
+                                    <include name="**/*.xml"/>
+                                </fileset>
+                                <report format="noframes" todir="${reportsDirectory}">
+                                    <param name="TITLE" expression="HermiT JUnit Test Results"/>
+                                </report>
+                            </junitreport>
+                        </tasks>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <phase>install</phase>
+                        <configuration>
+                            <target>
+                                <echo message="Publishing a new version of HermiT"/>
+                                <input message="Enter a user name for linux:" addproperty="username" defaultvalue="${user.name}"/>
+                                <input message="Enter ${username}'s password on linux: " addproperty="password"/>
+                                <sshexec host="linux.cs.ox.ac.uk" username="${username}" password="${password}" command="mkdir /fs/website/research/themes/isg/tools/HermiT/download/${project.version}/" trust="yes"/>
+                                <!-- SCP the assembly of the entrie code project. -->
+                                <scp file="${project.build.directory}/${project.artifactId}-${project.version}-src.zip" localTofile="${project.name}.zip" todir="${username}:${password}@linux.cs.ox.ac.uk:/fs/website/research/themes/isg/tools/HermiT/download/${project.version}/" trust="yes"/>
+                                <!-- SCP the Protege plugin jar. -->
+                                <scp file="${project.build.directory}/${project.artifactId}-${project.version}-protege-assembly.jar" todir="${username}:${password}@linux.cs.ox.ac.uk:/fs/website/research/themes/isg/tools/HermiT/download/${project.version}/" trust="yes"/>
+                                <!-- SCP the README file. -->
+                                <scp file="${project.basedir}/README.txt" todir="${username}:${password}@linux.cs.ox.ac.uk:/fs/website/research/themes/isg/tools/HermiT/download/${project.version}/" trust="yes"/>
+                                <!-- SCP the generated update.properties file for Protege. -->
+                                <scp file="${project.build.directory}/update.properties" todir="${username}:${password}@linux.cs.ox.ac.uk:/fs/website/research/themes/isg/tools/HermiT/protege-4-1-beta-update/" trust="yes"/>
+                                <sshexec host="linux.cs.ox.ac.uk" username="${username}" password="${password}" command="rm /fs/website/research/themes/isg/tools/HermiT/download/current/HermiT.zip" trust="yes"/>
+                                <sshexec host="linux.cs.ox.ac.uk" username="${username}" password="${password}" command="ln -s  /fs/website/research/themes/isg/tools/HermiT/download/${project.version}/HermiT.zip /fs/website/research/themes/isg/tools/HermiT/download/current/HermiT.zip" trust="yes"/>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.ant</groupId>
+                        <artifactId>ant-junit</artifactId>
+                        <version>1.9.6</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.apache.ant</groupId>
+                        <artifactId>ant-jsch</artifactId>
+                        <version>1.9.6</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
         </plugins>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+            <resource>
+                <directory>${project.basedir}</directory>
+                <targetPath>${project.build.directory}</targetPath>
+                <filtering>true</filtering>
+                <includes>
+                    <include>update.properties</include>
+                </includes>
+            </resource>
+        </resources>
     </build>
+
+    <!-- To view the report that results from the JUnit tests, run `mvn site`. -->
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-report-plugin</artifactId>
+                <version>2.19</version>
+                <configuration>
+                    <showSuccess>false</showSuccess>
+                    <outputDirectory>${basedir}/target/surefire-reports</outputDirectory>
+                </configuration>
+            </plugin>
+        </plugins>
+    </reporting>
+
+    <profiles>
+        <profile>
+            <id>allTests</id>
+            <activation>
+                <property>
+                    <name>allTests</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <!-- When using the allTests profile, run all tests. To enable, run maven with `mvn -PallTests` -->
+                            <includes>
+                                <include>org/semanticweb/HermiT/AllTests*</include>
+                            </includes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
     <dependencies>
         <dependency>
@@ -128,7 +433,7 @@
         <dependency>
             <groupId>net.sourceforge.owlapi</groupId>
             <artifactId>owlapi-distribution</artifactId>
-            <version>3.4.10</version>
+            <version>4.1.3</version>
         </dependency>
         <dependency>
             <groupId>org.apache.ws.commons.axiom</groupId>
@@ -165,6 +470,7 @@
             <groupId>edu.stanford.protege</groupId>
             <artifactId>org.protege.editor.owl</artifactId>
             <version>4.3.0</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>gnu.getopt</groupId>
@@ -186,6 +492,11 @@
             <name>Boris Motik</name>
             <email>boris.motik@cs.ox.ac.uk</email>
         </developer>
+        <developer>
+            <id>bglimm</id>
+            <name>Birte Glimm</name>
+            <email>birte.glimm@uni-ulm.de</email>
+        </developer>
     </developers>
 
     <mailingLists>
@@ -194,5 +505,10 @@
             <archive>http://groups.google.com/group/hermit-users</archive>
         </mailingList>
     </mailingLists>
+
+    <!-- additionally -->
+    <!-- tag the SVN with the current build version -->
+    <!-- update Protege binaries SVN with the Protege plugin and readme -->
+    <!-- update index.html for the HermiT web page -->
 
 </project>

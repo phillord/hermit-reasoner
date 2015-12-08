@@ -561,7 +561,7 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
                     if (ops.size()!=1) {
                         throw new RuntimeException("Internal error: HermiT decided that the anonymous individuals form a valid forest, but actually they do not. ");
                     }
-                    OWLObjectPropertyExpression op=ops.iterator().next().getInverseProperty().getSimplified();
+                    OWLObjectPropertyExpression op=ops.iterator().next().getInverseProperty();
                     OWLClassExpression c=getClassExpressionFor(factory,root,null);
                     anonIndAxioms.add(factory.getOWLClassAssertionAxiom(factory.getOWLObjectSomeValuesFrom(op,c),subject));
                 }
@@ -721,7 +721,7 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
         public void visit(OWLObjectPropertyAssertionAxiom axiom) {
             OWLIndividual sub=axiom.getSubject();
             OWLIndividual obj=axiom.getObject();
-            OWLObjectPropertyExpression ope=axiom.getProperty().getSimplified();
+            OWLObjectPropertyExpression ope=axiom.getProperty();
             if (!sub.isAnonymous()&&!obj.isAnonymous()) {
                 return; // not interesting for the forest
             }
@@ -730,7 +730,7 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
                     OWLIndividual tmp=sub;
                     sub=obj;
                     obj=tmp;
-                    ope=ope.getInverseProperty().getSimplified();
+                    ope=ope.getInverseProperty();
                 }
                 OWLNamedIndividual named=obj.asOWLNamedIndividual();
                 OWLAnonymousIndividual unnamed=sub.asOWLAnonymousIndividual();

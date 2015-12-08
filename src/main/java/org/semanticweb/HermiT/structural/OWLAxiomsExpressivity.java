@@ -86,7 +86,7 @@ public class OWLAxiomsExpressivity extends OWLAxiomVisitorAdapter implements OWL
     }
 
     protected void visitProperty(OWLObjectPropertyExpression object) {
-        if (object.getSimplified().isAnonymous())
+        if (object.isAnonymous())
             m_hasInverseRoles=true;
     }
 

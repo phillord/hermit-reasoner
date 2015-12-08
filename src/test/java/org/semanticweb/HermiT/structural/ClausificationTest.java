@@ -115,7 +115,7 @@ public class ClausificationTest extends AbstractStructuralTest {
     }
 
     protected void assertDLClauses(String[] control) throws Exception {
-        List<String> actualStrings = getDLClauses();
+        List<String> actualStrings=getDLClauses();
         assertContainsAll(this.getName(),actualStrings,control);
     }
 }

@@ -20,6 +20,9 @@ import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.Individual;
+import org.semanticweb.owlapi.model.IRI;
+
+import com.google.common.base.Optional;
 
 public abstract class AbstractStructuralTest extends AbstractOntologyTest {
 
@@ -90,7 +93,8 @@ public abstract class AbstractStructuralTest extends AbstractOntologyTest {
         OWLClausification clausifier=new OWLClausification(new Configuration());
         Set<DescriptionGraph> noDescriptionGraphs=Collections.emptySet();
         DLOntology dlOntology=(DLOntology)clausifier.preprocessAndClausify(m_ontology,noDescriptionGraphs)[1];
-        String ontologyIRI = m_ontology.getOntologyID().getDefaultDocumentIRI() == null ? "urn:hermit:kb" : m_ontology.getOntologyID().getDefaultDocumentIRI().toString();
+        Optional<IRI> iri=m_ontology.getOntologyID().getDefaultDocumentIRI();
+        String ontologyIRI=iri.isPresent() ? iri.get().toString() : "urn:hermit:kb";
         List<String> actualStrings=new ArrayList<String>();
         Prefixes prefixes=new Prefixes();
         prefixes.declareSemanticWebPrefixes();

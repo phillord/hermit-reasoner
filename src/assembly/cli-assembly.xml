@@ -1,0 +1,46 @@
+<assembly
+    xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.3"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.3 http://maven.apache.org/xsd/assembly-1.1.3.xsd">
+    <id>cli-assembly</id>
+    <formats>
+        <format>jar</format>
+    </formats>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <dependencySets>
+        <dependencySet>
+            <outputDirectory></outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <unpack>true</unpack>
+            <scope>runtime</scope>
+        </dependencySet>
+    </dependencySets>
+    <fileSets>
+        <fileSet>
+            <outputDirectory></outputDirectory>
+            <directory>${project.build.outputDirectory}</directory>
+            <excludes>
+                <!-- Exclude Protege from the generated CLI jar.
+                     Other Protege dependencies are 'provided' so do not need to be excluded. -->
+                <exclude>**/Protege*.*</exclude>
+            </excludes>
+        </fileSet>
+    </fileSets>
+    <files>
+        <file>
+            <source>${project.basedir}/README.txt</source>
+            <outputDirectory>META-INF</outputDirectory>
+            <destName>HermiT-README.txt</destName>
+        </file>
+        <file>
+            <source>${project.basedir}/lgpl-3.0.txt</source>
+            <outputDirectory>META-INF</outputDirectory>
+            <destName>HermiT-LGPL.LICENSE</destName>
+        </file>
+        <file>
+            <source>${project.basedir}/gpl-3.0.txt</source>
+            <outputDirectory>META-INF</outputDirectory>
+            <destName>HermiT-GPL.LICENSE</destName>
+        </file>
+    </files>
+</assembly>

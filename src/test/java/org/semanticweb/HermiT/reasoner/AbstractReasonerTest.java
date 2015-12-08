@@ -361,7 +361,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     protected static Set<String> nodeOfOPEs(Node<OWLObjectPropertyExpression> node) {
         Set<String> translatedSet=new HashSet<String>();
         for (OWLObjectPropertyExpression ope : node.getEntities()) {
-            if (ope.getSimplified().isAnonymous()) {
+            if (ope.isAnonymous()) {
                 // inverse
                 translatedSet.add("InverseOf("+ope.getNamedProperty().getIRI().toString()+")");
             }

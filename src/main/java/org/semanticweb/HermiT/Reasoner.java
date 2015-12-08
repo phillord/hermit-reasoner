@@ -110,7 +110,7 @@ import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
 import org.semanticweb.owlapi.model.OWLOntologyChangeListener;
-import org.semanticweb.owlapi.model.OWLOntologyFormat;
+import org.semanticweb.owlapi.model.OWLDocumentFormat;
 import org.semanticweb.owlapi.model.OWLSubObjectPropertyOfAxiom;
 import org.semanticweb.owlapi.model.OWLSubPropertyChainOfAxiom;
 import org.semanticweb.owlapi.model.OWLTransitiveObjectPropertyAxiom;
@@ -139,7 +139,7 @@ import org.semanticweb.owlapi.reasoner.impl.OWLNamedIndividualNodeSet;
 import org.semanticweb.owlapi.reasoner.impl.OWLObjectPropertyNode;
 import org.semanticweb.owlapi.reasoner.impl.OWLObjectPropertyNodeSet;
 import org.semanticweb.owlapi.util.Version;
-import org.semanticweb.owlapi.vocab.PrefixOWLOntologyFormat;
+import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
 
 /**
  * Answers queries about the logical implications of a particular knowledge base. A Reasoner is associated with a single knowledge base, which is "loaded" when the reasoner is constructed. By default a full classification of all atomic terms in the knowledge base is also performed at this time (which can take quite a while for large or complex ontologies), but this behavior can be disabled as a part of the Reasoner configuration. Internal details of the loading and reasoning algorithms can be configured in the Reasoner constructor and do not change over the lifetime of the Reasoner object---internal data structures and caches are optimized for a particular configuration. By default, HermiT will use the set of options which provide optimal performance.
@@ -239,9 +239,9 @@ public class Reasoner implements OWLReasoner {
         m_prefixes.declareInternalPrefixes(individualIRIs,anonIndividualIRIs);
         m_prefixes.declareDefaultPrefix(m_dlOntology.getOntologyIRI()+"#");
         // declare prefixes as used in the ontology if possible
-        OWLOntologyFormat format=m_rootOntology.getOWLOntologyManager().getOntologyFormat(m_rootOntology);
-        if (format instanceof PrefixOWLOntologyFormat) {
-            PrefixOWLOntologyFormat prefixFormat=(PrefixOWLOntologyFormat)format;
+        OWLDocumentFormat format=m_rootOntology.getOWLOntologyManager().getOntologyFormat(m_rootOntology);
+        if (format instanceof PrefixDocumentFormat) {
+        	PrefixDocumentFormat prefixFormat=(PrefixDocumentFormat)format;
             for (String prefixName : prefixFormat.getPrefixName2PrefixMap().keySet()) {
                 String prefix=prefixFormat.getPrefixName2PrefixMap().get(prefixName);
                 if (m_prefixes.getPrefixName(prefix)==null)
@@ -442,7 +442,7 @@ public class Reasoner implements OWLReasoner {
                         } else if (classExpression instanceof OWLObjectHasValue) {
                             OWLObjectHasValue hasValue=(OWLObjectHasValue)classExpression;
                             OWLObjectProperty namedOP=hasValue.getProperty().getNamedProperty();
-                            OWLIndividual filler=hasValue.getValue();
+                            OWLIndividual filler=hasValue.getFiller();
                             if (!(isDefined(namedOP) || Prefixes.isInternalIRI(namedOP.getIRI().toString())) || !isDefined(filler))
                                 return false;
                         } else if (classExpression instanceof OWLObjectComplementOf) {
@@ -459,7 +459,7 @@ public class Reasoner implements OWLReasoner {
                             } else if (negated instanceof OWLObjectHasValue) {
                                 OWLObjectHasValue hasSelf=(OWLObjectHasValue)negated;
                                 OWLObjectProperty namedOP=hasSelf.getProperty().getNamedProperty();
-                                OWLIndividual filler=hasSelf.getValue();
+                                OWLIndividual filler=hasSelf.getFiller();
                                 if (!(isDefined(namedOP) || Prefixes.isInternalIRI(namedOP.getIRI().toString())) || !isDefined(filler))
                                     return false;
                             } else {
@@ -1178,7 +1178,7 @@ public class Reasoner implements OWLReasoner {
         return atomicConceptHierarchyNodesToNodeSet(nodes);
     }
     public Node<OWLObjectPropertyExpression> getInverseObjectProperties(OWLObjectPropertyExpression propertyExpression) {
-        return getEquivalentObjectProperties(propertyExpression.getSimplified().getInverseProperty());
+        return getEquivalentObjectProperties(propertyExpression.getInverseProperty());
     }
     public NodeSet<OWLObjectPropertyExpression> getDisjointObjectProperties(OWLObjectPropertyExpression propertyExpression) {
         checkPreConditions(propertyExpression);
@@ -1760,7 +1760,7 @@ public class Reasoner implements OWLReasoner {
         initialisePropertiesInstanceManager();
         Individual individual=H(namedIndividual);
         Set<Individual> result;
-        if (propertyExpression.getSimplified().isAnonymous()) {
+        if (propertyExpression.isAnonymous()) {
             // inverse role
             result=m_instanceManager.getObjectPropertySubjects(role,individual);
         } else {
@@ -1796,7 +1796,7 @@ public class Reasoner implements OWLReasoner {
             return true;
         initialisePropertiesInstanceManager();
         OWLObjectProperty property=propertyExpression.getNamedProperty();
-        if (propertyExpression.getSimplified().isAnonymous()) {
+        if (propertyExpression.isAnonymous()) {
             OWLNamedIndividual tmp=subject;
             subject=object;
             object=tmp;
@@ -2238,7 +2238,6 @@ public class Reasoner implements OWLReasoner {
         return AtomicRole.create(objectProperty.getIRI().toString());
     }
     protected static Role H(OWLObjectPropertyExpression objectPropertyExpression) {
-        objectPropertyExpression=objectPropertyExpression.getSimplified();
         if (objectPropertyExpression instanceof OWLObjectProperty)
             return H((OWLObjectProperty)objectPropertyExpression);
         else

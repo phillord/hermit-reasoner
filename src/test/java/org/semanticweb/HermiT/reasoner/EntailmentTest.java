@@ -34,10 +34,10 @@ public class EntailmentTest extends AbstractReasonerTest {
             + "ClassAssertion(owl:Thing :a )"
             + "ObjectPropertyAssertion(:p :a _:anon)";
         loadReasonerWithAxioms(axioms);
-        m_ontologyManager.removeOntology(m_ontology);
         axioms = "ClassAssertion(ObjectSomeValuesFrom(:p owl:Thing) :a)";
         OWLOntology conlusions=getOntologyWithAxioms(axioms);
         assertEntails(conlusions.getLogicalAxioms(), true);
+        m_ontologyManager.removeOntology(m_ontology);
     }
     public void testInvalidBlankNodes() throws Exception {
         String axioms = "ClassAssertion(ObjectSomeValuesFrom(:p ObjectSomeValuesFrom(:s owl:Thing)) :a)"
@@ -61,56 +61,56 @@ public class EntailmentTest extends AbstractReasonerTest {
         String axioms = "ClassAssertion(ObjectSomeValuesFrom(:p ObjectSomeValuesFrom(:s ObjectOneOf(:b))) :a)"
             + "SubObjectPropertyOf( :s :r )";
         loadReasonerWithAxioms(axioms);
-        m_ontologyManager.removeOntology(m_ontology);
         axioms = "ObjectPropertyAssertion(:p :a _:anon1)"
             + "ObjectPropertyAssertion(:r _:anon1 :b)";
         OWLOntology conlusions=getOntologyWithAxioms(axioms);
         assertEntails(conlusions.getLogicalAxioms(), true);
+        m_ontologyManager.removeOntology(m_ontology);
     }
     public void testValidBlankNodesInPremise() throws Exception {
         String axioms = "ObjectPropertyAssertion(:r :a _:anon1)"
             + "ObjectPropertyAssertion(:s _:anon1 _:anon2)";
         loadReasonerWithAxioms(axioms);
-        m_ontologyManager.removeOntology(m_ontology);
         axioms = "ObjectPropertyAssertion(:r _:anon1 _:anon2)";
         OWLOntology conlusions=getOntologyWithAxioms(axioms);
         assertEntails(conlusions.getLogicalAxioms(), true);
+        m_ontologyManager.removeOntology(m_ontology);
     }
     public void testValidBlankNodes() throws Exception {
         String axioms = "ObjectPropertyAssertion(:r :a :b)"
             + "ObjectPropertyAssertion(:s :b :c)";
         loadReasonerWithAxioms(axioms);
-        m_ontologyManager.removeOntology(m_ontology);
         axioms = "ObjectPropertyAssertion(:r _:anon1 _:anon2)";
         OWLOntology conlusions=getOntologyWithAxioms(axioms);
         assertEntails(conlusions.getLogicalAxioms(), true);
+        m_ontologyManager.removeOntology(m_ontology);
     }
     public void testBlankWithDTs() throws Exception {
         String axioms = "ObjectPropertyAssertion(:r :a :b)"
             + "ObjectPropertyAssertion(:s :b :c)";
         loadReasonerWithAxioms(axioms);
-        m_ontologyManager.removeOntology(m_ontology);
         axioms = "DataPropertyAssertion(:dp _:anon1 \"test\")";
         OWLOntology conlusions=getOntologyWithAxioms(axioms);
         assertEntails(conlusions.getLogicalAxioms(), false);
+        m_ontologyManager.removeOntology(m_ontology);
     }
     public void testBlankWithDTs2() throws Exception {
         String axioms = "DataPropertyAssertion(:dp :a \"test\")"
             + "ObjectPropertyAssertion(:s :b :c)";
         loadReasonerWithAxioms(axioms);
-        m_ontologyManager.removeOntology(m_ontology);
         axioms = "DataPropertyAssertion(:dp _:anon1 \"test\")";
         OWLOntology conlusions=getOntologyWithAxioms(axioms);
         assertEntails(conlusions.getLogicalAxioms(), true);
+        m_ontologyManager.removeOntology(m_ontology);
     }
     public void testBlankWithDTs3() throws Exception {
         String axioms = "DataPropertyAssertion(:dp :a \"test\")"
             + "ObjectPropertyAssertion(:s :b :c)";
         loadReasonerWithAxioms(axioms);
-        m_ontologyManager.removeOntology(m_ontology);
         axioms = "DataPropertyAssertion(:dp _:anon1 \"test\"^^xsd:string)";
         OWLOntology conlusions=getOntologyWithAxioms(axioms);
         assertEntails(conlusions.getLogicalAxioms(), true);
+        m_ontologyManager.removeOntology(m_ontology);
     }
     protected OWLOntology getOntologyFromRessource(String resourceName) throws Exception {
         IRI physicalIRI=IRI.create(getClass().getResource(resourceName).toURI());

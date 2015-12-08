@@ -122,6 +122,8 @@ import org.semanticweb.owlapi.model.SWRLSameIndividualAtom;
 import org.semanticweb.owlapi.model.SWRLVariable;
 import org.semanticweb.owlapi.util.OWLAxiomVisitorAdapter;
 
+import com.google.common.base.Optional;
+
 public class OWLClausification {
     protected static final Variable X=Variable.create("X");
     protected static final Variable Y=Variable.create("Y");
@@ -134,7 +136,8 @@ public class OWLClausification {
     }
     public Object[] preprocessAndClausify(OWLOntology rootOntology,Collection<DescriptionGraph> descriptionGraphs) {
         OWLDataFactory factory=rootOntology.getOWLOntologyManager().getOWLDataFactory();
-        String ontologyIRI=rootOntology.getOntologyID().getDefaultDocumentIRI()==null ? "urn:hermit:kb" : rootOntology.getOntologyID().getDefaultDocumentIRI().toString();
+        Optional<IRI> defaultDocumentIRI=rootOntology.getOntologyID().getDefaultDocumentIRI();
+        String ontologyIRI=defaultDocumentIRI.isPresent() ? defaultDocumentIRI.get().toString() : "urn:hermit:kb";
         Collection<OWLOntology> importClosure=rootOntology.getImportsClosure();
         OWLAxioms axioms=new OWLAxioms();
         OWLNormalization normalization=new OWLNormalization(factory,axioms,0);
@@ -336,7 +339,6 @@ public class OWLClausification {
             throw new IllegalStateException("Internal error: invalid normal form.");
     }
     protected static Role getRole(OWLObjectPropertyExpression objectPropertyExpression) {
-        objectPropertyExpression=objectPropertyExpression.getSimplified();
         if (objectPropertyExpression instanceof OWLObjectProperty)
             return AtomicRole.create(((OWLObjectProperty)objectPropertyExpression).getIRI().toString());
         else if (objectPropertyExpression instanceof OWLObjectInverseOf) {
@@ -352,7 +354,6 @@ public class OWLClausification {
         return AtomicRole.create(((OWLDataProperty)dataPropertyExpression).getIRI().toString());
     }
     protected static Atom getRoleAtom(OWLObjectPropertyExpression objectProperty,Term first,Term second) {
-        objectProperty=objectProperty.getSimplified();
         if (!objectProperty.isAnonymous()) {
             AtomicRole role=AtomicRole.create(objectProperty.asOWLObjectProperty().getIRI().toString());
             return Atom.create(role,first,second);

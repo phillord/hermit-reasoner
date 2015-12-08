@@ -13,7 +13,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU Lesser General Public License for more details.
    
 Copies of the GNU General Public License and the GNU Lesser General Public 
-License have been included with this distribution in the file `gpl.txt` and 
+License have been included with this distribution in the file `gpl-0.0.txt` and 
 lgpl-3.0.txt, respectively. An online version is available at
 <http://www.gnu.org/licenses/>.
 

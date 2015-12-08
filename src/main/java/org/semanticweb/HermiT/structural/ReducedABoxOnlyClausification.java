@@ -100,7 +100,6 @@ public class ReducedABoxOnlyClausification extends OWLAxiomVisitorAdapter {
     }
     protected Atom getRoleAtom(OWLObjectPropertyExpression objectProperty,Term first,Term second) {
         AtomicRole atomicRole;
-        objectProperty=objectProperty.getSimplified();
         if (objectProperty.isAnonymous()) {
             OWLObjectProperty internalObjectProperty=objectProperty.getNamedProperty();
             atomicRole=AtomicRole.create(internalObjectProperty.getIRI().toString());
@@ -160,7 +159,7 @@ public class ReducedABoxOnlyClausification extends OWLAxiomVisitorAdapter {
         } else if (description instanceof OWLObjectHasValue) {
             OWLObjectHasValue hasValue=(OWLObjectHasValue)description;
             OWLObjectPropertyExpression role=hasValue.getProperty();
-            OWLIndividual filler=hasValue.getValue();
+            OWLIndividual filler=hasValue.getFiller();
             m_positiveFacts.add(getRoleAtom(role,getIndividual(object.getIndividual()),getIndividual(filler)));
         } else if (description instanceof OWLObjectComplementOf) {
             OWLClassExpression negated=((OWLObjectComplementOf)description).getOperand();
@@ -171,7 +170,7 @@ public class ReducedABoxOnlyClausification extends OWLAxiomVisitorAdapter {
             } else if (negated instanceof OWLObjectHasValue) {
                 OWLObjectHasValue hasValue=(OWLObjectHasValue)negated;
                 OWLObjectPropertyExpression role=hasValue.getProperty();
-                OWLIndividual filler=hasValue.getValue();
+                OWLIndividual filler=hasValue.getFiller();
                 m_negativeFacts.add(getRoleAtom(role,getIndividual(object.getIndividual()),getIndividual(filler)));
             } else {
                 throw new IllegalArgumentException("Internal error: invalid normal form for ABox updates (class assertion with negated class).");
