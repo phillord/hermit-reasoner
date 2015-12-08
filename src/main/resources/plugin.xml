@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <plugin>
     <extension id="HermiT.reasoner.factory" point="org.protege.editor.owl.inference_reasonerfactory">
         <name value="HermiT ${version}"/>
