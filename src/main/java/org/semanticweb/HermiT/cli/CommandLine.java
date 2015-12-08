@@ -745,7 +745,7 @@ public class CommandLine {
                             File file=new File(URI.create(ont.getNamespace()));
                             if (file.isDirectory()) {
                                 OWLOntologyIRIMapper mapper=new AutoIRIMapper(file, false);
-                                ontologyManager.addIRIMapper(mapper);
+                                ontologyManager.getIRIMappers().add(mapper);
                             }
                         }
                     }
