@@ -93,12 +93,6 @@
                     <debuglevel>lines,vars,source</debuglevel>
                     <source>1.8</source>
                     <target>1.8</target>
-                    <!-- FIXME remove these excludes -->
-                    <excludes>
-                        <!-- exclude the protege dependency and the command line because we 
-                             don't built a command line capable jar -->
-                        <exclude>**/Protege*.java</exclude>
-                    </excludes>
                 </configuration>
             </plugin>
             <plugin>
@@ -418,6 +412,20 @@
         </profile>
     </profiles>
 
+    <!-- Add the Sonatype snapshots repository to support Protege 5 beta 18;
+         remove this for the final release of Protege 5. -->
+    <repositories>
+        <repository>
+            <id>oss-sonatype</id>
+            <name>oss-sonatype</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
+        </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>commons-logging</groupId>
@@ -462,8 +470,8 @@
         </dependency>
         <dependency>
             <groupId>edu.stanford.protege</groupId>
-            <artifactId>org.protege.editor.owl</artifactId>
-            <version>4.3.0</version>
+            <artifactId>protege-editor-owl</artifactId>
+            <version>5.0.0-beta-18-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
