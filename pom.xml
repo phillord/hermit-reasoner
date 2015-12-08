@@ -9,9 +9,9 @@
          `mvn compile` to compile main sources.
          `mvn test` to compile all tests and run AllQuickTests.
          `mvn -PallTests test` to compile all tests and run AllTests.
-         `mvn install` to generate a standalone HermiT library without dependencies.
+         `mvn package` to assemble the Protege plugin, the standalone CLI with all dependencies, and the source code package.
+         `mvn install` to run all the preceeding tasks, and to generate a standalone HermiT library without dependencies.
            This will also generate the JUnit reports and attempt to SCP the build results to linux.cs.ox.ac.uk.
-
     -->
 
     <groupId>com.hermit-reasoner</groupId>
@@ -69,8 +69,6 @@
     <prerequisites>
         <maven>2.2.1</maven>
     </prerequisites>
-
-    <!-- TODO: exclude protege from the command line, and exclude the command line from protege. -->
 
     <build>
         <plugins>
@@ -222,16 +220,12 @@
                 </configuration>
             </plugin>
             <plugin>
-                <!-- Maven Assembly Plugin for uber jars. -->
+                <!-- Maven Assembly Plugin for jars with included dependencies. -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>2.6</version>
                 <configuration>
                     <archive>
-                        <!-- MainClass in mainfest make a executable jar. -->
-                        <manifest>
-                            <mainClass>${mainClass}</mainClass>
-                        </manifest>
                         <manifestEntries>
                             <Implementation-Title>${project.name}</Implementation-Title>
                             <Implementation-Vendor>Oxford University</Implementation-Vendor>
