@@ -1,10 +1,8 @@
 package rationals.transformations;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import rationals.Automaton;
-import rationals.NoSuchStateException;
 import rationals.State;
 import rationals.Transition;
 
@@ -24,23 +22,18 @@ import rationals.Transition;
 public class Union implements BinaryTransformation {
 
 
-  public Automaton transform(Automaton a , Automaton b) {
+  @Override
+public Automaton transform(Automaton a , Automaton b) {
     Automaton ap = (Automaton) a.clone() ;
-    Map map = new HashMap() ;
-    Iterator i = b.states().iterator() ;
-    while(i.hasNext()) {
-      State e = (State) i.next() ;
+    Map<State, State> map = new HashMap<>() ;
+    for (State e: b.states()) {
       map.put(e , ap.addState(e.isInitial() , e.isTerminal())) ;
     }
-    i = b.delta().iterator() ;
-    while(i.hasNext()) {
-      Transition t = (Transition) i.next() ;
-      try {
+    for (Transition t :b.delta()) {
         ap.addTransition(new Transition(
-          (State) map.get(t.start()) ,
+          map.get(t.start()) ,
           t.label() ,
-          (State) map.get(t.end()))) ;
-      } catch(NoSuchStateException x) {}
+          map.get(t.end())),null) ;
     }
     return ap ;
   }      

@@ -19,29 +19,31 @@ package org.semanticweb.HermiT.datatypes.rdfplainliteral;
 
 import java.util.Collection;
 
-public class RDFPlainLiteralLengthInterval {
+class RDFPlainLiteralLengthInterval {
     public static final int CHARACTER_COUNT=1112033;
-    public static enum LanguageTagMode { PRESENT,ABSENT };
+    public static enum LanguageTagMode { PRESENT,ABSENT }
     
     protected final LanguageTagMode m_languageTagMode;
     protected final int m_minLength;
     protected final int m_maxLength;
 
     public RDFPlainLiteralLengthInterval(LanguageTagMode languageTagMode,int minLength,int maxLength) {
-        assert !isIntervalEmpty(languageTagMode,minLength,maxLength);
+        assert !isIntervalEmpty(minLength,maxLength);
         m_languageTagMode=languageTagMode;
         m_minLength=minLength;
         m_maxLength=maxLength;
     }
     /**
      * Computes the intersection of this interval with the supplied one. If the two intervals do not intersect, the result is null.
+     * @param that that
+     * @return interval
      */
     public RDFPlainLiteralLengthInterval intersectWith(RDFPlainLiteralLengthInterval that) {
         if (m_languageTagMode!=that.m_languageTagMode)
             return null;
         int newMinLength=Math.max(m_minLength,that.m_minLength);
         int newMaxLength=Math.min(m_maxLength,that.m_maxLength);
-        if (isIntervalEmpty(m_languageTagMode,newMinLength,newMaxLength))
+        if (isIntervalEmpty(newMinLength,newMaxLength))
             return null;
         else if (isEqual(m_languageTagMode,newMinLength,newMaxLength))
             return this;
@@ -71,7 +73,7 @@ public class RDFPlainLiteralLengthInterval {
             long valuesOfLength=1L;
             long total=1L;
             for (int i=1;i<=length;i++) {
-                valuesOfLength*=(long)CHARACTER_COUNT;
+                valuesOfLength*=CHARACTER_COUNT;
                 total+=valuesOfLength;
             }
             return total;
@@ -113,6 +115,7 @@ public class RDFPlainLiteralLengthInterval {
                 }
         }
     }
+    @Override
     public String toString() {
         StringBuffer buffer=new StringBuffer();
         buffer.append('[');
@@ -129,7 +132,7 @@ public class RDFPlainLiteralLengthInterval {
             buffer.append("@<lt>");
         return buffer.toString();
     }
-    protected static boolean isIntervalEmpty(LanguageTagMode languageTagMode,int minLength,int maxLength) {
+    protected static boolean isIntervalEmpty(int minLength,int maxLength) {
         return minLength>maxLength;
     }
     protected static boolean isRDFPlainLiteralCharacter(char c) {

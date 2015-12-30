@@ -31,28 +31,41 @@ public class AtLeastDataRange extends AtLeast {
         super(number, onRole);
         m_toDataRange=toConcept;
     }
+    /**
+     * @return top data range
+     */
     public LiteralDataRange getToDataRange() {
         return m_toDataRange;
     }
+    @Override
     public boolean isAlwaysFalse() {
         return m_toDataRange.isAlwaysFalse();
     }
     protected Object readResolve() {
         return s_interningManager.intern(this);
     }
+    @Override
     public String toString(Prefixes prefixes) {
         return "atLeast("+m_number+' '+m_onRole.toString(prefixes)+' '+m_toDataRange.toString(prefixes)+')';
     }
 
-    protected static InterningManager<AtLeastDataRange> s_interningManager=new InterningManager<AtLeastDataRange>() {
+    protected final static InterningManager<AtLeastDataRange> s_interningManager=new InterningManager<AtLeastDataRange>() {
+        @Override
         protected boolean equal(AtLeastDataRange object1,AtLeastDataRange object2) {
             return object1.m_number==object2.m_number && object1.m_onRole==object2.m_onRole && object1.m_toDataRange==object2.m_toDataRange;
         }
+        @Override
         protected int getHashCode(AtLeastDataRange object) {
             return (object.m_number*7+object.m_onRole.hashCode())*7+object.m_toDataRange.hashCode();
         }
     };
     
+    /**
+     * @param number number
+     * @param onRole onRole
+     * @param toDataRange toDataRange
+     * @return at least data range
+     */
     public static AtLeastDataRange create(int number,Role onRole,LiteralDataRange toDataRange) {
         return s_interningManager.intern(new AtLeastDataRange(number,onRole,toDataRange));
     }

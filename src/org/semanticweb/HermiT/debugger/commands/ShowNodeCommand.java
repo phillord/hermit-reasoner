@@ -23,22 +23,29 @@ import java.io.PrintWriter;
 import org.semanticweb.HermiT.debugger.Debugger;
 import org.semanticweb.HermiT.debugger.Printing;
 import org.semanticweb.HermiT.tableau.Node;
-
+/**ShowNodeCommand*/
 public class ShowNodeCommand extends AbstractCommand {
 
+    /**
+     * @param debugger debugger
+     */
     public ShowNodeCommand(Debugger debugger) {
         super(debugger);
     }
+    @Override
     public String getCommandName() {
         return "showNode";
     }
+    @Override
     public String[] getDescription() {
         return new String[] { "nodeID","prints information about the given node" };
     }
+    @Override
     public void printHelp(PrintWriter writer) {
         writer.println("usage: showNode nodeID");
         writer.println("    Prints information about the node for the given node ID.");
     }
+    @Override
     public void execute(String[] args) {
         if (args.length<2) {
             m_debugger.getOutput().println("Node ID is missing.");
@@ -49,7 +56,7 @@ public class ShowNodeCommand extends AbstractCommand {
             nodeID=Integer.parseInt(args[1]);
         }
         catch (NumberFormatException e) {
-            m_debugger.getOutput().println("Invalid ID of the first node.");
+            m_debugger.getOutput().println("Invalid ID of the first node. "+e.getMessage());
             return;
         }
         Node node=m_debugger.getTableau().getNode(nodeID);

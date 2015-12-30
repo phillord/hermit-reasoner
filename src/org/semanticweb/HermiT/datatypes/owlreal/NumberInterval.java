@@ -19,7 +19,7 @@ package org.semanticweb.HermiT.datatypes.owlreal;
 
 import java.util.Collection;
 
-public class NumberInterval {
+class NumberInterval {
     protected final NumberRange m_baseRange;
     protected final NumberRange m_excludedRange;
     protected final Number m_lowerBound;
@@ -60,6 +60,8 @@ public class NumberInterval {
     /**
      * Computes the intersection of this interval with the supplied one. If the two intervals
      * do not intersect, the result is null.
+     * @param that that
+     * @return  intersection
      */
     public NumberInterval intersectWith(NumberInterval that) {
         NumberRange newBaseRange=NumberRange.intersection(m_baseRange,that.m_baseRange);
@@ -113,6 +115,8 @@ public class NumberInterval {
     /**
      * Subtracts from the given argument the number of distinct objects that are contained in this interval.
      * If the interval contains more objects than argument, the result is zero.
+     * @param argument argument
+     * @return subracted size
      */
     public int subtractSizeFrom(int argument) {
         if (argument<=0)
@@ -198,6 +202,7 @@ public class NumberInterval {
             return Numbers.compare(lowerBoundInclusive,upperBoundInclusive)>0;
         }
     }
+    @Override
     public String toString() {
         StringBuffer buffer=new StringBuffer();
         buffer.append(m_baseRange.toString());

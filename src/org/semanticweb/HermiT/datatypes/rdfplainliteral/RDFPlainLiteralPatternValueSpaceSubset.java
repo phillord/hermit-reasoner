@@ -31,7 +31,7 @@ import dk.brics.automaton.BasicOperations;
 import dk.brics.automaton.Datatypes;
 import dk.brics.automaton.RegExp;
 
-public class RDFPlainLiteralPatternValueSpaceSubset implements ValueSpaceSubset {
+class RDFPlainLiteralPatternValueSpaceSubset implements ValueSpaceSubset {
     public static final char SEPARATOR='\u0001';
     protected static final Automaton s_separator;
     protected static final Automaton s_languagePatternEnd;
@@ -54,7 +54,7 @@ public class RDFPlainLiteralPatternValueSpaceSubset implements ValueSpaceSubset 
         s_nonemptyLangTag=s_separator.concatenate(s_languageTag);
         s_anyLangTag=s_separator.concatenate(s_languageTagOrEmpty);
         s_xsdString=Datatypes.get("string");
-        s_anyDatatype=new HashMap<String,Automaton>();
+        s_anyDatatype=new HashMap<>();
         s_anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"string",s_xsdString.concatenate(s_emptyLangTag));
         s_anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"normalizedString",normalizedStringAutomaton().concatenate(s_emptyLangTag));
         s_anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"token",tokenAutomaton().concatenate(s_emptyLangTag));
@@ -99,6 +99,7 @@ public class RDFPlainLiteralPatternValueSpaceSubset implements ValueSpaceSubset 
     public RDFPlainLiteralPatternValueSpaceSubset(Automaton automaton) {
         m_automaton=automaton;
     }
+    @Override
     public boolean hasCardinalityAtLeast(int number) {
         Set<String> elements=m_automaton.getFiniteStrings(number);
         if (elements==null)
@@ -106,6 +107,7 @@ public class RDFPlainLiteralPatternValueSpaceSubset implements ValueSpaceSubset 
         else
             return elements.size()>=number;
     }
+    @Override
     public boolean containsDataValue(Object dataValue) {
         if (dataValue instanceof String) {
             String string=(String)dataValue;
@@ -120,6 +122,7 @@ public class RDFPlainLiteralPatternValueSpaceSubset implements ValueSpaceSubset 
         else
             return false;
     }
+    @Override
     public void enumerateDataValues(Collection<Object> dataValues) {
         Set<String> elements=m_automaton.getFiniteStrings();
         if (elements==null)
@@ -136,12 +139,9 @@ public class RDFPlainLiteralPatternValueSpaceSubset implements ValueSpaceSubset 
             }
         }
     }
+    @Override
     public String toString() {
-        StringBuffer buffer=new StringBuffer();
-        buffer.append("rdf:PlainLiteral{");
-        buffer.append(m_automaton.toString());
-        buffer.append('}');
-        return buffer.toString();
+        return "rdf:PlainLiteral{"+m_automaton+"}";
     }
     public static Automaton toAutomaton(RDFPlainLiteralLengthValueSpaceSubset valueSpaceSubset) {
         List<RDFPlainLiteralLengthInterval> intervals=valueSpaceSubset.m_intervals;
@@ -182,6 +182,7 @@ public class RDFPlainLiteralPatternValueSpaceSubset implements ValueSpaceSubset 
             stringPart=s_anyString.intersection(BasicOperations.repeat(s_anyChar,minLength,maxLength));
         return stringPart.concatenate(s_anyLangTag);
     }
+    @SuppressWarnings("unused")
     public static boolean isValidPattern(String pattern) {
         try {
             new RegExp(pattern);

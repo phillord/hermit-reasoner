@@ -32,24 +32,32 @@ public class NodeIDsAscendingOrEqual implements DLPredicate,Serializable {
     protected NodeIDsAscendingOrEqual(int arity) {
         m_arity=arity;
     }
+    @Override
     public int getArity() {
         return m_arity;
     }
     protected Object readResolve() {
         return s_interningManager.intern(this);
     }
+    @Override
     public String toString(Prefixes prefixes) {
         return "NodeIDsAscendingOrEqual";
     }
-    protected static InterningManager<NodeIDsAscendingOrEqual> s_interningManager=new InterningManager<NodeIDsAscendingOrEqual>() {
+    protected final static InterningManager<NodeIDsAscendingOrEqual> s_interningManager=new InterningManager<NodeIDsAscendingOrEqual>() {
+        @Override
         protected boolean equal(NodeIDsAscendingOrEqual object1,NodeIDsAscendingOrEqual object2) {
             return object1.m_arity==object2.m_arity;
         }
+        @Override
         protected int getHashCode(NodeIDsAscendingOrEqual object) {
             return object.m_arity;
         }
     };
     
+    /**
+     * @param arity arity
+     * @return node
+     */
     public static NodeIDsAscendingOrEqual create(int arity) {
         return s_interningManager.intern(new NodeIDsAscendingOrEqual(arity));
     }

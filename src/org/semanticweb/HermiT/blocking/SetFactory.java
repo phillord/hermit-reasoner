@@ -20,29 +20,26 @@ package org.semanticweb.HermiT.blocking;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
 /**
  * This class is used to create sets of various types. It ensures that each distinct set exists only once,
  * thus allowing sets to be compared with ==. Instances of this class are used to create various labels in blocking.
+ * @param <E> created type
  */
 @SuppressWarnings({ "unchecked", "rawtypes"})
 public class SetFactory<E> implements Serializable {
     private static final long serialVersionUID=7071071962187693657L;
 
-    protected Entry[] m_unusedEntries;
-    protected Entry[] m_entries;
-    protected int m_size;
-    protected int m_resizeThreshold;
+    protected Entry[] m_unusedEntries=new Entry[32];
+    protected Entry[] m_entries=new Entry[16];
+    protected int m_size=0;
+    protected int m_resizeThreshold=12;
 
-    public SetFactory() {
-        m_unusedEntries=new Entry[32];
-        m_entries=new Entry[16];
-        m_size=0;
-        m_resizeThreshold=(int)(0.75*m_entries.length);
-    }
+    /**
+     * Clear non permanent.
+     */
     public void clearNonpermanent() {
         for (int i=m_entries.length-1;i>=0;--i) {
             Entry entry=m_entries[i];
@@ -56,27 +53,15 @@ public class SetFactory<E> implements Serializable {
             }
         }
     }
-    public int sizeInMemory() {
-        int size=m_unusedEntries.length*4+m_entries.length*4;
-        for (int i=m_unusedEntries.length-1;i>=0;--i) {
-            Entry entry=m_unusedEntries[i];
-            while (entry!=null) {
-                size+=entry.m_table.length*4+6*4;
-                entry=entry.m_nextEntry;
-            }
-        }
-        for (int i=m_entries.length-1;i>=0;--i) {
-            Entry entry=m_entries[i];
-            while (entry!=null) {
-                size+=entry.m_table.length*4+6*4;
-                entry=entry.m_nextEntry;
-            }
-        }
-        return size;
-    }
+    /**
+     * @param set set
+     */
     public void addReference(Set<E> set) {
         ((Entry)set).m_referenceCount++;
     }
+    /**
+     * @param set set
+     */
     public void removeReference(Set<E> set) {
         Entry entry=(Entry)set;
         entry.m_referenceCount--;
@@ -85,13 +70,18 @@ public class SetFactory<E> implements Serializable {
             leaveEntry(entry);
         }
     }
+    /**
+     * @param set set
+     */
     public void makePermanent(Set<E> set) {
         ((Entry)set).m_permanent=true;
     }
-    public Set<E> getSet(List<E> elements) {
-        int hashCode=0;
-        for (int index=elements.size()-1;index>=0;--index)
-            hashCode+=elements.get(index).hashCode();
+    /**
+     * @param elements elements
+     * @return set
+     */
+    public Set<E> getSet(Set<E> elements) {
+        int hashCode=elements.hashCode();
         int index=getIndexFor(hashCode,m_entries.length);
         Entry<E> entry=m_entries[index];
         while (entry!=null) {
@@ -151,7 +141,7 @@ public class SetFactory<E> implements Serializable {
         }
         Entry<E> entry=m_unusedEntries[size];
         if (entry==null)
-            return new Entry<E>(size);
+            return new Entry<>(size);
         else {
             m_unusedEntries[size]=entry.m_nextEntry;
             entry.m_nextEntry=null;
@@ -170,7 +160,7 @@ public class SetFactory<E> implements Serializable {
     protected static class Entry<T> implements Serializable,Set<T> {
         private static final long serialVersionUID=-3850593656120645350L;
 
-        protected T[] m_table;
+        protected final T[] m_table;
         protected int m_hashCode;
         protected Entry<T> m_previousEntry;
         protected Entry<T> m_nextEntry;
@@ -181,17 +171,19 @@ public class SetFactory<E> implements Serializable {
             m_hashCode=0;
             m_table=(T[])new Object[size];
         }
-        public void initialize(List<T> elements,int hashCode) {
+        public void initialize(Collection<T> elements,int hashCode) {
             elements.toArray(m_table);
             m_hashCode=hashCode;
         }
+        @Override
         public void clear() {
             throw new UnsupportedOperationException();
         }
+        @Override
         public boolean add(T object) {
             throw new UnsupportedOperationException();
         }
-        public boolean equalsTo(List<T> elements) {
+        public boolean equalsTo(Set<T> elements) {
             if (m_table.length!=elements.size())
                 return false;
             for (int index=m_table.length-1;index>=0;--index)
@@ -199,49 +191,62 @@ public class SetFactory<E> implements Serializable {
                     return false;
             return true;
         }
+        @Override
         public boolean addAll(Collection<? extends T> c) {
             throw new UnsupportedOperationException();
         }
+        @Override
         public boolean contains(Object o) {
             for (int index=m_table.length-1;index>=0;--index)
                 if (m_table[index].equals(o))
                     return true;
             return false;
         }
+        @Override
         public boolean containsAll(Collection<?> c) {
             for (Object object : c)
                 if (!contains(object))
                     return false;
             return true;
         }
+        @Override
         public boolean isEmpty() {
             return m_table.length==0;
         }
+        @Override
         public Iterator<T> iterator() {
             return new EntryIterator();
         }
+        @Override
         public boolean remove(Object o) {
             throw new UnsupportedOperationException();
         }
+        @Override
         public boolean removeAll(Collection<?> c) {
             throw new UnsupportedOperationException();
         }
+        @Override
         public boolean retainAll(Collection<?> c) {
             throw new UnsupportedOperationException();
         }
+        @Override
         public int size() {
             return m_table.length;
         }
+        @Override
         public Object[] toArray() {
             return m_table.clone();
         }
+        @Override
         public <E> E[] toArray(E[] a) {
             System.arraycopy(m_table,0,a,0,m_table.length);
             return a;
         }
+        @Override
         public int hashCode() {
             return m_hashCode;
         }
+        @Override
         public boolean equals(Object that) {
             return this==that;
         }
@@ -252,14 +257,17 @@ public class SetFactory<E> implements Serializable {
             public EntryIterator() {
                 m_currentIndex=0;
             }
+            @Override
             public boolean hasNext() {
                 return m_currentIndex<m_table.length;
             }
+            @Override
             public T next() {
                 if (m_currentIndex>=m_table.length)
                     throw new NoSuchElementException();
                 return m_table[m_currentIndex++];
             }
+            @Override
             public void remove() {
                 throw new UnsupportedOperationException();
             }

@@ -25,39 +25,64 @@ import org.semanticweb.HermiT.Prefixes;
  */
 public class DatatypeRestriction extends AtomicDataRange {
     private static final long serialVersionUID=524235536504588458L;
+    /**no facet uris*/
     public static final String[] NO_FACET_URIs=new String[0];
+    /**no facet values*/
     public static final Constant[] NO_FACET_VALUES=new Constant[0];
 
     protected final String m_datatypeURI;
     protected final String[] m_facetURIs;
     protected final Constant[] m_facetValues;
 
+    /**
+     * @param datatypeURI datatypeURI
+     * @param facetURIs facetURIs
+     * @param facetValues facetValues
+     */
     public DatatypeRestriction(String datatypeURI,String[] facetURIs,Constant[] facetValues) {
         m_datatypeURI=datatypeURI;
         m_facetURIs=facetURIs;
         m_facetValues=facetValues;
     }
+    /**
+     * @return datatype uri
+     */
     public String getDatatypeURI() {
         return m_datatypeURI;
     }
+    /**
+     * @return number of restrictions
+     */
     public int getNumberOfFacetRestrictions() {
         return m_facetURIs.length;
     }
+    /**
+     * @param index index
+     * @return facet uri
+     */
     public String getFacetURI(int index) {
         return m_facetURIs[index];
     }
+    /**
+     * @param index index
+     * @return facet value
+     */
     public Constant getFacetValue(int index) {
         return m_facetValues[index];
     }
+    @Override
     public LiteralDataRange getNegation() {
         return AtomicNegationDataRange.create(this);
     }
+    @Override
     public boolean isAlwaysTrue() {
         return false;
     }
+    @Override
     public boolean isAlwaysFalse() {
         return false;
     }
+    @Override
     public String toString(Prefixes prefixes) {
         StringBuffer buffer=new StringBuffer();
         buffer.append(prefixes.abbreviateIRI(m_datatypeURI));
@@ -78,7 +103,8 @@ public class DatatypeRestriction extends AtomicDataRange {
         return s_interningManager.intern(this);
     }
 
-    protected static InterningManager<DatatypeRestriction> s_interningManager=new InterningManager<DatatypeRestriction>() {
+    protected final static InterningManager<DatatypeRestriction> s_interningManager=new InterningManager<DatatypeRestriction>() {
+        @Override
         protected boolean equal(DatatypeRestriction object1,DatatypeRestriction object2) {
             if (!object1.m_datatypeURI.equals(object2.m_datatypeURI) || object1.m_facetURIs.length!=object2.m_facetURIs.length)
                 return false;
@@ -93,6 +119,7 @@ public class DatatypeRestriction extends AtomicDataRange {
                     return true;
             return false;
         }
+        @Override
         protected int getHashCode(DatatypeRestriction object) {
             int hashCode=object.m_datatypeURI.hashCode();
             for (int index=object.m_facetURIs.length-1;index>=0;--index)
@@ -101,6 +128,12 @@ public class DatatypeRestriction extends AtomicDataRange {
         }
     };
 
+    /**
+     * @param datatypeURI datatypeURI
+     * @param facetURIs facetURIs
+     * @param facetValues facetValues
+     * @return restriction
+     */
     public static DatatypeRestriction create(String datatypeURI,String[] facetURIs,Constant[] facetValues) {
         return s_interningManager.intern(new DatatypeRestriction(datatypeURI,facetURIs,facetValues));
     }

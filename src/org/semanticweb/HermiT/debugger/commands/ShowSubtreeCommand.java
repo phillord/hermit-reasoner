@@ -21,20 +21,26 @@ import java.io.PrintWriter;
 
 import org.semanticweb.HermiT.debugger.Debugger;
 import org.semanticweb.HermiT.tableau.Node;
-
+/**ShowSubtreeCommand.*/
 public class ShowSubtreeCommand extends AbstractCommand {
 
+    /**
+     * @param debugger debugger
+     */
     public ShowSubtreeCommand(Debugger debugger) {
         super(debugger);
     }
+    @Override
     public String getCommandName() {
         return "showSubtree";
     }
+    @Override
     public String[] getDescription() {
         return new String[] {
             "nodeID","shows the subtree rooted at nodeID"
         };
     }
+    @Override
     public void printHelp(PrintWriter writer) {
         writer.println("usage: showSubtree nodeID");
         writer.println("    Shows the subtree of the model rooted at the given node.");
@@ -47,6 +53,8 @@ public class ShowSubtreeCommand extends AbstractCommand {
         writer.println("    magenta: description graph node");
         writer.println("    blue: concrete/data value node");
     }
+    @SuppressWarnings("unused")
+    @Override
     public void execute(String[] args) {
         if (args.length<2) {
             m_debugger.getOutput().println("Node ID is missing.");
@@ -57,7 +65,7 @@ public class ShowSubtreeCommand extends AbstractCommand {
             nodeID=Integer.parseInt(args[1]);
         }
         catch (NumberFormatException e) {
-            m_debugger.getOutput().println("Invalid ID of the first node.");
+            m_debugger.getOutput().println("Invalid ID of the first node. "+e.getMessage());
             return;
         }
         Node subtreeRoot=m_debugger.getTableau().getNode(nodeID);

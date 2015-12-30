@@ -17,6 +17,7 @@
 */
 package org.semanticweb.HermiT.debugger;
  
+import java.awt.AWTEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -31,24 +32,37 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.PlainDocument;
 
-@SuppressWarnings("serial")
+/**
+ * ConsoleTextArea.
+ */
+ @SuppressWarnings("serial")
 public class ConsoleTextArea extends JTextArea {
-    protected final ConsoleWriter m_writer;
-    protected final ConsoleReader m_reader;
+    protected final ConsoleWriter m_writer=new ConsoleWriter();
+    protected final ConsoleReader m_reader=new ConsoleReader();
     protected int m_userTypedTextStart;
 
+    /**
+     * Init class.
+     */
     public ConsoleTextArea() {
         setDocument(new ConsoleDocument());
-        m_writer=new ConsoleWriter();
-        m_reader=new ConsoleReader();
-        enableEvents(KeyEvent.KEY_EVENT_MASK);
+        enableEvents(AWTEvent.KEY_EVENT_MASK);
     }
+    /**
+     * @return writer
+     */
     public Writer getWriter() {
         return m_writer;
     }
+    /**
+     * @return reader
+     */
     public Reader getReader() {
         return m_reader;
     }
+    /**
+     * Clear.
+     */
     public void clear() {
         m_userTypedTextStart=0;
         setText("");
@@ -61,10 +75,12 @@ public class ConsoleTextArea extends JTextArea {
             select(length,length);
         }
     }
+    @Override
     public void replaceSelection(String string) {
         moveToEndIfNecessary();
         super.replaceSelection(string);
     }
+    @Override
     protected void processKeyEvent(KeyEvent event) {
         if (event.getKeyCode()!=KeyEvent.VK_ENTER)
             super.processKeyEvent(event);
@@ -77,7 +93,7 @@ public class ConsoleTextArea extends JTextArea {
             try {
                 text=getDocument().getText(m_userTypedTextStart,textEnd-m_userTypedTextStart);
             }
-            catch (BadLocationException error) {
+            catch (@SuppressWarnings("unused") BadLocationException error) {
                 text="";
             }
             m_reader.addToBuffer(text);
@@ -87,10 +103,12 @@ public class ConsoleTextArea extends JTextArea {
     }
 
     protected class ConsoleDocument extends PlainDocument {
+        @Override
         public void remove(int offset,int length) throws BadLocationException {
             if (offset>=m_userTypedTextStart)
                 super.remove(offset,length);
         }
+        @Override
         public void insertString(int offset,String string,AttributeSet attributeSet) throws BadLocationException {
             if (offset>=m_userTypedTextStart)
                 super.insertString(offset,string,attributeSet);
@@ -108,15 +126,18 @@ public class ConsoleTextArea extends JTextArea {
             m_timer.setRepeats(false);
             m_firstFreeChar=0;
         }
+        @Override
         public void close() {
             flush();
         }
+        @Override
         public void flush() {
             synchronized (lock) {
                 if (m_firstFreeChar>0) {
                     final String string=new String(m_buffer,0,m_firstFreeChar);
                     m_firstFreeChar=0;
                     SwingUtilities.invokeLater(new Runnable() {
+                        @Override
                         public void run() {
                             replaceSelection(string);
                             m_userTypedTextStart=getDocument().getLength();
@@ -127,6 +148,7 @@ public class ConsoleTextArea extends JTextArea {
                 }
             }
         }
+        @Override
         public void write(char[] buffer,int offset,int count) {
             synchronized (lock) {
                 int lastPosition=offset+count;
@@ -146,6 +168,7 @@ public class ConsoleTextArea extends JTextArea {
                 }
             }
         }
+        @Override
         public void actionPerformed(ActionEvent e) {
             flush();
         }
@@ -181,11 +204,12 @@ public class ConsoleTextArea extends JTextArea {
                 }
                 string.getChars(0,string.length(),m_buffer,m_firstFreeChar);
                 m_firstFreeChar+=string.length();
-                notifyAll();
             }
         }
-        public void close() throws IOException {
+        @Override
+        public void close() {
         }
+        @Override
         public int read(char[] buffer,int offset,int length) throws IOException {
             m_writer.flush();
             synchronized (lock) {
@@ -194,7 +218,7 @@ public class ConsoleTextArea extends JTextArea {
                         lock.wait();
                     }
                     catch (InterruptedException error) {
-                        throw new IOException("Read interruipted.");
+                        throw new IOException("Read interrupted.",error);
                     }
                 int toCopy=Math.min(m_firstFreeChar-m_nextCharToRead,length);
                 System.arraycopy(m_buffer,m_nextCharToRead,buffer,offset,toCopy);

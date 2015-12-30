@@ -29,7 +29,6 @@ import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
-import org.semanticweb.HermiT.model.DataRange;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.model.ExistsDescriptionGraph;
 import org.semanticweb.HermiT.model.Inequality;
@@ -53,7 +52,7 @@ import org.semanticweb.HermiT.tableau.Tableau;
  */
 public abstract class AbstractExpansionStrategy implements ExistentialExpansionStrategy,Serializable {
     private static final long serialVersionUID=2831957929321676444L;
-    protected static enum SatType { NOT_SATISFIED,PERMANENTLY_SATISFIED,CURRENTLY_SATISFIED };
+    protected static enum SatType { NOT_SATISFIED,PERMANENTLY_SATISFIED,CURRENTLY_SATISFIED }
 
     protected final BlockingStrategy m_blockingStrategy;
     protected final boolean m_expandNodeAtATime;
@@ -68,13 +67,18 @@ public abstract class AbstractExpansionStrategy implements ExistentialExpansionS
     protected ExistentialExpansionManager m_existentialExpansionManager;
     protected DescriptionGraphManager m_descriptionGraphManager;
 
+    /**
+     * @param blockingStrategy blockingStrategy
+     * @param expandNodeAtATime expandNodeAtATime
+     */
     public AbstractExpansionStrategy(BlockingStrategy blockingStrategy,boolean expandNodeAtATime) {
         m_blockingStrategy=blockingStrategy;
         m_expandNodeAtATime=expandNodeAtATime;
-        m_processedExistentials=new ArrayList<ExistentialConcept>();
-        m_auxiliaryNodes1=new ArrayList<Node>();
-        m_auxiliaryNodes2=new ArrayList<Node>();
+        m_processedExistentials=new ArrayList<>();
+        m_auxiliaryNodes1=new ArrayList<>();
+        m_auxiliaryNodes2=new ArrayList<>();
     }
+    @Override
     public void initialize(Tableau tableau) {
         m_tableau=tableau;
         m_interruptFlag=m_tableau.getInterruptFlag();
@@ -85,18 +89,22 @@ public abstract class AbstractExpansionStrategy implements ExistentialExpansionS
         m_descriptionGraphManager=m_tableau.getDescriptionGraphManager();
         m_blockingStrategy.initialize(m_tableau);
     }
+    @Override
     public void additionalDLOntologySet(DLOntology additionalDLOntology) {
         m_blockingStrategy.additionalDLOntologySet(additionalDLOntology);
     }
+    @Override
     public void additionalDLOntologyCleared() {
         m_blockingStrategy.additionalDLOntologyCleared();
     }
+    @Override
     public void clear() {
         m_blockingStrategy.clear();
         m_processedExistentials.clear();
         m_ternaryExtensionTableSearch01Bound.clear();
         m_ternaryExtensionTableSearch02Bound.clear();
     }
+    @Override
     public boolean expandExistentials(boolean finalChance) {
         TableauMonitor monitor=m_tableau.getTableauMonitor();
         m_blockingStrategy.computeBlocking(finalChance);
@@ -126,6 +134,8 @@ public abstract class AbstractExpansionStrategy implements ExistentialExpansionS
                             if (monitor!=null)
                                 monitor.existentialSatisfied(existentialConcept,node);
                             break;
+                        default:
+                            break;
                         }
                     }
                     else if (existentialConcept instanceof ExistsDescriptionGraph) {
@@ -150,58 +160,65 @@ public abstract class AbstractExpansionStrategy implements ExistentialExpansionS
         }
         return extensionsChanged;
     }
+    @Override
     public void assertionAdded(Concept concept,Node node,boolean isCore) {
         m_blockingStrategy.assertionAdded(concept,node,isCore);
     }
+    @Override
     public void assertionCoreSet(Concept concept,Node node) {
         m_blockingStrategy.assertionCoreSet(concept,node);
     }
+    @Override
     public void assertionRemoved(Concept concept,Node node,boolean isCore) {
         m_blockingStrategy.assertionRemoved(concept,node,isCore);
     }
-    public void assertionAdded(DataRange range,Node node,boolean isCore) {
-        m_blockingStrategy.assertionAdded(range,node,isCore);
-    }
-    public void assertionCoreSet(DataRange range,Node node) {
-        m_blockingStrategy.assertionCoreSet(range,node);
-    }
-    public void assertionRemoved(DataRange range,Node node,boolean isCore) {
-        m_blockingStrategy.assertionRemoved(range,node,isCore);
-    }
+    @Override
     public void assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
         m_blockingStrategy.assertionAdded(atomicRole,nodeFrom,nodeTo,isCore);
     }
+    @Override
     public void assertionCoreSet(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
         m_blockingStrategy.assertionCoreSet(atomicRole,nodeFrom,nodeTo);
     }
+    @Override
     public void assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
         m_blockingStrategy.assertionRemoved(atomicRole,nodeFrom,nodeTo,isCore);
     }
+    @Override
     public void nodesMerged(Node mergeFrom,Node mergeInto) {
         m_blockingStrategy.nodesMerged(mergeFrom,mergeInto);
     }
+    @Override
     public void nodesUnmerged(Node mergeFrom,Node mergeInto) {
         m_blockingStrategy.nodesUnmerged(mergeFrom,mergeInto);
     }
+    @Override
     public void nodeStatusChanged(Node node) {
         m_blockingStrategy.nodeStatusChanged(node);
     }
+    @Override
     public void nodeInitialized(Node node) {
         m_blockingStrategy.nodeInitialized(node);
     }
+    @Override
     public void nodeDestroyed(Node node) {
         m_blockingStrategy.nodeDestroyed(node);
     }
+    @Override
     public void branchingPointPushed() {
     }
+    @Override
     public void backtrack() {
     }
+    @Override
     public void modelFound() {
         m_blockingStrategy.modelFound();
     }
+    @Override
     public boolean isExact() {
         return m_blockingStrategy.isExact();
     }
+    @Override
     public void dlClauseBodyCompiled(List<DLClauseEvaluator.Worker> workers,DLClause dlClause,List<Variable> variables,Object[] valuesBuffer,boolean[] coreVariables) {
         m_blockingStrategy.dlClauseBodyCompiled(workers,dlClause,variables,valuesBuffer,coreVariables);
     }

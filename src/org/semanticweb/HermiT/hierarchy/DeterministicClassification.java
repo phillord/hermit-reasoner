@@ -34,7 +34,7 @@ import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.ReasoningTaskDescription;
 import org.semanticweb.HermiT.tableau.Tableau;
-
+/**DeterministicClassification.*/
 public class DeterministicClassification {
     protected final Tableau m_tableau;
     protected final ClassificationProgressMonitor m_progressMonitor;
@@ -42,6 +42,13 @@ public class DeterministicClassification {
     protected final AtomicConcept m_bottomElement;
     protected final Set<AtomicConcept> m_elements;
 
+    /**
+     * @param tableau tableau
+     * @param progressMonitor progressMonitor
+     * @param topElement topElement
+     * @param bottomElement bottomElement
+     * @param elements elements
+     */
     public DeterministicClassification(Tableau tableau,ClassificationProgressMonitor progressMonitor,AtomicConcept topElement,AtomicConcept bottomElement,Set<AtomicConcept> elements) {
         m_tableau=tableau;
         m_progressMonitor=progressMonitor;
@@ -49,21 +56,24 @@ public class DeterministicClassification {
         m_bottomElement=bottomElement;
         m_elements=elements;
     }
+    /**
+     * @return hierarchy
+     */
     public Hierarchy<AtomicConcept> classify() {
         if (!m_tableau.isDeterministic())
             throw new IllegalStateException("Internal error: DeterministicClassificationManager can be used only with a deterministic tableau.");
         Individual freshIndividual=Individual.createAnonymous("fresh-individual");
         if (!m_tableau.isSatisfiable(true,Collections.singleton(Atom.create(m_topElement,freshIndividual)),null,null,null,null,ReasoningTaskDescription.isConceptSatisfiable(m_topElement)))
             return Hierarchy.emptyHierarchy(m_elements,m_topElement,m_bottomElement);
-        Map<AtomicConcept,GraphNode<AtomicConcept>> allSubsumers=new HashMap<AtomicConcept,GraphNode<AtomicConcept>>();
+        Map<AtomicConcept,GraphNode<AtomicConcept>> allSubsumers=new HashMap<>();
         for (AtomicConcept element : m_elements) {
             Set<AtomicConcept> subsumers;
-            Map<Individual,Node> nodesForIndividuals=new HashMap<Individual,Node>();
+            Map<Individual,Node> nodesForIndividuals=new HashMap<>();
             nodesForIndividuals.put(freshIndividual,null);
             if (!m_tableau.isSatisfiable(true,Collections.singleton(Atom.create(element,freshIndividual)),null,null,null,nodesForIndividuals,ReasoningTaskDescription.isConceptSatisfiable(element)))
                 subsumers=m_elements;
             else {
-                subsumers=new HashSet<AtomicConcept>();
+                subsumers=new HashSet<>();
                 subsumers.add(m_topElement);
                 ExtensionTable.Retrieval retrieval=m_tableau.getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
                 retrieval.getBindingsBuffer()[1]=nodesForIndividuals.get(freshIndividual).getCanonicalNode();
@@ -75,24 +85,31 @@ public class DeterministicClassification {
                     retrieval.next();
                 }
             }
-            allSubsumers.put(element,new GraphNode<AtomicConcept>(element,subsumers));
+            allSubsumers.put(element,new GraphNode<>(element,subsumers));
             m_progressMonitor.elementClassified(element);
         }
         return buildHierarchy(m_topElement,m_bottomElement,allSubsumers);
     }
+    /**
+     * @param topElement topElement
+     * @param bottomElement bottomElement
+     * @param graphNodes graphNodes
+     * @param <T> type
+     * @return hierarchy
+     */
     public static <T> Hierarchy<T> buildHierarchy(T topElement,T bottomElement,Map<T,GraphNode<T>> graphNodes) {
-        HierarchyNode<T> topNode=new HierarchyNode<T>(topElement);
-        HierarchyNode<T> bottomNode=new HierarchyNode<T>(bottomElement);
-        Hierarchy<T> hierarchy=new Hierarchy<T>(topNode,bottomNode);
+        HierarchyNode<T> topNode=new HierarchyNode<>(topElement);
+        HierarchyNode<T> bottomNode=new HierarchyNode<>(bottomElement);
+        Hierarchy<T> hierarchy=new Hierarchy<>(topNode,bottomNode);
         // Compute SCCs (strongly connected components), create hierarchy nodes, and topologically order them
-        List<HierarchyNode<T>> topologicalOrder=new ArrayList<HierarchyNode<T>>();
+        List<HierarchyNode<T>> topologicalOrder=new ArrayList<>();
         visit(new Stack<GraphNode<T>>(),new DFSIndex(),graphNodes,graphNodes.get(bottomElement),hierarchy,topologicalOrder);
         // Process the nodes in the topological order
-        Map<HierarchyNode<T>,Set<HierarchyNode<T>>> reachableFrom=new HashMap<HierarchyNode<T>,Set<HierarchyNode<T>>>();
-        List<GraphNode<T>> allSuccessors=new ArrayList<GraphNode<T>>();
+        Map<HierarchyNode<T>,Set<HierarchyNode<T>>> reachableFrom=new HashMap<>();
+        List<GraphNode<T>> allSuccessors=new ArrayList<>();
         for (int index=0;index<topologicalOrder.size();index++) {
             HierarchyNode<T> node=topologicalOrder.get(index);
-            Set<HierarchyNode<T>> reachableFromNode=new HashSet<HierarchyNode<T>>();
+            Set<HierarchyNode<T>> reachableFromNode=new HashSet<>();
             reachableFromNode.add(node);
             reachableFrom.put(node,reachableFromNode);
             allSuccessors.clear();
@@ -133,7 +150,7 @@ public class DeterministicClassification {
         }
         if (graphNode.m_SCChead==graphNode) {
             int nextTopologicalOrderIndex=topologicalOrder.size();
-            Set<T> equivalentElements=new HashSet<T>();
+            Set<T> equivalentElements=new HashSet<>();
             GraphNode<T> poppedNode;
             do {
                 poppedNode=stack.pop();
@@ -147,7 +164,7 @@ public class DeterministicClassification {
             else if (equivalentElements.contains(hierarchy.getBottomNode().m_representative))
                 hierarchyNode=hierarchy.getBottomNode();
             else
-                hierarchyNode=new HierarchyNode<T>(graphNode.m_element);
+                hierarchyNode=new HierarchyNode<>(graphNode.m_element);
             for (T element : equivalentElements) {
                 hierarchyNode.m_equivalentElements.add(element);
                 hierarchy.m_nodesByElements.put(element,hierarchyNode);
@@ -156,7 +173,7 @@ public class DeterministicClassification {
         }
     }
 
-    public static class GraphNode<T> {
+    static class GraphNode<T> {
         public final T m_element;
         public final Set<T> m_successors;
         public int m_dfsIndex;
@@ -181,6 +198,7 @@ public class DeterministicClassification {
     protected static class TopologicalOrderComparator implements Comparator<GraphNode<?>> {
         public static final TopologicalOrderComparator INSTANCE=new TopologicalOrderComparator();
 
+        @Override
         public int compare(GraphNode<?> o1,GraphNode<?> o2) {
             return o1.m_topologicalOrderIndex-o2.m_topologicalOrderIndex;
         }

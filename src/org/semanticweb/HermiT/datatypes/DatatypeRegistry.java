@@ -37,7 +37,7 @@ import org.semanticweb.HermiT.model.DatatypeRestriction;
  * A registry for all available datatype handlers.
  */
 public class DatatypeRegistry {
-    protected static final Map<String,DatatypeHandler> s_handlersByDatatypeURI=new HashMap<String,DatatypeHandler>();
+    protected static final Map<String,DatatypeHandler> s_handlersByDatatypeURI=new HashMap<>();
     static {
         registerDatatypeHandler(new AnonymousConstantsDatatypeHandler());
         registerDatatypeHandler(new BooleanDatatypeHandler());
@@ -51,7 +51,7 @@ public class DatatypeRegistry {
         registerDatatypeHandler(new XMLLiteralDatatypeHandler());
     }
 
-    public static void registerDatatypeHandler(DatatypeHandler datatypeHandler) {
+    static void registerDatatypeHandler(DatatypeHandler datatypeHandler) {
         synchronized (s_handlersByDatatypeURI) {
             for (String datatypeURI : datatypeHandler.getManagedDatatypeURIs())
                 if (s_handlersByDatatypeURI.containsKey(datatypeURI))
@@ -81,6 +81,13 @@ public class DatatypeRegistry {
     protected static DatatypeHandler getDatatypeHandlerFor(DatatypeRestriction datatypeRestriction) throws UnsupportedDatatypeException {
         return getDatatypeHandlerFor(datatypeRestriction.getDatatypeURI());
     }
+    /**
+     * @param lexicalForm lexicalForm
+     * @param datatypeURI datatypeURI
+     * @return literal
+     * @throws MalformedLiteralException if literal is malformed
+     * @throws UnsupportedDatatypeException if literal is unsupported
+     */
     public static Object parseLiteral(String lexicalForm,String datatypeURI) throws MalformedLiteralException,UnsupportedDatatypeException {
         DatatypeHandler handler;
         try {
@@ -93,22 +100,46 @@ public class DatatypeRegistry {
                 "http://www.w3.org/TR/owl2-syntax/#Datatype_Maps. "+CRLF+
                 "The datatype '"+datatypeURI+"' is not part of the OWL 2 datatype map and "+CRLF+
                 "HermiT cannot parse this literal.";
-            throw new UnsupportedDatatypeException(message);
+            throw new UnsupportedDatatypeException(message, e);
         }
         return handler.parseLiteral(lexicalForm,datatypeURI);
     }
+    /**
+     * @param datatypeRestriction datatypeRestriction
+     * @throws UnsupportedDatatypeException if datatype is unsupported
+     * @throws UnsupportedFacetException if facet is unsupported
+     */
     public static void validateDatatypeRestriction(DatatypeRestriction datatypeRestriction) throws UnsupportedDatatypeException,UnsupportedFacetException {
         getDatatypeHandlerFor(datatypeRestriction).validateDatatypeRestriction(datatypeRestriction);
     }
+    /**
+     * @param datatypeRestriction datatypeRestriction
+     * @return subset
+     */
     public static ValueSpaceSubset createValueSpaceSubset(DatatypeRestriction datatypeRestriction) {
         return getDatatypeHandlerFor(datatypeRestriction).createValueSpaceSubset(datatypeRestriction);
     }
+    /**
+     * @param valueSpaceSubset valueSpaceSubset
+     * @param datatypeRestriction datatypeRestriction
+     * @return conjunction
+     */
     public static ValueSpaceSubset conjoinWithDR(ValueSpaceSubset valueSpaceSubset,DatatypeRestriction datatypeRestriction) {
         return getDatatypeHandlerFor(datatypeRestriction).conjoinWithDR(valueSpaceSubset,datatypeRestriction);
     }
+    /**
+     * @param valueSpaceSubset valueSpaceSubset
+     * @param datatypeRestriction datatypeRestriction
+     * @return conjunction
+     */
     public static ValueSpaceSubset conjoinWithDRNegation(ValueSpaceSubset valueSpaceSubset,DatatypeRestriction datatypeRestriction) {
         return getDatatypeHandlerFor(datatypeRestriction).conjoinWithDRNegation(valueSpaceSubset,datatypeRestriction);
     }
+    /**
+     * @param subsetDatatypeURI subsetDatatypeURI
+     * @param supersetDatatypeURI supersetDatatypeURI
+     * @return true if subset
+     */
     public static boolean isSubsetOf(String subsetDatatypeURI,String supersetDatatypeURI) {
         DatatypeHandler datatypeHandler=getDatatypeHandlerFor(subsetDatatypeURI);
         if (datatypeHandler.getManagedDatatypeURIs().contains(supersetDatatypeURI))
@@ -116,6 +147,11 @@ public class DatatypeRegistry {
         else
             return false;
     }
+    /**
+     * @param datatypeURI1 datatypeURI1
+     * @param datatypeURI2 datatypeURI2
+     * @return true if disjoint with
+     */
     public static boolean isDisjointWith(String datatypeURI1,String datatypeURI2) {
         DatatypeHandler datatypeHandler=getDatatypeHandlerFor(datatypeURI1);
         if (datatypeHandler.getManagedDatatypeURIs().contains(datatypeURI2))
@@ -128,34 +164,42 @@ public class DatatypeRegistry {
         protected static final String ANONYMOUS_CONSTANTS="internal:anonymous-constants";
         protected final static Set<String> s_managedDatatypeURIs=Collections.singleton(ANONYMOUS_CONSTANTS);
 
+        @Override
         public Set<String> getManagedDatatypeURIs() {
             return s_managedDatatypeURIs;
         }
+        @Override
         public Object parseLiteral(String lexicalForm,String datatypeURI) throws MalformedLiteralException {
             assert ANONYMOUS_CONSTANTS.equals(datatypeURI);
             return new AnonymousConstantValue(lexicalForm.trim());
         }
+        @Override
         public void validateDatatypeRestriction(DatatypeRestriction datatypeRestriction) throws UnsupportedFacetException {
             throw new IllegalStateException("Internal error: anonymous constants datatype should not occur in datatype restrictions.");
         }
+        @Override
         public ValueSpaceSubset createValueSpaceSubset(DatatypeRestriction datatypeRestriction) {
             throw new IllegalStateException("Internal error: anonymous constants datatype should not occur in datatype restrictions.");
         }
+        @Override
         public ValueSpaceSubset conjoinWithDR(ValueSpaceSubset valueSpaceSubset,DatatypeRestriction datatypeRestriction) {
             throw new IllegalStateException("Internal error: anonymous constants datatype should not occur in datatype restrictions.");
         }
+        @Override
         public ValueSpaceSubset conjoinWithDRNegation(ValueSpaceSubset valueSpaceSubset,DatatypeRestriction datatypeRestriction) {
             throw new IllegalStateException("Internal error: anonymous constants datatype should not occur in datatype restrictions.");
         }
+        @Override
         public boolean isSubsetOf(String subsetDatatypeURI,String supersetDatatypeURI) {
             throw new IllegalStateException("Internal error: anonymous constants datatype should not occur in datatype restrictions.");
         }
+        @Override
         public boolean isDisjointWith(String datatypeURI1,String datatypeURI2) {
             throw new IllegalStateException("Internal error: anonymous constants datatype should not occur in datatype restrictions.");
         }
     }
 
-    public static class AnonymousConstantValue {
+    static class AnonymousConstantValue {
         protected final String m_name;
 
         public AnonymousConstantValue(String name) {
@@ -164,18 +208,17 @@ public class DatatypeRegistry {
         public String getName() {
             return m_name;
         }
+        @Override
         public int hashCode() {
             return m_name.hashCode();
         }
+        @Override
         public boolean equals(Object that) {
             if (this==that)
                 return true;
             if (!(that instanceof AnonymousConstantValue))
                 return false;
             return ((AnonymousConstantValue)that).m_name.equals(m_name);
-        }
-        public static AnonymousConstantValue create(String name) {
-            return new AnonymousConstantValue(name);
         }
     }
 

@@ -11,15 +11,16 @@ import rationals.State;
  * @version $Id: isNormalized.java 2 2006-08-24 14:41:48Z oqube $
  */
 public class isNormalized implements UnaryTest {
+    @Override
     public boolean test(Automaton a) {
         if (a.initials().size() != 1)
             return false;
         if (a.terminals().size() != 1)
             return false;
-        State e = (State) a.initials().iterator().next();
+        State e = a.initials().iterator().next();
         if (a.deltaMinusOne(e).size() > 0)
             return false;
-        e = (State) a.terminals().iterator().next();
+        e = a.terminals().iterator().next();
         if (a.delta(e).size() > 0)
             return false;
         return true;

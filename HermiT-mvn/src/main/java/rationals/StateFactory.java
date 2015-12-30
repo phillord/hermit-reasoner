@@ -11,48 +11,31 @@ import java.util.Set;
  * @version $Id: StateFactory.java 10 2007-05-30 17:25:00Z oqube $
  */
 public interface StateFactory {
-  
-  /**
-   * 
-   * @param initial
-   * @param terminal
-   * @return
-   */
-  State create(boolean initial, boolean terminal);
 
-  /**
-   * Return a new empty set that can contains State instances created by this
-   * factory. This method is provided for optimisation purposes so that more
-   * efficient implementations than plain sets can be used for handling sets of
-   * states.
-   * 
-   * @return an - opaque - implementation of Set.
-   */
-  Set<State> stateSet();
+    /**
+     * @param initial initial
+     * @param terminal terminal
+     * @return state
+     */
+    State create(boolean initial, boolean terminal);
 
-  /**
-   * Returns a new Set which is a copy of <code>s</code>. The given set s
-   * must have been created through <strong>this</strong> StateFactory object
-   * to ensure consistent behavior.
-   * 
-   * @param s
-   *          a Set
-   * @return a shallow copy of <code>s</code>
-   */
-  Set<State> stateSet(Set<State> s);
+    /**
+     * Return a new empty set that can contains State instances created by this
+     * factory. This method is provided for optimisation purposes so that more
+     * efficient implementations than plain sets can be used for handling sets
+     * of states.
+     * 
+     * @return an - opaque - implementation of Set.
+     */
+    Set<State> stateSet();
 
-  /**
-   * Returns a new StateFactory object which is the same as this StateFactory.
-   * 
-   * @return an initialized StateFactory.
-   */
-  Object clone();
-
-  /**
-   * @param automaton
-   */
-  void setAutomaton(Automaton automaton);
-
+    /**
+     * Returns a new StateFactory object which is the same as this StateFactory.
+     * 
+     * @return an initialized StateFactory.
+     * @throws CloneNotSupportedException if clone not supported
+     */
+    Object clone() throws CloneNotSupportedException;
 }
 // /*
 // * $Log: StateFactory.java,v $

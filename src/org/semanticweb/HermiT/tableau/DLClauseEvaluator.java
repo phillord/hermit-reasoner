@@ -34,7 +34,7 @@ import org.semanticweb.HermiT.model.NodeIDsAscendingOrEqual;
 import org.semanticweb.HermiT.model.Term;
 import org.semanticweb.HermiT.model.Variable;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
-
+/**DLClauseEvaluator*/
 public class DLClauseEvaluator implements Serializable {
     private static final long serialVersionUID=4639844159658590456L;
     protected static final String CRLF=System.getProperty("line.separator");
@@ -46,6 +46,16 @@ public class DLClauseEvaluator implements Serializable {
     protected final DLClause m_bodyDLClause;
     protected final List<DLClause> m_headDLClauses;
 
+    /**
+     * @param tableau tableau
+     * @param bodyDLClause bodyDLClause
+     * @param headDLClauses headDLClauses
+     * @param firstAtomRetrieval firstAtomRetrieval
+     * @param bufferSupply bufferSupply
+     * @param valuesBufferManager valuesBufferManager
+     * @param groundDisjunctionHeaderManager groundDisjunctionHeaderManager
+     * @param unionDependencySetsBySize unionDependencySetsBySize
+     */
     public DLClauseEvaluator(Tableau tableau,DLClause bodyDLClause,List<DLClause> headDLClauses,ExtensionTable.Retrieval firstAtomRetrieval,BufferSupply bufferSupply,ValuesBufferManager valuesBufferManager,GroundDisjunctionHeaderManager groundDisjunctionHeaderManager,Map<Integer,UnionDependencySet> unionDependencySetsBySize) {
         m_interruptFlag=tableau.m_interruptFlag;
         m_extensionManager=tableau.m_extensionManager;
@@ -57,27 +67,57 @@ public class DLClauseEvaluator implements Serializable {
         m_bodyDLClause=bodyDLClause;
         m_headDLClauses=headDLClauses;
     }
+    /**
+     * @return body length
+     */
     public int getBodyLength() {
         return m_bodyDLClause.getBodyLength();
     }
+    /**
+     * @param atomIndex atomIndex
+     * @return body atom
+     */
     public Atom getBodyAtom(int atomIndex) {
         return m_bodyDLClause.getBodyAtom(atomIndex);
     }
+    /**
+     * @return number of clauses
+     */
     public int getNumberOfDLClauses() {
         return m_headDLClauses.size();
     }
+    /**
+     * @param dlClauseIndex dlClauseIndex
+     * @return dl clause
+     */
     public DLClause getDLClause(int dlClauseIndex) {
         return m_headDLClauses.get(dlClauseIndex);
     }
+    /**
+     * @param dlClauseIndex dlClauseIndex
+     * @return head length
+     */
     public int getHeadLength(int dlClauseIndex) {
         return m_headDLClauses.get(dlClauseIndex).getHeadLength();
     }
+    /**
+     * @param dlClauseIndex dlClauseIndex
+     * @param atomIndex atomIndex
+     * @return head atom
+     */
     public Atom getHeadAtom(int dlClauseIndex,int atomIndex) {
         return m_headDLClauses.get(dlClauseIndex).getHeadAtom(atomIndex);
     }
+    /**
+     * @param atomIndex atomIndex
+     * @return tuple matched to body
+     */
     public Object[] getTupleMatchedToBody(int atomIndex) {
         return m_retrievals[atomIndex].getTupleBuffer();
     }
+    /**
+     * Evaluate.
+     */
     public void evaluate() {
         int programCounter=0;
         while (programCounter<m_workers.length && !m_extensionManager.containsClash()) {
@@ -85,6 +125,7 @@ public class DLClauseEvaluator implements Serializable {
             programCounter=m_workers[programCounter].execute(programCounter);
         }
     }
+    @Override
     public String toString() {
         StringBuffer buffer=new StringBuffer();
         int maximalPCLength=String.valueOf(m_workers.length-1).length();
@@ -99,28 +140,24 @@ public class DLClauseEvaluator implements Serializable {
         }
         return buffer.toString();
     }
-
+    /**BufferSupply.*/
     public static class BufferSupply {
-        protected final List<Object[]> m_allBuffers;
-        protected final Map<Integer,List<Object[]>> m_availableBuffersByArity;
+        protected final List<Object[]> m_allBuffers=new ArrayList<>();
+        protected final Map<Integer,List<Object[]>> m_availableBuffersByArity=new HashMap<>();
 
-        public BufferSupply() {
-            m_allBuffers=new ArrayList<Object[]>();
-            m_availableBuffersByArity=new HashMap<Integer,List<Object[]>>();
-        }
-        public void reuseBuffers() {
+        void reuseBuffers() {
             m_availableBuffersByArity.clear();
             for (Object[] buffer : m_allBuffers) {
                 Integer arityInteger=Integer.valueOf(buffer.length);
                 List<Object[]> buffers=m_availableBuffersByArity.get(arityInteger);
                 if (buffers==null) {
-                    buffers=new ArrayList<Object[]>();
+                    buffers=new ArrayList<>();
                     m_availableBuffersByArity.put(arityInteger,buffers);
                 }
                 buffers.add(buffer);
             }
         }
-        public Object[] getBuffer(int arity) {
+        Object[] getBuffer(int arity) {
             Object[] buffer;
             Integer arityInteger=Integer.valueOf(arity);
             List<Object[]> buffers=m_availableBuffersByArity.get(arityInteger);
@@ -132,23 +169,30 @@ public class DLClauseEvaluator implements Serializable {
                 buffer=buffers.remove(buffers.size()-1);
             return buffer;
         }
-        public Object[][] getAllBuffers() {
+        Object[][] getAllBuffers() {
             Object[][] result=new Object[m_allBuffers.size()][];
             m_allBuffers.toArray(result);
             return result;
         }
     }
 
+    /**ValuesBufferManager.*/
     public static class ValuesBufferManager {
+        /**Values buffer.*/
         public final Object[] m_valuesBuffer;
-        public final Map<DLPredicate,Integer> m_bodyDLPredicatesToIndexes;
+        final Map<DLPredicate,Integer> m_bodyDLPredicatesToIndexes;
+        /**Max number of variables*/
         public final int m_maxNumberOfVariables;
-        public final Map<Term,Integer> m_bodyNonvariableTermsToIndexes;
+        final Map<Term,Integer> m_bodyNonvariableTermsToIndexes;
 
+        /**
+         * @param dlClauses dlClauses
+         * @param termsToNodes termsToNodes
+         */
         public ValuesBufferManager(Set<DLClause> dlClauses,Map<Term,Node> termsToNodes) {
-            Set<DLPredicate> bodyDLPredicates=new HashSet<DLPredicate>();
-            Set<Variable> variables=new HashSet<Variable>();
-            m_bodyNonvariableTermsToIndexes=new HashMap<Term,Integer>();
+            Set<DLPredicate> bodyDLPredicates=new HashSet<>();
+            Set<Variable> variables=new HashSet<>();
+            m_bodyNonvariableTermsToIndexes=new HashMap<>();
             int maxNumberOfVariables=0;
             for (DLClause dlClause : dlClauses) {
                 variables.clear();
@@ -167,7 +211,7 @@ public class DLClauseEvaluator implements Serializable {
                     maxNumberOfVariables=variables.size();
             }
             m_valuesBuffer=new Object[maxNumberOfVariables+bodyDLPredicates.size()+m_bodyNonvariableTermsToIndexes.size()];
-            m_bodyDLPredicatesToIndexes=new HashMap<DLPredicate,Integer>();
+            m_bodyDLPredicatesToIndexes=new HashMap<>();
             int bindingIndex=maxNumberOfVariables;
             for (DLPredicate bodyDLPredicate : bodyDLPredicates) {
                 m_bodyDLPredicatesToIndexes.put(bodyDLPredicate,Integer.valueOf(bindingIndex));
@@ -186,7 +230,7 @@ public class DLClauseEvaluator implements Serializable {
         }
     }
 
-    public static class GroundDisjunctionHeaderManager {
+    static class GroundDisjunctionHeaderManager {
         protected GroundDisjunctionHeader[] m_buckets;
         protected int m_numberOfElements;
         protected int m_threshold;
@@ -229,7 +273,8 @@ public class DLClauseEvaluator implements Serializable {
             m_buckets=newBuckets;
             m_threshold=(int)(newCapacity*0.75);
         }
-        protected static int getIndexFor(int hashCode,int tableLength) {
+        protected static int getIndexFor(int _hashCode,int tableLength) {
+            int hashCode=_hashCode;
             hashCode+=~(hashCode << 9);
             hashCode^=(hashCode >>> 14);
             hashCode+=(hashCode << 4);
@@ -238,11 +283,16 @@ public class DLClauseEvaluator implements Serializable {
         }
     }
 
-    public static interface Worker {
+    /**Worker.*/
+    public interface Worker {
+        /**
+         * @param programCounter programCounter
+         * @return counter
+         */
         int execute(int programCounter);
     }
 
-    protected static interface BranchingWorker extends Worker {
+    protected interface BranchingWorker extends Worker {
         int getBranchingAddress();
         void setBranchingAddress(int branchingAddress);
     }
@@ -261,10 +311,12 @@ public class DLClauseEvaluator implements Serializable {
             m_toBuffer=toBuffer;
             m_toIndex=toIndex;
         }
+        @Override
         public int execute(int programCounter) {
             m_toBuffer[m_toIndex]=m_fromBuffer[m_fromIndex];
             return programCounter+1;
         }
+        @Override
         public String toString() {
             return "Copy "+m_fromIndex+" --> "+m_toIndex;
         }
@@ -282,10 +334,12 @@ public class DLClauseEvaluator implements Serializable {
             m_targetDependencySets=targetDependencySets;
             m_targetIndex=targetIndex;
         }
+        @Override
         public int execute(int programCounter) {
             m_targetDependencySets[m_targetIndex]=m_retrieval.getDependencySet();
             return programCounter+1;
         }
+        @Override
         public String toString() {
             return "Copy dependency set to "+m_targetIndex;
         }
@@ -305,18 +359,22 @@ public class DLClauseEvaluator implements Serializable {
             m_index1=index1;
             m_index2=index2;
         }
+        @Override
         public int execute(int programCounter) {
             if (m_buffer[m_index1].equals(m_buffer[m_index2]))
                 return programCounter+1;
             else
                 return m_notEqualProgramCounter;
         }
+        @Override
         public int getBranchingAddress() {
             return m_notEqualProgramCounter;
         }
+        @Override
         public void setBranchingAddress(int branchingAddress) {
             m_notEqualProgramCounter=branchingAddress;
         }
+        @Override
         public String toString() {
             return "Branch to "+m_notEqualProgramCounter+" if "+m_index1+" != "+m_index2;
         }
@@ -336,18 +394,22 @@ public class DLClauseEvaluator implements Serializable {
             m_index1=index1;
             m_index2=index2;
         }
+        @Override
         public int execute(int programCounter) {
             if (((Node)m_buffer[m_index1]).getNodeID()<=((Node)m_buffer[m_index2]).getNodeID())
                 return programCounter+1;
             else
                 return m_notLessProgramCounter;
         }
+        @Override
         public int getBranchingAddress() {
             return m_notLessProgramCounter;
         }
+        @Override
         public void setBranchingAddress(int branchingAddress) {
             m_notLessProgramCounter=branchingAddress;
         }
+        @Override
         public String toString() {
             return "Branch to "+m_notLessProgramCounter+" if "+m_index1+".ID > "+m_index2+".ID";
         }
@@ -365,6 +427,7 @@ public class DLClauseEvaluator implements Serializable {
             m_buffer=buffer;
             m_nodeIndexes=nodeIndexes;
         }
+        @Override
         public int execute(int programCounter) {
             boolean strictlyAscending=true;
             boolean allEqual=true;
@@ -382,12 +445,15 @@ public class DLClauseEvaluator implements Serializable {
             else
                 return m_branchProgramCounter;
         }
+        @Override
         public int getBranchingAddress() {
             return m_branchProgramCounter;
         }
+        @Override
         public void setBranchingAddress(int branchingAddress) {
             m_branchProgramCounter=branchingAddress;
         }
+        @Override
         public String toString() {
             return "Branch to "+m_branchProgramCounter+" if node IDs are not ascending or equal";
         }
@@ -401,10 +467,12 @@ public class DLClauseEvaluator implements Serializable {
         public OpenRetrieval(ExtensionTable.Retrieval retrieval) {
             m_retrieval=retrieval;
         }
+        @Override
         public int execute(int programCounter) {
             m_retrieval.open();
             return programCounter+1;
         }
+        @Override
         public String toString() {
             return "Open "+m_retrieval.getBindingsBuffer()[m_retrieval.getBindingPositions()[0]];
         }
@@ -418,10 +486,12 @@ public class DLClauseEvaluator implements Serializable {
         public NextRetrieval(ExtensionTable.Retrieval retrieval) {
             m_retrieval=retrieval;
         }
+        @Override
         public int execute(int programCounter) {
             m_retrieval.next();
             return programCounter+1;
         }
+        @Override
         public String toString() {
             return "Next "+m_retrieval.getBindingsBuffer()[m_retrieval.getBindingPositions()[0]];
         }
@@ -437,18 +507,22 @@ public class DLClauseEvaluator implements Serializable {
             m_eofProgramCounter=eofProgramCounter;
             m_retrieval=retrieval;
         }
+        @Override
         public int execute(int programCounter) {
             if (m_retrieval.afterLast())
                 return m_eofProgramCounter;
             else
                 return programCounter+1;
         }
+        @Override
         public int getBranchingAddress() {
             return m_eofProgramCounter;
         }
+        @Override
         public void setBranchingAddress(int branchingAddress) {
             m_eofProgramCounter=branchingAddress;
         }
+        @Override
         public String toString() {
             return "Branch to "+m_eofProgramCounter+" if "+m_retrieval.getBindingsBuffer()[m_retrieval.getBindingPositions()[0]]+" is empty";
         }
@@ -462,15 +536,19 @@ public class DLClauseEvaluator implements Serializable {
         public JumpTo(int jumpTo) {
             m_jumpTo=jumpTo;
         }
+        @Override
         public int execute(int programCounter) {
             return m_jumpTo;
         }
+        @Override
         public int getBranchingAddress() {
             return m_jumpTo;
         }
+        @Override
         public void setBranchingAddress(int branchingAddress) {
             m_jumpTo=branchingAddress;
         }
+        @Override
         public String toString() {
             return "Jump to "+m_jumpTo;
         }
@@ -488,10 +566,12 @@ public class DLClauseEvaluator implements Serializable {
             m_dlClauseEvaluator=dlClauseEvaluator;
             m_dlClauseIndex=dlClauseIndex;
         }
+        @Override
         public int execute(int programCounter) {
             m_tableauMonitor.dlClauseMatchedStarted(m_dlClauseEvaluator,m_dlClauseIndex);
             return programCounter+1;
         }
+        @Override
         public String toString() {
             return "Monitor -> Match started";
         }
@@ -509,10 +589,12 @@ public class DLClauseEvaluator implements Serializable {
             m_dlClauseEvaluator=dlClauseEvaluator;
             m_dlClauseIndex=dlClauseIndex;
         }
+        @Override
         public int execute(int programCounter) {
             m_tableauMonitor.dlClauseMatchedFinished(m_dlClauseEvaluator,m_dlClauseIndex);
             return programCounter+1;
         }
+        @Override
         public String toString() {
             return "Monitor -> Match finished";
         }
@@ -528,10 +610,12 @@ public class DLClauseEvaluator implements Serializable {
             m_extensionManager=extensionManager;
             m_dependencySet=dependencySet;
         }
+        @Override
         public int execute(int programCounter) {
             m_extensionManager.setClash(m_dependencySet);
             return programCounter+1;
         }
+        @Override
         public String toString() {
             return "Set clash";
         }
@@ -555,12 +639,14 @@ public class DLClauseEvaluator implements Serializable {
             m_argumentIndex=argumentIndex;
             m_dlPredicate=dlPredicate;
         }
+        @Override
         public int execute(int programCounter) {
             Node argument=(Node)m_valuesBuffer[m_argumentIndex];
             boolean isCore=m_coreVariables[m_argumentIndex];
             m_extensionManager.addAssertion(m_dlPredicate,argument,m_dependencySet,isCore);
             return programCounter+1;
         }
+        @Override
         public String toString() {
             return "Derive unary fact";
         }
@@ -584,12 +670,14 @@ public class DLClauseEvaluator implements Serializable {
             m_argumentIndex1=argumentIndex1;
             m_argumentIndex2=argumentIndex2;
         }
+        @Override
         public int execute(int programCounter) {
             Node argument1=(Node)m_valuesBuffer[m_argumentIndex1];
             Node argument2=(Node)m_valuesBuffer[m_argumentIndex2];
             m_extensionManager.addAssertion(m_dlPredicate,argument1,argument2,m_dependencySet,true);
             return programCounter+1;
         }
+        @Override
         public String toString() {
             return "Derive binary fact";
         }
@@ -615,6 +703,7 @@ public class DLClauseEvaluator implements Serializable {
             m_argumentIndex2=argumentIndex2;
             m_argumentIndex3=argumentIndex3;
         }
+        @Override
         public int execute(int programCounter) {
             Node argument1=(Node)m_valuesBuffer[m_argumentIndex1];
             Node argument2=(Node)m_valuesBuffer[m_argumentIndex2];
@@ -622,6 +711,7 @@ public class DLClauseEvaluator implements Serializable {
             m_extensionManager.addAssertion(m_dlPredicate,argument1,argument2,argument3,m_dependencySet,true);
             return programCounter+1;
         }
+        @Override
         public String toString() {
             return "Derive ternary fact";
         }
@@ -647,8 +737,7 @@ public class DLClauseEvaluator implements Serializable {
             m_copyIsCore=copyIsCore;
             m_copyValuesToArguments=copyValuesToArguments;
         }
-        public void clear() {
-        }
+        @Override
         public int execute(int programCounter) {
             Node[] arguments=new Node[m_copyValuesToArguments.length];
             for (int argumentIndex=m_copyValuesToArguments.length-1;argumentIndex>=0;--argumentIndex)
@@ -666,6 +755,7 @@ public class DLClauseEvaluator implements Serializable {
                 m_tableau.addGroundDisjunction(groundDisjunction);
             return programCounter+1;
         }
+        @Override
         public String toString() {
             return "Derive disjunction";
         }
@@ -698,6 +788,7 @@ public class DLClauseEvaluator implements Serializable {
         protected Atom getHeadAtom(int dlClauseIndex,int atomIndex) {
             return m_headDLClauses.get(dlClauseIndex).getHeadAtom(atomIndex);
         }
+        @Override
         protected void compileHeads() {
             m_existentialExpansionStrategy.dlClauseBodyCompiled(m_workers,m_bodyDLClause,m_variables,m_valuesBufferManager.m_valuesBuffer,m_coreVariables);
             for (int dlClauseIndex=0;dlClauseIndex<getNumberOfHeads();dlClauseIndex++) {
@@ -753,7 +844,7 @@ public class DLClauseEvaluator implements Serializable {
             }
         }
         protected static List<Variable> getHeadVariables(List<DLClause> headDLClauses) {
-            List<Variable> result=new ArrayList<Variable>();
+            List<Variable> result=new ArrayList<>();
             for (DLClause dlClause : headDLClauses) {
                 for (int headIndex=0;headIndex<dlClause.getHeadLength();headIndex++) {
                     Atom atom=dlClause.getHeadAtom(headIndex);
@@ -767,7 +858,7 @@ public class DLClauseEvaluator implements Serializable {
             return result;
         }
     }
-    
+    /**ConjunctionCompiler.*/
     public static abstract class ConjunctionCompiler {
         protected final BufferSupply m_bufferSupply;
         protected final ValuesBufferManager m_valuesBufferManager;
@@ -777,16 +868,25 @@ public class DLClauseEvaluator implements Serializable {
         protected final Set<Variable> m_boundSoFar;
         protected final UnionDependencySet m_unionDependencySet;
         protected final List<ExtensionTable.Retrieval> m_retrievals;
+        /**Workers.*/
         public final List<Worker> m_workers;
         protected final List<Integer> m_labels;
 
+        /**
+         * @param bufferSupply bufferSupply
+         * @param valuesBufferManager valuesBufferManager
+         * @param unionDependencySetsBySize unionDependencySetsBySize
+         * @param extensionManager extensionManager
+         * @param bodyAtoms bodyAtoms
+         * @param headVariables headVariables
+         */
         public ConjunctionCompiler(BufferSupply bufferSupply,ValuesBufferManager valuesBufferManager,Map<Integer,UnionDependencySet> unionDependencySetsBySize,ExtensionManager extensionManager,Atom[] bodyAtoms,List<Variable> headVariables) {
             m_bufferSupply=bufferSupply;
             m_valuesBufferManager=valuesBufferManager;
             m_extensionManager=extensionManager;
             m_bodyAtoms=bodyAtoms;
-            m_variables=new ArrayList<Variable>();
-            m_boundSoFar=new HashSet<Variable>();
+            m_variables=new ArrayList<>();
+            m_boundSoFar=new HashSet<>();
             int numberOfRealAtoms=0;
             for (int bodyIndex=0;bodyIndex<getBodyLength();bodyIndex++) {
                 Atom atom=getBodyAtom(bodyIndex);
@@ -812,9 +912,9 @@ public class DLClauseEvaluator implements Serializable {
             }
             else
                 m_unionDependencySet=null;
-            m_retrievals=new ArrayList<ExtensionTable.Retrieval>();
-            m_workers=new ArrayList<Worker>();
-            m_labels=new ArrayList<Integer>();
+            m_retrievals=new ArrayList<>();
+            m_workers=new ArrayList<>();
+            m_labels=new ArrayList<>();
         }
         protected final void generateCode(int firstBodyAtomToCompile,ExtensionTable.Retrieval firstAtomRetrieval) {
             m_labels.add(null);
@@ -891,7 +991,7 @@ public class DLClauseEvaluator implements Serializable {
                     Term term=atom.getArgument(argumentIndex);
                     if (term instanceof Variable) {
                         if (m_boundSoFar.contains(term))
-                            bindingPositions[argumentIndex+1]=m_variables.indexOf((Variable)term);
+                            bindingPositions[argumentIndex+1]=m_variables.indexOf(term);
                         else
                             bindingPositions[argumentIndex+1]=-1;
                     }

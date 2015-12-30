@@ -21,7 +21,7 @@ import java.io.Serializable;
 import java.util.Set;
 
 import org.semanticweb.HermiT.Prefixes;
-
+/**DescriptionGraph.*/
 public class DescriptionGraph implements DLPredicate,Serializable {
     private static final long serialVersionUID=-6098910060520673164L;
 
@@ -30,33 +30,63 @@ public class DescriptionGraph implements DLPredicate,Serializable {
     protected final Edge[] m_edges;
     protected final Set<AtomicConcept> m_startConcepts;
 
+    /**
+     * @param name name
+     * @param atomicConceptsByVertices atomicConceptsByVertices
+     * @param edges edges
+     * @param startConcepts startConcepts
+     */
     public DescriptionGraph(String name,AtomicConcept[] atomicConceptsByVertices,Edge[] edges,Set<AtomicConcept> startConcepts) {
         m_name=name;
         m_atomicConceptsByVertices=atomicConceptsByVertices;
         m_edges=edges;
         m_startConcepts=startConcepts;
     }
+    /**
+     * @return name
+     */
     public String getName() {
         return m_name;
     }
+    @Override
     public int getArity() {
         return m_atomicConceptsByVertices.length;
     }
+    /**
+     * @param vertex vertex
+     * @return concept for vertex
+     */
     public AtomicConcept getAtomicConceptForVertex(int vertex) {
         return m_atomicConceptsByVertices[vertex];
     }
+    /**
+     * @return number of vertices
+     */
     public int getNumberOfVertices() {
         return m_atomicConceptsByVertices.length;
     }
+    /**
+     * @return number of edges
+     */
     public int getNumberOfEdges() {
         return m_edges.length;
     }
+    /**
+     * @param edgeIndex edgeIndex
+     * @return edge
+     */
     public Edge getEdge(int edgeIndex) {
         return m_edges[edgeIndex];
     }
+    /**
+     * @return start concepts
+     */
     public Set<AtomicConcept> getStartConcepts() {
         return m_startConcepts;
     }
+    /**
+     * @param resultingDLClauses resultingDLClauses
+     */
     public void produceStartDLClauses(Set<DLClause> resultingDLClauses) {
         Variable X=Variable.create("X");
         for (AtomicConcept startAtomicConcept : m_startConcepts) {
@@ -73,25 +103,29 @@ public class DescriptionGraph implements DLPredicate,Serializable {
             resultingDLClauses.add(DLClause.create(consequent,antecedent));
         }
     }
+    @Override
     public String toString(Prefixes ns) {
         return ns.abbreviateIRI(m_name);
     }
+    @Override
     public String toString() {
         return toString(Prefixes.STANDARD_PREFIXES);
     }
+    /**
+     * @return text representation
+     */
     public String getTextRepresentation() {
         StringBuffer buffer=new StringBuffer();
-        String CRLF=System.getProperty("line.separator");
         buffer.append('[');
-        buffer.append(CRLF);
-        for (int vertex=0;vertex<m_atomicConceptsByVertices.length;vertex++) {
+        buffer.append('\n');
+       for (int vertex=0;vertex<m_atomicConceptsByVertices.length;vertex++) {
             buffer.append("   ");
             buffer.append(vertex);
             buffer.append(" --> ");
             buffer.append(m_atomicConceptsByVertices[vertex].getIRI());
-            buffer.append(CRLF);
+            buffer.append('\n');
         }
-        buffer.append(CRLF);
+        buffer.append('\n');
         for (Edge edge : m_edges) {
             buffer.append("  ");
             buffer.append(edge.getFromVertex());
@@ -99,18 +133,19 @@ public class DescriptionGraph implements DLPredicate,Serializable {
             buffer.append(edge.getAtomicRole().getIRI());
             buffer.append(" --> ");
             buffer.append(edge.getToVertex());
-            buffer.append(CRLF);
+            buffer.append('\n');
         }
-        buffer.append(CRLF);
+        buffer.append('\n');
         for (AtomicConcept atomicConcept : m_startConcepts) {
             buffer.append("  ");
             buffer.append(atomicConcept.getIRI());
-            buffer.append(CRLF);
+            buffer.append('\n');
         }
         buffer.append(']');
         return buffer.toString();
     }
 
+    /**Edge.*/
     public static class Edge implements Serializable {
         private static final long serialVersionUID=-2407275128459101707L;
 
@@ -118,23 +153,39 @@ public class DescriptionGraph implements DLPredicate,Serializable {
         protected final int m_fromVertex;
         protected final int m_toVertex;
 
+        /**
+         * @param atomicRole atomicRole
+         * @param fromVertex fromVertex
+         * @param toVertex toVertex
+         */
         public Edge(AtomicRole atomicRole,int fromVertex,int toVertex) {
             m_atomicRole=atomicRole;
             m_fromVertex=fromVertex;
             m_toVertex=toVertex;
         }
+        /**
+         * @return atomic role
+         */
         public AtomicRole getAtomicRole() {
             return m_atomicRole;
         }
+        /**
+         * @return from vertex
+         */
         public int getFromVertex() {
             return m_fromVertex;
         }
+        /**
+         * @return to vertex
+         */
         public int getToVertex() {
             return m_toVertex;
         }
+        @Override
         public int hashCode() {
             return m_fromVertex+7*m_toVertex+11*m_atomicRole.hashCode();
         }
+        @Override
         public boolean equals(Object that) {
             if (this==that)
                 return true;

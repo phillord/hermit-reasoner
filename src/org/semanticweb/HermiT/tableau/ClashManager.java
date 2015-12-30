@@ -50,6 +50,9 @@ public final class ClashManager implements Serializable {
     protected final Object[] m_ternaryAuxiliaryTuple;
     protected final UnionDependencySet m_binaryUnionDependencySet;
 
+    /**
+     * @param tableau tableau
+     */
     public ClashManager(Tableau tableau) {
         m_extensionManager=tableau.m_extensionManager;
         m_ternaryExtensionTableSearch01Bound=m_extensionManager.m_ternaryExtensionTable.createRetrieval(new boolean[] { true,true,false },ExtensionTable.View.TOTAL);
@@ -58,6 +61,9 @@ public final class ClashManager implements Serializable {
         m_ternaryAuxiliaryTuple=new Object[3];
         m_binaryUnionDependencySet=new UnionDependencySet(2);
     }
+    /**
+     * Clear.
+     */
     public void clear() {
         m_ternaryExtensionTableSearch01Bound.clear();
         m_binaryAuxiliaryTuple[0]=null;
@@ -68,7 +74,12 @@ public final class ClashManager implements Serializable {
         m_binaryUnionDependencySet.m_dependencySets[0]=null;
         m_binaryUnionDependencySet.m_dependencySets[1]=null;
     }
-    public void tupleAdded(ExtensionTable extensionTable,Object[] tuple,DependencySet dependencySet,boolean isCore) {
+    /**
+     * @param extensionTable extensionTable
+     * @param tuple tuple
+     * @param dependencySet dependencySet
+     */
+    public void tupleAdded(ExtensionTable extensionTable,Object[] tuple,DependencySet dependencySet) {
         Object dlPredicateObject=tuple[0];
         Node node0=(Node)tuple[1];
         if (AtomicConcept.NOTHING.equals(dlPredicateObject) || NOT_RDFS_LITERAL.equals(dlPredicateObject) || (Inequality.INSTANCE.equals(dlPredicateObject) && tuple[1]==tuple[2])) {

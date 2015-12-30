@@ -17,11 +17,6 @@
 */
 package org.semanticweb.HermiT.model;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -42,7 +37,7 @@ import org.semanticweb.HermiT.Prefixes;
  */
 public class DLOntology implements Serializable {
     private static final long serialVersionUID=3189937959595369812L;
-    protected static final String CRLF=System.getProperty("line.separator");
+    protected static final String CRLF="\n";
 
     protected final String m_ontologyIRI;
     protected final Set<DLClause> m_dlClauses;
@@ -64,6 +59,23 @@ public class DLOntology implements Serializable {
     protected final Set<DescriptionGraph> m_allDescriptionGraphs;
     protected final Map<AtomicRole,Map<Individual,Set<Constant>>> m_dataPropertyAssertions;
 
+    /**
+     * @param ontologyIRI ontologyIRI
+     * @param dlClauses dlClauses
+     * @param positiveFacts positiveFacts
+     * @param negativeFacts negativeFacts
+     * @param atomicConcepts atomicConcepts
+     * @param atomicObjectRoles atomicObjectRoles
+     * @param allComplexObjectRoles allComplexObjectRoles
+     * @param atomicDataRoles atomicDataRoles
+     * @param allUnknownDatatypeRestrictions allUnknownDatatypeRestrictions
+     * @param definedDatatypeIRIs definedDatatypeIRIs
+     * @param individuals individuals
+     * @param hasInverseRoles hasInverseRoles
+     * @param hasAtMostRestrictions hasAtMostRestrictions
+     * @param hasNominals hasNominals
+     * @param hasDatatypes hasDatatypes
+     */
     public DLOntology(String ontologyIRI,Set<DLClause> dlClauses,Set<Atom> positiveFacts,Set<Atom> negativeFacts, Set<AtomicConcept> atomicConcepts,
             Set<AtomicRole> atomicObjectRoles,Set<Role> allComplexObjectRoles,Set<AtomicRole> atomicDataRoles,
             Set<DatatypeRestriction> allUnknownDatatypeRestrictions,Set<String> definedDatatypeIRIs,Set<Individual> individuals,
@@ -77,7 +89,7 @@ public class DLOntology implements Serializable {
         m_hasNominals=hasNominals;
         m_hasDatatypes=hasDatatypes;
         if (atomicConcepts==null)
-            m_allAtomicConcepts=new TreeSet<AtomicConcept>(AtomicConceptComparator.INSTANCE);
+            m_allAtomicConcepts=new TreeSet<>(AtomicConceptComparator.INSTANCE);
         else
             m_allAtomicConcepts=atomicConcepts;
         int numberOfExternalConcepts=0;
@@ -86,30 +98,30 @@ public class DLOntology implements Serializable {
                 numberOfExternalConcepts++;
         m_numberOfExternalConcepts=numberOfExternalConcepts;
         if (atomicObjectRoles==null)
-            m_allAtomicObjectRoles=new TreeSet<AtomicRole>(AtomicRoleComparator.INSTANCE);
+            m_allAtomicObjectRoles=new TreeSet<>(AtomicRoleComparator.INSTANCE);
         else
             m_allAtomicObjectRoles=atomicObjectRoles;
         if (allComplexObjectRoles==null)
-            m_allComplexObjectRoles=new HashSet<Role>();
+            m_allComplexObjectRoles=new HashSet<>();
         else
             m_allComplexObjectRoles=allComplexObjectRoles;
         if (atomicDataRoles==null)
-            m_allAtomicDataRoles=new TreeSet<AtomicRole>(AtomicRoleComparator.INSTANCE);
+            m_allAtomicDataRoles=new TreeSet<>(AtomicRoleComparator.INSTANCE);
         else
             m_allAtomicDataRoles=atomicDataRoles;
         if (allUnknownDatatypeRestrictions==null)
-            m_allUnknownDatatypeRestrictions=new HashSet<DatatypeRestriction>();
+            m_allUnknownDatatypeRestrictions=new HashSet<>();
         else
             m_allUnknownDatatypeRestrictions=allUnknownDatatypeRestrictions;
         if (definedDatatypeIRIs==null)
-            m_definedDatatypeIRIs=new HashSet<String>();
+            m_definedDatatypeIRIs=new HashSet<>();
         else
             m_definedDatatypeIRIs=definedDatatypeIRIs;
         if (individuals==null)
-            m_allIndividuals=new TreeSet<Individual>(IndividualComparator.INSTANCE);
+            m_allIndividuals=new TreeSet<>(IndividualComparator.INSTANCE);
         else
             m_allIndividuals=individuals;
-        m_allDescriptionGraphs=new HashSet<DescriptionGraph>();
+        m_allDescriptionGraphs=new HashSet<>();
         boolean isHorn=true;
         for (DLClause dlClause : m_dlClauses) {
             if (dlClause.getHeadLength()>1)
@@ -124,7 +136,7 @@ public class DLOntology implements Serializable {
             }
         }
         m_isHorn=isHorn;
-        m_dataPropertyAssertions=new HashMap<AtomicRole,Map<Individual,Set<Constant>>>();
+        m_dataPropertyAssertions=new HashMap<>();
         for (Atom atom : m_positiveFacts) {
             addDLPredicate(atom.getDLPredicate());
             for (int i=0;i<atom.getArity();++i) {
@@ -143,14 +155,14 @@ public class DLOntology implements Serializable {
                     if (m_dataPropertyAssertions.containsKey(atomicRole))
                         individualsToConstants=m_dataPropertyAssertions.get(atomicRole);
                     else {
-                        individualsToConstants=new HashMap<Individual,Set<Constant>>();
+                        individualsToConstants=new HashMap<>();
                         m_dataPropertyAssertions.put(atomicRole,individualsToConstants);
                     }
                     Set<Constant> constants;
                     if (individualsToConstants.containsKey(sourceIndividual))
                         constants=individualsToConstants.get(sourceIndividual);
                     else {
-                        constants=new HashSet<Constant>();
+                        constants=new HashSet<>();
                         individualsToConstants.put(sourceIndividual,constants);
                     }
                     constants.add((Constant)possibleConstant);
@@ -180,207 +192,197 @@ public class DLOntology implements Serializable {
             m_allDescriptionGraphs.add(((ExistsDescriptionGraph)dlPredicate).getDescriptionGraph());
     }
 
+    /**
+     * @return ontology iri
+     */
     public String getOntologyIRI() {
         return m_ontologyIRI;
     }
+    /**
+     * @return all atomic concepts
+     */
     public Set<AtomicConcept> getAllAtomicConcepts() {
         return m_allAtomicConcepts;
     }
+    /**
+     * @param concept concept
+     * @return true if contains atomic concept
+     */
     public boolean containsAtomicConcept(AtomicConcept concept) {
-    	return m_allAtomicConcepts.contains(concept);
+        return m_allAtomicConcepts.contains(concept);
     }
+    /**
+     * @return umber of external concepts
+     */
     public int getNumberOfExternalConcepts() {
         return m_numberOfExternalConcepts;
     }
+    /**
+     * @return all atomic object roles
+     */
     public Set<AtomicRole> getAllAtomicObjectRoles() {
         return m_allAtomicObjectRoles;
     }
+    /**
+     * @param role role
+     * @return true if object role contained
+     */
     public boolean containsObjectRole(AtomicRole role) {
-    	return m_allAtomicObjectRoles.contains(role);
+        return m_allAtomicObjectRoles.contains(role);
     }
+    /**
+     * @return all complex object roles
+     */
     public Set<Role> getAllComplexObjectRoles() {
         return m_allComplexObjectRoles;
     }
-    public boolean isComplexObjectRole(Role role) {
-        return m_allComplexObjectRoles.contains(role);
-    }
+    /**
+     * @return all atomic data roles
+     */
     public Set<AtomicRole> getAllAtomicDataRoles() {
         return m_allAtomicDataRoles;
     }
+    /**
+     * @param role role
+     * @return true if contains data role
+     */
     public boolean containsDataRole(AtomicRole role) {
-    	return m_allAtomicDataRoles.contains(role);
+        return m_allAtomicDataRoles.contains(role);
     }
+    /**
+     * @return all unknown data restrictions
+     */
     public Set<DatatypeRestriction> getAllUnknownDatatypeRestrictions() {
         return m_allUnknownDatatypeRestrictions;
     }
+    /**
+     * @return all individuals
+     */
     public Set<Individual> getAllIndividuals() {
         return m_allIndividuals;
     }
+    /**
+     * @param individual individual
+     * @return true if contains individual
+     */
     public boolean containsIndividual(Individual individual) {
-    	return m_allIndividuals.contains(individual);
+        return m_allIndividuals.contains(individual);
     }
+    /**
+     * @return description graphs
+     */
     public Set<DescriptionGraph> getAllDescriptionGraphs() {
         return m_allDescriptionGraphs;
     }
+    /**
+     * @return dl clauses
+     */
     public Set<DLClause> getDLClauses() {
         return m_dlClauses;
     }
+    /**
+     * @return positive facts
+     */
     public Set<Atom> getPositiveFacts() {
         return m_positiveFacts;
     }
+    /**
+     * @return data assertions
+     */
     public Map<AtomicRole,Map<Individual,Set<Constant>>> getDataPropertyAssertions() {
         return m_dataPropertyAssertions;
     }
+    /**
+     * @return negative facts
+     */
     public Set<Atom> getNegativeFacts() {
         return m_negativeFacts;
     }
+    /**
+     * @return true if inverse roles
+     */
     public boolean hasInverseRoles() {
         return m_hasInverseRoles;
     }
+    /**
+     * @return true if at most restrictions
+     */
     public boolean hasAtMostRestrictions() {
         return m_hasAtMostRestrictions;
     }
+    /**
+     * @return true if has nominals
+     */
     public boolean hasNominals() {
         return m_hasNominals;
     }
+    /**
+     * @return true if has datatypes
+     */
     public boolean hasDatatypes() {
         return m_hasDatatypes;
     }
+    /**
+     * @return true if has unknown datatypes restrictions
+     */
     public boolean hasUnknownDatatypeRestrictions() {
         return !m_allUnknownDatatypeRestrictions.isEmpty();
     }
+    /**
+     * @return true if Horn ontology
+     */
     public boolean isHorn() {
         return m_isHorn;
     }
+    /**
+     * @return datatypes
+     */
     public Set<String> getDefinedDatatypeIRIs() {
         return m_definedDatatypeIRIs;
     }
-    protected Set<AtomicConcept> getBodyOnlyAtomicConcepts() {
-        Set<AtomicConcept> bodyOnlyAtomicConcepts=new HashSet<AtomicConcept>(m_allAtomicConcepts);
-        for (DLClause dlClause : m_dlClauses)
-            for (int headIndex=0;headIndex<dlClause.getHeadLength();headIndex++) {
-                DLPredicate dlPredicate=dlClause.getHeadAtom(headIndex).getDLPredicate();
-                bodyOnlyAtomicConcepts.remove(dlPredicate);
-                if (dlPredicate instanceof AtLeastConcept)
-                    bodyOnlyAtomicConcepts.remove(((AtLeastConcept)dlPredicate).getToConcept());
-            }
-        return bodyOnlyAtomicConcepts;
-    }
-    protected Set<AtomicRole> computeGraphAtomicRoles() {
-        Set<AtomicRole> graphAtomicRoles=new HashSet<AtomicRole>();
-        for (DescriptionGraph descriptionGraph : m_allDescriptionGraphs)
-            for (int edgeIndex=0;edgeIndex<descriptionGraph.getNumberOfEdges();edgeIndex++) {
-                DescriptionGraph.Edge edge=descriptionGraph.getEdge(edgeIndex);
-                graphAtomicRoles.add(edge.getAtomicRole());
-            }
-        boolean change=true;
-        while (change) {
-            change=false;
-            for (DLClause dlClause : m_dlClauses)
-                if (containsAtomicRoles(dlClause,graphAtomicRoles))
-                    if (addAtomicRoles(dlClause,graphAtomicRoles))
-                        change=true;
-        }
-        return graphAtomicRoles;
-    }
-    protected boolean containsAtomicRoles(DLClause dlClause,Set<AtomicRole> roles) {
-        for (int atomIndex=0;atomIndex<dlClause.getBodyLength();atomIndex++) {
-            DLPredicate dlPredicate=dlClause.getBodyAtom(atomIndex).getDLPredicate();
-            if (dlPredicate instanceof AtomicRole && roles.contains(dlPredicate))
-                return true;
-        }
-        for (int atomIndex=0;atomIndex<dlClause.getHeadLength();atomIndex++) {
-            DLPredicate dlPredicate=dlClause.getHeadAtom(atomIndex).getDLPredicate();
-            if (dlPredicate instanceof AtomicRole && roles.contains(dlPredicate))
-                return true;
-        }
-        return false;
-    }
-    protected boolean addAtomicRoles(DLClause dlClause,Set<AtomicRole> roles) {
-        boolean change=false;
-        for (int atomIndex=0;atomIndex<dlClause.getBodyLength();atomIndex++) {
-            DLPredicate dlPredicate=dlClause.getBodyAtom(atomIndex).getDLPredicate();
-            if (dlPredicate instanceof AtomicRole)
-                if (roles.add((AtomicRole)dlPredicate))
-                    change=true;
-        }
-        for (int atomIndex=0;atomIndex<dlClause.getHeadLength();atomIndex++) {
-            DLPredicate dlPredicate=dlClause.getHeadAtom(atomIndex).getDLPredicate();
-            if (dlPredicate instanceof AtomicRole)
-                if (roles.add((AtomicRole)dlPredicate))
-                    change=true;
-        }
-        return change;
-    }
+    /**
+     * @param prefixes prefixes
+     * @return toString
+     */
     public String toString(Prefixes prefixes) {
-        StringBuffer stringBuffer=new StringBuffer();
-        stringBuffer.append("Prefixes: [");
-        stringBuffer.append(CRLF);
+        StringBuilder stringBuffer=new StringBuilder("Prefixes: [").append(CRLF);
         for (Map.Entry<String,String> entry : prefixes.getPrefixIRIsByPrefixName().entrySet()) {
-            stringBuffer.append("  ");
-            stringBuffer.append(entry.getKey());
-            stringBuffer.append(" = <");
-            stringBuffer.append(entry.getValue());
-            stringBuffer.append('>');
-            stringBuffer.append(CRLF);
+            stringBuffer.append("  ").append(entry.getKey()).append(" = <").append(entry.getValue()).append('>').append(CRLF);
         }
-        stringBuffer.append("]");
-        stringBuffer.append(CRLF);
-        stringBuffer.append("Deterministic DL-clauses: [");
-        stringBuffer.append(CRLF);
+        stringBuffer.append("]").append(CRLF).append("Deterministic DL-clauses: [").append(CRLF);
         int numDeterministicClauses=0;
         for (DLClause dlClause : m_dlClauses)
             if (dlClause.getHeadLength()<=1) {
                 numDeterministicClauses++;
-                stringBuffer.append("  ");
-                stringBuffer.append(dlClause.toString(prefixes));
-                stringBuffer.append(CRLF);
+                stringBuffer.append("  ").append(dlClause.toString(prefixes)).append(CRLF);
             }
-        stringBuffer.append("]");
-        stringBuffer.append(CRLF);
-        stringBuffer.append("Disjunctive DL-clauses: [");
-        stringBuffer.append(CRLF);
+        stringBuffer.append("]").append(CRLF).append("Disjunctive DL-clauses: [").append(CRLF);
         int numNondeterministicClauses=0;
         int numDisjunctions=0;
         for (DLClause dlClause : m_dlClauses)
             if (dlClause.getHeadLength()>1) {
                 numNondeterministicClauses++;
                 numDisjunctions+=dlClause.getHeadLength();
-                stringBuffer.append("  ");
-                stringBuffer.append(dlClause.toString(prefixes));
-                stringBuffer.append(CRLF);
+                stringBuffer.append("  ").append(dlClause.toString(prefixes)).append(CRLF);
             }
-        stringBuffer.append("]");
-        stringBuffer.append(CRLF);
-        stringBuffer.append("ABox: [");
-        stringBuffer.append(CRLF);
+        stringBuffer.append("]").append(CRLF).append("ABox: [").append(CRLF);
         for (Atom atom : m_positiveFacts) {
-            stringBuffer.append("  ");
-            stringBuffer.append(atom.toString(prefixes));
-            stringBuffer.append(CRLF);
+            stringBuffer.append("  ").append(atom.toString(prefixes)).append(CRLF);
         }
         for (Atom atom : m_negativeFacts) {
-            stringBuffer.append("  !");
-            stringBuffer.append(atom.toString(prefixes));
-            stringBuffer.append(CRLF);
+            stringBuffer.append("  !").append(atom.toString(prefixes)).append(CRLF);
         }
-        stringBuffer.append("]");
-        stringBuffer.append(CRLF);
-        stringBuffer.append("Statistics: [");
-        stringBuffer.append(CRLF);
-        stringBuffer.append("  Number of deterministic clauses: " + numDeterministicClauses);
-        stringBuffer.append(CRLF);
-        stringBuffer.append("  Number of nondeterministic clauses: " + numNondeterministicClauses);
-        stringBuffer.append(CRLF);
-        stringBuffer.append("  Number of disjunctions: " + numDisjunctions);
-        stringBuffer.append(CRLF);
-        stringBuffer.append("  Number of positive facts: " + m_positiveFacts.size());
-        stringBuffer.append(CRLF);
-        stringBuffer.append("  Number of negative facts: " + m_negativeFacts.size());
-        stringBuffer.append(CRLF);
-        stringBuffer.append("]");
+        stringBuffer.append("]").append(CRLF).append("Statistics: [").append(CRLF)
+        .append("  Number of deterministic clauses: " + numDeterministicClauses).append(CRLF)
+        .append("  Number of nondeterministic clauses: " + numNondeterministicClauses).append(CRLF)
+        .append("  Number of disjunctions: " + numDisjunctions).append(CRLF)
+        .append("  Number of positive facts: " + m_positiveFacts.size()).append(CRLF)
+        .append("  Number of negative facts: " + m_negativeFacts.size()).append(CRLF).append("]");
         return stringBuffer.toString();
     }
+    /**
+     * @return statistics
+     */
     public String getStatistics() {
         return getStatistics(null,null,null);
     }
@@ -398,80 +400,55 @@ public class DLOntology implements Serializable {
                 }
             }
         }
-        StringBuffer stringBuffer=new StringBuffer();
-        stringBuffer.append("DL clauses statistics: [");
-        stringBuffer.append(CRLF);
-        stringBuffer.append("  Number of deterministic clauses: " + numDeterministicClauses);
-        stringBuffer.append(CRLF);
-        stringBuffer.append("  Number of nondeterministic clauses: " + numNondeterministicClauses);
-        stringBuffer.append(CRLF);
-        stringBuffer.append("  Overall number of disjunctions: " + numDisjunctions);
-        stringBuffer.append(CRLF);
-        stringBuffer.append("  Number of positive facts: " + m_positiveFacts.size());
-        stringBuffer.append(CRLF);
-        stringBuffer.append("  Number of negative facts: " + m_negativeFacts.size());
-        stringBuffer.append(CRLF);
-        stringBuffer.append("  Inverses: " + this.hasInverseRoles());
-        stringBuffer.append(CRLF);
-        stringBuffer.append("  At-Mosts: " + this.hasAtMostRestrictions());
-        stringBuffer.append(CRLF);
-        stringBuffer.append("  Datatypes: " + this.hasDatatypes());
-        stringBuffer.append(CRLF);
-        stringBuffer.append("  Nominals: " + this.hasNominals());
-        stringBuffer.append(CRLF);
-        stringBuffer.append("  Number of atomic concepts: " + m_allAtomicConcepts.size());
-        stringBuffer.append(CRLF);
-        stringBuffer.append("  Number of object properties: " + m_allAtomicObjectRoles.size());
-        stringBuffer.append(CRLF);
-        stringBuffer.append("  Number of data properties: " + m_allAtomicDataRoles.size());
-        stringBuffer.append(CRLF);
-        stringBuffer.append("  Number of individuals: " + m_allIndividuals.size());
-        stringBuffer.append(CRLF);
-        stringBuffer.append("]");
+        StringBuilder stringBuffer=new StringBuilder("DL clauses statistics: [").append(CRLF)
+                .append("  Number of deterministic clauses: " ).append( numDeterministicClauses).append(CRLF)
+                .append("  Number of nondeterministic clauses: " ).append( numNondeterministicClauses).append(CRLF)
+                .append("  Overall number of disjunctions: " ).append( numDisjunctions).append(CRLF)
+                .append("  Number of positive facts: " ).append( m_positiveFacts.size()).append(CRLF)
+                .append("  Number of negative facts: " ).append( m_negativeFacts.size()).append(CRLF)
+                .append("  Inverses: " ).append( this.hasInverseRoles()).append(CRLF)
+                .append("  At-Mosts: " ).append( this.hasAtMostRestrictions()).append(CRLF)
+                .append("  Datatypes: " ).append( this.hasDatatypes()).append(CRLF)
+                .append("  Nominals: " ).append( this.hasNominals()).append(CRLF)
+                .append("  Number of atomic concepts: " ).append( m_allAtomicConcepts.size()).append(CRLF)
+                .append("  Number of object properties: ").append( m_allAtomicObjectRoles.size()).append(CRLF)
+                .append("  Number of data properties: ").append( m_allAtomicDataRoles.size()).append(CRLF)
+                .append("  Number of individuals: " ).append( m_allIndividuals.size()).append(CRLF).append("]");
         return stringBuffer.toString();
     }
+    @Override
     public String toString() {
         return toString(Prefixes.STANDARD_PREFIXES);
     }
-    public void save(File file) throws IOException {
-        OutputStream outputStream=new BufferedOutputStream(new FileOutputStream(file));
-        try {
-            save(outputStream);
-        }
-        finally {
-            outputStream.close();
-        }
-    }
+    /**
+     * @param outputStream outputStream
+     * @throws IOException if reading fails
+     */
     public void save(OutputStream outputStream) throws IOException {
         ObjectOutputStream objectOutputStream=new ObjectOutputStream(outputStream);
         objectOutputStream.writeObject(this);
         objectOutputStream.flush();
     }
+    /**
+     * @param inputStream inputStream
+     * @return ontology
+     * @throws IOException if class not found
+     */
     public static DLOntology load(InputStream inputStream) throws IOException {
         try {
             ObjectInputStream objectInputStream=new ObjectInputStream(inputStream);
             return (DLOntology)objectInputStream.readObject();
         }
         catch (ClassNotFoundException e) {
-            IOException error=new IOException();
-            error.initCause(e);
-            throw error;
-        }
-    }
-    public static DLOntology load(File file) throws IOException {
-        InputStream inputStream=new BufferedInputStream(new FileInputStream(file));
-        try {
-            return load(inputStream);
-        }
-        finally {
-            inputStream.close();
+            throw new IOException(e);
         }
     }
 
-    public static class AtomicConceptComparator implements Serializable,Comparator<AtomicConcept> {
+    static class AtomicConceptComparator implements Serializable,Comparator<AtomicConcept> {
         private static final long serialVersionUID=2386841732225838685L;
         public static final Comparator<AtomicConcept> INSTANCE=new AtomicConceptComparator();
 
+        @Override
         public int compare(AtomicConcept o1,AtomicConcept o2) {
             return o1.getIRI().compareTo(o2.getIRI());
         }
@@ -481,10 +458,11 @@ public class DLOntology implements Serializable {
         }
     }
 
-    public static class AtomicRoleComparator implements Serializable,Comparator<AtomicRole> {
+    static class AtomicRoleComparator implements Serializable,Comparator<AtomicRole> {
         private static final long serialVersionUID=3483541702854959793L;
         public static final Comparator<AtomicRole> INSTANCE=new AtomicRoleComparator();
 
+        @Override
         public int compare(AtomicRole o1,AtomicRole o2) {
             return o1.getIRI().compareTo(o2.getIRI());
         }
@@ -494,10 +472,11 @@ public class DLOntology implements Serializable {
         }
     }
 
-    public static class IndividualComparator implements Serializable,Comparator<Individual> {
+    static class IndividualComparator implements Serializable,Comparator<Individual> {
         private static final long serialVersionUID=2386841732225838685L;
         public static final Comparator<Individual> INSTANCE=new IndividualComparator();
 
+        @Override
         public int compare(Individual o1,Individual o2) {
             return o1.getIRI().compareTo(o2.getIRI());
         }

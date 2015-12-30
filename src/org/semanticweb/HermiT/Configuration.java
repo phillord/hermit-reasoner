@@ -33,7 +33,7 @@ import org.semanticweb.owlapi.reasoner.FreshEntityPolicy;
 import org.semanticweb.owlapi.reasoner.IndividualNodeSetPolicy;
 import org.semanticweb.owlapi.reasoner.OWLReasonerConfiguration;
 import org.semanticweb.owlapi.reasoner.ReasonerProgressMonitor;
-
+/**Configuration for the reasoner.*/
 public class Configuration implements Serializable,Cloneable,OWLReasonerConfiguration {
     private static final long serialVersionUID=7741510316249774519L;
 
@@ -171,16 +171,21 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
      * warning() method of the interface, e.g., if it ignores an unsupported datatype. HermiT does not provide an
      * implementation for the interface itself though.
      */
-    public WarningMonitor warningMonitor;
+    public final WarningMonitor warningMonitor;
     /**
      * If a progress monitor is set, HermiT will report the progress of a classification task. This is used for
      * example by Protege.
      */
     public ReasonerProgressMonitor reasonerProgressMonitor;
-    public TableauMonitorType tableauMonitorType;
+    /**tableau monitor type*/
+    public final TableauMonitorType tableauMonitorType;
+    /**direct blocking type*/
     public DirectBlockingType directBlockingType;
+    /**blocking strategy type*/
     public BlockingStrategyType blockingStrategyType;
+    /**blocking signature cache type*/
     public BlockingSignatureCacheType blockingSignatureCacheType;
+    /**existential strategy type*/
     public ExistentialStrategyType existentialStrategyType;
     /**
      * If HermiT encounters a non-OWL2 datatype, it normally throws an error. If set to true, axioms containing unsupported
@@ -200,7 +205,9 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
      * individualTaskTimeout ms.
      */
     public long individualTaskTimeout;
+    /**individual node set policy*/
     public IndividualNodeSetPolicy individualNodeSetPolicy;
+    /**fresh entity policy*/
     public FreshEntityPolicy freshEntityPolicy;
     /**
      * If set to true, then each disjunct of a disjunction is associated with a punish factor and whenever a disjunct causes
@@ -223,15 +230,16 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
      * etc. Use with care, e.g., only when trying to get explanations of inconsistencies, where throwing an error might not be helpful.
      */
     public boolean throwInconsistentOntologyException;
-
-    public PrepareReasonerInferences prepareReasonerInferences;
+    /**prepare reasoner inferences*/
+    public final PrepareReasonerInferences prepareReasonerInferences;
 
     /**
      * The default value is false and HermiT will use a specialiased classification strategy for deterministic ontologies, which often is faster, but not always.
      * If the value is set to true, then HermiT will use the Quasi Ordering Classification method even for deterministic ontologies.
      */
-    public boolean forceQuasiOrderClassification;
+    public final boolean forceQuasiOrderClassification;
 
+    /**Create configuration.*/
     public Configuration() {
         warningMonitor=null;
         reasonerProgressMonitor=null;
@@ -242,7 +250,7 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
         existentialStrategyType=Configuration.ExistentialStrategyType.CREATION_ORDER;
         ignoreUnsupportedDatatypes=false;
         monitor=null;
-        parameters=new HashMap<String,Object>();
+        parameters=new HashMap<>();
         individualTaskTimeout=-1;
         bufferChanges=true;
         individualNodeSetPolicy=IndividualNodeSetPolicy.BY_NAME;
@@ -255,21 +263,14 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
     protected void setIndividualReuseStrategyReuseAlways(Set<? extends AtomicConcept> concepts) {
         parameters.put("IndividualReuseStrategy.reuseAlways",concepts);
     }
-    public void loadIndividualReuseStrategyReuseAlways(File file) throws IOException {
-        Set<AtomicConcept> concepts=loadConceptsFromFile(file);
-        setIndividualReuseStrategyReuseAlways(concepts);
-    }
     protected void setIndividualReuseStrategyReuseNever(Set<? extends AtomicConcept> concepts) {
         parameters.put("IndividualReuseStrategy.reuseNever",concepts);
     }
-    public void loadIndividualReuseStrategyReuseNever(File file) throws IOException {
-        Set<AtomicConcept> concepts=loadConceptsFromFile(file);
-        setIndividualReuseStrategyReuseNever(concepts);
-    }
     protected Set<AtomicConcept> loadConceptsFromFile(File file) throws IOException {
-        Set<AtomicConcept> result=new HashSet<AtomicConcept>();
-        BufferedReader reader=new BufferedReader(new FileReader(file));
-        try {
+        Set<AtomicConcept> result=new HashSet<>();
+        
+        try (FileReader in = new FileReader(file);
+        BufferedReader reader=new BufferedReader(in);) {
             String line=reader.readLine();
             while (line!=null) {
                 result.add(AtomicConcept.create(line));
@@ -277,44 +278,58 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
             }
             return result;
         }
-        finally {
-            reader.close();
-        }
     }
+    @Override
     public Configuration clone() {
         try {
             Configuration result=(Configuration)super.clone();
-            result.parameters=new HashMap<String,Object>(parameters);
+            result.parameters=new HashMap<>(parameters);
             return result;
         }
-        catch (CloneNotSupportedException cantHappen) {
+        catch (@SuppressWarnings("unused") CloneNotSupportedException cantHappen) {
             return null;
         }
     }
-    public static interface WarningMonitor {
+    /**Warning monitor.*/
+    public interface WarningMonitor {
+        /**@param warning warning*/
         void warning(String warning);
     }
+    @Override
     public long getTimeOut() {
         return individualTaskTimeout;
     }
-	public IndividualNodeSetPolicy getIndividualNodeSetPolicy() {
-		return individualNodeSetPolicy;
-	}
-	public ReasonerProgressMonitor getProgressMonitor() {
-		return reasonerProgressMonitor;
-	}
-	public FreshEntityPolicy getFreshEntityPolicy() {
-		return freshEntityPolicy;
-	}
-	public static class PrepareReasonerInferences {
-	    public boolean classClassificationRequired=true;
-	    public boolean objectPropertyClassificationRequired=true;
-	    public boolean dataPropertyClassificationRequired=true;
-	    public boolean objectPropertyDomainsRequired=true;
-	    public boolean objectPropertyRangesRequired=true;
-	    public boolean realisationRequired=true;
-	    public boolean objectPropertyRealisationRequired=true;
-	    public boolean dataPropertyRealisationRequired=true;
-	    public boolean sameAs=true;
-	}
+    @Override
+    public IndividualNodeSetPolicy getIndividualNodeSetPolicy() {
+        return individualNodeSetPolicy;
+    }
+    @Override
+    public ReasonerProgressMonitor getProgressMonitor() {
+        return reasonerProgressMonitor;
+    }
+    @Override
+    public FreshEntityPolicy getFreshEntityPolicy() {
+        return freshEntityPolicy;
+    }
+    /**Prepare reasoner inferences.*/
+    public static class PrepareReasonerInferences {
+        /**class classification required*/
+        public boolean classClassificationRequired=true;
+        /**object property classification required*/
+        public boolean objectPropertyClassificationRequired=true;
+        /**data property classification required*/
+        public boolean dataPropertyClassificationRequired=true;
+        /**object property domains required*/
+        public boolean objectPropertyDomainsRequired=true;
+        /**object property ranges required*/
+        public boolean objectPropertyRangesRequired=true;
+        /**realisation required*/
+        public boolean realisationRequired=true;
+        /**object property realisation required*/
+        public boolean objectPropertyRealisationRequired=true;
+        /**data property realisation required*/
+        public boolean dataPropertyRealisationRequired=true;
+        /**individual same as required*/
+        public boolean sameAs=true;
+    }
 }

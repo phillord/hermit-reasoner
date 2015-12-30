@@ -24,22 +24,29 @@ import org.semanticweb.HermiT.debugger.Debugger;
 import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.model.Equality;
 import org.semanticweb.HermiT.tableau.GroundDisjunction;
-
+/**UnprocessedDisjunctionsCommand.*/
 public class UnprocessedDisjunctionsCommand extends AbstractCommand {
 
+    /**
+     * @param debugger debugger
+     */
     public UnprocessedDisjunctionsCommand(Debugger debugger) {
         super(debugger);
     }
+    @Override
     public String getCommandName() {
         return "uDisjunctions";
     }
+    @Override
     public String[] getDescription() {
         return new String[] { "","shows unprocessed ground disjunctions" };
     }
+    @Override
     public void printHelp(PrintWriter writer) {
         writer.println("usage: uDisjunctions");
         writer.println("    Prints a list of unprocessed ground disjunctions.");
     }
+    @Override
     public void execute(String[] args) {
         CharArrayWriter buffer=new CharArrayWriter();
         PrintWriter writer=new PrintWriter(buffer);

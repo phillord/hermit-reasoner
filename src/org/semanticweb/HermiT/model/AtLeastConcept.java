@@ -31,12 +31,17 @@ public class AtLeastConcept extends AtLeast {
         super(number,onRole);
         m_toConcept=toConcept;
     }
+    /**
+     * @return literal
+     */
     public LiteralConcept getToConcept() {
         return m_toConcept;
     }
+    @Override
     public boolean isAlwaysFalse() {
         return m_toConcept.isAlwaysFalse();
     }
+    @Override
     public String toString(Prefixes prefixes) {
         return "atLeast("+m_number+' '+m_onRole.toString(prefixes)+' '+m_toConcept.toString(prefixes)+')';
     }
@@ -44,15 +49,23 @@ public class AtLeastConcept extends AtLeast {
         return s_interningManager.intern(this);
     }
 
-    protected static InterningManager<AtLeastConcept> s_interningManager=new InterningManager<AtLeastConcept>() {
+    protected final static InterningManager<AtLeastConcept> s_interningManager=new InterningManager<AtLeastConcept>() {
+        @Override
         protected boolean equal(AtLeastConcept object1,AtLeastConcept object2) {
             return object1.m_number==object2.m_number && object1.m_onRole==object2.m_onRole && object1.m_toConcept==object2.m_toConcept;
         }
+        @Override
         protected int getHashCode(AtLeastConcept object) {
             return (object.m_number*7+object.m_onRole.hashCode())*7+object.m_toConcept.hashCode();
         }
     };
     
+    /**
+     * @param number number
+     * @param onRole onRole
+     * @param toConcept toConcept
+     * @return at least concept
+     */
     public static AtLeastConcept create(int number,Role onRole,LiteralConcept toConcept) {
         return s_interningManager.intern(new AtLeastConcept(number,onRole,toConcept));
     }

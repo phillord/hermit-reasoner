@@ -18,27 +18,34 @@
 package org.semanticweb.HermiT.datatypes.binarydata;
 
 import java.util.Collection;
-
+/**BinaryDataLengthInterval*/
 public class BinaryDataLengthInterval {
     protected final BinaryDataType m_binaryDataType;
     protected final int m_minLength;
     protected final int m_maxLength;
 
+    /**
+     * @param binaryDataType binaryDataType
+     * @param minLength minLength
+     * @param maxLength maxLength
+     */
     public BinaryDataLengthInterval(BinaryDataType binaryDataType,int minLength,int maxLength) {
-        assert !isIntervalEmpty(binaryDataType,minLength,maxLength);
+        assert !isIntervalEmpty(minLength,maxLength);
         m_binaryDataType=binaryDataType;
         m_minLength=minLength;
         m_maxLength=maxLength;
     }
     /**
      * Computes the intersection of this interval with the supplied one. If the two intervals do not intersect, the result is null.
+     * @param that that 
+     * @return intersection
      */
     public BinaryDataLengthInterval intersectWith(BinaryDataLengthInterval that) {
         if (m_binaryDataType!=that.m_binaryDataType)
             return null;
         int newMinLength=Math.max(m_minLength,that.m_minLength);
         int newMaxLength=Math.min(m_maxLength,that.m_maxLength);
-        if (isIntervalEmpty(m_binaryDataType,newMinLength,newMaxLength))
+        if (isIntervalEmpty(newMinLength,newMaxLength))
             return null;
         else if (isEqual(m_binaryDataType,newMinLength,newMaxLength))
             return this;
@@ -50,6 +57,10 @@ public class BinaryDataLengthInterval {
     protected boolean isEqual(BinaryDataType binaryDataType,int minLength,int maxLength) {
         return m_binaryDataType==binaryDataType && m_minLength==minLength && m_maxLength==maxLength;
     }
+    /**
+     * @param argument argument
+     * @return input minus size
+     */
     public int subtractSizeFrom(int argument) {
         if (argument<=0 || m_maxLength==Integer.MAX_VALUE)
             return 0;
@@ -74,9 +85,16 @@ public class BinaryDataLengthInterval {
             return total;
         }
     }
+    /**
+     * @param value value
+     * @return true if contained
+     */
     public boolean contains(BinaryData value) {
         return m_binaryDataType==value.getBinaryDataType() && m_minLength<=value.getNumberOfBytes() && value.getNumberOfBytes()<=m_maxLength;
     }
+    /**
+     * @param values values
+     */
     public void enumerateValues(Collection<Object> values) {
         if (m_maxLength==Integer.MAX_VALUE)
             throw new IllegalStateException("Internal error: the data range is infinite!");
@@ -98,6 +116,7 @@ public class BinaryDataLengthInterval {
             }
         }
     }
+    @Override
     public String toString() {
         StringBuffer buffer=new StringBuffer();
         buffer.append(m_binaryDataType.toString());
@@ -111,7 +130,7 @@ public class BinaryDataLengthInterval {
         buffer.append(']');
         return buffer.toString();
     }
-    protected static boolean isIntervalEmpty(BinaryDataType binaryDataType,int minLength,int maxLength) {
+    protected static boolean isIntervalEmpty(int minLength,int maxLength) {
         return minLength>maxLength;
     }
 }

@@ -35,17 +35,25 @@ public class ExtensionTableWithTupleIndexes extends ExtensionTable {
     protected final TupleIndex[] m_tupleIndexes;
     protected final Object[] m_auxiliaryTuple;
 
+    /**
+     * @param tableau tableau
+     * @param tupleArity tupleArity
+     * @param needsDependencySets needsDependencySets
+     * @param tupleIndexes tupleIndexes
+     */
     public ExtensionTableWithTupleIndexes(Tableau tableau,int tupleArity,boolean needsDependencySets,TupleIndex[] tupleIndexes) {
         super(tableau,tupleArity,needsDependencySets);
         m_tupleIndexes=tupleIndexes;
         m_auxiliaryTuple=new Object[m_tupleArity];
     }
+    @Override
     public int sizeInMemory() {
         int size=m_tupleTable.sizeInMemory();
         for (int i=m_tupleIndexes.length-1;i>=0;--i)
             size+=m_tupleIndexes[i].sizeInMemoy();
         return size;
     }
+    @Override
     public boolean addTuple(Object[] tuple,DependencySet dependencySet,boolean isCore) {
         if (m_tableauMonitor!=null)
             m_tableauMonitor.addFactStarted(tuple,isCore);
@@ -77,10 +85,12 @@ public class ExtensionTableWithTupleIndexes extends ExtensionTable {
             m_tableauMonitor.addFactFinished(tuple,isCore,false);
         return false;
     }
+    @Override
     public boolean containsTuple(Object[] tuple) {
         int tupleIndex=m_tupleIndexes[0].getTupleIndex(tuple);
         return tupleIndex!=-1 && isTupleActive(tupleIndex);
     }
+    @Override
     public DependencySet getDependencySet(Object[] tuple) {
         int tupleIndex=m_tupleIndexes[0].getTupleIndex(tuple);
         // If the tuple is not in the tuple table, we'll get back -1; then, there is no dependency set.
@@ -89,6 +99,7 @@ public class ExtensionTableWithTupleIndexes extends ExtensionTable {
         else
             return m_dependencySetManager.getDependencySet(tupleIndex);
     }
+    @Override
     public boolean isCore(Object[] tuple) {
         int tupleIndex=m_tupleIndexes[0].getTupleIndex(tuple);
         if (tupleIndex==-1)
@@ -96,6 +107,7 @@ public class ExtensionTableWithTupleIndexes extends ExtensionTable {
         else
             return m_coreManager.isCore(tupleIndex);
     }
+    @Override
     public Retrieval createRetrieval(int[] bindingPositions,Object[] bindingsBuffer,Object[] tupleBuffer,boolean ownsBuffers,View extensionView) {
         TupleIndex selectedTupleIndex=null;
         int boundPrefixSizeInSelected=0;
@@ -117,12 +129,14 @@ public class ExtensionTableWithTupleIndexes extends ExtensionTable {
         else
             return new IndexedRetrieval(selectedTupleIndex,bindingPositions,bindingsBuffer,tupleBuffer,ownsBuffers,extensionView);
     }
+    @Override
     protected void removeTuple(int tupleIndex) {
         m_tupleTable.retrieveTuple(m_auxiliaryTuple,tupleIndex);
         for (int index=m_tupleIndexes.length-1;index>=0;--index)
             m_tupleIndexes[index].removeTuple(m_auxiliaryTuple);
         postRemove(m_auxiliaryTuple,tupleIndex);
     }
+    @Override
     public void clear() {
         super.clear();
         for (int index=m_tupleIndexes.length-1;index>=0;--index)
@@ -154,12 +168,11 @@ public class ExtensionTableWithTupleIndexes extends ExtensionTable {
                     numberOfBoundPositions++;
             m_checkTupleSelection=(numberOfBoundPositions>m_selectionIndices.length);
         }
+        @Override
         public ExtensionTable getExtensionTable() {
             return ExtensionTableWithTupleIndexes.this;
         }
-        public ExtensionTable.View getExtensionView() {
-            return m_extensionView;
-        }
+        @Override
         public void clear() {
             if (m_ownsBuffers) {
                 for (int index=m_bindingsBuffer.length-1;index>=0;--index)
@@ -168,21 +181,27 @@ public class ExtensionTableWithTupleIndexes extends ExtensionTable {
                     m_tupleBuffer[index]=null;
             }
         }
+        @Override
         public int[] getBindingPositions() {
             return m_bindingPositions;
         }
+        @Override
         public Object[] getBindingsBuffer() {
             return m_bindingsBuffer;
         }
+        @Override
         public Object[] getTupleBuffer() {
             return m_tupleBuffer;
         }
+        @Override
         public DependencySet getDependencySet() {
             return m_dependencySet;
         }
+        @Override
         public boolean isCore() {
             return m_isCore;
         }
+        @Override
         public void open() {
             switch (m_extensionView) {
             case EXTENSION_THIS:
@@ -201,6 +220,8 @@ public class ExtensionTableWithTupleIndexes extends ExtensionTable {
                 m_firstTupleIndex=0;
                 m_afterLastTupleIndex=m_afterDeltaNewTupleIndex;
                 break;
+            default:
+                break;
             }
             super.open();
             while (!afterLast()) {
@@ -216,6 +237,7 @@ public class ExtensionTableWithTupleIndexes extends ExtensionTable {
                 super.next();
             }
         }
+        @Override
         public void next() {
             super.next();
             while (!afterLast()) {

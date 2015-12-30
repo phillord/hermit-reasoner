@@ -21,21 +21,25 @@ import java.io.Serializable;
 
 import org.semanticweb.owlapi.reasoner.ReasonerInterruptedException;
 import org.semanticweb.owlapi.reasoner.TimeOutException;
-
+/**InterruptFlag.*/
 public final class InterruptFlag implements Serializable {
     private static final long serialVersionUID=-6983680374511847003L;
 
-    protected static enum InterruptType { INTERRUPTED,TIMEOUT };
+    protected static enum InterruptType { INTERRUPTED,TIMEOUT }
 
     protected final InterruptTimer m_interruptTimer;
     protected volatile InterruptType m_interruptType;
 
+    /**
+     * @param individualTaskTimeout individualTaskTimeout
+     */
     public InterruptFlag(long individualTaskTimeout) {
         if (individualTaskTimeout>0)
             m_interruptTimer=new InterruptTimer(individualTaskTimeout);
         else
             m_interruptTimer=null;
     }
+    /**Check interrupt.*/
     public void checkInterrupt() {
         InterruptType interruptType=m_interruptType;
         if (interruptType!=null) {
@@ -45,25 +49,29 @@ public final class InterruptFlag implements Serializable {
                 throw new ReasonerInterruptedException();
         }
     }
+    /**Interrupt.*/
     public void interrupt() {
         m_interruptType=InterruptType.INTERRUPTED;
     }
+    /**Start task. */
     public void startTask() {
         m_interruptType=null;
         if (m_interruptTimer!=null)
             m_interruptTimer.startTiming();
     }
+    /**End task. */
     public void endTask() {
         if (m_interruptTimer!=null)
             m_interruptTimer.stopTiming();
         m_interruptType=null;
     }
+    /**Dispose.*/
     public void dispose() {
         if (m_interruptTimer!=null)
             m_interruptTimer.dispose();
     }
 
-    protected static enum TimerState { WAIT_FOR_TASK,TIMING,TIMING_STOPPED,DISPOSED };
+    protected static enum TimerState { WAIT_FOR_TASK,TIMING,TIMING_STOPPED,DISPOSED }
 
     protected class InterruptTimer extends Thread {
         protected final long m_timeout;
@@ -75,6 +83,8 @@ public final class InterruptFlag implements Serializable {
             m_timeout=timeout;
             start();
         }
+        @SuppressWarnings("unused")
+        @Override
         public synchronized void run() {
             while (m_timerState!=TimerState.DISPOSED) {
                 m_timerState=TimerState.WAIT_FOR_TASK;
@@ -99,6 +109,7 @@ public final class InterruptFlag implements Serializable {
                 }
             }
         }
+        @SuppressWarnings("unused")
         public synchronized void startTiming() {
             while (m_timerState!=TimerState.WAIT_FOR_TASK && m_timerState!=TimerState.DISPOSED) {
                 try {
@@ -120,7 +131,7 @@ public final class InterruptFlag implements Serializable {
                     try {
                         wait();
                     }
-                    catch (InterruptedException stopped) {
+                    catch (@SuppressWarnings("unused") InterruptedException stopped) {
                         return;
                     }
                 }
@@ -132,7 +143,7 @@ public final class InterruptFlag implements Serializable {
             try {
                 join();
             }
-            catch (InterruptedException e) {
+            catch (@SuppressWarnings("unused") InterruptedException e) {
             }
         }
     }

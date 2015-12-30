@@ -1,11 +1,9 @@
 package rationals.transformations;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import rationals.Automaton;
-import rationals.NoSuchStateException;
 import rationals.State;
 import rationals.Transition;
 import rationals.properties.ContainsEpsilon;
@@ -27,51 +25,33 @@ import rationals.properties.ContainsEpsilon;
  */
 public class Normalizer implements UnaryTransformation {
 
+    @Override
     public Automaton transform(Automaton a) {
         Automaton b = new Automaton();
         State ni = b.addState(true, false);
         State nt = b.addState(false, true);
-        Map map = new HashMap();
-        Iterator i = a.states().iterator();
-        while (i.hasNext()) {
-            State st = (State) i.next();
+        Map<State, State> map = new HashMap<>();
+        for (State st :a.states()) {
             map.put(st, b.addState(false, false));
         }
         /* add epsilon transition if contains epsilon */
         if (new ContainsEpsilon().test(a))
-            try {
-                b.addTransition(new Transition(ni, null, nt));
-            } catch (NoSuchStateException e) {
-            }
-        i = a.delta().iterator();
-        while (i.hasNext()) {
-            Transition t = (Transition) i.next();
+                b.addTransition(new Transition(ni, null, nt),null);
+        for (Transition t :a.delta()) {
             if (t.start().isInitial() && t.end().isTerminal()) {
-                try {
-                    b.addTransition(new Transition(ni, t.label(), nt));
-                } catch (NoSuchStateException x) {
-                }
+                    b.addTransition(new Transition(ni, t.label(), nt),null);
             }
             if (t.start().isInitial()) {
-                try {
-                    b.addTransition(new Transition(ni, t.label(), (State) map
-                            .get(t.end())));
-                } catch (NoSuchStateException x) {
-                }
+                    b.addTransition(new Transition(ni, t.label(), map
+                            .get(t.end())),null);
             }
 
             if (t.end().isTerminal())
-                try {
-                    b.addTransition(new Transition((State) map.get(t.start()),
-                            t.label(), nt));
-                } catch (NoSuchStateException x) {
-                }
+                    b.addTransition(new Transition(map.get(t.start()),
+                            t.label(), nt),null);
 
-            try {
-                b.addTransition(new Transition((State) map.get(t.start()), t
-                        .label(), (State) map.get(t.end())));
-            } catch (NoSuchStateException x) {
-            }
+                b.addTransition(new Transition(map.get(t.start()), t
+                        .label(), map.get(t.end())),null);
 
         }
         b = new Pruner().transform(b);

@@ -23,7 +23,7 @@ import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.model.AnnotatedEquality;
 import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.model.Equality;
-
+/**GroundDisjunction*/
 public final class GroundDisjunction implements Serializable {
     private static final long serialVersionUID=6245673952732442673L;
 
@@ -34,6 +34,13 @@ public final class GroundDisjunction implements Serializable {
     protected GroundDisjunction m_previousGroundDisjunction;
     protected GroundDisjunction m_nextGroundDisjunction;
 
+    /**
+     * @param tableau tableau
+     * @param groundDisjunctionHeader groundDisjunctionHeader
+     * @param arguments arguments
+     * @param isCore isCore
+     * @param dependencySet dependencySet
+     */
     public GroundDisjunction(Tableau tableau,GroundDisjunctionHeader groundDisjunctionHeader,Node[] arguments,boolean[] isCore,DependencySet dependencySet) {
         m_groundDisjunctionHeader=groundDisjunctionHeader;
         m_arguments=arguments;
@@ -41,34 +48,68 @@ public final class GroundDisjunction implements Serializable {
         m_dependencySet=tableau.m_dependencySetFactory.getPermanent(dependencySet);
         tableau.m_dependencySetFactory.addUsage(m_dependencySet);
     }
+    /**
+     * @return previous ground disjunction
+     */
     public GroundDisjunction getPreviousGroundDisjunction() {
         return m_previousGroundDisjunction;
     }
+    /**
+     * @return next ground disjunction
+     */
     public GroundDisjunction getNextGroundDisjunction() {
         return m_nextGroundDisjunction;
     }
+    /**
+     * @param tableau tableau
+     */
     public void destroy(Tableau tableau) {
         tableau.m_dependencySetFactory.removeUsage(m_dependencySet);
         m_dependencySet=null;
     }
+    /**
+     * @return number of disjuncts
+     */
     public int getNumberOfDisjuncts() {
         return m_groundDisjunctionHeader.m_dlPredicates.length;
     }
+    /**
+     * @param disjunctIndex disjunctIndex
+     * @return dl predicate
+     */
     public DLPredicate getDLPredicate(int disjunctIndex) {
         return m_groundDisjunctionHeader.m_dlPredicates[disjunctIndex];
     }
+    /**
+     * @param disjunctIndex disjunctIndex
+     * @param argumentIndex argumentIndex
+     * @return argument
+     */
     public Node getArgument(int disjunctIndex,int argumentIndex) {
         return m_arguments[m_groundDisjunctionHeader.m_disjunctStart[disjunctIndex]+argumentIndex];
     }
+    /**
+     * @param disjunctIndex disjunctIndex
+     * @return true if core
+     */
     public boolean isCore(int disjunctIndex) {
         return m_isCore[disjunctIndex];
     }
+    /**
+     * @return dependency set
+     */
     public DependencySet getDependencySet() {
         return m_dependencySet;
     }
+    /**
+     * @return ground disjunction header
+     */
     public GroundDisjunctionHeader getGroundDisjunctionHeader() {
         return m_groundDisjunctionHeader;
     }
+    /**
+     * @return true if pruned
+     */
     public boolean isPruned() {
         for (int argumentIndex=m_arguments.length-1;argumentIndex>=0;--argumentIndex)
             if (m_arguments[argumentIndex].isPruned())
@@ -76,6 +117,10 @@ public final class GroundDisjunction implements Serializable {
         return false;
     }
 
+    /**
+     * @param tableau tableau
+     * @return true if satisfied
+     */
     @SuppressWarnings("fallthrough")
     public boolean isSatisfied(Tableau tableau) {
         ExtensionManager extensionManager=tableau.m_extensionManager;
@@ -92,7 +137,7 @@ public final class GroundDisjunction implements Serializable {
                 break;
             case 3:
                 if (dlPredicate instanceof AnnotatedEquality) {
-                    if (extensionManager.containsAnnotatedEquality((AnnotatedEquality)dlPredicate,getArgument(disjunctIndex,0).getCanonicalNode(),getArgument(disjunctIndex,1).getCanonicalNode(),getArgument(disjunctIndex,2).getCanonicalNode()))
+                    if (ExtensionManager.containsAnnotatedEquality(getArgument(disjunctIndex,0).getCanonicalNode(),getArgument(disjunctIndex,1).getCanonicalNode(),getArgument(disjunctIndex,2).getCanonicalNode()))
                         return true;
                     break;
                 }
@@ -103,6 +148,12 @@ public final class GroundDisjunction implements Serializable {
         }
         return false;
     }
+    /**
+     * @param tableau tableau
+     * @param disjunctIndex disjunctIndex
+     * @param dependencySet dependencySet
+     * @return true if modified
+     */
     @SuppressWarnings("fallthrough")
     public boolean addDisjunctToTableau(Tableau tableau,int disjunctIndex,DependencySet dependencySet) {
         DLPredicate dlPredicate=getDLPredicate(disjunctIndex);
@@ -126,6 +177,10 @@ public final class GroundDisjunction implements Serializable {
             throw new IllegalStateException("Unsupported predicate arity.");
         }
     }
+    /**
+     * @param prefixes prefixes
+     * @return toString
+     */
     public String toString(Prefixes prefixes) {
         StringBuffer buffer=new StringBuffer();
         for (int disjunctIndex=0;disjunctIndex<getNumberOfDisjuncts();disjunctIndex++) {
@@ -166,6 +221,7 @@ public final class GroundDisjunction implements Serializable {
         }
         return buffer.toString();
     }
+    @Override
     public String toString() {
         return toString(Prefixes.STANDARD_PREFIXES);
     }

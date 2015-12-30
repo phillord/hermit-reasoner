@@ -40,7 +40,7 @@ import java.util.Arrays;
 /**
  * Matrix representation of an automaton.
  * <p>
- * The elements of a the matrix are {@see SemiRing}objects.
+ * The elements of a the matrix are SemiRing objects.
  * 
  * @author nono
  * @version $Id: Matrix.java 6 2006-08-30 08:56:44Z oqube $
@@ -50,30 +50,22 @@ public final class Matrix implements SemiRing {
     /* matrices for transitions, initial and terminal states */
     protected final SemiRing[][] matrix;
 
-    private int line;
+    private final int line;
     
-    private int col;
+    private final int col;
     
 
+    /**
+     * @param ns line and column number
+     */
     public Matrix(int ns) {
         this.line = this.col = ns;
         this.matrix = new SemiRing[ns][ns];
     }
 
     /**
-     * @param matrix
-     */
-    public Matrix(Matrix matrix) {
-        this(matrix.line);
-        for (int i = 0; i < line; i++) 
-            for (int j = 0; j < col; j++) 
-                this.matrix[i][j] = matrix.matrix[i][j];
-        
-    }
-
-    /**
-     * @param l
-     * @param c
+     * @param l l
+     * @param c c
      */
     public Matrix(int l, int c) {
         this.line = l;
@@ -119,38 +111,28 @@ public final class Matrix implements SemiRing {
         return res;
     }
 
-
     /**
-     * Returns the star of this matrix.
-     * 
-     * @return
+     * @return line number
      */
-    public Matrix star() {
-        return null;
-    }
-
     public int getLine() {
         return line;
     }
     
+    @Override
     public String toString() {
-        final String ln = System.getProperty("line.separator");
         StringBuffer sb = new StringBuffer();
-        int n = matrix.length;
         for (int i = 0; i < line; i++) {
             sb.append("[ ");
             for (int j = 0; j < col; j++) {
                 String s = matrix[i][j].toString();
                 sb.append(s).append(' ');
             }
-            sb.append("]").append(ln);
+            sb.append("]\n");
         }
         return sb.toString();
     }
 
-    /* (non-Javadoc)
-     * @see rationals.algebra.SemiRing#plus(rationals.algebra.SemiRing)
-     */
+    @Override
     public SemiRing plus(SemiRing s2) {
         if(s2 == null)
             throw new IllegalArgumentException("Null argument");
@@ -166,9 +148,7 @@ public final class Matrix implements SemiRing {
         return res;               
     }
 
-    /* (non-Javadoc)
-     * @see rationals.algebra.SemiRing#mult(rationals.algebra.SemiRing)
-     */
+    @Override
     public SemiRing mult(SemiRing s2) {
         if(s2 == null)
             throw new IllegalArgumentException("Null argument");
@@ -191,22 +171,21 @@ public final class Matrix implements SemiRing {
         return res;
     }
 
-    /* (non-Javadoc)
-     * @see rationals.algebra.SemiRing#one()
-     */
+    @Override
     public SemiRing one() {
         if(line != col)
             throw new IllegalStateException("Cannot get unit matrix on non-square matrices");
         return one(line,matrix[0][0]);
     }
 
-    /* (non-Javadoc)
-     * @see rationals.algebra.SemiRing#zero()
-     */
+    @Override
     public SemiRing zero() {
         return zero(line,col,matrix[0][0]);
     }
     
+    /**
+     * @return column number
+     */
     public int getCol() {
         return col;
     }
@@ -214,6 +193,8 @@ public final class Matrix implements SemiRing {
     /**
      * Factory method for creating Matrix instances with coefficients
      * in a certain SemiRing.
+     * @param line line 
+     * @param col col 
      * 
      * @param sr a SemiRing instance. Used to get one and zero.
      * @return a new zero matrix.
@@ -229,6 +210,7 @@ public final class Matrix implements SemiRing {
     /**
      * Factory method for creating unit Matrix instances with coefficients
      * in a certain SemiRing.
+     * @param dim dim 
      * 
      * @param sr a SemiRing instance. Used to get one and zero.
      * @return a new unit square matrix.

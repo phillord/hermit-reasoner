@@ -1,9 +1,12 @@
 package org.semanticweb.HermiT.reasoner;
 
+import org.semanticweb.HermiT.datatypes.binarydata.BinaryDataTest;
+import org.semanticweb.HermiT.datatypes.rdfplainliteral.RDFPlainLiteralTest;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
+@SuppressWarnings("javadoc")
 public class AllQuickTests extends TestCase {
 
     public static Test suite() {

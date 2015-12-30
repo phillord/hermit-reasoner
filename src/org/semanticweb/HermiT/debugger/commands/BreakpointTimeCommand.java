@@ -20,23 +20,30 @@ package org.semanticweb.HermiT.debugger.commands;
 import java.io.PrintWriter;
 
 import org.semanticweb.HermiT.debugger.Debugger;
-
+/**BreakpointTimeCommand.*/
 public class BreakpointTimeCommand extends AbstractCommand {
 
+    /**
+     * @param debugger debugger
+     */
     public BreakpointTimeCommand(Debugger debugger) {
         super(debugger);
     }
+    @Override
     public String getCommandName() {
         return "bpTime";
     }
+    @Override
     public String[] getDescription() {
         return new String[] { "timeInSeconds","sets the break point time" };
     }
+    @Override
     public void printHelp(PrintWriter writer) {
         writer.println("usage: bpTime timeInSeconds");
         writer.println("    Sets the breakpoint time -- that is, after timeInSeconds,");
         writer.println("    the debugger will return control to the user.");
     }
+    @Override
     public void execute(String[] args) {
         if (args.length<2) {
             m_debugger.getOutput().println("Time is missing.");
@@ -47,7 +54,7 @@ public class BreakpointTimeCommand extends AbstractCommand {
             breakpointTimeSeconds=Integer.parseInt(args[1]);
         }
         catch (NumberFormatException e) {
-            m_debugger.getOutput().println("Invalid time.");
+            m_debugger.getOutput().println("Invalid time. "+e.getMessage());
             return;
         }
         m_debugger.getOutput().println("Breakpoint time is "+breakpointTimeSeconds+" seconds.");

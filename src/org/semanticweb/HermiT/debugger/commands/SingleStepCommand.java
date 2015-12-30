@@ -20,23 +20,30 @@ package org.semanticweb.HermiT.debugger.commands;
 import java.io.PrintWriter;
 
 import org.semanticweb.HermiT.debugger.Debugger;
-
+/**SingleStepCommand*/
 public class SingleStepCommand extends AbstractCommand {
 
+    /**
+     * @param debugger debugger
+     */
     public SingleStepCommand(Debugger debugger) {
         super(debugger);
     }
+    @Override
     public String getCommandName() {
         return "singleStep";
     }
+    @Override
     public String[] getDescription() {
         return new String[] { "on|off","step-by-step mode on or off" };
     }
+    @Override
     public void printHelp(PrintWriter writer) {
         writer.println("usage: singleStep on|off");
         writer.println("    If on, the debugger will return control to the user after each step.");
         writer.println("    If off, the debugger will run until a breakpoint is reached.");
     }
+    @Override
     public void execute(String[] args) {
         if (args.length<2) {
             m_debugger.getOutput().println("The status is missing.");

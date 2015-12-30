@@ -31,10 +31,11 @@ import org.semanticweb.HermiT.model.ExistentialConcept;
  */
 public final class Node implements Serializable {
     private static final long serialVersionUID=-2549229429321484690L;
-    private static List<ExistentialConcept> NO_EXISTENTIALS=Collections.emptyList();
+    private final static List<ExistentialConcept> NO_EXISTENTIALS=Collections.emptyList();
+    /**Signature cache blocker.*/
     public static final Node SIGNATURE_CACHE_BLOCKER=new Node(null);
 
-    public static enum NodeState { ACTIVE,MERGED,PRUNED }
+    static enum NodeState { ACTIVE,MERGED,PRUNED }
 
     protected final Tableau m_tableau;
     protected int m_nodeID;
@@ -57,10 +58,16 @@ public final class Node implements Serializable {
     protected Object m_blockingCargo;
     protected int m_firstGraphOccurrenceNode;
 
+    /**
+     * @param tableau tableau
+     */
     public Node(Tableau tableau) {
         m_tableau=tableau;
         m_nodeID=-1;
     }
+    /**
+     * @return tableau
+     */
     public Tableau getTableau() {
         return m_tableau;
     }
@@ -83,7 +90,7 @@ public final class Node implements Serializable {
         m_mergedIntoDependencySet=null;
         m_blocker=null;
         m_directlyBlocked=false;
-        m_tableau.m_descriptionGraphManager.intializeNode(this);
+        DescriptionGraphManager.intializeNode(this);
     }
     protected void destroy() {
         m_nodeID=-1;
@@ -106,24 +113,44 @@ public final class Node implements Serializable {
         m_blocker=null;
         m_tableau.m_descriptionGraphManager.destroyNode(this);
     }
+    /**
+     * @return node id
+     */
     public int getNodeID() {
         return m_nodeID;
     }
+    /**
+     * @return parent
+     */
     public Node getParent() {
         return m_parent;
     }
+    /**
+     * @return cluster anchor
+     */
     public Node getClusterAnchor() {
         if (m_nodeType==NodeType.TREE_NODE)
             return this;
         else
             return m_parent;
     }
+    /**
+     * @return true if root node
+     */
     public boolean isRootNode() {
         return m_parent==null;
     }
+    /**
+     * @param potentialChild potentialChild
+     * @return true if parent
+     */
     public boolean isParentOf(Node potentialChild) {
         return potentialChild.m_parent==this;
     }
+    /**
+     * @param potendialDescendant potendialDescendant
+     * @return true if ancestor
+     */
     public boolean isAncestorOf(Node potendialDescendant) {
         while (potendialDescendant!=null) {
             potendialDescendant=potendialDescendant.m_parent;
@@ -132,24 +159,46 @@ public final class Node implements Serializable {
         }
         return false;
     }
+    /**
+     * @return node type
+     */
     public NodeType getNodeType() {
         return m_nodeType;
     }
+    /**
+     * @return tree depth
+     */
     public int getTreeDepth() {
         return m_treeDepth;
     }
+    /**
+     * @return true if blocked
+     */
     public boolean isBlocked() {
         return m_blocker!=null;
     }
+    /**
+     * @return true if directly blocked
+     */
     public boolean isDirectlyBlocked() {
         return m_directlyBlocked;
     }
+    /**
+     * @return true if indirectly blocked
+     */
     public boolean isIndirectlyBlocked() {
         return m_blocker!=null && !m_directlyBlocked;
     }
+    /**
+     * @return blocker
+     */
     public Node getBlocker() {
         return m_blocker;
     }
+    /**
+     * @param blocker blocker
+     * @param directlyBlocked directlyBlocked
+     */
     public void setBlocked(Node blocker,boolean directlyBlocked) {
         m_blocker=blocker;
         m_directlyBlocked=directlyBlocked;
@@ -164,7 +213,7 @@ public final class Node implements Serializable {
     /**
      * Stores a blocking object (PairwiseBlockingObject or SingleBlockingObject) for this node
      * that stores blocking relevant information of a node such as is label.
-     * @param blockingObject
+     * @param blockingObject blockingObject
      */
     public void setBlockingObject(Object blockingObject) {
         m_blockingObject=blockingObject;
@@ -183,39 +232,73 @@ public final class Node implements Serializable {
     public void setBlockingCargo(Object blockingCargo) {
         m_blockingCargo=blockingCargo;
     }
+    /**
+     * @return number of positive atomic concepts
+     */
     public int getNumberOfPositiveAtomicConcepts() {
         return m_numberOfPositiveAtomicConcepts;
     }
+    /**
+     * @return true if active
+     */
     public boolean isActive() {
         return m_nodeState==NodeState.ACTIVE;
     }
+    /**
+     * @return true if merged
+     */
     public boolean isMerged() {
         return m_nodeState==NodeState.MERGED;
     }
+    /**
+     * @return merged into
+     */
     public Node getMergedInto() {
         return m_mergedInto;
     }
+    /**
+     * @return merged into dep set
+     */
     public PermanentDependencySet getMergedIntoDependencySet() {
         return m_mergedIntoDependencySet;
     }
+    /**
+     * @return true if pruned
+     */
     public boolean isPruned() {
         return m_nodeState==NodeState.PRUNED;
     }
+    /**
+     * @return previous tableau node
+     */
     public Node getPreviousTableauNode() {
         return m_previousTableauNode;
     }
+    /**
+     * @return next tableau node
+     */
     public Node getNextTableauNode() {
         return m_nextTableauNode;
     }
+    /**
+     * @return canonical node
+     */
     public Node getCanonicalNode() {
         Node result=this;
         while (result.m_mergedInto!=null)
             result=result.m_mergedInto;
         return result;
     }
+    /**
+     * @return dep set
+     */
     public PermanentDependencySet getCanonicalNodeDependencySet() {
         return addCanonicalNodeDependencySet(m_tableau.m_dependencySetFactory.m_emptySet);
     }
+    /**
+     * @param dependencySet dependencySet
+     * @return dep set
+     */
     public PermanentDependencySet addCanonicalNodeDependencySet(DependencySet dependencySet) {
         PermanentDependencySet result=m_tableau.m_dependencySetFactory.getPermanent(dependencySet);
         Node node=this;
@@ -246,15 +329,25 @@ public final class Node implements Serializable {
             m_unprocessedExistentials=NO_EXISTENTIALS;
         }
     }
+    /**
+     * @return true if has unprocessed existentials
+     */
     public boolean hasUnprocessedExistentials() {
         return !m_unprocessedExistentials.isEmpty();
     }
+    /**
+     * @return some unprocessed existentials
+     */
     public ExistentialConcept getSomeUnprocessedExistential() {
         return m_unprocessedExistentials.get(m_unprocessedExistentials.size()-1);
     }
+    /**
+     * @return unprocessed existential
+     */
     public Collection<ExistentialConcept> getUnprocessedExistentials() {
         return m_unprocessedExistentials;
     }
+    @Override
     public String toString() {
         return String.valueOf(m_nodeID);
     }

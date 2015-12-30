@@ -13,7 +13,6 @@ import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
-import org.semanticweb.HermiT.model.DataRange;
 import org.semanticweb.HermiT.model.Term;
 import org.semanticweb.HermiT.model.Variable;
 import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
@@ -22,6 +21,9 @@ import org.semanticweb.HermiT.tableau.InterruptFlag;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.Tableau;
 
+/**
+ * Datalog engine.
+ */
 public final class DatalogEngine {
     protected final InterruptFlag m_interruptFlag;
     protected final DLOntology m_dlOntology;
@@ -31,20 +33,23 @@ public final class DatalogEngine {
     protected final Map<Term,Term> m_termsToRepresentatives;
     protected ExtensionManager m_extensionManager;
     
+    /**
+     * @param dlOntology dlOntology
+     */
     public DatalogEngine(DLOntology dlOntology) {
         for (DLClause dlClause : dlOntology.getDLClauses())
             if (dlClause.getHeadLength()>1)
                 throw new IllegalArgumentException("The supplied DL ontology contains rules with disjunctive heads.");
         m_interruptFlag=new InterruptFlag(0);
         m_dlOntology=dlOntology;
-        m_termsToNodes=new HashMap<Term,Node>();
-        m_nodesToTerms=new HashMap<Node,Term>();
-        m_termsToEquivalenceClasses=new HashMap<Term,Set<Term>>();
-        m_termsToRepresentatives=new HashMap<Term,Term>();
+        m_termsToNodes=new HashMap<>();
+        m_nodesToTerms=new HashMap<>();
+        m_termsToEquivalenceClasses=new HashMap<>();
+        m_termsToRepresentatives=new HashMap<>();
     }
-    public void interrupt() {
-        m_interruptFlag.interrupt();
-    }
+    /**
+     * @return true if no clashes
+     */
     public boolean materialize() {
         if (m_extensionManager==null) {
             m_termsToNodes.clear();
@@ -63,7 +68,7 @@ public final class DatalogEngine {
                 Term canonicalTerm=m_nodesToTerms.get(node.getCanonicalNode());
                 Set<Term> equivalenceClass=m_termsToEquivalenceClasses.get(canonicalTerm);
                 if (equivalenceClass==null) {
-                    equivalenceClass=new HashSet<Term>();
+                    equivalenceClass=new HashSet<>();
                     m_termsToEquivalenceClasses.put(canonicalTerm,equivalenceClass);
                 }
                 if (!term.equals(canonicalTerm))
@@ -75,12 +80,23 @@ public final class DatalogEngine {
         }
         return !m_extensionManager.containsClash();
     }
+    /**
+     * @return ontology
+     */
     public DLOntology getDLOntology() {
         return m_dlOntology;
     }
+    /**
+     * @param term term
+     * @return equivalence classes
+     */
     public Set<Term> getEquivalenceClass(Term term) {
         return m_termsToEquivalenceClasses.get(term);
     }
+    /**
+     * @param term term
+     * @return representative
+     */
     public Term getRepresentative(Term term) {
         return m_termsToRepresentatives.get(term);
     }
@@ -88,57 +104,73 @@ public final class DatalogEngine {
     protected static class NullExistentialExpansionStrategy implements ExistentialExpansionStrategy {
         public static final ExistentialExpansionStrategy INSTANCE=new NullExistentialExpansionStrategy();
 
+        @Override
         public void initialize(Tableau tableau) {
         }
+        @Override
         public void additionalDLOntologySet(DLOntology additionalDLOntology) {
         }
+        @Override
         public void additionalDLOntologyCleared() {
         }
+        @Override
         public void clear() {
         }
+        @Override
         public boolean expandExistentials(boolean finalChance) {
             return false;
         }
+        @Override
         public void assertionAdded(Concept concept,Node node,boolean isCore) {
         }
-        public void assertionAdded(DataRange dataRange,Node node,boolean isCore) {
-        }
+        @Override
         public void assertionCoreSet(Concept concept,Node node) {
         }
-        public void assertionCoreSet(DataRange dataRange,Node node) {
-        }
+        @Override
         public void assertionRemoved(Concept concept,Node node,boolean isCore) {
         }
-        public void assertionRemoved(DataRange dataRange,Node node,boolean isCore) {
-        }
+        @Override
         public void assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
         }
+        @Override
         public void assertionCoreSet(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
         }
+        @Override
         public void assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
         }
+        @Override
         public void nodesMerged(Node mergeFrom,Node mergeInto) {
         }
+        @Override
         public void nodesUnmerged(Node mergeFrom,Node mergeInto) {
         }
+        @Override
         public void nodeStatusChanged(Node node) {
         }
+        @Override
         public void nodeInitialized(Node node) {
         }
+        @Override
         public void nodeDestroyed(Node node) {
         }
+        @Override
         public void branchingPointPushed() {
         }
+        @Override
         public void backtrack() {
         }
+        @Override
         public void modelFound() {
         }
+        @Override
         public boolean isDeterministic() {
             return true;
         }
+        @Override
         public boolean isExact() {
             return true;
         }
+        @Override
         public void dlClauseBodyCompiled(List<DLClauseEvaluator.Worker> workers,DLClause dlClause,List<Variable> variables,Object[] valuesBuffer,boolean[] coreVariables) {
         }
     }

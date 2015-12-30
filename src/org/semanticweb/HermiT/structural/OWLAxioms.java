@@ -20,6 +20,7 @@ package org.semanticweb.HermiT.structural;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.semanticweb.owlapi.model.OWLClass;
@@ -33,53 +34,31 @@ import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.SWRLAtom;
-
+/**OWLAxioms.*/
 public class OWLAxioms {
-    public final Set<OWLClass> m_classes;
-    public final Set<OWLObjectProperty> m_objectProperties;
-    public final Set<OWLObjectProperty> m_objectPropertiesOccurringInOWLAxioms;
-    public final Set<OWLObjectPropertyExpression> m_complexObjectPropertyExpressions;
-    public final Set<OWLDataProperty> m_dataProperties;
-    public final Set<OWLNamedIndividual> m_namedIndividuals;
-    public final Collection<OWLClassExpression[]> m_conceptInclusions;
-    public final Collection<OWLDataRange[]> m_dataRangeInclusions;
-    public final Collection<OWLObjectPropertyExpression[]> m_simpleObjectPropertyInclusions;
-    public final Collection<ComplexObjectPropertyInclusion> m_complexObjectPropertyInclusions;
-    public final Collection<OWLObjectPropertyExpression[]> m_disjointObjectProperties;
-    public final Set<OWLObjectPropertyExpression> m_reflexiveObjectProperties;
-    public final Set<OWLObjectPropertyExpression> m_irreflexiveObjectProperties;
-    public final Set<OWLObjectPropertyExpression> m_asymmetricObjectProperties;
-    public final Collection<OWLDataPropertyExpression[]> m_dataPropertyInclusions;
-    public final Collection<OWLDataPropertyExpression[]> m_disjointDataProperties;
-    public final Collection<OWLIndividualAxiom> m_facts;
-    public final Set<OWLHasKeyAxiom> m_hasKeys;
-    public final Set<String> m_definedDatatypesIRIs; // contains custom datatypes from DatatypeDefinition axioms
-    public final Collection<DisjunctiveRule> m_rules;
+    final Set<OWLClass> m_classes =new HashSet<>();
+    final Set<OWLObjectProperty> m_objectProperties =new HashSet<>();
+    final Set<OWLObjectProperty> m_objectPropertiesOccurringInOWLAxioms =new HashSet<>();
+    final Set<OWLObjectPropertyExpression> m_complexObjectPropertyExpressions =new HashSet<>();
+    final Set<OWLDataProperty> m_dataProperties =new HashSet<>();
+    final Set<OWLNamedIndividual> m_namedIndividuals =new HashSet<>();
+    final Collection<List<OWLClassExpression>> m_conceptInclusions =new ArrayList<>();
+    final Collection<List<OWLDataRange>> m_dataRangeInclusions =new ArrayList<>();
+    final Collection<List<OWLObjectPropertyExpression>> m_simpleObjectPropertyInclusions =new ArrayList<>();
+    final Collection<ComplexObjectPropertyInclusion> m_complexObjectPropertyInclusions =new ArrayList<>();
+    final Collection<List<OWLObjectPropertyExpression>> m_disjointObjectProperties =new ArrayList<>();
+    final Set<OWLObjectPropertyExpression> m_reflexiveObjectProperties =new HashSet<>();
+    final Set<OWLObjectPropertyExpression> m_irreflexiveObjectProperties =new HashSet<>();
+    final Set<OWLObjectPropertyExpression> m_asymmetricObjectProperties =new HashSet<>();
+    final Collection<List<OWLDataPropertyExpression>> m_dataPropertyInclusions =new ArrayList<>();
+    final Collection<List<OWLDataPropertyExpression>> m_disjointDataProperties =new ArrayList<>();
+    final Collection<OWLIndividualAxiom> m_facts =new HashSet<>();
+    final Set<OWLHasKeyAxiom> m_hasKeys =new HashSet<>();
+    /** contains custom datatypes from DatatypeDefinition axioms*/
+    public final Set<String> m_definedDatatypesIRIs =new HashSet<>();
+    final Collection<DisjunctiveRule> m_rules =new HashSet<>();
 
-    public OWLAxioms() {
-        m_classes=new HashSet<OWLClass>();
-        m_objectProperties=new HashSet<OWLObjectProperty>();
-        m_objectPropertiesOccurringInOWLAxioms=new HashSet<OWLObjectProperty>();
-        m_complexObjectPropertyExpressions=new HashSet<OWLObjectPropertyExpression>();
-        m_dataProperties=new HashSet<OWLDataProperty>();
-        m_namedIndividuals=new HashSet<OWLNamedIndividual>();
-        m_conceptInclusions=new ArrayList<OWLClassExpression[]>();
-        m_dataRangeInclusions=new ArrayList<OWLDataRange[]>();
-        m_simpleObjectPropertyInclusions=new ArrayList<OWLObjectPropertyExpression[]>();
-        m_complexObjectPropertyInclusions=new ArrayList<ComplexObjectPropertyInclusion>();
-        m_disjointObjectProperties=new ArrayList<OWLObjectPropertyExpression[]>();
-        m_reflexiveObjectProperties=new HashSet<OWLObjectPropertyExpression>();
-        m_irreflexiveObjectProperties=new HashSet<OWLObjectPropertyExpression>();
-        m_asymmetricObjectProperties=new HashSet<OWLObjectPropertyExpression>();
-        m_disjointDataProperties=new ArrayList<OWLDataPropertyExpression[]>();
-        m_dataPropertyInclusions=new ArrayList<OWLDataPropertyExpression[]>();
-        m_facts=new HashSet<OWLIndividualAxiom>();
-        m_hasKeys=new HashSet<OWLHasKeyAxiom>();
-        m_definedDatatypesIRIs=new HashSet<String>();
-        m_rules=new HashSet<DisjunctiveRule>();
-    }
-
-    public static class ComplexObjectPropertyInclusion {
+    static class ComplexObjectPropertyInclusion {
         public final OWLObjectPropertyExpression[] m_subObjectProperties;
         public final OWLObjectPropertyExpression m_superObjectProperty;
 
@@ -93,7 +72,7 @@ public class OWLAxioms {
         }
     }
 
-    public static class DisjunctiveRule {
+    static class DisjunctiveRule {
         public final SWRLAtom[] m_body;
         public final SWRLAtom[] m_head;
 
@@ -101,6 +80,7 @@ public class OWLAxioms {
             m_body=body;
             m_head=head;
         }
+        @Override
         public String toString() {
             StringBuffer buffer=new StringBuffer();
             boolean first=true;

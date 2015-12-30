@@ -16,15 +16,30 @@
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
 package org.semanticweb.HermiT.datatypes.datetime;
-
+/**BoundType.*/
 public enum BoundType {
-    INCLUSIVE,EXCLUSIVE;
+    /**
+     * Inclusive.
+     */
+    INCLUSIVE,
+    /**
+     * Exclusive.
+     */
+    EXCLUSIVE;
 
+    /**
+     * @return complement
+     */
     public BoundType getComplement() {
         return values()[1-ordinal()];
     }
+    /**
+     * @param boundType1 boundType1
+     * @param boundType2 boundType2
+     * @return more restrictive
+     */
     public static BoundType getMoreRestrictive(BoundType boundType1,BoundType boundType2) {
-        int maxOrdinal=Math.max(boundType1.ordinal(),boundType1.ordinal());
+        int maxOrdinal=Math.max(boundType1.ordinal(),boundType2.ordinal());
         return values()[maxOrdinal];
     }
 }

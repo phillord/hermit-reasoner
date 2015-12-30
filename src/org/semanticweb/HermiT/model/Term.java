@@ -27,5 +27,9 @@ import org.semanticweb.HermiT.Prefixes;
 public abstract class Term implements Serializable {
     private static final long serialVersionUID=-8524194708579485033L;
 
+    /**
+     * @param prefixes prefixes
+     * @return toString
+     */
     public abstract String toString(Prefixes prefixes);
 }

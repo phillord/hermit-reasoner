@@ -22,7 +22,7 @@ import java.io.ByteArrayOutputStream;
 /**
  * Represents a binary data value.
  */
-public class BinaryData {
+class BinaryData {
     protected static final char[] INT_TO_HEX=new char[] { '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F' };
     protected static final int[] HEX_TO_INT=new int[127];
     static {
@@ -57,6 +57,7 @@ public class BinaryData {
     public byte getByte(int index) {
         return m_data[index];
     }
+    @Override
     public boolean equals(Object that) {
         if (this==that)
             return true;
@@ -70,9 +71,11 @@ public class BinaryData {
                 return false;
         return true;
     }
+    @Override
     public int hashCode() {
         return m_hashCode;
     }
+    @Override
     public String toString() {
         switch (m_binaryDataType) {
         case HEX_BINARY:
@@ -113,33 +116,28 @@ public class BinaryData {
             }
             return new BinaryData(BinaryDataType.HEX_BINARY,result.toByteArray());
         }
-        catch (IndexOutOfBoundsException e) {
+        catch (@SuppressWarnings("unused") IndexOutOfBoundsException e) {
             return null;
         }
     }
     public static BinaryData parseBase64Binary(String lexicalForm) {
-        lexicalForm=removeWhitespace(lexicalForm);
         try {
-            byte[] data=Base64.decodeBase64(lexicalForm);
+            byte[] data=Base64.decodeBase64(removeWhitespace(lexicalForm));
             return new BinaryData(BinaryDataType.HEX_BINARY,data);
         }
-        catch (IllegalArgumentException error) {
-            return null;
-        }
-        catch (IndexOutOfBoundsException error) {
+        catch (@SuppressWarnings("unused") IllegalArgumentException|IndexOutOfBoundsException error) {
             return null;
         }
     }
     protected static String removeWhitespace(String lexicalForm) {
-        lexicalForm=lexicalForm.trim();
-        for (int index=lexicalForm.length()-1;index>=0;index--) {
-            if (Character.isWhitespace(lexicalForm.charAt(index))) {
-                int upperSpaceIndex=index;
-                while (Character.isWhitespace(lexicalForm.charAt(index)))
-                    index--;
-                lexicalForm=lexicalForm.substring(0,index+1)+lexicalForm.substring(upperSpaceIndex+1);
+        StringBuilder b=new StringBuilder(lexicalForm);
+        for(int i=0;i<b.length();) {
+            if(Character.isWhitespace(b.charAt(i))) {
+                b.deleteCharAt(i);
+            }else {
+                i++;
             }
         }
-        return lexicalForm;
+        return b.toString();
     }
 }

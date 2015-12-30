@@ -22,11 +22,12 @@ package org.semanticweb.HermiT.owl_wg_tests;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.PrintWriter;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 
-import org.coode.owlapi.functionalrenderer.OWLFunctionalSyntaxRenderer;
+import org.semanticweb.owlapi.functional.renderer.OWLFunctionalSyntaxRenderer;
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -35,9 +36,9 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.ReasonerInterruptedException;
 import org.semanticweb.owlapi.util.SimpleIRIMapper;
-
+@SuppressWarnings("javadoc")
 public abstract class AbstractTest extends TestCase {
-    public static int TIMEOUT=300000;
+    public static int TIMEOUT = 300000;
 
     protected File m_dumpTestDataDirectory;
     protected WGTestDescriptor m_wgTestDescriptor;
@@ -45,81 +46,94 @@ public abstract class AbstractTest extends TestCase {
     protected OWLOntology m_premiseOntology;
     protected Reasoner m_reasoner;
     protected boolean m_useDisjunctionLearning;
-    
-    public AbstractTest(String name,WGTestDescriptor wgTestDescriptor,File dumpTestDataDirectory) {
-        this(name,wgTestDescriptor,dumpTestDataDirectory,true);
+
+    public AbstractTest(String name, WGTestDescriptor wgTestDescriptor, File dumpTestDataDirectory) {
+        this(name, wgTestDescriptor, dumpTestDataDirectory, true);
     }
-    public AbstractTest(String name,WGTestDescriptor wgTestDescriptor,File dumpTestDataDirectory,boolean useDisjunctionLearning) {
+
+    public AbstractTest(String name, WGTestDescriptor wgTestDescriptor, File dumpTestDataDirectory,
+            boolean useDisjunctionLearning) {
         super(name);
-        m_wgTestDescriptor=wgTestDescriptor;
-        m_dumpTestDataDirectory=dumpTestDataDirectory;
-        m_useDisjunctionLearning=useDisjunctionLearning;
+        m_wgTestDescriptor = wgTestDescriptor;
+        m_dumpTestDataDirectory = dumpTestDataDirectory;
+        m_useDisjunctionLearning = useDisjunctionLearning;
     }
+
+    @Override
     protected void setUp() throws Exception {
-        m_ontologyManager=OWLManager.createOWLOntologyManager();
+        m_ontologyManager = OWLManager.createOWLOntologyManager();
         registerImportedReosurces();
-        m_premiseOntology=m_wgTestDescriptor.getPremiseOntology(m_ontologyManager);
+        m_premiseOntology = m_wgTestDescriptor.getPremiseOntology(m_ontologyManager);
     }
-    protected void registerMappingToResource(String ontologyIRI,String physicalResource) throws Exception {
-        IRI physicalIRI=IRI.create(getClass().getResource(physicalResource).toURI());
-        IRI logicalIRI=IRI.create(ontologyIRI);
-        m_ontologyManager.addIRIMapper(new SimpleIRIMapper(logicalIRI,physicalIRI));
+
+    protected void registerMappingToResource(String ontologyIRI, String physicalResource) throws Exception {
+        IRI physicalIRI = IRI.create(getClass().getResource(physicalResource).toURI());
+        IRI logicalIRI = IRI.create(ontologyIRI);
+        m_ontologyManager.getIRIMappers().add(new SimpleIRIMapper(logicalIRI, physicalIRI));
     }
+
     protected void registerImportedReosurces() throws Exception {
-        registerMappingToResource("http://www.w3.org/2002/03owlt/miscellaneous/consistent001","ontologies/consistent001.rdf");
-        registerMappingToResource("http://www.w3.org/2002/03owlt/miscellaneous/consistent002","ontologies/consistent002.rdf");
-        registerMappingToResource("http://www.w3.org/2002/03owlt/imports/support011-A","ontologies/support011-A.rdf");
+        registerMappingToResource("http://www.w3.org/2002/03owlt/miscellaneous/consistent001",
+                "ontologies/consistent001.rdf");
+        registerMappingToResource("http://www.w3.org/2002/03owlt/miscellaneous/consistent002",
+                "ontologies/consistent002.rdf");
+        registerMappingToResource("http://www.w3.org/2002/03owlt/imports/support011-A", "ontologies/support011-A.rdf");
     }
+
+    @Override
     protected void tearDown() {
-        m_wgTestDescriptor=null;
-        m_ontologyManager=null;
-        m_premiseOntology=null;
-        m_reasoner=null;
-        m_dumpTestDataDirectory=null;
+        m_wgTestDescriptor = null;
+        m_ontologyManager = null;
+        m_premiseOntology = null;
+        m_reasoner = null;
+        m_dumpTestDataDirectory = null;
     }
+
+    @Override
     public void runTest() throws Throwable {
         dumpTestData();
-        m_reasoner=new Reasoner(getConfiguration(),m_premiseOntology,null);
-        InterruptTimer timer=new InterruptTimer(TIMEOUT,m_reasoner);
+        m_reasoner = new Reasoner(getConfiguration(), m_premiseOntology, null);
+        InterruptTimer timer = new InterruptTimer(TIMEOUT, m_reasoner);
         timer.start();
         try {
             doTest();
-        }
-        catch (ReasonerInterruptedException e) {
-            fail("Test timed out.");
-        }
-        catch (OutOfMemoryError e) {
-            m_reasoner=null;
+        } catch (ReasonerInterruptedException e) {
+            fail("Test timed out. "+e.getMessage());
+        } catch (OutOfMemoryError e) {
+            m_reasoner = null;
             Runtime.getRuntime().gc();
-            fail("Test ran out of memory.");
-        }
-        catch (AssertionFailedError e) {
-            fail("Test failed: "+e.getMessage());
-        }
-        catch (Throwable e) {
+            fail("Test ran out of memory. "+e.getMessage());
+        } catch (AssertionFailedError e) {
+            fail("Test failed: " + e.getMessage());
+        } catch (Throwable e) {
             throw e;
-        }
-        finally {
+        } finally {
             timer.stopTiming();
             timer.join();
         }
     }
+
     protected void dumpTestData() throws Exception {
-        if (m_dumpTestDataDirectory!=null)
-            saveOntology(m_ontologyManager,m_premiseOntology,new File(m_dumpTestDataDirectory,"premise.owl"));
+        if (m_dumpTestDataDirectory != null)
+            saveOntology(m_premiseOntology, new File(m_dumpTestDataDirectory, "premise.owl"));
     }
+
     protected Configuration getConfiguration() {
-        Configuration c=new Configuration();
-        c.throwInconsistentOntologyException=false;
-        c.useDisjunctionLearning=m_useDisjunctionLearning;
+        Configuration c = new Configuration();
+        c.throwInconsistentOntologyException = false;
+        c.useDisjunctionLearning = m_useDisjunctionLearning;
         return c;
     }
-    protected void saveOntology(OWLOntologyManager manager,OWLOntology ontology,File file) throws Exception {
-        BufferedWriter writer=new BufferedWriter(new FileWriter(file));
-        OWLFunctionalSyntaxRenderer renderer=new OWLFunctionalSyntaxRenderer();
-        renderer.render(ontology,writer);
-        writer.close();
+
+    protected void saveOntology(OWLOntology ontology, File file) throws Exception {
+        try (FileWriter out = new FileWriter(file);
+                BufferedWriter out2 = new BufferedWriter(out);
+                PrintWriter writer = new PrintWriter(out2);) {
+            OWLFunctionalSyntaxRenderer renderer = new OWLFunctionalSyntaxRenderer();
+            renderer.render(ontology, writer);
+        }
     }
+
     protected abstract void doTest() throws Exception;
 
     protected static class InterruptTimer extends Thread {
@@ -127,13 +141,15 @@ public abstract class AbstractTest extends TestCase {
         protected final Reasoner m_reasoner;
         protected boolean m_timingStopped;
 
-        public InterruptTimer(int timeout,Reasoner reasoner) {
+        public InterruptTimer(int timeout, Reasoner reasoner) {
             super("HermiT Interrupt Thread");
             setDaemon(true);
-            m_timeout=timeout;
-            m_reasoner=reasoner;
-            m_timingStopped=false;
+            m_timeout = timeout;
+            m_reasoner = reasoner;
+            m_timingStopped = false;
         }
+
+        @Override
         public synchronized void run() {
             try {
                 if (!m_timingStopped) {
@@ -141,12 +157,12 @@ public abstract class AbstractTest extends TestCase {
                     if (!m_timingStopped)
                         m_reasoner.interrupt();
                 }
-            }
-            catch (InterruptedException stopped) {
+            } catch (@SuppressWarnings("unused") InterruptedException stopped) {
             }
         }
+
         public synchronized void stopTiming() {
-            m_timingStopped=true;
+            m_timingStopped = true;
             notifyAll();
         }
     }

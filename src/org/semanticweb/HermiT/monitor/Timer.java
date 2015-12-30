@@ -17,12 +17,13 @@
 */
 package org.semanticweb.HermiT.monitor;
 
+import java.io.OutputStream;
 import java.io.PrintWriter;
 
 import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.tableau.BranchingPoint;
 import org.semanticweb.HermiT.tableau.ReasoningTaskDescription;
-
+/**Timer.*/
 public class Timer extends TableauMonitorAdapter {
     private static final long serialVersionUID=-8144444618897251350L;
 
@@ -32,11 +33,11 @@ public class Timer extends TableauMonitorAdapter {
     protected int m_numberOfBacktrackings;
     protected int m_testNumber=0;
 
-    public Timer() {
-        m_output=new PrintWriter(System.out);
-    }
-    public Timer(PrintWriter inOutput) {
-        m_output=inOutput;
+    /**
+     * @param out out
+     */
+    public Timer(OutputStream out) {
+        m_output=new PrintWriter(out);
     }
     protected Object readResolve() {
         m_output=new PrintWriter(System.out);
@@ -47,17 +48,20 @@ public class Timer extends TableauMonitorAdapter {
         m_problemStartTime=System.currentTimeMillis();
         m_lastStatusTime=m_problemStartTime;
     }
+    @Override
     public void isSatisfiableStarted(ReasoningTaskDescription reasoningTaskDescription) {
         m_output.print(reasoningTaskDescription.getTaskDescription(Prefixes.STANDARD_PREFIXES)+" ...");
         m_output.flush();
         start();
     }
+    @Override
     public void isSatisfiableFinished(ReasoningTaskDescription reasoningTaskDescription,boolean result) {
         if (reasoningTaskDescription.flipSatisfiabilityResult())
             result=!result;
         m_output.println(result ? "YES" : "NO");
         doStatistics();
     }
+    @Override
     public void iterationStarted() {
         if (System.currentTimeMillis()-m_lastStatusTime>30000) {
             if (m_lastStatusTime==m_problemStartTime)
@@ -66,9 +70,11 @@ public class Timer extends TableauMonitorAdapter {
             m_lastStatusTime=System.currentTimeMillis();
         }
     }
+    @Override
     public void saturateStarted() {
         m_testNumber++;
     }
+    @Override
     public void backtrackToFinished(BranchingPoint newCurrentBrancingPoint) {
         m_numberOfBacktrackings++;
     }
@@ -113,13 +119,13 @@ public class Timer extends TableauMonitorAdapter {
             m_output.print(' ');
     }
     protected void printPaddedMS(long number,int padding) {
-        String numberString=String.valueOf(number)+" ms";
+        String numberString=number+" ms";
         m_output.print(numberString);
         for (int index=numberString.length();index<padding;index++)
             m_output.print(' ');
     }
     protected void printPaddedKB(int number,int padding) {
-        String numberString=String.valueOf(number)+" kb";
+        String numberString=number+" kb";
         m_output.print(numberString);
         for (int index=numberString.length();index<padding;index++)
             m_output.print(' ');

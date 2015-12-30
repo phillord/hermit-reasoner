@@ -1,7 +1,11 @@
 package rationals.converters ;
 import rationals.Automaton;
 
-
+/**ToString.*/
 public interface ToString {
-  public String toString(Automaton a) ;
+    /**
+     * @param a a
+     * @return toString
+     */
+    String toString(Automaton a) ;
 }

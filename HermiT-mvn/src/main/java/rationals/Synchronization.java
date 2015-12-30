@@ -36,14 +36,11 @@
 package rationals;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 
 /**
- * An interface for defining various synchronization schemes.
- * This interface is used in {@see rationals.transformations.Synchronize} for
- * and allows various strategies of synchronization between transitions
- * of two automata.
+ * An interface for defining various synchronization schemes. This interface allows various
+ * strategies of synchronization between transitions of two automata.
  * 
  * @author nono
  * @version $Id: Synchronization.java 2 2006-08-24 14:41:48Z oqube $
@@ -51,50 +48,56 @@ import java.util.Set;
 public interface Synchronization {
 
     /**
-     * Synchronize two transitions.
-     * This method should return a letter denoting the result of synchronizing 
-     * the two transitions' labels. If the result is <code>null</code>, then no synchronization
-     * occurs.
+     * Synchronize two transitions. This method should return a letter denoting
+     * the result of synchronizing the two transitions' labels. If the result is
+     * <code>null</code>, then no synchronization occurs.
      * 
-     * @param t1 first label to synchronize
-     * @param t2 second label to synchronize
+     * @param t1
+     *            first label to synchronize
+     * @param t2
+     *            second label to synchronize
      * @return a non null Object if the two transitions can be synchronized.
      */
     Object synchronize(Object t1, Object t2);
-    
+
     /**
-     * Compute the synchronizable letters from two alphabets.
-     * This method returns the set of letters from a and b that can be synchronized.
-     * In the default case, this method simply computes the intersection of the two
+     * Compute the synchronizable letters from two alphabets. This method
+     * returns the set of letters from a and b that can be synchronized. In the
+     * default case, this method simply computes the intersection of the two
      * sets.
      * 
-     * @param a an alphabet 
-     * @param b another alphabet
-     * @return a new Set of letters (may be empty) from a and b that can be synchronized.
+     * @param a
+     *            an alphabet
+     * @param b
+     *            another alphabet
+     * @param <T> type
+     * @return a new Set of letters (may be empty) from a and b that can be
+     *         synchronized.
      */
-    Set synchronizable(Set a,Set b);
+    <T> Set<T> synchronizable(Set<T> a, Set<T> b);
 
     /**
-     * Construct the synchronization alphabet from a collection of
-     * alphabets.
+     * Construct the synchronization alphabet from a collection of alphabets.
      * 
-     * @param alphl
-     * @return a Set implementation containing all letters of all alphabets 
-     * in <code>alphl</code> that could be synchronized.
+     * @param alphl alphl
+     * @param <T> type
+     * @return a Set implementation containing all letters of all alphabets in
+     *         <code>alphl</code> that could be synchronized.
      */
-    Set synchronizable(Collection alphl);
+    <T> Set<T> synchronizable(Collection<Set<T>> alphl);
 
     /**
-     * Checks whether or not the given letter is synchronizable in the
-     * given automaton's alphabet.
-     * This method checks in a synchronization dependant way that the 
-     * given letter pertains to the synchronization set.
-     *  
-     * @param object the letter to check
-     * @param alph the alphabet
-     * @return true if object is synchronizable with some letter in <code>alph</code>, 
-     * false otherwise.
+     * Checks whether or not the given letter is synchronizable in the given
+     * automaton's alphabet. This method checks in a synchronization dependant
+     * way that the given letter pertains to the synchronization set.
+     * 
+     * @param object
+     *            the letter to check
+     * @param alph
+     *            the alphabet
+     * @return true if object is synchronizable with some letter in
+     *         <code>alph</code>, false otherwise.
      */
-    boolean synchronizeWith(Object object, Set alph);
-    
+    boolean synchronizeWith(Object object, Set<Object> alph);
+
 }

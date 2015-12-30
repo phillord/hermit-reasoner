@@ -18,7 +18,7 @@
 package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
-
+/**PermanentDependencySet.*/
 public final class PermanentDependencySet implements DependencySet,Serializable {
     private static final long serialVersionUID=353039301123337446L;
 
@@ -37,6 +37,7 @@ public final class PermanentDependencySet implements DependencySet,Serializable 
         m_previousUnusedSet=null;
         m_nextUnusedSet=null;
     }
+    @Override
     public boolean containsBranchingPoint(int branchingPoint) {
         PermanentDependencySet set=this;
         while (set!=null) {
@@ -46,12 +47,15 @@ public final class PermanentDependencySet implements DependencySet,Serializable 
         }
         return false;
     }
+    @Override
     public boolean isEmpty() {
         return m_branchingPoint==-1;
     }
+    @Override
     public int getMaximumBranchingPoint() {
         return m_branchingPoint;
     }
+    @Override
     public String toString() {
         StringBuffer buffer=new StringBuffer();
         buffer.append("{ ");

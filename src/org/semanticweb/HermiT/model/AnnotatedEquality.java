@@ -36,36 +36,56 @@ public class AnnotatedEquality implements DLPredicate,Serializable {
         m_onRole=onRole;
         m_toConcept=toConcept;
     }
+    /**
+     * @return cardinality
+     */
     public int getCaridnality() {
         return m_cardinality;
     }
+    /**
+     * @return role
+     */
     public Role getOnRole() {
         return m_onRole;
     }
+    /**
+     * @return concept
+     */
     public LiteralConcept getToConcept() {
         return m_toConcept;
     }
+    @Override
     public int getArity() {
         return 3;
     }
     protected Object readResolve() {
         return s_interningManager.intern(this);
     }
+    @Override
     public String toString() {
         return toString(Prefixes.STANDARD_PREFIXES);
     }
+    @Override
     public String toString(Prefixes prefixes) {
         return "==@atMost("+m_cardinality+" "+m_onRole.toString(prefixes)+" "+m_toConcept.toString(prefixes)+")";
     }
-    protected static InterningManager<AnnotatedEquality> s_interningManager=new InterningManager<AnnotatedEquality>() {
+    protected final static InterningManager<AnnotatedEquality> s_interningManager=new InterningManager<AnnotatedEquality>() {
+        @Override
         protected boolean equal(AnnotatedEquality object1,AnnotatedEquality object2) {
             return object1.m_cardinality==object2.m_cardinality && object1.m_onRole==object2.m_onRole && object1.m_toConcept==object2.m_toConcept;
         }
+        @Override
         protected int getHashCode(AnnotatedEquality object) {
             return object.m_cardinality+object.m_onRole.hashCode()+object.m_toConcept.hashCode();
         }
     };
     
+    /**
+     * @param cardinality cardinality
+     * @param onRole onRole
+     * @param toConcept toConcept
+     * @return annotated equality
+     */
     public static AnnotatedEquality create(int cardinality,Role onRole,LiteralConcept toConcept) {
         return s_interningManager.intern(new AnnotatedEquality(cardinality,onRole,toConcept));
     }

@@ -3,7 +3,7 @@ package org.semanticweb.HermiT;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
+@SuppressWarnings("javadoc")
 public class AllTests extends TestCase {
 
     public static Test suite() throws Exception {
@@ -16,6 +16,7 @@ public class AllTests extends TestCase {
         // $JUnit-END$
         return suite;
     }
+
     public static void main(String... args) throws Throwable {
         junit.textui.TestRunner.run(suite());
         System.exit(0);

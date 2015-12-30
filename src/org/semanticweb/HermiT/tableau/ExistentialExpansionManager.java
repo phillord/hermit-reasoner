@@ -53,22 +53,25 @@ public final class ExistentialExpansionManager implements Serializable {
     protected final UnionDependencySet m_binaryUnionDependencySet;
     protected int[] m_indicesByBranchingPoint;
 
+    /**
+     * @param tableau tableau
+     */
     public ExistentialExpansionManager(Tableau tableau) {
         m_tableau=tableau;
         m_extensionManager=m_tableau.m_extensionManager;
         m_expandedExistentials=new TupleTable(2);
         m_auxiliaryTuple=new Object[2];
-        m_auxiliaryNodes=new ArrayList<Node>();
+        m_auxiliaryNodes=new ArrayList<>();
         m_ternaryExtensionTableSearch01Bound=m_extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,true,false },ExtensionTable.View.TOTAL);
         m_ternaryExtensionTableSearch02Bound=m_extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,false,true },ExtensionTable.View.TOTAL);
-        m_functionalRoles=new HashMap<Role,Role[]>();
+        m_functionalRoles=new HashMap<>();
         updateFunctionalRoles();
         m_binaryUnionDependencySet=new UnionDependencySet(2);
         m_indicesByBranchingPoint=new int[2];
     }
     protected void updateFunctionalRoles() {
-        Graph<Role> superRoleGraph=new Graph<Role>();
-        Set<Role> functionalRoles=new HashSet<Role>();
+        Graph<Role> superRoleGraph=new Graph<>();
+        Set<Role> functionalRoles=new HashSet<>();
         loadDLClausesIntoGraph(m_tableau.m_permanentDLOntology.getDLClauses(),superRoleGraph,functionalRoles);
         for (Role role : superRoleGraph.getElements()) {
             superRoleGraph.addEdge(role,role);
@@ -78,7 +81,7 @@ public final class ExistentialExpansionManager implements Serializable {
         Graph<Role> subRoleGraph=superRoleGraph.getInverse();
         m_functionalRoles.clear();
         for (Role role : superRoleGraph.getElements()) {
-            Set<Role> relevantRoles=new HashSet<Role>();
+            Set<Role> relevantRoles=new HashSet<>();
             Set<Role> allSuperroles=superRoleGraph.getSuccessors(role);
             for (Role superrole : allSuperroles)
                 if (functionalRoles.contains(superrole))
@@ -90,7 +93,7 @@ public final class ExistentialExpansionManager implements Serializable {
             }
         }
     }
-    protected void loadDLClausesIntoGraph(Set<DLClause> dlClauses,Graph<Role> superRoleGraph,Set<Role> functionalRoles) {
+    protected static void loadDLClausesIntoGraph(Set<DLClause> dlClauses,Graph<Role> superRoleGraph,Set<Role> functionalRoles) {
         for (DLClause dlClause : dlClauses) {
             if (dlClause.isAtomicRoleInclusion()) {
                 AtomicRole subrole=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();
@@ -114,12 +117,19 @@ public final class ExistentialExpansionManager implements Serializable {
             }
         }
     }
+    /**
+     * @param existentialConcept existentialConcept
+     * @param forNode forNode
+     */
     public void markExistentialProcessed(ExistentialConcept existentialConcept,Node forNode) {
         m_auxiliaryTuple[0]=existentialConcept;
         m_auxiliaryTuple[1]=forNode;
         m_expandedExistentials.addTuple(m_auxiliaryTuple);
         forNode.removeFromUnprocessedExistentials(existentialConcept);
     }
+    /**
+     * Branching point pushed.
+     */
     public void branchingPointPushed() {
         int start=m_tableau.getCurrentBranchingPoint().m_level;
         int requiredSize=start+1;
@@ -133,6 +143,9 @@ public final class ExistentialExpansionManager implements Serializable {
         }
         m_indicesByBranchingPoint[start]=m_expandedExistentials.getFirstFreeTupleIndex();
     }
+    /**
+     * Backtrack.
+     */
     public void backtrack() {
         int newFirstFreeTupleIndex=m_indicesByBranchingPoint[m_tableau.getCurrentBranchingPoint().m_level];
         for (int tupleIndex=m_expandedExistentials.getFirstFreeTupleIndex()-1;tupleIndex>=newFirstFreeTupleIndex;--tupleIndex) {
@@ -143,6 +156,9 @@ public final class ExistentialExpansionManager implements Serializable {
         }
         m_expandedExistentials.truncate(newFirstFreeTupleIndex);
     }
+    /**
+     * Clear.
+     */
     public void clear() {
         m_expandedExistentials.clear();
         m_auxiliaryTuple[0]=null;
@@ -154,6 +170,8 @@ public final class ExistentialExpansionManager implements Serializable {
     }
     /**
      * Creates a new node in the tableau if the at least concept that caused the expansion is for cardinality 1. If it is not of cardinality 1 and the role in the at least concept is a functional role, it sets a clash in the extension manager.
+     * @param atLeast atLeast 
+     * @param forNode forNode 
      *
      * @return true if the at least cardinality is 1 (causes an expansion) or it is greater than one but the role is functional (causes a clash) and false otherwise.
      */
@@ -214,6 +232,10 @@ public final class ExistentialExpansionManager implements Serializable {
         }
         return false;
     }
+    /**
+     * @param atLeastConcept atLeastConcept
+     * @param forNode forNode
+     */
     public void doNormalExpansion(AtLeastConcept atLeastConcept,Node forNode) {
         if (m_tableau.m_tableauMonitor!=null)
             m_tableau.m_tableauMonitor.existentialExpansionStarted(atLeastConcept,forNode);
@@ -242,6 +264,10 @@ public final class ExistentialExpansionManager implements Serializable {
         if (m_tableau.m_tableauMonitor!=null)
             m_tableau.m_tableauMonitor.existentialExpansionFinished(atLeastConcept,forNode);
     }
+    /**
+     * @param atLeastDataRange atLeastDataRange
+     * @param forNode forNode
+     */
     public void doNormalExpansion(AtLeastDataRange atLeastDataRange,Node forNode) {
         if (m_tableau.m_tableauMonitor!=null)
             m_tableau.m_tableauMonitor.existentialExpansionStarted(atLeastDataRange,forNode);
@@ -270,6 +296,10 @@ public final class ExistentialExpansionManager implements Serializable {
         if (m_tableau.m_tableauMonitor!=null)
             m_tableau.m_tableauMonitor.existentialExpansionFinished(atLeastDataRange,forNode);
     }
+    /**
+     * @param atLeast atLeast
+     * @param forNode forNode
+     */
     public void expand(AtLeast atLeast,Node forNode) {
         if (!tryFunctionalExpansion(atLeast,forNode))
             if (atLeast instanceof AtLeastConcept)

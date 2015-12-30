@@ -46,46 +46,46 @@ import junit.framework.TestCase;
  * @author nono
  * @version $Id: StateFactoryTest.java 2 2006-08-24 14:41:48Z oqube $
  */
+@SuppressWarnings("javadoc")
 public abstract class StateFactoryTest extends TestCase {
 
-    private Automaton a;
+    private final Automaton a;
 
     /**
      * Constructor for DefaultStateFactoryTest.
      * 
      * @param arg0
      */
-    public StateFactoryTest(String arg0,StateFactory sf) {
+    public StateFactoryTest(String arg0, StateFactory sf) {
         super(arg0);
         this.a = new Automaton(sf);
     }
 
+    @Override
     protected void setUp() throws Exception {
         super.setUp();
         /* create lots of states */
         for (int i = 0; i < 5000; i++)
-            a
-                    .addState(i % 500 == 0 ? true : false, i % 600 == 0 ? true
-                            : false);
+            a.addState(i % 500 == 0 ? true : false, i % 600 == 0 ? true : false);
     }
 
     public void testIterator() {
-        Set s = a.initials();
+        Set<State> s = a.initials();
         int i = 0;
-        for (Iterator it = s.iterator(); it.hasNext(); i++) {
-            State st = (State) it.next();
+        for (Iterator<State> it = s.iterator(); it.hasNext(); i++) {
+            State st = it.next();
             assertTrue(st.isInitial());
         }
         assertEquals(10, i);
     }
 
     public void testIteratorConcur() {
-        Set s = a.initials();
+        Set<State> s = a.initials();
         int i = 0;
-        for (Iterator it = s.iterator(); it.hasNext(); i++) {
+        for (Iterator<State> it = s.iterator(); it.hasNext(); i++) {
             try {
-                State st = (State) it.next();
-            } catch (ConcurrentModificationException ccm) {
+                it.next();
+            } catch (@SuppressWarnings("unused") ConcurrentModificationException ccm) {
                 return;
             }
             if (i == 5)
@@ -95,21 +95,20 @@ public abstract class StateFactoryTest extends TestCase {
     }
 
     public void testIteratorNoSuchElement() {
-        Set s = a.initials();
-        int i = 0;
-        Iterator it;
-        for (it = s.iterator(); it.hasNext(); i++) {
-            State st = (State) it.next();
+        Set<State> s = a.initials();
+        Iterator<State> it;
+        for (it = s.iterator(); it.hasNext();) {
+            it.next();
         }
         try {
-            State s1 = (State) it.next();
+            it.next();
             fail("Should have thrown no such element exception");
-        } catch (NoSuchElementException nse) {
+        } catch (@SuppressWarnings("unused") NoSuchElementException nse) {
         }
     }
 
     public void testSetAdd() {
-        Set s = a.getStateFactory().stateSet();
+        Set<State> s = a.getStateFactory().stateSet();
         State st = a.addState(true, true);
         State s2 = a.addState(false, false);
         s.add(st);
@@ -118,59 +117,59 @@ public abstract class StateFactoryTest extends TestCase {
     }
 
     public void testSetAddAll() {
-        Set s = a.getStateFactory().stateSet();
-        Set i = a.initials();
+        Set<State> s = a.getStateFactory().stateSet();
+        Set<State> i = a.initials();
         s.addAll(i);
-        for (Iterator it = i.iterator(); it.hasNext();)
+        for (Iterator<State> it = i.iterator(); it.hasNext();)
             assertTrue(s.contains(it.next()));
     }
 
     public void testClear() {
-        Set s = a.terminals();
+        Set<State> s = a.terminals();
         s.clear();
         assertTrue(s.isEmpty());
     }
 
     public void testContainsAll() {
-        Set s = a.getStateFactory().stateSet();
-        Set i = a.initials();
+        Set<State> s = a.getStateFactory().stateSet();
+        Set<State> i = a.initials();
         s.addAll(i);
         s.addAll(a.terminals());
         assertTrue(s.containsAll(a.initials()) && s.containsAll(a.terminals()));
     }
 
     public void testEquals() {
-        Set s = a.getStateFactory().stateSet();
-        Set i = a.initials();
+        Set<State> s = a.getStateFactory().stateSet();
+        Set<State> i = a.initials();
         s.addAll(i);
-        assertTrue(s.equals(i));
+        assertEquals(s,i);
     }
 
     public void testRemove() {
-        Set s = a.getStateFactory().stateSet();
-        Set i = a.initials();
+        Set<State> s = a.getStateFactory().stateSet();
+        Set<State> i = a.initials();
         s.addAll(i);
-        Iterator it = i.iterator();
-        State st = (State) it.next();
+        Iterator<State> it = i.iterator();
+        State st = it.next();
         s.remove(st);
         while (it.hasNext())
             assertTrue(s.contains(it.next()));
         assertTrue(!s.contains(st));
     }
-    
+
     public void testRemoveAll() {
-        Set s = a.states();
+        Set<State> s = a.states();
         s.removeAll(a.initials());
-        for(Iterator it= s.iterator();it.hasNext();) 
-            if(((State)it.next()).isInitial())
+        for (Iterator<State> it = s.iterator(); it.hasNext();)
+            if (it.next().isInitial())
                 fail("Not removed all initial states");
     }
-    
+
     public void testRetainAll() {
-        Set s = a.initials();
+        Set<State> s = a.initials();
         s.retainAll(a.terminals());
         /* should contain state 0 and 3000 */
-        assertTrue(s.size() == 2);
+        assertEquals(2,s.size());
     }
-    
+
 }

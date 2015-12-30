@@ -13,10 +13,12 @@ import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
 import org.semanticweb.HermiT.tableau.DLClauseEvaluator.Worker;
 import org.semanticweb.HermiT.tableau.DependencySet;
 import org.semanticweb.HermiT.tableau.ExtensionTable;
-import org.semanticweb.HermiT.tableau.ExtensionTable.View;
 import org.semanticweb.HermiT.tableau.HyperresolutionManager;
 import org.semanticweb.HermiT.tableau.Node;
 
+/**
+ * Conjunctinve query.
+ */
 public class ConjunctiveQuery {
     protected final DatalogEngine m_datalogEngine;
     protected final Atom[] m_queryAtoms;
@@ -26,6 +28,11 @@ public class ConjunctiveQuery {
     protected final QueryResultCollector[] m_queryResultCollector;
     protected final Worker[] m_workers;
 
+    /**
+     * @param datalogEngine datalog engine
+     * @param queryAtoms query atoms
+     * @param answerTerms answer terms
+     */
     public ConjunctiveQuery(DatalogEngine datalogEngine,Atom[] queryAtoms,Term[] answerTerms) {
         if (!datalogEngine.materialize())
             throw new IllegalStateException("The supplied DL ontology is unsatisfiable.");
@@ -41,21 +48,27 @@ public class ConjunctiveQuery {
         m_workers=new Worker[queryCompiler.m_workers.size()];
         queryCompiler.m_workers.toArray(m_workers);
     }
+    /**
+     * @return datalog engine
+     */
     public DatalogEngine getDatalogEngine() {
         return m_datalogEngine;
     }
+    /**
+     * @return number of query atoms
+     */
     public int getNumberOfQUeryAtoms() {
         return m_queryAtoms.length;
     }
-    public Atom getQueryAtom(int atomIndex) {
-        return m_queryAtoms[atomIndex];
-    }
+    /**
+     * @return number of anser terms
+     */
     public int getNumberOfAnswerTerms() {
         return m_answerTerms.length;
     }
-    public Term getAnswerTerm(int termIndex) {
-        return m_answerTerms[termIndex];
-    }
+    /**
+     * @param queryResultCollector queryResultCollector
+     */
     public void evaluate(QueryResultCollector queryResultCollector) {
         try {
             m_queryResultCollector[0]=queryResultCollector;
@@ -78,45 +91,53 @@ public class ConjunctiveQuery {
         public OneEmptyTupleRetrieval() {
             m_afterLast=true;
         }
+        @Override
         public ExtensionTable getExtensionTable() {
             throw new UnsupportedOperationException();
         }
-        public View getExtensionView() {
-            return View.TOTAL;
-        }
+        @Override
         public void clear() {
             throw new UnsupportedOperationException();
         }
+        @Override
         public int[] getBindingPositions() {
             return s_noBindings;
         }
+        @Override
         public Object[] getBindingsBuffer() {
             return s_noObjects;
         }
+        @Override
         public Object[] getTupleBuffer() {
             return s_noObjects;
         }
+        @Override
         public DependencySet getDependencySet() {
             throw new UnsupportedOperationException();
         }
+        @Override
         public boolean isCore() {
             return false;
         }
+        @Override
         public void open() {
             m_afterLast=false;
         }
+        @Override
         public boolean afterLast() {
             return m_afterLast;
         }
+        @Override
         public int getCurrentTupleIndex() {
             return m_afterLast ? -1 : 0;
         }
+        @Override
         public void next() {
             m_afterLast=true;
         }
     }
     
-    public static class QueryAnswerCallback implements Worker {
+    private static class QueryAnswerCallback implements Worker {
         protected final ConjunctiveQuery m_conjunctiveQuery;
         protected final Map<Node,Term> m_nodesToTerms;
         protected final Term[] m_resultBuffer;
@@ -132,12 +153,14 @@ public class ConjunctiveQuery {
             m_copyAnswers=copyAnswers;
             m_valuesBuffer=valuesBuffer;
         }
+        @Override
         public int execute(int programCounter) {
             for (int copyIndex=m_copyAnswers.length-1;copyIndex>=0;--copyIndex)
-                m_resultBuffer[m_copyAnswers[copyIndex][1]]=m_nodesToTerms.get((Node)m_valuesBuffer[m_copyAnswers[copyIndex][0]]);
+                m_resultBuffer[m_copyAnswers[copyIndex][1]]=m_nodesToTerms.get(m_valuesBuffer[m_copyAnswers[copyIndex][0]]);
             m_queryResultCollector[0].processResult(m_conjunctiveQuery,m_resultBuffer);
             return programCounter+1;
         }
+        @Override
         public String toString() {
             return "Call query consumer";
         }
@@ -159,8 +182,9 @@ public class ConjunctiveQuery {
             m_queryResultCollector=queryResultCollector;
             generateCode(0,oneEmptyTupleRetrieval);
         }
+        @Override
         protected void compileHeads() {
-            List<int[]> copyAnswers=new ArrayList<int[]>();
+            List<int[]> copyAnswers=new ArrayList<>();
             for (int index=0;index<m_answerTerms.length;++index) {
                 Term answerTerm=m_answerTerms[index];
                 if (answerTerm instanceof Variable) {
@@ -172,7 +196,7 @@ public class ConjunctiveQuery {
         }
         
         protected static List<Variable> getAnswerVariables(Term[] answerTerms) {
-            List<Variable> result=new ArrayList<Variable>();
+            List<Variable> result=new ArrayList<>();
             for (Term answerTerm : answerTerms)
                 if (answerTerm instanceof Variable)
                     result.add((Variable)answerTerm);

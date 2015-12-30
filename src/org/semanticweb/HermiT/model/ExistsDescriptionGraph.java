@@ -18,7 +18,7 @@
 package org.semanticweb.HermiT.model;
 
 import org.semanticweb.HermiT.Prefixes;
-
+/**ExistsDescriptionGraph.*/
 public class ExistsDescriptionGraph extends ExistentialConcept implements DLPredicate {
     private static final long serialVersionUID=7433430510725260994L;
 
@@ -29,24 +29,35 @@ public class ExistsDescriptionGraph extends ExistentialConcept implements DLPred
         m_descriptionGraph=descriptionGraph;
         m_vertex=vertex;
     }
+    /**
+     * @return description graph
+     */
     public DescriptionGraph getDescriptionGraph() {
         return m_descriptionGraph;
     }
+    /**
+     * @return vertex
+     */
     public int getVertex() {
         return m_vertex;
     }
+    @Override
     public int getArity() {
         return 1;
     }
+    @Override
     public boolean isAlwaysTrue() {
         return false;
     }
+    @Override
     public boolean isAlwaysFalse() {
         return false;
     }
+    @Override
     public String toString(Prefixes prefixes) {
         return "exists("+prefixes.abbreviateIRI(m_descriptionGraph.getName())+'|'+m_vertex+')';
     }
+    @Override
     public String toString() {
         return toString(Prefixes.STANDARD_PREFIXES);
     }
@@ -54,15 +65,22 @@ public class ExistsDescriptionGraph extends ExistentialConcept implements DLPred
         return s_interningManager.intern(this);
     }
 
-    protected static InterningManager<ExistsDescriptionGraph> s_interningManager=new InterningManager<ExistsDescriptionGraph>() {
+    protected final static InterningManager<ExistsDescriptionGraph> s_interningManager=new InterningManager<ExistsDescriptionGraph>() {
+        @Override
         protected boolean equal(ExistsDescriptionGraph object1,ExistsDescriptionGraph object2) {
             return object1.m_descriptionGraph.equals(object2.m_descriptionGraph) && object1.m_vertex==object2.m_vertex;
         }
+        @Override
         protected int getHashCode(ExistsDescriptionGraph object) {
             return object.m_descriptionGraph.hashCode()+7*object.m_vertex;
         }
     };
     
+    /**
+     * @param descriptionGraph descriptionGraph
+     * @param vertex vertex
+     * @return description graph
+     */
     public static ExistsDescriptionGraph create(DescriptionGraph descriptionGraph,int vertex) {
         return s_interningManager.intern(new ExistsDescriptionGraph(descriptionGraph,vertex));
     }

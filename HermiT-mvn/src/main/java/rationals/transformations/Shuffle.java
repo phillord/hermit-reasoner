@@ -6,7 +6,6 @@ import java.util.Set;
 import rationals.Automaton;
 import rationals.Synchronization;
 import java.util.Collections;
-import java.util.HashSet;
 
 /**
  * This class implements the shuffle operator between two automatas.
@@ -23,28 +22,31 @@ import java.util.HashSet;
  * 
  * @author Arnaud Bailly
  * @version $Id: Shuffle.java 2 2006-08-24 14:41:48Z oqube $
- * @see rationals.transformation.Mix
+ * @see Mix
  */
 public class Shuffle implements BinaryTransformation {
 
+    @Override
     public Automaton transform(Automaton a, Automaton b) {
 
         Mix mix = new Mix(new Synchronization() {
+            @Override
             public Object synchronize(Object t1, Object t2) {
                 return null;
             }
 
-            public Set synchronizable(Set a, Set b) {
-                return Collections.unmodifiableSet(new HashSet());
+            @Override
+            public <T> Set<T> synchronizable(Set<T> a1,Set<T> b1) {
+                return Collections.<T>emptySet();
             }
 
-            public Set synchronizable(Collection alphl) {
-                // TODO Auto-generated method stub
-                return null;
+            @Override
+            public <T> Set<T> synchronizable(Collection<Set<T>> alphl) {
+                return Collections.<T>emptySet();
             }
 
-            public boolean synchronizeWith(Object object, Set alph) {
-                // TODO Auto-generated method stub
+            @Override
+            public boolean synchronizeWith(Object object, Set<Object> alph) {
                 return false;
             }
         });

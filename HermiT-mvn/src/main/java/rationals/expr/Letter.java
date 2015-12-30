@@ -35,40 +35,17 @@
  */
 package rationals.expr;
 
-import rationals.algebra.SemiRing;
-
 /**
- * A letter expression is simply a wrapper over any object. 
- * Note that the semantics of equals and hashcode must be properly
- * implemented by the wrapped object as this may be used in 
- * Collections, for example as keys in hashtables.
+ * A letter expression is simply a wrapper over any object. Note that the
+ * semantics of equals and hashcode must be properly implemented by the wrapped
+ * object as this may be used in Collections, for example as keys in hashtables.
  * 
  * @author nono
  * @version $Id: Letter.java 2 2006-08-24 14:41:48Z oqube $
  */
 public class Letter extends RationalExpr {
 
-    private Object label;
-
-    public static final Letter epsilon = new Letter(null) {
-
-        public boolean equals(Object o) {
-            return o == epsilon;
-        }
-        
-
-        public SemiRing mult(SemiRing s2) {
-            return s2;
-        }
-        
-        public String toString() {
-            return "1";
-        }
-
-        public int hashCode() {
-            return 0;
-        }
-    };
+    private final Object label;
 
     /**
      * Construct a new letter expression.
@@ -80,11 +57,7 @@ public class Letter extends RationalExpr {
         this.label = o;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
+    @Override
     public boolean equals(Object obj) {
         Letter lt = (Letter) obj;
         if (lt == null)
@@ -92,20 +65,12 @@ public class Letter extends RationalExpr {
         return lt.label == null ? this.label == null : lt.label.equals(label);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#hashCode()
-     */
+    @Override
     public int hashCode() {
         return label.hashCode();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#toString()
-     */
+    @Override
     public String toString() {
         return label.toString();
     }

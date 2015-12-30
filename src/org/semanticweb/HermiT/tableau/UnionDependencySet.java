@@ -20,7 +20,7 @@ package org.semanticweb.HermiT.tableau;
 import java.io.Serializable;
 import java.util.Arrays;
 
-public final class UnionDependencySet implements DependencySet,Serializable{
+final class UnionDependencySet implements DependencySet,Serializable{
     private static final long serialVersionUID=8296150535316233960L;
 
     protected int m_numberOfConstituents;
@@ -30,18 +30,21 @@ public final class UnionDependencySet implements DependencySet,Serializable{
         m_dependencySets=new DependencySet[numberOfConstituents];
         m_numberOfConstituents=numberOfConstituents;
     }
+    @Override
     public boolean containsBranchingPoint(int branchingPoint) {
         for (int index=m_numberOfConstituents-1;index>=0;--index)
             if (m_dependencySets[index].containsBranchingPoint(branchingPoint))
                 return true;
         return false;
     }
+    @Override
     public int getMaximumBranchingPoint() {
         int maximumSoFar=m_dependencySets[0].getMaximumBranchingPoint();
         for (int index=m_numberOfConstituents-1;index>=1;--index)
             maximumSoFar=Math.max(maximumSoFar,m_dependencySets[index].getMaximumBranchingPoint());
         return maximumSoFar;
     }
+    @Override
     public boolean isEmpty() {
         for (int index=m_numberOfConstituents-1;index>=0;--index)
             if (!m_dependencySets[index].isEmpty())

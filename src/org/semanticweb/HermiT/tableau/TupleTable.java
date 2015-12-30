@@ -34,10 +34,16 @@ public final class TupleTable implements Serializable {
     protected int m_tupleCapacity;
     protected int m_firstFreeTupleIndex;
 
+    /**
+     * @param arity arity
+     */
     public TupleTable(int arity) {
         m_arity=arity;
         clear();
     }
+    /**
+     * @return size
+     */
     public int sizeInMemory() {
         int size=m_pages.length*4;
         for (int i=m_pages.length-1;i>=0;--i)
@@ -45,9 +51,16 @@ public final class TupleTable implements Serializable {
                 size+=m_pages[i].sizeInMemory();
         return size;
     }
+    /**
+     * @return free tuple index
+     */
     public int getFirstFreeTupleIndex() {
         return m_firstFreeTupleIndex;
     }
+    /**
+     * @param tupleBuffer tupleBuffer
+     * @return index of added tuple
+     */
     public int addTuple(Object[] tupleBuffer) {
         int newTupleIndex=m_firstFreeTupleIndex;
         if (newTupleIndex==m_tupleCapacity) {
@@ -63,28 +76,62 @@ public final class TupleTable implements Serializable {
         m_firstFreeTupleIndex++;
         return newTupleIndex;
     }
+    /**
+     * @param tupleBuffer tupleBuffer
+     * @param tupleIndex tupleIndex
+     * @param compareLength compareLength
+     * @return true if equal
+     */
     public boolean tupleEquals(Object[] tupleBuffer,int tupleIndex,int compareLength) {
         return m_pages[tupleIndex / PAGE_SIZE].tupleEquals(tupleBuffer,(tupleIndex % PAGE_SIZE)*m_arity,compareLength);
     }
+    /**
+     * @param tupleBuffer tupleBuffer
+     * @param positionIndexes positionIndexes
+     * @param tupleIndex tupleIndex
+     * @param compareLength compareLength
+     * @return true if equals
+     */
     public boolean tupleEquals(Object[] tupleBuffer,int[] positionIndexes,int tupleIndex,int compareLength) {
         return m_pages[tupleIndex / PAGE_SIZE].tupleEquals(tupleBuffer,positionIndexes,(tupleIndex % PAGE_SIZE)*m_arity,compareLength);
     }
+    /**
+     * @param tupleBuffer tupleBuffer
+     * @param tupleIndex tupleIndex
+     */
     public void retrieveTuple(Object[] tupleBuffer,int tupleIndex) {
         m_pages[tupleIndex / PAGE_SIZE].retrieveTuple((tupleIndex % PAGE_SIZE)*m_arity,tupleBuffer);
     }
+    /**
+     * @param tupleIndex tupleIndex
+     * @param objectIndex objectIndex
+     * @return object
+     */
     public Object getTupleObject(int tupleIndex,int objectIndex) {
         assert objectIndex < m_arity;
         return m_pages[tupleIndex / PAGE_SIZE].m_objects[(tupleIndex % PAGE_SIZE)*m_arity+objectIndex];
     }
+    /**
+     * @param tupleIndex tupleIndex
+     * @param objectIndex objectIndex
+     * @param object object
+     */
     public void setTupleObject(int tupleIndex,int objectIndex,Object object) {
         m_pages[tupleIndex / PAGE_SIZE].m_objects[(tupleIndex % PAGE_SIZE)*m_arity+objectIndex]=object;
     }
+    /**
+     * @param newFirstFreeTupleIndex newFirstFreeTupleIndex
+     */
     public void truncate(int newFirstFreeTupleIndex) {
         m_firstFreeTupleIndex=newFirstFreeTupleIndex;
     }
+    /**
+     * @param tupleIndex tupleIndex
+     */
     public void nullifyTuple(int tupleIndex) {
         m_pages[tupleIndex / PAGE_SIZE].nullifyTuple((tupleIndex % PAGE_SIZE)*m_arity);
     }
+    /**Clear.*/
     public void clear() {
         m_pages=new Page[10];
         m_numberOfPages=1;
@@ -97,7 +144,7 @@ public final class TupleTable implements Serializable {
         private static final long serialVersionUID=2239482172592108644L;
 
         public final int m_arity;
-        public Object[] m_objects;
+        public final Object[] m_objects;
 
         public Page(int arity) {
             m_arity=arity;

@@ -29,29 +29,36 @@ import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.model.NegatedAtomicRole;
 import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.Node;
-
+/**ShowModelCommand.*/
 public class ShowModelCommand extends AbstractCommand {
 
+    /**
+     * @param debugger debugger
+     */
     public ShowModelCommand(Debugger debugger) {
         super(debugger);
     }
+    @Override
     public String getCommandName() {
         return "showModel";
     }
+    @Override
     public String[] getDescription() {
         return new String[] {
             "","prints all assertions",
             "predicate","prints all assertions for the given predicate"
         };
     }
+    @Override
     public void printHelp(PrintWriter writer) {
         writer.println("usage: showModel");
         writer.println("    Prints the entire current model.");
         writer.println("usage: showModel predicate");
         writer.println("    Prints all assertions containing the supplied predicate.");
     }
+    @Override
     public void execute(String[] args) {
-        Set<Object[]> facts=new TreeSet<Object[]>(Printing.FactComparator.INSTANCE);
+        Set<Object[]> facts=new TreeSet<>(Printing.FactComparator.INSTANCE);
         String title;
         if (args.length<2) {
             for (ExtensionTable extensionTable : m_debugger.getTableau().getExtensionManager().getExtensionTables()) {
@@ -83,7 +90,7 @@ public class ShowModelCommand extends AbstractCommand {
                     nodeID=Integer.parseInt(args[1]);
                 }
                 catch (NumberFormatException e) {
-                    m_debugger.getOutput().println("Invalid ID of the node.");
+                    m_debugger.getOutput().println("Invalid ID of the node. "+e.getMessage());
                     return;
                 }
                 Node node=m_debugger.getTableau().getNode(nodeID);

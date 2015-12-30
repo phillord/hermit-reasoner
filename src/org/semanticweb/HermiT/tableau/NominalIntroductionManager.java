@@ -24,7 +24,7 @@ import org.semanticweb.HermiT.model.AnnotatedEquality;
 /**
  * Implements the nominal introduction rule.
  */
-public final class NominalIntroductionManager implements Serializable {
+final class NominalIntroductionManager implements Serializable {
     private static final long serialVersionUID=5863617010809297861L;
 
     protected final Tableau m_tableau;
@@ -105,13 +105,13 @@ public final class NominalIntroductionManager implements Serializable {
         }
         return result;
     }
-    public boolean canForgetAnnotation(AnnotatedEquality annotatedEquality,Node node0,Node node1,Node node2) {
+    public static boolean canForgetAnnotation(Node node0,Node node1,Node node2) {
         return node0.isRootNode() || node1.isRootNode() || !node2.isRootNode() || (node2.isParentOf(node0) && node2.isParentOf(node1));
     }
     public boolean addAnnotatedEquality(AnnotatedEquality annotatedEquality,Node node0,Node node1,Node node2,DependencySet dependencySet) {
         if (!node0.isActive() || !node1.isActive() || !node2.isActive())
             return false;
-        else if (canForgetAnnotation(annotatedEquality,node0,node1,node2))
+        else if (canForgetAnnotation(node0,node1,node2))
             return m_mergingManager.mergeNodes(node0,node1,dependencySet);
         else if (annotatedEquality.getCaridnality()==1)
             return applyNIRule(annotatedEquality,node0,node1,node2,dependencySet);
@@ -136,7 +136,7 @@ public final class NominalIntroductionManager implements Serializable {
         node0=node0.getCanonicalNode();
         node1=node1.getCanonicalNode();
         node2=node2.getCanonicalNode();
-        if (canForgetAnnotation(annotatedEquality,node0,node1,node2))
+        if (canForgetAnnotation(node0,node1,node2))
             return m_mergingManager.mergeNodes(node0,node1,dependencySet);
         else {
             Node niTargetNode;
@@ -205,6 +205,7 @@ public final class NominalIntroductionManager implements Serializable {
             m_annotatedEquality=annotatedEquality;
             m_currentRootNode=1; // This reflects the assumption that the first merge is performed from the NominalIntroductionManager
         }
+        @Override
         public void startNextChoice(Tableau tableau,DependencySet clashDepdendencySet) {
             m_currentRootNode++;
             assert m_currentRootNode<=m_annotatedEquality.getCaridnality();

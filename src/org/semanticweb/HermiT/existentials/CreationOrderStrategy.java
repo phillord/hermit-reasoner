@@ -32,12 +32,17 @@ import org.semanticweb.HermiT.tableau.Node;
 public class CreationOrderStrategy extends AbstractExpansionStrategy implements Serializable {
     private static final long serialVersionUID=-64673639237063636L;
     
+    /**
+     * @param strategy strategy
+     */
     public CreationOrderStrategy(BlockingStrategy strategy) {
         super(strategy,true);
     }
+    @Override
     public boolean isDeterministic() {
         return true;
     }
+    @Override
     protected void expandExistential(AtLeast atLeast,Node forNode) {
         m_existentialExpansionManager.expand(atLeast,forNode);
         m_existentialExpansionManager.markExistentialProcessed(atLeast,forNode);

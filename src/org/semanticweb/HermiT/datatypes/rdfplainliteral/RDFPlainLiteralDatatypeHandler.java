@@ -33,13 +33,14 @@ import org.semanticweb.HermiT.model.Constant;
 import org.semanticweb.HermiT.model.DatatypeRestriction;
 
 import dk.brics.automaton.Automaton;
-
+/**RDFPlainLiteralDatatypeHandler.*/
 public class RDFPlainLiteralDatatypeHandler implements DatatypeHandler {
     protected static final String XSD_NS=Prefixes.s_semanticWebPrefixes.get("xsd:");
     protected static final String RDF_NS=Prefixes.s_semanticWebPrefixes.get("rdf:");
-    protected static final Map<String,ValueSpaceSubset> s_subsetsByDatatype=new HashMap<String,ValueSpaceSubset>();
+    protected static final Map<String,ValueSpaceSubset> s_subsetsByDatatype=new HashMap<>();
     static {
         s_subsetsByDatatype.put(RDF_NS+"PlainLiteral",new RDFPlainLiteralLengthValueSpaceSubset(new RDFPlainLiteralLengthInterval(RDFPlainLiteralLengthInterval.LanguageTagMode.ABSENT,0,Integer.MAX_VALUE),new RDFPlainLiteralLengthInterval(RDFPlainLiteralLengthInterval.LanguageTagMode.PRESENT,0,Integer.MAX_VALUE)));
+        s_subsetsByDatatype.put(RDF_NS+"langString",new RDFPlainLiteralLengthValueSpaceSubset(new RDFPlainLiteralLengthInterval(RDFPlainLiteralLengthInterval.LanguageTagMode.ABSENT,0,Integer.MAX_VALUE),new RDFPlainLiteralLengthInterval(RDFPlainLiteralLengthInterval.LanguageTagMode.PRESENT,0,Integer.MAX_VALUE)));
         s_subsetsByDatatype.put(XSD_NS+"string",new RDFPlainLiteralLengthValueSpaceSubset(new RDFPlainLiteralLengthInterval(RDFPlainLiteralLengthInterval.LanguageTagMode.ABSENT,0,Integer.MAX_VALUE)));
         registerPatternDatatype(XSD_NS+"normalizedString");
         registerPatternDatatype(XSD_NS+"token");
@@ -53,10 +54,11 @@ public class RDFPlainLiteralDatatypeHandler implements DatatypeHandler {
         s_subsetsByDatatype.put(datatypeURI,new RDFPlainLiteralPatternValueSpaceSubset(automaton));
     }
     protected static final ValueSpaceSubset EMPTY_SUBSET=new RDFPlainLiteralLengthValueSpaceSubset();
-    protected static final Map<String,Set<String>> s_datatypeSupersets=new HashMap<String,Set<String>>();
+    protected static final Map<String,Set<String>> s_datatypeSupersets=new HashMap<>();
     static {
         String[][] initializer=new String[][] {
             { RDF_NS+"PlainLiteral",     RDF_NS+"PlainLiteral" },
+            { RDF_NS+"langString",       RDF_NS+"PlainLiteral" },
             { XSD_NS+"string",           RDF_NS+"PlainLiteral", XSD_NS+"string" },
             { XSD_NS+"normalizedString", RDF_NS+"PlainLiteral", XSD_NS+"string", XSD_NS+"normalizedString" },
             { XSD_NS+"token",            RDF_NS+"PlainLiteral", XSD_NS+"string", XSD_NS+"normalizedString", XSD_NS+"token" },
@@ -67,16 +69,18 @@ public class RDFPlainLiteralDatatypeHandler implements DatatypeHandler {
         };
         for (int datatype1Index=0;datatype1Index<initializer.length;datatype1Index++) {
             String datatype1URI=initializer[datatype1Index][0];
-            Set<String> set=new HashSet<String>();
+            Set<String> set=new HashSet<>();
             for (int datatype2Index=1;datatype2Index<initializer[datatype1Index].length;datatype2Index++)
                 set.add(initializer[datatype1Index][datatype2Index]);
             s_datatypeSupersets.put(datatype1URI,set);
         }
     }
 
+    @Override
     public Set<String> getManagedDatatypeURIs() {
         return s_subsetsByDatatype.keySet();
     }
+    @Override
     public Object parseLiteral(String lexicalForm,String datatypeURI) throws MalformedLiteralException {
         assert s_subsetsByDatatype.containsKey(datatypeURI);
         Object dataValue;
@@ -98,6 +102,7 @@ public class RDFPlainLiteralDatatypeHandler implements DatatypeHandler {
         else
             throw new MalformedLiteralException(lexicalForm,datatypeURI);
     }
+    @Override
     public void validateDatatypeRestriction(DatatypeRestriction datatypeRestriction) throws UnsupportedFacetException {
         String datatypeURI=datatypeRestriction.getDatatypeURI();
         assert s_subsetsByDatatype.containsKey(datatypeURI);
@@ -131,6 +136,7 @@ public class RDFPlainLiteralDatatypeHandler implements DatatypeHandler {
                 throw new UnsupportedFacetException("Facet with URI '"+facetURI+"' is not supported on rdf:PlainLiteral; only xsd:minLength, xsd:maxLength, xsd:length, xsd:pattern, and rdf:langRange are supported, but the ontology contains the restriction: "+this.toString());
         }
     }
+    @Override
     public ValueSpaceSubset createValueSpaceSubset(DatatypeRestriction datatypeRestriction) {
         String datatypeURI=datatypeRestriction.getDatatypeURI();
         assert s_subsetsByDatatype.containsKey(datatypeURI);
@@ -155,6 +161,7 @@ public class RDFPlainLiteralDatatypeHandler implements DatatypeHandler {
                 return new RDFPlainLiteralLengthValueSpaceSubset(intervals[0]);
         }
     }
+    @Override
     public ValueSpaceSubset conjoinWithDR(ValueSpaceSubset valueSpaceSubset,DatatypeRestriction datatypeRestriction) {
         String datatypeURI=datatypeRestriction.getDatatypeURI();
         assert s_subsetsByDatatype.containsKey(datatypeURI);
@@ -179,7 +186,7 @@ public class RDFPlainLiteralDatatypeHandler implements DatatypeHandler {
                 return EMPTY_SUBSET;
             else {
                 List<RDFPlainLiteralLengthInterval> oldIntervals=((RDFPlainLiteralLengthValueSpaceSubset)valueSpaceSubset).m_intervals;
-                List<RDFPlainLiteralLengthInterval> newIntervals=new ArrayList<RDFPlainLiteralLengthInterval>();
+                List<RDFPlainLiteralLengthInterval> newIntervals=new ArrayList<>();
                 for (int index=0;index<oldIntervals.size();index++) {
                     RDFPlainLiteralLengthInterval oldInterval=oldIntervals.get(index);
                     if (intervals[0]!=null) {
@@ -200,6 +207,7 @@ public class RDFPlainLiteralDatatypeHandler implements DatatypeHandler {
             }
         }
     }
+    @Override
     public ValueSpaceSubset conjoinWithDRNegation(ValueSpaceSubset valueSpaceSubset,DatatypeRestriction datatypeRestriction) {
         String datatypeURI=datatypeRestriction.getDatatypeURI();
         assert s_subsetsByDatatype.containsKey(datatypeURI);
@@ -223,7 +231,7 @@ public class RDFPlainLiteralDatatypeHandler implements DatatypeHandler {
             if (intervals[0]==null && intervals[1]==null)
                 return valueSpaceSubset;
             else {
-                List<RDFPlainLiteralLengthInterval> complementedIntervals=new ArrayList<RDFPlainLiteralLengthInterval>(4);
+                List<RDFPlainLiteralLengthInterval> complementedIntervals=new ArrayList<>(4);
                 if (intervals[0]!=null) {
                     if (intervals[0].m_minLength>0)
                         complementedIntervals.add(new RDFPlainLiteralLengthInterval(RDFPlainLiteralLengthInterval.LanguageTagMode.PRESENT,0,intervals[0].m_minLength-1));
@@ -241,7 +249,7 @@ public class RDFPlainLiteralDatatypeHandler implements DatatypeHandler {
                 else
                     complementedIntervals.add(new RDFPlainLiteralLengthInterval(RDFPlainLiteralLengthInterval.LanguageTagMode.ABSENT,0,Integer.MAX_VALUE));
                 List<RDFPlainLiteralLengthInterval> oldIntervals=((RDFPlainLiteralLengthValueSpaceSubset)valueSpaceSubset).m_intervals;
-                List<RDFPlainLiteralLengthInterval> newIntervals=new ArrayList<RDFPlainLiteralLengthInterval>();
+                List<RDFPlainLiteralLengthInterval> newIntervals=new ArrayList<>();
                 for (int index=0;index<oldIntervals.size();index++) {
                     RDFPlainLiteralLengthInterval oldInterval=oldIntervals.get(index);
                     for (int complementedIndex=complementedIntervals.size()-1;complementedIndex>=0;--complementedIndex) {
@@ -344,11 +352,13 @@ public class RDFPlainLiteralDatatypeHandler implements DatatypeHandler {
         else
             return automaton;
     }
+    @Override
     public boolean isSubsetOf(String subsetDatatypeURI,String supersetDatatypeURI) {
         assert s_subsetsByDatatype.containsKey(subsetDatatypeURI);
         assert s_subsetsByDatatype.containsKey(supersetDatatypeURI);
         return s_datatypeSupersets.get(subsetDatatypeURI).contains(supersetDatatypeURI);
     }
+    @Override
     public boolean isDisjointWith(String datatypeURI1,String datatypeURI2) {
         assert s_subsetsByDatatype.containsKey(datatypeURI1);
         assert s_subsetsByDatatype.containsKey(datatypeURI2);

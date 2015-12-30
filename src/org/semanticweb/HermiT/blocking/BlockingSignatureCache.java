@@ -20,7 +20,7 @@ package org.semanticweb.HermiT.blocking;
 import java.io.Serializable;
 
 import org.semanticweb.HermiT.tableau.Node;
-
+/**Blocking signature cache*/
 public class BlockingSignatureCache implements Serializable {
     private static final long serialVersionUID=-7692825443489644667L;
 
@@ -29,15 +29,25 @@ public class BlockingSignatureCache implements Serializable {
     protected int m_numberOfElements;
     protected int m_threshold;
 
+    /**
+     * @param directBlockingChecker directBlockingChecker
+     */
     public BlockingSignatureCache(DirectBlockingChecker directBlockingChecker) {
         m_directBlockingChecker=directBlockingChecker;
         m_buckets=new BlockingSignature[1024];
         m_threshold=(int)(m_buckets.length*0.75);
         m_numberOfElements=0;
     }
+    /**
+     * @return true if empty
+     */
     public boolean isEmpty() {
         return m_numberOfElements==0;
     }
+    /**
+     * @param node node
+     * @return true if node added
+     */
     public boolean addNode(Node node) {
         int hashCode=m_directBlockingChecker.blockingHashCode(node);
         int bucketIndex=getIndexFor(hashCode,m_buckets.length);
@@ -70,6 +80,10 @@ public class BlockingSignatureCache implements Serializable {
         m_buckets=newBuckets;
         m_threshold=(int)(newCapacity*0.75);
     }
+    /**
+     * @param node node
+     * @return true if contains in signature
+     */
     public boolean containsSignature(Node node) {
         if (m_directBlockingChecker.canBeBlocked(node)) {
             int hashCode=m_directBlockingChecker.blockingHashCode(node);
@@ -83,7 +97,8 @@ public class BlockingSignatureCache implements Serializable {
         }
         return false;
     }
-    protected static int getIndexFor(int hashCode,int tableLength) {
+    protected static int getIndexFor(int _hashCode,int tableLength) {
+        int hashCode=_hashCode;
         hashCode+=~(hashCode << 9);
         hashCode^=(hashCode >>> 14);
         hashCode+=(hashCode << 4);

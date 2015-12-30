@@ -24,22 +24,29 @@ import org.semanticweb.HermiT.existentials.ExistentialExpansionStrategy;
 import org.semanticweb.HermiT.existentials.IndividualReuseStrategy;
 import org.semanticweb.HermiT.model.AtomicConcept;
 import org.semanticweb.HermiT.tableau.Node;
-
+/**ReuseNodeForCommand.*/
 public class ReuseNodeForCommand extends AbstractCommand {
 
+    /**
+     * @param debugger debugger
+     */
     public ReuseNodeForCommand(Debugger debugger) {
         super(debugger);
     }
+    @Override
     public String getCommandName() {
         return "reuseNodeFor";
     }
+    @Override
     public String[] getDescription() {
         return new String[] { "nodeID","prints concepts for which the given node is a reuse node under individual reuse strategy" };
     }
+    @Override
     public void printHelp(PrintWriter writer) {
         writer.println("usage: reuseNodeFor nodeID");
         writer.println("    If individual reuse strategy is used, prints the concepts for which the given node is a reuse node.");
     }
+    @Override
     public void execute(String[] args) {
         if (args.length<2) {
             m_debugger.getOutput().println("Node ID is missing.");
@@ -50,7 +57,7 @@ public class ReuseNodeForCommand extends AbstractCommand {
             nodeID=Integer.parseInt(args[1]);
         }
         catch (NumberFormatException e) {
-            m_debugger.getOutput().println("Invalid ID of the node.");
+            m_debugger.getOutput().println("Invalid ID of the node. "+e.getMessage());
             return;
         }
         Node node=m_debugger.getTableau().getNode(nodeID);

@@ -22,25 +22,36 @@ import java.util.Collections;
 import java.util.List;
 
 import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
-
+/**BinaryDataValueSpaceSubset.*/
 public class BinaryDataValueSpaceSubset implements ValueSpaceSubset {
     protected final List<BinaryDataLengthInterval> m_intervals;
     
+    /**
+     * Empty constructor.
+     */
     public BinaryDataValueSpaceSubset() {
         m_intervals=Collections.emptyList();
     }
+    /**
+     * @param interval interval
+     */
     public BinaryDataValueSpaceSubset(BinaryDataLengthInterval interval) {
         m_intervals=Collections.singletonList(interval);
     }
+    /**
+     * @param intervals intervals
+     */
     public BinaryDataValueSpaceSubset(List<BinaryDataLengthInterval> intervals) {
         m_intervals=intervals;
     }
+    @Override
     public boolean hasCardinalityAtLeast(int number) {
         int left=number;
         for (int index=m_intervals.size()-1;left>0 && index>=0;--index)
             left=m_intervals.get(index).subtractSizeFrom(left);
         return left==0;
     }
+    @Override
     public boolean containsDataValue(Object dataValue) {
         if (dataValue instanceof BinaryData) {
             BinaryData binaryData=(BinaryData)dataValue;
@@ -50,10 +61,12 @@ public class BinaryDataValueSpaceSubset implements ValueSpaceSubset {
         }
         return false;
     }
+    @Override
     public void enumerateDataValues(Collection<Object> dataValues) {
         for (int index=m_intervals.size()-1;index>=0;--index)
             m_intervals.get(index).enumerateValues(dataValues);
     }
+    @Override
     public String toString() {
         StringBuffer buffer=new StringBuffer();
         buffer.append("binaryData{");

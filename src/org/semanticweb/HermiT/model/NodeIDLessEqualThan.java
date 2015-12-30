@@ -26,23 +26,24 @@ import org.semanticweb.HermiT.Prefixes;
  */
 public class NodeIDLessEqualThan implements DLPredicate,Serializable {
     private static final long serialVersionUID=5572346926189452451L;
+    /**Instance.*/
     public static final NodeIDLessEqualThan INSTANCE=new NodeIDLessEqualThan();
     
     protected NodeIDLessEqualThan () {
     }
+    @Override
     public int getArity() {
         return 2;
     }
+    @Override
     public String toString(Prefixes prefixes) {
         return "<=";
     }
+    @Override
     public String toString() {
         return toString(Prefixes.STANDARD_PREFIXES);
     }
     protected Object readResolve() {
-        return INSTANCE;
-    }
-    public static NodeIDLessEqualThan create() {
         return INSTANCE;
     }
 }

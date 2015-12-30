@@ -19,7 +19,7 @@ package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
 
-public final class TupleIndex implements Serializable {
+final class TupleIndex implements Serializable {
     private static final long serialVersionUID=-4284072092430590904L;
 
     protected static final float LOAD_FACTOR=0.7f;
@@ -158,10 +158,10 @@ public final class TupleIndex implements Serializable {
         return child;
     }
     protected void resizeBuckets() {
-    	if (m_buckets.length==0x40000000)
-    	    m_resizeThreshold=Integer.MAX_VALUE;
-    	else {
-    		int[] newBuckets=new int[m_buckets.length*2];
+        if (m_buckets.length==0x40000000)
+            m_resizeThreshold=Integer.MAX_VALUE;
+        else {
+            int[] newBuckets=new int[m_buckets.length*2];
             int newBucketsLengthMinusOne=newBuckets.length-1;
             for (int bucketIndex=m_bucketsLengthMinusOne;bucketIndex>=0;--bucketIndex) {
                 int trieNode=m_buckets[bucketIndex]-BUCKET_OFFSET;
@@ -177,7 +177,7 @@ public final class TupleIndex implements Serializable {
             m_buckets=newBuckets;
             m_bucketsLengthMinusOne=newBucketsLengthMinusOne;
             m_resizeThreshold=(int)(m_buckets.length*LOAD_FACTOR);
-    	}
+        }
     }
     protected static int getIndexFor(int hashCode,int tableLengthMinusOne) {
         hashCode+=~(hashCode << 9);

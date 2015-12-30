@@ -20,15 +20,21 @@ package org.semanticweb.HermiT.monitor;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-
+import java.io.OutputStream;
+/**TimerWithPause.*/
 public class TimerWithPause extends Timer {
     private static final long serialVersionUID=-9176603965017225734L;
 
-    protected BufferedReader m_in;
+    protected final BufferedReader m_in;
     
-    public TimerWithPause() {
+    /**
+     * @param out out
+     */
+    public TimerWithPause(OutputStream out) {
+        super(out);
         m_in=new BufferedReader(new InputStreamReader(System.in));
     }
+    @Override
     protected void doStatistics() {
         super.doStatistics();
         System.out.print("Press something to continue.. ");
@@ -36,7 +42,7 @@ public class TimerWithPause extends Timer {
         try {
             m_in.readLine();
         }
-        catch (IOException ignored) {
+        catch (@SuppressWarnings("unused") IOException ignored) {
         }
     }
 }

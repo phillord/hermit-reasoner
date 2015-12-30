@@ -36,21 +36,35 @@ public class Constant extends Term {
         m_datatypeURI=datatypeURI;
         m_dataValue=dataValue;
     }
+    /**
+     * @return lexical form
+     */
     public String getLexicalForm() {
         return m_lexicalForm;
     }
+    /**
+     * @return datatype iri
+     */
     public String getDatatypeURI() {
         return m_datatypeURI;
     }
+    /**
+     * @return data value
+     */
     public Object getDataValue() {
         return m_dataValue;
     }
+    /**
+     * @return true if anonymous
+     */
     public boolean isAnonymous() {
         return "internal:anonymous-constants".equals(m_datatypeURI);
     }
+    @Override
     public String toString() {
         return toString(Prefixes.STANDARD_PREFIXES);
     }
+    @Override
     public String toString(Prefixes prefixes) {
         StringBuffer buffer=new StringBuffer();
         buffer.append('"');
@@ -76,19 +90,31 @@ public class Constant extends Term {
         return s_interningManager.intern(this);
     }
 
-    protected static InterningManager<Constant> s_interningManager=new InterningManager<Constant>() {
+    protected final static InterningManager<Constant> s_interningManager=new InterningManager<Constant>() {
+        @Override
         protected boolean equal(Constant object1,Constant object2) {
             return object1.m_lexicalForm.equals(object2.m_lexicalForm) && object1.m_datatypeURI.equals(object2.m_datatypeURI);
         }
+        @Override
         protected int getHashCode(Constant object) {
             return object.m_lexicalForm.hashCode()+object.m_datatypeURI.hashCode();
         }
     };
 
+    /**
+     * @param lexicalForm lexicalForm
+     * @param datatypeURI datatypeURI
+     * @return constant
+     * @throws MalformedLiteralException if literal is malformed
+     */
     public static Constant create(String lexicalForm,String datatypeURI) throws MalformedLiteralException {
         Object dataValue=DatatypeRegistry.parseLiteral(lexicalForm,datatypeURI);
         return s_interningManager.intern(new Constant(lexicalForm,datatypeURI,dataValue));
     }
+    /**
+     * @param id id
+     * @return anonymous constant
+     */
     public static Constant createAnonymous(String id) {
         return create(id,"internal:anonymous-constants");
     }

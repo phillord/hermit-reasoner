@@ -26,15 +26,26 @@ public class NegatedAtomicRole {
     
     protected final AtomicRole m_negatedAtomicRole;
     
+    /**
+     * @param negatedAtomicRole negatedAtomicRole
+     */
     public NegatedAtomicRole(AtomicRole negatedAtomicRole) {
         m_negatedAtomicRole=negatedAtomicRole;
     }
+    /**
+     * @return negated role
+     */
     public AtomicRole getNegatedAtomicRole() {
         return m_negatedAtomicRole;
     }
+    @Override
     public String toString() {
         return toString(Prefixes.STANDARD_PREFIXES);
     }
+    /**
+     * @param prefixes prefixes
+     * @return toString
+     */
     public String toString(Prefixes prefixes) {
         return "not("+m_negatedAtomicRole.toString(prefixes)+")";
     }
@@ -42,15 +53,21 @@ public class NegatedAtomicRole {
         return s_interningManager.intern(this);
     }
 
-    protected static InterningManager<NegatedAtomicRole> s_interningManager=new InterningManager<NegatedAtomicRole>() {
+    protected final static InterningManager<NegatedAtomicRole> s_interningManager=new InterningManager<NegatedAtomicRole>() {
+        @Override
         protected boolean equal(NegatedAtomicRole object1,NegatedAtomicRole object2) {
             return object1.m_negatedAtomicRole==object2.m_negatedAtomicRole;
         }
+        @Override
         protected int getHashCode(NegatedAtomicRole object) {
             return -object.m_negatedAtomicRole.hashCode();
         }
     };
     
+    /**
+     * @param negatedAtomicRole negatedAtomicRole
+     * @return role
+     */
     public static NegatedAtomicRole create(AtomicRole negatedAtomicRole) {
         return s_interningManager.intern(new NegatedAtomicRole(negatedAtomicRole));
     }

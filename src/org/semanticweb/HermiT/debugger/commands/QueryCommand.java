@@ -28,21 +28,27 @@ import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.Node;
-
+/**QueryCommand.*/
 public class QueryCommand extends AbstractCommand {
 
+    /**
+     * @param debugger debugger
+     */
     public QueryCommand(Debugger debugger) {
         super(debugger);
     }
+    @Override
     public String getCommandName() {
         return "query";
     }
+    @Override
     public String[] getDescription() {
         return new String[] {
             "","prints whether there is a clash",
             "?|predicate [?|nodeID]+","prints all facts matching the query; ? is a joker",
         };
     }
+    @Override
     public void printHelp(PrintWriter writer) {
         writer.println("usage: query");
         writer.println("    Prints whether the model contains a clash.");
@@ -50,6 +56,7 @@ public class QueryCommand extends AbstractCommand {
         writer.println("    Prints all facts matching the query, which is a partially specified atom.");
         writer.println("    Parts of the atom are either specified fully, or by using ? as a joker.");
     }
+    @Override
     public void execute(String[] args) {
         Object[] tuple=new Object[args.length-1];
         if (tuple.length==0) {
@@ -86,7 +93,7 @@ public class QueryCommand extends AbstractCommand {
                         nodeID=Integer.parseInt(nodeIDString);
                     }
                     catch (NumberFormatException e) {
-                        m_debugger.getOutput().println("Invalid node ID.");
+                        m_debugger.getOutput().println("Invalid node ID. "+e.getMessage());
                         return;
                     }
                     tuple[index]=m_debugger.getTableau().getNode(nodeID);
@@ -104,7 +111,7 @@ public class QueryCommand extends AbstractCommand {
             ExtensionTable.Retrieval retrieval=extensionTable.createRetrieval(boundPositions,ExtensionTable.View.TOTAL);
             System.arraycopy(tuple,0,retrieval.getBindingsBuffer(),0,tuple.length);
             retrieval.open();
-            Set<Object[]> facts=new TreeSet<Object[]>(Printing.FactComparator.INSTANCE);
+            Set<Object[]> facts=new TreeSet<>(Printing.FactComparator.INSTANCE);
             Object[] tupleBuffer=retrieval.getTupleBuffer();
             while (!retrieval.afterLast()) {
                 facts.add(tupleBuffer.clone());

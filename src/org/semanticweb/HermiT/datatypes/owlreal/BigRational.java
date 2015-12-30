@@ -36,51 +36,72 @@ public class BigRational extends Number implements Comparable<BigRational> {
     private final BigInteger m_numerator;
     private final BigInteger m_denominator;
 
+    /**
+     * @param numerator numerator
+     * @param denominator denominator
+     */
     public BigRational(BigInteger numerator,BigInteger denominator) {
         m_numerator=numerator;
         m_denominator=denominator;
     }
+    /**
+     * @return numerator
+     */
     public BigInteger getNumerator() {
         return m_numerator;
     }
+    /**
+     * @return denominator
+     */
     public BigInteger getDenominator() {
         return m_denominator;
     }
+    /**
+     * @return true if finitely representable
+     */
     public boolean isFinitelyRepresentable() {
         try {
             new BigDecimal(m_numerator).divide(new BigDecimal(m_denominator)).doubleValue();
             return true;
         }
-        catch (ArithmeticException e) {
+        catch (@SuppressWarnings("unused") ArithmeticException e) {
             return false;
         }
     }
+    @Override
     public int compareTo(BigRational that) {
         return m_numerator.multiply(that.m_denominator).compareTo(m_denominator.multiply(that.m_numerator));
     }
+    @Override
     public boolean equals(Object that) {
         if (that==this)
             return true;
-        if (!(that instanceof BigRational) || that==null)
+        if (!(that instanceof BigRational))
             return false;
         BigRational thatRational=(BigRational)that;
         return m_numerator.equals(thatRational.m_numerator) && m_denominator.equals(thatRational.m_denominator);
     }
+    @Override
     public int hashCode() {
         return m_numerator.hashCode()*3+m_denominator.hashCode();
     }
+    @Override
     public String toString() {
         return m_numerator.toString()+"/"+m_denominator.toString();
     }
+    @Override
     public double doubleValue() {
         return m_numerator.divide(m_denominator).doubleValue();
     }
+    @Override
     public float floatValue() {
         return m_numerator.divide(m_denominator).floatValue();
     }
+    @Override
     public int intValue() {
         return m_numerator.divide(m_denominator).intValue();
     }
+    @Override
     public long longValue() {
         return m_numerator.divide(m_denominator).longValue();
     }

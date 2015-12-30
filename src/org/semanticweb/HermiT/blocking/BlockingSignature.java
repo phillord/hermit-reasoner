@@ -19,19 +19,27 @@ package org.semanticweb.HermiT.blocking;
 
 import org.semanticweb.HermiT.tableau.Node;
 
+/**
+ * Blocking signature.
+ */
 public abstract class BlockingSignature {
-    protected BlockingSignature m_nextEntry;
-    
-    public BlockingSignature() {
-        m_nextEntry=null;
-    }
+    protected BlockingSignature m_nextEntry=null;
+
+    /**
+     * @return next entry
+     */
     public final BlockingSignature getNextEntry() {
         return m_nextEntry;
     }
+    /**
+     * @param nextEntry next entry
+     */
     public void setNextEntry(BlockingSignature nextEntry) {
         m_nextEntry=nextEntry;
     }
+    /**
+     * @param node node
+     * @return true if block
+     */
     public abstract boolean blocksNode(Node node);
-    public abstract int hashCode();
-    public abstract boolean equals(Object that);
 }

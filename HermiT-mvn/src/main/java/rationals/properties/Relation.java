@@ -35,7 +35,6 @@
  */
 package rationals.properties;
 
-import java.util.List;
 import java.util.Set;
 
 import rationals.Automaton;
@@ -54,10 +53,10 @@ public interface Relation {
 
     /**
      * Sets the context for computing the relation.
-     * This method must be called before {@link equivalent(State,State)}.
+     * This method must be called before {@link #equivalence(State,State)}.
      * 
-     * @param a1
-     * @param a2
+     * @param a1 a1
+     * @param a2 a2
      */
     void setAutomata(Automaton a1,Automaton a2);
     
@@ -66,8 +65,8 @@ public interface Relation {
      * This method returns true if and only if the two states
      * are in relation.
      * 
-     * @param s1
-     * @param s2
+     * @param s1 s1
+     * @param s2 s2
      * @return true is s1 ~ s2, false otherwise 
      */
     boolean equivalence(State s1,State s2);
@@ -82,13 +81,5 @@ public interface Relation {
      * @param nsb a Set of State objects from b
      * @return true if nsa is equivalent to nsb
      */
-    public boolean equivalence(Set nsa, Set nsb);
-    
-    /**
-     * Returns the trace of labels that lead to an error.
-     * 
-     * @return a List of objects or null.
-     */
-    public List getErrorTrace();
-
+    boolean equivalence(Set<State> nsa, Set<State> nsb);
 }

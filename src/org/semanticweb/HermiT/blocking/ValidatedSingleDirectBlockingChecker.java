@@ -18,8 +18,7 @@
 package org.semanticweb.HermiT.blocking;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.semanticweb.HermiT.model.AtomicConcept;
@@ -30,33 +29,37 @@ import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.NodeType;
 import org.semanticweb.HermiT.tableau.Tableau;
-
+/**Validated single direct bocking checker.*/
 public class ValidatedSingleDirectBlockingChecker implements DirectBlockingChecker,Serializable {
     private static final long serialVersionUID=9093753046859877016L;
 
-    protected final SetFactory<AtomicConcept> m_atomicConceptsSetFactory=new SetFactory<AtomicConcept>();
-    protected final SetFactory<AtomicRole> m_atomicRolesSetFactory=new SetFactory<AtomicRole>();
-    protected final List<AtomicConcept> m_atomicConceptsBuffer=new ArrayList<AtomicConcept>();
-    protected final List<AtomicRole> m_atomicRolesBuffer=new ArrayList<AtomicRole>();
+    protected final SetFactory<AtomicConcept> m_atomicConceptsSetFactory=new SetFactory<>();
+    protected final SetFactory<AtomicRole> m_atomicRolesSetFactory=new SetFactory<>();
+    protected final Set<AtomicConcept> m_atomicConceptsBuffer=new LinkedHashSet<>();
+    protected final Set<AtomicRole> m_atomicRolesBuffer=new LinkedHashSet<>();
     protected final boolean m_hasInverses;
-    protected Tableau m_tableau;
     protected ExtensionTable.Retrieval m_binaryTableSearch1Bound;
     protected ExtensionTable.Retrieval m_ternaryTableSearch12Bound;
 
+    /**
+     * @param hasInverses hasInverses
+     */
     public ValidatedSingleDirectBlockingChecker(boolean hasInverses) {
-    	m_hasInverses=hasInverses;
+        m_hasInverses=hasInverses;
     }
+    @Override
     public void initialize(Tableau tableau) {
-        m_tableau=tableau;
         m_binaryTableSearch1Bound=tableau.getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
         m_ternaryTableSearch12Bound=tableau.getExtensionManager().getTernaryExtensionTable().createRetrieval(new boolean[] { false,true,true },ExtensionTable.View.TOTAL);
     }
+    @Override
     public void clear() {
         m_atomicConceptsSetFactory.clearNonpermanent();
         m_atomicRolesSetFactory.clearNonpermanent();
         m_binaryTableSearch1Bound.clear();
         m_ternaryTableSearch12Bound.clear();
     }
+    @Override
     public boolean isBlockedBy(Node blocker,Node blocked) {
         boolean isBlockedBy=
             !blocker.isBlocked() &&
@@ -65,60 +68,77 @@ public class ValidatedSingleDirectBlockingChecker implements DirectBlockingCheck
             ((ValidatedSingleBlockingObject)blocker.getBlockingObject()).getAtomicConceptsLabel()==((ValidatedSingleBlockingObject)blocked.getBlockingObject()).getAtomicConceptsLabel();
         return isBlockedBy;
     }
+    @Override
     public int blockingHashCode(Node node) {
         return ((ValidatedSingleBlockingObject)node.getBlockingObject()).m_blockingRelevantHashCode;
     }
+    @Override
     public boolean canBeBlocker(Node node) {
-    	Node parent=node.getParent();
+        Node parent=node.getParent();
         return node.getNodeType()==NodeType.TREE_NODE && (!m_hasInverses || node.getParent().getNodeType()==NodeType.TREE_NODE || parent.getNodeType()==NodeType.GRAPH_NODE);
     }
+    @Override
     public boolean canBeBlocked(Node node) {
-    	Node parent=node.getParent();
+        Node parent=node.getParent();
         return node.getNodeType()==NodeType.TREE_NODE && (!m_hasInverses || node.getParent().getNodeType()==NodeType.TREE_NODE || parent.getNodeType()==NodeType.GRAPH_NODE);
     }
+    @Override
     public boolean hasBlockingInfoChanged(Node node) {
         return ((ValidatedSingleBlockingObject)node.getBlockingObject()).m_hasChangedForBlocking;
     }
+    @Override
     public void clearBlockingInfoChanged(Node node) {
         ((ValidatedSingleBlockingObject)node.getBlockingObject()).m_hasChangedForBlocking=false;
     }
+    @Override
     public boolean hasChangedSinceValidation(Node node) {
         return ((ValidatedSingleBlockingObject)node.getBlockingObject()).m_hasChangedForValidation;
     }
+    @Override
     public void setHasChangedSinceValidation(Node node, boolean hasChanged) {
         ((ValidatedSingleBlockingObject)node.getBlockingObject()).m_hasChangedForValidation=hasChanged;
     }
+    @Override
     public void nodeInitialized(Node node) {
         if (node.getBlockingObject()==null)
             node.setBlockingObject(new ValidatedSingleBlockingObject(node));
         ((ValidatedSingleBlockingObject)node.getBlockingObject()).initialize();
     }
+    @Override
     public void nodeDestroyed(Node node) {
         ((ValidatedSingleBlockingObject)node.getBlockingObject()).destroy();
     }
+    @Override
     public Node assertionAdded(Concept concept,Node node,boolean isCore) {
         ((ValidatedSingleBlockingObject)node.getBlockingObject()).addConcept(concept, isCore);
         return (concept instanceof AtomicConcept && isCore)?node:null;
     }
+    @Override
     public Node assertionRemoved(Concept concept, Node node, boolean isCore) {
         ((ValidatedSingleBlockingObject) node.getBlockingObject()).removeConcept(concept, isCore);
         return (concept instanceof AtomicConcept && isCore)?node:null;
     }
+    @Override
     public Node assertionAdded(DataRange range,Node node,boolean isCore) {
         return null;
     }
+    @Override
     public Node assertionRemoved(DataRange range,Node node,boolean isCore) {
         return null;
     }
+    @Override
     public Node assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
         return null;
     }
+    @Override
     public Node assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
         return null;
     }
+    @Override
     public Node nodesMerged(Node mergeFrom,Node mergeInto) {
         return null;
     }
+    @Override
     public Node nodesUnmerged(Node mergeFrom,Node mergeInto) {
         return null;
     }
@@ -157,10 +177,11 @@ public class ValidatedSingleDirectBlockingChecker implements DirectBlockingCheck
         m_atomicRolesBuffer.clear();
         return result;
     }
+    @Override
     public BlockingSignature getBlockingSignatureFor(Node node) {
         return new ValidatedBlockingSignature(this,node);
     }
-    public class ValidatedSingleBlockingObject implements ValidatedBlockingObject {
+    private class ValidatedSingleBlockingObject implements ValidatedBlockingObject {
         protected final Node m_node;
         protected boolean m_hasChangedForBlocking;
         protected boolean m_hasChangedForValidation;
@@ -175,6 +196,7 @@ public class ValidatedSingleDirectBlockingChecker implements DirectBlockingCheck
         public ValidatedSingleBlockingObject(Node node) {
             m_node=node;
         }
+        @Override
         public void initialize() {
             m_blockingRelevantLabel=null;
             m_blockingRelevantHashCode=0;
@@ -184,6 +206,7 @@ public class ValidatedSingleDirectBlockingChecker implements DirectBlockingCheck
             m_hasChangedForBlocking=true;
             m_hasChangedForValidation=true;
         }
+        @Override
         public void destroy() {
             if (m_blockingRelevantLabel!=null) {
                 m_atomicConceptsSetFactory.removeReference(m_blockingRelevantLabel);
@@ -202,6 +225,7 @@ public class ValidatedSingleDirectBlockingChecker implements DirectBlockingCheck
                 m_fullToParentLabel=null;
             }
         }
+        @Override
         public Set<AtomicConcept> getAtomicConceptsLabel() {
             if (m_blockingRelevantLabel==null) {
                 m_blockingRelevantLabel=ValidatedSingleDirectBlockingChecker.this.fetchAtomicConceptsLabel(m_node,true);
@@ -209,6 +233,7 @@ public class ValidatedSingleDirectBlockingChecker implements DirectBlockingCheck
             }
             return m_blockingRelevantLabel;
         }
+        @Override
         public void addConcept(Concept concept, boolean isCore) {
           // for validation purposes not only the core and atomic concept changes matter
           m_hasChangedForValidation=true;
@@ -230,6 +255,7 @@ public class ValidatedSingleDirectBlockingChecker implements DirectBlockingCheck
               }
           }
         }
+        @Override
         public void removeConcept(Concept concept, boolean isCore) {
             // for validation purposes not only the core and atomicConcept
             // changes matter
@@ -251,6 +277,7 @@ public class ValidatedSingleDirectBlockingChecker implements DirectBlockingCheck
                 }
             }
         }
+        @Override
         public Set<AtomicConcept> getFullAtomicConceptsLabel() {
             if (m_fullAtomicConceptsLabel==null) {
                 m_fullAtomicConceptsLabel=ValidatedSingleDirectBlockingChecker.this.fetchAtomicConceptsLabel(m_node,false);
@@ -258,6 +285,7 @@ public class ValidatedSingleDirectBlockingChecker implements DirectBlockingCheck
             }
             return m_fullAtomicConceptsLabel;
         }
+        @Override
         public Set<AtomicRole> getFullFromParentLabel() {
             if (m_hasChangedForValidation || m_fullFromParentLabel==null) {
                 m_fullFromParentLabel=ValidatedSingleDirectBlockingChecker.this.fetchAtomicRolesLabel(m_node.getParent(),m_node,false);
@@ -265,6 +293,7 @@ public class ValidatedSingleDirectBlockingChecker implements DirectBlockingCheck
             }
             return m_fullFromParentLabel;
         }
+        @Override
         public Set<AtomicRole> getFullToParentLabel() {
             if (m_hasChangedForValidation || m_fullToParentLabel==null) {
                 m_fullToParentLabel=ValidatedSingleDirectBlockingChecker.this.fetchAtomicRolesLabel(m_node,m_node.getParent(),false);
@@ -272,15 +301,19 @@ public class ValidatedSingleDirectBlockingChecker implements DirectBlockingCheck
             }
             return m_fullToParentLabel;
         }
+        @Override
         public void setBlockViolatesParentConstraints(boolean violates) {
             m_blockViolatesParentConstraints=violates;
         }
+        @Override
         public void setHasAlreadyBeenChecked(boolean hasBeenChecked) {
             m_hasAlreadyBeenChecked=hasBeenChecked;
         }
+        @Override
         public boolean hasAlreadyBeenChecked() {
             return m_hasAlreadyBeenChecked;
         }
+        @Override
         public boolean blockViolatesParentConstraints() {
             return m_blockViolatesParentConstraints;
         }
@@ -307,13 +340,16 @@ public class ValidatedSingleDirectBlockingChecker implements DirectBlockingCheck
             checker.m_atomicRolesSetFactory.makePermanent(m_fromParentLabel);
             checker.m_atomicRolesSetFactory.makePermanent(m_toParentLabel);
         }
+        @Override
         public boolean blocksNode(Node node) {
             ValidatedSingleBlockingObject nodeBlockingObject = (ValidatedSingleBlockingObject) node.getBlockingObject();
             return nodeBlockingObject.getAtomicConceptsLabel() == m_blockingRelevantConceptsLabel;
         }
+        @Override
         public int hashCode() {
             return m_hashCode;
         }
+        @Override
         public boolean equals(Object that) {
             if (this==that)
                 return true;
@@ -328,18 +364,59 @@ public class ValidatedSingleDirectBlockingChecker implements DirectBlockingCheck
                 m_toParentLabel==thatSignature.m_toParentLabel;
         }
     }
+    /**
+     * Validated blocking object.
+     */
     public static interface ValidatedBlockingObject {
-        public void initialize();
-        public void destroy();
-        public Set<AtomicConcept> getAtomicConceptsLabel();
-        public void addConcept(Concept concept, boolean isCore);
-        public void removeConcept(Concept concept, boolean isCore);
-        public Set<AtomicConcept> getFullAtomicConceptsLabel();
-        public Set<AtomicRole> getFullFromParentLabel();
-        public Set<AtomicRole> getFullToParentLabel();
-        public void setBlockViolatesParentConstraints(boolean violates);
-        public void setHasAlreadyBeenChecked(boolean hasBeenChecked);
-        public boolean hasAlreadyBeenChecked();
-        public boolean blockViolatesParentConstraints();
+        /**
+         * Initialize.
+         */
+        void initialize();
+        /**
+         * Destroy.
+         */
+        void destroy();
+        /**
+         * @return atomic concepts label
+         */
+        Set<AtomicConcept> getAtomicConceptsLabel();
+        /**
+         * @param concept concept
+         * @param isCore isCore
+         */
+        void addConcept(Concept concept, boolean isCore);
+        /**
+         * @param concept concept
+         * @param isCore isCore
+         */
+        void removeConcept(Concept concept, boolean isCore);
+        /**
+         * @return full atomic concepts label
+         */
+        Set<AtomicConcept> getFullAtomicConceptsLabel();
+        /**
+         * @return full from parent label
+         */
+        Set<AtomicRole> getFullFromParentLabel();
+        /**
+         * @return full to parent label
+         */
+        Set<AtomicRole> getFullToParentLabel();
+        /**
+         * @param violates violates
+         */
+        void setBlockViolatesParentConstraints(boolean violates);
+        /**
+         * @param hasBeenChecked hasBeenChecked
+         */
+        void setHasAlreadyBeenChecked(boolean hasBeenChecked);
+        /**
+         * @return true if already checked
+         */
+        boolean hasAlreadyBeenChecked();
+        /**
+         * @return true if block violates parent constraints
+         */
+        boolean blockViolatesParentConstraints();
     }
 }

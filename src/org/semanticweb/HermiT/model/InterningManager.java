@@ -22,21 +22,20 @@ import java.lang.ref.WeakReference;
 
 /**
  * The manager for the internable objects.
+ * @param <E> type
  */
 public abstract class InterningManager<E> {
     protected static final double LOAD_FACTOR=0.75;
 
-    protected final ReferenceQueue<E> m_referenceQueue;
-    protected Entry<E>[] m_entries;
-    protected int m_size;
-    protected int m_resizeThreshold;
+    protected final ReferenceQueue<E> m_referenceQueue=new ReferenceQueue<>();
+    protected Entry<E>[] m_entries=createEntries(16);
+    protected int m_size=0;
+    protected int m_resizeThreshold=12;
     
-    public InterningManager() {
-        m_referenceQueue=new ReferenceQueue<E>();
-        m_entries=createEntries(16);
-        m_size=0;
-        m_resizeThreshold=(int)(m_entries.length*LOAD_FACTOR);
-    }
+    /**
+     * @param object object
+     * @return interned object
+     */
     public synchronized E intern(E object) {
         processQueue();
         int hashCode=getHashCode(object);
@@ -80,12 +79,12 @@ public abstract class InterningManager<E> {
             m_resizeThreshold=(int)(newEntriesLength*LOAD_FACTOR);
             objectEntryIndex=getIndexFor(hashCode,m_entries.length);
         }
-        Entry<E> newEntry=new Entry<E>(object,m_referenceQueue,hashCode,m_entries[objectEntryIndex]);
+        Entry<E> newEntry=new Entry<>(object,m_referenceQueue,hashCode,m_entries[objectEntryIndex]);
         m_entries[objectEntryIndex]=newEntry;
         m_size++;
         return object;
     }
-    protected final int getIndexFor(int hashCode,int entriesLength) {
+    protected static final int getIndexFor(int hashCode,int entriesLength) {
         return hashCode & (entriesLength-1);
     }
     protected void removeEntry(Entry<E> entry) {
@@ -113,7 +112,7 @@ public abstract class InterningManager<E> {
     }
     @SuppressWarnings("unchecked")
     protected final Entry<E>[] createEntries(int size) {
-        return (Entry<E>[])new Entry[size];
+        return new Entry[size];
     }
     protected abstract int getHashCode(E object);
     protected abstract boolean equal(E object1,E object2);

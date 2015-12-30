@@ -20,27 +20,34 @@ package org.semanticweb.HermiT.debugger.commands;
 import java.io.PrintWriter;
 
 import org.semanticweb.HermiT.debugger.Debugger;
-
+/**HelpCommand.*/
 public class HelpCommand extends AbstractCommand {
 
+    /**
+     * @param debugger debugger
+     */
     public HelpCommand(Debugger debugger) {
         super(debugger);
     }
+    @Override
     public String getCommandName() {
         return "help";
     }
+    @Override
     public String[] getDescription() {
         return new String[] {
             "","prints this list of command",
             "commandName","prints help for a command"
         };
     }
+    @Override
     public void printHelp(PrintWriter writer) {
         writer.println("usage: help");
         writer.println("    Prints this message.");
         writer.println("usage: help commandName");
         writer.println("    Prints help for the command commandName.");
     }
+    @Override
     public void execute(String[] args) {
         if (args.length>1) {
             String commandName=args[1];

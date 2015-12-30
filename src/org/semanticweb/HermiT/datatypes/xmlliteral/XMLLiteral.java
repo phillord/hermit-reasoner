@@ -3,7 +3,7 @@ package org.semanticweb.HermiT.datatypes.xmlliteral;
 import org.apache.axiom.c14n.impl.Canonicalizer20010315ExclWithComments;
 
 
-public class XMLLiteral {
+class XMLLiteral {
     protected final String m_xml;
 
     public XMLLiteral(String xml) {
@@ -12,6 +12,7 @@ public class XMLLiteral {
     public String getXML() {
         return m_xml;
     }
+    @Override
     public boolean equals(Object that) {
         if (this==that)
             return true;
@@ -19,9 +20,11 @@ public class XMLLiteral {
             return false;
         return ((XMLLiteral)that).m_xml.equals(m_xml);
     }
+    @Override
     public int hashCode() {
         return m_xml.hashCode();
     }
+    @Override
     public String toString() {
         return m_xml;
     }

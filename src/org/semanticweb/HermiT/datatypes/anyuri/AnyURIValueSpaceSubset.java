@@ -29,6 +29,9 @@ import dk.brics.automaton.BasicOperations;
 import dk.brics.automaton.Datatypes;
 import dk.brics.automaton.RegExp;
 
+/**
+ * AnyURI value subset.
+ */
 public class AnyURIValueSpaceSubset implements ValueSpaceSubset {
     protected static final Automaton s_anyChar;
     protected static final Automaton s_anyString;
@@ -43,9 +46,13 @@ public class AnyURIValueSpaceSubset implements ValueSpaceSubset {
 
     protected final Automaton m_automaton;
     
+    /**
+     * @param automaton automaton
+     */
     public AnyURIValueSpaceSubset(Automaton automaton) {
         m_automaton=automaton;
     }
+    @Override
     public boolean hasCardinalityAtLeast(int number) {
         Set<String> elements=m_automaton.getFiniteStrings(number);
         if (elements==null)
@@ -53,12 +60,14 @@ public class AnyURIValueSpaceSubset implements ValueSpaceSubset {
         else
             return elements.size()>=number;
     }
+    @Override
     public boolean containsDataValue(Object dataValue) {
         if (dataValue instanceof URI)
             return m_automaton.run(dataValue.toString());
         else
             return false;
     }
+    @Override
     public void enumerateDataValues(Collection<Object> dataValues) {
         Set<String> elements=m_automaton.getFiniteStrings();
         if (elements==null)
@@ -68,6 +77,7 @@ public class AnyURIValueSpaceSubset implements ValueSpaceSubset {
                 dataValues.add(URI.create(element));
         }
     }
+    @Override
     public String toString() {
         StringBuffer buffer=new StringBuffer();
         buffer.append("xsd:anyURI{");
@@ -75,7 +85,7 @@ public class AnyURIValueSpaceSubset implements ValueSpaceSubset {
         buffer.append('}');
         return buffer.toString();
     }
-    public static Automaton toAutomaton(int minLength,int maxLength) {
+    static Automaton toAutomaton(int minLength,int maxLength) {
         assert minLength<=maxLength;
         if (maxLength==Integer.MAX_VALUE) {
             if (minLength==0)
@@ -86,7 +96,8 @@ public class AnyURIValueSpaceSubset implements ValueSpaceSubset {
         else
             return s_anyString.intersection(BasicOperations.repeat(s_anyChar,minLength,maxLength));
     }
-    public static boolean isValidPattern(String pattern) {
+    @SuppressWarnings("unused")
+    static boolean isValidPattern(String pattern) {
         try {
             new RegExp(pattern);
             return true;
@@ -95,7 +106,7 @@ public class AnyURIValueSpaceSubset implements ValueSpaceSubset {
             return false;
         }
     }
-    public static Automaton getPatternAutomaton(String pattern) {
+    static Automaton getPatternAutomaton(String pattern) {
         return new RegExp(pattern).toAutomaton();
     }
 }

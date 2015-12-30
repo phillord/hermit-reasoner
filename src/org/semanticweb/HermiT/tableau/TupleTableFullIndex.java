@@ -19,7 +19,7 @@ package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
 
-public final class TupleTableFullIndex implements Serializable {
+final class TupleTableFullIndex implements Serializable {
     private static final long serialVersionUID=5006873858554891684L;
 
     protected static final int BUCKET_OFFSET=1;
@@ -193,10 +193,6 @@ public final class TupleTableFullIndex implements Serializable {
             else
                 m_firstFreeEntry=nextFreeEntry;
             return result;
-        }
-        public void deleteEntry(int entry) {
-            m_entries[entry+ENTRY_NEXT]=m_firstFreeEntry;
-            m_firstFreeEntry=entry;
         }
     }
 }

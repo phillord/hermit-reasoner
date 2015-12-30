@@ -37,44 +37,42 @@ package rationals.transformations;
 
 import java.util.Set;
 
+import rationals.State;
 
-public class StatesCouple {
-    public final Set sa;
+class StatesCouple {
+    final Set<State> sa;
 
-    public final Set sb;
+    final Set<State> sb;
 
     final int hash;
 
-    public StatesCouple(Set sa, Set sb) {
+    public StatesCouple(Set<State> sa, Set<State> sb) {
         this.sa = sa;
         this.sb = sb;
         this.hash = sa.hashCode() + sb.hashCode();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
+    @Override
     public boolean equals(Object obj) {
+        if(obj==null) {
+            return false;
+        }
+        if(obj==this) {
+            return true;
+        }
+        if(!(obj instanceof StatesCouple)) {
+            return false;
+        }
         StatesCouple sc = (StatesCouple) obj;
         return sc.sa.equals(sa) && sc.sb.equals(sb);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#hashCode()
-     */
+    @Override
     public int hashCode() {
         return hash;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#toString()
-     */
+    @Override
     public String toString() {
         return " < " + sa.toString() + "," + sb.toString() + " >";
     }

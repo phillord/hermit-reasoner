@@ -39,6 +39,9 @@ public final class MergingManager implements Serializable {
     protected final Object[] m_ternaryAuxiliaryTuple;
     protected final UnionDependencySet m_binaryUnionDependencySet;
 
+    /**
+     * @param tableau tableau for this manager
+     */
     public MergingManager(Tableau tableau) {
         m_tableau=tableau;
         m_tableauMonitor=m_tableau.m_tableauMonitor;
@@ -50,6 +53,9 @@ public final class MergingManager implements Serializable {
         m_ternaryAuxiliaryTuple=new Object[3];
         m_binaryUnionDependencySet=new UnionDependencySet(2);
     }
+    /**
+     * Clear manager.
+     */
     public void clear() {
         m_binaryExtensionTableSearch1Bound.clear();
         m_ternaryExtensionTableSearch1Bound.clear();
@@ -64,6 +70,10 @@ public final class MergingManager implements Serializable {
      * Merges the two given nodes and adjusts the dependency set as required. It is
      * automatically figured out which node has to be merged into which -- that is,
      * the order between node0 and node1 is not important.
+     * @param node0 node to merge
+     * @param node1 node to merge
+     * @param dependencySet dependency set
+     * @return true if merges are made
      */
     public boolean mergeNodes(Node node0,Node node1,DependencySet dependencySet) {
         assert node0.getNodeType().isAbstract()==node1.getNodeType().isAbstract();
@@ -184,7 +194,7 @@ public final class MergingManager implements Serializable {
                 m_ternaryExtensionTableSearch2Bound.next();
             }
             // Now merge the description graphs
-            m_tableau.m_descriptionGraphManager.mergeGraphs(mergeFrom,mergeInto,m_binaryUnionDependencySet);
+            m_tableau.m_descriptionGraphManager.mergeGraphs(mergeFrom,mergeInto);
             // Now finally merge the nodes
             m_tableau.mergeNode(mergeFrom,mergeInto,dependencySet);
             // Inform the monitor
@@ -193,7 +203,7 @@ public final class MergingManager implements Serializable {
             return true;
         }
     }
-    protected boolean isDescendantOfAtMostThreeLevels(Node descendant,Node ancestor) {
+    protected static boolean isDescendantOfAtMostThreeLevels(Node descendant,Node ancestor) {
         // The method tests ancestry, but only up to three levels.
         // Merges over more levels should not happen.
         if (descendant!=null) {

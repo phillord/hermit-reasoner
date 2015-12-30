@@ -29,12 +29,26 @@ import org.semanticweb.HermiT.Prefixes;
 public abstract class DataRange implements Serializable {
     private static final long serialVersionUID=352467050584766830L;
 
+    /**
+     * @return true if always true
+     */
     public abstract boolean isAlwaysTrue();
+    /**
+     * @return true if always false
+     */
     public abstract boolean isAlwaysFalse();
+    /**
+     * @return arity
+     */
     public int getArity() {
         return 1;
     }
+    /**
+     * @param prefixes prefixes
+     * @return toString
+     */
     public abstract String toString(Prefixes prefixes);
+    @Override
     public String toString() {
         return toString(Prefixes.STANDARD_PREFIXES);
     }

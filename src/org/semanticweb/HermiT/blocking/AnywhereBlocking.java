@@ -29,7 +29,7 @@ import org.semanticweb.HermiT.model.Variable;
 import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.Tableau;
-
+/**Anywhere blocking strategy.*/
 public class AnywhereBlocking implements BlockingStrategy,Serializable {
     private static final long serialVersionUID=-2959900333817197464L;
 
@@ -40,30 +40,39 @@ public class AnywhereBlocking implements BlockingStrategy,Serializable {
     protected boolean m_useBlockingSignatureCache;
     protected Node m_firstChangedNode;
 
+    /**
+     * @param directBlockingChecker directBlockingChecker
+     * @param blockingSignatureCache blockingSignatureCache
+     */
     public AnywhereBlocking(DirectBlockingChecker directBlockingChecker,BlockingSignatureCache blockingSignatureCache) {
         m_directBlockingChecker=directBlockingChecker;
         m_currentBlockersCache=new BlockersCache(m_directBlockingChecker);
         m_blockingSignatureCache=blockingSignatureCache;
     }
+    @Override
     public void initialize(Tableau tableau) {
         m_tableau=tableau;
         m_directBlockingChecker.initialize(tableau);
         updateBlockingSignatureCacheUsage();
     }
+    @Override
     public void additionalDLOntologySet(DLOntology additionalDLOntology) {
         updateBlockingSignatureCacheUsage();
     }
+    @Override
     public void additionalDLOntologyCleared() {
         updateBlockingSignatureCacheUsage();
     }
     protected void updateBlockingSignatureCacheUsage() {
         m_useBlockingSignatureCache=(m_tableau.getAdditionalHyperresolutionManager()==null);
     }
+    @Override
     public void clear() {
         m_currentBlockersCache.clear();
         m_firstChangedNode=null;
         m_directBlockingChecker.clear();
     }
+    @Override
     public void computeBlocking(boolean finalChance) {
         if (m_firstChangedNode!=null) {
             Node node=m_firstChangedNode;
@@ -103,42 +112,56 @@ public class AnywhereBlocking implements BlockingStrategy,Serializable {
             m_firstChangedNode=null;
         }
     }
+    @Override
     public boolean isPermanentAssertion(Concept concept,Node node) {
         return true;
     }
+    @Override
     public boolean isPermanentAssertion(DataRange range,Node node) {
         return true;
     }
+    @Override
     public void assertionAdded(Concept concept,Node node,boolean isCore) {
         updateNodeChange(m_directBlockingChecker.assertionAdded(concept,node,isCore));
     }
+    @Override
     public void assertionCoreSet(Concept concept,Node node) {
     }
+    @Override
     public void assertionRemoved(Concept concept,Node node,boolean isCore) {
         updateNodeChange(m_directBlockingChecker.assertionRemoved(concept,node,isCore));
     }
+    @Override
     public void assertionAdded(DataRange range,Node node,boolean isCore) {
         m_directBlockingChecker.assertionAdded(range,node,isCore);
     }
+    @Override
     public void assertionCoreSet(DataRange range,Node node) {
     }
+    @Override
     public void assertionRemoved(DataRange range,Node node,boolean isCore) {
         m_directBlockingChecker.assertionRemoved(range,node,isCore);
     }
+    @Override
     public void assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
         updateNodeChange(m_directBlockingChecker.assertionAdded(atomicRole,nodeFrom,nodeTo,isCore));
     }
+    @Override
     public void nodesMerged(Node mergeFrom,Node mergeInto) {
         updateNodeChange(m_directBlockingChecker.nodesMerged(mergeFrom,mergeInto));
     }
+    @Override
     public void nodesUnmerged(Node mergeFrom,Node mergeInto) {
         updateNodeChange(m_directBlockingChecker.nodesUnmerged(mergeFrom,mergeInto));
     }
+    @Override
     public void assertionCoreSet(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
     }
+    @Override
     public void assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
         updateNodeChange(m_directBlockingChecker.assertionRemoved(atomicRole,nodeFrom,nodeTo,isCore));
     }
+    @Override
     public void nodeStatusChanged(Node node) {
         updateNodeChange(node);
     }
@@ -146,15 +169,18 @@ public class AnywhereBlocking implements BlockingStrategy,Serializable {
         if (node!=null && (m_firstChangedNode==null || node.getNodeID()<m_firstChangedNode.getNodeID()))
             m_firstChangedNode=node;
     }
+    @Override
     public void nodeInitialized(Node node) {
         m_directBlockingChecker.nodeInitialized(node);
     }
+    @Override
     public void nodeDestroyed(Node node) {
         m_currentBlockersCache.removeNode(node);
         m_directBlockingChecker.nodeDestroyed(node);
         if (m_firstChangedNode!=null && m_firstChangedNode.getNodeID()>=node.getNodeID())
             m_firstChangedNode=null;
     }
+    @Override
     public void modelFound() {
         if (m_useBlockingSignatureCache && m_blockingSignatureCache!=null) {
             // Since we've found a model, we know what is blocked and what is not, so we don't need to update the blocking status.
@@ -167,9 +193,11 @@ public class AnywhereBlocking implements BlockingStrategy,Serializable {
             }
         }
     }
+    @Override
     public boolean isExact() {
         return true;
     }
+    @Override
     public void dlClauseBodyCompiled(List<DLClauseEvaluator.Worker> workers,DLClause dlClause,List<Variable> variables,Object[] valuesBuffer,boolean[] coreVariables) {
         for (int i=0;i<coreVariables.length;i++) {
             coreVariables[i]=true;
@@ -179,7 +207,6 @@ public class AnywhereBlocking implements BlockingStrategy,Serializable {
 class BlockersCache implements Serializable {
     private static final long serialVersionUID=-7692825443489644667L;
 
-    protected Tableau m_tableau;
     protected final DirectBlockingChecker m_directBlockingChecker;
     protected CacheEntry[] m_buckets;
     protected int m_numberOfElements;
@@ -281,7 +308,8 @@ class BlockersCache implements Serializable {
         }
         return null;
     }
-    protected static int getIndexFor(int hashCode,int tableLength) {
+    protected static int getIndexFor(int _hashCode,int tableLength) {
+        int hashCode=_hashCode;
         hashCode+=~(hashCode << 9);
         hashCode^=(hashCode >>> 14);
         hashCode+=(hashCode << 4);

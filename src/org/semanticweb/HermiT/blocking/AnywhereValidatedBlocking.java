@@ -30,39 +30,41 @@ import org.semanticweb.HermiT.model.DataRange;
 import org.semanticweb.HermiT.model.Variable;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
 import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
-import org.semanticweb.HermiT.tableau.ExtensionManager;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.NodeType;
 import org.semanticweb.HermiT.tableau.Tableau;
-
+/**Anywhere validated blocking strategy.*/
 public class AnywhereValidatedBlocking implements BlockingStrategy {
     protected final DirectBlockingChecker m_directBlockingChecker;
     protected final ValidatedBlockersCache m_currentBlockersCache;
     protected BlockingValidator m_permanentBlockingValidator;
     protected BlockingValidator m_additionalBlockingValidator;
     protected Tableau m_tableau;
-    protected ExtensionManager m_extensionManager;
     protected Node m_firstChangedNode;
     protected Node m_lastValidatedUnchangedNode;
-    protected boolean m_useSimpleCore;
-    protected final boolean m_hasInverses;
+    protected final boolean m_useSimpleCore;
 
-    public AnywhereValidatedBlocking(DirectBlockingChecker directBlockingChecker,boolean hasInverses,boolean useSimpleCore) {
+    /**
+     * @param directBlockingChecker directBlockingChecker
+     * @param useSimpleCore useSimpleCore
+     */
+    public AnywhereValidatedBlocking(DirectBlockingChecker directBlockingChecker,boolean useSimpleCore) {
         m_directBlockingChecker=directBlockingChecker;
         m_currentBlockersCache=new ValidatedBlockersCache(m_directBlockingChecker);
-        m_hasInverses=hasInverses;
         m_useSimpleCore=useSimpleCore;
     }
+    @Override
     public void initialize(Tableau tableau) {
         m_tableau=tableau;
         m_directBlockingChecker.initialize(tableau);
-        m_extensionManager=m_tableau.getExtensionManager();
         m_permanentBlockingValidator=new BlockingValidator(m_tableau,m_tableau.getPermanentDLOntology().getDLClauses());
         updateAdditionalBlockingValidator();
     }
+    @Override
     public void additionalDLOntologySet(DLOntology additionalDLOntology) {
         updateAdditionalBlockingValidator();
     }
+    @Override
     public void additionalDLOntologyCleared() {
         updateAdditionalBlockingValidator();
     }
@@ -72,6 +74,7 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
         else
             m_additionalBlockingValidator=new BlockingValidator(m_tableau,m_tableau.getAdditionalDLOntology().getDLClauses());
     }
+    @Override
     public void clear() {
         m_currentBlockersCache.clear();
         m_firstChangedNode=null;
@@ -81,6 +84,7 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
         if (m_additionalBlockingValidator!=null)
             m_additionalBlockingValidator.clear();
     }
+    @Override
     public void computeBlocking(boolean finalChance) {
         if (finalChance) {
             validateBlocks();
@@ -89,6 +93,9 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
             computePreBlocking();
         }
     }
+    /**
+     * Compute preblocking.
+     */
     public void computePreBlocking() {
         if (m_firstChangedNode!=null) {
             Node node=m_firstChangedNode;
@@ -132,6 +139,9 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
             m_firstChangedNode=null;
         }
     }
+    /**
+     * Validate blocks.
+     */
     public void validateBlocks() {
         // statistics for debugging:
         boolean debuggingMode=false;
@@ -225,9 +235,11 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
         else
             return false;
     }
+    @Override
     public boolean isPermanentAssertion(Concept concept,Node node) {
         return true;
     }
+    @Override
     public boolean isPermanentAssertion(DataRange range,Node node) {
         return true;
     }
@@ -238,36 +250,43 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
             m_directBlockingChecker.setHasChangedSinceValidation(node,true);
         }
     }
+    @Override
     public void assertionAdded(Concept concept,Node node,boolean isCore) {
         updateNodeChange(m_directBlockingChecker.assertionAdded(concept,node,isCore));
         validationInfoChanged(node);
         validationInfoChanged(node.getParent());
     }
+    @Override
     public void assertionCoreSet(Concept concept,Node node) {
         updateNodeChange(m_directBlockingChecker.assertionAdded(concept,node,true));
         validationInfoChanged(node);
         validationInfoChanged(node.getParent());
     }
+    @Override
     public void assertionRemoved(Concept concept,Node node,boolean isCore) {
         updateNodeChange(m_directBlockingChecker.assertionRemoved(concept,node,isCore));
         validationInfoChanged(node);
         validationInfoChanged(node.getParent());
     }
+    @Override
     public void assertionAdded(DataRange range,Node node,boolean isCore) {
         updateNodeChange(m_directBlockingChecker.assertionAdded(range,node,isCore));
         validationInfoChanged(node);
         validationInfoChanged(node.getParent());
     }
+    @Override
     public void assertionCoreSet(DataRange range,Node node) {
         updateNodeChange(m_directBlockingChecker.assertionAdded(range,node,true));
         validationInfoChanged(node);
         validationInfoChanged(node.getParent());
     }
+    @Override
     public void assertionRemoved(DataRange range,Node node,boolean isCore) {
         updateNodeChange(m_directBlockingChecker.assertionRemoved(range,node,isCore));
         validationInfoChanged(node);
         validationInfoChanged(node.getParent());
     }
+    @Override
     public void assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
         if (isCore)
             updateNodeChange(nodeFrom);
@@ -276,26 +295,31 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
         validationInfoChanged(nodeFrom);
         validationInfoChanged(nodeTo);
     }
+    @Override
     public void assertionCoreSet(AtomicRole atomicRole,Node nodeFrom,Node nodeTo) {
         updateNodeChange(m_directBlockingChecker.assertionAdded(atomicRole,nodeFrom,nodeTo,true));
         validationInfoChanged(nodeFrom);
         validationInfoChanged(nodeTo);
     }
+    @Override
     public void assertionRemoved(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {
         updateNodeChange(m_directBlockingChecker.assertionRemoved(atomicRole,nodeFrom,nodeTo,true));
         validationInfoChanged(nodeFrom);
         validationInfoChanged(nodeTo);
     }
+    @Override
     public void nodesMerged(Node mergeFrom,Node mergeInto) {
         Node parent=mergeFrom.getParent();
         if (parent!=null && (m_directBlockingChecker.canBeBlocker(parent) || m_directBlockingChecker.canBeBlocked(parent)))
             validationInfoChanged(parent);
     }
+    @Override
     public void nodesUnmerged(Node mergeFrom,Node mergeInto) {
         Node parent=mergeFrom.getParent();
         if (parent!=null && (m_directBlockingChecker.canBeBlocker(parent) || m_directBlockingChecker.canBeBlocked(parent)))
             validationInfoChanged(parent);
     }
+    @Override
     public void nodeStatusChanged(Node node) {
         updateNodeChange(node);
         validationInfoChanged(node);
@@ -307,9 +331,11 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
                 m_firstChangedNode=node;
         }
     }
+    @Override
     public void nodeInitialized(Node node) {
         m_directBlockingChecker.nodeInitialized(node);
     }
+    @Override
     public void nodeDestroyed(Node node) {
         m_currentBlockersCache.removeNode(node);
         m_directBlockingChecker.nodeDestroyed(node);
@@ -318,33 +344,15 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
         if (m_lastValidatedUnchangedNode!=null && node.getNodeID()<m_lastValidatedUnchangedNode.getNodeID())
             m_lastValidatedUnchangedNode=node;
     }
+    @Override
     public void modelFound() {
     }
 
-    protected final class ViolationStatistic implements Comparable<ViolationStatistic> {
-        public final String m_violatedConstraint;
-        public final Integer m_numberOfViolations;
-        public ViolationStatistic(String violatedConstraint,Integer numberOfViolations) {
-            m_violatedConstraint=violatedConstraint;
-            m_numberOfViolations=numberOfViolations;
-        }
-        public int compareTo(ViolationStatistic that) {
-            if (this==that)
-                return 0;
-            if (that==null)
-                throw new NullPointerException("Comparing to a null object is illegal. ");
-            if (this.m_numberOfViolations==that.m_numberOfViolations)
-                return m_violatedConstraint.compareTo(that.m_violatedConstraint);
-            else
-                return that.m_numberOfViolations-this.m_numberOfViolations;
-        }
-        public String toString() {
-            return m_numberOfViolations+": "+m_violatedConstraint.replaceAll("http://www.co-ode.org/ontologies/galen#","");
-        }
-    }
+    @Override
     public boolean isExact() {
         return false;
     }
+    @Override
     public void dlClauseBodyCompiled(List<DLClauseEvaluator.Worker> workers,DLClause dlClause,List<Variable> variables,Object[] valuesBuffer,boolean[] coreVariables) {
         if (m_useSimpleCore) {
             for (int i=0;i<coreVariables.length;i++) {
@@ -364,7 +372,7 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
                     coreVariables[i]=false;
                 }
                 if (dlClause.isAtomicConceptInclusion() && variables.size()>1) {
-                    workers.add(new ComputeCoreVariables(dlClause,variables,valuesBuffer,coreVariables));
+                    workers.add(new ComputeCoreVariables(valuesBuffer,coreVariables));
                 }
             }
         }
@@ -373,19 +381,16 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
     protected static final class ComputeCoreVariables implements DLClauseEvaluator.Worker,Serializable {
         private static final long serialVersionUID=899293772370136783L;
 
-        protected final DLClause m_dlClause;
-        protected final List<Variable> m_variables;
         protected final Object[] m_valuesBuffer;
         protected final boolean[] m_coreVariables;
 
-        public ComputeCoreVariables(DLClause dlClause,List<Variable> variables,Object[] valuesBuffer,boolean[] coreVariables) {
-            m_dlClause=dlClause;
-            m_variables=variables;
+        public ComputeCoreVariables(Object[] valuesBuffer,boolean[] coreVariables) {
             m_valuesBuffer=valuesBuffer;
             m_coreVariables=coreVariables;
         }
         public void clear() {
         }
+        @Override
         public int execute(int programCounter) {
             Node potentialNonCore=null;
             // find the root of the subtree induced by the mapped nodes that node cannot be core
@@ -404,6 +409,7 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
             }
             return programCounter+1;
         }
+        @Override
         public String toString() {
             return "Compute core variables";
         }
@@ -411,7 +417,6 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
 }
 
 class ValidatedBlockersCache {
-    protected Tableau m_tableau;
     protected final DirectBlockingChecker m_directBlockingChecker;
     protected CacheEntry[] m_buckets;
     protected int m_numberOfElements;
@@ -450,7 +455,7 @@ class ValidatedBlockersCache {
                         else
                             lastEntry.m_nextEntry=entry.m_nextEntry;
                         entry.m_nextEntry=m_emptyEntries;
-                        entry.m_nodes=new ArrayList<Node>();
+                        entry.m_nodes=new ArrayList<>();
                         entry.m_hashCode=0;
                         m_emptyEntries=entry;
                         m_numberOfElements--;
@@ -558,15 +563,17 @@ class ValidatedBlockersCache {
                 entry=entry.m_nextEntry;
             }
         }
-        return new ArrayList<Node>();
+        return new ArrayList<>();
     }
-    protected static int getIndexFor(int hashCode,int tableLength) {
+    protected static int getIndexFor(int _hashCode,int tableLength) {
+        int hashCode=_hashCode;
         hashCode+=~(hashCode<<9);
         hashCode^=(hashCode>>>14);
         hashCode+=(hashCode<<4);
         hashCode^=(hashCode>>>10);
         return hashCode&(tableLength-1);
     }
+    @Override
     public String toString() {
         String buckets="";
         for (int i=0;i<m_buckets.length;i++) {
@@ -586,7 +593,7 @@ class ValidatedBlockersCache {
         protected CacheEntry m_nextEntry;
 
         public void initialize(Node node,int hashCode,CacheEntry nextEntry) {
-            m_nodes=new ArrayList<Node>();
+            m_nodes=new ArrayList<>();
             add(node);
             m_hashCode=hashCode;
             m_nextEntry=nextEntry;
@@ -597,6 +604,7 @@ class ValidatedBlockersCache {
             }
             return m_nodes.add(node);
         }
+        @Override
         public String toString() {
             String nodes="HashCode: "+m_hashCode+" Nodes: ";
             for (Node n : m_nodes) {

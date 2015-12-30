@@ -26,26 +26,27 @@ import org.semanticweb.HermiT.Prefixes;
  */
 public class Equality implements DLPredicate,Serializable {
     private static final long serialVersionUID=8308051741088513244L;
-
+    /**Instance.*/
     public static final Equality INSTANCE=new Equality();
     
     protected Equality () {
     }
+    @Override
     public int getArity() {
         return 2;
     }
+    @Override
     public String toString(Prefixes prefixes) {
         return "==";
     }
-    public String toOrderedString(Prefixes prefixes) {
-        return toString(prefixes);
-    }
+    @Override
     public String toString() {
         return toString(Prefixes.STANDARD_PREFIXES);
     }
     protected Object readResolve() {
         return INSTANCE;
     }
+    /**@return instance*/
     public static Equality create() {
         return INSTANCE;
     }

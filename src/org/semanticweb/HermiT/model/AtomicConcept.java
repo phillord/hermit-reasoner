@@ -30,12 +30,17 @@ public class AtomicConcept extends LiteralConcept implements DLPredicate {
     protected AtomicConcept(String iri) {
         m_iri=iri;
     }
+    /**
+     * @return iri
+     */
     public String getIRI() {
         return m_iri;
     }
+    @Override
     public int getArity() {
         return 1;
     }
+    @Override
     public LiteralConcept getNegation() {
         if (this==THING)
             return NOTHING;
@@ -44,12 +49,15 @@ public class AtomicConcept extends LiteralConcept implements DLPredicate {
         else
             return AtomicNegationConcept.create(this);
     }
+    @Override
     public boolean isAlwaysTrue() {
         return this==THING;
     }
+    @Override
     public boolean isAlwaysFalse() {
         return this==NOTHING;
     }
+    @Override
     public String toString(Prefixes prefixes) {
         return prefixes.abbreviateIRI(m_iri);
     }
@@ -57,20 +65,35 @@ public class AtomicConcept extends LiteralConcept implements DLPredicate {
         return s_interningManager.intern(this);
     }
 
-    protected static InterningManager<AtomicConcept> s_interningManager=new InterningManager<AtomicConcept>() {
+    protected final static InterningManager<AtomicConcept> s_interningManager=new InterningManager<AtomicConcept>() {
+        @Override
         protected boolean equal(AtomicConcept object1,AtomicConcept object2) {
             return object1.m_iri.equals(object2.m_iri);
         }
+        @Override
         protected int getHashCode(AtomicConcept object) {
             return object.m_iri.hashCode();
         }
     };
     
+    /**
+     * @param uri iri
+     * @return concept
+     */
     public static AtomicConcept create(String uri) {
         return s_interningManager.intern(new AtomicConcept(uri));
     }
 
+    /**
+     * Thing.
+     */
     public static final AtomicConcept THING=create("http://www.w3.org/2002/07/owl#Thing");
+    /**
+     * Nothing.
+     */
     public static final AtomicConcept NOTHING=create("http://www.w3.org/2002/07/owl#Nothing");
+    /**
+     * Internal.
+     */
     public static final AtomicConcept INTERNAL_NAMED=create("internal:nam#Named");
 }

@@ -19,10 +19,17 @@ package org.semanticweb.HermiT.datatypes.floatnum;
 
 import java.util.Collection;
 
+/**
+ * Float interval.
+ */
 public class FloatInterval {
     protected final float m_lowerBoundInclusive;
     protected final float m_upperBoundInclusive;
 
+    /**
+     * @param lowerBoundInclusive lowerBoundInclusive
+     * @param upperBoundInclusive upperBoundInclusive
+     */
     public FloatInterval(float lowerBoundInclusive,float upperBoundInclusive) {
         assert !isIntervalEmpty(lowerBoundInclusive,upperBoundInclusive);
         m_lowerBoundInclusive=lowerBoundInclusive;
@@ -30,6 +37,8 @@ public class FloatInterval {
     }
     /**
      * Computes the intersection of this interval with the supplied one. If the two intervals do not intersect, the result is null.
+     * @param that that 
+     * @return float interval
      */
     public FloatInterval intersectWith(FloatInterval that) {
         // This code uses the assumption no bound in either interval contains NaN.
@@ -55,12 +64,23 @@ public class FloatInterval {
     protected boolean isEqual(float lowerBoundInclusive,float upperBoundInclusive) {
         return areIdentical(m_lowerBoundInclusive,lowerBoundInclusive) && areIdentical(m_upperBoundInclusive,upperBoundInclusive);
     }
+    /**
+     * @param argument argument
+     * @return subtracted size
+     */
     public int subtractSizeFrom(int argument) {
         return subtractIntervalSizeFrom(m_lowerBoundInclusive,m_upperBoundInclusive,argument);
     }
+    /**
+     * @param value value
+     * @return true if contained
+     */
     public boolean contains(float value) {
         return contains(m_lowerBoundInclusive,m_upperBoundInclusive,value);
     }
+    /**
+     * @param numbers numbers
+     */
     public void enumerateNumbers(Collection<Object> numbers) {
         // We know that the interval is not empty; hence, neither bound is NaN.
         float number=m_lowerBoundInclusive;
@@ -70,6 +90,7 @@ public class FloatInterval {
         }
         numbers.add(m_upperBoundInclusive);
     }
+    @Override
     public String toString() {
         StringBuffer buffer=new StringBuffer();
         buffer.append("FLOAT[");
@@ -79,15 +100,24 @@ public class FloatInterval {
         buffer.append(']');
         return buffer.toString();
     }
-    public static boolean isNaN(int bits) {
+    protected static boolean isNaN(int bits) {
         return ((bits & 0x7f800000)==0x7f800000) && ((bits & 0x003fffff)!=0);
     }
     protected static boolean isIntervalEmpty(float lowerBoundInclusive,float upperBoundInclusive) {
         return !isSmallerEqual(lowerBoundInclusive,upperBoundInclusive);
     }
+    /**
+     * @param value1 value1
+     * @param value2 value2
+     * @return true if identical
+     */
     public static boolean areIdentical(float value1,float value2) {
         return Float.floatToIntBits(value1)==Float.floatToIntBits(value2);
     }
+    /**
+     * @param value value
+     * @return next float
+     */
     public static float nextFloat(float value) {
         int bits=Float.floatToIntBits(value);
         int magnitude=(bits & 0x7fffffff);
@@ -115,7 +145,7 @@ public class FloatInterval {
             return Float.intBitsToFloat(newBits);
         }
     }
-    public static float previousFloat(float value) {
+    protected static float previousFloat(float value) {
         int bits=Float.floatToIntBits(value);
         int magnitude=(bits & 0x7fffffff);
         boolean positive=((bits & 0x80000000)==0);
@@ -142,6 +172,12 @@ public class FloatInterval {
             return Float.intBitsToFloat(newBits);
         }
     }
+    /**
+     * @param lowerBoundInclusive lowerBoundInclusive
+     * @param upperBoundInclusive upperBoundInclusive
+     * @param argument argument
+     * @return subtracted size
+     */
     public static int subtractIntervalSizeFrom(float lowerBoundInclusive,float upperBoundInclusive,int argument) {
         if (argument<=0)
             return 0;
@@ -182,7 +218,7 @@ public class FloatInterval {
         else // if (positiveLowerBoundInclusive && !positiveUpperBoundInclusiev) is impossible at this point
             throw new IllegalStateException();
     }
-    public static boolean contains(float startInclusive,float endInclusive,float value) {
+    protected static boolean contains(float startInclusive,float endInclusive,float value) {
         int bitsStart=Float.floatToIntBits(startInclusive);
         int bitsEnd=Float.floatToIntBits(endInclusive);
         int bitsValue=Float.floatToIntBits(value);
@@ -196,6 +232,12 @@ public class FloatInterval {
         int magnitudeValue=(bitsValue & 0x7fffffff);
         return isSmallerEqual(positiveStart,magnitudeStart,positiveValue,magnitudeValue) && isSmallerEqual(positiveValue,magnitudeValue,positiveEnd,magnitudeEnd);
     }
+    
+    /**
+     * @param value1 value1
+     * @param value2 value2
+     * @return true if smaller equal
+     */
     public static boolean isSmallerEqual(float value1,float value2) {
         int bitsValue1=Float.floatToIntBits(value1);
         int bitsValue2=Float.floatToIntBits(value2);
@@ -207,6 +249,13 @@ public class FloatInterval {
         int magnitudeValue2=(bitsValue2 & 0x7fffffff);
         return isSmallerEqual(positiveValue1,magnitudeValue1,positiveValue2,magnitudeValue2);
     }
+    /**
+     * @param positive1 positive1
+     * @param magnitude1 magnitude1
+     * @param positive2 positive2
+     * @param magnitude2 magnitude2
+     * @return true if smaller equal
+     */
     public static boolean isSmallerEqual(boolean positive1,int magnitude1,boolean positive2,int magnitude2) {
         if (positive1 && positive2)
             return magnitude1<=magnitude2;

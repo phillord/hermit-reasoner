@@ -22,22 +22,29 @@ import java.io.PrintWriter;
 
 import org.semanticweb.HermiT.debugger.Debugger;
 import org.semanticweb.HermiT.tableau.Node;
-
+/**ModelStatsCommand.*/
 public class ModelStatsCommand extends AbstractCommand {
 
+    /**
+     * @param debugger debugger
+     */
     public ModelStatsCommand(Debugger debugger) {
         super(debugger);
     }
+    @Override
     public String getCommandName() {
         return "modelStats";
     }
+    @Override
     public String[] getDescription() {
         return new String[] { "","prints statistics about a model" };
     }
+    @Override
     public void printHelp(PrintWriter writer) {
         writer.println("usage: modelStats");
         writer.println("    Prints statistics about the current model.");
     }
+    @Override
     public void execute(String[] args) {
         int noNodes=0;
         int noUnblockedNodes=0;

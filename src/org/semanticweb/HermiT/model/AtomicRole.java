@@ -30,21 +30,28 @@ public class AtomicRole extends Role implements DLPredicate {
     protected AtomicRole(String iri) {
         m_iri=iri;
     }
+    /**
+     * @return iri
+     */
     public String getIRI() {
         return m_iri;
     }
+    @Override
     public int getArity() {
         return 2;
     }
+    @Override
     public Role getInverse() {
         if (this==TOP_OBJECT_ROLE || this==BOTTOM_OBJECT_ROLE)
             return this;
         else
             return InverseRole.create(this);
     }
+    @Override
     public Atom getRoleAssertion(Term term0,Term term1) {
         return Atom.create(this,term0,term1);
     }
+    @Override
     public String toString(Prefixes prefixes) {
         return prefixes.abbreviateIRI(m_iri);
     }
@@ -52,21 +59,39 @@ public class AtomicRole extends Role implements DLPredicate {
         return s_interningManager.intern(this);
     }
 
-    protected static InterningManager<AtomicRole> s_interningManager=new InterningManager<AtomicRole>() {
+    protected final static InterningManager<AtomicRole> s_interningManager=new InterningManager<AtomicRole>() {
+        @Override
         protected boolean equal(AtomicRole object1,AtomicRole object2) {
             return object1.m_iri.equals(object2.m_iri);
         }
+        @Override
         protected int getHashCode(AtomicRole object) {
             return object.m_iri.hashCode();
         }
     };
 
+    /**
+     * @param iri iri
+     * @return role
+     */
     public static AtomicRole create(String iri) {
         return s_interningManager.intern(new AtomicRole(iri));
     }
 
+    /**
+     * Top oject role.
+     */
     public static final AtomicRole TOP_OBJECT_ROLE=create("http://www.w3.org/2002/07/owl#topObjectProperty");
+    /**
+     * Bottom object role.
+     */
     public static final AtomicRole BOTTOM_OBJECT_ROLE=create("http://www.w3.org/2002/07/owl#bottomObjectProperty");
+    /**
+     * Top data role.
+     */
     public static final AtomicRole TOP_DATA_ROLE=create("http://www.w3.org/2002/07/owl#topDataProperty");
+    /**
+     * Bottom data role.
+     */
     public static final AtomicRole BOTTOM_DATA_ROLE=create("http://www.w3.org/2002/07/owl#bottomDataProperty");
 }

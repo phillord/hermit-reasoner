@@ -44,16 +44,14 @@ package rationals.expr;
 public class Plus extends BinaryExpr {
 
     /**
-     * @param e
-     * @param f
+     * @param e e
+     * @param f f
      */
     public Plus(RationalExpr e, RationalExpr f) {
         super(e, f);
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
+    @Override
     public String toString() {
         return getLeft() + "+"+getRight();
     }

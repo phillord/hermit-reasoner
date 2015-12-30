@@ -27,18 +27,27 @@ public class InverseRole extends Role {
 
     protected final AtomicRole m_inverseOf;
 
+    /**
+     * @param inverseOf inverseOf
+     */
     public InverseRole(AtomicRole inverseOf) {
         m_inverseOf=inverseOf;
     }
+    /**
+     * @return role
+     */
     public AtomicRole getInverseOf() {
         return m_inverseOf;
     }
+    @Override
     public Role getInverse() {
         return m_inverseOf;
     }
+    @Override
     public Atom getRoleAssertion(Term term0,Term term1) {
         return Atom.create(m_inverseOf,term1,term0);
     }
+    @Override
     public String toString(Prefixes prefixes) {
         return "inv("+m_inverseOf.toString(prefixes)+")";
     }
@@ -46,15 +55,21 @@ public class InverseRole extends Role {
         return s_interningManager.intern(this);
     }
 
-    protected static InterningManager<InverseRole> s_interningManager=new InterningManager<InverseRole>() {
+    protected final static InterningManager<InverseRole> s_interningManager=new InterningManager<InverseRole>() {
+        @Override
         protected boolean equal(InverseRole object1,InverseRole object2) {
             return object1.m_inverseOf==object2.m_inverseOf;
         }
+        @Override
         protected int getHashCode(InverseRole object) {
             return -object.m_inverseOf.hashCode();
         }
     };
 
+    /**
+     * @param inverseOf inverseOf
+     * @return inverse role
+     */
     public static InverseRole create(AtomicRole inverseOf) {
         return s_interningManager.intern(new InverseRole(inverseOf));
     }

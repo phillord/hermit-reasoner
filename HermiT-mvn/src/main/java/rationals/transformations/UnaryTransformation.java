@@ -2,6 +2,13 @@ package rationals.transformations ;
 
 import rationals.Automaton;
 
+/**
+ * Unary transformation.
+ */
 public interface UnaryTransformation {
-  public Automaton transform(Automaton a) ;
+    /**
+     * @param a a
+     * @return automatom
+     */
+    Automaton transform(Automaton a) ;
 }

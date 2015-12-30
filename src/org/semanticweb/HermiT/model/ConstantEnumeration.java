@@ -30,21 +30,32 @@ public class ConstantEnumeration extends AtomicDataRange {
     protected ConstantEnumeration(Constant[] constants) {
         m_constants=constants;
     }
+    /**
+     * @return number of constants
+     */
     public int getNumberOfConstants() {
         return m_constants.length;
     }
+    /**
+     * @param index index
+     * @return constant
+     */
     public Constant getConstant(int index) {
         return m_constants[index];
     }
+    @Override
     public LiteralDataRange getNegation() {
         return AtomicNegationDataRange.create(this);
     }
+    @Override
     public boolean isAlwaysTrue() {
         return false;
     }
+    @Override
     public boolean isAlwaysFalse() {
         return m_constants.length==0;
     }
+    @Override
     public String toString(Prefixes prefixes) {
         StringBuffer buffer=new StringBuffer();
         buffer.append("{ ");
@@ -60,7 +71,8 @@ public class ConstantEnumeration extends AtomicDataRange {
         return s_interningManager.intern(this);
     }
 
-    protected static InterningManager<ConstantEnumeration> s_interningManager=new InterningManager<ConstantEnumeration>() {
+    protected final static InterningManager<ConstantEnumeration> s_interningManager=new InterningManager<ConstantEnumeration>() {
+        @Override
         protected boolean equal(ConstantEnumeration object1,ConstantEnumeration object2) {
             if (object1.m_constants.length!=object2.m_constants.length)
                 return false;
@@ -75,6 +87,7 @@ public class ConstantEnumeration extends AtomicDataRange {
                     return true;
             return false;
         }
+        @Override
         protected int getHashCode(ConstantEnumeration object) {
             int hashCode=0;
             for (int index=object.m_constants.length-1;index>=0;--index)
@@ -83,6 +96,10 @@ public class ConstantEnumeration extends AtomicDataRange {
         }
     };
 
+    /**
+     * @param constants constants
+     * @return enumeration
+     */
     public static ConstantEnumeration create(Constant[] constants) {
         return s_interningManager.intern(new ConstantEnumeration(constants));
     }

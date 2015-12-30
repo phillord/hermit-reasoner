@@ -47,41 +47,45 @@ public final class HyperresolutionManager implements Serializable {
     protected final ExtensionTable.Retrieval m_binaryTableRetrieval;
     protected final Map<DLPredicate,CompiledDLClauseInfo> m_tupleConsumersByDeltaPredicate;
     protected final Map<AtomicRole,CompiledDLClauseInfo> m_atomicRoleTupleConsumersUnguarded;
-    protected final HashMap<AtomicRole,Map<AtomicConcept,CompiledDLClauseInfo>> m_atomicRoleTupleConsumersByGuardConcept1;
-    protected final HashMap<AtomicRole,Map<AtomicConcept,CompiledDLClauseInfo>> m_atomicRoleTupleConsumersByGuardConcept2;
+    protected final Map<AtomicRole,Map<AtomicConcept,CompiledDLClauseInfo>> m_atomicRoleTupleConsumersByGuardConcept1;
+    protected final Map<AtomicRole,Map<AtomicConcept,CompiledDLClauseInfo>> m_atomicRoleTupleConsumersByGuardConcept2;
     protected final Object[][] m_buffersToClear;
     protected final UnionDependencySet[] m_unionDependencySetsToClear;
     protected final Object[] m_valuesBuffer;
     protected final int m_maxNumberOfVariables;
 
+    /**
+     * @param tableau tableau
+     * @param dlClauses dlClauses
+     */
     public HyperresolutionManager(Tableau tableau,Set<DLClause> dlClauses) {
         InterruptFlag interruptFlag=tableau.m_interruptFlag;
         m_extensionManager=tableau.m_extensionManager;
-        m_tupleConsumersByDeltaPredicate=new HashMap<DLPredicate,CompiledDLClauseInfo>();
-        m_atomicRoleTupleConsumersUnguarded=new HashMap<AtomicRole,CompiledDLClauseInfo>();
-        m_atomicRoleTupleConsumersByGuardConcept1=new HashMap<AtomicRole,Map<AtomicConcept,CompiledDLClauseInfo>>();
-        m_atomicRoleTupleConsumersByGuardConcept2=new HashMap<AtomicRole,Map<AtomicConcept,CompiledDLClauseInfo>>();
+        m_tupleConsumersByDeltaPredicate=new HashMap<>();
+        m_atomicRoleTupleConsumersUnguarded=new HashMap<>();
+        m_atomicRoleTupleConsumersByGuardConcept1=new HashMap<>();
+        m_atomicRoleTupleConsumersByGuardConcept2=new HashMap<>();
         // Index DL clauses by body
-        Map<DLClauseBodyKey,List<DLClause>> dlClausesByBody=new HashMap<DLClauseBodyKey,List<DLClause>>();
+        Map<DLClauseBodyKey,List<DLClause>> dlClausesByBody=new HashMap<>();
         for (DLClause dlClause : dlClauses) {
             DLClauseBodyKey key=new DLClauseBodyKey(dlClause);
             List<DLClause> dlClausesForKey=dlClausesByBody.get(key);
             if (dlClausesForKey==null) {
-                dlClausesForKey=new ArrayList<DLClause>();
+                dlClausesForKey=new ArrayList<>();
                 dlClausesByBody.put(key,dlClausesForKey);
             }
             dlClausesForKey.add(dlClause);
             interruptFlag.checkInterrupt();
         }
         // Compile the DL clauses
-        Map<Integer,ExtensionTable.Retrieval> retrievalsByArity=new HashMap<Integer,ExtensionTable.Retrieval>();
+        Map<Integer,ExtensionTable.Retrieval> retrievalsByArity=new HashMap<>();
         DLClauseEvaluator.BufferSupply bufferSupply=new DLClauseEvaluator.BufferSupply();
         Map<Term,Node> noTermsToNodes=Collections.emptyMap();
         DLClauseEvaluator.ValuesBufferManager valuesBufferManager=new DLClauseEvaluator.ValuesBufferManager(dlClauses,noTermsToNodes);
         DLClauseEvaluator.GroundDisjunctionHeaderManager groundDisjunctionHeaderManager=new DLClauseEvaluator.GroundDisjunctionHeaderManager();
-        Map<Integer,UnionDependencySet> unionDependencySetsBySize=new HashMap<Integer,UnionDependencySet>();
-        ArrayList<Atom> guardingAtomicConceptAtoms1=new ArrayList<Atom>();
-        ArrayList<Atom> guardingAtomicConceptAtoms2=new ArrayList<Atom>();
+        Map<Integer,UnionDependencySet> unionDependencySetsBySize=new HashMap<>();
+        ArrayList<Atom> guardingAtomicConceptAtoms1=new ArrayList<>();
+        ArrayList<Atom> guardingAtomicConceptAtoms2=new ArrayList<>();
         for (Map.Entry<DLClauseBodyKey,List<DLClause>> entry : dlClausesByBody.entrySet()) {
             DLClause bodyDLClause=entry.getKey().m_dlClause;
             BodyAtomsSwapper bodyAtomsSwapper=new BodyAtomsSwapper(bodyDLClause);
@@ -106,7 +110,7 @@ public final class HyperresolutionManager implements Serializable {
                         if (!guardingAtomicConceptAtoms1.isEmpty()) {
                             Map<AtomicConcept,CompiledDLClauseInfo> compiledDLClauseInfos=m_atomicRoleTupleConsumersByGuardConcept1.get(deltaAtomicRole);
                             if (compiledDLClauseInfos==null) {
-                                compiledDLClauseInfos=new HashMap<AtomicConcept,CompiledDLClauseInfo>();
+                                compiledDLClauseInfos=new HashMap<>();
                                 m_atomicRoleTupleConsumersByGuardConcept1.put(deltaAtomicRole,compiledDLClauseInfos);
                             }
                             for (Atom guardingAtom : guardingAtomicConceptAtoms1) {
@@ -118,7 +122,7 @@ public final class HyperresolutionManager implements Serializable {
                         if (!guardingAtomicConceptAtoms2.isEmpty()) {
                             Map<AtomicConcept,CompiledDLClauseInfo> compiledDLClauseInfos=m_atomicRoleTupleConsumersByGuardConcept2.get(deltaAtomicRole);
                             if (compiledDLClauseInfos==null) {
-                                compiledDLClauseInfos=new HashMap<AtomicConcept,CompiledDLClauseInfo>();
+                                compiledDLClauseInfos=new HashMap<>();
                                 m_atomicRoleTupleConsumersByGuardConcept2.put(deltaAtomicRole,compiledDLClauseInfos);
                             }
                             for (Atom guardingAtom : guardingAtomicConceptAtoms2) {
@@ -145,7 +149,7 @@ public final class HyperresolutionManager implements Serializable {
         m_valuesBuffer=valuesBufferManager.m_valuesBuffer;
         m_maxNumberOfVariables=valuesBufferManager.m_maxNumberOfVariables;
     }
-    protected void getAtomicRoleClauseGuards(DLClause swappedDLClause,List<Atom> guardingAtomicConceptAtoms1,List<Atom> guardingAtomicConceptAtoms2) {
+    protected static void getAtomicRoleClauseGuards(DLClause swappedDLClause,List<Atom> guardingAtomicConceptAtoms1,List<Atom> guardingAtomicConceptAtoms2) {
         guardingAtomicConceptAtoms1.clear();
         guardingAtomicConceptAtoms2.clear();
         Atom deltaOldAtom=swappedDLClause.getBodyAtom(0);
@@ -165,9 +169,10 @@ public final class HyperresolutionManager implements Serializable {
             bodyIndex++;
         }
     }
-    protected boolean isPredicateWithExtension(DLPredicate dlPredicate) {
+    protected static boolean isPredicateWithExtension(DLPredicate dlPredicate) {
         return !NodeIDLessEqualThan.INSTANCE.equals(dlPredicate) && !(dlPredicate instanceof NodeIDsAscendingOrEqual);
     }
+    /**Clear.*/
     public void clear() {
         for (int retrievalIndex=m_deltaOldRetrievals.length-1;retrievalIndex>=0;--retrievalIndex)
             m_deltaOldRetrievals[retrievalIndex].clear();
@@ -185,6 +190,9 @@ public final class HyperresolutionManager implements Serializable {
         for (int variableIndex=0;variableIndex<m_maxNumberOfVariables;variableIndex++)
             m_valuesBuffer[variableIndex]=null;
     }
+    /**
+     * Apply dl clause.
+     */
     public void applyDLClauses() {
         for (int index=0;index<m_deltaOldRetrievals.length;index++) {
             ExtensionTable.Retrieval deltaOldRetrieval=m_deltaOldRetrievals[index];
@@ -268,6 +276,7 @@ public final class HyperresolutionManager implements Serializable {
         }
     }
 
+    /**BodyAtomsSwapper.*/
     public static final class BodyAtomsSwapper {
         protected final DLClause m_dlClause;
         protected final List<Atom> m_nodeIDComparisonAtoms;
@@ -275,13 +284,20 @@ public final class HyperresolutionManager implements Serializable {
         protected final List<Atom> m_reorderedAtoms;
         protected final Set<Variable> m_boundVariables;
 
+        /**
+         * @param dlClause dl clause
+         */
         public BodyAtomsSwapper(DLClause dlClause) {
             m_dlClause=dlClause;
-            m_nodeIDComparisonAtoms=new ArrayList<Atom>(m_dlClause.getBodyLength());
+            m_nodeIDComparisonAtoms=new ArrayList<>(m_dlClause.getBodyLength());
             m_usedAtoms=new boolean[m_dlClause.getBodyLength()];
-            m_reorderedAtoms=new ArrayList<Atom>(m_dlClause.getBodyLength());
-            m_boundVariables=new HashSet<Variable>();
+            m_reorderedAtoms=new ArrayList<>(m_dlClause.getBodyLength());
+            m_boundVariables=new HashSet<>();
         }
+        /**
+         * @param bodyIndex bodyIndex
+         * @return swapped dl clause
+         */
         public DLClause getSwappedDLClause(int bodyIndex) {
             m_nodeIDComparisonAtoms.clear();
             for (int index=m_usedAtoms.length-1;index>=0;--index) {
@@ -310,6 +326,7 @@ public final class HyperresolutionManager implements Serializable {
                             bestAtomIndex=index;
                         }
                     }
+                assert bestAtom!=null;
                 m_reorderedAtoms.add(bestAtom);
                 m_usedAtoms[bestAtomIndex]=true;
                 bestAtom.getVariables(m_boundVariables);
@@ -385,9 +402,16 @@ public final class HyperresolutionManager implements Serializable {
                 hashCode+=m_dlClause.getBodyAtom(atomIndex).hashCode();
             m_hashCode=hashCode;
         }
+        @Override
         public boolean equals(Object that) {
+            if(that ==null) {
+                return false;
+            }
             if (this==that)
                 return true;
+            if(!(that instanceof DLClauseBodyKey)) {
+                return false;
+            }
             DLClause thatDLClause=((DLClauseBodyKey)that).m_dlClause;
             if (m_dlClause.getBodyLength()!=thatDLClause.getBodyLength())
                 return false;
@@ -396,6 +420,7 @@ public final class HyperresolutionManager implements Serializable {
                     return false;
             return true;
         }
+        @Override
         public int hashCode() {
             return m_hashCode;
         }

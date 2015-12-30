@@ -29,14 +29,14 @@ import org.semanticweb.HermiT.datatypes.MalformedLiteralException;
 import org.semanticweb.HermiT.datatypes.UnsupportedFacetException;
 import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
 import org.semanticweb.HermiT.model.DatatypeRestriction;
-
+/**DoubleDatatypeHandler.*/
 public class DoubleDatatypeHandler implements DatatypeHandler {
     protected static final String XSD_NS=Prefixes.s_semanticWebPrefixes.get("xsd:");
     protected static final String XSD_DOUBLE=XSD_NS+"double";
     protected static final ValueSpaceSubset DOUBLE_ENTIRE=new EntireDoubleSubset();
     protected static final ValueSpaceSubset EMPTY_SUBSET=new EmptyDoubleSubset();
     protected static final Set<String> s_managedDatatypeURIs=Collections.singleton(XSD_DOUBLE);
-    protected static final Set<String> s_supportedFacetURIs=new HashSet<String>();
+    protected static final Set<String> s_supportedFacetURIs=new HashSet<>();
     static {
         s_supportedFacetURIs.add(XSD_NS+"minInclusive");
         s_supportedFacetURIs.add(XSD_NS+"minExclusive");
@@ -44,9 +44,11 @@ public class DoubleDatatypeHandler implements DatatypeHandler {
         s_supportedFacetURIs.add(XSD_NS+"maxExclusive");
     }
 
+    @Override
     public Set<String> getManagedDatatypeURIs() {
         return s_managedDatatypeURIs;
     }
+    @Override
     public Object parseLiteral(String lexicalForm,String datatypeURI) throws MalformedLiteralException {
         assert XSD_DOUBLE.equals(datatypeURI);
         try {
@@ -55,9 +57,10 @@ public class DoubleDatatypeHandler implements DatatypeHandler {
         catch (NumberFormatException error) {
             if (lexicalForm.equals("INF")) return Double.POSITIVE_INFINITY;
             if (lexicalForm.equals("-INF")) return Double.NEGATIVE_INFINITY;
-            throw new MalformedLiteralException(lexicalForm,datatypeURI);
+            throw new MalformedLiteralException(lexicalForm,datatypeURI, error);
         }
     }
+    @Override
     public void validateDatatypeRestriction(DatatypeRestriction datatypeRestriction) throws UnsupportedFacetException {
         assert XSD_DOUBLE.equals(datatypeRestriction.getDatatypeURI());
         for (int index=datatypeRestriction.getNumberOfFacetRestrictions()-1;index>=0;--index) {
@@ -69,6 +72,7 @@ public class DoubleDatatypeHandler implements DatatypeHandler {
                 throw new UnsupportedFacetException("The '"+facetURI+"' facet takes only doubles as values when used on an xsd:double datatype, but the ontology contains a datatype restriction "+this.toString());
         }
     }
+    @Override
     public ValueSpaceSubset createValueSpaceSubset(DatatypeRestriction datatypeRestriction) {
         assert XSD_DOUBLE.equals(datatypeRestriction.getDatatypeURI());
         if (datatypeRestriction.getNumberOfFacetRestrictions()==0)
@@ -81,6 +85,7 @@ public class DoubleDatatypeHandler implements DatatypeHandler {
                 return new NoNaNDoubleSubset(interval);
         }
     }
+    @Override
     public ValueSpaceSubset conjoinWithDR(ValueSpaceSubset valueSpaceSubset,DatatypeRestriction datatypeRestriction) {
         assert XSD_DOUBLE.equals(datatypeRestriction.getDatatypeURI());
         if (datatypeRestriction.getNumberOfFacetRestrictions()==0 || valueSpaceSubset==EMPTY_SUBSET)
@@ -94,7 +99,7 @@ public class DoubleDatatypeHandler implements DatatypeHandler {
             else {
                 NoNaNDoubleSubset doubleSubset=(NoNaNDoubleSubset)valueSpaceSubset;
                 List<DoubleInterval> oldIntervals=doubleSubset.m_intervals;
-                List<DoubleInterval> newIntervals=new ArrayList<DoubleInterval>();
+                List<DoubleInterval> newIntervals=new ArrayList<>();
                 for (int index=0;index<oldIntervals.size();index++) {
                     DoubleInterval oldInterval=oldIntervals.get(index);
                     DoubleInterval intersection=oldInterval.intersectWith(interval);
@@ -108,6 +113,7 @@ public class DoubleDatatypeHandler implements DatatypeHandler {
             }
         }
     }
+    @Override
     public ValueSpaceSubset conjoinWithDRNegation(ValueSpaceSubset valueSpaceSubset,DatatypeRestriction datatypeRestriction) {
         assert XSD_DOUBLE.equals(datatypeRestriction.getDatatypeURI());
         if (datatypeRestriction.getNumberOfFacetRestrictions()==0 || valueSpaceSubset==EMPTY_SUBSET)
@@ -117,7 +123,7 @@ public class DoubleDatatypeHandler implements DatatypeHandler {
             if (interval==null)
                 return valueSpaceSubset;
             else if (valueSpaceSubset==DOUBLE_ENTIRE) {
-                List<DoubleInterval> newIntervals=new ArrayList<DoubleInterval>();
+                List<DoubleInterval> newIntervals=new ArrayList<>();
                 if (!DoubleInterval.areIdentical(interval.m_lowerBoundInclusive,Double.NEGATIVE_INFINITY))
                     newIntervals.add(new DoubleInterval(Double.NEGATIVE_INFINITY,DoubleInterval.previousDouble(interval.m_lowerBoundInclusive)));
                 if (!DoubleInterval.areIdentical(interval.m_upperBoundInclusive,Double.POSITIVE_INFINITY))
@@ -136,7 +142,7 @@ public class DoubleDatatypeHandler implements DatatypeHandler {
                 if (!DoubleInterval.areIdentical(interval.m_upperBoundInclusive,Double.POSITIVE_INFINITY))
                     complementInterval2=new DoubleInterval(DoubleInterval.nextDouble(interval.m_upperBoundInclusive),Double.POSITIVE_INFINITY);
                 List<DoubleInterval> oldIntervals=doubleSubset.m_intervals;
-                List<DoubleInterval> newIntervals=new ArrayList<DoubleInterval>();
+                List<DoubleInterval> newIntervals=new ArrayList<>();
                 for (int index=0;index<oldIntervals.size();index++) {
                     DoubleInterval oldInterval=oldIntervals.get(index);
                     if (complementInterval1!=null) {
@@ -198,11 +204,13 @@ public class DoubleDatatypeHandler implements DatatypeHandler {
         else
             return new DoubleInterval(lowerBoundInclusive,upperBoundInclusive);
     }
+    @Override
     public boolean isSubsetOf(String subsetDatatypeURI,String supersetDatatypeURI) {
         assert XSD_DOUBLE.equals(subsetDatatypeURI);
         assert XSD_DOUBLE.equals(supersetDatatypeURI);
         return true;
     }
+    @Override
     public boolean isDisjointWith(String datatypeURI1,String datatypeURI2) {
         assert XSD_DOUBLE.equals(datatypeURI1);
         assert XSD_DOUBLE.equals(datatypeURI2);

@@ -37,6 +37,8 @@ package rationals.transformations;
 
 import java.util.Set;
 
+import rationals.State;
+
 /**
  * A simple class for encapsulating sets s.t. they can be used
  * efficiently in Set or HashMap.
@@ -46,36 +48,35 @@ import java.util.Set;
  */
 public class HashValue {
     
-    public final int hash;
+    private final int hash;
 
-    public final Set s;
+    final Set<State> s;
 
-    public HashValue(Set s) {
+    HashValue(Set<State> s) {
         this.s = s;
         this.hash = s.hashCode();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
+    @Override
     public boolean equals(Object obj) {
+        if(obj==null) {
+            return false;
+        }
+        if(this==obj) {
+            return true;
+        }
+        if(!(obj instanceof HashValue)) {
+            return false;
+        }
         return ((HashValue) obj).hash == hash;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#hashCode()
-     */
+    @Override
     public int hashCode() {
         return hash;
     }
     
-    /* (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
+    @Override
     public String toString() {
         return s.toString();
     }

@@ -32,15 +32,23 @@ public abstract class AtLeast extends ExistentialConcept implements DLPredicate 
         m_number=number;
         m_onRole=onRole;
     }
+    /**
+     * @return number
+     */
     public int getNumber() {
         return m_number;
     }
+    /**
+     * @return role
+     */
     public Role getOnRole() {
         return m_onRole;
     }
+    @Override
     public int getArity() {
         return 1;
     }
+    @Override
     public boolean isAlwaysTrue() {
         return false;
     }

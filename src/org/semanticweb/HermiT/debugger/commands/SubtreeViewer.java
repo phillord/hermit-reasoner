@@ -47,17 +47,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.Icon;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.JTree;
+import javax.swing.*;
 import javax.swing.event.EventListenerList;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
@@ -75,7 +65,7 @@ import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.tableau.Node;
 
 @SuppressWarnings("serial")
-public class SubtreeViewer extends JFrame {
+class SubtreeViewer extends JFrame {
     protected final Debugger m_debugger;
     protected final SubtreeTreeModel m_subtreeTreeModel;
     protected final JTextArea m_nodeInfoTextArea;
@@ -84,7 +74,7 @@ public class SubtreeViewer extends JFrame {
 
     public SubtreeViewer(Debugger debugger,Node rootNode) {
         super("Subtree for node "+rootNode.getNodeID());
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         m_debugger=debugger;
         m_subtreeTreeModel=new SubtreeTreeModel(debugger,rootNode);
         m_tableauTree=new JTree(m_subtreeTreeModel);
@@ -92,6 +82,7 @@ public class SubtreeViewer extends JFrame {
         m_tableauTree.setShowsRootHandles(true);
         m_tableauTree.setCellRenderer(new NodeCellRenderer(debugger));
         m_tableauTree.addTreeSelectionListener(new TreeSelectionListener() {
+            @Override
             public void valueChanged(TreeSelectionEvent e) {
                 TreePath selectionPath=m_tableauTree.getSelectionPath();
                 if (selectionPath==null)
@@ -114,6 +105,7 @@ public class SubtreeViewer extends JFrame {
         commandsPanel.add(m_nodeIDField);
         JButton button=new JButton("Search");
         button.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 int nodeID;
                 String nodeIDText=m_nodeIDField.getText();
@@ -121,7 +113,7 @@ public class SubtreeViewer extends JFrame {
                     nodeID=Integer.parseInt(nodeIDText);
                 }
                 catch (NumberFormatException error) {
-                    JOptionPane.showMessageDialog(SubtreeViewer.this,"Invalid node ID '"+nodeIDText+"'.");
+                    JOptionPane.showMessageDialog(SubtreeViewer.this,"Invalid node ID '"+nodeIDText+"'. "+error.getMessage());
                     return;
                 }
                 Node node=m_debugger.getTableau().getNode(nodeID);
@@ -136,6 +128,7 @@ public class SubtreeViewer extends JFrame {
         commandsPanel.add(button);
         button=new JButton("Refresh");
         button.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 refresh();
             }
@@ -154,7 +147,7 @@ public class SubtreeViewer extends JFrame {
         m_subtreeTreeModel.refresh();
     }
     public void findNode(Node node) {
-        List<Node> pathToRoot=new ArrayList<Node>();
+        List<Node> pathToRoot=new ArrayList<>();
         Node currentNode=node;
         while (currentNode!=null && currentNode!=m_subtreeTreeModel.getRoot()) {
             pathToRoot.add(currentNode);
@@ -194,12 +187,15 @@ public class SubtreeViewer extends JFrame {
             m_debugger=debugger;
             m_root=root;
         }
+        @Override
         public void addTreeModelListener(TreeModelListener listener) {
             m_eventListeners.add(TreeModelListener.class,listener);
         }
+        @Override
         public void removeTreeModelListener(TreeModelListener listener) {
             m_eventListeners.remove(TreeModelListener.class,listener);
         }
+        @Override
         public Node getChild(Object parent,int index) {
             NodeCreationInfo nodeCreationInfo = null;
             if (parent instanceof Node) {
@@ -210,6 +206,7 @@ public class SubtreeViewer extends JFrame {
             else
                 return nodeCreationInfo.m_children.get(index);
         }
+        @Override
         public int getChildCount(Object parent) {
             NodeCreationInfo nodeCreationInfo = null;
             if (parent instanceof Node)
@@ -219,6 +216,7 @@ public class SubtreeViewer extends JFrame {
             else
                 return nodeCreationInfo.m_children.size();
         }
+        @Override
         public int getIndexOfChild(Object parent,Object child) {
             NodeCreationInfo nodeCreationInfo = null;
             if (parent instanceof Node)
@@ -228,12 +226,15 @@ public class SubtreeViewer extends JFrame {
             else
                 return nodeCreationInfo.m_children.indexOf(child);
         }
+        @Override
         public Object getRoot() {
             return m_root;
         }
+        @Override
         public boolean isLeaf(Object node) {
             return getChildCount(node)==0;
         }
+        @Override
         public void valueForPathChanged(TreePath path,Object newValue) {
         }
         public void refresh() {
@@ -260,7 +261,8 @@ public class SubtreeViewer extends JFrame {
         public NodeCellRenderer(Debugger debugger) {
             m_debugger=debugger;
         }
-        public Component getTreeCellRendererComponent(JTree tree,Object value,boolean selected,boolean expanded,boolean leaf,int row,boolean hasFocus) {
+        @Override
+        public Component getTreeCellRendererComponent(JTree tree,Object value,boolean s,boolean expanded,boolean leaf,int row,boolean focus) {
             Node node=(Node)value;
             StringBuffer buffer=new StringBuffer();
             ExistentialConcept existentialConcept=m_debugger.getNodeCreationInfo(node).m_createdByExistential;
@@ -277,10 +279,10 @@ public class SubtreeViewer extends JFrame {
                 buffer.append(atLeastConcept.getToConcept().toString(m_debugger.getPrefixes()));
                 buffer.append("]");
             }
-            else {
-                // Do nothing for now.
-            }
-            super.getTreeCellRendererComponent(tree,buffer.toString(),selected,expanded,leaf,row,hasFocus);
+            //else {
+            // Do nothing for now.
+            //}
+            super.getTreeCellRendererComponent(tree,buffer.toString(),s,expanded,leaf,row,focus);
             if (!node.isActive())
                 setIcon(NOT_ACTIVE_ICON);
             else if (node.isBlocked())
@@ -318,12 +320,15 @@ public class SubtreeViewer extends JFrame {
         public DotIcon(Color color) {
             m_color=color;
         }
+        @Override
         public int getIconHeight() {
             return 16;
         }
+        @Override
         public int getIconWidth() {
             return 16;
         }
+        @Override
         public void paintIcon(Component c,Graphics g,int x,int y) {
             Color oldColor=g.getColor();
             g.setColor(m_color);
@@ -333,9 +338,6 @@ public class SubtreeViewer extends JFrame {
     }
 
     protected static class MyTreePath extends TreePath {
-        public MyTreePath(Object object) {
-            super(object);
-        }
         public MyTreePath(TreePath treePath,Object object) {
             super(treePath,object);
         }

@@ -17,10 +17,23 @@
 */
 package org.semanticweb.HermiT.datatypes;
 
+/**
+ * Unsupported datatype exception.
+ */
 @SuppressWarnings("serial")
 public class UnsupportedDatatypeException extends RuntimeException {
 
+    /**
+     * @param message message
+     */
     public UnsupportedDatatypeException(String message) {
         super(message);
+    }
+    /**
+     * @param message message
+     * @param exception exception
+     */
+    public UnsupportedDatatypeException(String message, Throwable exception) {
+        super(message, exception);
     }
 }

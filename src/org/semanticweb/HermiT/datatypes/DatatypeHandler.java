@@ -25,12 +25,49 @@ import org.semanticweb.HermiT.model.DatatypeRestriction;
  * Implements the functions needed for a particular datatype.
  */
 public interface DatatypeHandler {
+    /**
+     * @return managed datatypes
+     */
     Set<String> getManagedDatatypeURIs();
+    /**
+     * @param lexicalForm lexicalForm
+     * @param datatypeURI datatypeURI
+     * @return literal
+     * @throws MalformedLiteralException if the input is malformed
+     */
     Object parseLiteral(String lexicalForm,String datatypeURI) throws MalformedLiteralException;
+    /**
+     * @param datatypeRestriction datatypeRestriction
+     * @throws UnsupportedFacetException if facet unsupported
+     */
     void validateDatatypeRestriction(DatatypeRestriction datatypeRestriction) throws UnsupportedFacetException;
+    /**
+     * @param datatypeRestriction datatypeRestriction
+     * @return value space
+     */
     ValueSpaceSubset createValueSpaceSubset(DatatypeRestriction datatypeRestriction);
+    /**
+     * @param valueSpaceSubset valueSpaceSubset
+     * @param datatypeRestriction datatypeRestriction
+     * @return intersection
+     */
     ValueSpaceSubset conjoinWithDR(ValueSpaceSubset valueSpaceSubset,DatatypeRestriction datatypeRestriction);
+    /**
+     * @param valueSpaceSubset valueSpaceSubset
+     * @param datatypeRestriction datatypeRestriction
+     * @return intersection
+     */
     ValueSpaceSubset conjoinWithDRNegation(ValueSpaceSubset valueSpaceSubset,DatatypeRestriction datatypeRestriction);
+    /**
+     * @param subsetDatatypeURI subsetDatatypeURI
+     * @param supersetDatatypeURI supersetDatatypeURI
+     * @return true if subset
+     */
     boolean isSubsetOf(String subsetDatatypeURI,String supersetDatatypeURI);
+    /**
+     * @param datatypeURI1 datatypeURI1
+     * @param datatypeURI2 datatypeURI2
+     * @return true if disjointwith
+     */
     boolean isDisjointWith(String datatypeURI1,String datatypeURI2);
 }

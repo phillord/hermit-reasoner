@@ -23,6 +23,13 @@ import org.semanticweb.HermiT.Prefixes;
  * Represents a DL predicate.
  */
 public interface DLPredicate {
+    /**
+     * @return arity
+     */
     int getArity();
+    /**
+     * @param prefixes prefixes
+     * @return tostring
+     */
     String toString(Prefixes prefixes);
 }

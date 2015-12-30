@@ -49,11 +49,11 @@ public interface BinaryTest {
   /**
    * Tests that some predicate is true for two given automata.
    * 
-   * @param a
-   * @param b
-   * @return
+   * @param a a
+   * @param b b
+   * @return true if test
    */
-  public boolean test(Automaton a, Automaton b);
+    boolean test(Automaton a, Automaton b);
   
 }
 

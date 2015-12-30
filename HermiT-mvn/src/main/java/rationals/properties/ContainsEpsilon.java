@@ -17,16 +17,17 @@ import rationals.transformations.TransformationsToolBox;
  */
 public class ContainsEpsilon implements UnaryTest {
 
+    @Override
     public boolean test(Automaton a) {
-        Iterator i = a.initials().iterator();
-        Set s = a.getStateFactory().stateSet();
+        Iterator<State> i = a.initials().iterator();
+        Set<State> s = a.getStateFactory().stateSet();
         while (i.hasNext()) {
-            State st = (State) i.next();
+            State st = i.next();
             if (st.isTerminal())
                 return true;
             s.add(st);
             /* compute epsilon closure */
-            Set cl = TransformationsToolBox.epsilonClosure(s,a);
+            Set<State> cl = TransformationsToolBox.epsilonClosure(s,a);
             if(TransformationsToolBox.containsATerminalState(cl))
                 return true;
         }

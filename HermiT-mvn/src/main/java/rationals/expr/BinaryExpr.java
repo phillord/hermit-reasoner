@@ -47,8 +47,8 @@ public abstract class BinaryExpr extends RationalExpr {
     /**
      * Construct a binary expression from two sub-expressions.
      * 
-     * @param e
-     * @param f
+     * @param e e
+     * @param f f
      */
     public BinaryExpr(RationalExpr e,RationalExpr f) {
         this.left = e ;

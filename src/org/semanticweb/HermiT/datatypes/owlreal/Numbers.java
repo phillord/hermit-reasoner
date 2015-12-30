@@ -20,7 +20,7 @@ package org.semanticweb.HermiT.datatypes.owlreal;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-public class Numbers {
+class Numbers {
     protected enum NumberType {
         INTEGER, LONG, BIG_INTEGER, BIG_DECIMAL, BIG_RATIONAL;
         
@@ -50,46 +50,55 @@ public class Numbers {
     /**
      * Parses the given string into a Java Number object representing an integer.
      * The Java object is chosen such that .equals() works correctly across all Number-derived objects.
+     * @param string string
+     * @return number
+     * @throws NumberFormatException if number is malformed
      */
     public static Number parseInteger(String string) throws NumberFormatException {
         try {
             return Integer.parseInt(string);
         }
-        catch (NumberFormatException e) {
+        catch (@SuppressWarnings("unused") NumberFormatException e) {
         }
         try {
             return Long.parseLong(string);
         }
-        catch (NumberFormatException e) {
+        catch (@SuppressWarnings("unused") NumberFormatException e) {
         }
         return new BigInteger(string);
     }
     /**
      * Parses the given string into a Java Number object representing an decimal.
      * The Java object is chosen such that .equals() works correctly across all Number-derived objects.
+     * @param string string
+     * @return number
+     * @throws NumberFormatException if number is malformed
      */
     public static Number parseDecimal(String string) throws NumberFormatException {
         BigDecimal decimal=new BigDecimal(string);
         try {
             return decimal.intValueExact();
         }
-        catch (ArithmeticException e) {
+        catch (@SuppressWarnings("unused") ArithmeticException e) {
         }
         try {
             return decimal.longValueExact();
         }
-        catch (ArithmeticException e) {
+        catch (@SuppressWarnings("unused") ArithmeticException e) {
         }
         try {
             return decimal.toBigIntegerExact();
         }
-        catch (ArithmeticException e) {
+        catch (@SuppressWarnings("unused") ArithmeticException e) {
         }
         return decimal.stripTrailingZeros();
     }
     /**
      * Parses the given string into a Java Number object representing a rational.
      * The Java object is chosen such that .equals() works correctly across all Number-derived objects.
+     * @param string string
+     * @return number
+     * @throws NumberFormatException if number is malformed
      */
     public static Number parseRational(String string) throws NumberFormatException {
         int divideIndex=string.indexOf('/');
@@ -117,7 +126,7 @@ public class Numbers {
         try {
             return new BigDecimal(numerator).divide(new BigDecimal(denominator));
         }
-        catch (ArithmeticException e) {
+        catch (@SuppressWarnings("unused") ArithmeticException e) {
         }
         return new BigRational(numerator,denominator);
     }
@@ -170,6 +179,8 @@ public class Numbers {
             return BigInteger.valueOf(n.longValue());
         case BIG_INTEGER:
             return (BigInteger)n;
+        case BIG_DECIMAL:
+        case BIG_RATIONAL:
         default:
             throw new IllegalArgumentException();
         }
@@ -187,6 +198,7 @@ public class Numbers {
             return new BigDecimal((BigInteger)n);
         case BIG_DECIMAL:
             return (BigDecimal)n;
+        case BIG_RATIONAL:
         default:
             throw new IllegalArgumentException();
         }
@@ -331,7 +343,7 @@ public class Numbers {
                 if (size<=0L)
                     return 0;
                 else
-                    return (int)Math.max(((long)argument)-size,0);
+                    return (int)Math.max((argument)-size,0);
             }
         case BIG_INTEGER: {
                 BigInteger leftover=BigInteger.valueOf(argument).subtract(toBigInteger(upperBoundInclusive,typeUpperBound)).add(toBigInteger(lowerBoundInclusive,typeLowerBound)).subtract(BigInteger.ONE);
@@ -340,6 +352,8 @@ public class Numbers {
                 else
                     return leftover.intValue();
             }
+        case BIG_DECIMAL:
+        case BIG_RATIONAL:
         default:
             throw new IllegalArgumentException();
         }
@@ -362,6 +376,8 @@ public class Numbers {
             }
         case BIG_INTEGER:
             return ((BigInteger)integer).add(BigInteger.ONE);
+        case BIG_DECIMAL:
+        case BIG_RATIONAL:
         default:
             throw new IllegalArgumentException();
         }

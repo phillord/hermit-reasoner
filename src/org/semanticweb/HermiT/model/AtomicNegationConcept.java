@@ -30,18 +30,25 @@ public class AtomicNegationConcept extends LiteralConcept {
     protected AtomicNegationConcept(AtomicConcept negatedAtomicConcept) {
         m_negatedAtomicConcept=negatedAtomicConcept;
     }
+    /**
+     * @return negated concept
+     */
     public AtomicConcept getNegatedAtomicConcept() {
         return m_negatedAtomicConcept;
     }
+    @Override
     public LiteralConcept getNegation() {
         return m_negatedAtomicConcept;
     }
+    @Override
     public boolean isAlwaysTrue() {
         return m_negatedAtomicConcept.isAlwaysFalse();
     }
+    @Override
     public boolean isAlwaysFalse() {
         return m_negatedAtomicConcept.isAlwaysTrue();
     }
+    @Override
     public String toString(Prefixes prefixes) {
         return "not("+m_negatedAtomicConcept.toString(prefixes)+")";
     }
@@ -49,15 +56,21 @@ public class AtomicNegationConcept extends LiteralConcept {
         return s_interningManager.intern(this);
     }
 
-    protected static InterningManager<AtomicNegationConcept> s_interningManager=new InterningManager<AtomicNegationConcept>() {
+    protected final static InterningManager<AtomicNegationConcept> s_interningManager=new InterningManager<AtomicNegationConcept>() {
+        @Override
         protected boolean equal(AtomicNegationConcept object1,AtomicNegationConcept object2) {
             return object1.m_negatedAtomicConcept==object2.m_negatedAtomicConcept;
         }
+        @Override
         protected int getHashCode(AtomicNegationConcept object) {
             return -object.m_negatedAtomicConcept.hashCode();
         }
     };
     
+    /**
+     * @param negatedAtomicConcept negatedAtomicConcept
+     * @return concept
+     */
     public static AtomicNegationConcept create(AtomicConcept negatedAtomicConcept) {
         return s_interningManager.intern(new AtomicNegationConcept(negatedAtomicConcept));
     }

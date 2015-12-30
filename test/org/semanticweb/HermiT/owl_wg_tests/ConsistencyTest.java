@@ -26,37 +26,40 @@ import org.junit.runner.RunWith;
 import org.junit.Test;
 import org.junit.Before;
 import org.junit.After;
-
-
+@SuppressWarnings("javadoc")
 @RunWith(Parameterized.class)
 public class ConsistencyTest extends AbstractTest {
     protected final boolean m_positive;
 
-    public ConsistencyTest(WGTestDescriptor wgTestDescriptor,boolean positive,File dumpTestDataDirectory,boolean useDisjunctionLearning) {
-        super(wgTestDescriptor.identifier+(positive ? "-consistency" : "-inconsistency"),wgTestDescriptor,dumpTestDataDirectory,useDisjunctionLearning);
-        m_positive=positive;
-    }
-    protected void doTest() {
-        assertEquals(m_positive,m_reasoner.isConsistent());
+    public ConsistencyTest(WGTestDescriptor wgTestDescriptor, boolean positive, File dumpTestDataDirectory,
+            boolean useDisjunctionLearning) {
+        super(wgTestDescriptor.identifier + (positive ? "-consistency" : "-inconsistency"), wgTestDescriptor,
+                dumpTestDataDirectory, useDisjunctionLearning);
+        m_positive = positive;
     }
 
+    @Override
+    protected void doTest() {
+        assertEquals(m_positive, m_reasoner.isConsistent());
+    }
 
     @Test
-    public void test() throws Throwable{
+    public void test() throws Throwable {
         runTest();
     }
-    
+
     @Before
-    public void before() throws Exception{
+    public void before() throws Exception {
         setUp();
     }
-    
+
     @After
-    public void after() throws Exception{
+    public void after() {
         tearDown();
     }
+
     @Parameters
-    public static Collection<Object[]> params() throws Exception{
+    public static Collection<Object[]> params() throws Exception {
         return TstDescriptorForMaven.getConsistencyTestParams();
     }
 

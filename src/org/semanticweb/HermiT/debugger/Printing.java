@@ -44,53 +44,31 @@ import org.semanticweb.HermiT.model.InverseRole;
 import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.tableau.ExtensionTable;
 import org.semanticweb.HermiT.tableau.Node;
-
+/**Printing.*/
 public class Printing {
+    /**
+     * @param writer writer
+     * @param number number
+     * @param size size
+     */
     public static void printPadded(PrintWriter writer,int number,int size) {
         printPadded(writer,String.valueOf(number),size);
     }
+    /**
+     * @param writer writer
+     * @param string string
+     * @param size size
+     */
     public static void printPadded(PrintWriter writer,String string,int size) {
         for (int i=size-string.length();i>=0;--i)
             writer.print(' ');
         writer.print(string);
     }
-    public static <T> void printCollection(Collection<T> collection,PrintWriter writer) {
-        for (T object : collection) {
-            writer.print("    ");
-            writer.print(object.toString());
-            writer.println();
-        }
-    }
-    public static <T> void diffCollections(String in1NotIn2,String in2NotIn1,PrintWriter writer,Collection<T> c1,Collection<T> c2) {
-        boolean window1Message=false;
-        for (Object object : c1) {
-            if (!c2.contains(object)) {
-                if (!window1Message) {
-                    writer.println("<<<  "+in1NotIn2+":");
-                    window1Message=true;
-                }
-                writer.print("    ");
-                writer.print(object.toString());
-                writer.println();
-            }
-        }
-        if (window1Message)
-            writer.println("--------------------------------------------");
-        boolean window2Message=false;
-        for (Object object : c2) {
-            if (!c1.contains(object)) {
-                if (!window2Message) {
-                    writer.println(">>>  "+in2NotIn1+":");
-                    window2Message=true;
-                }
-                writer.print("    ");
-                writer.print(object.toString());
-                writer.println();
-            }
-        }
-        if (window1Message)
-            writer.println("--------------------------------------------");
-    }
+    /**
+     * @param debugger debugger
+     * @param node node
+     * @param writer writer
+     */
     public static void printNodeData(Debugger debugger,Node node,PrintWriter writer) {
         writer.print("Node ID:    ");
         writer.println(node.getNodeID());
@@ -135,11 +113,11 @@ public class Printing {
             return "indirectly by "+(node.getBlocker()==Node.SIGNATURE_CACHE_BLOCKER ? "signature in cache" : node.getBlocker().getNodeID());
     }
     protected static void printConceptLabel(Debugger debugger,Node node,PrintWriter writer) {
-        TreeSet<AtomicConcept> atomicConceptsCore=new TreeSet<AtomicConcept>(ConceptComparator.INSTANCE);
-        TreeSet<AtomicConcept> atomicConceptsNoncore=new TreeSet<AtomicConcept>(ConceptComparator.INSTANCE);
-        TreeSet<ExistentialConcept> existentialConcepts=new TreeSet<ExistentialConcept>(ConceptComparator.INSTANCE);
-        TreeSet<AtomicNegationConcept> negativeConcepts=new TreeSet<AtomicNegationConcept>(ConceptComparator.INSTANCE);
-        TreeSet<DataRange> dataRanges=new TreeSet<DataRange>(DataRangeComparator.INSTANCE);
+        TreeSet<AtomicConcept> atomicConceptsCore=new TreeSet<>(ConceptComparator.INSTANCE);
+        TreeSet<AtomicConcept> atomicConceptsNoncore=new TreeSet<>(ConceptComparator.INSTANCE);
+        TreeSet<ExistentialConcept> existentialConcepts=new TreeSet<>(ConceptComparator.INSTANCE);
+        TreeSet<AtomicNegationConcept> negativeConcepts=new TreeSet<>(ConceptComparator.INSTANCE);
+        TreeSet<DataRange> dataRanges=new TreeSet<>(DataRangeComparator.INSTANCE);
         ExtensionTable.Retrieval retrieval=debugger.getTableau().getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
         retrieval.getBindingsBuffer()[1]=node;
         retrieval.open();
@@ -184,7 +162,7 @@ public class Printing {
         }
     }
     protected static void printEdges(Debugger debugger,Node node,PrintWriter writer) {
-        Map<Node,Set<AtomicRole>> outgoingEdges=new TreeMap<Node,Set<AtomicRole>>(NodeComparator.INSTANCE);
+        Map<Node,Set<AtomicRole>> outgoingEdges=new TreeMap<>(NodeComparator.INSTANCE);
         ExtensionTable.Retrieval retrieval=debugger.getTableau().getExtensionManager().getTernaryExtensionTable().createRetrieval(new boolean[] { false,true,false },ExtensionTable.View.TOTAL);
         retrieval.getBindingsBuffer()[1]=node;
         retrieval.open();
@@ -195,7 +173,7 @@ public class Printing {
                 Node toNode=(Node)retrieval.getTupleBuffer()[2];
                 Set<AtomicRole> set=outgoingEdges.get(toNode);
                 if (set==null) {
-                    set=new TreeSet<AtomicRole>(RoleComparator.INSTANCE);
+                    set=new TreeSet<>(RoleComparator.INSTANCE);
                     outgoingEdges.put(toNode,set);
                 }
                 set.add(atomicRole);
@@ -206,7 +184,7 @@ public class Printing {
             writer.println("-- Outgoing edges --------------------------------");
             printEdgeMap(debugger,outgoingEdges,writer);
         }
-        Map<Node,Set<AtomicRole>> incomingEdges=new TreeMap<Node,Set<AtomicRole>>(NodeComparator.INSTANCE);
+        Map<Node,Set<AtomicRole>> incomingEdges=new TreeMap<>(NodeComparator.INSTANCE);
         retrieval=debugger.getTableau().getExtensionManager().getTernaryExtensionTable().createRetrieval(new boolean[] { false,false,true },ExtensionTable.View.TOTAL);
         retrieval.getBindingsBuffer()[2]=node;
         retrieval.open();
@@ -217,7 +195,7 @@ public class Printing {
                 Node fromNode=(Node)retrieval.getTupleBuffer()[1];
                 Set<AtomicRole> set=incomingEdges.get(fromNode);
                 if (set==null) {
-                    set=new TreeSet<AtomicRole>(RoleComparator.INSTANCE);
+                    set=new TreeSet<>(RoleComparator.INSTANCE);
                     incomingEdges.put(fromNode,set);
                 }
                 set.add(atomicRole);
@@ -279,9 +257,12 @@ public class Printing {
         }
     }
 
+    /**ConceptComparator*/
     public static class ConceptComparator implements Comparator<Concept> {
+        /**instance*/
         public static final ConceptComparator INSTANCE=new ConceptComparator();
 
+        @Override
         public int compare(Concept c1,Concept c2) {
             ConceptType type1=getConceptType(c1);
             ConceptType type2=getConceptType(c2);
@@ -339,9 +320,10 @@ public class Printing {
         }
     }
     
-    public static class DataRangeComparator implements Comparator<DataRange> {
+    static class DataRangeComparator implements Comparator<DataRange> {
         public static final DataRangeComparator INSTANCE=new DataRangeComparator();
 
+        @Override
         public int compare(DataRange c1,DataRange c2) {
             DataRangeType type1=getDataRangeType(c1);
             DataRangeType type2=getDataRangeType(c2);
@@ -429,6 +411,7 @@ public class Printing {
     protected static class RoleComparator implements Comparator<Role> {
         public static final RoleComparator INSTANCE=new RoleComparator();
 
+        @Override
         public int compare(Role ar1,Role ar2) {
             int type1=getRoleType(ar1);
             int type2=getRoleType(ar2);
@@ -450,14 +433,18 @@ public class Printing {
     protected static class NodeComparator implements Comparator<Node> {
         public static final NodeComparator INSTANCE=new NodeComparator();
 
+        @Override
         public int compare(Node o1,Node o2) {
             return o1.getNodeID()-o2.getNodeID();
         }
     }
 
+    /**FactComparator.*/
     public static class FactComparator implements Comparator<Object[]> {
+        /**instance*/
         public static final FactComparator INSTANCE=new FactComparator();
 
+        @Override
         public int compare(Object[] o1,Object[] o2) {
             int compare=o1.length-o2.length;
             if (compare!=0)
