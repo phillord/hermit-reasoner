@@ -18,8 +18,11 @@
     <artifactId>org.semanticweb.hermit</artifactId>
     <!-- Note that on each released build, the ${updatefile} on the web site
          should be replaced, and the new version of the plugin should be
-         posted at the (auto-generated) URL in that file. -->
-    <version>1.3.8.5-SNAPSHOT</version>
+         posted at the (auto-generated) URL in that file.
+         It seems that Protege requires that the version string for the plugin
+         is either in the format X.Y.Z.W or X.Y.Z.W-SNAPSHOT, and Protege will
+         silently refuse to load the plugin otherwise. -->
+    <version>1.4.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>HermiT</name>
@@ -230,12 +233,16 @@
                             <Built-By>${user.name}</Built-By>
                             <Built-OS>${os.name}</Built-OS>
                             <Build-Date>${timestamp}</Build-Date>
-                            <Bundle-ManifestVersion>2</Bundle-ManifestVersion>
-                            <Bundle-Name>HermiT Reasoner</Bundle-Name>
+                            <Bundle-Activator>org.protege.editor.core.plugin.DefaultPluginActivator</Bundle-Activator>
+                            <Bundle-ClassPath>.</Bundle-ClassPath>
                             <Bundle-Description>An OWL 2 reasoner</Bundle-Description>
                             <Bundle-DocURL>${homepage}</Bundle-DocURL>
+                            <Bundle-ManifestVersion>2</Bundle-ManifestVersion>
+                            <Bundle-Name>HermiT Reasoner</Bundle-Name>
+                            <Bundle-SymbolicName>${project.artifactId};singleton:=true</Bundle-SymbolicName>
                             <Bundle-Vendor>Boris Motik, Birte Glimm, Giorgos Stoilos, and Ian Horrocks</Bundle-Vendor>
                             <Bundle-Version>${project.version}</Bundle-Version>
+                            <Require-Bundle>org.eclipse.equinox.registry,org.eclipse.equinox.common,org.protege.editor.core.application;bundle-version=4.1,org.protege.editor.owl;bundle-version=4.1,org.semanticweb.owl.owlapi;bundle-version=3.2</Require-Bundle>
                             <Update-Url>${updatefile}</Update-Url>
                         </manifestEntries>
                     </archive>
