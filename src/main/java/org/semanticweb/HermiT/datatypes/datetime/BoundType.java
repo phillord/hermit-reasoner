@@ -24,7 +24,7 @@ public enum BoundType {
         return values()[1-ordinal()];
     }
     public static BoundType getMoreRestrictive(BoundType boundType1,BoundType boundType2) {
-        int maxOrdinal=Math.max(boundType1.ordinal(),boundType1.ordinal());
+        int maxOrdinal=Math.max(boundType1.ordinal(),boundType2.ordinal());
         return values()[maxOrdinal];
     }
 }
