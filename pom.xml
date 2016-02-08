@@ -419,20 +419,6 @@
         </profile>
     </profiles>
 
-    <!-- Add the Sonatype snapshots repository to support Protege 5 beta 18;
-         remove this for the final release of Protege 5. -->
-    <repositories>
-        <repository>
-            <id>oss-sonatype</id>
-            <name>oss-sonatype</name>
-            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>always</updatePolicy>
-            </snapshots>
-        </repository>
-    </repositories>
-
     <dependencies>
         <dependency>
             <groupId>commons-logging</groupId>
@@ -476,9 +462,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>edu.stanford.protege</groupId>
-            <artifactId>protege-editor-owl</artifactId>
-            <version>5.0.0-beta-18-SNAPSHOT</version>
+    		<groupId>edu.stanford.protege</groupId>
+    		<artifactId>protege-editor-owl</artifactId>
+		    <version>5.0.0-beta-21</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
