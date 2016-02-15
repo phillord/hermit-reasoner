@@ -19,12 +19,12 @@ package org.semanticweb.HermiT.monitor;
 
 import java.io.Serializable;
 
+import org.semanticweb.HermiT.datatypes.DatatypeChecker;
 import org.semanticweb.HermiT.model.AnnotatedEquality;
 import org.semanticweb.HermiT.model.DataRange;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.tableau.BranchingPoint;
 import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
-import org.semanticweb.HermiT.tableau.DatatypeManager;
 import org.semanticweb.HermiT.tableau.GroundDisjunction;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.ReasoningTaskDescription;
@@ -224,13 +224,13 @@ public class TableauMonitorFork implements TableauMonitor,Serializable  {
         m_first.datatypeCheckingFinished(result);
         m_second.datatypeCheckingFinished(result);
     }
-    public void datatypeConjunctionCheckingStarted(DatatypeManager.DConjunction conjunction) {
-        m_first.datatypeConjunctionCheckingStarted(conjunction);
-        m_second.datatypeConjunctionCheckingStarted(conjunction);
+    public void datatypeConjunctionCheckingStarted(DatatypeChecker<Node> datatypeChecker) {
+        m_first.datatypeConjunctionCheckingStarted(datatypeChecker);
+        m_second.datatypeConjunctionCheckingStarted(datatypeChecker);
     }
-    public void datatypeConjunctionCheckingFinished(DatatypeManager.DConjunction conjunction,boolean result) {
-        m_first.datatypeConjunctionCheckingFinished(conjunction,result);
-        m_second.datatypeConjunctionCheckingFinished(conjunction,result);
+    public void datatypeConjunctionCheckingFinished(DatatypeChecker<Node> datatypeChecker,boolean result) {
+        m_first.datatypeConjunctionCheckingFinished(datatypeChecker,result);
+        m_second.datatypeConjunctionCheckingFinished(datatypeChecker,result);
     }
     public void blockingValidationStarted() {
         m_first.blockingValidationStarted();

@@ -19,12 +19,12 @@ package org.semanticweb.HermiT.monitor;
 
 import java.io.Serializable;
 
+import org.semanticweb.HermiT.datatypes.DatatypeChecker;
 import org.semanticweb.HermiT.model.AnnotatedEquality;
 import org.semanticweb.HermiT.model.DataRange;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.tableau.BranchingPoint;
 import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
-import org.semanticweb.HermiT.tableau.DatatypeManager;
 import org.semanticweb.HermiT.tableau.GroundDisjunction;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.ReasoningTaskDescription;
@@ -228,13 +228,13 @@ public class TableauMonitorForwarder implements TableauMonitor,Serializable {
         if (m_forwardingOn)
             m_forwardingTargetMonitor.datatypeCheckingFinished(result);
     }
-    public void datatypeConjunctionCheckingStarted(DatatypeManager.DConjunction conjunction) {
+    public void datatypeConjunctionCheckingStarted(DatatypeChecker<Node> datatypeChecker) {
         if (m_forwardingOn)
-            m_forwardingTargetMonitor.datatypeConjunctionCheckingStarted(conjunction);
+            m_forwardingTargetMonitor.datatypeConjunctionCheckingStarted(datatypeChecker);
     }
-    public void datatypeConjunctionCheckingFinished(DatatypeManager.DConjunction conjunction,boolean result) {
+    public void datatypeConjunctionCheckingFinished(DatatypeChecker<Node> datatypeChecker,boolean result) {
         if (m_forwardingOn)
-            m_forwardingTargetMonitor.datatypeConjunctionCheckingFinished(conjunction,result);
+            m_forwardingTargetMonitor.datatypeConjunctionCheckingFinished(datatypeChecker,result);
     }
     public void blockingValidationStarted() {
         if (m_forwardingOn)

@@ -25,11 +25,12 @@ import java.util.Map;
 import java.util.Stack;
 
 import org.semanticweb.HermiT.Prefixes;
+import org.semanticweb.HermiT.datatypes.DatatypeChecker;
 import org.semanticweb.HermiT.model.Concept;
+import org.semanticweb.HermiT.model.ConstantEnumeration;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.model.DataRange;
-import org.semanticweb.HermiT.model.ConstantEnumeration;
 import org.semanticweb.HermiT.model.DatatypeRestriction;
 import org.semanticweb.HermiT.model.Equality;
 import org.semanticweb.HermiT.model.ExistentialConcept;
@@ -39,7 +40,6 @@ import org.semanticweb.HermiT.model.NodeIDsAscendingOrEqual;
 import org.semanticweb.HermiT.monitor.TableauMonitorAdapter;
 import org.semanticweb.HermiT.tableau.BranchingPoint;
 import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
-import org.semanticweb.HermiT.tableau.DatatypeManager;
 import org.semanticweb.HermiT.tableau.GroundDisjunction;
 import org.semanticweb.HermiT.tableau.Node;
 
@@ -154,9 +154,9 @@ public class DerivationHistory extends TableauMonitorAdapter {
     public void unknownDatatypeRestrictionDetectionFinished(DataRange dataRange1,Node node1, DataRange dataRange2,Node node2) {
         m_derivations.pop();
     }
-    public void datatypeConjunctionCheckingStarted(DatatypeManager.DConjunction conjunction) {
+    public void datatypeConjunctionCheckingStarted(DatatypeChecker<Node> datatypeChecker) {
         List<Atom> atoms=new ArrayList<Atom>();
-        for (DatatypeManager.DVariable variable : conjunction.getActiveVariables()) {
+        for (DatatypeChecker.DVariable<Node> variable : datatypeChecker.getActiveVariables()) {
             Node node=variable.getNode();
             for (DatatypeRestriction datatypeRestriction : variable.getPositiveDatatypeRestrictions())
                 atoms.add(getAtom(new Object[] { datatypeRestriction,node }));
@@ -166,14 +166,14 @@ public class DerivationHistory extends TableauMonitorAdapter {
                 atoms.add(getAtom(new Object[] { dataValueEnumeration,node }));
             for (ConstantEnumeration dataValueEnumeration : variable.getNegativeDataValueEnumerations())
                 atoms.add(getAtom(new Object[] { dataValueEnumeration.getNegation(),node }));
-            for (DatatypeManager.DVariable neighborVariable : variable.getUnequalToDirect())
+            for (DatatypeChecker.DVariable<Node> neighborVariable : variable.getUnequalToDirected())
                 atoms.add(getAtom(new Object[] { Inequality.INSTANCE,node,neighborVariable.getNode() }));
         }
         Atom[] atomsArray=new Atom[atoms.size()];
         atoms.toArray(atomsArray);
         m_derivations.push(new DatatypeChecking(atomsArray));
     }
-    public void datatypeConjunctionCheckingFinished(DatatypeManager.DConjunction conjunction,boolean result) {
+    public void datatypeConjunctionCheckingFinished(DatatypeChecker<Node> datatypeChecker,boolean result) {
         m_derivations.pop();
     }
     public Atom getAtom(Object[] tuple) {

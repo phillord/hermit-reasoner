@@ -19,12 +19,12 @@ package org.semanticweb.HermiT.monitor;
 
 import java.io.Serializable;
 
+import org.semanticweb.HermiT.datatypes.DatatypeChecker;
 import org.semanticweb.HermiT.model.AnnotatedEquality;
 import org.semanticweb.HermiT.model.DataRange;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.tableau.BranchingPoint;
 import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
-import org.semanticweb.HermiT.tableau.DatatypeManager;
 import org.semanticweb.HermiT.tableau.GroundDisjunction;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.ReasoningTaskDescription;
@@ -130,9 +130,9 @@ public class TableauMonitorAdapter implements TableauMonitor,Serializable  {
     }
     public void datatypeCheckingFinished(boolean result) {
     }
-    public void datatypeConjunctionCheckingStarted(DatatypeManager.DConjunction conjunction) {
+    public void datatypeConjunctionCheckingStarted(DatatypeChecker<Node> datatypeChecker) {
     }
-    public void datatypeConjunctionCheckingFinished(DatatypeManager.DConjunction conjunction,boolean result) {
+    public void datatypeConjunctionCheckingFinished(DatatypeChecker<Node> datatypeChecker,boolean result) {
     }
     public void blockingValidationStarted() {
     }

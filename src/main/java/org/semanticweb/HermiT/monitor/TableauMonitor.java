@@ -17,12 +17,12 @@
 */
 package org.semanticweb.HermiT.monitor;
 
+import org.semanticweb.HermiT.datatypes.DatatypeChecker;
 import org.semanticweb.HermiT.model.AnnotatedEquality;
 import org.semanticweb.HermiT.model.DataRange;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.tableau.BranchingPoint;
 import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
-import org.semanticweb.HermiT.tableau.DatatypeManager;
 import org.semanticweb.HermiT.tableau.GroundDisjunction;
 import org.semanticweb.HermiT.tableau.Node;
 import org.semanticweb.HermiT.tableau.ReasoningTaskDescription;
@@ -75,8 +75,8 @@ public interface TableauMonitor {
     void unknownDatatypeRestrictionDetectionFinished(DataRange dataRange1,Node node1,DataRange dataRange2,Node node2);
     void datatypeCheckingStarted();
     void datatypeCheckingFinished(boolean result);
-    void datatypeConjunctionCheckingStarted(DatatypeManager.DConjunction conjunction);
-    void datatypeConjunctionCheckingFinished(DatatypeManager.DConjunction conjunction,boolean result);
+    void datatypeConjunctionCheckingStarted(DatatypeChecker<Node> datatypeChecker);
+    void datatypeConjunctionCheckingFinished(DatatypeChecker<Node> datatypeChecker,boolean result);
     void blockingValidationStarted();
     void blockingValidationFinished(int noInvalidlyBlocked);
     void possibleInstanceIsInstance();
