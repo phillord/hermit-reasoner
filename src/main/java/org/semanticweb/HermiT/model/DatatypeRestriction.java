@@ -21,7 +21,7 @@ import org.semanticweb.HermiT.Prefixes;
 
 /**
  * A data range consisting of a datatype URI and a number of facet restrictions.
- * NOTE: RDFS_LITERAL is treated as InternalDatatype due to implemetnation side-effects.
+ * NOTE: RDFS_LITERAL is treated as InternalDatatype due to implementation side-effects.
  */
 public class DatatypeRestriction extends AtomicDataRange {
     private static final long serialVersionUID=524235536504588458L;
