@@ -37,13 +37,13 @@ class EntireFloatSubset implements ValueSpaceSubset {
     }
     @Override
     public void enumerateDataValues(Collection<Object> dataValues) {
-        dataValues.add(Float.NaN);
+        dataValues.add(Float.valueOf(Float.NaN));
         float number=Float.NEGATIVE_INFINITY;
         while (!FloatInterval.areIdentical(number,Float.POSITIVE_INFINITY)) {
-            dataValues.add(number);
+            dataValues.add(Float.valueOf(number));
             number=FloatInterval.nextFloat(number);
         }
-        dataValues.add(Float.POSITIVE_INFINITY);
+        dataValues.add(Float.valueOf(Float.POSITIVE_INFINITY));
     }
     @Override
     public String toString() {

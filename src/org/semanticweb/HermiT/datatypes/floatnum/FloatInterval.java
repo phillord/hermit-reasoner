@@ -85,10 +85,10 @@ public class FloatInterval {
         // We know that the interval is not empty; hence, neither bound is NaN.
         float number=m_lowerBoundInclusive;
         while (!areIdentical(number,m_upperBoundInclusive)) {
-            numbers.add(number);
+            numbers.add(Float.valueOf(number));
             number=nextFloat(number);
         }
-        numbers.add(m_upperBoundInclusive);
+        numbers.add(Float.valueOf(m_upperBoundInclusive));
     }
     @Override
     public String toString() {

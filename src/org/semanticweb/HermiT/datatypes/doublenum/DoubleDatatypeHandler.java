@@ -52,11 +52,11 @@ public class DoubleDatatypeHandler implements DatatypeHandler {
     public Object parseLiteral(String lexicalForm,String datatypeURI) throws MalformedLiteralException {
         assert XSD_DOUBLE.equals(datatypeURI);
         try {
-            return Double.parseDouble(lexicalForm);
+            return Double.valueOf(lexicalForm);
         }
         catch (NumberFormatException error) {
-            if (lexicalForm.equals("INF")) return Double.POSITIVE_INFINITY;
-            if (lexicalForm.equals("-INF")) return Double.NEGATIVE_INFINITY;
+            if (lexicalForm.equals("INF")) return Double.valueOf( Double.POSITIVE_INFINITY);
+            if (lexicalForm.equals("-INF")) return Double.valueOf( Double.NEGATIVE_INFINITY);
             throw new MalformedLiteralException(lexicalForm,datatypeURI, error);
         }
     }
@@ -169,7 +169,7 @@ public class DoubleDatatypeHandler implements DatatypeHandler {
         double upperBoundInclusive=Double.POSITIVE_INFINITY;
         for (int index=datatypeRestriction.getNumberOfFacetRestrictions()-1;index>=0;--index) {
             String facetURI=datatypeRestriction.getFacetURI(index);
-            double facetDataValue=(Double)datatypeRestriction.getFacetValue(index).getDataValue();
+            double facetDataValue=((Double)datatypeRestriction.getFacetValue(index).getDataValue()).doubleValue();
             if ((XSD_NS+"minInclusive").equals(facetURI)) {
                 if (DoubleInterval.areIdentical(facetDataValue,+0.0))
                     facetDataValue=-0.0;

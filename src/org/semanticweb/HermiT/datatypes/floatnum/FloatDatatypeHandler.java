@@ -52,11 +52,11 @@ public class FloatDatatypeHandler implements DatatypeHandler {
     public Object parseLiteral(String lexicalForm,String datatypeURI) throws MalformedLiteralException {
         assert XSD_FLOAT.equals(datatypeURI);
         try {
-            return Float.parseFloat(lexicalForm);
+            return Float.valueOf(lexicalForm);
         }
         catch (NumberFormatException error) {
-            if (lexicalForm.equals("INF")) return Float.POSITIVE_INFINITY;
-            if (lexicalForm.equals("-INF")) return Float.NEGATIVE_INFINITY;
+            if (lexicalForm.equals("INF")) return Float.valueOf(Float.POSITIVE_INFINITY);
+            if (lexicalForm.equals("-INF")) return Float.valueOf(Float.NEGATIVE_INFINITY);
             throw new MalformedLiteralException(lexicalForm,datatypeURI,error);
         }
     }
@@ -169,7 +169,7 @@ public class FloatDatatypeHandler implements DatatypeHandler {
         float upperBoundInclusive=Float.POSITIVE_INFINITY;
         for (int index=datatypeRestriction.getNumberOfFacetRestrictions()-1;index>=0;--index) {
             String facetURI=datatypeRestriction.getFacetURI(index);
-            float facetDataValue=(Float)datatypeRestriction.getFacetValue(index).getDataValue();
+            float facetDataValue=((Float)datatypeRestriction.getFacetValue(index).getDataValue()).floatValue();
             if ((XSD_NS+"minInclusive").equals(facetURI)) {
                 if (FloatInterval.areIdentical(facetDataValue,+0.0F))
                     facetDataValue=-0.0F;

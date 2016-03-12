@@ -45,7 +45,7 @@ class NoNaNDoubleSubset implements ValueSpaceSubset {
     @Override
     public boolean containsDataValue(Object dataValue) {
         if (dataValue instanceof Double) {
-            double number=(Double)dataValue;
+            double number=((Double)dataValue).doubleValue();
             for (int index=m_intervals.size()-1;index>=0;--index)
                 if (m_intervals.get(index).contains(number))
                     return true;

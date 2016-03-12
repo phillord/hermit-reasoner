@@ -112,7 +112,7 @@ public class RDFPlainLiteralDatatypeHandler implements DatatypeHandler {
             Object facetDataValue=facetValue.getDataValue();
             if ((XSD_NS+"minLength").equals(facetURI) || (XSD_NS+"maxLength").equals(facetURI) || (XSD_NS+"length").equals(facetURI)) {
                 if (facetDataValue instanceof Integer) {
-                    int value=(Integer)facetDataValue;
+                    int value=((Integer)facetDataValue).intValue();
                     if (value<0 || value==Integer.MAX_VALUE)
                         throw new UnsupportedFacetException("The datatype restriction "+this.toString()+" cannot be handled. The facet with URI '"+facetURI+"' does not support integer "+value+" as value. "+(value<0?"The value should not be negative. ":"The value is outside of the supported integer range, i.e., it is larger than "+Integer.MAX_VALUE));
                 }
@@ -288,7 +288,7 @@ public class RDFPlainLiteralDatatypeHandler implements DatatypeHandler {
         for (int index=datatypeRestriction.getNumberOfFacetRestrictions()-1;index>=0;--index) {
             String facetURI=datatypeRestriction.getFacetURI(index);
             assert (XSD_NS+"minLength").equals(facetURI) || (XSD_NS+"maxLength").equals(facetURI) || (XSD_NS+"length").equals(facetURI);
-            int facetDataValue=(Integer)datatypeRestriction.getFacetValue(index).getDataValue();
+            int facetDataValue=((Integer)datatypeRestriction.getFacetValue(index).getDataValue()).intValue();
             if ((XSD_NS+"minLength").equals(facetURI))
                 minLength=Math.max(minLength,facetDataValue);
             else if ((XSD_NS+"maxLength").equals(facetURI))
@@ -323,12 +323,12 @@ public class RDFPlainLiteralDatatypeHandler implements DatatypeHandler {
             String facetURI=datatypeRestriction.getFacetURI(index);
             Object facetDataValue=datatypeRestriction.getFacetValue(index).getDataValue();
             if ((XSD_NS+"minLength").equals(facetURI))
-                minLength=Math.max(minLength,(Integer)facetDataValue);
+                minLength=Math.max(minLength,((Integer)facetDataValue).intValue());
             else if ((XSD_NS+"maxLength").equals(facetURI))
-                maxLength=Math.min(maxLength,(Integer)facetDataValue);
+                maxLength=Math.min(maxLength,((Integer)facetDataValue).intValue());
             else if ((XSD_NS+"length").equals(facetURI)) {
-                minLength=Math.max(minLength,(Integer)facetDataValue);
-                maxLength=Math.min(maxLength,(Integer)facetDataValue);
+                minLength=Math.max(minLength,((Integer)facetDataValue).intValue());
+                maxLength=Math.min(maxLength,((Integer)facetDataValue).intValue());
             }
             else if ((XSD_NS+"pattern").equals(facetURI)) {
                 String pattern=(String)facetDataValue;

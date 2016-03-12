@@ -79,7 +79,7 @@ public class BinaryDataDatatypeHandler implements DatatypeHandler {
             Object facetDataValue=datatypeRestriction.getFacetValue(index).getDataValue();
             if (!(facetDataValue instanceof Integer))
                 throw new UnsupportedFacetException("The binary datatypes accept only integers as facet values, but for the facet with URI '"+facetURI+"' there is a non-integer value "+facetDataValue+" in the datatype restriction "+this.toString()+". ");
-            int value=(Integer)facetDataValue;
+            int value=((Integer)facetDataValue).intValue();
             if (value<0 || value==Integer.MAX_VALUE)
                 throw new UnsupportedFacetException("The datatype restriction "+this.toString()+" cannot be handled. The facet with URI '"+facetURI+"' does not support integer "+value+" as value. "+(value<0?"The value should not be negative. ":"The value is outside of the supported integer range, i.e., it is larger than "+Integer.MAX_VALUE));
         }
@@ -173,7 +173,7 @@ public class BinaryDataDatatypeHandler implements DatatypeHandler {
         int maxLength=Integer.MAX_VALUE;
         for (int index=datatypeRestriction.getNumberOfFacetRestrictions()-1;index>=0;--index) {
             String facetURI=datatypeRestriction.getFacetURI(index);
-            int facetDataValue=(Integer)datatypeRestriction.getFacetValue(index).getDataValue();
+            int facetDataValue=((Integer)datatypeRestriction.getFacetValue(index).getDataValue()).intValue();
             if ((XSD_NS+"minLength").equals(facetURI))
                 minLength=Math.max(minLength,facetDataValue);
             else if ((XSD_NS+"maxLength").equals(facetURI))

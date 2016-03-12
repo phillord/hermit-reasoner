@@ -82,10 +82,10 @@ public class DoubleInterval {
         // We know that the interval is not empty; hence, neither bound is NaN.
         double number=m_lowerBoundInclusive;
         while (!areIdentical(number,m_upperBoundInclusive)) {
-            numbers.add(number);
+            numbers.add(Double.valueOf(number));
             number=nextDouble(number);
         }
-        numbers.add(m_upperBoundInclusive);
+        numbers.add(Double.valueOf(m_upperBoundInclusive));
     }
     @Override
     public String toString() {

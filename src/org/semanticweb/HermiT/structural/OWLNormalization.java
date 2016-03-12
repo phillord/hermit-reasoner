@@ -359,7 +359,7 @@ public class OWLNormalization {
         OWLClassExpression definition=m_definitions.get(description);
         if (definition==null || (forcePositive && !(definition instanceof OWLClass))) {
             definition=m_factory.getOWLClass(IRI.create("internal:def#"+(m_definitions.size()+m_firstReplacementIndex)));
-            if (!forcePositive && !description.accept(m_plVisitor))
+            if (!forcePositive && !description.accept(m_plVisitor).booleanValue())
                 definition=m_factory.getOWLObjectComplementOf(definition);
             m_definitions.put(description,definition);
             alreadyExists[0]=false;
@@ -1112,7 +1112,7 @@ public class OWLNormalization {
         @Override
         public void visit(SWRLSameIndividualAtom atom) {
             Set<OWLNamedIndividual> inds=new HashSet<>();
-            for (SWRLArgument arg : atom.getAllArguments()) {
+            for (SWRLArgument arg :asList( atom.allArguments())) {
                 if (!(arg instanceof SWRLIndividualArgument))
                     throwVarError(atom);
                 OWLIndividual ind=((SWRLIndividualArgument)arg).getIndividual();
@@ -1125,7 +1125,7 @@ public class OWLNormalization {
         @Override
         public void visit(SWRLDifferentIndividualsAtom atom) {
             Set<OWLNamedIndividual> inds=new HashSet<>();
-            for (SWRLArgument arg : atom.getAllArguments()) {
+            for (SWRLArgument arg : asList( atom.allArguments())) {
                 if (!(arg instanceof SWRLIndividualArgument))
                     throwVarError(atom);
                 OWLIndividual ind=((SWRLIndividualArgument)arg).getIndividual();
@@ -1404,11 +1404,11 @@ public class OWLNormalization {
         }
         @Override
         public Boolean visit(OWLObjectIntersectionOf object) {
-            return object.operands().anyMatch(d->d.accept(this));
+            return Boolean.valueOf( object.operands().anyMatch(d->d.accept(this).booleanValue()));
         }
         @Override
         public Boolean visit(OWLObjectUnionOf object) {
-            return object.operands().anyMatch(d->d.accept(this));
+            return Boolean.valueOf(object.operands().anyMatch(d->d.accept(this).booleanValue()));
         }
         @Override
         public Boolean visit(OWLObjectComplementOf object) {
@@ -1420,7 +1420,7 @@ public class OWLNormalization {
         }
         @Override
         public Boolean visit(OWLObjectMinCardinality object) {
-            return object.getCardinality()>0;
+            return Boolean.valueOf(object.getCardinality()>0);
         }
         @Override
         public Boolean visit(OWLObjectMaxCardinality object) {

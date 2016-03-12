@@ -175,7 +175,7 @@ final class NominalIntroductionManager implements Serializable {
     protected Node getNIRootFor(DependencySet dependencySet,Node rootNode,AnnotatedEquality annotatedEquality,int number) {
         m_bufferForRootNodes[0]=rootNode;
         m_bufferForRootNodes[1]=annotatedEquality;
-        m_bufferForRootNodes[2]=number;
+        m_bufferForRootNodes[2]=Integer.valueOf(number);
         int tupleIndex=m_newRootNodesIndex.getTupleIndex(m_bufferForRootNodes);
         if (tupleIndex==-1) {
             Node newRootNode=m_tableau.createNewNINode(dependencySet);

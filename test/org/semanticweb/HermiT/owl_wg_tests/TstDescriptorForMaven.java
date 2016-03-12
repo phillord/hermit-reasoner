@@ -27,12 +27,12 @@ public class TstDescriptorForMaven {
 
                     if (wgTestDescriptor.testTypes.contains(testType) && wgTestDescriptor.isDLTest()) {
                         if (testType == WGTestDescriptor.TestType.POSITIVE_ENTAILMENT) {
-                            Object[] param = { wgTestDescriptor, true, null, useDisjunctionLearning };
+                            Object[] param = { wgTestDescriptor, Boolean.TRUE, null, Boolean.valueOf(useDisjunctionLearning) };
                             params.add(param);
                             continue;
                         }
                         if (testType == WGTestDescriptor.TestType.NEGATIVE_ENTAILMENT) {
-                            Object[] param = { wgTestDescriptor, false, null, useDisjunctionLearning };
+                            Object[] param = { wgTestDescriptor, Boolean.FALSE, null, Boolean.valueOf(useDisjunctionLearning) };
                             params.add(param);
                             continue;
                         }
@@ -65,12 +65,12 @@ public class TstDescriptorForMaven {
 
                     if (wgTestDescriptor.testTypes.contains(testType) && wgTestDescriptor.isDLTest()) {
                         if (testType == WGTestDescriptor.TestType.CONSISTENCY) {
-                            Object[] param = { wgTestDescriptor, true, null, useDisjunctionLearning };
+                            Object[] param = { wgTestDescriptor, Boolean.TRUE, null, Boolean.valueOf(useDisjunctionLearning) };
                             params.add(param);
                             continue;
                         }
                         if (testType == WGTestDescriptor.TestType.INCONSISTENCY) {
-                            Object[] param = { wgTestDescriptor, false, null, useDisjunctionLearning };
+                            Object[] param = { wgTestDescriptor, Boolean.FALSE, null, Boolean.valueOf(useDisjunctionLearning) };
                             params.add(param);
                             continue;
                         }

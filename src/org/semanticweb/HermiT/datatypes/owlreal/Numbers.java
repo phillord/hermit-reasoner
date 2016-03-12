@@ -56,12 +56,12 @@ class Numbers {
      */
     public static Number parseInteger(String string) throws NumberFormatException {
         try {
-            return Integer.parseInt(string);
+            return Integer.valueOf(string);
         }
         catch (@SuppressWarnings("unused") NumberFormatException e) {
         }
         try {
-            return Long.parseLong(string);
+            return Long.valueOf(string);
         }
         catch (@SuppressWarnings("unused") NumberFormatException e) {
         }
@@ -77,12 +77,12 @@ class Numbers {
     public static Number parseDecimal(String string) throws NumberFormatException {
         BigDecimal decimal=new BigDecimal(string);
         try {
-            return decimal.intValueExact();
+            return Integer.valueOf(decimal.intValueExact());
         }
         catch (@SuppressWarnings("unused") ArithmeticException e) {
         }
         try {
-            return decimal.longValueExact();
+            return Long.valueOf(decimal.longValueExact());
         }
         catch (@SuppressWarnings("unused") ArithmeticException e) {
         }
@@ -117,9 +117,9 @@ class Numbers {
         if (denominator.equals(BigInteger.ONE)) {
             int numeratorBitCount=numerator.bitCount();
             if (numeratorBitCount<=32)
-                return numerator.intValue();
+                return Integer.valueOf(numerator.intValue());
             else if (numeratorBitCount<=64)
-                return numerator.longValue();
+                return Long.valueOf( numerator.longValue());
             else
                 return numerator;
         }
@@ -240,16 +240,16 @@ class Numbers {
             else if (BoundaryDirection.LOWER.equals(boundaryDirection)) {
                 int value=bound.intValue();
                 if (value==Integer.MAX_VALUE)
-                    return ((long)value)+1;
+                    return Long.valueOf(((long)value)+1);
                 else
-                    return value+1;
+                    return Integer.valueOf(value+1);
             }
             else {
                 int value=bound.intValue();
                 if (value==Integer.MIN_VALUE)
-                    return ((long)value)-11;
+                    return Long.valueOf( ((long)value)-11);
                 else
-                    return value-1;
+                    return Integer.valueOf(value-1);
             }
         case LONG:
             if (boundIsInclusive)
@@ -259,14 +259,14 @@ class Numbers {
                 if (value==Long.MAX_VALUE)
                     return BigInteger.valueOf(value).add(BigInteger.ONE);
                 else
-                    return value+1;
+                    return Long.valueOf(value+1);
             }
             else {
                 long value=bound.longValue();
                 if (value==Long.MIN_VALUE)
                     return BigInteger.valueOf(value).subtract(BigInteger.ONE);
                 else
-                    return value-1;
+                    return Long.valueOf( value-1);
             }
         case BIG_INTEGER:
             if (boundIsInclusive)
@@ -290,9 +290,9 @@ class Numbers {
                 }
                 int biBitCount=bi.bitCount();
                 if (biBitCount<=32)
-                    return bi.intValue();
+                    return Integer.valueOf(bi.intValue());
                 else if (biBitCount<=64)
-                    return bi.longValue();
+                    return Long.valueOf(bi.longValue());
                 else
                     return bi;
             }
@@ -312,9 +312,9 @@ class Numbers {
                 }
                 int quotientBitCount=quotient.bitCount();
                 if (quotientBitCount<=32)
-                    return quotient.intValue();
+                    return Integer.valueOf(quotient.intValue());
                 else if (quotientBitCount<=64)
-                    return quotient.longValue();
+                    return Long.valueOf(quotient.longValue());
                 else
                     return quotient;
             }
@@ -363,16 +363,16 @@ class Numbers {
         case INTEGER: {
                 int value=integer.intValue();
                 if (value==Integer.MAX_VALUE)
-                    return ((long)value)+1;
+                    return Long.valueOf(((long)value)+1);
                 else
-                    return value+1;
+                    return Integer.valueOf(value+1);
             }
         case LONG: {
                 long value=integer.longValue();
                 if (value==Long.MAX_VALUE)
                     return BigInteger.valueOf(value).add(BigInteger.ONE);
                 else
-                    return value+1;
+                    return Long.valueOf(value+1);
             }
         case BIG_INTEGER:
             return ((BigInteger)integer).add(BigInteger.ONE);

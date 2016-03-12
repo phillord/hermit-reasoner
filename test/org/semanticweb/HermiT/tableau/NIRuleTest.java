@@ -549,7 +549,7 @@ public class NIRuleTest extends AbstractReasonerInternalsTest {
 
     protected Node getRootNodeFor(Node rootNode, AnnotatedEquality annotatedEquality, int index) {
         int tupleIndex = m_manager.m_newRootNodesIndex
-                .getTupleIndex(new Object[] { rootNode, annotatedEquality, index });
+                .getTupleIndex(new Object[] { rootNode, annotatedEquality, Integer.valueOf( index) });
         if (tupleIndex == -1)
             return null;
         else

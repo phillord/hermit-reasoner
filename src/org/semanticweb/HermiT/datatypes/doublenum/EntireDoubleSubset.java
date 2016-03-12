@@ -37,13 +37,13 @@ class EntireDoubleSubset implements ValueSpaceSubset {
     }
     @Override
     public void enumerateDataValues(Collection<Object> dataValues) {
-        dataValues.add(Double.NaN);
+        dataValues.add(Double.valueOf(Double.NaN));
         double number=Double.NEGATIVE_INFINITY;
         while (!DoubleInterval.areIdentical(number,Double.POSITIVE_INFINITY)) {
-            dataValues.add(number);
+            dataValues.add(Double.valueOf(number));
             number=DoubleInterval.nextDouble(number);
         }
-        dataValues.add(Double.POSITIVE_INFINITY);
+        dataValues.add(Double.valueOf(Double.POSITIVE_INFINITY));
     }
     @Override
     public String toString() {

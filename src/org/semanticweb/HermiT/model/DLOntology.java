@@ -386,8 +386,9 @@ public class DLOntology implements Serializable {
     public String getStatistics() {
         return getStatistics(null,null,null);
     }
-    protected String getStatistics(Integer numDeterministicClauses, Integer numNondeterministicClauses, Integer numDisjunctions) {
-        if (numDeterministicClauses==null || numNondeterministicClauses==null || numDisjunctions==null) {
+    protected String getStatistics(Integer _numDeterministicClauses, Integer _numNondeterministicClauses, Integer _numDisjunctions) {
+        int numDeterministicClauses;int numNondeterministicClauses; int numDisjunctions;
+        if (_numDeterministicClauses==null || _numNondeterministicClauses==null || _numDisjunctions==null) {
             numDeterministicClauses=0;
             numNondeterministicClauses=0;
             numDisjunctions=0;
@@ -399,6 +400,10 @@ public class DLOntology implements Serializable {
                     numDisjunctions+=dlClause.getHeadLength();
                 }
             }
+        }else {
+            numDeterministicClauses=_numDeterministicClauses.intValue();
+            numNondeterministicClauses=_numNondeterministicClauses.intValue();
+            numDisjunctions=_numDisjunctions.intValue();
         }
         StringBuilder stringBuffer=new StringBuilder("DL clauses statistics: [").append(CRLF)
                 .append("  Number of deterministic clauses: " ).append( numDeterministicClauses).append(CRLF)

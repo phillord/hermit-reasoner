@@ -108,6 +108,6 @@ public class QuasiOrderClassificationForRoles extends QuasiOrderClassification {
             assert superconcepts[i] instanceof AtomicConcept;
             roles[i]=m_rolesForConcepts.get(superconcepts[i]);
         }
-        return ReasoningTaskDescription.isRoleSubsumedByList(m_rolesForConcepts.get(subConcept),roles,true);
+        return ReasoningTaskDescription.isRoleSubsumedByList(m_rolesForConcepts.get(subConcept),roles,Boolean.TRUE);
     }
 }

@@ -204,7 +204,7 @@ public class DLClauseEvaluator implements Serializable {
                         if (term instanceof Variable)
                             variables.add((Variable)term);
                         else
-                            m_bodyNonvariableTermsToIndexes.put(term,-1);
+                            m_bodyNonvariableTermsToIndexes.put(term,Integer.valueOf(-1));
                     }
                 }
                 if (variables.size()>maxNumberOfVariables)
@@ -222,7 +222,7 @@ public class DLClauseEvaluator implements Serializable {
                 Node termNode=termsToNodes.get(entry.getKey());
                 if (termNode==null)
                     throw new IllegalArgumentException("Term '"+entry.getValue()+"' is unknown to the reasoner.");
-                entry.setValue(bindingIndex);
+                entry.setValue(Integer.valueOf(bindingIndex));
                 m_valuesBuffer[bindingIndex]=termNode.getCanonicalNode();
                 bindingIndex++;
             }
@@ -933,7 +933,7 @@ public class DLClauseEvaluator implements Serializable {
                     BranchingWorker branchingWorker=(BranchingWorker)worker;
                     int branchingAddress=branchingWorker.getBranchingAddress();
                     if (branchingAddress<0) {
-                        int resolvedAddress=m_labels.get(-branchingAddress);
+                        int resolvedAddress=m_labels.get(-branchingAddress).intValue();
                         branchingWorker.setBranchingAddress(resolvedAddress);
                     }
                 }

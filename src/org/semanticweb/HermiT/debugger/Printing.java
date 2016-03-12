@@ -75,7 +75,7 @@ public class Printing {
         writer.print("Node Type:  ");
         writer.println(node.getNodeType());
         writer.print("Parent ID:  ");
-        writer.println(node.getParent()==null ? "(root node)" : node.getParent().getNodeID());
+        writer.println(node.getParent()==null ? "(root node)" : Integer.valueOf(node.getParent().getNodeID()));
         writer.print("Depth:      ");
         writer.println(node.getTreeDepth());
         writer.print("Status:     ");
@@ -108,9 +108,9 @@ public class Printing {
         if (!node.isBlocked())
             return "no";
         else if (node.isDirectlyBlocked())
-            return "directly by "+(node.getBlocker()==Node.SIGNATURE_CACHE_BLOCKER ? "signature in cache" : node.getBlocker().getNodeID());
+            return "directly by "+(node.getBlocker()==Node.SIGNATURE_CACHE_BLOCKER ? "signature in cache" : Integer.valueOf(node.getBlocker().getNodeID()));
         else
-            return "indirectly by "+(node.getBlocker()==Node.SIGNATURE_CACHE_BLOCKER ? "signature in cache" : node.getBlocker().getNodeID());
+            return "indirectly by "+(node.getBlocker()==Node.SIGNATURE_CACHE_BLOCKER ? "signature in cache" : Integer.valueOf(node.getBlocker().getNodeID()));
     }
     protected static void printConceptLabel(Debugger debugger,Node node,PrintWriter writer) {
         TreeSet<AtomicConcept> atomicConceptsCore=new TreeSet<>(ConceptComparator.INSTANCE);

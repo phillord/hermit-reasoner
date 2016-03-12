@@ -57,14 +57,14 @@ public class OWLRealDatatypeHandler implements DatatypeHandler {
             { XSD_NS+"positiveInteger",   NumberRange.INTEGER, Integer.valueOf(0),    BoundType.EXCLUSIVE,PlusInfinity.INSTANCE,                  BoundType.EXCLUSIVE },
             { XSD_NS+"nonPositiveInteger",NumberRange.INTEGER, MinusInfinity.INSTANCE,BoundType.EXCLUSIVE,Integer.valueOf(0),                     BoundType.INCLUSIVE },
             { XSD_NS+"negativeInteger",   NumberRange.INTEGER, MinusInfinity.INSTANCE,BoundType.EXCLUSIVE,Integer.valueOf(0),                     BoundType.EXCLUSIVE },
-            { XSD_NS+"long",              NumberRange.INTEGER, Long.MIN_VALUE,        BoundType.INCLUSIVE,Long.MAX_VALUE,                         BoundType.INCLUSIVE },
-            { XSD_NS+"int",               NumberRange.INTEGER, Integer.MIN_VALUE,     BoundType.INCLUSIVE,Integer.MAX_VALUE,                      BoundType.INCLUSIVE },
-            { XSD_NS+"short",             NumberRange.INTEGER, (int)Short.MIN_VALUE,  BoundType.INCLUSIVE,(int)Short.MAX_VALUE,                   BoundType.INCLUSIVE },
-            { XSD_NS+"byte",              NumberRange.INTEGER, (int)Byte.MIN_VALUE,   BoundType.INCLUSIVE,(int)Byte.MAX_VALUE,                    BoundType.INCLUSIVE },
+            { XSD_NS+"long",              NumberRange.INTEGER, Long.valueOf(Long.MIN_VALUE),        BoundType.INCLUSIVE,Long.valueOf(Long.MAX_VALUE),                         BoundType.INCLUSIVE },
+            { XSD_NS+"int",               NumberRange.INTEGER, Integer.valueOf(Integer.MIN_VALUE),     BoundType.INCLUSIVE,Integer.valueOf(Integer.MAX_VALUE),                      BoundType.INCLUSIVE },
+            { XSD_NS+"short",             NumberRange.INTEGER, Integer.valueOf(Short.MIN_VALUE),  BoundType.INCLUSIVE,Integer.valueOf(Short.MAX_VALUE),                   BoundType.INCLUSIVE },
+            { XSD_NS+"byte",              NumberRange.INTEGER, Integer.valueOf(Byte.MIN_VALUE),   BoundType.INCLUSIVE,Integer.valueOf(Byte.MAX_VALUE),                    BoundType.INCLUSIVE },
             { XSD_NS+"unsignedLong",      NumberRange.INTEGER, Integer.valueOf(0),    BoundType.INCLUSIVE,new BigInteger("18446744073709551615"), BoundType.INCLUSIVE },
-            { XSD_NS+"unsignedInt",       NumberRange.INTEGER, Integer.valueOf(0),    BoundType.INCLUSIVE,4294967295L,                            BoundType.INCLUSIVE },
-            { XSD_NS+"unsignedShort",     NumberRange.INTEGER, Integer.valueOf(0),    BoundType.INCLUSIVE,65535,                                  BoundType.INCLUSIVE },
-            { XSD_NS+"unsignedByte",      NumberRange.INTEGER, Integer.valueOf(0),    BoundType.INCLUSIVE,255,                                    BoundType.INCLUSIVE },
+            { XSD_NS+"unsignedInt",       NumberRange.INTEGER, Integer.valueOf(0),    BoundType.INCLUSIVE,Long.valueOf(4294967295L),                            BoundType.INCLUSIVE },
+            { XSD_NS+"unsignedShort",     NumberRange.INTEGER, Integer.valueOf(0),    BoundType.INCLUSIVE,Integer.valueOf(65535),                                  BoundType.INCLUSIVE },
+            { XSD_NS+"unsignedByte",      NumberRange.INTEGER, Integer.valueOf(0),    BoundType.INCLUSIVE,Integer.valueOf(255),                                    BoundType.INCLUSIVE },
         };
         for (Object[] row : initializer) {
             String datatypeURI=(String)row[0];
