@@ -12,6 +12,7 @@ import java.util.TreeSet;
 
 import junit.framework.AssertionFailedError;
 
+import org.junit.Ignore;
 import org.semanticweb.HermiT.AbstractOntologyTest;
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.Prefixes;
@@ -21,6 +22,7 @@ import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.owlapi.model.IRI;
+@Ignore
 @SuppressWarnings("javadoc")
 public abstract class AbstractStructuralTest extends AbstractOntologyTest {
 

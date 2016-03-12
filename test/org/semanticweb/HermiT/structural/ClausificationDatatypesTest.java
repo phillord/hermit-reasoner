@@ -1,6 +1,9 @@
 package org.semanticweb.HermiT.structural;
 
 import java.util.List;
+
+import org.junit.Ignore;
+@Ignore
 @SuppressWarnings("javadoc")
 public class ClausificationDatatypesTest extends AbstractStructuralTest {
 

@@ -1,8 +1,11 @@
 package org.semanticweb.HermiT.structural;
 
+import org.junit.Ignore;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+@Ignore
 @SuppressWarnings("javadoc")
 public class AllTests extends TestCase {
 

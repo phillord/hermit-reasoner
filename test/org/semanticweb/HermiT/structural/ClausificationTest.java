@@ -8,10 +8,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.junit.Ignore;
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLHasKeyAxiom;
+@Ignore
 @SuppressWarnings("javadoc")
 public class ClausificationTest extends AbstractStructuralTest {
     static {

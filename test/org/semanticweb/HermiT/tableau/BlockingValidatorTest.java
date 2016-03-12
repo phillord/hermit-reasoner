@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.junit.Ignore;
 import org.semanticweb.HermiT.blocking.AnywhereValidatedBlocking;
 import org.semanticweb.HermiT.blocking.BlockingStrategy;
 import org.semanticweb.HermiT.blocking.BlockingValidator;
@@ -21,6 +22,8 @@ import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.InverseRole;
 import org.semanticweb.HermiT.model.Variable;
+
+@Ignore
 @SuppressWarnings("javadoc")
 public class BlockingValidatorTest extends AbstractReasonerInternalsTest {
     protected final AtomicConcept A = AtomicConcept.create("A");
