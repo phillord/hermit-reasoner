@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.Ignore;
 import org.semanticweb.HermiT.AbstractOntologyTest;
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.ReasonerFactory;
@@ -51,6 +52,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         super(name);
     }
 
+    @Ignore("Empty chains no longer parsed")
     public void testEmptyChain() {
         boolean errorThrown = false;
         try {
