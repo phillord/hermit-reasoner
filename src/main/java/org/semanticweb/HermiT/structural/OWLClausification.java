@@ -199,7 +199,7 @@ public class OWLClausification {
                     DLClause dlClause=DLClause.create(new Atom[] {},new Atom[] { atom_i,atom_j });
                     dlClauses.add(dlClause);
                 }
-        if (axioms.m_dataPropertyInclusions.contains(factory.getOWLDataProperty(IRI.create(AtomicRole.BOTTOM_DATA_ROLE.getIRI())))) {
+        if (axioms.m_dataProperties.contains(factory.getOWLDataProperty(IRI.create(AtomicRole.BOTTOM_DATA_ROLE.getIRI())))) {
             Atom bodyAtom=Atom.create(AtomicRole.BOTTOM_DATA_ROLE,X,Y);
             dlClauses.add(DLClause.create(new Atom[] {},new Atom[] { bodyAtom }));
         }
@@ -716,7 +716,7 @@ public class OWLClausification {
         }
         public void visit(OWLDataComplementOf dr) {
             OWLDataRange description=dr.getDataRange();
-            if (description.isDatatype() && (Prefixes.isInternalIRI(description.asOWLDatatype().getIRI().toString()) || m_definedDatatypeIRIs.contains(description.asOWLDatatype()))) {
+            if (description.isDatatype() && (Prefixes.isInternalIRI(description.asOWLDatatype().getIRI().toString()) || m_definedDatatypeIRIs.contains(description.asOWLDatatype().getIRI().toString()))) {
                 m_bodyAtoms.add(Atom.create(InternalDatatype.create(description.asOWLDatatype().getIRI().toString()),X));
             }
             else {

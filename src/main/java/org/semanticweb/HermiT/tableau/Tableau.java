@@ -298,7 +298,7 @@ public final class Tableau implements Serializable {
         }
         if (nodesForIndividuals!=null)
             for (Map.Entry<Individual,Node> entry : nodesForIndividuals.entrySet()) {
-                if (termsToNodes.get(entry.getValue())==null) {
+                if (termsToNodes.get(entry.getKey())==null) {
                     Atom topAssertion=Atom.create(AtomicConcept.THING, entry.getKey());
                     loadPositiveFact(termsToNodes,topAssertion,m_dependencySetFactory.emptySet());
                 }
