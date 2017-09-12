@@ -713,7 +713,7 @@ public class InstanceManager {
                         }
                     }
 
-                    for (Node sourceNode : possiblyEquivalentToNode) {
+                    for (Node sourceNode : new ArrayList<>(possiblyEquivalentToNode)) {
                         Individual sourceIndividual=m_individualsForNodes.get(sourceNode);
                         possiblyEquivalentToSuccessor.addAll(equivalentToSuccessor);
                         for (Node targetNode : possiblyEquivalentToSuccessor) {
