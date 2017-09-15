@@ -145,6 +145,10 @@ public class ExtensionTableWithFullIndex extends ExtensionTable {
             return ExtensionTableWithFullIndex.this;
         }
         @Override
+        public ExtensionTable.View getExtensionView() {
+            return m_extensionView;
+        }
+        @Override
         public void clear() {
             if (m_ownsBuffers) {
                 for (int index=m_bindingsBuffer.length-1;index>=0;--index)

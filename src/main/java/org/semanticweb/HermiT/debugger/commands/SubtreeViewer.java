@@ -64,14 +64,21 @@ import org.semanticweb.HermiT.model.AtLeastConcept;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.tableau.Node;
 
+/**
+ * Subtree viewer.
+ */
 @SuppressWarnings("serial")
-class SubtreeViewer extends JFrame {
+public class SubtreeViewer extends JFrame {
     protected final Debugger m_debugger;
     protected final SubtreeTreeModel m_subtreeTreeModel;
     protected final JTextArea m_nodeInfoTextArea;
     protected final JTree m_tableauTree;
     protected final JTextField m_nodeIDField;
 
+    /**
+     * @param debugger debugger
+     * @param rootNode root node
+     */
     public SubtreeViewer(Debugger debugger,Node rootNode) {
         super("Subtree for node "+rootNode.getNodeID());
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -143,9 +150,15 @@ class SubtreeViewer extends JFrame {
         setVisible(true);
         m_nodeIDField.requestFocusInWindow();
     }
+    /**
+     * Refresh.
+     */
     public void refresh() {
         m_subtreeTreeModel.refresh();
     }
+    /**
+     * @param node node
+     */
     public void findNode(Node node) {
         List<Node> pathToRoot=new ArrayList<>();
         Node currentNode=node;
@@ -164,6 +177,9 @@ class SubtreeViewer extends JFrame {
         m_tableauTree.setSelectionPath(treePath);
         m_tableauTree.scrollPathToVisible(treePath);
     }
+    /**
+     * @param node node
+     */
     public void showNodeLabels(Node node) {
         if (node==null)
             m_nodeInfoTextArea.setText("");

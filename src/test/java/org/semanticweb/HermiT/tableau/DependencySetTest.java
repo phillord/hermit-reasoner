@@ -102,11 +102,12 @@ public class DependencySetTest extends TestCase {
                         buffer.append(',');
                 }
                 buffer.append(" } but got { ");
-                while (dependencySet.m_branchingPoint != -1) {
-                    buffer.append(dependencySet.m_branchingPoint);
-                    if (dependencySet.m_rest.m_branchingPoint != -1)
+                PermanentDependencySet d=dependencySet;
+                while (d.m_branchingPoint != -1) {
+                    buffer.append(d.m_branchingPoint);
+                    if (d.m_rest.m_branchingPoint != -1)
                         buffer.append(',');
-                    dependencySet = dependencySet.m_rest;
+                    d = d.m_rest;
                 }
                 buffer.append(" }.");
                 fail(buffer.toString());

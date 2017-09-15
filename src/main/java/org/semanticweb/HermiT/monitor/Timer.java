@@ -57,9 +57,13 @@ public class Timer extends TableauMonitorAdapter {
     @Override
     public void isSatisfiableFinished(ReasoningTaskDescription reasoningTaskDescription,boolean result) {
         if (reasoningTaskDescription.flipSatisfiabilityResult())
-            result=!result;
-        m_output.println(result ? "YES" : "NO");
+            print(!result);
+        else
+            print(result);
         doStatistics();
+    }
+    protected void print(boolean result) {
+        m_output.println(result ? "YES" : "NO");
     }
     @Override
     public void iterationStarted() {

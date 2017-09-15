@@ -3,7 +3,6 @@ package org.semanticweb.HermiT.structural;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -114,7 +113,7 @@ public abstract class AbstractStructuralTest extends AbstractOntologyTest {
 
     protected static String toOrderedString(DLClause dlClause, Prefixes prefixes) {
         StringBuffer buffer = new StringBuffer();
-        SortedSet<Atom> headAtoms = new TreeSet<>(AtomLexicalComparator.INSTANCE);
+        SortedSet<Atom> headAtoms = new TreeSet<>(AbstractStructuralTest::atomLexicalCompare);
         for (int atomIndex = 0; atomIndex < dlClause.getHeadLength(); atomIndex++)
             headAtoms.add(dlClause.getHeadAtom(atomIndex));
         boolean isFirstAtom = true;
@@ -126,7 +125,7 @@ public abstract class AbstractStructuralTest extends AbstractOntologyTest {
             buffer.append(atom.toString(prefixes));
         }
         buffer.append(" :- ");
-        SortedSet<Atom> bodyAtoms = new TreeSet<>(AtomLexicalComparator.INSTANCE);
+        SortedSet<Atom> bodyAtoms = new TreeSet<>(AbstractStructuralTest::atomLexicalCompare);
         for (int atomIndex = 0; atomIndex < dlClause.getBodyLength(); atomIndex++)
             bodyAtoms.add(dlClause.getBodyAtom(atomIndex));
         isFirstAtom = true;
@@ -150,26 +149,20 @@ public abstract class AbstractStructuralTest extends AbstractOntologyTest {
         }
     }
 
-    protected static class AtomLexicalComparator implements Comparator<Atom> {
-        public static final Comparator<Atom> INSTANCE = new AtomLexicalComparator();
-
-        @Override
-        public int compare(Atom a1, Atom a2) {
-            if (a1 == a2)
-                return 0;
-            int comparison = a1.getDLPredicate().toString().compareTo(a2.getDLPredicate().toString());
-            if (comparison != 0)
-                return comparison;
-            comparison = a1.getArity() - a2.getArity();
-            if (comparison != 0)
-                return comparison;
-            for (int i = 0; i < a1.getArity(); i++) {
-                comparison = a1.getArgument(i).toString().compareTo(a2.getArgument(i).toString());
-                if (comparison != 0)
-                    return comparison;
-            }
+    protected static int atomLexicalCompare(Atom a1, Atom a2) {
+        if (a1 == a2)
             return 0;
+        int comparison = a1.getDLPredicate().toString().compareTo(a2.getDLPredicate().toString());
+        if (comparison != 0)
+            return comparison;
+        comparison = a1.getArity() - a2.getArity();
+        if (comparison != 0)
+            return comparison;
+        for (int i = 0; i < a1.getArity(); i++) {
+            comparison = a1.getArgument(i).toString().compareTo(a2.getArgument(i).toString());
+            if (comparison != 0)
+                return comparison;
         }
+        return 0;
     }
-
 }

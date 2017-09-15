@@ -23,15 +23,21 @@ import java.util.List;
 
 import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
 
-class NoNaNFloatSubset implements ValueSpaceSubset {
+/**
+ * Float with no NaN subset.
+ */
+public class NoNaNFloatSubset implements ValueSpaceSubset {
     protected final List<FloatInterval> m_intervals;
     
-    public NoNaNFloatSubset() {
-        m_intervals=Collections.emptyList();
-    }
+    /**
+     * @param interval interval
+     */
     public NoNaNFloatSubset(FloatInterval interval) {
         m_intervals=Collections.singletonList(interval);
     }
+    /**
+     * @param intervals intervals
+     */
     public NoNaNFloatSubset(List<FloatInterval> intervals) {
         m_intervals=intervals;
     }

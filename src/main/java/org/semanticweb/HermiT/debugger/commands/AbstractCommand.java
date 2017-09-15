@@ -32,6 +32,7 @@ import org.semanticweb.HermiT.model.DLPredicate;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.Equality;
 import org.semanticweb.HermiT.model.Inequality;
+import org.semanticweb.HermiT.tableau.Node;
 /**AbstractCommand.*/
 public abstract class AbstractCommand implements DebuggerCommand {
     protected final Debugger m_debugger;
@@ -81,5 +82,18 @@ public abstract class AbstractCommand implements DebuggerCommand {
         }
         else
             return null;
+    }
+    /**
+     * @param node
+     *            a node in the tableau
+     * @return "no" if node is not blocked; "directly by" plus "signature in cache" or the ID of the blocking node if the node is directly blocked; "indirectly by" plus "signature in cache" or the ID of the blocking node otherwise
+     */
+    protected static String formatBlockingStatus(Node node) {
+        if (!node.isBlocked())
+            return "no";
+        else if (node.isDirectlyBlocked())
+            return "directly by "+(node.getBlocker()==Node.SIGNATURE_CACHE_BLOCKER ? "signature in cache" : Integer.toString(node.getBlocker().getNodeID()));
+        else
+            return "indirectly by "+(node.getBlocker()==Node.SIGNATURE_CACHE_BLOCKER ? "signature in cache" : Integer.toString(node.getBlocker().getNodeID()));
     }
 }

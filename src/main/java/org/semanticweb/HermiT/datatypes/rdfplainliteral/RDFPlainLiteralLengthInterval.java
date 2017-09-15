@@ -19,16 +19,37 @@ package org.semanticweb.HermiT.datatypes.rdfplainliteral;
 
 import java.util.Collection;
 
-class RDFPlainLiteralLengthInterval {
+/**
+ * Plain literal length interval
+ */
+public class RDFPlainLiteralLengthInterval {
+    /**Count.*/
     public static final int CHARACTER_COUNT=1112033;
-    public static enum LanguageTagMode { PRESENT,ABSENT }
+    /**
+     * Language tag mode.
+     */
+    public static enum LanguageTagMode {
+        /**
+         * Present.
+         */
+        PRESENT,
+        /**
+         * Absent.
+         */
+        ABSENT
+    }
     
     protected final LanguageTagMode m_languageTagMode;
     protected final int m_minLength;
     protected final int m_maxLength;
 
+    /**
+     * @param languageTagMode lnguage tag
+     * @param minLength min length
+     * @param maxLength max length
+     */
     public RDFPlainLiteralLengthInterval(LanguageTagMode languageTagMode,int minLength,int maxLength) {
-        assert !isIntervalEmpty(minLength,maxLength);
+        assert minLength<=maxLength;
         m_languageTagMode=languageTagMode;
         m_minLength=minLength;
         m_maxLength=maxLength;
@@ -55,6 +76,10 @@ class RDFPlainLiteralLengthInterval {
     protected boolean isEqual(LanguageTagMode languageTagMode,int minLength,int maxLength) {
         return m_languageTagMode==languageTagMode && m_minLength==minLength && m_maxLength==maxLength;
     }
+    /**
+     * @param argument argument
+     * @return subtraction
+     */
     public int subtractSizeFrom(int argument) {
         if (argument<=0 || m_maxLength==Integer.MAX_VALUE || m_languageTagMode==LanguageTagMode.PRESENT)
             return 0;
@@ -79,6 +104,10 @@ class RDFPlainLiteralLengthInterval {
             return total;
         }
     }
+    /**
+     * @param value value
+     * @return true if contained
+     */
     public boolean contains(String value) {
         return
             m_languageTagMode==LanguageTagMode.ABSENT &&
@@ -86,6 +115,10 @@ class RDFPlainLiteralLengthInterval {
             value.length()<=m_maxLength &&
             RDFPlainLiteralPatternValueSpaceSubset.s_xsdString.run(value);
     }
+    /**
+     * @param value value
+     * @return true if contained
+     */
     public boolean contains(RDFPlainLiteralDataValue value) {
         String string=value.getString();
         String languageTag=value.getLanguageTag();
@@ -96,6 +129,9 @@ class RDFPlainLiteralLengthInterval {
             RDFPlainLiteralPatternValueSpaceSubset.s_xsdString.run(string) &&
             RDFPlainLiteralPatternValueSpaceSubset.s_languageTag.run(languageTag);
     }
+    /**
+     * @param values values to add to
+     */
     public void enumerateValues(Collection<Object> values) {
         if (m_maxLength==Integer.MAX_VALUE || m_languageTagMode==LanguageTagMode.PRESENT)
             throw new IllegalStateException("Internal error: the data range is infinite!");

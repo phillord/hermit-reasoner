@@ -23,6 +23,7 @@ import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
+import org.semanticweb.HermiT.model.DataRange;
 import org.semanticweb.HermiT.model.Variable;
 import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
 import org.semanticweb.HermiT.tableau.Node;
@@ -64,16 +65,33 @@ public interface ExistentialExpansionStrategy {
      */
     void assertionAdded(Concept concept,Node node,boolean isCore);
     /**
+     * @param dataRange data range
+     * @param node node
+     * @param isCore is core
+     */
+    void assertionAdded(DataRange dataRange,Node node,boolean isCore);
+    /**
      * @param concept concept
      * @param node node
      */
     void assertionCoreSet(Concept concept,Node node);
+    /**
+     * @param dataRange data range
+     * @param node node
+     */
+    void assertionCoreSet(DataRange dataRange,Node node);
     /**
      * @param concept concept
      * @param node node
      * @param isCore isCore
      */
     void assertionRemoved(Concept concept,Node node,boolean isCore);
+    /**
+     * @param dataRange data range
+     * @param node node
+     * @param isCore is core
+     */
+    void assertionRemoved(DataRange dataRange,Node node,boolean isCore);
     /**
      * @param atomicRole atomicRole
      * @param nodeFrom nodeFrom

@@ -61,9 +61,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     }
 
     protected void createReasoner(Configuration configuration, Set<DescriptionGraph> descriptionGraphs) {
-        if (descriptionGraphs == null)
-            descriptionGraphs = Collections.emptySet();
-        m_reasoner = new Reasoner(configuration, m_ontology, descriptionGraphs);
+        m_reasoner = new Reasoner(configuration, m_ontology, descriptionGraphs!=null?descriptionGraphs:Collections.emptySet());
     }
 
     protected void createOWLReasoner(Configuration c) {
@@ -127,12 +125,8 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
      * @param expectedResult
      */
     protected void assertSubsumedBy(String subAtomicConcept, String superAtomicConcept, boolean expectedResult) {
-        if (!subAtomicConcept.contains("#"))
-            subAtomicConcept = NS + subAtomicConcept;
-        if (!superAtomicConcept.contains("#"))
-            superAtomicConcept = NS + superAtomicConcept;
-        OWLClass subClass = m_dataFactory.getOWLClass(IRI.create(subAtomicConcept));
-        OWLClass superClass = m_dataFactory.getOWLClass(IRI.create(superAtomicConcept));
+        OWLClass subClass = m_dataFactory.getOWLClass(IRI.create(subAtomicConcept.contains("#")?subAtomicConcept: NS + subAtomicConcept));
+        OWLClass superClass = m_dataFactory.getOWLClass(IRI.create(superAtomicConcept.contains("#")?superAtomicConcept: NS + superAtomicConcept));
         boolean result = m_reasoner.isEntailed(m_dataFactory.getOWLSubClassOfAxiom(subClass, superClass));
         assertEquals(expectedResult, result);
     }
@@ -153,9 +147,8 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
      * that this coincides with the expected result (satisfiable).
      */
     protected void assertSatisfiable(String atomicConcept, boolean expectedResult) {
-        if (!atomicConcept.contains("#"))
-            atomicConcept = NS + atomicConcept;
-        OWLClass clazz = m_dataFactory.getOWLClass(IRI.create(atomicConcept));
+        org.semanticweb.owlapi.model.IRI iri = IRI.create(atomicConcept.contains("#")?atomicConcept: NS + atomicConcept);
+        OWLClass clazz = m_dataFactory.getOWLClass(iri);
         boolean result = m_reasoner.isSatisfiable(clazz);
         assertEquals(expectedResult, result);
     }
@@ -292,9 +285,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
      * Checks the equivalents of some object property.
      */
     protected void assertEquivalentObjectProperties(String objectProperty, String... control) {
-        if (!objectProperty.contains("#"))
-            objectProperty = NS + objectProperty;
-        OWLObjectPropertyExpression ope = m_dataFactory.getOWLObjectProperty(IRI.create(objectProperty));
+        OWLObjectPropertyExpression ope = m_dataFactory.getOWLObjectProperty(IRI.create(objectProperty.contains("#")?objectProperty: NS + objectProperty));
         Set<String> actual = nodeOfOPEs(m_reasoner.getEquivalentObjectProperties(ope));
         assertContainsAll(actual, control);
     }
@@ -351,9 +342,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
      * Checks the equivalents of some data property.
      */
     protected void assertEquivalentDataProperties(String dataProperty, String... control) {
-        if (!dataProperty.contains("#"))
-            dataProperty = NS + dataProperty;
-        OWLDataProperty dp = m_dataFactory.getOWLDataProperty(IRI.create(dataProperty));
+        OWLDataProperty dp = m_dataFactory.getOWLDataProperty(IRI.create(dataProperty.contains("#")?dataProperty:NS + dataProperty));
         Set<String> actual = nodeOfDPEs(m_reasoner.getEquivalentDataProperties(dp));
         assertContainsAll(actual, control);
     }
@@ -519,7 +508,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
 
     protected static String IRI(String arg) {
         if (!arg.contains("#"))
-            arg = NS + arg;
+            return NS + arg;
         return arg;
     }
 

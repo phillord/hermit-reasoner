@@ -51,7 +51,10 @@ public class DatatypeRegistry {
         registerDatatypeHandler(new XMLLiteralDatatypeHandler());
     }
 
-    static void registerDatatypeHandler(DatatypeHandler datatypeHandler) {
+    /**
+     * @param datatypeHandler handler to register
+     */
+    public static void registerDatatypeHandler(DatatypeHandler datatypeHandler) {
         synchronized (s_handlersByDatatypeURI) {
             for (String datatypeURI : datatypeHandler.getManagedDatatypeURIs())
                 if (s_handlersByDatatypeURI.containsKey(datatypeURI))
@@ -199,12 +202,21 @@ public class DatatypeRegistry {
         }
     }
 
-    static class AnonymousConstantValue {
+    /**
+     * Anonymous constant.
+     */
+    public static class AnonymousConstantValue {
         protected final String m_name;
 
+        /**
+         * @param name name
+         */
         public AnonymousConstantValue(String name) {
             m_name=name;
         }
+        /**
+         * @return name
+         */
         public String getName() {
             return m_name;
         }
@@ -220,6 +232,12 @@ public class DatatypeRegistry {
                 return false;
             return ((AnonymousConstantValue)that).m_name.equals(m_name);
         }
+        /**
+         * @param name name
+         * @return value
+         */
+        public static AnonymousConstantValue create(String name) {
+            return new AnonymousConstantValue(name);
+        }
     }
-
 }

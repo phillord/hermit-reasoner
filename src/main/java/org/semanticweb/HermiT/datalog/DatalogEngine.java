@@ -13,6 +13,7 @@ import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
+import org.semanticweb.HermiT.model.DataRange;
 import org.semanticweb.HermiT.model.Term;
 import org.semanticweb.HermiT.model.Variable;
 import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
@@ -46,6 +47,12 @@ public final class DatalogEngine {
         m_nodesToTerms=new HashMap<>();
         m_termsToEquivalenceClasses=new HashMap<>();
         m_termsToRepresentatives=new HashMap<>();
+    }
+    /**
+     * Interrupt.
+     */
+    public void interrupt() {
+        m_interruptFlag.interrupt();
     }
     /**
      * @return true if no clashes
@@ -124,10 +131,19 @@ public final class DatalogEngine {
         public void assertionAdded(Concept concept,Node node,boolean isCore) {
         }
         @Override
+        public void assertionAdded(DataRange dataRange,Node node,boolean isCore) {
+        }
+        @Override
         public void assertionCoreSet(Concept concept,Node node) {
         }
         @Override
+        public void assertionCoreSet(DataRange dataRange,Node node) {
+        }
+        @Override
         public void assertionRemoved(Concept concept,Node node,boolean isCore) {
+        }
+        @Override
+        public void assertionRemoved(DataRange dataRange,Node node,boolean isCore) {
         }
         @Override
         public void assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {

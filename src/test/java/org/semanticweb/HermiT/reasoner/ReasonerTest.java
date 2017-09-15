@@ -52,19 +52,6 @@ public class ReasonerTest extends AbstractReasonerTest {
         super(name);
     }
 
-    @Ignore("Empty chains no longer parsed")
-    public void testEmptyChain() {
-        boolean errorThrown = false;
-        try {
-            loadReasonerFromResource("/org/semanticweb/HermiT/reasoner/res/only1.owl");
-        } catch (@SuppressWarnings("unused") IllegalArgumentException e) {
-            errorThrown = true;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        assertTrue(errorThrown);
-    }
-
     public void testOnyDeclaredEntitiesInHierarchy() throws Exception {
         IRI testOntologyIRI = IRI.create("http://test.org");
         OWLOntologyManager m = OWLManager.createOWLOntologyManager();

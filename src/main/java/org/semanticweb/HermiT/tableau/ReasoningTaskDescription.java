@@ -172,6 +172,24 @@ public class ReasoningTaskDescription {
         return new ReasoningTaskDescription(true,StandardTestType.INSTANCE_OF,atomicConcept,individual);
     }
     /**
+     * @param atomicRole role
+     * @param individual1 subject
+     * @param individual2 object
+     * @return task description
+     */
+    public static ReasoningTaskDescription isObjectRoleInstanceOf(Object atomicRole,Object individual1,Object individual2) {
+        return new ReasoningTaskDescription(true,StandardTestType.OBJECT_ROLE_INSTANCE_OF,atomicRole,individual1,individual2);
+    }
+    /**
+     * @param atomicRole role
+     * @param individual1 subject
+     * @param individual2 object
+     * @return task description
+     */
+    public static ReasoningTaskDescription isDataRoleInstanceOf(Object atomicRole,Object individual1,Object individual2) {
+        return new ReasoningTaskDescription(true,StandardTestType.DATA_ROLE_INSTANCE_OF,atomicRole,individual1,individual2);
+    }
+    /**
      * @param axiom axiom
      * @return task description
      */

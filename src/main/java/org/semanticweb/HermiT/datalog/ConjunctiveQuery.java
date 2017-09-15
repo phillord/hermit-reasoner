@@ -13,6 +13,7 @@ import org.semanticweb.HermiT.tableau.DLClauseEvaluator;
 import org.semanticweb.HermiT.tableau.DLClauseEvaluator.Worker;
 import org.semanticweb.HermiT.tableau.DependencySet;
 import org.semanticweb.HermiT.tableau.ExtensionTable;
+import org.semanticweb.HermiT.tableau.ExtensionTable.View;
 import org.semanticweb.HermiT.tableau.HyperresolutionManager;
 import org.semanticweb.HermiT.tableau.Node;
 
@@ -96,6 +97,10 @@ public class ConjunctiveQuery {
             throw new UnsupportedOperationException();
         }
         @Override
+        public View getExtensionView() {
+            return View.TOTAL;
+        }
+        @Override
         public void clear() {
             throw new UnsupportedOperationException();
         }
@@ -137,7 +142,10 @@ public class ConjunctiveQuery {
         }
     }
     
-    private static class QueryAnswerCallback implements Worker {
+    /**
+     * Query answr callback.
+     */
+    public static class QueryAnswerCallback implements Worker {
         protected final ConjunctiveQuery m_conjunctiveQuery;
         protected final Map<Node,Term> m_nodesToTerms;
         protected final Term[] m_resultBuffer;
@@ -145,6 +153,14 @@ public class ConjunctiveQuery {
         protected final int[][] m_copyAnswers;
         protected final Object[] m_valuesBuffer;
         
+        /**
+         * @param conjunctiveQuery query
+         * @param nodesToTerms nodes to terms
+         * @param resultBuffer results
+         * @param queryResultCollector collector
+         * @param copyAnswers answers
+         * @param valuesBuffer value buffer
+         */
         public QueryAnswerCallback(ConjunctiveQuery conjunctiveQuery,Map<Node,Term> nodesToTerms,Term[] resultBuffer,QueryResultCollector[] queryResultCollector,int[][] copyAnswers,Object[] valuesBuffer) {
             m_conjunctiveQuery=conjunctiveQuery;
             m_nodesToTerms=nodesToTerms;

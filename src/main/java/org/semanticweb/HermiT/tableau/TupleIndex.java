@@ -179,7 +179,8 @@ final class TupleIndex implements Serializable {
             m_resizeThreshold=(int)(m_buckets.length*LOAD_FACTOR);
         }
     }
-    protected static int getIndexFor(int hashCode,int tableLengthMinusOne) {
+    protected static int getIndexFor(int _hashCode,int tableLengthMinusOne) {
+        int hashCode=_hashCode;
         hashCode+=~(hashCode << 9);
         hashCode^=(hashCode >>> 14);
         hashCode+=(hashCode << 4);

@@ -1,4 +1,4 @@
-package org.semanticweb.HermiT.datatypes.rdfplainliteral;
+package org.semanticweb.HermiT.reasoner;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -13,7 +13,6 @@ import org.semanticweb.HermiT.datatypes.rdfplainliteral.RDFPlainLiteralDataValue
 import org.semanticweb.HermiT.datatypes.rdfplainliteral.RDFPlainLiteralLengthInterval;
 import org.semanticweb.HermiT.model.Constant;
 import org.semanticweb.HermiT.model.DatatypeRestriction;
-import org.semanticweb.HermiT.reasoner.AbstractReasonerTest;
 @SuppressWarnings("javadoc")
 public class RDFPlainLiteralTest extends AbstractReasonerTest {
     protected static final String RDF_PLAIN_LITERAL = Prefixes.s_semanticWebPrefixes.get("rdf:") + "PlainLiteral";

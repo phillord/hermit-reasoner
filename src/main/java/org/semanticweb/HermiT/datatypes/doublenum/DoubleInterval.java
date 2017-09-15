@@ -180,10 +180,11 @@ public class DoubleInterval {
     /**
      * @param lowerBoundInclusive lowerBoundInclusive
      * @param upperBoundInclusive upperBoundInclusive
-     * @param argument argument
+     * @param _argument argument
      * @return subtracted size
      */
-    public static int subtractIntervalSizeFrom(double lowerBoundInclusive,double upperBoundInclusive,int argument) {
+    public static int subtractIntervalSizeFrom(double lowerBoundInclusive,double upperBoundInclusive,int _argument) {
+        int argument=_argument;
         if (argument<=0)
             return 0;
         long bitsLowerBoundInclusive=Double.doubleToRawLongBits(lowerBoundInclusive);

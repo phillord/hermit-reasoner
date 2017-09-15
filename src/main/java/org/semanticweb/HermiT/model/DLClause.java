@@ -120,11 +120,7 @@ public class DLClause implements Serializable {
      * @return changed dl clause
      */
     public DLClause getChangedDLClause(Atom[] headAtoms,Atom[] bodyAtoms) {
-        if (headAtoms==null)
-            headAtoms=m_headAtoms;
-        if (bodyAtoms==null)
-            bodyAtoms=m_bodyAtoms;
-        return DLClause.create(headAtoms,bodyAtoms);
+        return DLClause.create(headAtoms!=null?headAtoms:m_headAtoms,bodyAtoms!=null?bodyAtoms:m_bodyAtoms);
     }
     /**
      * @return true if gci

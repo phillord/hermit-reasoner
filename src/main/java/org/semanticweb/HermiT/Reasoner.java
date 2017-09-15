@@ -85,6 +85,7 @@ import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.AddOntologyAnnotation;
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLAnonymousIndividual;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
@@ -934,6 +935,32 @@ public class Reasoner implements OWLReasoner {
             result=equivalentToComplement.getChildNodes();
             m_directDisjointClasses.put(node,result);
             return result;
+        }
+    }
+    /**
+     * Precompute disjoint classes.
+     */
+    public void precomputeDisjointClasses() {
+        checkPreConditions();
+        if (!m_isConsistent.booleanValue())
+            return;
+        if (m_atomicConceptHierarchy==null || m_directDisjointClasses.keySet().size()<m_atomicConceptHierarchy.getAllNodesSet().size()-2) {
+            classifyClasses();
+            Set<HierarchyNode<AtomicConcept>> nodes=new HashSet<>(m_atomicConceptHierarchy.getAllNodes());
+            nodes.remove(m_atomicConceptHierarchy.getTopNode());
+            nodes.remove(m_atomicConceptHierarchy.getBottomNode());
+            nodes.removeAll(m_directDisjointClasses.keySet());
+            int steps=nodes.size();
+            int step=0;
+            if (m_configuration.reasonerProgressMonitor!=null)
+                m_configuration.reasonerProgressMonitor.reasonerTaskStarted("Compute disjoint classes");
+            for (HierarchyNode<AtomicConcept> node : nodes) {
+                getDisjointConceptNodes(node);
+                if (m_configuration.reasonerProgressMonitor!=null)
+                    m_configuration.reasonerProgressMonitor.reasonerTaskProgressChanged(++step,steps);
+            }
+            if (m_configuration.reasonerProgressMonitor!=null)
+                m_configuration.reasonerProgressMonitor.reasonerTaskStopped();
         }
     }
     protected HierarchyNode<AtomicConcept> getHierarchyNode(OWLClassExpression classExpression) {
@@ -1880,12 +1907,14 @@ public class Reasoner implements OWLReasoner {
         return result;
     }
     /**
-     * @param subject subject
+     * @param _subject subject
      * @param propertyExpression propertyExpression
-     * @param object object
+     * @param _object object
      * @return true if has object property relationships
      */
-    public boolean hasObjectPropertyRelationship(OWLNamedIndividual subject,OWLObjectPropertyExpression propertyExpression,OWLNamedIndividual object) {
+    public boolean hasObjectPropertyRelationship(OWLNamedIndividual _subject,OWLObjectPropertyExpression propertyExpression,OWLNamedIndividual _object) {
+        OWLNamedIndividual subject=_subject;
+        OWLNamedIndividual object=_object;
         checkPreConditions(subject,propertyExpression,object);
         if (!m_isConsistent.booleanValue())
             return true;
@@ -1937,6 +1966,44 @@ public class Reasoner implements OWLReasoner {
             }
         }
         return result;
+    }
+    /**
+     * @param subject subject
+     * @param property property
+     * @param object object
+     * @return true if relationship exists
+     */
+    public boolean hasDataPropertyRelationship(OWLNamedIndividual subject,OWLDataProperty property,OWLLiteral object) {
+        checkPreConditions(subject,property);
+        if (!m_isConsistent.booleanValue())
+            return true;
+        OWLDataFactory factory=getDataFactory();
+        OWLAxiom notAssertion=factory.getOWLNegativeDataPropertyAssertionAxiom(property,subject,object);
+        Tableau tableau=getTableau(notAssertion);
+        boolean result=tableau.isSatisfiable(true,true,null,null,null,null,null,new ReasoningTaskDescription(true,"is {0} connected to {1} via {2}",H(subject),object,H(property)));
+        tableau.clearAdditionalDLOntology();
+        return !result;
+    }
+    protected Set<HierarchyNode<AtomicConcept>> getDirectSuperConceptNodes(final Individual individual) {
+        HierarchySearch.SearchPredicate<HierarchyNode<AtomicConcept>> predicate=new HierarchySearch.SearchPredicate<HierarchyNode<AtomicConcept>>() {
+            @Override
+            public Set<HierarchyNode<AtomicConcept>> getSuccessorElements(HierarchyNode<AtomicConcept> u) {
+                return u.getChildNodes();
+            }
+            @Override
+            public Set<HierarchyNode<AtomicConcept>> getPredecessorElements(HierarchyNode<AtomicConcept> u) {
+                return u.getParentNodes();
+            }
+            @Override
+            public boolean trueOf(HierarchyNode<AtomicConcept> u) {
+                AtomicConcept atomicConcept=u.getRepresentative();
+                if (AtomicConcept.THING.equals(atomicConcept))
+                    return true;
+                else
+                    return !getTableau().isSatisfiable(true,true,null,Collections.singleton(Atom.create(atomicConcept,individual)),null,null,null,ReasoningTaskDescription.isInstanceOf(atomicConcept,individual));
+            }
+        };
+        return HierarchySearch.search(predicate,Collections.singleton(m_atomicConceptHierarchy.getTopNode()),null);
     }
     protected NodeSet<OWLNamedIndividual> sortBySameAsIfNecessary(Set<Individual> individuals) {
         OWLDataFactory factory=getDataFactory();
@@ -2291,8 +2358,20 @@ public class Reasoner implements OWLReasoner {
     protected static AtomicRole H(OWLDataProperty dataProperty) {
         return AtomicRole.create(dataProperty.getIRI().toString());
     }
+    protected static Role H(OWLDataPropertyExpression dataPropertyExpression) {
+        return H((OWLDataProperty)dataPropertyExpression);
+    }
     protected static Individual H(OWLNamedIndividual namedIndividual) {
         return Individual.create(namedIndividual.getIRI().toString());
+    }
+    protected static Individual H(OWLAnonymousIndividual anonymousIndividual) {
+        return Individual.createAnonymous(anonymousIndividual.getID().toString());
+    }
+    protected static Individual H(OWLIndividual individual) {
+        if (individual.isAnonymous())
+            return H((OWLAnonymousIndividual)individual);
+        else
+            return H((OWLNamedIndividual)individual);
     }
 
     // Extended methods for conversion from HermiT's API to OWL API

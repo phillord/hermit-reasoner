@@ -86,10 +86,8 @@ public class OWLClausification {
         // expressed as concept assertions so that transitivity rewriting applies properly.
         objectPropertyInclusionManager.rewriteNegativeObjectPropertyAssertions(factory,axioms,normalization.m_definitions.size());
         objectPropertyInclusionManager.rewriteAxioms(factory,axioms,0);
-        if (descriptionGraphs==null)
-            descriptionGraphs=Collections.emptySet();
         OWLAxiomsExpressivity axiomsExpressivity=new OWLAxiomsExpressivity(axioms);
-        DLOntology dlOntology=clausify(factory,ontologyIRI,axioms,axiomsExpressivity,descriptionGraphs);
+        DLOntology dlOntology=clausify(factory,ontologyIRI,axioms,axiomsExpressivity,descriptionGraphs!=null?descriptionGraphs:Collections.emptySet());
         return new Object[] { objectPropertyInclusionManager,dlOntology };
     }
     /**
@@ -163,7 +161,7 @@ public class OWLClausification {
             DLClause dlClause=clausifier.getDLClause();
             dlClauses.add(dlClause.getSafeVersion(AtomicConcept.THING));
         }
-        NormalizedDataRangeAxiomClausifier normalizedDataRangeAxiomClausifier=new NormalizedDataRangeAxiomClausifier(dataRangeConverter,axioms.m_definedDatatypesIRIs);
+        NormalizedDataRangeAxiomClausifier normalizedDataRangeAxiomClausifier=new NormalizedDataRangeAxiomClausifier(dataRangeConverter,factory, axioms.m_definedDatatypesIRIs);
         for (List<OWLDataRange> inclusion : axioms.m_dataRangeInclusions) {
             for (OWLDataRange description : inclusion)
                 description.accept(normalizedDataRangeAxiomClausifier);
@@ -636,12 +634,15 @@ public class OWLClausification {
         protected final Set<String> m_definedDatatypeIRIs;
         protected final List<Atom> m_headAtoms;
         protected final List<Atom> m_bodyAtoms;
+        protected final OWLDataFactory m_factory;
+        protected int m_yIndex;
 
-        public NormalizedDataRangeAxiomClausifier(DataRangeConverter dataRangeConverter,Set<String> definedDatatypeIRIs) {
+        public NormalizedDataRangeAxiomClausifier(DataRangeConverter dataRangeConverter,OWLDataFactory factory,Set<String> definedDatatypeIRIs) {
             m_dataRangeConverter=dataRangeConverter;
             m_definedDatatypeIRIs=definedDatatypeIRIs;
             m_headAtoms=new ArrayList<>();
             m_bodyAtoms=new ArrayList<>();
+            m_factory=factory;
         }
         protected DLClause getDLClause() {
             Atom[] headAtoms=new Atom[m_headAtoms.size()];
@@ -651,7 +652,21 @@ public class OWLClausification {
             DLClause dlClause=DLClause.create(headAtoms,bodyAtoms);
             m_headAtoms.clear();
             m_bodyAtoms.clear();
+            m_yIndex=0;
             return dlClause;
+        }
+        protected void ensureYNotZero() {
+            if (m_yIndex==0)
+                m_yIndex++;
+        }
+        protected Variable nextY() {
+            Variable result;
+            if (m_yIndex==0)
+                result=Y;
+            else
+                result=Variable.create("Y"+m_yIndex);
+            m_yIndex++;
+            return result;
         }
 
         // Various types of descriptions

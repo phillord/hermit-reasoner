@@ -19,8 +19,10 @@ package org.semanticweb.HermiT.datatypes.owlreal;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-
-class Numbers {
+/**
+ * Numbers.
+ */
+public class Numbers {
     protected enum NumberType {
         INTEGER, LONG, BIG_INTEGER, BIG_DECIMAL, BIG_RATIONAL;
         
@@ -44,6 +46,10 @@ class Numbers {
         }
     } 
     
+    /**
+     * @param n number
+     * @return true if valid
+     */
     public static boolean isValidNumber(Number n) {
         return (n instanceof Integer) || (n instanceof Long) || (n instanceof BigInteger) || (n instanceof BigDecimal) || (n instanceof BigRational);
     }
@@ -130,6 +136,11 @@ class Numbers {
         }
         return new BigRational(numerator,denominator);
     }
+    /**
+     * @param n1 number 
+     * @param n2 number
+     * @return comparison result
+     */
     public static int compare(Number n1,Number n2) {
         if (n1.equals(n2))
             return 0;
@@ -228,10 +239,26 @@ class Numbers {
         }
     }
     
+    /**
+     * Boundary direction.
+     */
     public static enum BoundaryDirection {
-        UPPER,LOWER
+        /**
+         * Upper.
+         */
+        UPPER,
+        /**
+         * Lower.
+         */
+        LOWER
     }
     
+    /**
+     * @param bound bound
+     * @param boundaryDirection boundary direction
+     * @param boundIsInclusive bound inclusive
+     * @return nearest integer
+     */
     public static Number getNearestIntegerInBound(Number bound,BoundaryDirection boundaryDirection,boolean boundIsInclusive) {
         switch (NumberType.getNumberTypeFor(bound)) {
         case INTEGER:
@@ -322,6 +349,12 @@ class Numbers {
             throw new IllegalArgumentException();
         }
     }
+    /**
+     * @param lowerBoundInclusive lower bound
+     * @param upperBoundInclusive upper bound
+     * @param argument argument
+     * @return subtraction
+     */
     public static int subtractIntegerIntervalSizeFrom(Number lowerBoundInclusive,Number upperBoundInclusive,int argument) {
         if (argument<=0)
             return 0;
@@ -358,6 +391,10 @@ class Numbers {
             throw new IllegalArgumentException();
         }
     }
+    /**
+     * @param integer int
+     * @return next integer
+     */
     public static Number nextInteger(Number integer) {
         switch (NumberType.getNumberTypeFor(integer)) {
         case INTEGER: {

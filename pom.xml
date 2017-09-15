@@ -11,7 +11,7 @@
 
 	<groupId>net.sourceforge.owlapi</groupId>
 	<artifactId>org.semanticweb.hermit</artifactId>
-	<version>1.3.8.510</version>
+	<version>1.4.0.510</version>
 	<packaging>bundle</packaging>
 
 	<name>HermiT</name>

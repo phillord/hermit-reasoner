@@ -127,9 +127,11 @@ final class NominalIntroductionManager implements Serializable {
             return true;
         }
     }
-    protected boolean applyNIRule(AnnotatedEquality annotatedEquality,Node node0,Node node1,Node node2,DependencySet dependencySet) {
+    protected boolean applyNIRule(AnnotatedEquality annotatedEquality,Node _node0,Node _node1,Node _node2,DependencySet _dependencySet) {
+        Node node0=_node0;Node node1=_node1;Node node2=_node2;
         if (node0.isPruned() || node1.isPruned() || node2.isPruned())
             return false;
+        DependencySet dependencySet=_dependencySet;
         dependencySet=node0.addCanonicalNodeDependencySet(dependencySet);
         dependencySet=node1.addCanonicalNodeDependencySet(dependencySet);
         dependencySet=node2.addCanonicalNodeDependencySet(dependencySet);

@@ -18,6 +18,7 @@
 package org.semanticweb.HermiT.datatypes.rdfplainliteral;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -53,7 +54,7 @@ public class RDFPlainLiteralDatatypeHandler implements DatatypeHandler {
         Automaton automaton=RDFPlainLiteralPatternValueSpaceSubset.getDatatypeAutomaton(datatypeURI);
         s_subsetsByDatatype.put(datatypeURI,new RDFPlainLiteralPatternValueSpaceSubset(automaton));
     }
-    protected static final ValueSpaceSubset EMPTY_SUBSET=new RDFPlainLiteralLengthValueSpaceSubset();
+    protected static final ValueSpaceSubset EMPTY_SUBSET=new RDFPlainLiteralLengthValueSpaceSubset(Collections.emptyList());
     protected static final Map<String,Set<String>> s_datatypeSupersets=new HashMap<>();
     static {
         String[][] initializer=new String[][] {

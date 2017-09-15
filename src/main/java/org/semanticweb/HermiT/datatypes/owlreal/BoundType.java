@@ -17,12 +17,30 @@
 */
 package org.semanticweb.HermiT.datatypes.owlreal;
 
-enum BoundType {
-    INCLUSIVE,EXCLUSIVE;
+/**
+ * Bound type.
+ */
+public enum BoundType {
+    /**
+     * Inclusive.
+     */
+    INCLUSIVE,
+    /**
+     * Exclusive.
+     */
+    EXCLUSIVE;
 
+    /**
+     * @return complement
+     */
     public BoundType getComplement() {
         return values()[1-ordinal()];
     }
+    /**
+     * @param boundType1 type 1
+     * @param boundType2 type 2
+     * @return mos restrictive type
+     */
     public static BoundType getMoreRestrictive(BoundType boundType1,BoundType boundType2) {
         int maxOrdinal=Math.max(boundType1.ordinal(),boundType2.ordinal());
         return values()[maxOrdinal];

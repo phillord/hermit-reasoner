@@ -18,11 +18,12 @@
 package org.semanticweb.HermiT.datatypes.binarydata;
 
 import java.io.ByteArrayOutputStream;
+import java.util.Base64;
 
 /**
  * Represents a binary data value.
  */
-class BinaryData {
+public class BinaryData {
     protected static final char[] INT_TO_HEX=new char[] { '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F' };
     protected static final int[] HEX_TO_INT=new int[127];
     static {
@@ -40,6 +41,10 @@ class BinaryData {
     protected final byte[] m_data;
     protected final int m_hashCode;
     
+    /**
+     * @param binaryDataType data type
+     * @param data data
+     */
     public BinaryData(BinaryDataType binaryDataType,byte[] data) {
         m_binaryDataType=binaryDataType;
         m_data=data;
@@ -48,12 +53,22 @@ class BinaryData {
             hashCode=hashCode*3+m_data[index];
         m_hashCode=hashCode;
     }
+    /**
+     * @return data type
+     */
     public BinaryDataType getBinaryDataType() {
         return m_binaryDataType;
     }
+    /**
+     * @return number of bytes
+     */
     public int getNumberOfBytes() {
         return m_data.length;
     }
+    /**
+     * @param index index
+     * @return value at index
+     */
     public byte getByte(int index) {
         return m_data[index];
     }
@@ -81,7 +96,7 @@ class BinaryData {
         case HEX_BINARY:
             return toHexBinary();
         case BASE_64_BINARY:
-            return Base64.base64Encode(m_data);
+            return Base64.getEncoder().encodeToString(m_data);
         default:
             throw new IllegalStateException("Internal error: invalid binary data type.");
         }
@@ -97,6 +112,10 @@ class BinaryData {
         }
         return buffer.toString();
     }
+    /**
+     * @param lexicalForm form to parse
+     * @return parsed data
+     */
     public static BinaryData parseHexBinary(String lexicalForm) {
         try {
             if ((lexicalForm.length() % 2)!=0)
@@ -120,9 +139,13 @@ class BinaryData {
             return null;
         }
     }
+    /**
+     * @param lexicalForm form to parse
+     * @return parsed data
+     */
     public static BinaryData parseBase64Binary(String lexicalForm) {
         try {
-            byte[] data=Base64.decodeBase64(removeWhitespace(lexicalForm));
+            byte[] data=Base64.getDecoder().decode(removeWhitespace(lexicalForm));
             return new BinaryData(BinaryDataType.HEX_BINARY,data);
         }
         catch (@SuppressWarnings("unused") IllegalArgumentException|IndexOutOfBoundsException error) {

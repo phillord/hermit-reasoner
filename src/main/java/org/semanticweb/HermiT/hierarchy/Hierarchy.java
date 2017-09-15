@@ -173,7 +173,9 @@ public class Hierarchy<E> {
         Set<HierarchyNode<E>> visited=new HashSet<>();
         traverseDepthFirst(visitor,0,m_topNode,null,visited,redirectBuffer);
     }
-    protected void traverseDepthFirst(HierarchyNodeVisitor<E> visitor,int level,HierarchyNode<E> node,HierarchyNode<E> parentNode,Set<HierarchyNode<E>> visited,HierarchyNode<E>[] redirectBuffer) {
+    protected void traverseDepthFirst(HierarchyNodeVisitor<E> visitor,int level,HierarchyNode<E> _node,HierarchyNode<E> _parentNode,Set<HierarchyNode<E>> visited,HierarchyNode<E>[] redirectBuffer) {
+        HierarchyNode<E> node=_node;
+        HierarchyNode<E> parentNode=_parentNode;
         redirectBuffer[0]=node;
         redirectBuffer[1]=parentNode;
         if (visitor.redirect(redirectBuffer)) {

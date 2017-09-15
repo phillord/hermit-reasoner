@@ -19,7 +19,10 @@ package org.semanticweb.HermiT.datatypes.owlreal;
 
 import java.util.Collection;
 
-class NumberInterval {
+/**
+ * Numeric interval.
+ */
+public class NumberInterval {
     protected final NumberRange m_baseRange;
     protected final NumberRange m_excludedRange;
     protected final Number m_lowerBound;
@@ -27,6 +30,14 @@ class NumberInterval {
     protected final Number m_upperBound;
     protected final BoundType m_upperBoundType;
     
+    /**
+     * @param baseRange range
+     * @param excludedRange exclusion
+     * @param lowerBound lower bound
+     * @param lowerBoundType lower type
+     * @param upperBound upper bound
+     * @param upperBoundType upper type
+     */
     public NumberInterval(NumberRange baseRange,NumberRange excludedRange,Number lowerBound,BoundType lowerBoundType,Number upperBound,BoundType upperBoundType) {
         assert !isIntervalEmpty(baseRange,excludedRange,lowerBound,lowerBoundType,upperBound,upperBoundType);
         m_baseRange=baseRange;
@@ -139,6 +150,10 @@ class NumberInterval {
             return Numbers.subtractIntegerIntervalSizeFrom(m_lowerBound,m_upperBound,argument);
         }
     }
+    /**
+     * @param number number to check
+     * @return true if contained
+     */
     public boolean containsNumber(Number number) {
         NumberRange mostSpecificRange=NumberRange.getMostSpecificRange(number);
         if (!NumberRange.isSubsetOf(mostSpecificRange,m_baseRange) || NumberRange.isSubsetOf(mostSpecificRange,m_excludedRange))
@@ -151,6 +166,9 @@ class NumberInterval {
             return false;
         return true;
     }
+    /**
+     * @param numbers collection to add to
+     */
     public void enumerateNumbers(Collection<Object> numbers) {
         if (m_lowerBound.equals(m_upperBound)) {
             // The interval is not empty, and we know that it is not empty; hence, it is a singleton.

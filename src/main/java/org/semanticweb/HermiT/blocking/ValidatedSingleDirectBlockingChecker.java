@@ -181,7 +181,10 @@ public class ValidatedSingleDirectBlockingChecker implements DirectBlockingCheck
     public BlockingSignature getBlockingSignatureFor(Node node) {
         return new ValidatedBlockingSignature(this,node);
     }
-    private class ValidatedSingleBlockingObject implements ValidatedBlockingObject {
+    /**
+     * Blocking object.
+     */
+    public class ValidatedSingleBlockingObject implements ValidatedBlockingObject {
         protected final Node m_node;
         protected boolean m_hasChangedForBlocking;
         protected boolean m_hasChangedForValidation;
@@ -190,9 +193,12 @@ public class ValidatedSingleDirectBlockingChecker implements DirectBlockingCheck
         protected Set<AtomicRole> m_fullFromParentLabel;
         protected Set<AtomicRole> m_fullToParentLabel;
         protected int m_blockingRelevantHashCode;
-        public boolean m_blockViolatesParentConstraints=false;
-        public boolean m_hasAlreadyBeenChecked=false;
+        protected boolean m_blockViolatesParentConstraints=false;
+        protected boolean m_hasAlreadyBeenChecked=false;
         
+        /**
+         * @param node node
+         */
         public ValidatedSingleBlockingObject(Node node) {
             m_node=node;
         }

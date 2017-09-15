@@ -95,6 +95,14 @@ class RoleElementManager {
             }
             return successors.add(individual2);
         }
+        public boolean addKnowns(Individual individual, Set<Individual> individuals) {
+            Set<Individual> successors=m_knownRelations.get(individual);
+            if (successors==null) {
+                successors=new HashSet<>();
+                m_knownRelations.put(individual, successors);
+            }
+            return successors.addAll(individuals);
+        }
         public boolean removeKnown(Individual individual1, Individual individual2) {
             Set<Individual> successors=m_knownRelations.get(individual1);
             boolean removed=false;

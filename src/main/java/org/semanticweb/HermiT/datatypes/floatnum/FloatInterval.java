@@ -100,7 +100,11 @@ public class FloatInterval {
         buffer.append(']');
         return buffer.toString();
     }
-    protected static boolean isNaN(int bits) {
+    /**
+     * @param bits bits to test
+     * @return true if NaN
+     */
+    public static boolean isNaN(int bits) {
         return ((bits & 0x7f800000)==0x7f800000) && ((bits & 0x003fffff)!=0);
     }
     protected static boolean isIntervalEmpty(float lowerBoundInclusive,float upperBoundInclusive) {
@@ -145,7 +149,11 @@ public class FloatInterval {
             return Float.intBitsToFloat(newBits);
         }
     }
-    protected static float previousFloat(float value) {
+    /**
+     * @param value float
+     * @return previous float
+     */
+    public static float previousFloat(float value) {
         int bits=Float.floatToIntBits(value);
         int magnitude=(bits & 0x7fffffff);
         boolean positive=((bits & 0x80000000)==0);
@@ -175,10 +183,11 @@ public class FloatInterval {
     /**
      * @param lowerBoundInclusive lowerBoundInclusive
      * @param upperBoundInclusive upperBoundInclusive
-     * @param argument argument
+     * @param _argument argument
      * @return subtracted size
      */
-    public static int subtractIntervalSizeFrom(float lowerBoundInclusive,float upperBoundInclusive,int argument) {
+    public static int subtractIntervalSizeFrom(float lowerBoundInclusive,float upperBoundInclusive,int _argument) {
+        int argument=_argument;
         if (argument<=0)
             return 0;
         int bitsLowerBoundInclusive=Float.floatToIntBits(lowerBoundInclusive);
@@ -218,7 +227,13 @@ public class FloatInterval {
         else // if (positiveLowerBoundInclusive && !positiveUpperBoundInclusiev) is impossible at this point
             throw new IllegalStateException();
     }
-    protected static boolean contains(float startInclusive,float endInclusive,float value) {
+    /**
+     * @param startInclusive start
+     * @param endInclusive end
+     * @param value value
+     * @return true if contained
+     */
+    public static boolean contains(float startInclusive,float endInclusive,float value) {
         int bitsStart=Float.floatToIntBits(startInclusive);
         int bitsEnd=Float.floatToIntBits(endInclusive);
         int bitsValue=Float.floatToIntBits(value);

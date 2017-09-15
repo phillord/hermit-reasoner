@@ -31,8 +31,11 @@ import dk.brics.automaton.BasicOperations;
 import dk.brics.automaton.Datatypes;
 import dk.brics.automaton.RegExp;
 
-class RDFPlainLiteralPatternValueSpaceSubset implements ValueSpaceSubset {
-    public static final char SEPARATOR='\u0001';
+/**
+ * Pattern vlue subset.
+ */
+public class RDFPlainLiteralPatternValueSpaceSubset implements ValueSpaceSubset {
+    private static final char SEPARATOR='\u0001';
     protected static final Automaton s_separator;
     protected static final Automaton s_languagePatternEnd;
     protected static final Automaton s_languageTag;
@@ -96,6 +99,9 @@ class RDFPlainLiteralPatternValueSpaceSubset implements ValueSpaceSubset {
     }
     protected final Automaton m_automaton;
 
+    /**
+     * @param automaton automaton
+     */
     public RDFPlainLiteralPatternValueSpaceSubset(Automaton automaton) {
         m_automaton=automaton;
     }
@@ -143,6 +149,10 @@ class RDFPlainLiteralPatternValueSpaceSubset implements ValueSpaceSubset {
     public String toString() {
         return "rdf:PlainLiteral{"+m_automaton+"}";
     }
+    /**
+     * @param valueSpaceSubset value space
+     * @return automaton
+     */
     public static Automaton toAutomaton(RDFPlainLiteralLengthValueSpaceSubset valueSpaceSubset) {
         List<RDFPlainLiteralLengthInterval> intervals=valueSpaceSubset.m_intervals;
         Automaton result=null;
@@ -169,6 +179,11 @@ class RDFPlainLiteralPatternValueSpaceSubset implements ValueSpaceSubset {
         }
         return result;
     }
+    /**
+     * @param minLength min length
+     * @param maxLength max length
+     * @return automaton
+     */
     public static Automaton toAutomaton(int minLength,int maxLength) {
         assert minLength<=maxLength;
         Automaton stringPart;
@@ -182,6 +197,10 @@ class RDFPlainLiteralPatternValueSpaceSubset implements ValueSpaceSubset {
             stringPart=s_anyString.intersection(BasicOperations.repeat(s_anyChar,minLength,maxLength));
         return stringPart.concatenate(s_anyLangTag);
     }
+    /**
+     * @param pattern pattern
+     * @return true if valid
+     */
     @SuppressWarnings("unused")
     public static boolean isValidPattern(String pattern) {
         try {
@@ -192,10 +211,18 @@ class RDFPlainLiteralPatternValueSpaceSubset implements ValueSpaceSubset {
             return false;
         }
     }
+    /**
+     * @param pattern pattern
+     * @return automaton
+     */
     public static Automaton getPatternAutomaton(String pattern) {
         Automaton stringPart=new RegExp(pattern).toAutomaton();
         return stringPart.concatenate(s_anyLangTag);
     }
+    /**
+     * @param languageRange language range
+     * @return automaton
+     */
     public static Automaton getLanguageRangeAutomaton(String languageRange) {
         if ("*".equals(languageRange))
             return s_anyStringWithNonemptyLangTag;
@@ -204,6 +231,10 @@ class RDFPlainLiteralPatternValueSpaceSubset implements ValueSpaceSubset {
             return s_anyString.concatenate(s_separator).concatenate(languageTagPart);
         }
     }
+    /**
+     * @param datatypeURI datatype uri
+     * @return automaton
+     */
     public static Automaton getDatatypeAutomaton(String datatypeURI) {
         return s_anyDatatype.get(datatypeURI);
     }

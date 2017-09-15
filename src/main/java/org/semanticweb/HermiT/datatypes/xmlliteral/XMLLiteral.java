@@ -3,12 +3,21 @@ package org.semanticweb.HermiT.datatypes.xmlliteral;
 import org.apache.axiom.c14n.impl.Canonicalizer20010315ExclWithComments;
 
 
-class XMLLiteral {
+/**
+ * XML literal.
+ */
+public class XMLLiteral {
     protected final String m_xml;
 
+    /**
+     * @param xml xml
+     */
     public XMLLiteral(String xml) {
         m_xml=xml;
     }
+    /**
+     * @return xml
+     */
     public String getXML() {
         return m_xml;
     }
@@ -28,6 +37,11 @@ class XMLLiteral {
     public String toString() {
         return m_xml;
     }
+    /**
+     * @param lexicalForm string to parse
+     * @return parsed literal
+     * @throws Exception if a canonicalization exception happens
+     */
     public static XMLLiteral parse(String lexicalForm) throws Exception {
         String enclosedXML="<arbitraryTag>"+lexicalForm+"</arbitraryTag>";
         Canonicalizer20010315ExclWithComments canonicalizer=new Canonicalizer20010315ExclWithComments();

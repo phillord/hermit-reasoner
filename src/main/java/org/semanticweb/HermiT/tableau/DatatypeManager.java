@@ -21,7 +21,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -483,7 +482,7 @@ public final class DatatypeManager implements Serializable {
         // This method could be further optimized to check each clique of inequalities separately.
         // It is not expected that this is an important optimization, so we don't to it for the moment.
         // The nodes are sorted so that we get a kind of 'join order' optimization.
-        Collections.sort(m_conjunction.m_activeVariables,SmallestEnumerationFirst.INSTANCE);
+        Collections.sort(m_conjunction.m_activeVariables);
         if (!findAssignment(0))
             setClashFor(m_conjunction.m_activeVariables);
     }
@@ -587,6 +586,20 @@ public final class DatatypeManager implements Serializable {
         public List<DVariable> getActiveVariables() {
             return Collections.unmodifiableList(m_activeVariables);
         }
+        /**
+         * @param node node
+         * @return variable
+         */
+        public DVariable getVariableFor(Node node) {
+            int index=getIndexFor(node.hashCode(),m_buckets.length);
+            DVariable entry=m_buckets[index];
+            while (entry!=null) {
+                if (entry.m_node==node)
+                    return entry;
+                entry=entry.m_nextEntry;
+            }
+            return null;
+        }
         protected DVariable getVariableForEx(Node node,boolean[] newVariableAdded) {
             int index=getIndexFor(node.hashCode(),m_buckets.length);
             DVariable entry=m_buckets[index];
@@ -683,7 +696,7 @@ public final class DatatypeManager implements Serializable {
     }
 
     /**DVariable.*/
-    public static class DVariable implements Serializable {
+    public static class DVariable implements Serializable, Comparable<DVariable> {
         private static final long serialVersionUID = -2490195841140286089L;
         protected final List<ConstantEnumeration> m_positiveConstantEnumerations=new ArrayList<>();
         protected final List<ConstantEnumeration> m_negativeConstantEnumerations=new ArrayList<>();
@@ -700,6 +713,10 @@ public final class DatatypeManager implements Serializable {
         protected ValueSpaceSubset m_valueSpaceSubset;
         protected Object m_dataValue;
 
+        @Override
+        public int compareTo(DVariable o) {
+            return m_explicitDataValues.size()-o.m_explicitDataValues.size();
+        }
         protected void dispose() {
             m_positiveConstantEnumerations.clear();
             m_negativeConstantEnumerations.clear();
@@ -842,16 +859,5 @@ public final class DatatypeManager implements Serializable {
         hashCode+=(hashCode << 4);
         hashCode^=(hashCode >>> 10);
         return hashCode & (tableLength-1);
-    }
-
-    protected static class SmallestEnumerationFirst implements Comparator<DVariable>, Serializable {
-        private static final long serialVersionUID = 8838838641444833249L;
-        public static final Comparator<DVariable> INSTANCE=new SmallestEnumerationFirst();
-
-        @Override
-        public int compare(DVariable o1,DVariable o2) {
-            return o1.m_explicitDataValues.size()-o2.m_explicitDataValues.size();
-        }
-
     }
 }

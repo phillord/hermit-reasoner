@@ -1,4 +1,4 @@
-package org.semanticweb.HermiT.datatypes.binarydata;
+package org.semanticweb.HermiT.reasoner;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -7,7 +7,6 @@ import java.util.List;
 import org.semanticweb.HermiT.datatypes.binarydata.BinaryData;
 import org.semanticweb.HermiT.datatypes.binarydata.BinaryDataLengthInterval;
 import org.semanticweb.HermiT.datatypes.binarydata.BinaryDataType;
-import org.semanticweb.HermiT.reasoner.AbstractReasonerTest;
 @SuppressWarnings("javadoc")
 public class BinaryDataTest extends AbstractReasonerTest {
 

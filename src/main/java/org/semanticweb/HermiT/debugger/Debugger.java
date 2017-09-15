@@ -311,8 +311,8 @@ public class Debugger extends TableauMonitorForwarder {
                 m_lastCommand=commandLine;
         }
     }
-    protected String[] parse(String command) {
-        command=command.trim();
+    protected String[] parse(String _command) {
+        String command=_command.trim();
         List<String> arguments=new ArrayList<>();
         int firstChar=0;
         int nextSpace=command.indexOf(' ');
@@ -366,9 +366,13 @@ public class Debugger extends TableauMonitorForwarder {
     public void isSatisfiableFinished(ReasoningTaskDescription reasoningTaskDescription,boolean result) {
         super.isSatisfiableFinished(reasoningTaskDescription,result);
         if (reasoningTaskDescription.flipSatisfiabilityResult())
-            result=!result;
-        m_output.println("Reasoning task finished: "+(result ? "true" : "false"));
+            print(!result);
+        else
+            print(result);
         mainLoop();
+    }
+    protected void print(boolean result) {
+        m_output.println("Reasoning task finished: "+(result ? "true" : "false"));
     }
     @Override
     public void tableauCleared() {

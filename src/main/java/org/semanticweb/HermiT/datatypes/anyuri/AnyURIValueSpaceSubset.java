@@ -85,7 +85,12 @@ public class AnyURIValueSpaceSubset implements ValueSpaceSubset {
         buffer.append('}');
         return buffer.toString();
     }
-    static Automaton toAutomaton(int minLength,int maxLength) {
+    /**
+     * @param minLength min lenght
+     * @param maxLength max length
+     * @return automaton
+     */
+    public static Automaton toAutomaton(int minLength,int maxLength) {
         assert minLength<=maxLength;
         if (maxLength==Integer.MAX_VALUE) {
             if (minLength==0)
@@ -96,8 +101,12 @@ public class AnyURIValueSpaceSubset implements ValueSpaceSubset {
         else
             return s_anyString.intersection(BasicOperations.repeat(s_anyChar,minLength,maxLength));
     }
+    /**
+     * @param pattern pattern to compile
+     * @return true if valid
+     */
     @SuppressWarnings("unused")
-    static boolean isValidPattern(String pattern) {
+    public static boolean isValidPattern(String pattern) {
         try {
             new RegExp(pattern);
             return true;
@@ -106,7 +115,11 @@ public class AnyURIValueSpaceSubset implements ValueSpaceSubset {
             return false;
         }
     }
-    static Automaton getPatternAutomaton(String pattern) {
+    /**
+     * @param pattern pattern to compile
+     * @return pattern automaton
+     */
+    public static Automaton getPatternAutomaton(String pattern) {
         return new RegExp(pattern).toAutomaton();
     }
 }

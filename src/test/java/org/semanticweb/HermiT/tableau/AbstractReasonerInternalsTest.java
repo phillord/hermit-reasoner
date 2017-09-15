@@ -30,9 +30,7 @@ public abstract class AbstractReasonerInternalsTest extends AbstractReasonerTest
 
     protected DLOntology getDLOntology(Configuration c, Set<DescriptionGraph> dgs) {
         OWLClausification clausification = new OWLClausification(c);
-        if (dgs == null)
-            dgs = Collections.emptySet();
-        return (DLOntology) clausification.preprocessAndClausify(m_ontology, dgs)[1];
+        return (DLOntology) clausification.preprocessAndClausify(m_ontology, dgs!=null?dgs:Collections.emptySet())[1];
     }
 
     protected Tableau getTableau(Set<DescriptionGraph> dgs) {

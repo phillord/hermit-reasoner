@@ -54,10 +54,11 @@ public class ObjectPropertyInclusionManager {
     /**
      * @param factory factory
      * @param axioms axioms
-     * @param replacementIndex replacementIndex
+     * @param _replacementIndex replacementIndex
      * @return replacement index
      */
-    public int rewriteNegativeObjectPropertyAssertions(OWLDataFactory factory,OWLAxioms axioms,int replacementIndex) {
+    public int rewriteNegativeObjectPropertyAssertions(OWLDataFactory factory,OWLAxioms axioms,int _replacementIndex) {
+        int replacementIndex=_replacementIndex;
         // now object property inclusion manager added all non-simple properties to axioms.m_complexObjectPropertyExpressions
         // now that we know which roles are non-simple, we can decide which negative object property assertions have to be
         // expressed as concept assertions so that transitivity rewriting applies properly. All new concepts for the concept
@@ -91,9 +92,10 @@ public class ObjectPropertyInclusionManager {
     /**
      * @param dataFactory dataFactory
      * @param axioms axioms
-     * @param firstReplacementIndex firstReplacementIndex
+     * @param _firstReplacementIndex firstReplacementIndex
      */
-    public void rewriteAxioms(OWLDataFactory dataFactory,OWLAxioms axioms,int firstReplacementIndex) {
+    public void rewriteAxioms(OWLDataFactory dataFactory,OWLAxioms axioms,int _firstReplacementIndex) {
+        int firstReplacementIndex=_firstReplacementIndex;
         // Check the asymmetric object properties for simplicity
         for (OWLObjectPropertyExpression objectPropertyExpression : axioms.m_asymmetricObjectProperties)
             if (axioms.m_complexObjectPropertyExpressions.contains(objectPropertyExpression))
@@ -521,9 +523,9 @@ public class ObjectPropertyInclusionManager {
             Transition basicTransition=new Transition(biggerPropertyAutomaton.initials().iterator().next(),propertyToBuildAutomatonFor.getInverseProperty(),biggerPropertyAutomaton.terminals().iterator().next());
             automataConnector(biggerPropertyAutomaton,getMirroredCopy(biggerPropertyAutomaton),basicTransition);
         }
-        biggerPropertyAutomaton=minimizeAndNormalizeAutomaton(biggerPropertyAutomaton);
-        completeAutomata.put(propertyToBuildAutomatonFor,biggerPropertyAutomaton);
-        completeAutomata.put(propertyToBuildAutomatonFor.getInverseProperty(),getMirroredCopy(biggerPropertyAutomaton));
+        Automaton bga=minimizeAndNormalizeAutomaton(biggerPropertyAutomaton);
+        completeAutomata.put(propertyToBuildAutomatonFor,bga);
+        completeAutomata.put(propertyToBuildAutomatonFor.getInverseProperty(),getMirroredCopy(bga));
     }
     protected void increaseWithDefinedInverseIfNecessary(OWLObjectPropertyExpression propertyToBuildAutomatonFor,Automaton leafPropertyAutomaton,Map<OWLObjectPropertyExpression,Set<OWLObjectPropertyExpression>> inversePropertiesMap,Map<OWLObjectPropertyExpression,Automaton> individualAutomata) {
         Set<OWLObjectPropertyExpression> inverses=inversePropertiesMap.get(propertyToBuildAutomatonFor);
@@ -577,6 +579,15 @@ public class ObjectPropertyInclusionManager {
     }
     protected void automataConnector(Automaton biggerPropertyAutomaton,Automaton smallerPropertyAutomaton,Transition transition) {
         useStandardAutomataConnector(biggerPropertyAutomaton,smallerPropertyAutomaton,transition);
+    }
+    protected Set<Transition> deltaToState(Automaton smallerPropertyAutomaton,State state) {
+        Set<Transition> incommingTrans=new HashSet<>();
+        for (Object transitionObject : smallerPropertyAutomaton.delta()) {
+            Transition transition=(Transition)transitionObject;
+            if (transition.end().equals(state))
+                incommingTrans.add(transition);
+        }
+        return incommingTrans;
     }
     protected Graph<OWLObjectPropertyExpression> buildPropertyOrdering(Collection<List<OWLObjectPropertyExpression>> simpleObjectPropertyInclusions,Collection<ComplexObjectPropertyInclusion> complexObjectPropertyInclusions,Map<OWLObjectPropertyExpression,Set<OWLObjectPropertyExpression>> equivalentPropertiesMap) {
         Graph<OWLObjectPropertyExpression> propertyDependencyGraph=new Graph<>();

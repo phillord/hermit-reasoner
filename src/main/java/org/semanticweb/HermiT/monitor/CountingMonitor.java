@@ -94,9 +94,9 @@ public class CountingMonitor extends TableauMonitorAdapter {
     @Override
     public void isSatisfiableFinished(ReasoningTaskDescription reasoningTaskDescription,boolean result) {
         super.isSatisfiableFinished(reasoningTaskDescription,result);
-        if (reasoningTaskDescription.flipSatisfiabilityResult())
-            result=!result;
         m_testResult=result;
+        if (reasoningTaskDescription.flipSatisfiabilityResult())
+            m_testResult=!result;
         m_time=System.currentTimeMillis()-m_problemStartTime;
         String messagePattern=m_reasoningTaskDescription.getMessagePattern();
         List<TestRecord> records=m_testRecords.get(messagePattern);
@@ -478,12 +478,20 @@ public class CountingMonitor extends TableauMonitorAdapter {
         return timeStr;
     }
 
-    private static class TestRecord implements Comparable<TestRecord>, Serializable {
+	/**
+	 * Test record.
+	 */
+	public static class TestRecord implements Comparable<TestRecord>, Serializable {
         private static final long serialVersionUID = -3815493500625020183L;
         protected final long m_testTime;
         protected final String m_testDescription;
         protected final boolean m_testResult;
 
+        /**
+         * @param testTime time
+         * @param testDescription description
+         * @param result result
+         */
         public TestRecord(long testTime, String testDescription, boolean result) {
             m_testTime=testTime;
             m_testDescription=testDescription;
@@ -495,6 +503,24 @@ public class CountingMonitor extends TableauMonitorAdapter {
             int result=Long.compare(that.m_testTime,m_testTime);
             if (result!=0) return result;
             else return this.m_testDescription.compareToIgnoreCase(that.m_testDescription);
+        }
+        /**
+         * @return test time
+         */
+        public long getTestTime() {
+            return m_testTime;
+        }
+        /**
+         * @return test description
+         */
+        public String getTestDescription() {
+            return m_testDescription;
+        }
+        /**
+         * @return test result
+         */
+        public boolean getTestResult() {
+            return m_testResult;
         }
         @Override
         public String toString() {

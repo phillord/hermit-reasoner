@@ -58,7 +58,7 @@ public class ShowModelCommand extends AbstractCommand {
     }
     @Override
     public void execute(String[] args) {
-        Set<Object[]> facts=new TreeSet<>(Printing.FactComparator.INSTANCE);
+        Set<Object[]> facts=new TreeSet<>(Printing::factCompare);
         String title;
         if (args.length<2) {
             for (ExtensionTable extensionTable : m_debugger.getTableau().getExtensionManager().getExtensionTables()) {

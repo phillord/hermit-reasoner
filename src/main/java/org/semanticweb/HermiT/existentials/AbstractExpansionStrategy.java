@@ -29,6 +29,7 @@ import org.semanticweb.HermiT.model.AtomicRole;
 import org.semanticweb.HermiT.model.Concept;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.HermiT.model.DLOntology;
+import org.semanticweb.HermiT.model.DataRange;
 import org.semanticweb.HermiT.model.ExistentialConcept;
 import org.semanticweb.HermiT.model.ExistsDescriptionGraph;
 import org.semanticweb.HermiT.model.Inequality;
@@ -171,6 +172,18 @@ public abstract class AbstractExpansionStrategy implements ExistentialExpansionS
     @Override
     public void assertionRemoved(Concept concept,Node node,boolean isCore) {
         m_blockingStrategy.assertionRemoved(concept,node,isCore);
+    }
+    @Override
+    public void assertionAdded(DataRange range,Node node,boolean isCore) {
+        m_blockingStrategy.assertionAdded(range,node,isCore);
+    }
+    @Override
+    public void assertionCoreSet(DataRange range,Node node) {
+        m_blockingStrategy.assertionCoreSet(range,node);
+    }
+    @Override
+    public void assertionRemoved(DataRange range,Node node,boolean isCore) {
+        m_blockingStrategy.assertionRemoved(range,node,isCore);
     }
     @Override
     public void assertionAdded(AtomicRole atomicRole,Node nodeFrom,Node nodeTo,boolean isCore) {

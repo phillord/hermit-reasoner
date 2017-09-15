@@ -20,23 +20,67 @@ package org.semanticweb.HermiT.datatypes.owlreal;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-enum NumberRange {
-    NOTHING,INTEGER,DECIMAL,RATIONAL,REAL;
+/**
+ * Number range.
+ */
+public enum NumberRange {
+    /**
+     * Nothing.
+     */
+    NOTHING,
+    /**
+     * Integer.
+     */
+    INTEGER,
+    /**
+     * Decimal.
+     */
+    DECIMAL,
+    /**
+     * Rational.
+     */
+    RATIONAL,
+    /**
+     * Real.
+     */
+    REAL;
 
+    /**
+     * @return true if dense
+     */
     public boolean isDense() {
         return ordinal()>=DECIMAL.ordinal();
     }
+    /**
+     * @param it1 range 1
+     * @param it2 range 2
+     * @return intersection
+     */
     public static NumberRange intersection(NumberRange it1,NumberRange it2) {
         int minOrdinal=Math.min(it1.ordinal(),it2.ordinal());
         return values()[minOrdinal];
     }
+    /**
+     * @param it1 range 1
+     * @param it2 range 2
+     * @return union
+     */
     public static NumberRange union(NumberRange it1,NumberRange it2) {
         int maxOrdinal=Math.max(it1.ordinal(),it2.ordinal());
         return values()[maxOrdinal];
     }
+    /**
+     * @param subset subset
+     * @param superset superset
+     * @return true if subset
+     */
     public static boolean isSubsetOf(NumberRange subset,NumberRange superset) {
         return subset.ordinal()<=superset.ordinal();
     }
+    /**
+     * @param n number
+     * @return most specific range
+     */
     public static NumberRange getMostSpecificRange(Number n) {
         if (n instanceof Integer || n instanceof Long || n instanceof BigInteger)
             return INTEGER;

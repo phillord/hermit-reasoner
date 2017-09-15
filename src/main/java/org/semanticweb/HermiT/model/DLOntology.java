@@ -89,7 +89,7 @@ public class DLOntology implements Serializable {
         m_hasNominals=hasNominals;
         m_hasDatatypes=hasDatatypes;
         if (atomicConcepts==null)
-            m_allAtomicConcepts=new TreeSet<>(AtomicConceptComparator.INSTANCE);
+            m_allAtomicConcepts=new TreeSet<>(Comparator.comparing(AtomicConcept::getIRI));
         else
             m_allAtomicConcepts=atomicConcepts;
         int numberOfExternalConcepts=0;
@@ -98,7 +98,7 @@ public class DLOntology implements Serializable {
                 numberOfExternalConcepts++;
         m_numberOfExternalConcepts=numberOfExternalConcepts;
         if (atomicObjectRoles==null)
-            m_allAtomicObjectRoles=new TreeSet<>(AtomicRoleComparator.INSTANCE);
+            m_allAtomicObjectRoles=new TreeSet<>(Comparator.comparing(AtomicRole::getIRI));
         else
             m_allAtomicObjectRoles=atomicObjectRoles;
         if (allComplexObjectRoles==null)
@@ -106,7 +106,7 @@ public class DLOntology implements Serializable {
         else
             m_allComplexObjectRoles=allComplexObjectRoles;
         if (atomicDataRoles==null)
-            m_allAtomicDataRoles=new TreeSet<>(AtomicRoleComparator.INSTANCE);
+            m_allAtomicDataRoles=new TreeSet<>(Comparator.comparing(AtomicRole::getIRI));
         else
             m_allAtomicDataRoles=atomicDataRoles;
         if (allUnknownDatatypeRestrictions==null)
@@ -118,7 +118,7 @@ public class DLOntology implements Serializable {
         else
             m_definedDatatypeIRIs=definedDatatypeIRIs;
         if (individuals==null)
-            m_allIndividuals=new TreeSet<>(IndividualComparator.INSTANCE);
+            m_allIndividuals=new TreeSet<>(Comparator.comparing(Individual::getIRI));
         else
             m_allIndividuals=individuals;
         m_allDescriptionGraphs=new HashSet<>();
@@ -237,6 +237,13 @@ public class DLOntology implements Serializable {
         return m_allComplexObjectRoles;
     }
     /**
+     * @param role role
+     * @return true if complex
+     */
+    public boolean isComplexObjectRole(Role role) {
+        return m_allComplexObjectRoles.contains(role);
+    }
+    /**
      * @return all atomic data roles
      */
     public Set<AtomicRole> getAllAtomicDataRoles() {
@@ -339,6 +346,63 @@ public class DLOntology implements Serializable {
      */
     public Set<String> getDefinedDatatypeIRIs() {
         return m_definedDatatypeIRIs;
+    }
+    protected Set<AtomicConcept> getBodyOnlyAtomicConcepts() {
+        Set<AtomicConcept> bodyOnlyAtomicConcepts=new HashSet<>(m_allAtomicConcepts);
+        for (DLClause dlClause : m_dlClauses)
+            for (int headIndex=0;headIndex<dlClause.getHeadLength();headIndex++) {
+                DLPredicate dlPredicate=dlClause.getHeadAtom(headIndex).getDLPredicate();
+                bodyOnlyAtomicConcepts.remove(dlPredicate);
+                if (dlPredicate instanceof AtLeastConcept)
+                    bodyOnlyAtomicConcepts.remove(((AtLeastConcept)dlPredicate).getToConcept());
+            }
+        return bodyOnlyAtomicConcepts;
+    }
+    protected Set<AtomicRole> computeGraphAtomicRoles() {
+        Set<AtomicRole> graphAtomicRoles=new HashSet<>();
+        for (DescriptionGraph descriptionGraph : m_allDescriptionGraphs)
+            for (int edgeIndex=0;edgeIndex<descriptionGraph.getNumberOfEdges();edgeIndex++) {
+                DescriptionGraph.Edge edge=descriptionGraph.getEdge(edgeIndex);
+                graphAtomicRoles.add(edge.getAtomicRole());
+            }
+        boolean change=true;
+        while (change) {
+            change=false;
+            for (DLClause dlClause : m_dlClauses)
+                if (containsAtomicRoles(dlClause,graphAtomicRoles))
+                    if (addAtomicRoles(dlClause,graphAtomicRoles))
+                        change=true;
+        }
+        return graphAtomicRoles;
+    }
+    protected boolean containsAtomicRoles(DLClause dlClause,Set<AtomicRole> roles) {
+        for (int atomIndex=0;atomIndex<dlClause.getBodyLength();atomIndex++) {
+            DLPredicate dlPredicate=dlClause.getBodyAtom(atomIndex).getDLPredicate();
+            if (dlPredicate instanceof AtomicRole && roles.contains(dlPredicate))
+                return true;
+        }
+        for (int atomIndex=0;atomIndex<dlClause.getHeadLength();atomIndex++) {
+            DLPredicate dlPredicate=dlClause.getHeadAtom(atomIndex).getDLPredicate();
+            if (dlPredicate instanceof AtomicRole && roles.contains(dlPredicate))
+                return true;
+        }
+        return false;
+    }
+    protected boolean addAtomicRoles(DLClause dlClause,Set<AtomicRole> roles) {
+        boolean change=false;
+        for (int atomIndex=0;atomIndex<dlClause.getBodyLength();atomIndex++) {
+            DLPredicate dlPredicate=dlClause.getBodyAtom(atomIndex).getDLPredicate();
+            if (dlPredicate instanceof AtomicRole)
+                if (roles.add((AtomicRole)dlPredicate))
+                    change=true;
+        }
+        for (int atomIndex=0;atomIndex<dlClause.getHeadLength();atomIndex++) {
+            DLPredicate dlPredicate=dlClause.getHeadAtom(atomIndex).getDLPredicate();
+            if (dlPredicate instanceof AtomicRole)
+                if (roles.add((AtomicRole)dlPredicate))
+                    change=true;
+        }
+        return change;
     }
     /**
      * @param prefixes prefixes
@@ -446,48 +510,6 @@ public class DLOntology implements Serializable {
         }
         catch (ClassNotFoundException e) {
             throw new IOException(e);
-        }
-    }
-
-    static class AtomicConceptComparator implements Serializable,Comparator<AtomicConcept> {
-        private static final long serialVersionUID=2386841732225838685L;
-        public static final Comparator<AtomicConcept> INSTANCE=new AtomicConceptComparator();
-
-        @Override
-        public int compare(AtomicConcept o1,AtomicConcept o2) {
-            return o1.getIRI().compareTo(o2.getIRI());
-        }
-
-        protected Object readResolve() {
-            return INSTANCE;
-        }
-    }
-
-    static class AtomicRoleComparator implements Serializable,Comparator<AtomicRole> {
-        private static final long serialVersionUID=3483541702854959793L;
-        public static final Comparator<AtomicRole> INSTANCE=new AtomicRoleComparator();
-
-        @Override
-        public int compare(AtomicRole o1,AtomicRole o2) {
-            return o1.getIRI().compareTo(o2.getIRI());
-        }
-
-        protected Object readResolve() {
-            return INSTANCE;
-        }
-    }
-
-    static class IndividualComparator implements Serializable,Comparator<Individual> {
-        private static final long serialVersionUID=2386841732225838685L;
-        public static final Comparator<Individual> INSTANCE=new IndividualComparator();
-
-        @Override
-        public int compare(Individual o1,Individual o2) {
-            return o1.getIRI().compareTo(o2.getIRI());
-        }
-
-        protected Object readResolve() {
-            return INSTANCE;
         }
     }
 }

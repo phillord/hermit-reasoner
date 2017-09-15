@@ -149,7 +149,9 @@ public class ConsoleTextArea extends JTextArea {
             }
         }
         @Override
-        public void write(char[] buffer,int offset,int count) {
+        public void write(char[] buffer,int _offset,int _count) {
+            int count=_count;
+            int offset=_offset;
             synchronized (lock) {
                 int lastPosition=offset+count;
                 while (offset!=lastPosition) {
@@ -204,6 +206,7 @@ public class ConsoleTextArea extends JTextArea {
                 }
                 string.getChars(0,string.length(),m_buffer,m_firstFreeChar);
                 m_firstFreeChar+=string.length();
+                notifyAll();
             }
         }
         @Override

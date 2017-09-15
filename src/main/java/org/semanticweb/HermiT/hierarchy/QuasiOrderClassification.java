@@ -212,7 +212,8 @@ public class QuasiOrderClassification {
     protected boolean isUnsatisfiable(AtomicConcept concept) {
         return m_knownSubsumptions.getSuccessors(concept).contains(m_bottomElement);
     }
-    protected void readKnownSubsumersFromRootNode(AtomicConcept subconcept,Node checkedNode) {
+    protected void readKnownSubsumersFromRootNode(AtomicConcept subconcept,Node _checkedNode) {
+        Node checkedNode=_checkedNode;
         if (checkedNode.getCanonicalNodeDependencySet().isEmpty()) {
             checkedNode=checkedNode.getCanonicalNode();
             ExtensionTable.Retrieval retrieval=m_tableau.getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);

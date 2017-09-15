@@ -296,6 +296,10 @@ public abstract class ExtensionTable implements Serializable {
          */
         ExtensionTable getExtensionTable();
         /**
+         * @return extension view
+         */
+        View getExtensionView();
+        /**
          * Clear.
          */
         void clear();
@@ -364,6 +368,10 @@ public abstract class ExtensionTable implements Serializable {
         @Override
         public ExtensionTable getExtensionTable() {
             return ExtensionTable.this;
+        }
+        @Override
+        public ExtensionTable.View getExtensionView() {
+            return m_extensionView;
         }
         @Override
         public void clear() {

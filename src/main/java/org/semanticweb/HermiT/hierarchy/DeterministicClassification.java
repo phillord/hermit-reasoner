@@ -19,7 +19,6 @@ package org.semanticweb.HermiT.hierarchy;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -121,7 +120,7 @@ public class DeterministicClassification {
                         allSuccessors.add(successorGraphNode);
                 }
             }
-            Collections.sort(allSuccessors,TopologicalOrderComparator.INSTANCE);
+            Collections.sort(allSuccessors);
             for (int successorIndex=allSuccessors.size()-1;successorIndex>=0;--successorIndex) {
                 GraphNode<T> successorGraphNode=allSuccessors.get(successorIndex);
                 HierarchyNode<T> successorNode=hierarchy.m_nodesByElements.get(successorGraphNode.m_element);
@@ -173,7 +172,7 @@ public class DeterministicClassification {
         }
     }
 
-    static class GraphNode<T> {
+    static class GraphNode<T> implements Comparable<GraphNode<T>> {
         public final T m_element;
         public final Set<T> m_successors;
         public int m_dfsIndex;
@@ -193,16 +192,10 @@ public class DeterministicClassification {
         public boolean isAssignedToSCC() {
             return m_topologicalOrderIndex!=-1;
         }
-    }
-
-    protected static class TopologicalOrderComparator implements Comparator<GraphNode<?>> {
-        public static final TopologicalOrderComparator INSTANCE=new TopologicalOrderComparator();
-
         @Override
-        public int compare(GraphNode<?> o1,GraphNode<?> o2) {
-            return o1.m_topologicalOrderIndex-o2.m_topologicalOrderIndex;
+        public int compareTo(GraphNode<T> o) {
+            return m_topologicalOrderIndex-o.m_topologicalOrderIndex;
         }
-
     }
 
     protected static class DFSIndex {

@@ -21,7 +21,6 @@ import java.io.CharArrayWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,7 +75,7 @@ public class OriginStatsCommand extends AbstractCommand {
         }
         OriginInfo[] originInfosArray=new OriginInfo[originInfos.size()];
         originInfos.values().toArray(originInfosArray);
-        Arrays.sort(originInfosArray,OriginInfoComparator.INSTANCE);
+        Arrays.sort(originInfosArray,OriginStatsCommand::originInfoCompare);
         CharArrayWriter buffer=new CharArrayWriter();
         PrintWriter writer=new PrintWriter(buffer);
         writer.println("Statistics of node origins");
@@ -121,18 +120,13 @@ public class OriginStatsCommand extends AbstractCommand {
         }
     }
 
-    protected static class OriginInfoComparator implements Comparator<OriginInfo> {
-        public static final OriginInfoComparator INSTANCE=new OriginInfoComparator();
-
-        @Override
-        public int compare(OriginInfo o1,OriginInfo o2) {
-            int comparison=o1.m_nodes.size()-o2.m_nodes.size();
-            if (comparison==0) {
-                comparison=o1.m_numberOfNonactiveOccurrences-o2.m_numberOfNonactiveOccurrences;
-                if (comparison==0)
-                    comparison=Printing.ConceptComparator.INSTANCE.compare(o1.m_concept,o2.m_concept);
-            }
-            return comparison;
+    protected static int originInfoCompare(OriginInfo o1,OriginInfo o2) {
+        int comparison=o1.m_nodes.size()-o2.m_nodes.size();
+        if (comparison==0) {
+            comparison=o1.m_numberOfNonactiveOccurrences-o2.m_numberOfNonactiveOccurrences;
+            if (comparison==0)
+                comparison=Printing.conceptCompare(o1.m_concept,o2.m_concept);
         }
+        return comparison;
     }
 }

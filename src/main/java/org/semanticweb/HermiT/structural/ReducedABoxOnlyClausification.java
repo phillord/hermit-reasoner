@@ -97,7 +97,9 @@ public class ReducedABoxOnlyClausification implements OWLAxiomVisitor {
         else
             throw new IllegalArgumentException("Internal error: fresh classes in class assertions are not compatible with incremental ABox loading!");
     }
-    protected Atom getRoleAtom(OWLObjectPropertyExpression objectProperty,Term first,Term second) {
+    protected Atom getRoleAtom(OWLObjectPropertyExpression objectProperty,Term _first,Term _second) {
+        Term first=_first;
+        Term second=_second;
         AtomicRole atomicRole;
         if (objectProperty.isAnonymous()) {
             OWLObjectProperty internalObjectProperty=objectProperty.getNamedProperty();

@@ -17,6 +17,16 @@
 */
 package org.semanticweb.HermiT.datatypes.binarydata;
 
-enum BinaryDataType {
-    BASE_64_BINARY,HEX_BINARY
+/**
+ * Binary data type.
+ */
+public enum BinaryDataType {
+    /**
+     * Base 64.
+     */
+    BASE_64_BINARY,
+    /**
+     * Hex.
+     */
+    HEX_BINARY
 }

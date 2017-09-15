@@ -383,10 +383,9 @@ public class Automaton implements Acceptor, StateMachine, Rational, Cloneable {
     }
 
     @Override
-    public Set<State> steps(Set<State> s, List<?> word) {
-        Iterator<?> it = word.iterator();
-        while (it.hasNext()) {
-            Object o = it.next();
+    public Set<State> steps(Set<State> _s, List<?> word) {
+        Set<State> s = _s;
+        for(Object o: word) {
             s = step(s, o);
             if (s.isEmpty())
                 return s;

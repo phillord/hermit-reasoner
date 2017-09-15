@@ -65,6 +65,54 @@ public class Printing {
         writer.print(string);
     }
     /**
+     * @param collection collection
+     * @param writer writer
+     */
+    public static <T> void printCollection(Collection<T> collection,PrintWriter writer) {
+        for (T object : collection) {
+            writer.print("    ");
+            writer.print(object.toString());
+            writer.println();
+        }
+    }
+    /**
+     * @param in1NotIn2 label 1
+     * @param in2NotIn1 label 2
+     * @param writer writer
+     * @param c1 first collection
+     * @param c2 second collection
+     */
+    public static <T> void diffCollections(String in1NotIn2,String in2NotIn1,PrintWriter writer,Collection<T> c1,Collection<T> c2) {
+        boolean window1Message=false;
+        for (Object object : c1) {
+            if (!c2.contains(object)) {
+                if (!window1Message) {
+                    writer.println("<<<  "+in1NotIn2+":");
+                    window1Message=true;
+                }
+                writer.print("    ");
+                writer.print(object.toString());
+                writer.println();
+            }
+        }
+        if (window1Message)
+            writer.println("--------------------------------------------");
+        boolean window2Message=false;
+        for (Object object : c2) {
+            if (!c1.contains(object)) {
+                if (!window2Message) {
+                    writer.println(">>>  "+in2NotIn1+":");
+                    window2Message=true;
+                }
+                writer.print("    ");
+                writer.print(object.toString());
+                writer.println();
+            }
+        }
+        if (window1Message)
+            writer.println("--------------------------------------------");
+    }
+    /**
      * @param debugger debugger
      * @param node node
      * @param writer writer
@@ -113,11 +161,11 @@ public class Printing {
             return "indirectly by "+(node.getBlocker()==Node.SIGNATURE_CACHE_BLOCKER ? "signature in cache" : Integer.valueOf(node.getBlocker().getNodeID()));
     }
     protected static void printConceptLabel(Debugger debugger,Node node,PrintWriter writer) {
-        TreeSet<AtomicConcept> atomicConceptsCore=new TreeSet<>(ConceptComparator.INSTANCE);
-        TreeSet<AtomicConcept> atomicConceptsNoncore=new TreeSet<>(ConceptComparator.INSTANCE);
-        TreeSet<ExistentialConcept> existentialConcepts=new TreeSet<>(ConceptComparator.INSTANCE);
-        TreeSet<AtomicNegationConcept> negativeConcepts=new TreeSet<>(ConceptComparator.INSTANCE);
-        TreeSet<DataRange> dataRanges=new TreeSet<>(DataRangeComparator.INSTANCE);
+        TreeSet<AtomicConcept> atomicConceptsCore=new TreeSet<>(Printing::conceptCompare);
+        TreeSet<AtomicConcept> atomicConceptsNoncore=new TreeSet<>(Printing::conceptCompare);
+        TreeSet<ExistentialConcept> existentialConcepts=new TreeSet<>(Printing::conceptCompare);
+        TreeSet<AtomicNegationConcept> negativeConcepts=new TreeSet<>(Printing::conceptCompare);
+        TreeSet<DataRange> dataRanges=new TreeSet<>(Printing::dataRangeCompare);
         ExtensionTable.Retrieval retrieval=debugger.getTableau().getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
         retrieval.getBindingsBuffer()[1]=node;
         retrieval.open();
@@ -162,7 +210,7 @@ public class Printing {
         }
     }
     protected static void printEdges(Debugger debugger,Node node,PrintWriter writer) {
-        Map<Node,Set<AtomicRole>> outgoingEdges=new TreeMap<>(NodeComparator.INSTANCE);
+        Map<Node,Set<AtomicRole>> outgoingEdges=new TreeMap<>(Comparator.comparing(Node::getNodeID));
         ExtensionTable.Retrieval retrieval=debugger.getTableau().getExtensionManager().getTernaryExtensionTable().createRetrieval(new boolean[] { false,true,false },ExtensionTable.View.TOTAL);
         retrieval.getBindingsBuffer()[1]=node;
         retrieval.open();
@@ -173,7 +221,7 @@ public class Printing {
                 Node toNode=(Node)retrieval.getTupleBuffer()[2];
                 Set<AtomicRole> set=outgoingEdges.get(toNode);
                 if (set==null) {
-                    set=new TreeSet<>(RoleComparator.INSTANCE);
+                    set=new TreeSet<>(Printing::roleCompare);
                     outgoingEdges.put(toNode,set);
                 }
                 set.add(atomicRole);
@@ -184,7 +232,7 @@ public class Printing {
             writer.println("-- Outgoing edges --------------------------------");
             printEdgeMap(debugger,outgoingEdges,writer);
         }
-        Map<Node,Set<AtomicRole>> incomingEdges=new TreeMap<>(NodeComparator.INSTANCE);
+        Map<Node,Set<AtomicRole>> incomingEdges=new TreeMap<>(Comparator.comparing(Node::getNodeID));
         retrieval=debugger.getTableau().getExtensionManager().getTernaryExtensionTable().createRetrieval(new boolean[] { false,false,true },ExtensionTable.View.TOTAL);
         retrieval.getBindingsBuffer()[2]=node;
         retrieval.open();
@@ -195,7 +243,7 @@ public class Printing {
                 Node fromNode=(Node)retrieval.getTupleBuffer()[1];
                 Set<AtomicRole> set=incomingEdges.get(fromNode);
                 if (set==null) {
-                    set=new TreeSet<>(RoleComparator.INSTANCE);
+                    set=new TreeSet<>(Printing::roleCompare);
                     incomingEdges.put(fromNode,set);
                 }
                 set.add(atomicRole);
@@ -257,207 +305,182 @@ public class Printing {
         }
     }
 
-    /**ConceptComparator*/
-    public static class ConceptComparator implements Comparator<Concept> {
-        /**instance*/
-        public static final ConceptComparator INSTANCE=new ConceptComparator();
-
-        @Override
-        public int compare(Concept c1,Concept c2) {
-            ConceptType type1=getConceptType(c1);
-            ConceptType type2=getConceptType(c2);
-            if (type1!=type2)
-                return type1.getTypeIndex()-type2.getTypeIndex();
-            switch (type1) {
-            case AtomicConcept:
-                return ((AtomicConcept)c1).getIRI().compareTo(((AtomicConcept)c2).getIRI());
-            case AtLeastConcept:
-                {
-                    AtLeastConcept l1=(AtLeastConcept)c1;
-                    AtLeastConcept l2=(AtLeastConcept)c2;
-                    int comparison=RoleComparator.INSTANCE.compare(l1.getOnRole(),l2.getOnRole());
-                    if (comparison!=0)
-                        return comparison;
-                    return compare(l1.getToConcept(),l2.getToConcept());
-                }
-            case ExistsDescriptionGraph:
-                {
-                    ExistsDescriptionGraph g1=(ExistsDescriptionGraph)c1;
-                    ExistsDescriptionGraph g2=(ExistsDescriptionGraph)c2;
-                    return g1.getDescriptionGraph().getName().compareTo(g2.getDescriptionGraph().getName());
-                }
-            case AtomicNegationConcept:
-                return ((AtomicNegationConcept)c1).getNegatedAtomicConcept().getIRI().compareTo(((AtomicNegationConcept)c2).getNegatedAtomicConcept().getIRI());
-            default:
-                throw new IllegalArgumentException();
+    /**@param c1 c1
+     * @param c2 c2
+     * @return comparison*/
+    public static int conceptCompare(Concept c1,Concept c2) {
+        ConceptType type1=getConceptType(c1);
+        ConceptType type2=getConceptType(c2);
+        if (type1!=type2)
+            return type1.getTypeIndex()-type2.getTypeIndex();
+        switch (type1) {
+        case AtomicConcept:
+            return ((AtomicConcept)c1).getIRI().compareTo(((AtomicConcept)c2).getIRI());
+        case AtLeastConcept:
+            {
+                AtLeastConcept l1=(AtLeastConcept)c1;
+                AtLeastConcept l2=(AtLeastConcept)c2;
+                int comparison=roleCompare(l1.getOnRole(),l2.getOnRole());
+                if (comparison!=0)
+                    return comparison;
+                return conceptCompare(l1.getToConcept(),l2.getToConcept());
             }
-        }
-        protected static enum ConceptType {
-            AtomicConcept(0),
-            AtLeastConcept(1),
-            ExistsDescriptionGraph(2), 
-            AtomicNegationConcept(3);
-
-            private final int m_typeIndex;
-            ConceptType(int typeIndex) {
-                m_typeIndex=typeIndex;
+        case ExistsDescriptionGraph:
+            {
+                ExistsDescriptionGraph g1=(ExistsDescriptionGraph)c1;
+                ExistsDescriptionGraph g2=(ExistsDescriptionGraph)c2;
+                return g1.getDescriptionGraph().getName().compareTo(g2.getDescriptionGraph().getName());
             }
-            final int getTypeIndex() {
-                return m_typeIndex;
-            }
-        }
-        protected ConceptType getConceptType(Concept c) {
-            if (c instanceof AtomicConcept)
-                return ConceptType.AtomicConcept;
-            else if (c instanceof AtLeastConcept)
-                return ConceptType.AtLeastConcept;
-            else if (c instanceof ExistsDescriptionGraph)
-                return ConceptType.ExistsDescriptionGraph;
-            else if (c instanceof AtomicNegationConcept)
-                return ConceptType.AtomicNegationConcept;
-            else
-                throw new IllegalArgumentException();
+        case AtomicNegationConcept:
+            return ((AtomicNegationConcept)c1).getNegatedAtomicConcept().getIRI().compareTo(((AtomicNegationConcept)c2).getNegatedAtomicConcept().getIRI());
+        default:
+            throw new IllegalArgumentException();
         }
     }
-    
-    static class DataRangeComparator implements Comparator<DataRange> {
-        public static final DataRangeComparator INSTANCE=new DataRangeComparator();
+    protected static enum ConceptType {
+        AtomicConcept(0),
+        AtLeastConcept(1),
+        ExistsDescriptionGraph(2), 
+        AtomicNegationConcept(3);
 
-        @Override
-        public int compare(DataRange c1,DataRange c2) {
-            DataRangeType type1=getDataRangeType(c1);
-            DataRangeType type2=getDataRangeType(c2);
-            if (type1!=type2)
-                return type1.getTypeIndex()-type2.getTypeIndex();
-            switch (type1) {
-            case DatatypeRestriction:
-                return compareDatatypeRestrictions((DatatypeRestriction)c1,(DatatypeRestriction)c2);
-            case ConstantEnumeration:
-                return compareConstantEnumerations((ConstantEnumeration)c1,(ConstantEnumeration)c2);
-            case AtomicNegationDataRange:
-                {
-                    AtomicNegationDataRange ndr1=(AtomicNegationDataRange)c1;
-                    AtomicNegationDataRange ndr2=(AtomicNegationDataRange)c2;
-                    return compare(ndr1.getNegatedDataRange(),ndr2.getNegatedDataRange());
-                }
-            case InternalDatatype:
-                return ((InternalDatatype)c1).getIRI().compareTo(((InternalDatatype)c2).getIRI());
-            default:
-                throw new IllegalArgumentException();
-            }
+        private final int m_typeIndex;
+        ConceptType(int typeIndex) {
+            m_typeIndex=typeIndex;
         }
-        protected static enum DataRangeType {
-            DatatypeRestriction(0),
-            ConstantEnumeration(1),
-            AtomicNegationDataRange(2), 
-            InternalDatatype(3);
+        final int getTypeIndex() {
+            return m_typeIndex;
+        }
+    }
+    protected static ConceptType getConceptType(Concept c) {
+        if (c instanceof AtomicConcept)
+            return ConceptType.AtomicConcept;
+        else if (c instanceof AtLeastConcept)
+            return ConceptType.AtLeastConcept;
+        else if (c instanceof ExistsDescriptionGraph)
+            return ConceptType.ExistsDescriptionGraph;
+        else if (c instanceof AtomicNegationConcept)
+            return ConceptType.AtomicNegationConcept;
+        else
+            throw new IllegalArgumentException();
+    }
+    /**@param c1 c1
+     * @param c2 c2
+     * @return comparison*/
+    public static int dataRangeCompare(DataRange c1,DataRange c2) {
+        DataRangeType type1=getDataRangeType(c1);
+        DataRangeType type2=getDataRangeType(c2);
+        if (type1!=type2)
+            return type1.getTypeIndex()-type2.getTypeIndex();
+        switch (type1) {
+        case DatatypeRestriction:
+            return compareDatatypeRestrictions((DatatypeRestriction)c1,(DatatypeRestriction)c2);
+        case ConstantEnumeration:
+            return compareConstantEnumerations((ConstantEnumeration)c1,(ConstantEnumeration)c2);
+        case AtomicNegationDataRange:
+            {
+                AtomicNegationDataRange ndr1=(AtomicNegationDataRange)c1;
+                AtomicNegationDataRange ndr2=(AtomicNegationDataRange)c2;
+                return dataRangeCompare(ndr1.getNegatedDataRange(),ndr2.getNegatedDataRange());
+            }
+        case InternalDatatype:
+            return ((InternalDatatype)c1).getIRI().compareTo(((InternalDatatype)c2).getIRI());
+        default:
+            throw new IllegalArgumentException();
+        }
+    }
+    protected static enum DataRangeType {
+        DatatypeRestriction(0),
+        ConstantEnumeration(1),
+        AtomicNegationDataRange(2), 
+        InternalDatatype(3);
 
-            private final int m_typeIndex;
-            DataRangeType(int typeIndex) {
-                m_typeIndex=typeIndex;
-            }
-            final int getTypeIndex() {
-                return m_typeIndex;
-            }
+        private final int m_typeIndex;
+        DataRangeType(int typeIndex) {
+            m_typeIndex=typeIndex;
         }
-        protected DataRangeType getDataRangeType(DataRange dr) {
-            if (dr instanceof DatatypeRestriction)
-                return DataRangeType.DatatypeRestriction;
-            else if (dr instanceof InternalDatatype)
-                return DataRangeType.InternalDatatype; 
-            else if (dr instanceof ConstantEnumeration)
-                return DataRangeType.ConstantEnumeration;
-            else if (dr instanceof AtomicNegationDataRange)
-                return DataRangeType.AtomicNegationDataRange;
-            else
-                throw new IllegalArgumentException();
+        final int getTypeIndex() {
+            return m_typeIndex;
         }
-        protected int compareDatatypeRestrictions(DatatypeRestriction dr1,DatatypeRestriction dr2) {
-            int comparison=dr1.getDatatypeURI().compareTo(dr2.getDatatypeURI());
+    }
+    protected static DataRangeType getDataRangeType(DataRange dr) {
+        if (dr instanceof DatatypeRestriction)
+            return DataRangeType.DatatypeRestriction;
+        else if (dr instanceof InternalDatatype)
+            return DataRangeType.InternalDatatype; 
+        else if (dr instanceof ConstantEnumeration)
+            return DataRangeType.ConstantEnumeration;
+        else if (dr instanceof AtomicNegationDataRange)
+            return DataRangeType.AtomicNegationDataRange;
+        else
+            throw new IllegalArgumentException();
+    }
+    protected static int compareDatatypeRestrictions(DatatypeRestriction dr1,DatatypeRestriction dr2) {
+        int comparison=dr1.getDatatypeURI().compareTo(dr2.getDatatypeURI());
+        if (comparison!=0)
+            return comparison;
+        comparison=dr1.getNumberOfFacetRestrictions()-dr2.getNumberOfFacetRestrictions();
+        if (comparison!=0)
+            return comparison;
+        for (int index=0;index<dr1.getNumberOfFacetRestrictions();index++) {
+            comparison=dr1.getFacetURI(index).compareTo(dr2.getFacetURI(index));
             if (comparison!=0)
                 return comparison;
-            comparison=dr1.getNumberOfFacetRestrictions()-dr2.getNumberOfFacetRestrictions();
+            comparison=compareConstants(dr1.getFacetValue(index),dr2.getFacetValue(index));
             if (comparison!=0)
                 return comparison;
-            for (int index=0;index<dr1.getNumberOfFacetRestrictions();index++) {
-                comparison=dr1.getFacetURI(index).compareTo(dr2.getFacetURI(index));
-                if (comparison!=0)
-                    return comparison;
-                comparison=compareConstants(dr1.getFacetValue(index),dr2.getFacetValue(index));
-                if (comparison!=0)
-                    return comparison;
-            }
+        }
+        return 0;
+    }
+    protected static int compareConstantEnumerations(ConstantEnumeration dve1,ConstantEnumeration dve2) {
+        int comparison=dve1.getNumberOfConstants()-dve2.getNumberOfConstants();
+        if (comparison!=0)
+            return comparison;
+        for (int index=0;index<dve1.getNumberOfConstants();index++) {
+            comparison=compareConstants(dve1.getConstant(index),dve2.getConstant(index));
+            if (comparison!=0)
+                return comparison;
+        }
+        return 0;
+
+    }
+    protected static int compareConstants(Constant c1,Constant c2) {
+        int comparison=c1.getDatatypeURI().compareTo(c2.getDatatypeURI());
+        if (comparison!=0)
+            return comparison;
+        return c1.getLexicalForm().compareTo(c2.getLexicalForm());
+    }
+    protected static int roleCompare(Role ar1,Role ar2) {
+        int type1=getRoleType(ar1);
+        int type2=getRoleType(ar2);
+        if (type1!=type2)
+            return type1-type2;
+        if (type1==0)
+            return ((AtomicRole)ar1).getIRI().compareTo(((AtomicRole)ar2).getIRI());
+        else
+            return ((InverseRole)ar1).getInverseOf().getIRI().compareTo(((InverseRole)ar2).getInverseOf().getIRI());
+    }
+    protected static int getRoleType(Role ar) {
+        if (ar instanceof AtomicRole)
             return 0;
-        }
-        protected int compareConstantEnumerations(ConstantEnumeration dve1,ConstantEnumeration dve2) {
-            int comparison=dve1.getNumberOfConstants()-dve2.getNumberOfConstants();
-            if (comparison!=0)
-                return comparison;
-            for (int index=0;index<dve1.getNumberOfConstants();index++) {
-                comparison=compareConstants(dve1.getConstant(index),dve2.getConstant(index));
-                if (comparison!=0)
-                    return comparison;
-            }
-            return 0;
-
-        }
-        protected int compareConstants(Constant c1,Constant c2) {
-            int comparison=c1.getDatatypeURI().compareTo(c2.getDatatypeURI());
-            if (comparison!=0)
-                return comparison;
-            return c1.getLexicalForm().compareTo(c2.getLexicalForm());
-        }
-    }
-    protected static class RoleComparator implements Comparator<Role> {
-        public static final RoleComparator INSTANCE=new RoleComparator();
-
-        @Override
-        public int compare(Role ar1,Role ar2) {
-            int type1=getRoleType(ar1);
-            int type2=getRoleType(ar2);
-            if (type1!=type2)
-                return type1-type2;
-            if (type1==0)
-                return ((AtomicRole)ar1).getIRI().compareTo(((AtomicRole)ar2).getIRI());
-            else
-                return ((InverseRole)ar1).getInverseOf().getIRI().compareTo(((InverseRole)ar2).getInverseOf().getIRI());
-        }
-        protected int getRoleType(Role ar) {
-            if (ar instanceof AtomicRole)
-                return 0;
-            else
-                return 1;
-        }
+        else
+            return 1;
     }
 
-    protected static class NodeComparator implements Comparator<Node> {
-        public static final NodeComparator INSTANCE=new NodeComparator();
-
-        @Override
-        public int compare(Node o1,Node o2) {
-            return o1.getNodeID()-o2.getNodeID();
-        }
-    }
-
-    /**FactComparator.*/
-    public static class FactComparator implements Comparator<Object[]> {
-        /**instance*/
-        public static final FactComparator INSTANCE=new FactComparator();
-
-        @Override
-        public int compare(Object[] o1,Object[] o2) {
-            int compare=o1.length-o2.length;
+    /**@param o1 o1
+     * @param o2 o2
+     * @return comparison*/
+    public static int factCompare(Object[] o1,Object[] o2) {
+        int compare=o1.length-o2.length;
+        if (compare!=0)
+            return compare;
+        compare=o1[0].toString().compareTo(o2[0].toString());
+        if (compare!=0)
+            return compare;
+        for (int index=1;index<o1.length;index++) {
+            compare=((Node)o1[index]).getNodeID()-((Node)o2[index]).getNodeID();
             if (compare!=0)
                 return compare;
-            compare=o1[0].toString().compareTo(o2[0].toString());
-            if (compare!=0)
-                return compare;
-            for (int index=1;index<o1.length;index++) {
-                compare=((Node)o1[index]).getNodeID()-((Node)o2[index]).getNodeID();
-                if (compare!=0)
-                    return compare;
-            }
-            return 0;
         }
+        return 0;
     }
 }

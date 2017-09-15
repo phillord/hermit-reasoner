@@ -18,7 +18,6 @@
 package org.semanticweb.HermiT.hierarchy;
 
 import java.io.PrintWriter;
-import java.util.Comparator;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -41,7 +40,7 @@ public class HierarchyDumperFSS {
      */
     public void printAtomicConceptHierarchy(Hierarchy<AtomicConcept> atomicConceptHierarchy) {
         for (HierarchyNode<AtomicConcept> node : atomicConceptHierarchy.getAllNodesSet()) {
-            SortedSet<AtomicConcept> equivs=new TreeSet<>(AtomicConceptComparator.INSTANCE);
+            SortedSet<AtomicConcept> equivs=new TreeSet<>(HierarchyDumperFSS::atomicConceptCompare);
             equivs.addAll(node.getEquivalentElements());
             AtomicConcept representative=equivs.first();
             if (equivs.size()>1) {
@@ -83,7 +82,7 @@ public class HierarchyDumperFSS {
      */
     public void printObjectPropertyHierarchy(Hierarchy<Role> objectRoleHierarchy) {
         for (HierarchyNode<Role> node : objectRoleHierarchy.getAllNodesSet()) {
-            SortedSet<Role> equivs=new TreeSet<>(ObjectRoleComparator.INSTANCE);
+            SortedSet<Role> equivs=new TreeSet<>(HierarchyDumperFSS::objectRoleCompare);
             equivs.addAll(node.getEquivalentElements());
             Role representative=equivs.first();
             if (equivs.size()>1) {
@@ -123,7 +122,7 @@ public class HierarchyDumperFSS {
      */
     public void printDataPropertyHierarchy(Hierarchy<AtomicRole> dataRoleHierarchy) {
         for (HierarchyNode<AtomicRole> node : dataRoleHierarchy.getAllNodesSet()) {
-            SortedSet<AtomicRole> equivs=new TreeSet<>(DataRoleComparator.INSTANCE);
+            SortedSet<AtomicRole> equivs=new TreeSet<>(HierarchyDumperFSS::dataRoleCompare);
             equivs.addAll(node.getEquivalentElements());
             AtomicRole representative=equivs.first();
             if (equivs.size()>1) {
@@ -175,75 +174,60 @@ public class HierarchyDumperFSS {
         m_out.print(">");
     }
 
-    protected static class AtomicConceptComparator implements Comparator<AtomicConcept> {
-        public static final AtomicConceptComparator INSTANCE=new AtomicConceptComparator();
-
-        @Override
-        public int compare(AtomicConcept atomicConcept1,AtomicConcept atomicConcept2) {
-            int comparison=getAtomicConceptClass(atomicConcept1)-getAtomicConceptClass(atomicConcept2);
-            if (comparison!=0)
-                return comparison;
-            return atomicConcept1.getIRI().compareTo(atomicConcept2.getIRI());
-        }
-        protected int getAtomicConceptClass(AtomicConcept atomicConcept) {
-            if (AtomicConcept.NOTHING.equals(atomicConcept))
-                return 0;
-            else if (AtomicConcept.THING.equals(atomicConcept))
-                return 1;
-            else
-                return 2;
-        }
+    protected static int atomicConceptCompare(AtomicConcept atomicConcept1,AtomicConcept atomicConcept2) {
+        int comparison=getAtomicConceptClass(atomicConcept1)-getAtomicConceptClass(atomicConcept2);
+        if (comparison!=0)
+            return comparison;
+        return atomicConcept1.getIRI().compareTo(atomicConcept2.getIRI());
+    }
+    protected static int getAtomicConceptClass(AtomicConcept atomicConcept) {
+        if (AtomicConcept.NOTHING.equals(atomicConcept))
+            return 0;
+        else if (AtomicConcept.THING.equals(atomicConcept))
+            return 1;
+        else
+            return 2;
     }
 
-    protected static class ObjectRoleComparator implements Comparator<Role> {
-        public static final ObjectRoleComparator INSTANCE=new ObjectRoleComparator();
-
-        @Override
-        public int compare(Role role1,Role role2) {
-            int comparison=getRoleClass(role1)-getRoleClass(role2);
-            if (comparison!=0)
-                return comparison;
-            comparison=getRoleDirection(role1)-getRoleDirection(role2);
-            if (comparison!=0)
-                return comparison;
-            return getInnerAtomicRole(role1).getIRI().compareTo(getInnerAtomicRole(role2).getIRI());
-        }
-        protected int getRoleClass(Role role) {
-            if (AtomicRole.BOTTOM_OBJECT_ROLE.equals(role))
-                return 0;
-            else if (AtomicRole.TOP_OBJECT_ROLE.equals(role))
-                return 1;
-            else
-                return 2;
-        }
-        protected AtomicRole getInnerAtomicRole(Role role) {
-            if (role instanceof AtomicRole)
-                return (AtomicRole)role;
-            else
-                return ((InverseRole)role).getInverseOf();
-        }
-        protected int getRoleDirection(Role role) {
-            return role instanceof AtomicRole ? 0 : 1;
-        }
+    protected static int objectRoleCompare(Role role1,Role role2) {
+        int comparison=getRoleClass(role1)-getRoleClass(role2);
+        if (comparison!=0)
+            return comparison;
+        comparison=getRoleDirection(role1)-getRoleDirection(role2);
+        if (comparison!=0)
+            return comparison;
+        return getInnerAtomicRole(role1).getIRI().compareTo(getInnerAtomicRole(role2).getIRI());
+    }
+    protected static int getRoleClass(Role role) {
+        if (AtomicRole.BOTTOM_OBJECT_ROLE.equals(role))
+            return 0;
+        else if (AtomicRole.TOP_OBJECT_ROLE.equals(role))
+            return 1;
+        else
+            return 2;
+    }
+    protected static AtomicRole getInnerAtomicRole(Role role) {
+        if (role instanceof AtomicRole)
+            return (AtomicRole)role;
+        else
+            return ((InverseRole)role).getInverseOf();
+    }
+    protected static int getRoleDirection(Role role) {
+        return role instanceof AtomicRole ? 0 : 1;
     }
 
-    protected static class DataRoleComparator implements Comparator<AtomicRole> {
-        public static final DataRoleComparator INSTANCE=new DataRoleComparator();
-
-        @Override
-        public int compare(AtomicRole atomicRole1,AtomicRole atomicRole2) {
-            int comparison=getAtomicRoleClass(atomicRole1)-getAtomicRoleClass(atomicRole2);
-            if (comparison!=0)
-                return comparison;
-            return atomicRole1.getIRI().compareTo(atomicRole2.getIRI());
-        }
-        protected int getAtomicRoleClass(AtomicRole atomicRole) {
-            if (AtomicRole.BOTTOM_DATA_ROLE.equals(atomicRole))
-                return 0;
-            else if (AtomicRole.TOP_DATA_ROLE.equals(atomicRole))
-                return 1;
-            else
-                return 2;
-        }
+    protected static int dataRoleCompare(AtomicRole atomicRole1,AtomicRole atomicRole2) {
+        int comparison=getAtomicRoleClass(atomicRole1)-getAtomicRoleClass(atomicRole2);
+        if (comparison!=0)
+            return comparison;
+        return atomicRole1.getIRI().compareTo(atomicRole2.getIRI());
+    }
+    protected static int getAtomicRoleClass(AtomicRole atomicRole) {
+        if (AtomicRole.BOTTOM_DATA_ROLE.equals(atomicRole))
+            return 0;
+        else if (AtomicRole.TOP_DATA_ROLE.equals(atomicRole))
+            return 1;
+        else
+            return 2;
     }
 }
