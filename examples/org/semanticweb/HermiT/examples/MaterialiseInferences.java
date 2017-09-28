@@ -50,7 +50,7 @@ import org.semanticweb.owlapi.util.InferredSubClassAxiomGenerator;
  * input ontology. Further inferences can be added by adding more InferredAxiomGenerators.  
  */
 public class MaterialiseInferences {
-   
+
     public static void main(String[] args) throws Exception {
     	// First, we create an OWLOntologyManager object. The manager will load and 
     	// save ontologies. 
@@ -104,7 +104,7 @@ public class MaterialiseInferences {
         OWLOntology inferredAxiomsOntology=manager.createOntology();
         // Now we use the inferred ontology generator to fill the ontology. That might take some 
         // time since it involves possibly a lot of calls to the reasoner.    
-        iog.fillOntology(manager, inferredAxiomsOntology);
+        iog.fillOntology(manager.getOWLDataFactory(), inferredAxiomsOntology);
         // Now the axioms are computed and added to the ontology, but we still have to save 
         // the ontology into a file. Since we cannot write to relative files, we have to resolve the 
         // relative path to an absolute one in an OS independent form. We do this by (virtually) creating a 
