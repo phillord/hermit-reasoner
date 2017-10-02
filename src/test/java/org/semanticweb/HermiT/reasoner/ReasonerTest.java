@@ -1392,7 +1392,7 @@ public class ReasonerTest extends AbstractReasonerTest {
             + "ObjectPropertyRange(:p3 :c3)"
             + "ObjectPropertyDomain(:p4 :c4)"
             + "AnnotationPropertyDomain(:p5 :c5)"
-            + "AnnotationPropertyRange(:p6 :c6)";
+            + "AnnotationPropertyRange(:p6 rdf:PlainLiteral)";
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(true);
     }
