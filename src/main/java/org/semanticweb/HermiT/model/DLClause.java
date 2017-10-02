@@ -226,7 +226,7 @@ public class DLClause implements Serializable {
         return buffer.toString();
     }
     public String toString() {
-        return toString(Prefixes.STANDARD_PREFIXES);
+        return toString(Prefixes.ImmutablePrefixes.getStandartPrefixes());
     }
 
     protected static InterningManager<DLClause> s_interningManager=new InterningManager<DLClause>() {

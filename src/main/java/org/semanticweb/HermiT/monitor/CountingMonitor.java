@@ -136,7 +136,7 @@ public class CountingMonitor extends TableauMonitorAdapter {
         m_time=System.currentTimeMillis()-m_problemStartTime;
         String messagePattern=m_reasoningTaskDescription.getMessagePattern();
         List<TestRecord> records = m_testRecords.computeIfAbsent(messagePattern, k -> new ArrayList<>());
-        records.add(new TestRecord(m_time, m_reasoningTaskDescription.getTaskDescription(Prefixes.STANDARD_PREFIXES), m_testResult));
+        records.add(new TestRecord(m_time, m_reasoningTaskDescription.getTaskDescription(Prefixes.ImmutablePrefixes.getStandartPrefixes()), m_testResult));
         m_overallTime+=m_time;
         m_overallNumberOfBacktrackings+=m_numberOfBacktrackings;
         m_numberOfNodes=m_tableau.getNumberOfNodesInTableau()-m_tableau.getNumberOfMergedOrPrunedNodes();
@@ -235,7 +235,7 @@ public class CountingMonitor extends TableauMonitorAdapter {
         return m_numberOfBlockedNodes;
     }
 	public String getTestDescription() {
-	    return m_reasoningTaskDescription.getTaskDescription(Prefixes.STANDARD_PREFIXES);
+	    return m_reasoningTaskDescription.getTaskDescription(Prefixes.ImmutablePrefixes.getStandartPrefixes());
 	}
 	public boolean getTestResult() {
         return m_testResult;

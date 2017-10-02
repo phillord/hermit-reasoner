@@ -122,7 +122,7 @@ public class Atom implements Serializable {
         return buffer.toString();
     }
     public String toString() {
-        return toString(Prefixes.STANDARD_PREFIXES);
+        return toString(Prefixes.ImmutablePrefixes.getStandartPrefixes());
     }
     protected Object readResolve() {
         return s_interningManager.intern(this);

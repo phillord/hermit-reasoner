@@ -33,7 +33,7 @@ public class NegatedAtomicRole {
         return m_negatedAtomicRole;
     }
     public String toString() {
-        return toString(Prefixes.STANDARD_PREFIXES);
+        return toString(Prefixes.ImmutablePrefixes.getStandartPrefixes());
     }
     public String toString(Prefixes prefixes) {
         return "not("+m_negatedAtomicRole.toString(prefixes)+")";

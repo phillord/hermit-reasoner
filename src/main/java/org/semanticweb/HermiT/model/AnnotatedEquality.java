@@ -52,7 +52,7 @@ public class AnnotatedEquality implements DLPredicate,Serializable {
         return s_interningManager.intern(this);
     }
     public String toString() {
-        return toString(Prefixes.STANDARD_PREFIXES);
+        return toString(Prefixes.ImmutablePrefixes.getStandartPrefixes());
     }
     public String toString(Prefixes prefixes) {
         return "==@atMost("+m_cardinality+" "+m_onRole.toString(prefixes)+" "+m_toConcept.toString(prefixes)+")";

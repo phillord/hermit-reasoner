@@ -77,7 +77,7 @@ public class DescriptionGraph implements DLPredicate,Serializable {
         return ns.abbreviateIRI(m_name);
     }
     public String toString() {
-        return toString(Prefixes.STANDARD_PREFIXES);
+        return toString(Prefixes.ImmutablePrefixes.getStandartPrefixes());
     }
     public String getTextRepresentation() {
         StringBuffer buffer=new StringBuffer();

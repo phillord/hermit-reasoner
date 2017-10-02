@@ -37,7 +37,7 @@ public class Individual extends Term {
         return m_uri.startsWith("internal:anonymous#");
     }
     public String toString() {
-        return toString(Prefixes.STANDARD_PREFIXES);
+        return toString(Prefixes.ImmutablePrefixes.getStandartPrefixes());
     }
     protected Object readResolve() {
         return s_interningManager.intern(this);

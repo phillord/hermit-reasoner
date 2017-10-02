@@ -213,7 +213,7 @@ public abstract class AbstractOntologyTest extends AbstractHermiTTest {
         return m_dataFactory.getOWLLiteral(lexicalForm,languageTag);
     }
     protected OWLLiteral TL(String lexicalForm,String datatypeURI) {
-        return m_dataFactory.getOWLLiteral(lexicalForm,m_dataFactory.getOWLDatatype(IRI.create(Prefixes.STANDARD_PREFIXES.expandAbbreviatedIRI(datatypeURI))));
+        return m_dataFactory.getOWLLiteral(lexicalForm,m_dataFactory.getOWLDatatype(IRI.create(Prefixes.ImmutablePrefixes.getStandartPrefixes().expandAbbreviatedIRI(datatypeURI))));
     }
     protected OWLAnonymousIndividual AI(String id) {
         return m_dataFactory.getOWLAnonymousIndividual(id);

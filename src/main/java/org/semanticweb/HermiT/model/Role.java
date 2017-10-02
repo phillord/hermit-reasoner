@@ -31,6 +31,6 @@ public abstract class Role implements Serializable {
     public abstract Atom getRoleAssertion(Term term0,Term term1);
     public abstract String toString(Prefixes prefixes);
     public String toString() {
-        return toString(Prefixes.STANDARD_PREFIXES);
+        return toString(Prefixes.ImmutablePrefixes.getStandartPrefixes());
     }
 }

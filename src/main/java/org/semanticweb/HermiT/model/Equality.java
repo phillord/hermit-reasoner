@@ -41,7 +41,7 @@ public class Equality implements DLPredicate,Serializable {
         return toString(prefixes);
     }
     public String toString() {
-        return toString(Prefixes.STANDARD_PREFIXES);
+        return toString(Prefixes.ImmutablePrefixes.getStandartPrefixes());
     }
     protected Object readResolve() {
         return INSTANCE;

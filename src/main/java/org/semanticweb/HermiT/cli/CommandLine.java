@@ -753,7 +753,7 @@ public class CommandLine {
 //                    if (!ignoreOntologyPrefixes) {
 //                        SimpleRenderer renderer=new SimpleRenderer();
 //                        renderer.setPrefixesFromOntologyFormat(ontology, ontologyManager, true);
-//                        ToStringRenderer.getInstance().setRenderer(renderer);
+//                        ToStringRenderer.getStandartPrefixes().setRenderer(renderer);
 //                    }
                     long parseTime=System.currentTimeMillis()-startTime;
                     status.log(2,"Ontology parsed in "+String.valueOf(parseTime)+" msec.");

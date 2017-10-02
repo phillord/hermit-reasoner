@@ -278,7 +278,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
             }
         }
         public String toString() {
-            return toString(Prefixes.STANDARD_PREFIXES);
+            return toString(Prefixes.ImmutablePrefixes.getStandartPrefixes());
         }
     }
 
@@ -335,7 +335,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
             return buffer.toString();
         }
         public String toString() {
-            return toString(Prefixes.STANDARD_PREFIXES);
+            return toString(Prefixes.ImmutablePrefixes.getStandartPrefixes());
         }
     }
 
@@ -343,7 +343,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
     public abstract static class Derivation implements Serializable {
         public abstract String toString(Prefixes prefixes);
         public String toString() {
-            return toString(Prefixes.STANDARD_PREFIXES);
+            return toString(Prefixes.ImmutablePrefixes.getStandartPrefixes());
         }
         public abstract int getNumberOfPremises();
         public abstract Fact getPremise(int premiseIndex);

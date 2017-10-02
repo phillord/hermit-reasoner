@@ -431,7 +431,7 @@ public class DLOntology implements Serializable {
         return stringBuffer.toString();
     }
     public String toString() {
-        return toString(Prefixes.STANDARD_PREFIXES);
+        return toString(Prefixes.ImmutablePrefixes.getStandartPrefixes());
     }
     public void save(File file) throws IOException {
         OutputStream outputStream=new BufferedOutputStream(new FileOutputStream(file));

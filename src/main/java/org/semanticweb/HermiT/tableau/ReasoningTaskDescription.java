@@ -65,7 +65,7 @@ public class ReasoningTaskDescription {
         return m_messagePattern;
     }
     public String toString() {
-        return getTaskDescription(Prefixes.STANDARD_PREFIXES);
+        return getTaskDescription(Prefixes.ImmutablePrefixes.getStandartPrefixes());
     }
     
     public static ReasoningTaskDescription isABoxSatisfiable() {

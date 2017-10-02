@@ -60,7 +60,7 @@ public class Prefixes implements Serializable {
         s_semanticWebPrefixes.put("swrlx:","http://www.w3.org/2003/11/swrlx#");
         s_semanticWebPrefixes.put("ruleml:","http://www.w3.org/2003/11/ruleml#");
     }
-    public static final Prefixes STANDARD_PREFIXES=new ImmutablePrefixes(s_semanticWebPrefixes);
+    //public static final Prefixes Prefixes.ImmutablePrefixes.getStandartPrefixes()=new ImmutablePrefixes(s_semanticWebPrefixes);
 
     protected final Map<String,String> m_prefixIRIsByPrefixName;
     protected final Map<String,String> m_prefixNamesByPrefixIRI;
@@ -265,8 +265,14 @@ public class Prefixes implements Serializable {
 
     public static class ImmutablePrefixes extends Prefixes {
         private static final long serialVersionUID=8517988865445255837L;
+        private static final ImmutablePrefixes STANDARD_PREFIXES = new ImmutablePrefixes(s_semanticWebPrefixes);
 
-        public ImmutablePrefixes(Map<String,String> initialPrefixes) {
+        public static ImmutablePrefixes getStandartPrefixes()
+        {
+            return STANDARD_PREFIXES;
+        }
+
+        private ImmutablePrefixes(Map<String,String> initialPrefixes) {
             for (Map.Entry<String,String> entry : initialPrefixes.entrySet())
                 super.declarePrefixRaw(entry.getKey(),entry.getValue());
             buildPrefixIRIMatchingPattern();

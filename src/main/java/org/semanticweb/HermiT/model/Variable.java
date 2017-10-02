@@ -34,7 +34,7 @@ public class Variable extends Term {
         return m_name;
     }
     public String toString() {
-        return toString(Prefixes.STANDARD_PREFIXES);
+        return toString(Prefixes.ImmutablePrefixes.getStandartPrefixes());
     }
     public String toString(Prefixes prefixes) {
         return m_name;

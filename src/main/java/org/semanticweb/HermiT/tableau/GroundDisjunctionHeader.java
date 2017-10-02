@@ -130,7 +130,7 @@ public final class GroundDisjunctionHeader {
         return buffer.toString();
     }
     public String toString() {
-        return toString(Prefixes.STANDARD_PREFIXES);
+        return toString(Prefixes.ImmutablePrefixes.getStandartPrefixes());
     }
 
     protected static class DisjunctIndexWithBacktrackings {

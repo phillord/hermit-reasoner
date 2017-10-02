@@ -68,7 +68,7 @@ public abstract class DatatypeChecker<NT> implements Serializable {
         m_numberOfEntries=0;
     }
     public String toString() {
-        return toString(Prefixes.STANDARD_PREFIXES);
+        return toString(Prefixes.ImmutablePrefixes.getStandartPrefixes());
     }
     public String toString(Prefixes prefixes) {
         StringBuffer buffer=new StringBuffer();
@@ -331,7 +331,7 @@ public abstract class DatatypeChecker<NT> implements Serializable {
             return m_unequalToDirected;
         }
         public String toString() {
-            return toString(Prefixes.STANDARD_PREFIXES);
+            return toString(Prefixes.ImmutablePrefixes.getStandartPrefixes());
         }
         public String toString(Prefixes prefixes) {
             StringBuffer buffer=new StringBuffer();

@@ -49,7 +49,7 @@ public class Constant extends Term {
         return "internal:anonymous-constants".equals(m_datatypeURI);
     }
     public String toString() {
-        return toString(Prefixes.STANDARD_PREFIXES);
+        return toString(Prefixes.ImmutablePrefixes.getStandartPrefixes());
     }
     public String toString(Prefixes prefixes) {
         StringBuffer buffer=new StringBuffer();
