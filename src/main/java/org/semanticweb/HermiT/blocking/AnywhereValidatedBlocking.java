@@ -333,7 +333,7 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
                 return 0;
             if (that==null)
                 throw new NullPointerException("Comparing to a null object is illegal. ");
-            if (this.m_numberOfViolations==that.m_numberOfViolations)
+            if (this.m_numberOfViolations.equals(that.m_numberOfViolations))
                 return m_violatedConstraint.compareTo(that.m_violatedConstraint);
             else
                 return that.m_numberOfViolations-this.m_numberOfViolations;

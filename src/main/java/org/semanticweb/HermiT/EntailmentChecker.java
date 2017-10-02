@@ -708,8 +708,8 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
             }
             else {
                 nodes.add(node.asOWLAnonymousIndividual());
-                if (nodelLabels.containsKey(node)) {
-                    nodelLabels.get(node).add(axiom.getClassExpression());
+                if (nodelLabels.containsKey(node.asOWLAnonymousIndividual())) {
+                    nodelLabels.get(node.asOWLAnonymousIndividual()).add(axiom.getClassExpression());
                 }
                 else {
                     Set<OWLClassExpression> label= new HashSet<>();

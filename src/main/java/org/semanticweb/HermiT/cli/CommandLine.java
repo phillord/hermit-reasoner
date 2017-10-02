@@ -851,7 +851,7 @@ class Option {
         }
         String curGroup=null;
         for (Option o : opts) {
-            if (o.group!=curGroup) {
+            if (o.group!=null) {
                 curGroup=o.group;
                 out.append(System.getProperty("line.separator"));
                 if (o.group!=null) {
@@ -862,7 +862,7 @@ class Option {
             if (o.optChar<256) {
                 out.append("  -");
                 out.appendCodePoint(o.optChar);
-                if (o.longStr!=null&&o.longStr!="") {
+                if (o.longStr!=null&& !o.longStr.equals("")) {
                     out.append(", ");
                 }
                 else {
@@ -873,7 +873,7 @@ class Option {
                 out.append("      ");
             }
             int fieldLeft=fieldWidth+1;
-            if (o.longStr!=null&&o.longStr!="") {
+            if (o.longStr!=null&& !o.longStr.equals("")) {
                 String s=o.getLongOptExampleStr();
                 out.append(s);
                 fieldLeft-=s.length();
