@@ -186,8 +186,7 @@ public class OWLNormalization {
         m_axioms.m_simpleObjectPropertyInclusions.add(new OWLObjectPropertyExpression[] { subObjectPropertyExpression,superObjectPropertyExpression });
     }
     protected void addInclusion(OWLObjectPropertyExpression[] subObjectPropertyExpressions,OWLObjectPropertyExpression superObjectPropertyExpression) {
-        for (int index=subObjectPropertyExpressions.length-1;index>=0;--index)
-            subObjectPropertyExpressions[index]=subObjectPropertyExpressions[index];
+        System.arraycopy(subObjectPropertyExpressions, 0, subObjectPropertyExpressions, 0, subObjectPropertyExpressions.length - 1 + 1);
         m_axioms.m_complexObjectPropertyInclusions.add(new OWLAxioms.ComplexObjectPropertyInclusion(subObjectPropertyExpressions,superObjectPropertyExpression));
     }
     protected void addInclusion(OWLDataPropertyExpression subDataPropertyExpression,OWLDataPropertyExpression superDataPropertyExpression) {

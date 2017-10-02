@@ -903,11 +903,11 @@ public class BlockingValidator {
                 return extensionManager.containsTuple(m_assertionBuffer);
         }
         public String toString() {
-            String result="";
+            StringBuilder result= new StringBuilder();
             for (Object o : m_assertionBuffer) {
-                result+=" "+o.toString();
+                result.append(" ").append(o.toString());
             }
-            return result;
+            return result.toString();
         }
     }
 

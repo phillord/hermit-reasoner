@@ -886,7 +886,7 @@ public class DLClauseEvaluator implements Serializable {
                     Term term=atom.getArgument(argumentIndex);
                     if (term instanceof Variable) {
                         if (m_boundSoFar.contains(term))
-                            bindingPositions[argumentIndex+1]=m_variables.indexOf((Variable)term);
+                            bindingPositions[argumentIndex+1]=m_variables.indexOf(term);
                         else
                             bindingPositions[argumentIndex+1]=-1;
                     }

@@ -568,14 +568,14 @@ class ValidatedBlockersCache {
         return hashCode&(tableLength-1);
     }
     public String toString() {
-        String buckets="";
+        StringBuilder buckets= new StringBuilder();
         for (int i=0;i<m_buckets.length;i++) {
             CacheEntry entry=m_buckets[i];
             if (entry!=null) {
-                buckets+="Bucket "+i+": ["+entry.toString()+"] ";
+                buckets.append("Bucket ").append(i).append(": [").append(entry.toString()).append("] ");
             }
         }
-        return buckets;
+        return buckets.toString();
     }
 
     public static class CacheEntry implements Serializable {
@@ -598,11 +598,11 @@ class ValidatedBlockersCache {
             return m_nodes.add(node);
         }
         public String toString() {
-            String nodes="HashCode: "+m_hashCode+" Nodes: ";
+            StringBuilder nodes= new StringBuilder("HashCode: " + m_hashCode + " Nodes: ");
             for (Node n : m_nodes) {
-                nodes+=n.getNodeID()+" ";
+                nodes.append(n.getNodeID()).append(" ");
             }
-            return nodes;
+            return nodes.toString();
         }
     }
 }

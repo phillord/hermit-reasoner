@@ -172,7 +172,7 @@ public class Reasoner implements OWLReasoner {
      *            - the ontology that should be loaded by the reasoner
      */
     public Reasoner(OWLOntology rootOntology) {
-        this(new Configuration(),rootOntology,(Set<DescriptionGraph>)null);
+        this(new Configuration(),rootOntology, null);
     }
 
     /**
@@ -184,7 +184,7 @@ public class Reasoner implements OWLReasoner {
      *            - the ontology that should be loaded by the reasoner
      */
     public Reasoner(Configuration configuration,OWLOntology rootOntology) {
-        this(configuration,rootOntology,(Set<DescriptionGraph>)null);
+        this(configuration,rootOntology, null);
     }
 
     /**
@@ -472,11 +472,11 @@ public class Reasoner implements OWLReasoner {
                     }
                 } else if (axiom instanceof OWLDeclarationAxiom) {
                     OWLEntity entity=((OWLDeclarationAxiom)axiom).getEntity();
-                    if (entity.isOWLClass() && !(isDefined((OWLClass)entity) || Prefixes.isInternalIRI(((OWLClass)entity).getIRI().toString())))
+                    if (entity.isOWLClass() && !(isDefined((OWLClass)entity) || Prefixes.isInternalIRI(entity.getIRI().toString())))
                         return false;
-                    else if (entity.isOWLObjectProperty() && !(isDefined((OWLObjectProperty)entity) || Prefixes.isInternalIRI(((OWLObjectProperty)entity).getIRI().toString())))
+                    else if (entity.isOWLObjectProperty() && !(isDefined((OWLObjectProperty)entity) || Prefixes.isInternalIRI(entity.getIRI().toString())))
                         return false;
-                    else if (entity.isOWLDataProperty() && !(isDefined((OWLDataProperty)entity) || Prefixes.isInternalIRI(((OWLDataProperty)entity).getIRI().toString())))
+                    else if (entity.isOWLDataProperty() && !(isDefined((OWLDataProperty)entity) || Prefixes.isInternalIRI(entity.getIRI().toString())))
                         return false;
                 }
             }
@@ -1092,8 +1092,7 @@ public class Reasoner implements OWLReasoner {
         HierarchyNode<Role> node=getHierarchyNode(propertyExpression);
         Set<HierarchyNode<Role>> result= new HashSet<>();
         if (direct)
-            for (HierarchyNode<Role> n : node.getParentNodes())
-                result.add(n);
+            result.addAll(node.getParentNodes());
         else {
             result=node.getAncestorNodes();
             result.remove(node);
@@ -1104,8 +1103,7 @@ public class Reasoner implements OWLReasoner {
         HierarchyNode<Role> node=getHierarchyNode(propertyExpression);
         Set<HierarchyNode<Role>> result= new HashSet<>();
         if (direct)
-            for (HierarchyNode<Role> n : node.getChildNodes())
-                result.add(n);
+            result.addAll(node.getChildNodes());
         else {
             result=node.getDescendantNodes();
             result.remove(node);

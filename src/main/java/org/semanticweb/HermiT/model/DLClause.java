@@ -120,7 +120,7 @@ public class DLClause implements Serializable {
                     DLPredicate bodyPredicate=bodyAtom.getDLPredicate();
                     if (bodyAtom.getArity()==1 
                             && bodyPredicate instanceof AtomicConcept 
-                            && ((AtomicConcept)bodyPredicate).equals(AtomicConcept.INTERNAL_NAMED))
+                            && bodyPredicate.equals(AtomicConcept.INTERNAL_NAMED))
                         return false;
                 }
             }

@@ -17,12 +17,7 @@
 */
 package org.semanticweb.HermiT.datatypes.rdfplainliteral;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.datatypes.DatatypeHandler;
@@ -68,8 +63,7 @@ public class RDFPlainLiteralDatatypeHandler implements DatatypeHandler {
         for (String[] anInitializer : initializer) {
             String datatype1URI = anInitializer[0];
             Set<String> set = new HashSet<String>();
-            for (int datatype2Index = 1; datatype2Index < anInitializer.length; datatype2Index++)
-                set.add(anInitializer[datatype2Index]);
+            set.addAll(Arrays.asList(anInitializer).subList(1, anInitializer.length));
             s_datatypeSupersets.put(datatype1URI, set);
         }
     }

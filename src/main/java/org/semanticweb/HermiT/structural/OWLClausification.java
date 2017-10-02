@@ -620,7 +620,7 @@ public class OWLClausification {
             }
             else {
                 if (!literalRange.isAlwaysFalse())
-                    m_headAtoms.add(Atom.create((DLPredicate)literalRange,y));
+                    m_headAtoms.add(Atom.create(literalRange,y));
             }
         }
         public void visit(OWLDataHasValue object) {
@@ -650,7 +650,7 @@ public class OWLClausification {
                 }
                 else {
                     if (!negatedDataRange.isAlwaysFalse())
-                        m_headAtoms.add(Atom.create((DLPredicate)negatedDataRange,yVars[i]));
+                        m_headAtoms.add(Atom.create(negatedDataRange,yVars[i]));
                 }
             }
             for (int i=0;i<yVars.length;i++)
@@ -706,7 +706,7 @@ public class OWLClausification {
 
         public void visit(OWLDatatype dt) {
             LiteralDataRange literalRange=m_dataRangeConverter.convertDataRange(dt);
-            m_headAtoms.add(Atom.create((DLPredicate)literalRange,X));
+            m_headAtoms.add(Atom.create(literalRange,X));
         }
         public void visit(OWLDataIntersectionOf dr) {
             throw new IllegalStateException("Internal error: invalid normal form.");
@@ -728,20 +728,20 @@ public class OWLClausification {
                 }
                 else {
                     if (!literalRange.isAlwaysFalse())
-                        m_headAtoms.add(Atom.create((DLPredicate)literalRange,X));
+                        m_headAtoms.add(Atom.create(literalRange,X));
                 }
             }
         }
         public void visit(OWLDataOneOf object) {
             LiteralDataRange literalRange=m_dataRangeConverter.convertDataRange(object);
-            m_headAtoms.add(Atom.create((DLPredicate)literalRange,X));
+            m_headAtoms.add(Atom.create(literalRange,X));
         }
         public void visit(OWLFacetRestriction node) {
             throw new IllegalStateException("Internal error: Invalid normal form. ");
         }
         public void visit(OWLDatatypeRestriction node) {
             LiteralDataRange literalRange=m_dataRangeConverter.convertDataRange(node);
-            m_headAtoms.add(Atom.create((DLPredicate)literalRange,X));
+            m_headAtoms.add(Atom.create(literalRange,X));
         }
         public void visit(OWLLiteral node) {
             throw new IllegalStateException("Internal error: Invalid normal form. ");
@@ -1050,7 +1050,7 @@ public class OWLClausification {
         public Atom visit(SWRLDataRangeAtom atom) {
             Variable variable=toVariable(atom.getArgument());
             LiteralDataRange literalRange=m_dataRangeConverter.convertDataRange(atom.getPredicate());
-            return Atom.create((DLPredicate)literalRange,variable);
+            return Atom.create(literalRange,variable);
         }
         public Atom visit(SWRLObjectPropertyAtom atom) {
             Variable variable1=toVariable(atom.getFirstArgument());

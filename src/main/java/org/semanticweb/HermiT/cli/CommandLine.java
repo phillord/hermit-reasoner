@@ -838,7 +838,7 @@ class Option {
     public String getLongOptExampleStr() {
         if (longStr==null||longStr.equals(""))
             return "";
-        return new String("--"+longStr+(arg==Arg.NONE ? "" : arg==Arg.OPTIONAL ? "[="+metavar+"]" : "="+metavar));
+        return "--" + longStr + (arg == Arg.NONE ? "" : arg == Arg.OPTIONAL ? "[=" + metavar + "]" : "=" + metavar);
     }
 
     public static String formatOptionHelp(Option[] opts) {
@@ -855,7 +855,7 @@ class Option {
                 curGroup=o.group;
                 out.append(System.getProperty("line.separator"));
                 if (o.group!=null) {
-                    out.append(curGroup+":");
+                    out.append(curGroup).append(":");
                     out.append(System.getProperty("line.separator"));
                 }
             }

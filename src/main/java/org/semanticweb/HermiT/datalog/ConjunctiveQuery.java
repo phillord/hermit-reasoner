@@ -134,7 +134,7 @@ public class ConjunctiveQuery {
         }
         public int execute(int programCounter) {
             for (int copyIndex=m_copyAnswers.length-1;copyIndex>=0;--copyIndex)
-                m_resultBuffer[m_copyAnswers[copyIndex][1]]=m_nodesToTerms.get((Node)m_valuesBuffer[m_copyAnswers[copyIndex][0]]);
+                m_resultBuffer[m_copyAnswers[copyIndex][1]]=m_nodesToTerms.get(m_valuesBuffer[m_copyAnswers[copyIndex][0]]);
             m_queryResultCollector[0].processResult(m_conjunctiveQuery,m_resultBuffer);
             return programCounter+1;
         }
