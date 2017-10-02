@@ -154,7 +154,7 @@ public class SubtreeViewer extends JFrame {
         m_subtreeTreeModel.refresh();
     }
     public void findNode(Node node) {
-        List<Node> pathToRoot=new ArrayList<Node>();
+        List<Node> pathToRoot= new ArrayList<>();
         Node currentNode=node;
         while (currentNode!=null && currentNode!=m_subtreeTreeModel.getRoot()) {
             pathToRoot.add(currentNode);

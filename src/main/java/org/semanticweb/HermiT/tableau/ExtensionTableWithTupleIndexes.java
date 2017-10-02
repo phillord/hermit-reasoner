@@ -102,8 +102,8 @@ public class ExtensionTableWithTupleIndexes extends ExtensionTable {
         for (int index=m_tupleIndexes.length-1;index>=0;--index) {
             int[] indexingSequence=m_tupleIndexes[index].getIndexingSequence();
             int boundPrefixSize=0;
-            for (int position=0;position<indexingSequence.length;position++)
-                if (bindingPositions[indexingSequence[position]]!=-1)
+            for (int anIndexingSequence : indexingSequence)
+                if (bindingPositions[anIndexingSequence] != -1)
                     boundPrefixSize++;
                 else
                     break;
@@ -243,8 +243,8 @@ public class ExtensionTableWithTupleIndexes extends ExtensionTable {
     }
     protected static int[] createSelectionArray(int[] bindingPositions,int[] indexingSequence) {
         int boundPrefixLength=0;
-        for (int index=0;index<indexingSequence.length;index++)
-            if (bindingPositions[indexingSequence[index]]!=-1)
+        for (int anIndexingSequence : indexingSequence)
+            if (bindingPositions[anIndexingSequence] != -1)
                 boundPrefixLength++;
             else
                 break;

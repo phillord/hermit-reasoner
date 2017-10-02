@@ -44,7 +44,7 @@ import org.semanticweb.HermiT.monitor.TableauMonitor;
 public abstract class ExtensionTable implements Serializable {
     private static final long serialVersionUID=-5029938218056017193L;
 
-    public static enum View { EXTENSION_THIS,EXTENSION_OLD,DELTA_OLD,TOTAL };
+    public enum View { EXTENSION_THIS,EXTENSION_OLD,DELTA_OLD,TOTAL }
 
     protected final Tableau m_tableau;
     protected final TableauMonitor m_tableauMonitor;
@@ -200,7 +200,7 @@ public abstract class ExtensionTable implements Serializable {
         return true;
     }
 
-    public static interface Retrieval {
+    public interface Retrieval {
         ExtensionTable getExtensionTable();
         View getExtensionView();
         void clear();
@@ -322,7 +322,7 @@ public abstract class ExtensionTable implements Serializable {
         }
     }
 
-    protected static interface DependencySetManager {
+    protected interface DependencySetManager {
         DependencySet getDependencySet(int tupleIndex);
         void setDependencySet(int tupleIndex,DependencySet dependencySet);
         void forgetDependencySet(int tupleIndex);
@@ -367,7 +367,7 @@ public abstract class ExtensionTable implements Serializable {
         }
     }
 
-    protected static interface CoreManager {
+    protected interface CoreManager {
         boolean isCore(int tupleIndex);
         void addCore(int tupleIndex);
         void setCore(int tupleIndex,boolean isCore);

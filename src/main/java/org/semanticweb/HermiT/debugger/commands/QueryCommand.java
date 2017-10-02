@@ -104,7 +104,7 @@ public class QueryCommand extends AbstractCommand {
             ExtensionTable.Retrieval retrieval=extensionTable.createRetrieval(boundPositions,ExtensionTable.View.TOTAL);
             System.arraycopy(tuple,0,retrieval.getBindingsBuffer(),0,tuple.length);
             retrieval.open();
-            Set<Object[]> facts=new TreeSet<Object[]>(Printing.FactComparator.INSTANCE);
+            Set<Object[]> facts= new TreeSet<>(Printing.FactComparator.INSTANCE);
             Object[] tupleBuffer=retrieval.getTupleBuffer();
             while (!retrieval.afterLast()) {
                 facts.add(tupleBuffer.clone());

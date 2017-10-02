@@ -36,12 +36,12 @@ public class BinaryDataDatatypeHandler implements DatatypeHandler {
     protected static final ValueSpaceSubset HEX_BINARY_ALL=new BinaryDataValueSpaceSubset(new BinaryDataLengthInterval(BinaryDataType.HEX_BINARY,0,Integer.MAX_VALUE));
     protected static final ValueSpaceSubset BASE_64_BINARY_ALL=new BinaryDataValueSpaceSubset(new BinaryDataLengthInterval(BinaryDataType.BASE_64_BINARY,0,Integer.MAX_VALUE));
     protected static final ValueSpaceSubset EMPTY=new BinaryDataValueSpaceSubset();
-    protected static final Set<String> s_managedDatatypeURIs=new HashSet<String>();
+    protected static final Set<String> s_managedDatatypeURIs= new HashSet<>();
     static {
         s_managedDatatypeURIs.add(XSD_HEX_BINARY);
         s_managedDatatypeURIs.add(XSD_BASE_64_BINARY);
     }
-    protected static final Set<String> s_supportedFacetURIs=new HashSet<String>();
+    protected static final Set<String> s_supportedFacetURIs= new HashSet<>();
     static {
         s_supportedFacetURIs.add(XSD_NS+"minLength");
         s_supportedFacetURIs.add(XSD_NS+"maxLength");
@@ -103,11 +103,10 @@ public class BinaryDataDatatypeHandler implements DatatypeHandler {
             else {
                 BinaryDataValueSpaceSubset doubleSubset=(BinaryDataValueSpaceSubset)valueSpaceSubset;
                 List<BinaryDataLengthInterval> oldIntervals=doubleSubset.m_intervals;
-                List<BinaryDataLengthInterval> newIntervals=new ArrayList<BinaryDataLengthInterval>();
-                for (int index=0;index<oldIntervals.size();index++) {
-                    BinaryDataLengthInterval oldInterval=oldIntervals.get(index);
-                    BinaryDataLengthInterval intersection=oldInterval.intersectWith(interval);
-                    if (intersection!=null)
+                List<BinaryDataLengthInterval> newIntervals= new ArrayList<>();
+                for (BinaryDataLengthInterval oldInterval : oldIntervals) {
+                    BinaryDataLengthInterval intersection = oldInterval.intersectWith(interval);
+                    if (intersection != null)
                         newIntervals.add(intersection);
                 }
                 if (newIntervals.isEmpty())
@@ -136,17 +135,16 @@ public class BinaryDataDatatypeHandler implements DatatypeHandler {
                 if (interval.m_maxLength!=Integer.MAX_VALUE)
                     complementInterval2=new BinaryDataLengthInterval(binaryDataType,interval.m_maxLength+1,Integer.MAX_VALUE);
                 List<BinaryDataLengthInterval> oldIntervals=doubleSubset.m_intervals;
-                List<BinaryDataLengthInterval> newIntervals=new ArrayList<BinaryDataLengthInterval>();
-                for (int index=0;index<oldIntervals.size();index++) {
-                    BinaryDataLengthInterval oldInterval=oldIntervals.get(index);
-                    if (complementInterval1!=null) {
-                        BinaryDataLengthInterval intersection=oldInterval.intersectWith(complementInterval1);
-                        if (intersection!=null)
+                List<BinaryDataLengthInterval> newIntervals= new ArrayList<>();
+                for (BinaryDataLengthInterval oldInterval : oldIntervals) {
+                    if (complementInterval1 != null) {
+                        BinaryDataLengthInterval intersection = oldInterval.intersectWith(complementInterval1);
+                        if (intersection != null)
                             newIntervals.add(intersection);
                     }
-                    if (complementInterval2!=null) {
-                        BinaryDataLengthInterval intersection=oldInterval.intersectWith(complementInterval2);
-                        if (intersection!=null)
+                    if (complementInterval2 != null) {
+                        BinaryDataLengthInterval intersection = oldInterval.intersectWith(complementInterval2);
+                        if (intersection != null)
                             newIntervals.add(intersection);
                     }
                 }

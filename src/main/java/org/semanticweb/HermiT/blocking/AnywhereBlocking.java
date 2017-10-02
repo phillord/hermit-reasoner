@@ -255,14 +255,14 @@ class BlockersCache implements Serializable {
     }
     protected void resize(int newCapacity) {
         CacheEntry[] newBuckets=new CacheEntry[newCapacity];
-        for (int i=0;i<m_buckets.length;i++) {
-            CacheEntry entry=m_buckets[i];
-            while (entry!=null) {
-                CacheEntry nextEntry=entry.m_nextEntry;
-                int newIndex=getIndexFor(entry.m_hashCode,newCapacity);
-                entry.m_nextEntry=newBuckets[newIndex];
-                newBuckets[newIndex]=entry;
-                entry=nextEntry;
+        for (CacheEntry m_bucket : m_buckets) {
+            CacheEntry entry = m_bucket;
+            while (entry != null) {
+                CacheEntry nextEntry = entry.m_nextEntry;
+                int newIndex = getIndexFor(entry.m_hashCode, newCapacity);
+                entry.m_nextEntry = newBuckets[newIndex];
+                newBuckets[newIndex] = entry;
+                entry = nextEntry;
             }
         }
         m_buckets=newBuckets;

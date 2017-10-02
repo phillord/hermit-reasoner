@@ -75,7 +75,7 @@ public final class DatatypeManager implements Serializable {
             	m_interruptFlag.checkInterrupt();
             }
         };
-        m_auxiliaryVariableList=new ArrayList<DatatypeChecker.DVariable<Node>>();
+        m_auxiliaryVariableList= new ArrayList<>();
         m_unionDependencySet=new UnionDependencySet(16);
         m_newVariableAdded=new boolean[1];
         m_unknownDatatypeRestrictionsPermanent=tableau.m_permanentDLOntology.getAllUnknownDatatypeRestrictions();

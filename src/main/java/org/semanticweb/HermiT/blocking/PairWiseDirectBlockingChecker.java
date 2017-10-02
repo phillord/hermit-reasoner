@@ -43,10 +43,10 @@ public class PairWiseDirectBlockingChecker implements DirectBlockingChecker,Seri
     protected ExtensionTable.Retrieval m_ternaryTableSearch12Bound;
 
     public PairWiseDirectBlockingChecker() {
-        m_atomicConceptsSetFactory=new SetFactory<AtomicConcept>();
-        m_atomicRolesSetFactory=new SetFactory<AtomicRole>();
-        m_atomicConceptsBuffer=new ArrayList<AtomicConcept>();
-        m_atomicRolesBuffer=new ArrayList<AtomicRole>();
+        m_atomicConceptsSetFactory= new SetFactory<>();
+        m_atomicRolesSetFactory= new SetFactory<>();
+        m_atomicConceptsBuffer= new ArrayList<>();
+        m_atomicRolesBuffer= new ArrayList<>();
     }
     public void initialize(Tableau tableau) {
         m_tableau=tableau;

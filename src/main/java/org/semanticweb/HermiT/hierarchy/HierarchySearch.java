@@ -34,9 +34,9 @@ public class HierarchySearch {
             return parentNodes.iterator().next();
         }
         else {
-            Set<E> equivalentElements=new HashSet<E>();
+            Set<E> equivalentElements= new HashSet<>();
             equivalentElements.add(element);
-            return new HierarchyNode<E>(element,equivalentElements,parentNodes,childNodes);
+            return new HierarchyNode<>(element, equivalentElements, parentNodes, childNodes);
         }
     }
     protected static <E> Set<HierarchyNode<E>> findParents(final Relation<E> hierarchyRelation,final E element,HierarchyNode<E> topNode) {
@@ -59,11 +59,11 @@ public class HierarchySearch {
         else {
             // We now determine the set of nodes that are descendants of each node in parentNodes
             Iterator<HierarchyNode<E>> parentNodesIterator=parentNodes.iterator();
-            Set<HierarchyNode<E>> marked=new HashSet<HierarchyNode<E>>(parentNodesIterator.next().getDescendantNodes());
+            Set<HierarchyNode<E>> marked= new HashSet<>(parentNodesIterator.next().getDescendantNodes());
             while (parentNodesIterator.hasNext()) {
-                Set<HierarchyNode<E>> freshlyMarked=new HashSet<HierarchyNode<E>>();
-                Set<HierarchyNode<E>> visited=new HashSet<HierarchyNode<E>>();
-                Queue<HierarchyNode<E>> toProcess=new LinkedList<HierarchyNode<E>>();
+                Set<HierarchyNode<E>> freshlyMarked= new HashSet<>();
+                Set<HierarchyNode<E>> visited= new HashSet<>();
+                Queue<HierarchyNode<E>> toProcess= new LinkedList<>();
                 toProcess.add(parentNodesIterator.next());
                 while (!toProcess.isEmpty()) {
                     HierarchyNode<E> currentNode=toProcess.remove();
@@ -83,13 +83,13 @@ public class HierarchySearch {
                 marked=freshlyMarked;
             }
             // Determine the subset of marked that is directly above the bottomNode and that is below the current element.
-            Set<HierarchyNode<E>> aboveBottomNodes=new HashSet<HierarchyNode<E>>();
+            Set<HierarchyNode<E>> aboveBottomNodes= new HashSet<>();
             for (HierarchyNode<E> node : marked)
                 if (node.m_childNodes.contains(bottomNode) && hierarchyRelation.doesSubsume(element,node.getRepresentative()))
                     aboveBottomNodes.add(node);
             // If this set is empty, then we omit the bottom search phase.
             if (aboveBottomNodes.isEmpty()) {
-                Set<HierarchyNode<E>> childNodes=new HashSet<HierarchyNode<E>>();
+                Set<HierarchyNode<E>> childNodes= new HashSet<>();
                 childNodes.add(bottomNode);
                 return childNodes;
             }
@@ -111,10 +111,10 @@ public class HierarchySearch {
     }
 
     public static <U> Set<U> search(SearchPredicate<U> searchPredicate,Collection<U> startSearch,Set<U> possibilities) {
-        SearchCache<U> cache=new SearchCache<U>(searchPredicate,possibilities);
-        Set<U> result=new HashSet<U>();
-        Set<U> visited=new HashSet<U>(startSearch);
-        Queue<U> toProcess=new LinkedList<U>(startSearch);
+        SearchCache<U> cache= new SearchCache<>(searchPredicate, possibilities);
+        Set<U> result= new HashSet<>();
+        Set<U> visited= new HashSet<>(startSearch);
+        Queue<U> toProcess= new LinkedList<>(startSearch);
         while (!toProcess.isEmpty()) {
             U current=toProcess.remove();
             boolean foundSubordinateElement=false;
@@ -131,11 +131,11 @@ public class HierarchySearch {
         return result;
     }
 
-    public static interface Relation<U> {
+    public interface Relation<U> {
         boolean doesSubsume(U parent,U child);
     }
 
-    public static interface SearchPredicate<U> {
+    public interface SearchPredicate<U> {
         Set<U> getSuccessorElements(U u);
         Set<U> getPredecessorElements(U u);
         boolean trueOf(U u);
@@ -150,8 +150,8 @@ public class HierarchySearch {
         public SearchCache(SearchPredicate<U> f,Set<U> possibilities) {
             m_searchPredicate=f;
             m_possibilities=possibilities;
-            m_positives=new HashSet<U>();
-            m_negatives=new HashSet<U>();
+            m_positives= new HashSet<>();
+            m_negatives= new HashSet<>();
         }
         public boolean trueOf(U element) {
             if (m_positives.contains(element))

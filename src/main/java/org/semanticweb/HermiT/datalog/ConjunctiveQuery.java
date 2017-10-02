@@ -160,7 +160,7 @@ public class ConjunctiveQuery {
             generateCode(0,oneEmptyTupleRetrieval);
         }
         protected void compileHeads() {
-            List<int[]> copyAnswers=new ArrayList<int[]>();
+            List<int[]> copyAnswers= new ArrayList<>();
             for (int index=0;index<m_answerTerms.length;++index) {
                 Term answerTerm=m_answerTerms[index];
                 if (answerTerm instanceof Variable) {
@@ -172,7 +172,7 @@ public class ConjunctiveQuery {
         }
         
         protected static List<Variable> getAnswerVariables(Term[] answerTerms) {
-            List<Variable> result=new ArrayList<Variable>();
+            List<Variable> result= new ArrayList<>();
             for (Term answerTerm : answerTerms)
                 if (answerTerm instanceof Variable)
                     result.add((Variable)answerTerm);

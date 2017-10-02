@@ -36,7 +36,7 @@ public class FloatDatatypeHandler implements DatatypeHandler {
     protected static final ValueSpaceSubset FLOAT_ENTIRE=new EntireFloatSubset();
     protected static final ValueSpaceSubset EMPTY_SUBSET=new EmptyFloatSubset();
     protected static final Set<String> s_managedDatatypeURIs=Collections.singleton(XSD_FLOAT);
-    protected static final Set<String> s_supportedFacetURIs=new HashSet<String>();
+    protected static final Set<String> s_supportedFacetURIs= new HashSet<>();
     static {
         s_supportedFacetURIs.add(XSD_NS+"minInclusive");
         s_supportedFacetURIs.add(XSD_NS+"minExclusive");
@@ -94,11 +94,10 @@ public class FloatDatatypeHandler implements DatatypeHandler {
             else {
                 NoNaNFloatSubset floatSubset=(NoNaNFloatSubset)valueSpaceSubset;
                 List<FloatInterval> oldIntervals=floatSubset.m_intervals;
-                List<FloatInterval> newIntervals=new ArrayList<FloatInterval>();
-                for (int index=0;index<oldIntervals.size();index++) {
-                    FloatInterval oldInterval=oldIntervals.get(index);
-                    FloatInterval intersection=oldInterval.intersectWith(interval);
-                    if (intersection!=null)
+                List<FloatInterval> newIntervals= new ArrayList<>();
+                for (FloatInterval oldInterval : oldIntervals) {
+                    FloatInterval intersection = oldInterval.intersectWith(interval);
+                    if (intersection != null)
                         newIntervals.add(intersection);
                 }
                 if (newIntervals.isEmpty())
@@ -117,7 +116,7 @@ public class FloatDatatypeHandler implements DatatypeHandler {
             if (interval==null)
                 return valueSpaceSubset;
             else if (valueSpaceSubset==FLOAT_ENTIRE) {
-                List<FloatInterval> newIntervals=new ArrayList<FloatInterval>();
+                List<FloatInterval> newIntervals= new ArrayList<>();
                 if (!FloatInterval.areIdentical(interval.m_lowerBoundInclusive,Float.NEGATIVE_INFINITY))
                     newIntervals.add(new FloatInterval(Float.NEGATIVE_INFINITY,FloatInterval.previousFloat(interval.m_lowerBoundInclusive)));
                 if (!FloatInterval.areIdentical(interval.m_upperBoundInclusive,Float.POSITIVE_INFINITY))
@@ -136,17 +135,16 @@ public class FloatDatatypeHandler implements DatatypeHandler {
                 if (!FloatInterval.areIdentical(interval.m_upperBoundInclusive,Float.POSITIVE_INFINITY))
                     complementInterval2=new FloatInterval(FloatInterval.nextFloat(interval.m_upperBoundInclusive),Float.POSITIVE_INFINITY);
                 List<FloatInterval> oldIntervals=floatSubset.m_intervals;
-                List<FloatInterval> newIntervals=new ArrayList<FloatInterval>();
-                for (int index=0;index<oldIntervals.size();index++) {
-                    FloatInterval oldInterval=oldIntervals.get(index);
-                    if (complementInterval1!=null) {
-                        FloatInterval intersection=oldInterval.intersectWith(complementInterval1);
-                        if (intersection!=null)
+                List<FloatInterval> newIntervals= new ArrayList<>();
+                for (FloatInterval oldInterval : oldIntervals) {
+                    if (complementInterval1 != null) {
+                        FloatInterval intersection = oldInterval.intersectWith(complementInterval1);
+                        if (intersection != null)
                             newIntervals.add(intersection);
                     }
-                    if (complementInterval2!=null) {
-                        FloatInterval intersection=oldInterval.intersectWith(complementInterval2);
-                        if (intersection!=null)
+                    if (complementInterval2 != null) {
+                        FloatInterval intersection = oldInterval.intersectWith(complementInterval2);
+                        if (intersection != null)
                             newIntervals.add(intersection);
                     }
                 }

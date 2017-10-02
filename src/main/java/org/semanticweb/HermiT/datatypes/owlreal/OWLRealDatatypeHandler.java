@@ -45,8 +45,8 @@ public class OWLRealDatatypeHandler implements DatatypeHandler {
     protected static final String OWL_NS=Prefixes.s_semanticWebPrefixes.get("owl:");
     protected static final String XSD_NS=Prefixes.s_semanticWebPrefixes.get("xsd:");
 
-    protected static final Map<String,NumberInterval> s_intervalsByDatatype=new HashMap<String,NumberInterval>();
-    protected static final Map<String,ValueSpaceSubset> s_subsetsByDatatype=new HashMap<String,ValueSpaceSubset>();
+    protected static final Map<String,NumberInterval> s_intervalsByDatatype= new HashMap<>();
+    protected static final Map<String,ValueSpaceSubset> s_subsetsByDatatype= new HashMap<>();
     static {
         Object[][] initializer=new Object[][] {
             { OWL_NS+"real",              NumberRange.REAL,    MinusInfinity.INSTANCE,BoundType.EXCLUSIVE,PlusInfinity.INSTANCE,                  BoundType.EXCLUSIVE },
@@ -74,19 +74,19 @@ public class OWLRealDatatypeHandler implements DatatypeHandler {
         }
     }
     protected static final ValueSpaceSubset EMPTY_SUBSET=new OWLRealValueSpaceSubset();
-    protected static final Set<String> s_supportedFacetURIs=new HashSet<String>();
+    protected static final Set<String> s_supportedFacetURIs= new HashSet<>();
     static {
         s_supportedFacetURIs.add(XSD_NS+"minInclusive");
         s_supportedFacetURIs.add(XSD_NS+"minExclusive");
         s_supportedFacetURIs.add(XSD_NS+"maxInclusive");
         s_supportedFacetURIs.add(XSD_NS+"maxExclusive");
     }
-    protected static final Map<String,Set<String>> s_datatypeSupersets=new HashMap<String,Set<String>>();
-    protected static final Map<String,Set<String>> s_datatypeDisjoints=new HashMap<String,Set<String>>();
+    protected static final Map<String,Set<String>> s_datatypeSupersets= new HashMap<>();
+    protected static final Map<String,Set<String>> s_datatypeDisjoints= new HashMap<>();
     static {
         for (String datatypeURI : s_intervalsByDatatype.keySet()) {
-            s_datatypeSupersets.put(datatypeURI,new HashSet<String>());
-            s_datatypeDisjoints.put(datatypeURI,new HashSet<String>());
+            s_datatypeSupersets.put(datatypeURI, new HashSet<>());
+            s_datatypeDisjoints.put(datatypeURI, new HashSet<>());
         }
         for (Map.Entry<String,NumberInterval> entry1 : s_intervalsByDatatype.entrySet()) {
             String datatypeURI1=entry1.getKey();
@@ -157,11 +157,10 @@ public class OWLRealDatatypeHandler implements DatatypeHandler {
         else {
             OWLRealValueSpaceSubset realSubset=(OWLRealValueSpaceSubset)valueSpaceSubset;
             List<NumberInterval> oldIntervals=realSubset.m_intervals;
-            List<NumberInterval> newIntervals=new ArrayList<NumberInterval>();
-            for (int index=0;index<oldIntervals.size();index++) {
-                NumberInterval oldInterval=oldIntervals.get(index);
-                NumberInterval intersection=oldInterval.intersectWith(interval);
-                if (intersection!=null)
+            List<NumberInterval> newIntervals= new ArrayList<>();
+            for (NumberInterval oldInterval : oldIntervals) {
+                NumberInterval intersection = oldInterval.intersectWith(interval);
+                if (intersection != null)
                     newIntervals.add(intersection);
             }
             if (newIntervals.isEmpty())
@@ -187,22 +186,21 @@ public class OWLRealDatatypeHandler implements DatatypeHandler {
                 complementInterval3=new NumberInterval(NumberRange.REAL,NumberRange.NOTHING,interval.m_upperBound,interval.m_upperBoundType.getComplement(),PlusInfinity.INSTANCE,BoundType.EXCLUSIVE);
             OWLRealValueSpaceSubset realSubset=(OWLRealValueSpaceSubset)valueSpaceSubset;
             List<NumberInterval> oldIntervals=realSubset.m_intervals;
-            List<NumberInterval> newIntervals=new ArrayList<NumberInterval>();
-            for (int index=0;index<oldIntervals.size();index++) {
-                NumberInterval oldInterval=oldIntervals.get(index);
-                if (complementInterval1!=null) {
-                    NumberInterval intersection=oldInterval.intersectWith(complementInterval1);
-                    if (intersection!=null)
+            List<NumberInterval> newIntervals= new ArrayList<>();
+            for (NumberInterval oldInterval : oldIntervals) {
+                if (complementInterval1 != null) {
+                    NumberInterval intersection = oldInterval.intersectWith(complementInterval1);
+                    if (intersection != null)
                         newIntervals.add(intersection);
                 }
-                if (complementInterval2!=null) {
-                    NumberInterval intersection=oldInterval.intersectWith(complementInterval2);
-                    if (intersection!=null)
+                if (complementInterval2 != null) {
+                    NumberInterval intersection = oldInterval.intersectWith(complementInterval2);
+                    if (intersection != null)
                         newIntervals.add(intersection);
                 }
-                if (complementInterval3!=null) {
-                    NumberInterval intersection=oldInterval.intersectWith(complementInterval3);
-                    if (intersection!=null)
+                if (complementInterval3 != null) {
+                    NumberInterval intersection = oldInterval.intersectWith(complementInterval3);
+                    if (intersection != null)
                         newIntervals.add(intersection);
                 }
             }

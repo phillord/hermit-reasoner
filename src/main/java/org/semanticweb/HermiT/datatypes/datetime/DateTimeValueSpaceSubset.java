@@ -31,7 +31,7 @@ public class DateTimeValueSpaceSubset implements ValueSpaceSubset {
         m_intervals=Collections.emptyList();
     }
     public DateTimeValueSpaceSubset(DateTimeInterval interval1,DateTimeInterval interval2) {
-        m_intervals=new ArrayList<DateTimeInterval>(2);
+        m_intervals= new ArrayList<>(2);
         if (interval1!=null)
             m_intervals.add(interval1);
         if (interval2!=null)

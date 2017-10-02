@@ -31,10 +31,10 @@ public class HierarchyNode<E> {
 
     public HierarchyNode(E representative) {
         m_representative=representative;
-        m_equivalentElements=new HashSet<E>();
+        m_equivalentElements= new HashSet<>();
         m_equivalentElements.add(m_representative);
-        m_parentNodes=new HashSet<HierarchyNode<E>>();
-        m_childNodes=new HashSet<HierarchyNode<E>>();
+        m_parentNodes= new HashSet<>();
+        m_childNodes= new HashSet<>();
     }
     public HierarchyNode(E element,Set<E> equivalentElements,Set<HierarchyNode<E>> parentNodes,Set<HierarchyNode<E>> childNodes) {
         m_representative=element;
@@ -79,8 +79,8 @@ public class HierarchyNode<E> {
         return m_equivalentElements.toString();
     }
     public static <T> Set<HierarchyNode<T>> getAncestorNodes(Set<HierarchyNode<T>> inputNodes) {
-        Set<HierarchyNode<T>> result=new HashSet<HierarchyNode<T>>();
-        Queue<HierarchyNode<T>> toVisit=new LinkedList<HierarchyNode<T>>(inputNodes);
+        Set<HierarchyNode<T>> result= new HashSet<>();
+        Queue<HierarchyNode<T>> toVisit= new LinkedList<>(inputNodes);
         while (!toVisit.isEmpty()) {
             HierarchyNode<T> current=toVisit.poll();
             if (result.add(current))
@@ -89,8 +89,8 @@ public class HierarchyNode<E> {
         return result;
     }
     public static <T> Set<HierarchyNode<T>> getDescendantNodes(Set<HierarchyNode<T>> inputNodes) {
-        Set<HierarchyNode<T>> result=new HashSet<HierarchyNode<T>>();
-        Queue<HierarchyNode<T>> toVisit=new LinkedList<HierarchyNode<T>>(inputNodes);
+        Set<HierarchyNode<T>> result= new HashSet<>();
+        Queue<HierarchyNode<T>> toVisit= new LinkedList<>(inputNodes);
         while (!toVisit.isEmpty()) {
             HierarchyNode<T> current=toVisit.poll();
             if (result.add(current))

@@ -135,12 +135,12 @@ public class Numbers {
         case INTEGER: {
                 int iv1=n1.intValue();
                 int iv2=n2.intValue();
-                return iv1<iv2 ? -1 : (iv1==iv2 ? 0 : 1);
+                return Integer.compare(iv1, iv2);
             }
         case LONG: {
                 long lv1=n1.longValue();
                 long lv2=n2.longValue();
-                return lv1<lv2 ? -1 : (lv1==lv2 ? 0 : 1);
+                return Long.compare(lv1, lv2);
             }
         case BIG_INTEGER: {
                 BigInteger bi1=toBigInteger(n1,typeN1);
@@ -216,7 +216,7 @@ public class Numbers {
         }
     }
     
-    public static enum BoundaryDirection {
+    public enum BoundaryDirection {
         UPPER,LOWER
     }
     

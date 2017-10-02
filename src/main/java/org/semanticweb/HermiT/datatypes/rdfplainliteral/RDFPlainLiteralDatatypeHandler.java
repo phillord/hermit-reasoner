@@ -37,7 +37,7 @@ import dk.brics.automaton.Automaton;
 public class RDFPlainLiteralDatatypeHandler implements DatatypeHandler {
     protected static final String XSD_NS=Prefixes.s_semanticWebPrefixes.get("xsd:");
     protected static final String RDF_NS=Prefixes.s_semanticWebPrefixes.get("rdf:");
-    protected static final Map<String,ValueSpaceSubset> s_subsetsByDatatype=new HashMap<String,ValueSpaceSubset>();
+    protected static final Map<String,ValueSpaceSubset> s_subsetsByDatatype= new HashMap<>();
     static {
         s_subsetsByDatatype.put(RDF_NS+"PlainLiteral",new RDFPlainLiteralLengthValueSpaceSubset(new RDFPlainLiteralLengthInterval(RDFPlainLiteralLengthInterval.LanguageTagMode.ABSENT,0,Integer.MAX_VALUE),new RDFPlainLiteralLengthInterval(RDFPlainLiteralLengthInterval.LanguageTagMode.PRESENT,0,Integer.MAX_VALUE)));
         s_subsetsByDatatype.put(XSD_NS+"string",new RDFPlainLiteralLengthValueSpaceSubset(new RDFPlainLiteralLengthInterval(RDFPlainLiteralLengthInterval.LanguageTagMode.ABSENT,0,Integer.MAX_VALUE)));
@@ -53,7 +53,7 @@ public class RDFPlainLiteralDatatypeHandler implements DatatypeHandler {
         s_subsetsByDatatype.put(datatypeURI,new RDFPlainLiteralPatternValueSpaceSubset(automaton));
     }
     protected static final ValueSpaceSubset EMPTY_SUBSET=new RDFPlainLiteralLengthValueSpaceSubset();
-    protected static final Map<String,Set<String>> s_datatypeSupersets=new HashMap<String,Set<String>>();
+    protected static final Map<String,Set<String>> s_datatypeSupersets= new HashMap<>();
     static {
         String[][] initializer=new String[][] {
             { RDF_NS+"PlainLiteral",     RDF_NS+"PlainLiteral" },
@@ -65,12 +65,12 @@ public class RDFPlainLiteralDatatypeHandler implements DatatypeHandler {
             { XSD_NS+"NMTOKEN",          RDF_NS+"PlainLiteral", XSD_NS+"string", XSD_NS+"normalizedString", XSD_NS+"token", XSD_NS+"NMTOKEN"},
             { XSD_NS+"language",         RDF_NS+"PlainLiteral", XSD_NS+"string", XSD_NS+"normalizedString", XSD_NS+"token", XSD_NS+"language" },
         };
-        for (int datatype1Index=0;datatype1Index<initializer.length;datatype1Index++) {
-            String datatype1URI=initializer[datatype1Index][0];
-            Set<String> set=new HashSet<String>();
-            for (int datatype2Index=1;datatype2Index<initializer[datatype1Index].length;datatype2Index++)
-                set.add(initializer[datatype1Index][datatype2Index]);
-            s_datatypeSupersets.put(datatype1URI,set);
+        for (String[] anInitializer : initializer) {
+            String datatype1URI = anInitializer[0];
+            Set<String> set = new HashSet<String>();
+            for (int datatype2Index = 1; datatype2Index < anInitializer.length; datatype2Index++)
+                set.add(anInitializer[datatype2Index]);
+            s_datatypeSupersets.put(datatype1URI, set);
         }
     }
 
@@ -179,17 +179,16 @@ public class RDFPlainLiteralDatatypeHandler implements DatatypeHandler {
                 return EMPTY_SUBSET;
             else {
                 List<RDFPlainLiteralLengthInterval> oldIntervals=((RDFPlainLiteralLengthValueSpaceSubset)valueSpaceSubset).m_intervals;
-                List<RDFPlainLiteralLengthInterval> newIntervals=new ArrayList<RDFPlainLiteralLengthInterval>();
-                for (int index=0;index<oldIntervals.size();index++) {
-                    RDFPlainLiteralLengthInterval oldInterval=oldIntervals.get(index);
-                    if (intervals[0]!=null) {
-                        RDFPlainLiteralLengthInterval intersection=oldInterval.intersectWith(intervals[0]);
-                        if (intersection!=null)
+                List<RDFPlainLiteralLengthInterval> newIntervals= new ArrayList<>();
+                for (RDFPlainLiteralLengthInterval oldInterval : oldIntervals) {
+                    if (intervals[0] != null) {
+                        RDFPlainLiteralLengthInterval intersection = oldInterval.intersectWith(intervals[0]);
+                        if (intersection != null)
                             newIntervals.add(intersection);
                     }
-                    if (intervals[1]!=null) {
-                        RDFPlainLiteralLengthInterval intersection=oldInterval.intersectWith(intervals[1]);
-                        if (intersection!=null)
+                    if (intervals[1] != null) {
+                        RDFPlainLiteralLengthInterval intersection = oldInterval.intersectWith(intervals[1]);
+                        if (intersection != null)
                             newIntervals.add(intersection);
                     }
                 }
@@ -223,7 +222,7 @@ public class RDFPlainLiteralDatatypeHandler implements DatatypeHandler {
             if (intervals[0]==null && intervals[1]==null)
                 return valueSpaceSubset;
             else {
-                List<RDFPlainLiteralLengthInterval> complementedIntervals=new ArrayList<RDFPlainLiteralLengthInterval>(4);
+                List<RDFPlainLiteralLengthInterval> complementedIntervals= new ArrayList<>(4);
                 if (intervals[0]!=null) {
                     if (intervals[0].m_minLength>0)
                         complementedIntervals.add(new RDFPlainLiteralLengthInterval(RDFPlainLiteralLengthInterval.LanguageTagMode.PRESENT,0,intervals[0].m_minLength-1));
@@ -241,13 +240,12 @@ public class RDFPlainLiteralDatatypeHandler implements DatatypeHandler {
                 else
                     complementedIntervals.add(new RDFPlainLiteralLengthInterval(RDFPlainLiteralLengthInterval.LanguageTagMode.ABSENT,0,Integer.MAX_VALUE));
                 List<RDFPlainLiteralLengthInterval> oldIntervals=((RDFPlainLiteralLengthValueSpaceSubset)valueSpaceSubset).m_intervals;
-                List<RDFPlainLiteralLengthInterval> newIntervals=new ArrayList<RDFPlainLiteralLengthInterval>();
-                for (int index=0;index<oldIntervals.size();index++) {
-                    RDFPlainLiteralLengthInterval oldInterval=oldIntervals.get(index);
-                    for (int complementedIndex=complementedIntervals.size()-1;complementedIndex>=0;--complementedIndex) {
-                        RDFPlainLiteralLengthInterval complementedInterval=complementedIntervals.get(complementedIndex);
-                        RDFPlainLiteralLengthInterval intersection=oldInterval.intersectWith(complementedInterval);
-                        if (intersection!=null)
+                List<RDFPlainLiteralLengthInterval> newIntervals= new ArrayList<>();
+                for (RDFPlainLiteralLengthInterval oldInterval : oldIntervals) {
+                    for (int complementedIndex = complementedIntervals.size() - 1; complementedIndex >= 0; --complementedIndex) {
+                        RDFPlainLiteralLengthInterval complementedInterval = complementedIntervals.get(complementedIndex);
+                        RDFPlainLiteralLengthInterval intersection = oldInterval.intersectWith(complementedInterval);
+                        if (intersection != null)
                             newIntervals.add(intersection);
                     }
                 }

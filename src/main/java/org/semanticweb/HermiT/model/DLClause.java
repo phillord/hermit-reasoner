@@ -55,23 +55,21 @@ public class DLClause implements Serializable {
         return m_bodyAtoms.clone();
     }
     public DLClause getSafeVersion(DLPredicate safeMakingPredicate) {
-        Set<Variable> variables=new HashSet<Variable>();
+        Set<Variable> variables= new HashSet<>();
         // collect all the variables that occur in the head into the set variables
-        for (int headIndex=0;headIndex<m_headAtoms.length;headIndex++) {
-            Atom atom=m_headAtoms[headIndex];
-            for (int argumentIndex=0;argumentIndex<atom.getArity();argumentIndex++) {
-                Variable variable=atom.getArgumentVariable(argumentIndex);
-                if (variable!=null)
+        for (Atom atom : m_headAtoms) {
+            for (int argumentIndex = 0; argumentIndex < atom.getArity(); argumentIndex++) {
+                Variable variable = atom.getArgumentVariable(argumentIndex);
+                if (variable != null)
                     variables.add(variable);
             }
         }
         // remove all those variables that occur in the body, so we get a set
         // with the unsafe variables
-        for (int bodyIndex=0;bodyIndex<m_bodyAtoms.length;bodyIndex++) {
-            Atom atom=m_bodyAtoms[bodyIndex];
-            for (int argumentIndex=0;argumentIndex<atom.getArity();argumentIndex++) {
-                Variable variable=atom.getArgumentVariable(argumentIndex);
-                if (variable!=null)
+        for (Atom atom : m_bodyAtoms) {
+            for (int argumentIndex = 0; argumentIndex < atom.getArity(); argumentIndex++) {
+                Variable variable = atom.getArgumentVariable(argumentIndex);
+                if (variable != null)
                     variables.remove(variable);
             }
         }

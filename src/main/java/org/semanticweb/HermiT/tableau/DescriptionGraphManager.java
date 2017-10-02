@@ -55,10 +55,10 @@ public final class DescriptionGraphManager implements Serializable {
         m_extensionManager=m_tableau.m_extensionManager;
         m_mergingManager=m_tableau.m_mergingManager;
         m_occurrenceManager=new OccurrenceManager();
-        m_descriptionGraphIndices=new HashMap<DescriptionGraph,Integer>();
-        Set<ExtensionTable> extensionTables=new HashSet<ExtensionTable>();
-        List<DescriptionGraph> descriptionGraphsByIndex=new ArrayList<DescriptionGraph>();
-        List<ExtensionTable> extensionTablesByIndex=new ArrayList<ExtensionTable>();
+        m_descriptionGraphIndices= new HashMap<>();
+        Set<ExtensionTable> extensionTables= new HashSet<>();
+        List<DescriptionGraph> descriptionGraphsByIndex= new ArrayList<>();
+        List<ExtensionTable> extensionTablesByIndex= new ArrayList<>();
         for (DescriptionGraph descriptionGraph : m_tableau.m_permanentDLOntology.getAllDescriptionGraphs()) {
             m_descriptionGraphIndices.put(descriptionGraph,Integer.valueOf(descriptionGraphsByIndex.size()));
             descriptionGraphsByIndex.add(descriptionGraph);
@@ -77,7 +77,7 @@ public final class DescriptionGraphManager implements Serializable {
             m_auxiliaryTuples1[index]=new Object[descriptionGraph.getNumberOfVertices()+1];
             m_auxiliaryTuples2[index]=new Object[descriptionGraph.getNumberOfVertices()+1];
         }
-        m_newNodes=new ArrayList<Node>();
+        m_newNodes= new ArrayList<>();
         m_binaryUnionDependencySet=new UnionDependencySet(2);
         m_deltaOldRetrievals=new ExtensionTable.Retrieval[extensionTables.size()];
         int index=0;

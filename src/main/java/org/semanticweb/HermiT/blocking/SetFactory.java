@@ -113,17 +113,17 @@ public class SetFactory<E> implements Serializable {
     }
     protected void resize() {
         Entry[] newEntries=new Entry[m_entries.length*2];
-        for (int index=0;index<m_entries.length;index++) {
-            Entry entry=m_entries[index];
-            while (entry!=null) {
-                Entry nextEntry=entry.m_nextEntry;
-                int newIndex=getIndexFor(entry.m_hashCode,newEntries.length);
-                entry.m_nextEntry=newEntries[newIndex];
-                entry.m_previousEntry=null;
-                if (entry.m_nextEntry!=null)
-                    entry.m_nextEntry.m_previousEntry=entry;
-                newEntries[newIndex]=entry;
-                entry=nextEntry;
+        for (Entry m_entry : m_entries) {
+            Entry entry = m_entry;
+            while (entry != null) {
+                Entry nextEntry = entry.m_nextEntry;
+                int newIndex = getIndexFor(entry.m_hashCode, newEntries.length);
+                entry.m_nextEntry = newEntries[newIndex];
+                entry.m_previousEntry = null;
+                if (entry.m_nextEntry != null)
+                    entry.m_nextEntry.m_previousEntry = entry;
+                newEntries[newIndex] = entry;
+                entry = nextEntry;
             }
         }
         m_entries=newEntries;
@@ -151,7 +151,7 @@ public class SetFactory<E> implements Serializable {
         }
         Entry<E> entry=m_unusedEntries[size];
         if (entry==null)
-            return new Entry<E>(size);
+            return new Entry<>(size);
         else {
             m_unusedEntries[size]=entry.m_nextEntry;
             entry.m_nextEntry=null;

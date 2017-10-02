@@ -46,11 +46,11 @@ public abstract class DatatypeChecker<NT> implements Serializable {
 
 	@SuppressWarnings("unchecked")
 	public DatatypeChecker() {
-		m_smallestEnumerationFirst=new SmallestEnumerationFirst<NT>();
-        m_unusedVariables=new ArrayList<DVariable<NT>>();
-        m_usedVariables=new ArrayList<DVariable<NT>>();
-        m_activeVariables=new ArrayList<DVariable<NT>>();
-        m_auxiliaryVariableList=new ArrayList<DVariable<NT>>();
+		m_smallestEnumerationFirst= new SmallestEnumerationFirst<>();
+        m_unusedVariables= new ArrayList<>();
+        m_usedVariables= new ArrayList<>();
+        m_activeVariables= new ArrayList<>();
+        m_auxiliaryVariableList= new ArrayList<>();
         m_buckets=new DVariable[16];
         m_resizeThreshold=(int)(m_buckets.length*0.75);
         m_numberOfEntries=0;
@@ -114,7 +114,7 @@ public abstract class DatatypeChecker<NT> implements Serializable {
         }
         DVariable<NT> newVariable;
         if (m_unusedVariables.isEmpty())
-            newVariable=new DVariable<NT>();
+            newVariable= new DVariable<>();
         else
             newVariable=m_unusedVariables.remove(m_unusedVariables.size()-1);
         newVariable.m_node=node;
@@ -133,14 +133,14 @@ public abstract class DatatypeChecker<NT> implements Serializable {
     protected void resize(int newCapacity) {
         @SuppressWarnings("unchecked")
 		DVariable<NT>[] newBuckets=new DVariable[newCapacity];
-        for (int i=0;i<m_buckets.length;i++) {
-            DVariable<NT> entry=m_buckets[i];
-            while (entry!=null) {
-                DVariable<NT> nextEntry=entry.m_nextEntry;
-                int newIndex=getIndexFor(entry.m_node.hashCode(),newCapacity);
-                entry.m_nextEntry=newBuckets[newIndex];
-                newBuckets[newIndex]=entry;
-                entry=nextEntry;
+        for (DVariable<NT> m_bucket : m_buckets) {
+            DVariable<NT> entry = m_bucket;
+            while (entry != null) {
+                DVariable<NT> nextEntry = entry.m_nextEntry;
+                int newIndex = getIndexFor(entry.m_node.hashCode(), newCapacity);
+                entry.m_nextEntry = newBuckets[newIndex];
+                newBuckets[newIndex] = entry;
+                entry = nextEntry;
             }
         }
         m_buckets=newBuckets;
@@ -297,14 +297,14 @@ public abstract class DatatypeChecker<NT> implements Serializable {
         protected Object m_dataValue;
 
         protected DVariable() {
-            m_positiveConstantEnumerations=new ArrayList<ConstantEnumeration>();
-            m_negativeConstantEnumerations=new ArrayList<ConstantEnumeration>();
-            m_positiveDatatypeRestrictions=new ArrayList<DatatypeRestriction>();
-            m_negativeDatatypeRestrictions=new ArrayList<DatatypeRestriction>();
-            m_unequalTo=new ArrayList<DVariable<NT>>();
-            m_unequalToDirected=new ArrayList<DVariable<NT>>();
-            m_forbiddenDataValues=new ArrayList<Object>();
-            m_explicitDataValues=new ArrayList<Object>();
+            m_positiveConstantEnumerations= new ArrayList<>();
+            m_negativeConstantEnumerations= new ArrayList<>();
+            m_positiveDatatypeRestrictions= new ArrayList<>();
+            m_negativeDatatypeRestrictions= new ArrayList<>();
+            m_unequalTo= new ArrayList<>();
+            m_unequalToDirected= new ArrayList<>();
+            m_forbiddenDataValues= new ArrayList<>();
+            m_explicitDataValues= new ArrayList<>();
         }
         public NT getNode() {
             return m_node;
@@ -337,33 +337,33 @@ public abstract class DatatypeChecker<NT> implements Serializable {
             StringBuffer buffer=new StringBuffer();
             boolean first=true;
             buffer.append('[');
-            for (int index=0;index<m_positiveConstantEnumerations.size();index++) {
+            for (ConstantEnumeration m_positiveConstantEnumeration : m_positiveConstantEnumerations) {
                 if (first)
-                    first=false;
+                    first = false;
                 else
                     buffer.append(", ");
-                buffer.append(m_positiveConstantEnumerations.get(index).toString(prefixes));
+                buffer.append(m_positiveConstantEnumeration.toString(prefixes));
             }
-            for (int index=0;index<m_negativeConstantEnumerations.size();index++) {
+            for (ConstantEnumeration m_negativeConstantEnumeration : m_negativeConstantEnumerations) {
                 if (first)
-                    first=false;
+                    first = false;
                 else
                     buffer.append(", ");
-                buffer.append(m_negativeConstantEnumerations.get(index).getNegation().toString(prefixes));
+                buffer.append(m_negativeConstantEnumeration.getNegation().toString(prefixes));
             }
-            for (int index=0;index<m_positiveDatatypeRestrictions.size();index++) {
+            for (DatatypeRestriction m_positiveDatatypeRestriction : m_positiveDatatypeRestrictions) {
                 if (first)
-                    first=false;
+                    first = false;
                 else
                     buffer.append(", ");
-                buffer.append(m_positiveDatatypeRestrictions.get(index).toString(prefixes));
+                buffer.append(m_positiveDatatypeRestriction.toString(prefixes));
             }
-            for (int index=0;index<m_negativeDatatypeRestrictions.size();index++) {
+            for (DatatypeRestriction m_negativeDatatypeRestriction : m_negativeDatatypeRestrictions) {
                 if (first)
-                    first=false;
+                    first = false;
                 else
                     buffer.append(", ");
-                buffer.append(m_negativeDatatypeRestrictions.get(index).getNegation().toString(prefixes));
+                buffer.append(m_negativeDatatypeRestriction.getNegation().toString(prefixes));
             }
             buffer.append(']');
             return buffer.toString();

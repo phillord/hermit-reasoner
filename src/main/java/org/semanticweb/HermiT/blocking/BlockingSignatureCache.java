@@ -57,14 +57,14 @@ public class BlockingSignatureCache implements Serializable {
     }
     protected void resize(int newCapacity) {
         BlockingSignature[] newBuckets=new BlockingSignature[newCapacity];
-        for (int i=0;i<m_buckets.length;i++) {
-            BlockingSignature entry=m_buckets[i];
-            while (entry!=null) {
-                BlockingSignature nextEntry=entry.m_nextEntry;
-                int newIndex=getIndexFor(entry.hashCode(),newCapacity);
-                entry.m_nextEntry=newBuckets[newIndex];
-                newBuckets[newIndex]=entry;
-                entry=nextEntry;
+        for (BlockingSignature m_bucket : m_buckets) {
+            BlockingSignature entry = m_bucket;
+            while (entry != null) {
+                BlockingSignature nextEntry = entry.m_nextEntry;
+                int newIndex = getIndexFor(entry.hashCode(), newCapacity);
+                entry.m_nextEntry = newBuckets[newIndex];
+                newBuckets[newIndex] = entry;
+                entry = nextEntry;
             }
         }
         m_buckets=newBuckets;

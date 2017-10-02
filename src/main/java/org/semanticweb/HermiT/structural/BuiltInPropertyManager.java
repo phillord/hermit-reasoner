@@ -131,8 +131,7 @@ public class BuiltInPropertyManager {
                 visitProperty(inclusion.m_superObjectProperty);
             }
             for (OWLObjectPropertyExpression[] disjoint : axioms.m_disjointObjectProperties)
-                for (int index=0;index<disjoint.length;index++)
-                    visitProperty(disjoint[index]);
+                for (OWLObjectPropertyExpression aDisjoint : disjoint) visitProperty(aDisjoint);
             for (OWLObjectPropertyExpression property : axioms.m_reflexiveObjectProperties)
                 visitProperty(property);
             for (OWLObjectPropertyExpression property : axioms.m_irreflexiveObjectProperties)
@@ -144,8 +143,7 @@ public class BuiltInPropertyManager {
                 visitProperty(inclusion[1]);
             }
             for (OWLDataPropertyExpression[] disjoint : axioms.m_disjointDataProperties)
-                for (int index=0;index<disjoint.length;index++)
-                    visitProperty(disjoint[index]);
+                for (OWLDataPropertyExpression aDisjoint : disjoint) visitProperty(aDisjoint);
             FactVisitor factVisitor=new FactVisitor();
             for (OWLIndividualAxiom fact : axioms.m_facts)
                 fact.accept(factVisitor);

@@ -44,8 +44,7 @@ public class BinaryData {
         m_binaryDataType=binaryDataType;
         m_data=data;
         int hashCode=binaryDataType.hashCode();
-        for (int index=0;index<m_data.length;index++)
-            hashCode=hashCode*3+m_data[index];
+        for (byte aM_data : m_data) hashCode = hashCode * 3 + aM_data;
         m_hashCode=hashCode;
     }
     public BinaryDataType getBinaryDataType() {
@@ -85,10 +84,10 @@ public class BinaryData {
     }
     protected String toHexBinary() {
         StringBuffer buffer=new StringBuffer();
-        for (int index=0;index<m_data.length;index++) {
-            int octet=(m_data[index] & 0xFF);
-            int high=octet/16;
-            int low=octet % 16;
+        for (byte aM_data : m_data) {
+            int octet = (aM_data & 0xFF);
+            int high = octet / 16;
+            int low = octet % 16;
             buffer.append(INT_TO_HEX[high]);
             buffer.append(INT_TO_HEX[low]);
         }

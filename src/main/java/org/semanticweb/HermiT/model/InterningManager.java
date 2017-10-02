@@ -32,7 +32,7 @@ public abstract class InterningManager<E> {
     protected int m_resizeThreshold;
     
     public InterningManager() {
-        m_referenceQueue=new ReferenceQueue<E>();
+        m_referenceQueue= new ReferenceQueue<>();
         m_entries=createEntries(16);
         m_size=0;
         m_resizeThreshold=(int)(m_entries.length*LOAD_FACTOR);
@@ -62,25 +62,25 @@ public abstract class InterningManager<E> {
         if (m_size>=m_resizeThreshold) {
             int newEntriesLength=m_entries.length*2;
             Entry<E>[] newEntries=createEntries(newEntriesLength);
-            for (int entryIndex=0;entryIndex<m_entries.length;entryIndex++) {
-                Entry<E> currentEntry=m_entries[entryIndex];
-                while (currentEntry!=null) {
-                    Entry<E> nextEntry=currentEntry.m_next;
-                    if (currentEntry.get()==null)
+            for (Entry<E> m_entry : m_entries) {
+                Entry<E> currentEntry = m_entry;
+                while (currentEntry != null) {
+                    Entry<E> nextEntry = currentEntry.m_next;
+                    if (currentEntry.get() == null)
                         m_size--;
                     else {
-                        int newIndex=getIndexFor(currentEntry.m_hashCode,newEntriesLength);
-                        currentEntry.m_next=newEntries[newIndex];
-                        newEntries[newIndex]=currentEntry;
+                        int newIndex = getIndexFor(currentEntry.m_hashCode, newEntriesLength);
+                        currentEntry.m_next = newEntries[newIndex];
+                        newEntries[newIndex] = currentEntry;
                     }
-                    currentEntry=nextEntry;
+                    currentEntry = nextEntry;
                 }
             }
             m_entries=newEntries;
             m_resizeThreshold=(int)(newEntriesLength*LOAD_FACTOR);
             objectEntryIndex=getIndexFor(hashCode,m_entries.length);
         }
-        Entry<E> newEntry=new Entry<E>(object,m_referenceQueue,hashCode,m_entries[objectEntryIndex]);
+        Entry<E> newEntry= new Entry<>(object, m_referenceQueue, hashCode, m_entries[objectEntryIndex]);
         m_entries[objectEntryIndex]=newEntry;
         m_size++;
         return object;

@@ -37,7 +37,7 @@ import org.semanticweb.HermiT.model.DatatypeRestriction;
  * A registry for all available datatype handlers.
  */
 public class DatatypeRegistry {
-    protected static final Map<String,DatatypeHandler> s_handlersByDatatypeURI=new HashMap<String,DatatypeHandler>();
+    protected static final Map<String,DatatypeHandler> s_handlersByDatatypeURI= new HashMap<>();
     static {
         registerDatatypeHandler(new AnonymousConstantsDatatypeHandler());
         registerDatatypeHandler(new BooleanDatatypeHandler());

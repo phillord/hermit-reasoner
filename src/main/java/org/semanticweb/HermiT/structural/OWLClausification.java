@@ -158,10 +158,10 @@ public class OWLClausification {
         return new Object[] { objectPropertyInclusionManager,dlOntology };
     }
     public DLOntology clausify(OWLDataFactory factory,String ontologyIRI,OWLAxioms axioms,OWLAxiomsExpressivity axiomsExpressivity,Collection<DescriptionGraph> descriptionGraphs) {
-        Set<DLClause> dlClauses=new LinkedHashSet<DLClause>();
-        Set<Atom> positiveFacts=new HashSet<Atom>();
-        Set<Atom> negativeFacts=new HashSet<Atom>();
-        Set<DatatypeRestriction> allUnknownDatatypeRestrictions=new HashSet<DatatypeRestriction>();
+        Set<DLClause> dlClauses= new LinkedHashSet<>();
+        Set<Atom> positiveFacts= new HashSet<>();
+        Set<Atom> negativeFacts= new HashSet<>();
+        Set<DatatypeRestriction> allUnknownDatatypeRestrictions= new HashSet<>();
         for (OWLObjectPropertyExpression[] inclusion : axioms.m_simpleObjectPropertyInclusions) {
             Atom subRoleAtom=getRoleAtom(inclusion[0],X,Y);
             Atom superRoleAtom=getRoleAtom(inclusion[1],X,Y);
@@ -234,13 +234,13 @@ public class OWLClausification {
             fact.accept(factClausifier);
         for (DescriptionGraph descriptionGraph : descriptionGraphs)
             descriptionGraph.produceStartDLClauses(dlClauses);
-        Set<AtomicConcept> atomicConcepts=new HashSet<AtomicConcept>();
-        Set<AtomicRole> atomicObjectRoles=new HashSet<AtomicRole>();
-        Set<Role> complexObjectRoles=new HashSet<Role>();
-        Set<AtomicRole> atomicDataRoles=new HashSet<AtomicRole>();
+        Set<AtomicConcept> atomicConcepts= new HashSet<>();
+        Set<AtomicRole> atomicObjectRoles= new HashSet<>();
+        Set<Role> complexObjectRoles= new HashSet<>();
+        Set<AtomicRole> atomicDataRoles= new HashSet<>();
         for (OWLClass owlClass : axioms.m_classes)
             atomicConcepts.add(AtomicConcept.create(owlClass.getIRI().toString()));
-        Set<Individual> individuals=new HashSet<Individual>();
+        Set<Individual> individuals= new HashSet<>();
         for (OWLNamedIndividual owlIndividual : axioms.m_namedIndividuals) {
             Individual individual=Individual.create(owlIndividual.getIRI().toString());
             individuals.add(individual);
@@ -262,8 +262,8 @@ public class OWLClausification {
         return new DLOntology(ontologyIRI,dlClauses,positiveFacts,negativeFacts,atomicConcepts,atomicObjectRoles,complexObjectRoles,atomicDataRoles,allUnknownDatatypeRestrictions,axioms.m_definedDatatypesIRIs,individuals,axiomsExpressivity.m_hasInverseRoles,axiomsExpressivity.m_hasAtMostRestrictions,axiomsExpressivity.m_hasNominals,axiomsExpressivity.m_hasDatatypes);
     }
     protected DLClause clausifyKey(OWLHasKeyAxiom object) {
-        List<Atom> headAtoms=new ArrayList<Atom>();
-        List<Atom> bodyAtoms=new ArrayList<Atom>();
+        List<Atom> headAtoms= new ArrayList<>();
+        List<Atom> bodyAtoms= new ArrayList<>();
         // we have two named individuals (corresponding to X1 and X2) that
         // might have to be equated
         Variable X2=Variable.create("X2");
@@ -392,8 +392,8 @@ public class OWLClausification {
 
         public NormalizedAxiomClausifier(DataRangeConverter dataRangeConverter,Set<Atom> positiveFacts,OWLDataFactory factory) {
             m_dataRangeConverter=dataRangeConverter;
-            m_headAtoms=new ArrayList<Atom>();
-            m_bodyAtoms=new ArrayList<Atom>();
+            m_headAtoms= new ArrayList<>();
+            m_bodyAtoms= new ArrayList<>();
             m_positiveFacts=positiveFacts;
             m_factory=factory;
         }
@@ -673,8 +673,8 @@ public class OWLClausification {
         public NormalizedDataRangeAxiomClausifier(DataRangeConverter dataRangeConverter,OWLDataFactory factory,Set<String> definedDatatypeIRIs) {
             m_dataRangeConverter=dataRangeConverter;
             m_definedDatatypeIRIs=definedDatatypeIRIs;
-            m_headAtoms=new ArrayList<Atom>();
-            m_bodyAtoms=new ArrayList<Atom>();
+            m_headAtoms= new ArrayList<>();
+            m_bodyAtoms= new ArrayList<>();
             m_factory=factory;
         }
         protected DLClause getDLClause() {
@@ -792,7 +792,7 @@ public class OWLClausification {
             return convertDataRange(object.getDataRange()).getNegation();
         }
         public Object visit(OWLDataOneOf object) {
-            Set<Constant> constants=new HashSet<Constant>();
+            Set<Constant> constants= new HashSet<>();
             for (OWLLiteral literal : object.getValues())
                 constants.add((Constant)literal.accept(this));
             Constant[] constantsArray=new Constant[constants.size()];
@@ -919,7 +919,7 @@ public class OWLClausification {
         protected final List<Atom> m_headAtoms;
         protected final List<Atom> m_bodyAtoms;
         protected final Set<Variable> m_abstractVariables;
-        protected final Set<OWLObjectProperty> m_graphObjectProperties=new HashSet<OWLObjectProperty>();
+        protected final Set<OWLObjectProperty> m_graphObjectProperties= new HashSet<>();
         protected boolean m_containsObjectProperties;
         protected boolean m_containsGraphObjectProperties;
         protected boolean m_containsNonGraphObjectProperties;
@@ -929,9 +929,9 @@ public class OWLClausification {
             m_objectPropertiesOccurringInOWLAxioms=objectPropertiesOccurringInOWLAxioms;
             m_dataRangeConverter=dataRangeConverter;
             m_dlClauses=dlClauses;
-            m_headAtoms=new ArrayList<Atom>();
-            m_bodyAtoms=new ArrayList<Atom>();
-            m_abstractVariables=new HashSet<Variable>();
+            m_headAtoms= new ArrayList<>();
+            m_bodyAtoms= new ArrayList<>();
+            m_abstractVariables= new HashSet<>();
             OWLDataFactory factory=OWLManager.createOWLOntologyManager().getOWLDataFactory();
             for (DescriptionGraph descriptionGraph : descriptionGraphs)
                 for (int i=0;i<descriptionGraph.getNumberOfEdges();i++)
@@ -941,7 +941,7 @@ public class OWLClausification {
                     throw new IllegalArgumentException("Mixing graph and non-graph object properties is not supported.");
         }
         public void processRules(Collection<OWLAxioms.DisjunctiveRule> rules) {
-            List<OWLAxioms.DisjunctiveRule> unprocessedRules=new ArrayList<OWLAxioms.DisjunctiveRule>(rules);
+            List<OWLAxioms.DisjunctiveRule> unprocessedRules= new ArrayList<>(rules);
             boolean changed=true;
             while (!unprocessedRules.isEmpty() && changed) {
                 changed=false;

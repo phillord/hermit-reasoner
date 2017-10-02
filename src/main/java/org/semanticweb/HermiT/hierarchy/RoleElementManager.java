@@ -34,7 +34,7 @@ public class RoleElementManager {
 
     
     protected RoleElementManager() {
-        m_roleToElement=new HashMap<AtomicRole, RoleElement>();
+        m_roleToElement= new HashMap<>();
     }
     public RoleElement getRoleElement(AtomicRole role) {
         if (m_roleToElement.containsKey(role)) 
@@ -63,8 +63,8 @@ public class RoleElementManager {
         
         protected RoleElement(AtomicRole role) {
             m_role=role;
-            m_knownRelations=new HashMap<Individual,Set<Individual>>();
-            m_possibleRelations=new HashMap<Individual,Set<Individual>>();
+            m_knownRelations= new HashMap<>();
+            m_possibleRelations= new HashMap<>();
         }
         public AtomicRole getRole() {
             return m_role;
@@ -92,19 +92,11 @@ public class RoleElementManager {
             addKnown(individual1, individual2);
         }
         public boolean addKnown(Individual individual1, Individual individual2) {
-            Set<Individual> successors=m_knownRelations.get(individual1);
-            if (successors==null) {
-                successors=new HashSet<Individual>();
-                m_knownRelations.put(individual1, successors);
-            }
+            Set<Individual> successors = m_knownRelations.computeIfAbsent(individual1, k -> new HashSet<>());
             return successors.add(individual2);
         }
         public boolean addKnowns(Individual individual, Set<Individual> individuals) {
-            Set<Individual> successors=m_knownRelations.get(individual);
-            if (successors==null) {
-                successors=new HashSet<Individual>();
-                m_knownRelations.put(individual, successors);
-            }
+            Set<Individual> successors = m_knownRelations.computeIfAbsent(individual, k -> new HashSet<>());
             return successors.addAll(individuals);
         }
         public boolean removeKnown(Individual individual1, Individual individual2) {
@@ -118,11 +110,7 @@ public class RoleElementManager {
             return removed;
         }
         public boolean addPossible(Individual individual1, Individual individual2) {
-            Set<Individual> successors=m_possibleRelations.get(individual1);
-            if (successors==null) {
-                successors=new HashSet<Individual>();
-                m_possibleRelations.put(individual1, successors);
-            }
+            Set<Individual> successors = m_possibleRelations.computeIfAbsent(individual1, k -> new HashSet<>());
             return successors.add(individual2);
         }
         public boolean removePossible(Individual individual1, Individual individual2) {
@@ -136,11 +124,7 @@ public class RoleElementManager {
             return removed;
         }
         public boolean addPossibles(Individual individual, Set<Individual> individuals) {
-            Set<Individual> successors=m_possibleRelations.get(individual);
-            if (successors==null) {
-                successors=new HashSet<Individual>();
-                m_possibleRelations.put(individual, successors);
-            }
+            Set<Individual> successors = m_possibleRelations.computeIfAbsent(individual, k -> new HashSet<>());
             return successors.addAll(individuals);
         }
         public String toString() {

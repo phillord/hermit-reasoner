@@ -135,11 +135,11 @@ public class Printing {
             return "indirectly by "+(node.getBlocker()==Node.SIGNATURE_CACHE_BLOCKER ? "signature in cache" : node.getBlocker().getNodeID());
     }
     protected static void printConceptLabel(Debugger debugger,Node node,PrintWriter writer) {
-        TreeSet<AtomicConcept> atomicConceptsCore=new TreeSet<AtomicConcept>(ConceptComparator.INSTANCE);
-        TreeSet<AtomicConcept> atomicConceptsNoncore=new TreeSet<AtomicConcept>(ConceptComparator.INSTANCE);
-        TreeSet<ExistentialConcept> existentialConcepts=new TreeSet<ExistentialConcept>(ConceptComparator.INSTANCE);
-        TreeSet<AtomicNegationConcept> negativeConcepts=new TreeSet<AtomicNegationConcept>(ConceptComparator.INSTANCE);
-        TreeSet<DataRange> dataRanges=new TreeSet<DataRange>(DataRangeComparator.INSTANCE);
+        TreeSet<AtomicConcept> atomicConceptsCore= new TreeSet<>(ConceptComparator.INSTANCE);
+        TreeSet<AtomicConcept> atomicConceptsNoncore= new TreeSet<>(ConceptComparator.INSTANCE);
+        TreeSet<ExistentialConcept> existentialConcepts= new TreeSet<>(ConceptComparator.INSTANCE);
+        TreeSet<AtomicNegationConcept> negativeConcepts= new TreeSet<>(ConceptComparator.INSTANCE);
+        TreeSet<DataRange> dataRanges= new TreeSet<>(DataRangeComparator.INSTANCE);
         ExtensionTable.Retrieval retrieval=debugger.getTableau().getExtensionManager().getBinaryExtensionTable().createRetrieval(new boolean[] { false,true },ExtensionTable.View.TOTAL);
         retrieval.getBindingsBuffer()[1]=node;
         retrieval.open();
@@ -184,7 +184,7 @@ public class Printing {
         }
     }
     protected static void printEdges(Debugger debugger,Node node,PrintWriter writer) {
-        Map<Node,Set<AtomicRole>> outgoingEdges=new TreeMap<Node,Set<AtomicRole>>(NodeComparator.INSTANCE);
+        Map<Node,Set<AtomicRole>> outgoingEdges= new TreeMap<>(NodeComparator.INSTANCE);
         ExtensionTable.Retrieval retrieval=debugger.getTableau().getExtensionManager().getTernaryExtensionTable().createRetrieval(new boolean[] { false,true,false },ExtensionTable.View.TOTAL);
         retrieval.getBindingsBuffer()[1]=node;
         retrieval.open();
@@ -193,11 +193,7 @@ public class Printing {
             if (atomicRoleObject instanceof AtomicRole) {
                 AtomicRole atomicRole=(AtomicRole)retrieval.getTupleBuffer()[0];
                 Node toNode=(Node)retrieval.getTupleBuffer()[2];
-                Set<AtomicRole> set=outgoingEdges.get(toNode);
-                if (set==null) {
-                    set=new TreeSet<AtomicRole>(RoleComparator.INSTANCE);
-                    outgoingEdges.put(toNode,set);
-                }
+                Set<AtomicRole> set = outgoingEdges.computeIfAbsent(toNode, k -> new TreeSet<>(RoleComparator.INSTANCE));
                 set.add(atomicRole);
             }
             retrieval.next();
@@ -206,7 +202,7 @@ public class Printing {
             writer.println("-- Outgoing edges --------------------------------");
             printEdgeMap(debugger,outgoingEdges,writer);
         }
-        Map<Node,Set<AtomicRole>> incomingEdges=new TreeMap<Node,Set<AtomicRole>>(NodeComparator.INSTANCE);
+        Map<Node,Set<AtomicRole>> incomingEdges= new TreeMap<>(NodeComparator.INSTANCE);
         retrieval=debugger.getTableau().getExtensionManager().getTernaryExtensionTable().createRetrieval(new boolean[] { false,false,true },ExtensionTable.View.TOTAL);
         retrieval.getBindingsBuffer()[2]=node;
         retrieval.open();
@@ -215,11 +211,7 @@ public class Printing {
             if (atomicRoleObject instanceof AtomicRole) {
                 AtomicRole atomicRole=(AtomicRole)retrieval.getTupleBuffer()[0];
                 Node fromNode=(Node)retrieval.getTupleBuffer()[1];
-                Set<AtomicRole> set=incomingEdges.get(fromNode);
-                if (set==null) {
-                    set=new TreeSet<AtomicRole>(RoleComparator.INSTANCE);
-                    incomingEdges.put(fromNode,set);
-                }
+                Set<AtomicRole> set = incomingEdges.computeIfAbsent(fromNode, k -> new TreeSet<>(RoleComparator.INSTANCE));
                 set.add(atomicRole);
             }
             retrieval.next();
@@ -311,7 +303,7 @@ public class Printing {
                 throw new IllegalArgumentException();
             }
         }
-        protected static enum ConceptType {
+        protected enum ConceptType {
             AtomicConcept(0),
             AtLeastConcept(1),
             ExistsDescriptionGraph(2), 
@@ -364,7 +356,7 @@ public class Printing {
                 throw new IllegalArgumentException();
             }
         }
-        protected static enum DataRangeType {
+        protected enum DataRangeType {
             DatatypeRestriction(0),
             ConstantEnumeration(1),
             AtomicNegationDataRange(2), 

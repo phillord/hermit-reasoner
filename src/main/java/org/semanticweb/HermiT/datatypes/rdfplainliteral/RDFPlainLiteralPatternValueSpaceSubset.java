@@ -54,7 +54,7 @@ public class RDFPlainLiteralPatternValueSpaceSubset implements ValueSpaceSubset 
         s_nonemptyLangTag=s_separator.concatenate(s_languageTag);
         s_anyLangTag=s_separator.concatenate(s_languageTagOrEmpty);
         s_xsdString=Datatypes.get("string");
-        s_anyDatatype=new HashMap<String,Automaton>();
+        s_anyDatatype= new HashMap<>();
         s_anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"string",s_xsdString.concatenate(s_emptyLangTag));
         s_anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"normalizedString",normalizedStringAutomaton().concatenate(s_emptyLangTag));
         s_anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"token",tokenAutomaton().concatenate(s_emptyLangTag));

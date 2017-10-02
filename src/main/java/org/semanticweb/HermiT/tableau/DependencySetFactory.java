@@ -45,8 +45,8 @@ public final class DependencySetFactory implements Serializable {
 
     public DependencySetFactory() {
         m_mergeArray=new IntegerArray();
-        m_mergeSets=new ArrayList<PermanentDependencySet>();
-        m_unprocessedSets=new ArrayList<UnionDependencySet>();
+        m_mergeSets= new ArrayList<>();
+        m_unprocessedSets= new ArrayList<>();
         clear();
     }
     public int sizeInMemory() {
@@ -195,14 +195,14 @@ public final class DependencySetFactory implements Serializable {
         int newLength=m_entries.length*2;
         int newLengthMinusOne=newLength-1;
         PermanentDependencySet[] newEntries=new PermanentDependencySet[newLength];
-        for (int oldIndex=0;oldIndex<m_entries.length;oldIndex++) {
-            PermanentDependencySet entry=m_entries[oldIndex];
-            while (entry!=null) {
-                PermanentDependencySet nextEntry=entry.m_nextEntry;
-                int newIndex=(entry.m_rest.hashCode()+entry.m_branchingPoint) & newLengthMinusOne;
-                entry.m_nextEntry=newEntries[newIndex];
-                newEntries[newIndex]=entry;
-                entry=nextEntry;
+        for (PermanentDependencySet m_entry : m_entries) {
+            PermanentDependencySet entry = m_entry;
+            while (entry != null) {
+                PermanentDependencySet nextEntry = entry.m_nextEntry;
+                int newIndex = (entry.m_rest.hashCode() + entry.m_branchingPoint) & newLengthMinusOne;
+                entry.m_nextEntry = newEntries[newIndex];
+                newEntries[newIndex] = entry;
+                entry = nextEntry;
             }
         }
         m_entries=newEntries;

@@ -55,9 +55,9 @@ public final class TupleIndex implements Serializable {
     }
     public int addTuple(Object[] tuple,int potentialTupleIndex) {
         int trieNode=m_root;
-        for (int position=0;position<m_indexingSequence.length;position++) {
-            Object object=tuple[m_indexingSequence[position]];
-            trieNode=getChildNodeAddIfNecessary(trieNode,object);
+        for (int aM_indexingSequence : m_indexingSequence) {
+            Object object = tuple[aM_indexingSequence];
+            trieNode = getChildNodeAddIfNecessary(trieNode, object);
         }
         if (m_trieNodeManager.getTrieNodeComponent(trieNode,TRIE_NODE_TUPLE_INDEX)==-1) {
             m_trieNodeManager.setTrieNodeComponent(trieNode,TRIE_NODE_TUPLE_INDEX,potentialTupleIndex);
@@ -68,20 +68,20 @@ public final class TupleIndex implements Serializable {
     }
     public int getTupleIndex(Object[] tuple) {
         int trieNode=m_root;
-        for (int position=0;position<m_indexingSequence.length;position++) {
-            Object object=tuple[m_indexingSequence[position]];
-            trieNode=getChildNode(trieNode,object);
-            if (trieNode==-1)
+        for (int aM_indexingSequence : m_indexingSequence) {
+            Object object = tuple[aM_indexingSequence];
+            trieNode = getChildNode(trieNode, object);
+            if (trieNode == -1)
                 return -1;
         }
         return m_trieNodeManager.getTrieNodeComponent(trieNode,TRIE_NODE_TUPLE_INDEX);
     }
     public int removeTuple(Object[] tuple) {
         int leafTrieNode=m_root;
-        for (int position=0;position<m_indexingSequence.length;position++) {
-            Object object=tuple[m_indexingSequence[position]];
-            leafTrieNode=getChildNode(leafTrieNode,object);
-            if (leafTrieNode==-1)
+        for (int aM_indexingSequence : m_indexingSequence) {
+            Object object = tuple[aM_indexingSequence];
+            leafTrieNode = getChildNode(leafTrieNode, object);
+            if (leafTrieNode == -1)
                 return -1;
         }
         int tupleIndex=m_trieNodeManager.getTrieNodeComponent(leafTrieNode,TRIE_NODE_TUPLE_INDEX);

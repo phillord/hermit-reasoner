@@ -142,11 +142,11 @@ public class OWLNormalization {
         m_factory=factory;
         m_axioms=axioms;
         m_firstReplacementIndex=firstReplacementIndex;
-        m_definitions=new HashMap<OWLClassExpression,OWLClassExpression>();
-        m_definitionsForNegativeNominals=new HashMap<OWLObjectOneOf,OWLClass>();
+        m_definitions= new HashMap<>();
+        m_definitionsForNegativeNominals= new HashMap<>();
         m_expressionManager=new ExpressionManager(m_factory);
         m_plVisitor=new PLVisitor();
-        m_dataRangeDefinitions=new HashMap<OWLDataRange,OWLDatatype>();
+        m_dataRangeDefinitions= new HashMap<>();
     }
     public void processOntology(OWLOntology ontology) {
         // Each entry in the inclusions list represents a disjunction of
@@ -412,9 +412,9 @@ public class OWLNormalization {
         protected final boolean[] m_alreadyExists;
 
         public AxiomVisitor() {
-            m_classExpressionInclusionsAsDisjunctions=new ArrayList<OWLClassExpression[]>();
-            m_dataRangeInclusionsAsDisjunctions=new ArrayList<OWLDataRange[]>();
-            m_rules=new HashSet<SWRLRule>();
+            m_classExpressionInclusionsAsDisjunctions= new ArrayList<>();
+            m_dataRangeInclusionsAsDisjunctions= new ArrayList<>();
+            m_rules= new HashSet<>();
             m_alreadyExists=new boolean[1];
         }
 
@@ -481,7 +481,7 @@ public class OWLNormalization {
         public void visit(OWLDisjointUnionAxiom axiom) {
             // DisjointUnion(C CE1 ... CEn)
             // 1. add C implies CE1 or ... or CEn, which is { not C or CE1 or ... or CEn }
-            Set<OWLClassExpression> inclusion=new HashSet<OWLClassExpression>(axiom.getClassExpressions());
+            Set<OWLClassExpression> inclusion= new HashSet<>(axiom.getClassExpressions());
             inclusion.add(m_expressionManager.getComplementNNF(axiom.getOWLClass()));
             OWLClassExpression[] inclusionArray=new OWLClassExpression[axiom.getClassExpressions().size()+1];
             inclusion.toArray(inclusionArray);
@@ -1056,7 +1056,7 @@ public class OWLNormalization {
             throw new IllegalArgumentException("Error: A rule uses built-in atoms ("+atom+"), but built-in atoms are not supported yet. ");
         }
         public void visit(SWRLSameIndividualAtom atom) {
-            Set<OWLNamedIndividual> inds=new HashSet<OWLNamedIndividual>();
+            Set<OWLNamedIndividual> inds= new HashSet<>();
             for (SWRLArgument arg : atom.getAllArguments()) {
                 if (!(arg instanceof SWRLIndividualArgument))
                     throwVarError(atom);
@@ -1068,7 +1068,7 @@ public class OWLNormalization {
             addFact(m_factory.getOWLSameIndividualAxiom(inds));
         }
         public void visit(SWRLDifferentIndividualsAtom atom) {
-            Set<OWLNamedIndividual> inds=new HashSet<OWLNamedIndividual>();
+            Set<OWLNamedIndividual> inds= new HashSet<>();
             for (SWRLArgument arg : atom.getAllArguments()) {
                 if (!(arg instanceof SWRLIndividualArgument))
                     throwVarError(atom);
@@ -1098,14 +1098,14 @@ public class OWLNormalization {
         protected final Collection<OWLClassExpression[]> m_classExpressionInclusions;
         protected final Collection<OWLDataRange[]> m_dataRangeInclusions;
         protected final boolean[] m_alreadyExists;
-        protected final List<SWRLAtom> m_bodyAtoms=new ArrayList<SWRLAtom>();
-        protected final List<SWRLAtom> m_headAtoms=new ArrayList<SWRLAtom>();
-        protected final Set<SWRLAtom> m_normalizedBodyAtoms=new HashSet<SWRLAtom>();
-        protected final Set<SWRLAtom> m_normalizedHeadAtoms=new HashSet<SWRLAtom>();
-        protected final Map<SWRLVariable,SWRLVariable> m_variableRepresentative=new HashMap<SWRLVariable,SWRLVariable>();
-        protected final Map<OWLNamedIndividual,SWRLVariable> m_individualsToVariables=new HashMap<OWLNamedIndividual,SWRLVariable>();
-        protected final Set<SWRLVariable> m_bodyDataRangeVariables=new HashSet<SWRLVariable>();
-        protected final Set<SWRLVariable> m_headDataRangeVariables=new HashSet<SWRLVariable>();
+        protected final List<SWRLAtom> m_bodyAtoms= new ArrayList<>();
+        protected final List<SWRLAtom> m_headAtoms= new ArrayList<>();
+        protected final Set<SWRLAtom> m_normalizedBodyAtoms= new HashSet<>();
+        protected final Set<SWRLAtom> m_normalizedHeadAtoms= new HashSet<>();
+        protected final Map<SWRLVariable,SWRLVariable> m_variableRepresentative= new HashMap<>();
+        protected final Map<OWLNamedIndividual,SWRLVariable> m_individualsToVariables= new HashMap<>();
+        protected final Set<SWRLVariable> m_bodyDataRangeVariables= new HashSet<>();
+        protected final Set<SWRLVariable> m_headDataRangeVariables= new HashSet<>();
         protected int m_newVariableIndex=0;
         protected boolean m_isPositive;
 

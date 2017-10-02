@@ -54,10 +54,10 @@ public class DerivationHistory extends TableauMonitorAdapter {
     protected final Stack<Atom> m_mergeAtoms;
 
     public DerivationHistory() {
-        m_derivedAtoms=new HashMap<AtomKey,Atom>();
-        m_derivedDisjunctions=new HashMap<GroundDisjunction,Disjunction>();
-        m_derivations=new Stack<Derivation>();
-        m_mergeAtoms=new Stack<Atom>();
+        m_derivedAtoms= new HashMap<>();
+        m_derivedDisjunctions= new HashMap<>();
+        m_derivations= new Stack<>();
+        m_mergeAtoms= new Stack<>();
     }
     public void tableauCleared() {
         m_derivedAtoms.clear();
@@ -155,7 +155,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
         m_derivations.pop();
     }
     public void datatypeConjunctionCheckingStarted(DatatypeChecker<Node> datatypeChecker) {
-        List<Atom> atoms=new ArrayList<Atom>();
+        List<Atom> atoms= new ArrayList<>();
         for (DatatypeChecker.DVariable<Node> variable : datatypeChecker.getActiveVariables()) {
             Node node=variable.getNode();
             for (DatatypeRestriction datatypeRestriction : variable.getPositiveDatatypeRestrictions())
@@ -198,8 +198,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
         public AtomKey(Object[] tuple) {
             m_tuple=tuple;
             int hashCode=0;
-            for (int index=0;index<tuple.length;index++)
-                hashCode+=tuple[index].hashCode();
+            for (Object aTuple : tuple) hashCode += aTuple.hashCode();
             m_hashCode=hashCode;
         }
         public int hashCode() {
@@ -220,7 +219,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
         }
     }
 
-    protected static interface Fact extends Serializable {
+    protected interface Fact extends Serializable {
         String toString(Prefixes prefixes);
         Derivation getDerivation();
     }

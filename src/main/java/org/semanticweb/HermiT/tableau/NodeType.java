@@ -24,7 +24,7 @@ public enum NodeType {
     protected final boolean m_isNITarget;
     protected final boolean m_isAbstract;
     
-    private NodeType(int mergePrecedence,boolean isNITarget,boolean isAbstract) {
+    NodeType(int mergePrecedence, boolean isNITarget, boolean isAbstract) {
         m_mergePrecedence=mergePrecedence;
         m_isNITarget=isNITarget;
         m_isAbstract=isAbstract;

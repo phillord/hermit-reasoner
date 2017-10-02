@@ -120,7 +120,7 @@ public final class Tableau implements Serializable {
             m_descriptionGraphManager=new DescriptionGraphManager(this);
             m_datatypeManager=new DatatypeManager(this);
             m_existentialExpansionStrategy.initialize(this);
-            m_existentialConceptsBuffers=new ArrayList<List<ExistentialConcept>>();
+            m_existentialConceptsBuffers= new ArrayList<>();
             m_useDisjunctionLearning=useDisjunctionLearning;
             m_hasDescriptionGraphs=!m_permanentDLOntology.getAllDescriptionGraphs().isEmpty();
             m_branchingPoints=new BranchingPoint[2];
@@ -257,10 +257,10 @@ public final class Tableau implements Serializable {
     }
     public boolean isSatisfiable(boolean loadAdditionalABox,Set<Atom> perTestPositiveFactsNoDependency,Set<Atom> perTestNegativeFactsNoDependency,Set<Atom> perTestPositiveFactsDummyDependency,Set<Atom> perTestNegativeFactsDummyDependency,Map<Individual,Node> nodesForIndividuals,ReasoningTaskDescription reasoningTaskDescription) {
         boolean loadPermanentABox=m_permanentDLOntology.hasNominals() || (m_additionalDLOntology!=null && m_additionalDLOntology.hasNominals());
-        return isSatisfiable(loadPermanentABox,loadAdditionalABox,perTestPositiveFactsNoDependency,perTestNegativeFactsNoDependency,perTestPositiveFactsDummyDependency,perTestNegativeFactsDummyDependency,new HashMap<Term,Node>(),nodesForIndividuals,reasoningTaskDescription);
+        return isSatisfiable(loadPermanentABox,loadAdditionalABox,perTestPositiveFactsNoDependency,perTestNegativeFactsNoDependency,perTestPositiveFactsDummyDependency,perTestNegativeFactsDummyDependency, new HashMap<>(),nodesForIndividuals,reasoningTaskDescription);
     }
     public boolean isSatisfiable(boolean loadPermanentABox,boolean loadAdditionalABox,Set<Atom> perTestPositiveFactsNoDependency,Set<Atom> perTestNegativeFactsNoDependency,Set<Atom> perTestPositiveFactsDummyDependency,Set<Atom> perTestNegativeFactsDummyDependency,Map<Individual,Node> nodesForIndividuals,ReasoningTaskDescription reasoningTaskDescription) {
-        return isSatisfiable(loadPermanentABox,loadAdditionalABox,perTestPositiveFactsNoDependency,perTestNegativeFactsNoDependency,perTestPositiveFactsDummyDependency,perTestNegativeFactsDummyDependency,new HashMap<Term,Node>(),nodesForIndividuals,reasoningTaskDescription);
+        return isSatisfiable(loadPermanentABox,loadAdditionalABox,perTestPositiveFactsNoDependency,perTestNegativeFactsNoDependency,perTestPositiveFactsDummyDependency,perTestNegativeFactsDummyDependency, new HashMap<>(),nodesForIndividuals,reasoningTaskDescription);
     }
     public boolean isSatisfiable(boolean loadPermanentABox,boolean loadAdditionalABox,Set<Atom> perTestPositiveFactsNoDependency,Set<Atom> perTestNegativeFactsNoDependency,Set<Atom> perTestPositiveFactsDummyDependency,Set<Atom> perTestNegativeFactsDummyDependency,Map<Term,Node> termsToNodes,Map<Individual,Node> nodesForIndividuals,ReasoningTaskDescription reasoningTaskDescription) {
         if (m_tableauMonitor!=null)
@@ -769,7 +769,7 @@ public final class Tableau implements Serializable {
     }
     protected List<ExistentialConcept> getExistentialConceptsBuffer() {
         if (m_existentialConceptsBuffers.isEmpty())
-            return new ArrayList<ExistentialConcept>();
+            return new ArrayList<>();
         else
             return m_existentialConceptsBuffers.remove(m_existentialConceptsBuffers.size()-1);
     }

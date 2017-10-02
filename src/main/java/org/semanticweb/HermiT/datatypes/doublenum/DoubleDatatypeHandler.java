@@ -36,7 +36,7 @@ public class DoubleDatatypeHandler implements DatatypeHandler {
     protected static final ValueSpaceSubset DOUBLE_ENTIRE=new EntireDoubleSubset();
     protected static final ValueSpaceSubset EMPTY_SUBSET=new EmptyDoubleSubset();
     protected static final Set<String> s_managedDatatypeURIs=Collections.singleton(XSD_DOUBLE);
-    protected static final Set<String> s_supportedFacetURIs=new HashSet<String>();
+    protected static final Set<String> s_supportedFacetURIs= new HashSet<>();
     static {
         s_supportedFacetURIs.add(XSD_NS+"minInclusive");
         s_supportedFacetURIs.add(XSD_NS+"minExclusive");
@@ -94,11 +94,10 @@ public class DoubleDatatypeHandler implements DatatypeHandler {
             else {
                 NoNaNDoubleSubset doubleSubset=(NoNaNDoubleSubset)valueSpaceSubset;
                 List<DoubleInterval> oldIntervals=doubleSubset.m_intervals;
-                List<DoubleInterval> newIntervals=new ArrayList<DoubleInterval>();
-                for (int index=0;index<oldIntervals.size();index++) {
-                    DoubleInterval oldInterval=oldIntervals.get(index);
-                    DoubleInterval intersection=oldInterval.intersectWith(interval);
-                    if (intersection!=null)
+                List<DoubleInterval> newIntervals= new ArrayList<>();
+                for (DoubleInterval oldInterval : oldIntervals) {
+                    DoubleInterval intersection = oldInterval.intersectWith(interval);
+                    if (intersection != null)
                         newIntervals.add(intersection);
                 }
                 if (newIntervals.isEmpty())
@@ -117,7 +116,7 @@ public class DoubleDatatypeHandler implements DatatypeHandler {
             if (interval==null)
                 return valueSpaceSubset;
             else if (valueSpaceSubset==DOUBLE_ENTIRE) {
-                List<DoubleInterval> newIntervals=new ArrayList<DoubleInterval>();
+                List<DoubleInterval> newIntervals= new ArrayList<>();
                 if (!DoubleInterval.areIdentical(interval.m_lowerBoundInclusive,Double.NEGATIVE_INFINITY))
                     newIntervals.add(new DoubleInterval(Double.NEGATIVE_INFINITY,DoubleInterval.previousDouble(interval.m_lowerBoundInclusive)));
                 if (!DoubleInterval.areIdentical(interval.m_upperBoundInclusive,Double.POSITIVE_INFINITY))
@@ -136,17 +135,16 @@ public class DoubleDatatypeHandler implements DatatypeHandler {
                 if (!DoubleInterval.areIdentical(interval.m_upperBoundInclusive,Double.POSITIVE_INFINITY))
                     complementInterval2=new DoubleInterval(DoubleInterval.nextDouble(interval.m_upperBoundInclusive),Double.POSITIVE_INFINITY);
                 List<DoubleInterval> oldIntervals=doubleSubset.m_intervals;
-                List<DoubleInterval> newIntervals=new ArrayList<DoubleInterval>();
-                for (int index=0;index<oldIntervals.size();index++) {
-                    DoubleInterval oldInterval=oldIntervals.get(index);
-                    if (complementInterval1!=null) {
-                        DoubleInterval intersection=oldInterval.intersectWith(complementInterval1);
-                        if (intersection!=null)
+                List<DoubleInterval> newIntervals= new ArrayList<>();
+                for (DoubleInterval oldInterval : oldIntervals) {
+                    if (complementInterval1 != null) {
+                        DoubleInterval intersection = oldInterval.intersectWith(complementInterval1);
+                        if (intersection != null)
                             newIntervals.add(intersection);
                     }
-                    if (complementInterval2!=null) {
-                        DoubleInterval intersection=oldInterval.intersectWith(complementInterval2);
-                        if (intersection!=null)
+                    if (complementInterval2 != null) {
+                        DoubleInterval intersection = oldInterval.intersectWith(complementInterval2);
+                        if (intersection != null)
                             newIntervals.add(intersection);
                     }
                 }

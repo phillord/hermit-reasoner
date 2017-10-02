@@ -35,10 +35,10 @@ import org.semanticweb.HermiT.tableau.Tableau;
 public class ValidatedPairwiseDirectBlockingChecker implements DirectBlockingChecker,Serializable {
     private static final long serialVersionUID=9093753046859877016L;
 
-    protected final SetFactory<AtomicConcept> m_atomicConceptsSetFactory=new SetFactory<AtomicConcept>();
-    protected final SetFactory<AtomicRole> m_atomicRolesSetFactory=new SetFactory<AtomicRole>();
-    protected final List<AtomicConcept> m_atomicConceptsBuffer=new ArrayList<AtomicConcept>();
-    protected final List<AtomicRole> m_atomicRolesBuffer=new ArrayList<AtomicRole>();
+    protected final SetFactory<AtomicConcept> m_atomicConceptsSetFactory= new SetFactory<>();
+    protected final SetFactory<AtomicRole> m_atomicRolesSetFactory= new SetFactory<>();
+    protected final List<AtomicConcept> m_atomicConceptsBuffer= new ArrayList<>();
+    protected final List<AtomicRole> m_atomicRolesBuffer= new ArrayList<>();
     protected final boolean m_hasInverses;
     protected Tableau m_tableau;
     protected ExtensionTable.Retrieval m_binaryTableSearch1Bound;

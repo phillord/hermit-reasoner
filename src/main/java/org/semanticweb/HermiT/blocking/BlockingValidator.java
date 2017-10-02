@@ -56,10 +56,10 @@ public class BlockingValidator {
     protected final List<DLClauseInfo> m_dlClauseInfos;
     protected final Map<AtomicConcept,List<DLClauseInfo>> m_dlClauseInfosByXConcepts;
     protected final List<DLClauseInfo> m_dlClauseInfosWithoutXConcepts;
-    public Map<AtLeastConcept,Node> inValidAtleastForBlockedParent=new HashMap<AtLeastConcept, Node>();
-    public Map<DLClauseInfo,Node> inValidClausesForBlockedParent=new HashMap<DLClauseInfo, Node>();
-    public Map<AtLeastConcept,Node> inValidAtleastForBlocker=new HashMap<AtLeastConcept, Node>();
-    public Map<DLClauseInfo,Node> inValidClausesForBlocker=new HashMap<DLClauseInfo, Node>();
+    public Map<AtLeastConcept,Node> inValidAtleastForBlockedParent= new HashMap<>();
+    public Map<DLClauseInfo,Node> inValidClausesForBlockedParent= new HashMap<>();
+    public Map<AtLeastConcept,Node> inValidAtleastForBlocker= new HashMap<>();
+    public Map<DLClauseInfo,Node> inValidClausesForBlocker= new HashMap<>();
     protected final boolean debuggingMode=false;
 
 
@@ -70,7 +70,7 @@ public class BlockingValidator {
         m_ternaryRetrieval02Bound=m_extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,false,true }, ExtensionTable.View.TOTAL);
         m_ternaryRetrieval1Bound=m_extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { false,true,false }, ExtensionTable.View.TOTAL);
         m_ternaryRetrieval2Bound=m_extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { false,false,true }, ExtensionTable.View.TOTAL);
-        m_dlClauseInfos=new ArrayList<DLClauseInfo>();
+        m_dlClauseInfos= new ArrayList<>();
         for (DLClause dlClause : dlClauses) {
             if (dlClause.isGeneralConceptInclusion()) {
                 DLClauseInfo clauseInfo=new DLClauseInfo(dlClause,m_extensionManager);
@@ -78,18 +78,14 @@ public class BlockingValidator {
                     m_dlClauseInfos.add(clauseInfo);
             }
         }
-        m_dlClauseInfosByXConcepts=new HashMap<AtomicConcept,List<DLClauseInfo>>();
-        m_dlClauseInfosWithoutXConcepts=new ArrayList<DLClauseInfo>();
+        m_dlClauseInfosByXConcepts= new HashMap<>();
+        m_dlClauseInfosWithoutXConcepts= new ArrayList<>();
         for (DLClauseInfo dlClauseInfo : m_dlClauseInfos) {
             if (dlClauseInfo.m_xConcepts.length==0)
                 m_dlClauseInfosWithoutXConcepts.add(dlClauseInfo);
             else {
                 for (AtomicConcept xConcept : dlClauseInfo.m_xConcepts) {
-                    List<DLClauseInfo> dlClauseInfosForXConcept=m_dlClauseInfosByXConcepts.get(xConcept);
-                    if (dlClauseInfosForXConcept==null) {
-                        dlClauseInfosForXConcept=new ArrayList<DLClauseInfo>();
-                        m_dlClauseInfosByXConcepts.put(xConcept,dlClauseInfosForXConcept);
-                    }
+                    List<DLClauseInfo> dlClauseInfosForXConcept = m_dlClauseInfosByXConcepts.computeIfAbsent(xConcept, k -> new ArrayList<>());
                     dlClauseInfosForXConcept.add(dlClauseInfo);
                 }
             }
@@ -381,7 +377,7 @@ public class BlockingValidator {
         }
         retrieval.open();
         Object[] tupleBuffer=retrieval.getTupleBuffer();
-        List<Node> possiblyInvalidlyBlocked=new ArrayList<Node>();
+        List<Node> possiblyInvalidlyBlocked= new ArrayList<>();
         while (!retrieval.afterLast()&&suitableSuccessors<requiredSuccessors) {
             Node rSuccessor=(Node)tupleBuffer[position];
             if (rSuccessor.isBlocked()&&!((ValidatedBlockingObject)rSuccessor.getBlockingObject()).blockViolatesParentConstraints()) {
@@ -551,13 +547,13 @@ public class BlockingValidator {
             // TODO: We'll sort our variables by names. This introduces a dependency
             // to clausification. That's ugly and should be fixed later.
             Variable X=Variable.create("X");
-            Set<AtomicConcept> xConcepts=new HashSet<AtomicConcept>();
-            Set<AtomicRole> x2xRoles=new HashSet<AtomicRole>();
-            Set<Variable> ys=new HashSet<Variable>();
-            Map<Variable,Set<AtomicConcept>> y2concepts=new HashMap<Variable, Set<AtomicConcept>>();
-            Map<Variable,Set<AtomicConcept>> z2concepts=new HashMap<Variable, Set<AtomicConcept>>();
-            Map<Variable,Set<AtomicRole>> x2yRoles=new HashMap<Variable, Set<AtomicRole>>();
-            Map<Variable,Set<AtomicRole>> y2xRoles=new HashMap<Variable, Set<AtomicRole>>();
+            Set<AtomicConcept> xConcepts= new HashSet<>();
+            Set<AtomicRole> x2xRoles= new HashSet<>();
+            Set<Variable> ys= new HashSet<>();
+            Map<Variable,Set<AtomicConcept>> y2concepts= new HashMap<>();
+            Map<Variable,Set<AtomicConcept>> z2concepts= new HashMap<>();
+            Map<Variable,Set<AtomicRole>> x2yRoles= new HashMap<>();
+            Map<Variable,Set<AtomicRole>> y2xRoles= new HashMap<>();
             // Each atom in the antecedent is of the form A(x), R(x,x), R(x,yi), R(yi,x), A(yi), or A(zj).
             for (int i=0;i<dlClause.getBodyLength();i++) {
                 Atom atom=dlClause.getBodyAtom(i);
@@ -572,7 +568,7 @@ public class BlockingValidator {
                         if (y2concepts.containsKey(var1))
                             y2concepts.get(var1).add((AtomicConcept)predicate);
                         else {
-                            Set<AtomicConcept> concepts=new HashSet<AtomicConcept>();
+                            Set<AtomicConcept> concepts= new HashSet<>();
                             concepts.add((AtomicConcept)predicate);
                             y2concepts.put(var1, concepts);
                         }
@@ -583,7 +579,7 @@ public class BlockingValidator {
                             concepts.add((AtomicConcept)predicate);
                         }
                         else {
-                            Set<AtomicConcept> concepts=new HashSet<AtomicConcept>();
+                            Set<AtomicConcept> concepts= new HashSet<>();
                             concepts.add((AtomicConcept)predicate);
                             z2concepts.put(var1, concepts);
                         }
@@ -601,7 +597,7 @@ public class BlockingValidator {
                             if (x2yRoles.containsKey(var2))
                                 x2yRoles.get(var2).add((AtomicRole)predicate);
                             else {
-                                Set<AtomicRole> roles=new HashSet<AtomicRole>();
+                                Set<AtomicRole> roles= new HashSet<>();
                                 roles.add((AtomicRole)predicate);
                                 x2yRoles.put(var2,roles);
                             }
@@ -615,7 +611,7 @@ public class BlockingValidator {
                             if (y2xRoles.containsKey(var1))
                                 y2xRoles.get(var1).add((AtomicRole)predicate);
                             else {
-                                Set<AtomicRole> roles=new HashSet<AtomicRole>();
+                                Set<AtomicRole> roles= new HashSet<>();
                                 roles.add((AtomicRole)predicate);
                                 y2xRoles.put(var1,roles);
                             }
@@ -866,9 +862,9 @@ public class BlockingValidator {
         }
     }
 
-    protected static enum ArgumentType { XVAR,YVAR,ZVAR }
+    protected enum ArgumentType { XVAR,YVAR,ZVAR }
 
-    protected static interface ConsequenceAtom {
+    protected interface ConsequenceAtom {
         boolean isSatisfied(ExtensionManager extensionManager,DLClauseInfo dlClauseInfo,Node blockedX);
     }
 

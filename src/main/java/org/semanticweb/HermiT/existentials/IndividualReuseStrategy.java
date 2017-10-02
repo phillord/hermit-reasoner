@@ -50,10 +50,10 @@ public class IndividualReuseStrategy extends AbstractExpansionStrategy implement
     public IndividualReuseStrategy(BlockingStrategy strategy,boolean isDeterministic) {
         super(strategy,true);
         m_isDeterministic=isDeterministic;
-        m_reusedNodes=new HashMap<AtomicConcept,NodeBranchingPointPair>();
-        m_doReuseConceptsAlways=new HashSet<AtomicConcept>();
-        m_dontReuseConceptsThisRun=new HashSet<AtomicConcept>();
-        m_dontReuseConceptsEver=new HashSet<AtomicConcept>();
+        m_reusedNodes= new HashMap<>();
+        m_doReuseConceptsAlways= new HashSet<>();
+        m_dontReuseConceptsThisRun= new HashSet<>();
+        m_dontReuseConceptsEver= new HashSet<>();
         m_reuseBacktrackingTable=new TupleTable(1);
         m_auxiliaryBuffer=new Object[1];
         m_indicesByBranchingPoint=new int[10];

@@ -50,7 +50,7 @@ public class Prefixes implements Serializable {
     protected static final Pattern s_localNameChecker=Pattern.compile("("+PN_CHARS_BASE+"|_|[0-9])(("+PN_CHARS+"|[.])*("+PN_CHARS+"))?");
     public static final Map<String,String> s_semanticWebPrefixes;
     static {
-        s_semanticWebPrefixes=new HashMap<String,String>();
+        s_semanticWebPrefixes= new HashMap<>();
         s_semanticWebPrefixes.put("rdf:","http://www.w3.org/1999/02/22-rdf-syntax-ns#");
         s_semanticWebPrefixes.put("rdfs:","http://www.w3.org/2000/01/rdf-schema#");
         s_semanticWebPrefixes.put("owl:","http://www.w3.org/2002/07/owl#");
@@ -67,12 +67,12 @@ public class Prefixes implements Serializable {
     protected Pattern m_prefixIRIMatchingPattern;
 
     public Prefixes() {
-        m_prefixIRIsByPrefixName=new TreeMap<String,String>();
-        m_prefixNamesByPrefixIRI=new TreeMap<String,String>();
+        m_prefixIRIsByPrefixName= new TreeMap<>();
+        m_prefixNamesByPrefixIRI= new TreeMap<>();
         buildPrefixIRIMatchingPattern();
     }
     protected void buildPrefixIRIMatchingPattern() {
-        List<String> list=new ArrayList<String>(m_prefixNamesByPrefixIRI.keySet());
+        List<String> list= new ArrayList<>(m_prefixNamesByPrefixIRI.keySet());
         // Sort the prefix IRIs, longest first
         Collections.sort(list,new Comparator<String>() {
             public int compare(String lhs,String rhs) {

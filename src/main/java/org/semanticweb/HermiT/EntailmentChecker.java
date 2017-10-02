@@ -96,7 +96,7 @@ import org.semanticweb.owlapi.model.SWRLRule;
 public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
     private final OWLDataFactory factory;
     private final Reasoner reasoner;
-    protected Set<OWLAxiom> anonymousIndividualAxioms=new HashSet<OWLAxiom>();
+    protected Set<OWLAxiom> anonymousIndividualAxioms= new HashSet<>();
 
     public EntailmentChecker(Reasoner reasoner,OWLDataFactory factory) {
         this.reasoner=reasoner;
@@ -179,7 +179,7 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
         // see OWL 2 Syntax, Sec 11.2
         // No axiom in Ax of the following form contains anonymous individuals:
         // SameIndividual, DifferentIndividuals, NegativeObjectPropertyAssertion, and NegativeDataPropertyAssertion.
-        ArrayList<OWLIndividual> list=new ArrayList<OWLIndividual>(axiom.getIndividuals());
+        ArrayList<OWLIndividual> list= new ArrayList<>(axiom.getIndividuals());
         for (OWLIndividual i : list) {
             if (i.isAnonymous()) {
                 throw new IllegalArgumentException("OWLDifferentIndividualsAxiom axioms are not allowed to be used "+"with anonymous individuals (see OWL 2 Syntax Sec 11.2) but the axiom "+axiom+" cotains an anonymous individual. ");
@@ -403,13 +403,13 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
     public Boolean visit(OWLDisjointUnionAxiom axiom) {
         // C = C1 or ... or Cn, for 1 <= i < j <= n: Ci and Cj -> bottom
         OWLClass c=axiom.getOWLClass();
-        Set<OWLClassExpression> cs=new HashSet<OWLClassExpression>(axiom.getClassExpressions());
+        Set<OWLClassExpression> cs= new HashSet<>(axiom.getClassExpressions());
         cs.add(factory.getOWLObjectComplementOf(c));
         OWLClassExpression incl1=factory.getOWLObjectUnionOf(cs);
         OWLClassExpression incl2=factory.getOWLObjectUnionOf(factory.getOWLObjectComplementOf(factory.getOWLObjectUnionOf(axiom.getClassExpressions())),c);
         // incl1: not C or C1 or ... or Cn
         // incl2: not(C1 or ... or Cn) or C
-        Set<OWLClassExpression> conjuncts=new HashSet<OWLClassExpression>();
+        Set<OWLClassExpression> conjuncts= new HashSet<>();
         conjuncts.add(incl1);
         conjuncts.add(incl2);
         int n=axiom.getClassExpressions().size();
@@ -464,7 +464,7 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
         OWLDataFactory factory=ontologyManager.getOWLDataFactory();
         OWLIndividual individualA=factory.getOWLNamedIndividual(IRI.create("internal:named-fresh-individual-A"));
         OWLIndividual individualB=factory.getOWLNamedIndividual(IRI.create("internal:named-fresh-individual-B"));
-        Set<OWLAxiom> axioms=new HashSet<OWLAxiom>();
+        Set<OWLAxiom> axioms= new HashSet<>();
         axioms.add(factory.getOWLClassAssertionAxiom(axiom.getClassExpression(),individualA));
         axioms.add(factory.getOWLClassAssertionAxiom(axiom.getClassExpression(),individualB));
         int i=0;
@@ -499,19 +499,19 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
         // - for each anonymous individual _:x that is a root in F, the set Ax contains at most one assertion of the
         // form ObjectPropertyAssertion( OPE _:x a ) or ObjectPropertyAssertion( OPE a _:x ).
 
-        protected final Set<OWLNamedIndividual> namedNodes=new HashSet<OWLNamedIndividual>();
-        protected final Set<OWLAnonymousIndividual> nodes=new HashSet<OWLAnonymousIndividual>();
+        protected final Set<OWLNamedIndividual> namedNodes= new HashSet<>();
+        protected final Set<OWLAnonymousIndividual> nodes= new HashSet<>();
         // that is the forest we are trying to construct
-        protected final Map<OWLAnonymousIndividual,Set<OWLAnonymousIndividual>> edges=new HashMap<OWLAnonymousIndividual,Set<OWLAnonymousIndividual>>();
+        protected final Map<OWLAnonymousIndividual,Set<OWLAnonymousIndividual>> edges= new HashMap<>();
         // the following map determines which anonymous individual nodes are reachable from the named individuals
-        protected final Map<OWLAnonymousIndividual,Map<OWLNamedIndividual,Set<OWLObjectPropertyExpression>>> specialOPEdges=new HashMap<OWLAnonymousIndividual,Map<OWLNamedIndividual,Set<OWLObjectPropertyExpression>>>();
+        protected final Map<OWLAnonymousIndividual,Map<OWLNamedIndividual,Set<OWLObjectPropertyExpression>>> specialOPEdges= new HashMap<>();
         // node labels for the anonymous individual forest
-        protected final Map<OWLAnonymousIndividual,Set<OWLClassExpression>> nodelLabels=new HashMap<OWLAnonymousIndividual,Set<OWLClassExpression>>();
+        protected final Map<OWLAnonymousIndividual,Set<OWLClassExpression>> nodelLabels= new HashMap<>();
         // edge labels for the anonymous individual forest
-        protected final Map<Edge,OWLObjectProperty> edgeOPLabels=new HashMap<Edge,OWLObjectProperty>();
+        protected final Map<Edge,OWLObjectProperty> edgeOPLabels= new HashMap<>();
 
-        protected final Set<OWLAxiom> anonIndAxioms=new HashSet<OWLAxiom>();
-        protected final Set<OWLAxiom> anonNoNamedIndAxioms=new HashSet<OWLAxiom>();
+        protected final Set<OWLAxiom> anonIndAxioms= new HashSet<>();
+        protected final Set<OWLAxiom> anonNoNamedIndAxioms= new HashSet<>();
 
         /**
          * @param factory
@@ -610,7 +610,7 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
                     return factory.getOWLObjectIntersectionOf(nodelLabels.get(node));
                 }
             }
-            Set<OWLClassExpression> concepts=new HashSet<OWLClassExpression>();
+            Set<OWLClassExpression> concepts= new HashSet<>();
             for (OWLAnonymousIndividual successor : successors) {
                 OWLObjectProperty op;
                 Edge pair=new Edge(node,successor);
@@ -632,7 +632,7 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
         }
 
         protected Map<Set<OWLAnonymousIndividual>,OWLAnonymousIndividual> findSuitableRoots(Set<Set<OWLAnonymousIndividual>> components) {
-            Map<Set<OWLAnonymousIndividual>,OWLAnonymousIndividual> componentsToRoots=new HashMap<Set<OWLAnonymousIndividual>,OWLAnonymousIndividual>();
+            Map<Set<OWLAnonymousIndividual>,OWLAnonymousIndividual> componentsToRoots= new HashMap<>();
             for (Set<OWLAnonymousIndividual> component : components) {
                 // We have to find a node with at most one relation to the named individuals
                 // if there is one with exactly one relation that is a bit nicer for the rolling-up
@@ -662,17 +662,17 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
             return componentsToRoots;
         }
         protected Set<Set<OWLAnonymousIndividual>> getComponents() {
-            Set<Set<OWLAnonymousIndividual>> components=new HashSet<Set<OWLAnonymousIndividual>>();
+            Set<Set<OWLAnonymousIndividual>> components= new HashSet<>();
             if (nodes.isEmpty())
                 return components;
 
             Set<OWLAnonymousIndividual> toProcess=nodes;
             Set<OWLAnonymousIndividual> currentComponent;
-            List<Edge> workQueue=new ArrayList<Edge>();
+            List<Edge> workQueue= new ArrayList<>();
             Edge nodePlusPredecessor;
 
             while (!toProcess.isEmpty()) {
-                currentComponent=new HashSet<OWLAnonymousIndividual>();
+                currentComponent= new HashSet<>();
                 nodePlusPredecessor=new Edge(toProcess.iterator().next(),null);
                 workQueue.add(nodePlusPredecessor);
                 while (!workQueue.isEmpty()) {
@@ -712,7 +712,7 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
                     nodelLabels.get(node).add(axiom.getClassExpression());
                 }
                 else {
-                    Set<OWLClassExpression> label=new HashSet<OWLClassExpression>();
+                    Set<OWLClassExpression> label= new HashSet<>();
                     label.add(axiom.getClassExpression());
                     nodelLabels.put(node.asOWLAnonymousIndividual(),label);
                 }
@@ -742,16 +742,16 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
                         specialEdges.get(named).add(ope);
                     }
                     else {
-                        specialEdges=new HashMap<OWLNamedIndividual,Set<OWLObjectPropertyExpression>>();
-                        Set<OWLObjectPropertyExpression> label=new HashSet<OWLObjectPropertyExpression>();
+                        specialEdges= new HashMap<>();
+                        Set<OWLObjectPropertyExpression> label= new HashSet<>();
                         label.add(ope);
                         specialEdges.put(named,label);
                         specialOPEdges.put(unnamed,specialEdges);
                     }
                 }
                 else {
-                    Map<OWLNamedIndividual,Set<OWLObjectPropertyExpression>> specialEdge=new HashMap<OWLNamedIndividual,Set<OWLObjectPropertyExpression>>();
-                    Set<OWLObjectPropertyExpression> label=new HashSet<OWLObjectPropertyExpression>();
+                    Map<OWLNamedIndividual,Set<OWLObjectPropertyExpression>> specialEdge= new HashMap<>();
+                    Set<OWLObjectPropertyExpression> label= new HashSet<>();
                     label.add(ope);
                     specialEdge.put(named,label);
                     specialOPEdges.put(unnamed,specialEdge);
@@ -781,7 +781,7 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
                     edges.get(subAnon).add(objAnon);
                 }
                 else {
-                    Set<OWLAnonymousIndividual> successors=new HashSet<OWLAnonymousIndividual>();
+                    Set<OWLAnonymousIndividual> successors= new HashSet<>();
                     successors.add(objAnon);
                     edges.put(subAnon,successors);
                 }
@@ -789,7 +789,7 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
                     edges.get(objAnon).add(subAnon);
                 }
                 else {
-                    Set<OWLAnonymousIndividual> successors=new HashSet<OWLAnonymousIndividual>();
+                    Set<OWLAnonymousIndividual> successors= new HashSet<>();
                     successors.add(subAnon);
                     edges.put(objAnon,successors);
                 }
@@ -807,7 +807,7 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
                 nodelLabels.get(sub).add(c);
             }
             else {
-                Set<OWLClassExpression> labels=new HashSet<OWLClassExpression>();
+                Set<OWLClassExpression> labels= new HashSet<>();
                 labels.add(c);
                 nodelLabels.put(sub,labels);
             }

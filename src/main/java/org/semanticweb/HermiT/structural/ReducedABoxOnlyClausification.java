@@ -72,9 +72,9 @@ public class ReducedABoxOnlyClausification extends OWLAxiomVisitorAdapter {
         m_allAtomicConcepts=allAtomicConcepts;
         m_allAtomicObjectRoles=allAtomicObjectRoles;
         m_allAtomicDataRoles=allAtomicDataRoles;
-        m_positiveFacts=new HashSet<Atom>();
-        m_negativeFacts=new HashSet<Atom>();
-        m_allIndividuals=new HashSet<Individual>();
+        m_positiveFacts= new HashSet<>();
+        m_negativeFacts= new HashSet<>();
+        m_allIndividuals= new HashSet<>();
     }
     public void clausify(OWLIndividualAxiom... axioms) {
         m_positiveFacts.clear();

@@ -107,33 +107,33 @@ public class InstanceManager {
             m_reasoner=reasoner;
             m_tableauMonitor=m_reasoner.getTableau().getTableauMonitor();
             DLOntology dlo=m_reasoner.getDLOntology();
-            m_individuals=new ArrayList<Individual>(dlo.getAllIndividuals()).toArray(new Individual[0]);
-            m_complexRoles=new HashSet<AtomicRole>();
-            m_individualToEquivalenceClass=new HashMap<Individual, Set<Individual>>();
-            m_nodesForIndividuals=new HashMap<Individual,Node>();
+            m_individuals= new ArrayList<>(dlo.getAllIndividuals()).toArray(new Individual[0]);
+            m_complexRoles= new HashSet<>();
+            m_individualToEquivalenceClass= new HashMap<>();
+            m_nodesForIndividuals= new HashMap<>();
             for (Individual individual : m_individuals) {
                 m_nodesForIndividuals.put(individual,null);
-                Set<Individual> equivalentIndividuals=new HashSet<Individual>();
+                Set<Individual> equivalentIndividuals= new HashSet<>();
                 equivalentIndividuals.add(individual);
                 m_individualToEquivalenceClass.put(individual, equivalentIndividuals);
                 m_interruptFlag.checkInterrupt();
             }
-            m_individualsForNodes=new HashMap<Node,Individual>();
-            m_canonicalNodeToDetMergedNodes=new HashMap<Node,Set<Node>>();
-            m_canonicalNodeToNonDetMergedNodes=new HashMap<Node,Set<Node>>();
+            m_individualsForNodes= new HashMap<>();
+            m_canonicalNodeToDetMergedNodes= new HashMap<>();
+            m_canonicalNodeToNonDetMergedNodes= new HashMap<>();
             m_individualToPossibleEquivalenceClass=null;
 
             m_topConcept=AtomicConcept.THING;
             m_bottomConcept=AtomicConcept.NOTHING;
-            m_conceptToElement=new HashMap<AtomicConcept, AtomicConceptElement>();
+            m_conceptToElement= new HashMap<>();
             m_conceptToElement.put(m_topConcept, new AtomicConceptElement(null, null));
             Graph<AtomicConcept> knownConceptSubsumptions=null;
             Set<AtomicConcept> atomicConcepts=null;
             if (atomicConceptHierarchy!=null)
                 setToClassifiedConceptHierarchy(atomicConceptHierarchy);
             else {
-                knownConceptSubsumptions=new Graph<AtomicConcept>();
-                atomicConcepts=new HashSet<AtomicConcept>();
+                knownConceptSubsumptions= new Graph<>();
+                atomicConcepts= new HashSet<>();
                 atomicConcepts.add(m_topConcept);
                 atomicConcepts.add(m_bottomConcept);
                 for (AtomicConcept atomicConcept : dlo.getAllAtomicConcepts()) {
@@ -162,8 +162,8 @@ public class InstanceManager {
                         m_complexRoles.add((AtomicRole)role);
             }
             else {
-                knownRoleSubsumptions=new Graph<Role>();
-                roles=new HashSet<Role>();
+                knownRoleSubsumptions= new Graph<>();
+                roles= new HashSet<>();
                 roles.add(AtomicRole.TOP_OBJECT_ROLE);
                 roles.add(AtomicRole.BOTTOM_OBJECT_ROLE);
                 roles.addAll(dlo.getAllAtomicObjectRoles());
@@ -235,9 +235,9 @@ public class InstanceManager {
         }
     }
     protected Hierarchy<AtomicConcept> buildTransitivelyReducedConceptHierarchy(Graph<AtomicConcept> knownSubsumptions) {
-        final Map<AtomicConcept,GraphNode<AtomicConcept>> allSubsumers=new HashMap<AtomicConcept,GraphNode<AtomicConcept>>();
+        final Map<AtomicConcept,GraphNode<AtomicConcept>> allSubsumers= new HashMap<>();
         for (AtomicConcept element : knownSubsumptions.getElements())
-            allSubsumers.put(element,new GraphNode<AtomicConcept>(element,knownSubsumptions.getSuccessors(element)));
+            allSubsumers.put(element, new GraphNode<>(element, knownSubsumptions.getSuccessors(element)));
         m_interruptFlag.checkInterrupt();
         return DeterministicClassification.buildHierarchy(m_topConcept,m_bottomConcept,allSubsumers);
     }
@@ -248,14 +248,14 @@ public class InstanceManager {
                 for (HierarchyNode<AtomicConcept> node : m_currentConceptHierarchy.getAllNodesSet()) {
                     if (node.m_representative!=m_bottomConcept) {
                         AtomicConcept representativeConcept=node.getRepresentative();
-                        Set<Individual> known=new HashSet<Individual>();
+                        Set<Individual> known= new HashSet<>();
                         Set<Individual> possible=null;
                         for (AtomicConcept concept : node.getEquivalentElements()) {
                             if (m_conceptToElement.containsKey(concept)) {
                                 AtomicConceptElement element=m_conceptToElement.get(concept);
                                 known.addAll(element.m_knownInstances);
                                 if (possible==null)
-                                    possible=new HashSet<Individual>(element.m_possibleInstances);
+                                    possible= new HashSet<>(element.m_possibleInstances);
                                 else
                                     possible.retainAll(element.m_possibleInstances);
                                 m_conceptToElement.remove(concept);
@@ -268,7 +268,7 @@ public class InstanceManager {
                     }
                 }
                 // clean up known and possibles
-                Queue<HierarchyNode<AtomicConcept>> toProcess=new LinkedList<HierarchyNode<AtomicConcept>>();
+                Queue<HierarchyNode<AtomicConcept>> toProcess= new LinkedList<>();
                 toProcess.addAll(m_currentConceptHierarchy.m_bottomNode.m_parentNodes);
                 while (!toProcess.isEmpty()) {
                     HierarchyNode<AtomicConcept> current=toProcess.remove();
@@ -297,9 +297,9 @@ public class InstanceManager {
         }
     }
     protected Hierarchy<RoleElement> buildTransitivelyReducedRoleHierarchy(Graph<Role> knownSubsumptions) {
-        final Map<Role,GraphNode<Role>> allSubsumers=new HashMap<Role,GraphNode<Role>>();
+        final Map<Role,GraphNode<Role>> allSubsumers= new HashMap<>();
         for (Role role : knownSubsumptions.getElements())
-            allSubsumers.put(role,new GraphNode<Role>(role,knownSubsumptions.getSuccessors(role)));
+            allSubsumers.put(role, new GraphNode<>(role, knownSubsumptions.getSuccessors(role)));
         m_interruptFlag.checkInterrupt();
         return transformRoleHierarchy(DeterministicClassification.buildHierarchy(AtomicRole.TOP_OBJECT_ROLE,AtomicRole.BOTTOM_OBJECT_ROLE,allSubsumers));
     }
@@ -323,11 +323,7 @@ public class InstanceManager {
                 for (RoleElement newEquiv : newEquivalentElements) {
                     if (!newEquiv.equals(representative)) {
                         for (Individual individual : newEquiv.m_knownRelations.keySet()) {
-                            Set<Individual> successors=representative.m_knownRelations.get(individual);
-                            if (successors==null) {
-                                successors=new HashSet<Individual>();
-                                representative.m_knownRelations.put(individual, successors);
-                            }
+                            Set<Individual> successors = representative.m_knownRelations.computeIfAbsent(individual, k -> new HashSet<>());
                             successors.addAll(newEquiv.m_knownRelations.get(individual));
                         }
                         for (Individual individual : newEquiv.m_possibleRelations.keySet()) {
@@ -347,17 +343,17 @@ public class InstanceManager {
         return newHierarchy.transform(transformer,null);
     }
     protected Hierarchy<AtomicRole> removeInverses(Hierarchy<Role> hierarchy) {
-        final Map<AtomicRole,GraphNode<AtomicRole>> allSubsumers=new HashMap<AtomicRole,GraphNode<AtomicRole>>();
-        Set<AtomicRole> toProcess=new HashSet<AtomicRole>();
-        Set<AtomicRole> visited=new HashSet<AtomicRole>();
+        final Map<AtomicRole,GraphNode<AtomicRole>> allSubsumers= new HashMap<>();
+        Set<AtomicRole> toProcess= new HashSet<>();
+        Set<AtomicRole> visited= new HashSet<>();
         toProcess.add(m_bottomRoleElement.m_role);
         while (!toProcess.isEmpty()) {
             AtomicRole current=toProcess.iterator().next();
             visited.add(current);
             HierarchyNode<Role> currentNode=hierarchy.getNodeForElement(current);
-            Set<AtomicRole> atomicRepresentatives=new HashSet<AtomicRole>();
+            Set<AtomicRole> atomicRepresentatives= new HashSet<>();
             findNextHierarchyNodeWithAtomic(atomicRepresentatives, currentNode);
-            allSubsumers.put(current,new GraphNode<AtomicRole>(current,atomicRepresentatives));
+            allSubsumers.put(current, new GraphNode<>(current, atomicRepresentatives));
             toProcess.addAll(atomicRepresentatives);
             toProcess.removeAll(visited);
             m_interruptFlag.checkInterrupt();
@@ -378,7 +374,7 @@ public class InstanceManager {
         m_currentRoleHierarchy=transformRoleHierarchy(roleHierarchy);
         // clean up known and possibles
         if (m_propertiesInitialised && m_individuals.length>0) {
-            Queue<HierarchyNode<RoleElement>> toProcess=new LinkedList<HierarchyNode<RoleElement>>();
+            Queue<HierarchyNode<RoleElement>> toProcess= new LinkedList<>();
             toProcess.add(m_currentRoleHierarchy.m_bottomNode);
             while (!toProcess.isEmpty()) {
                 HierarchyNode<RoleElement> current=toProcess.remove();
@@ -422,7 +418,7 @@ public class InstanceManager {
     }
     protected void findNextHierarchyNodeWithAtomic(Set<AtomicRole> atomicRepresentatives, HierarchyNode<Role> current) {
         for (HierarchyNode<Role> successor : current.getParentNodes()) {
-            Set<AtomicRole> suitable=new HashSet<AtomicRole>();
+            Set<AtomicRole> suitable= new HashSet<>();
             for (Role role : successor.getEquivalentElements()) {
                 if (role instanceof AtomicRole)
                     suitable.add((AtomicRole)role);
@@ -436,7 +432,7 @@ public class InstanceManager {
     public OWLAxiom[] getAxiomsForReadingOffCompexProperties(OWLDataFactory factory, ReasonerProgressMonitor monitor, int completedSteps, int steps) {
         if (m_complexRoles.size()>0) {
             int noAdditionalAxioms=0;
-            List<OWLAxiom> additionalAxioms=new ArrayList<OWLAxiom>();
+            List<OWLAxiom> additionalAxioms= new ArrayList<>();
             m_interruptFlag.startTask();
             try {
                 for (;m_currentIndividualIndex<m_individuals.length && noAdditionalAxioms < thresholdForAdditionalAxioms;m_currentIndividualIndex++) {
@@ -496,11 +492,7 @@ public class InstanceManager {
             // read of concept instances and normal role instances only once, we don't slice that
             boolean hasType=readOffTypes(ind,nodeForIndividual);
             if (!hasType) {
-                AtomicConceptElement topElement=m_conceptToElement.get(m_topConcept);
-                if (topElement==null) {
-                    topElement=new AtomicConceptElement(null, null);
-                    m_conceptToElement.put(m_topConcept, topElement);
-                }
+                AtomicConceptElement topElement = m_conceptToElement.computeIfAbsent(m_topConcept, k -> new AtomicConceptElement(null, null));
                 topElement.m_knownInstances.add(ind);
             }
             completedSteps++;
@@ -562,19 +554,11 @@ public class InstanceManager {
                 Node canonicalNode=node.getCanonicalNode();
                 if (node.getCanonicalNodeDependencySet()==null) {
                     // deterministically merged
-                    Set<Node> merged=m_canonicalNodeToDetMergedNodes.get(canonicalNode);
-                    if (merged==null) {
-                        merged=new HashSet<Node>();
-                        m_canonicalNodeToDetMergedNodes.put(canonicalNode,merged);
-                    }
+                    Set<Node> merged = m_canonicalNodeToDetMergedNodes.computeIfAbsent(canonicalNode, k -> new HashSet<>());
                     merged.add(node);
                 } else {
                     // nondeterministically merged
-                    Set<Node> merged=m_canonicalNodeToNonDetMergedNodes.get(canonicalNode);
-                    if (merged==null) {
-                        merged=new HashSet<Node>();
-                        m_canonicalNodeToNonDetMergedNodes.put(canonicalNode,merged);
-                    }
+                    Set<Node> merged = m_canonicalNodeToNonDetMergedNodes.computeIfAbsent(canonicalNode, k -> new HashSet<>());
                     merged.add(node);
                 }
             }
@@ -582,7 +566,7 @@ public class InstanceManager {
         }
     }
     protected void initializeSameAs() {
-        m_individualToPossibleEquivalenceClass=new HashMap<Set<Individual>, Set<Set<Individual>>>();
+        m_individualToPossibleEquivalenceClass= new HashMap<>();
         for (Node node : m_individualsForNodes.keySet()) {
             Node mergedInto=node.getMergedInto();
             if (mergedInto!=null) {
@@ -595,11 +579,7 @@ public class InstanceManager {
                     m_individualToEquivalenceClass.put(individual2, individual1Equivalences);
                 }
                 else {
-                    Set<Set<Individual>> possibleEquivalenceClasses=m_individualToPossibleEquivalenceClass.get(individual1Equivalences);
-                    if (possibleEquivalenceClasses==null) {
-                        possibleEquivalenceClasses=new HashSet<Set<Individual>>();
-                        m_individualToPossibleEquivalenceClass.put(individual1Equivalences,possibleEquivalenceClasses);
-                    }
+                    Set<Set<Individual>> possibleEquivalenceClasses = m_individualToPossibleEquivalenceClass.computeIfAbsent(individual1Equivalences, k -> new HashSet<>());
                     possibleEquivalenceClasses.add(individual2Equivalences);
                 }
             }
@@ -618,11 +598,7 @@ public class InstanceManager {
                 if (!atomicConcept.equals(m_topConcept) && !Prefixes.isInternalIRI(atomicConcept.getIRI())) {
                     HierarchyNode<AtomicConcept> node=m_currentConceptHierarchy.getNodeForElement(atomicConcept);
                     AtomicConcept representative=node.getRepresentative();
-                    AtomicConceptElement element=m_conceptToElement.get(representative);
-                    if (element==null) {
-                        element=new AtomicConceptElement(null, null);
-                        m_conceptToElement.put(representative, element);
-                    }
+                    AtomicConceptElement element = m_conceptToElement.computeIfAbsent(representative, k -> new AtomicConceptElement(null, null));
                     hasBeenAdded=true;
                     if (m_binaryRetrieval1Bound.getDependencySet().isEmpty())
                         addKnownConceptInstance(node, element, ind);
@@ -653,19 +629,19 @@ public class InstanceManager {
                     // determine equivalent and possibly equivalent named nodes for the node
                     Set<Node> equivalentToNode=m_canonicalNodeToDetMergedNodes.get(nodeForIndividual);
                     if (equivalentToNode==null)
-                        equivalentToNode=new HashSet<Node>();
+                        equivalentToNode= new HashSet<>();
                     equivalentToNode.add(nodeForIndividual);
                     Set<Node> possiblyEquivalentToNode=m_canonicalNodeToNonDetMergedNodes.get(nodeForIndividual);
                     if (possiblyEquivalentToNode==null)
-                        possiblyEquivalentToNode=new HashSet<Node>();
+                        possiblyEquivalentToNode= new HashSet<>();
                     // determine equivalent and possibly equivalent named nodes for the successor node
                     Set<Node> equivalentToSuccessor=m_canonicalNodeToDetMergedNodes.get(successorNode);
                     if (equivalentToSuccessor==null)
-                        equivalentToSuccessor=new HashSet<Node>();
+                        equivalentToSuccessor= new HashSet<>();
                     equivalentToSuccessor.add(successorNode);
                     Set<Node> possiblyEquivalentToSuccessor=m_canonicalNodeToNonDetMergedNodes.get(successorNode);
                     if (possiblyEquivalentToSuccessor==null)
-                        possiblyEquivalentToSuccessor=new HashSet<Node>();
+                        possiblyEquivalentToSuccessor= new HashSet<>();
                     
                     for (Node sourceNode : equivalentToNode) {
                         Individual sourceIndividual=m_individualsForNodes.get(sourceNode);
@@ -685,7 +661,7 @@ public class InstanceManager {
                         }
                     }
 
-                    for (Node sourceNode : new HashSet<Node>(possiblyEquivalentToNode)) {
+                    for (Node sourceNode : new HashSet<>(possiblyEquivalentToNode)) {
                         Individual sourceIndividual=m_individualsForNodes.get(sourceNode);
                         possiblyEquivalentToSuccessor.addAll(equivalentToSuccessor);
                         for (Node targetNode : possiblyEquivalentToSuccessor) {
@@ -716,11 +692,11 @@ public class InstanceManager {
                     // determine equivalent and possibly equivalent named nodes for the successor node
                     Set<Node> equivalentToSuccessor=m_canonicalNodeToDetMergedNodes.get(node);
                     if (equivalentToSuccessor==null)
-                        equivalentToSuccessor=new HashSet<Node>();
+                        equivalentToSuccessor= new HashSet<>();
                     equivalentToSuccessor.add(node);
                     Set<Node> possiblyEquivalentToSuccessor=m_canonicalNodeToNonDetMergedNodes.get(node);
                     if (possiblyEquivalentToSuccessor==null)
-                        possiblyEquivalentToSuccessor=new HashSet<Node>();
+                        possiblyEquivalentToSuccessor= new HashSet<>();
                     for (Node targetNode : equivalentToSuccessor) {
                         Individual targetIndividual=m_individualsForNodes.get(targetNode);
                         if (m_binaryRetrieval0Bound.getDependencySet().isEmpty()) {
@@ -838,14 +814,14 @@ public class InstanceManager {
         m_currentRoleHierarchy=null;
     }
     public void realize(ReasonerProgressMonitor monitor) {
-        assert m_usesClassifiedConceptHierarchy==true;
+        assert m_usesClassifiedConceptHierarchy;
         if (m_readingOffFoundPossibleConceptInstance && !m_realizationCompleted) {
             if (monitor!=null)
                 monitor.reasonerTaskStarted("Computing instances for all classes");
             int numHierarchyNodes=m_currentConceptHierarchy.m_nodesByElements.values().size();
             int currentHierarchyNode=0;
-            Queue<HierarchyNode<AtomicConcept>> toProcess=new LinkedList<HierarchyNode<AtomicConcept>>();
-            Set<HierarchyNode<AtomicConcept>> visited=new HashSet<HierarchyNode<AtomicConcept>>();
+            Queue<HierarchyNode<AtomicConcept>> toProcess= new LinkedList<>();
+            Set<HierarchyNode<AtomicConcept>> visited= new HashSet<>();
             toProcess.addAll(m_currentConceptHierarchy.m_bottomNode.m_parentNodes);
             while (!toProcess.isEmpty()) {
                 if (monitor!=null)
@@ -862,7 +838,7 @@ public class InstanceManager {
                             toProcess.add(parent);
                     }
                     if (atomicConceptElement.hasPossibles()) {
-                        Set<Individual> nonInstances=new HashSet<Individual>();
+                        Set<Individual> nonInstances= new HashSet<>();
                         for (Individual individual : atomicConceptElement.getPossibleInstances()) {
                             if (isInstance(individual, atomicConcept))
                                 atomicConceptElement.m_knownInstances.add(individual);
@@ -897,8 +873,8 @@ public class InstanceManager {
                 monitor.reasonerTaskStarted("Computing instances for all object properties...");
             int numHierarchyNodes=m_currentRoleHierarchy.m_nodesByElements.values().size();
             int currentHierarchyNode=0;
-            Queue<HierarchyNode<RoleElement>> toProcess=new LinkedList<HierarchyNode<RoleElement>>();
-            Set<HierarchyNode<RoleElement>> visited=new HashSet<HierarchyNode<RoleElement>>();
+            Queue<HierarchyNode<RoleElement>> toProcess= new LinkedList<>();
+            Set<HierarchyNode<RoleElement>> visited= new HashSet<>();
             toProcess.add(m_currentRoleHierarchy.m_bottomNode);
             while (!toProcess.isEmpty()) {
                 if (monitor!=null)
@@ -914,7 +890,7 @@ public class InstanceManager {
                         toProcess.add(parent);
                 if (roleElement.hasPossibles()) {
                     for (Individual individual : roleElement.m_possibleRelations.keySet()) {
-                        Set<Individual> nonInstances=new HashSet<Individual>();
+                        Set<Individual> nonInstances= new HashSet<>();
                         for (Individual successor : roleElement.m_possibleRelations.get(individual)) {
                             if (isRoleInstance(role, individual, successor))
                                 roleElement.addKnown(individual, successor);
@@ -940,10 +916,10 @@ public class InstanceManager {
     public Set<HierarchyNode<AtomicConcept>> getTypes(Individual individual,boolean direct) {
         if (m_isInconsistent)
             return Collections.singleton(m_currentConceptHierarchy.m_bottomNode);
-        Set<HierarchyNode<AtomicConcept>> result=new HashSet<HierarchyNode<AtomicConcept>>();
+        Set<HierarchyNode<AtomicConcept>> result= new HashSet<>();
         assert !direct || m_usesClassifiedConceptHierarchy;
-        Queue<HierarchyNode<AtomicConcept>> toProcess=new LinkedList<HierarchyNode<AtomicConcept>>();
-        Set<HierarchyNode<AtomicConcept>> visited=new HashSet<HierarchyNode<AtomicConcept>>();
+        Queue<HierarchyNode<AtomicConcept>> toProcess= new LinkedList<>();
+        Set<HierarchyNode<AtomicConcept>> visited= new HashSet<>();
         toProcess.add(m_currentConceptHierarchy.m_bottomNode);
         while (!toProcess.isEmpty()) {
             HierarchyNode<AtomicConcept> current=toProcess.remove();
@@ -973,11 +949,7 @@ public class InstanceManager {
                     else {
                         for (HierarchyNode<AtomicConcept> parent : parents) {
                             AtomicConcept parentRepresentative=parent.getRepresentative();
-                            AtomicConceptElement parentElement=m_conceptToElement.get(parentRepresentative);
-                            if (parentElement==null) {
-                                parentElement=new AtomicConceptElement(null, null);
-                                m_conceptToElement.put(parentRepresentative,parentElement);
-                            }
+                            AtomicConceptElement parentElement = m_conceptToElement.computeIfAbsent(parentRepresentative, k -> new AtomicConceptElement(null, null));
                             parentElement.addPossible(individual);
                         }
                     }
@@ -1022,11 +994,7 @@ public class InstanceManager {
                     m_conceptToElement.remove(representative);
                 for (HierarchyNode<AtomicConcept> parent : node.getParentNodes()) {
                     AtomicConcept parentConcept=parent.getRepresentative();
-                    AtomicConceptElement parentElement=m_conceptToElement.get(parentConcept);
-                    if (parentElement==null) {
-                        parentElement=new AtomicConceptElement(null, null);
-                        m_conceptToElement.put(parentConcept, parentElement);
-                    }
+                    AtomicConceptElement parentElement = m_conceptToElement.computeIfAbsent(parentConcept, k -> new AtomicConceptElement(null, null));
                     parentElement.addPossible(individual);
                 }
             }
@@ -1038,14 +1006,14 @@ public class InstanceManager {
         return false;
     }
     public Set<Individual> getInstances(AtomicConcept atomicConcept, boolean direct) {
-        Set<Individual> result=new HashSet<Individual>();
+        Set<Individual> result= new HashSet<>();
         HierarchyNode<AtomicConcept> node=m_currentConceptHierarchy.getNodeForElement(atomicConcept);
         if (node==null) return result; // unknown concept
         getInstancesForNode(node,result,direct);
         return result;
     }
     public Set<Individual> getInstances(HierarchyNode<AtomicConcept> node,boolean direct) {
-        Set<Individual> result=new HashSet<Individual>();
+        Set<Individual> result= new HashSet<>();
         HierarchyNode<AtomicConcept> nodeFromCurrentHierarchy=m_currentConceptHierarchy.getNodeForElement(node.m_representative);
         if (nodeFromCurrentHierarchy==null) {
             // complex concept instances
@@ -1072,7 +1040,7 @@ public class InstanceManager {
         if (representativeElement!=null) {
             Set<Individual> possibleInstances=representativeElement.getPossibleInstances();
             if (!possibleInstances.isEmpty()) {
-                for (Individual possibleInstance : new HashSet<Individual>(possibleInstances)) {
+                for (Individual possibleInstance : new HashSet<>(possibleInstances)) {
                     if (isInstance(possibleInstance, representative))
                         representativeElement.setToKnown(possibleInstance);
                     else {
@@ -1081,11 +1049,7 @@ public class InstanceManager {
                             m_conceptToElement.remove(representative);
                         for (HierarchyNode<AtomicConcept> parent : node.getParentNodes()) {
                             AtomicConcept parentConcept=parent.getRepresentative();
-                            AtomicConceptElement parentElement=m_conceptToElement.get(parentConcept);
-                            if (parentElement==null) {
-                                parentElement=new AtomicConceptElement(null, null);
-                                m_conceptToElement.put(parentConcept, parentElement);
-                            }
+                            AtomicConceptElement parentElement = m_conceptToElement.computeIfAbsent(parentConcept, k -> new AtomicConceptElement(null, null));
                             parentElement.addPossible(possibleInstance);
                         }
                     }
@@ -1143,7 +1107,7 @@ public class InstanceManager {
         return false;
     }
     public Map<Individual,Set<Individual>> getObjectPropertyInstances(AtomicRole role) {
-        Map<Individual,Set<Individual>> result=new HashMap<Individual, Set<Individual>>();
+        Map<Individual,Set<Individual>> result= new HashMap<>();
         HierarchyNode<RoleElement> node=m_currentRoleHierarchy.getNodeForElement(m_roleElementManager.getRoleElement(role));
         if (node==null)
             return result;
@@ -1153,7 +1117,7 @@ public class InstanceManager {
     protected void getObjectPropertyInstances(HierarchyNode<RoleElement> node,Map<Individual,Set<Individual>> result) {
         RoleElement representativeElement=node.getRepresentative();
         if (representativeElement.equals(m_topRoleElement) || m_isInconsistent) {
-            Set<Individual> allResultRelevantIndividuals=new HashSet<Individual>();
+            Set<Individual> allResultRelevantIndividuals= new HashSet<>();
             for (Individual individual : m_individuals)
                 if (isResultRelevantIndividual(individual)) {
                     allResultRelevantIndividuals.add(individual);
@@ -1162,8 +1126,8 @@ public class InstanceManager {
             return;
         }
         Map<Individual,Set<Individual>> possibleInstances=representativeElement.getPossibleRelations();
-        for (Individual possibleInstance : new HashSet<Individual>(possibleInstances.keySet())) {
-            for (Individual possibleSuccessor : new HashSet<Individual>(possibleInstances.get(possibleInstance))) {
+        for (Individual possibleInstance : new HashSet<>(possibleInstances.keySet())) {
+            for (Individual possibleSuccessor : new HashSet<>(possibleInstances.get(possibleInstance))) {
                 if (isRoleInstance(representativeElement.getRole(),possibleInstance,possibleSuccessor))
                     representativeElement.setToKnown(possibleInstance,possibleSuccessor);
                 else
@@ -1177,7 +1141,7 @@ public class InstanceManager {
                 Set<Individual> successors=result.get(instance1);
                 boolean isNew=false;
                 if (successors==null) {
-                    successors=new HashSet<Individual>();
+                    successors= new HashSet<>();
                     isNew=true;
                 }
                 for (Individual instance2 : knownInstances.get(instance1)) {
@@ -1193,13 +1157,13 @@ public class InstanceManager {
             getObjectPropertyInstances(child, result);
     }
     public Set<Individual> getObjectPropertyValues(AtomicRole role,Individual individual) {
-        Set<Individual> result=new HashSet<Individual>();
-        HierarchyNode<RoleElement> node=m_currentRoleHierarchy.getNodeForElement(m_roleElementManager.getRoleElement(role));;
+        Set<Individual> result= new HashSet<>();
+        HierarchyNode<RoleElement> node=m_currentRoleHierarchy.getNodeForElement(m_roleElementManager.getRoleElement(role));
         getObjectPropertyValues(node,individual, result);
         return result;
     }
     public Set<Individual> getObjectPropertySubjects(AtomicRole role,Individual individual) {
-        Set<Individual> result=new HashSet<Individual>();
+        Set<Individual> result= new HashSet<>();
         HierarchyNode<RoleElement> node=m_currentRoleHierarchy.getNodeForElement(m_roleElementManager.getRoleElement(role));
         getObjectPropertySubjects(node, individual, result);
         return result;
@@ -1213,12 +1177,12 @@ public class InstanceManager {
             return;
         }
         Map<Individual,Set<Individual>> relevantRelations=representativeElement.getKnownRelations();
-        for (Individual subject : new HashSet<Individual>(relevantRelations.keySet())) {
+        for (Individual subject : new HashSet<>(relevantRelations.keySet())) {
             if (isResultRelevantIndividual(subject) && relevantRelations.get(subject).contains(object))
                 result.add(subject);
         }
         relevantRelations=representativeElement.getPossibleRelations();
-        for (Individual possibleSubject : new HashSet<Individual>(relevantRelations.keySet())) {
+        for (Individual possibleSubject : new HashSet<>(relevantRelations.keySet())) {
             if (isResultRelevantIndividual(possibleSubject) && relevantRelations.get(possibleSubject).contains(object) && isRoleInstance(representativeElement.getRole(),possibleSubject,object)) {
                 representativeElement.setToKnown(possibleSubject,object);
                 result.add(possibleSubject);
@@ -1240,7 +1204,7 @@ public class InstanceManager {
         }
         Set<Individual> possibleSuccessors=representativeElement.getPossibleRelations().get(subject);
         if (possibleSuccessors!=null) {
-            for (Individual possibleSuccessor : new HashSet<Individual>(possibleSuccessors)) {
+            for (Individual possibleSuccessor : new HashSet<>(possibleSuccessors)) {
                 if (isRoleInstance(representativeElement.getRole(),subject,possibleSuccessor))
                     representativeElement.setToKnown(subject,possibleSuccessor);
                 else
@@ -1283,7 +1247,7 @@ public class InstanceManager {
                 }
             }
         }
-        for (Set<Individual> otherEquivalenceClass : new HashSet<Set<Individual>>(m_individualToPossibleEquivalenceClass.keySet())) {
+        for (Set<Individual> otherEquivalenceClass : new HashSet<>(m_individualToPossibleEquivalenceClass.keySet())) {
             if (otherEquivalenceClass!=equivalenceClass && m_individualToPossibleEquivalenceClass.get(otherEquivalenceClass).contains(equivalenceClass)) {
                 if (isSameIndividual(equivalenceClass.iterator().next(), otherEquivalenceClass.iterator().next())) {
                     m_individualToPossibleEquivalenceClass.get(otherEquivalenceClass).remove(equivalenceClass);

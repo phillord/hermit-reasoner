@@ -49,18 +49,14 @@ public class OriginStatsCommand extends AbstractCommand {
         writer.println("    Prints origin information for the nodes in the current model.");
     }
     public void execute(String[] args) {
-        Map<Concept,OriginInfo> originInfos=new HashMap<Concept,OriginInfo>();
+        Map<Concept,OriginInfo> originInfos= new HashMap<>();
         Node node=m_debugger.getTableau().getFirstTableauNode();
         while (node!=null) {
             Debugger.NodeCreationInfo nodeCreationInfo=m_debugger.getNodeCreationInfo(node);
             ExistentialConcept existentialConcept=nodeCreationInfo.m_createdByExistential;
             if (existentialConcept instanceof AtLeastConcept) {
                 Concept toConcept=((AtLeastConcept)existentialConcept).getToConcept();
-                OriginInfo originInfo=originInfos.get(toConcept);
-                if (originInfo==null) {
-                    originInfo=new OriginInfo(toConcept);
-                    originInfos.put(toConcept,originInfo);
-                }
+                OriginInfo originInfo = originInfos.computeIfAbsent(toConcept, OriginInfo::new);
                 originInfo.m_nodes.add(node);
                 if (!node.isActive())
                     originInfo.m_numberOfNonactiveOccurrences++;
@@ -110,7 +106,7 @@ public class OriginStatsCommand extends AbstractCommand {
 
         public OriginInfo(Concept concept) {
             m_concept=concept;
-            m_nodes=new ArrayList<Node>();
+            m_nodes= new ArrayList<>();
         }
     }
 

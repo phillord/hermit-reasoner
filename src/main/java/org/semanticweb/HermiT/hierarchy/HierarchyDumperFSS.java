@@ -35,7 +35,7 @@ public class HierarchyDumperFSS {
     }
     public void printAtomicConceptHierarchy(Hierarchy<AtomicConcept> atomicConceptHierarchy) {
         for (HierarchyNode<AtomicConcept> node : atomicConceptHierarchy.getAllNodesSet()) {
-            SortedSet<AtomicConcept> equivs=new TreeSet<AtomicConcept>(AtomicConceptComparator.INSTANCE);
+            SortedSet<AtomicConcept> equivs= new TreeSet<>(AtomicConceptComparator.INSTANCE);
             equivs.addAll(node.getEquivalentElements());
             AtomicConcept representative=equivs.first();
             if (equivs.size()>1) {
@@ -74,7 +74,7 @@ public class HierarchyDumperFSS {
     }
     public void printObjectPropertyHierarchy(Hierarchy<Role> objectRoleHierarchy) {
         for (HierarchyNode<Role> node : objectRoleHierarchy.getAllNodesSet()) {
-            SortedSet<Role> equivs=new TreeSet<Role>(ObjectRoleComparator.INSTANCE);
+            SortedSet<Role> equivs= new TreeSet<>(ObjectRoleComparator.INSTANCE);
             equivs.addAll(node.getEquivalentElements());
             Role representative=equivs.first();
             if (equivs.size()>1) {
@@ -111,7 +111,7 @@ public class HierarchyDumperFSS {
     }
     public void printDataPropertyHierarchy(Hierarchy<AtomicRole> dataRoleHierarchy) {
         for (HierarchyNode<AtomicRole> node : dataRoleHierarchy.getAllNodesSet()) {
-            SortedSet<AtomicRole> equivs=new TreeSet<AtomicRole>(DataRoleComparator.INSTANCE);
+            SortedSet<AtomicRole> equivs= new TreeSet<>(DataRoleComparator.INSTANCE);
             equivs.addAll(node.getEquivalentElements());
             AtomicRole representative=equivs.first();
             if (equivs.size()>1) {

@@ -139,7 +139,7 @@ public class CommandLine {
             this.outputLocation=outputLocation;
         }
         public void run(Reasoner hermit, StatusOutput status, PrintWriter output,boolean ignoreOntologyPrefixes) {
-            Set<InferenceType> inferences=new HashSet<InferenceType>();
+            Set<InferenceType> inferences= new HashSet<>();
             if (classifyClasses)
                 inferences.add(InferenceType.CLASS_HIERARCHY);
             if (classifyOPs)
@@ -435,13 +435,13 @@ public class CommandLine {
             boolean ignoreOntologyPrefixes=false;
             PrintWriter output=new PrintWriter(System.out);
             String defaultPrefix=null;
-            Map<String,String> prefixMappings=new HashMap<String,String>();
+            Map<String,String> prefixMappings= new HashMap<>();
             String resultsFileLocation=null;
             boolean classifyClasses=false;
             boolean classifyOPs=false;
             boolean classifyDPs=false;
             boolean prettyPrint=false;
-            Collection<Action> actions=new LinkedList<Action>();
+            Collection<Action> actions= new LinkedList<>();
             URI base;
             IRI conclusionIRI=null;
             Configuration config=new Configuration();
@@ -452,7 +452,7 @@ public class CommandLine {
             catch (java.net.URISyntaxException e) {
                 throw new RuntimeException("unable to create default IRI base");
             }
-            Collection<IRI> ontologies=new LinkedList<IRI>();
+            Collection<IRI> ontologies= new LinkedList<>();
             boolean didSomething=false;
             {
                 Getopt g=new Getopt("java-jar Hermit.jar",argv,Option.formatOptionsString(options),Option.createLongOpts(options));

@@ -105,18 +105,14 @@ public class DLClauseEvaluator implements Serializable {
         protected final Map<Integer,List<Object[]>> m_availableBuffersByArity;
 
         public BufferSupply() {
-            m_allBuffers=new ArrayList<Object[]>();
-            m_availableBuffersByArity=new HashMap<Integer,List<Object[]>>();
+            m_allBuffers= new ArrayList<>();
+            m_availableBuffersByArity= new HashMap<>();
         }
         public void reuseBuffers() {
             m_availableBuffersByArity.clear();
             for (Object[] buffer : m_allBuffers) {
                 Integer arityInteger=Integer.valueOf(buffer.length);
-                List<Object[]> buffers=m_availableBuffersByArity.get(arityInteger);
-                if (buffers==null) {
-                    buffers=new ArrayList<Object[]>();
-                    m_availableBuffersByArity.put(arityInteger,buffers);
-                }
+                List<Object[]> buffers = m_availableBuffersByArity.computeIfAbsent(arityInteger, k -> new ArrayList<>());
                 buffers.add(buffer);
             }
         }
@@ -146,9 +142,9 @@ public class DLClauseEvaluator implements Serializable {
         public final Map<Term,Integer> m_bodyNonvariableTermsToIndexes;
 
         public ValuesBufferManager(Set<DLClause> dlClauses,Map<Term,Node> termsToNodes) {
-            Set<DLPredicate> bodyDLPredicates=new HashSet<DLPredicate>();
-            Set<Variable> variables=new HashSet<Variable>();
-            m_bodyNonvariableTermsToIndexes=new HashMap<Term,Integer>();
+            Set<DLPredicate> bodyDLPredicates= new HashSet<>();
+            Set<Variable> variables= new HashSet<>();
+            m_bodyNonvariableTermsToIndexes= new HashMap<>();
             int maxNumberOfVariables=0;
             for (DLClause dlClause : dlClauses) {
                 variables.clear();
@@ -167,7 +163,7 @@ public class DLClauseEvaluator implements Serializable {
                     maxNumberOfVariables=variables.size();
             }
             m_valuesBuffer=new Object[maxNumberOfVariables+bodyDLPredicates.size()+m_bodyNonvariableTermsToIndexes.size()];
-            m_bodyDLPredicatesToIndexes=new HashMap<DLPredicate,Integer>();
+            m_bodyDLPredicatesToIndexes= new HashMap<>();
             int bindingIndex=maxNumberOfVariables;
             for (DLPredicate bodyDLPredicate : bodyDLPredicates) {
                 m_bodyDLPredicatesToIndexes.put(bodyDLPredicate,Integer.valueOf(bindingIndex));
@@ -198,8 +194,7 @@ public class DLClauseEvaluator implements Serializable {
         }
         public GroundDisjunctionHeader get(DLPredicate[] dlPredicates) {
             int hashCode=0;
-            for (int disjunctIndex=0;disjunctIndex<dlPredicates.length;disjunctIndex++)
-                hashCode=hashCode*7+dlPredicates[disjunctIndex].hashCode();
+            for (DLPredicate dlPredicate : dlPredicates) hashCode = hashCode * 7 + dlPredicate.hashCode();
             int bucketIndex=getIndexFor(hashCode,m_buckets.length);
             GroundDisjunctionHeader entry=m_buckets[bucketIndex];
             while (entry!=null) {
@@ -216,14 +211,14 @@ public class DLClauseEvaluator implements Serializable {
         }
         protected void resize(int newCapacity) {
             GroundDisjunctionHeader[] newBuckets=new GroundDisjunctionHeader[newCapacity];
-            for (int i=0;i<m_buckets.length;i++) {
-                GroundDisjunctionHeader entry=m_buckets[i];
-                while (entry!=null) {
-                    GroundDisjunctionHeader nextEntry=entry.m_nextEntry;
-                    int newIndex=getIndexFor(entry.hashCode(),newCapacity);
-                    entry.m_nextEntry=newBuckets[newIndex];
-                    newBuckets[newIndex]=entry;
-                    entry=nextEntry;
+            for (GroundDisjunctionHeader m_bucket : m_buckets) {
+                GroundDisjunctionHeader entry = m_bucket;
+                while (entry != null) {
+                    GroundDisjunctionHeader nextEntry = entry.m_nextEntry;
+                    int newIndex = getIndexFor(entry.hashCode(), newCapacity);
+                    entry.m_nextEntry = newBuckets[newIndex];
+                    newBuckets[newIndex] = entry;
+                    entry = nextEntry;
                 }
             }
             m_buckets=newBuckets;
@@ -238,11 +233,11 @@ public class DLClauseEvaluator implements Serializable {
         }
     }
 
-    public static interface Worker {
+    public interface Worker {
         int execute(int programCounter);
     }
 
-    protected static interface BranchingWorker extends Worker {
+    protected interface BranchingWorker extends Worker {
         int getBranchingAddress();
         void setBranchingAddress(int branchingAddress);
     }
@@ -753,7 +748,7 @@ public class DLClauseEvaluator implements Serializable {
             }
         }
         protected static List<Variable> getHeadVariables(List<DLClause> headDLClauses) {
-            List<Variable> result=new ArrayList<Variable>();
+            List<Variable> result= new ArrayList<>();
             for (DLClause dlClause : headDLClauses) {
                 for (int headIndex=0;headIndex<dlClause.getHeadLength();headIndex++) {
                     Atom atom=dlClause.getHeadAtom(headIndex);
@@ -785,8 +780,8 @@ public class DLClauseEvaluator implements Serializable {
             m_valuesBufferManager=valuesBufferManager;
             m_extensionManager=extensionManager;
             m_bodyAtoms=bodyAtoms;
-            m_variables=new ArrayList<Variable>();
-            m_boundSoFar=new HashSet<Variable>();
+            m_variables= new ArrayList<>();
+            m_boundSoFar= new HashSet<>();
             int numberOfRealAtoms=0;
             for (int bodyIndex=0;bodyIndex<getBodyLength();bodyIndex++) {
                 Atom atom=getBodyAtom(bodyIndex);
@@ -812,9 +807,9 @@ public class DLClauseEvaluator implements Serializable {
             }
             else
                 m_unionDependencySet=null;
-            m_retrievals=new ArrayList<ExtensionTable.Retrieval>();
-            m_workers=new ArrayList<Worker>();
-            m_labels=new ArrayList<Integer>();
+            m_retrievals= new ArrayList<>();
+            m_workers= new ArrayList<>();
+            m_labels= new ArrayList<>();
         }
         protected final void generateCode(int firstBodyAtomToCompile,ExtensionTable.Retrieval firstAtomRetrieval) {
             m_labels.add(null);

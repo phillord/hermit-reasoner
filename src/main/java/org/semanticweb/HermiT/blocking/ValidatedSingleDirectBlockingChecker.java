@@ -34,10 +34,10 @@ import org.semanticweb.HermiT.tableau.Tableau;
 public class ValidatedSingleDirectBlockingChecker implements DirectBlockingChecker,Serializable {
     private static final long serialVersionUID=9093753046859877016L;
 
-    protected final SetFactory<AtomicConcept> m_atomicConceptsSetFactory=new SetFactory<AtomicConcept>();
-    protected final SetFactory<AtomicRole> m_atomicRolesSetFactory=new SetFactory<AtomicRole>();
-    protected final List<AtomicConcept> m_atomicConceptsBuffer=new ArrayList<AtomicConcept>();
-    protected final List<AtomicRole> m_atomicRolesBuffer=new ArrayList<AtomicRole>();
+    protected final SetFactory<AtomicConcept> m_atomicConceptsSetFactory= new SetFactory<>();
+    protected final SetFactory<AtomicRole> m_atomicRolesSetFactory= new SetFactory<>();
+    protected final List<AtomicConcept> m_atomicConceptsBuffer= new ArrayList<>();
+    protected final List<AtomicRole> m_atomicRolesBuffer= new ArrayList<>();
     protected final boolean m_hasInverses;
     protected Tableau m_tableau;
     protected ExtensionTable.Retrieval m_binaryTableSearch1Bound;
@@ -328,18 +328,18 @@ public class ValidatedSingleDirectBlockingChecker implements DirectBlockingCheck
                 m_toParentLabel==thatSignature.m_toParentLabel;
         }
     }
-    public static interface ValidatedBlockingObject {
-        public void initialize();
-        public void destroy();
-        public Set<AtomicConcept> getAtomicConceptsLabel();
-        public void addConcept(Concept concept, boolean isCore);
-        public void removeConcept(Concept concept, boolean isCore);
-        public Set<AtomicConcept> getFullAtomicConceptsLabel();
-        public Set<AtomicRole> getFullFromParentLabel();
-        public Set<AtomicRole> getFullToParentLabel();
-        public void setBlockViolatesParentConstraints(boolean violates);
-        public void setHasAlreadyBeenChecked(boolean hasBeenChecked);
-        public boolean hasAlreadyBeenChecked();
-        public boolean blockViolatesParentConstraints();
+    public interface ValidatedBlockingObject {
+        void initialize();
+        void destroy();
+        Set<AtomicConcept> getAtomicConceptsLabel();
+        void addConcept(Concept concept, boolean isCore);
+        void removeConcept(Concept concept, boolean isCore);
+        Set<AtomicConcept> getFullAtomicConceptsLabel();
+        Set<AtomicRole> getFullFromParentLabel();
+        Set<AtomicRole> getFullToParentLabel();
+        void setBlockViolatesParentConstraints(boolean violates);
+        void setHasAlreadyBeenChecked(boolean hasBeenChecked);
+        boolean hasAlreadyBeenChecked();
+        boolean blockViolatesParentConstraints();
     }
 }

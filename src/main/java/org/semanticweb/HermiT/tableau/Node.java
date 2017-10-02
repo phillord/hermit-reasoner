@@ -34,7 +34,7 @@ public final class Node implements Serializable {
     private static List<ExistentialConcept> NO_EXISTENTIALS=Collections.emptyList();
     public static final Node SIGNATURE_CACHE_BLOCKER=new Node(null);
 
-    public static enum NodeState { ACTIVE,MERGED,PRUNED }
+    public enum NodeState { ACTIVE,MERGED,PRUNED }
 
     protected final Tableau m_tableau;
     protected int m_nodeID;

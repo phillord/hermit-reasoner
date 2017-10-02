@@ -40,8 +40,8 @@ public class SingleDirectBlockingChecker implements DirectBlockingChecker,Serial
     protected ExtensionTable.Retrieval m_binaryTableSearch1Bound;
 
     public SingleDirectBlockingChecker() {
-        m_atomicConceptsSetFactory=new SetFactory<AtomicConcept>();
-        m_atomicConceptsBuffer=new ArrayList<AtomicConcept>();
+        m_atomicConceptsSetFactory= new SetFactory<>();
+        m_atomicConceptsBuffer= new ArrayList<>();
     }
     public void initialize(Tableau tableau) {
         m_tableau=tableau;

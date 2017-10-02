@@ -40,7 +40,7 @@ public class HierarchyPrinterFSS {
     public HierarchyPrinterFSS(PrintWriter out,String defaultPrefixIRI) {
         m_out=out;
         m_defaultPrefixIRI=defaultPrefixIRI;
-        m_prefixIRIs=new TreeSet<String>();
+        m_prefixIRIs= new TreeSet<>();
         m_prefixIRIs.add(defaultPrefixIRI);
         m_prefixIRIs.add(Prefixes.s_semanticWebPrefixes.get("owl:"));
     }
@@ -87,13 +87,13 @@ public class HierarchyPrinterFSS {
         m_out.println();
     }
     public void printAtomicConceptHierarchy(Hierarchy<AtomicConcept> atomicConceptHierarchy) {
-        Hierarchy<AtomicConcept> sortedAtomicConceptHierarchy=atomicConceptHierarchy.transform(new IdentityTransformer<AtomicConcept>(),AtomicConceptComparator.INSTANCE);
+        Hierarchy<AtomicConcept> sortedAtomicConceptHierarchy=atomicConceptHierarchy.transform(new IdentityTransformer<>(),AtomicConceptComparator.INSTANCE);
         AtomicConceptPrinter atomicConceptPrinter=new AtomicConceptPrinter(sortedAtomicConceptHierarchy.getBottomNode());
         sortedAtomicConceptHierarchy.traverseDepthFirst(atomicConceptPrinter);
         atomicConceptPrinter.printNode(0,sortedAtomicConceptHierarchy.getBottomNode(),null,true);
     }
     public void printRoleHierarchy(Hierarchy<? extends Role> roleHierarchy,boolean objectProperties) {
-        Hierarchy<Role> sortedRoleHierarchy=roleHierarchy.transform(new IdentityTransformer<Role>(),RoleComparator.INSTANCE);
+        Hierarchy<Role> sortedRoleHierarchy=roleHierarchy.transform(new IdentityTransformer<>(),RoleComparator.INSTANCE);
         RolePrinter rolePrinter=new RolePrinter(sortedRoleHierarchy,objectProperties);
         sortedRoleHierarchy.traverseDepthFirst(rolePrinter);
         rolePrinter.printNode(0,sortedRoleHierarchy.getBottomNode(),null,true);

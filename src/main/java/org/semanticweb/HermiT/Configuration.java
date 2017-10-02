@@ -40,7 +40,7 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
     /**
      * Tableau monitors can be used to be informed about what HermiT does and they can be useful for debugging the reasoner.
      */
-    public static enum TableauMonitorType {
+    public enum TableauMonitorType {
         /**
          * The standard setting is no monitor, i.e., no information is recorded and printed about what the reasoner does.
          */
@@ -72,7 +72,7 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
      * Sets the blocking type used by HermiT. This can be combined with settings for the blocking strategy (anywhere or
      * ancestor or core blocking).
      */
-    public static enum DirectBlockingType {
+    public enum DirectBlockingType {
         /**
          * Forces HermiT to use single blocking even if the ontology is not suitable for single blocking (contains inverse roles).
          */
@@ -92,7 +92,7 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
     /**
      * The blocking strategy determines how which nodes HermiT considers for blockers.
      */
-    public static enum BlockingStrategyType {
+    public enum BlockingStrategyType {
         /**
          * Forces HermiT to use anywhere blocking. Anywhere blocking usually creates smaller models than ancestor blocking.
          * It might be slower, but seems to work better in average cases.
@@ -132,7 +132,7 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
      * With caching HermiT caches blockers. The first satisfiability test can be slow, but in subsequent tests blocking can occur
      * much earlier from cached blockers, which saves time and memory.
      */
-    public static enum BlockingSignatureCacheType {
+    public enum BlockingSignatureCacheType {
         /**
          * Forces HermiT to use caching (if compatible with the ontology).
          */
@@ -146,7 +146,7 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
     /**
      * Sets a strategy type that determines how HermiT expands the model.
      */
-    public static enum ExistentialStrategyType {
+    public enum ExistentialStrategyType {
         /**
          * Strategy for expanding all existentials on the oldest node in the tableau with unexpanded existentials.
          * This usually closely approximates a breadth-first expansion. (Existentials introduced onto parent nodes
@@ -242,7 +242,7 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
         existentialStrategyType=Configuration.ExistentialStrategyType.CREATION_ORDER;
         ignoreUnsupportedDatatypes=false;
         monitor=null;
-        parameters=new HashMap<String,Object>();
+        parameters= new HashMap<>();
         individualTaskTimeout=-1;
         bufferChanges=true;
         individualNodeSetPolicy=IndividualNodeSetPolicy.BY_NAME;
@@ -267,7 +267,7 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
         setIndividualReuseStrategyReuseNever(concepts);
     }
     protected Set<AtomicConcept> loadConceptsFromFile(File file) throws IOException {
-        Set<AtomicConcept> result=new HashSet<AtomicConcept>();
+        Set<AtomicConcept> result= new HashSet<>();
         BufferedReader reader=new BufferedReader(new FileReader(file));
         try {
             String line=reader.readLine();
@@ -284,14 +284,14 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
     public Configuration clone() {
         try {
             Configuration result=(Configuration)super.clone();
-            result.parameters=new HashMap<String,Object>(parameters);
+            result.parameters= new HashMap<>(parameters);
             return result;
         }
         catch (CloneNotSupportedException cantHappen) {
             return null;
         }
     }
-    public static interface WarningMonitor {
+    public interface WarningMonitor {
         void warning(String warning);
     }
     public long getTimeOut() {

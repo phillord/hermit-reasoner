@@ -77,7 +77,7 @@ public class DLOntology implements Serializable {
         m_hasNominals=hasNominals;
         m_hasDatatypes=hasDatatypes;
         if (atomicConcepts==null)
-            m_allAtomicConcepts=new TreeSet<AtomicConcept>(AtomicConceptComparator.INSTANCE);
+            m_allAtomicConcepts= new TreeSet<>(AtomicConceptComparator.INSTANCE);
         else
             m_allAtomicConcepts=atomicConcepts;
         int numberOfExternalConcepts=0;
@@ -86,30 +86,30 @@ public class DLOntology implements Serializable {
                 numberOfExternalConcepts++;
         m_numberOfExternalConcepts=numberOfExternalConcepts;
         if (atomicObjectRoles==null)
-            m_allAtomicObjectRoles=new TreeSet<AtomicRole>(AtomicRoleComparator.INSTANCE);
+            m_allAtomicObjectRoles= new TreeSet<>(AtomicRoleComparator.INSTANCE);
         else
             m_allAtomicObjectRoles=atomicObjectRoles;
         if (allComplexObjectRoles==null)
-            m_allComplexObjectRoles=new HashSet<Role>();
+            m_allComplexObjectRoles= new HashSet<>();
         else
             m_allComplexObjectRoles=allComplexObjectRoles;
         if (atomicDataRoles==null)
-            m_allAtomicDataRoles=new TreeSet<AtomicRole>(AtomicRoleComparator.INSTANCE);
+            m_allAtomicDataRoles= new TreeSet<>(AtomicRoleComparator.INSTANCE);
         else
             m_allAtomicDataRoles=atomicDataRoles;
         if (allUnknownDatatypeRestrictions==null)
-            m_allUnknownDatatypeRestrictions=new HashSet<DatatypeRestriction>();
+            m_allUnknownDatatypeRestrictions= new HashSet<>();
         else
             m_allUnknownDatatypeRestrictions=allUnknownDatatypeRestrictions;
         if (definedDatatypeIRIs==null)
-            m_definedDatatypeIRIs=new HashSet<String>();
+            m_definedDatatypeIRIs= new HashSet<>();
         else
             m_definedDatatypeIRIs=definedDatatypeIRIs;
         if (individuals==null)
-            m_allIndividuals=new TreeSet<Individual>(IndividualComparator.INSTANCE);
+            m_allIndividuals= new TreeSet<>(IndividualComparator.INSTANCE);
         else
             m_allIndividuals=individuals;
-        m_allDescriptionGraphs=new HashSet<DescriptionGraph>();
+        m_allDescriptionGraphs= new HashSet<>();
         boolean isHorn=true;
         for (DLClause dlClause : m_dlClauses) {
             if (dlClause.getHeadLength()>1)
@@ -124,7 +124,7 @@ public class DLOntology implements Serializable {
             }
         }
         m_isHorn=isHorn;
-        m_dataPropertyAssertions=new HashMap<AtomicRole,Map<Individual,Set<Constant>>>();
+        m_dataPropertyAssertions= new HashMap<>();
         for (Atom atom : m_positiveFacts) {
             addDLPredicate(atom.getDLPredicate());
             for (int i=0;i<atom.getArity();++i) {
@@ -143,14 +143,14 @@ public class DLOntology implements Serializable {
                     if (m_dataPropertyAssertions.containsKey(atomicRole))
                         individualsToConstants=m_dataPropertyAssertions.get(atomicRole);
                     else {
-                        individualsToConstants=new HashMap<Individual,Set<Constant>>();
+                        individualsToConstants= new HashMap<>();
                         m_dataPropertyAssertions.put(atomicRole,individualsToConstants);
                     }
                     Set<Constant> constants;
                     if (individualsToConstants.containsKey(sourceIndividual))
                         constants=individualsToConstants.get(sourceIndividual);
                     else {
-                        constants=new HashSet<Constant>();
+                        constants= new HashSet<>();
                         individualsToConstants.put(sourceIndividual,constants);
                     }
                     constants.add((Constant)possibleConstant);
@@ -256,7 +256,7 @@ public class DLOntology implements Serializable {
         return m_definedDatatypeIRIs;
     }
     protected Set<AtomicConcept> getBodyOnlyAtomicConcepts() {
-        Set<AtomicConcept> bodyOnlyAtomicConcepts=new HashSet<AtomicConcept>(m_allAtomicConcepts);
+        Set<AtomicConcept> bodyOnlyAtomicConcepts= new HashSet<>(m_allAtomicConcepts);
         for (DLClause dlClause : m_dlClauses)
             for (int headIndex=0;headIndex<dlClause.getHeadLength();headIndex++) {
                 DLPredicate dlPredicate=dlClause.getHeadAtom(headIndex).getDLPredicate();
@@ -267,7 +267,7 @@ public class DLOntology implements Serializable {
         return bodyOnlyAtomicConcepts;
     }
     protected Set<AtomicRole> computeGraphAtomicRoles() {
-        Set<AtomicRole> graphAtomicRoles=new HashSet<AtomicRole>();
+        Set<AtomicRole> graphAtomicRoles= new HashSet<>();
         for (DescriptionGraph descriptionGraph : m_allDescriptionGraphs)
             for (int edgeIndex=0;edgeIndex<descriptionGraph.getNumberOfEdges();edgeIndex++) {
                 DescriptionGraph.Edge edge=descriptionGraph.getEdge(edgeIndex);

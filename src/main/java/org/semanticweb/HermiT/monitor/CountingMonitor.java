@@ -56,7 +56,7 @@ public class CountingMonitor extends TableauMonitorAdapter {
     protected int m_datatypeCheckingTime;
 
     // overall numbers
-    protected final Map<String,List<TestRecord>> m_testRecords=new HashMap<String, List<TestRecord>>();
+    protected final Map<String,List<TestRecord>> m_testRecords= new HashMap<>();
     protected long m_overallTime=0;
     protected int m_overallNumberOfBacktrackings=0;
     protected int m_overallNumberOfNodes=0;
@@ -135,11 +135,7 @@ public class CountingMonitor extends TableauMonitorAdapter {
         m_testResult=result;
         m_time=System.currentTimeMillis()-m_problemStartTime;
         String messagePattern=m_reasoningTaskDescription.getMessagePattern();
-        List<TestRecord> records=m_testRecords.get(messagePattern);
-        if (records==null) {
-            records=new ArrayList<TestRecord>();
-            m_testRecords.put(messagePattern, records);
-        }
+        List<TestRecord> records = m_testRecords.computeIfAbsent(messagePattern, k -> new ArrayList<>());
         records.add(new TestRecord(m_time, m_reasoningTaskDescription.getTaskDescription(Prefixes.STANDARD_PREFIXES), m_testResult));
         m_overallTime+=m_time;
         m_overallNumberOfBacktrackings+=m_numberOfBacktrackings;
@@ -211,7 +207,7 @@ public class CountingMonitor extends TableauMonitorAdapter {
         return getTimeSortedTestRecords(limit, standardTestType.messagePattern);
     }
     public List<TestRecord> getTimeSortedTestRecords(int limit, String messagePattern) {
-        List<TestRecord> filteredRecords=new ArrayList<TestRecord>();;
+        List<TestRecord> filteredRecords= new ArrayList<>();
         if (messagePattern==null) {
             for (List<TestRecord> records : m_testRecords.values())
                 filteredRecords.addAll(records);
@@ -421,7 +417,7 @@ public class CountingMonitor extends TableauMonitorAdapter {
 	    }
         public int compareTo(TestRecord that) {
             if (this==that) return 0;
-            int result=((Long)that.m_testTime).compareTo(m_testTime);
+            int result= Long.compare(that.m_testTime, m_testTime);
             if (result!=0) return result;
             else return this.m_testDescription.compareToIgnoreCase(that.m_testDescription);
         }

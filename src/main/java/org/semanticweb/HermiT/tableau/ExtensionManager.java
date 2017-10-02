@@ -58,7 +58,7 @@ public final class ExtensionManager implements Serializable {
         m_tableau=tableau;
         m_tableauMonitor=m_tableau.m_tableauMonitor;
         m_dependencySetFactory=m_tableau.m_dependencySetFactory;
-        m_extensionTablesByArity=new HashMap<Integer,ExtensionTable>();
+        m_extensionTablesByArity= new HashMap<>();
         m_binaryExtensionTable=
             new ExtensionTableWithTupleIndexes(m_tableau,2,!m_tableau.isDeterministic(),
                 new TupleIndex[] {
@@ -162,9 +162,9 @@ public final class ExtensionManager implements Serializable {
     }
     public boolean propagateDeltaNew() {
         boolean hasChange=false;
-        for (int index=0;index<m_allExtensionTablesArray.length;index++)
-            if (m_allExtensionTablesArray[index].propagateDeltaNew())
-                hasChange=true;
+        for (ExtensionTable aM_allExtensionTablesArray : m_allExtensionTablesArray)
+            if (aM_allExtensionTablesArray.propagateDeltaNew())
+                hasChange = true;
         return hasChange;
     }
     public void clearClash() {

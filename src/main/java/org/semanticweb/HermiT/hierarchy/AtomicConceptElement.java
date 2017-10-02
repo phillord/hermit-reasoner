@@ -32,11 +32,11 @@ public class AtomicConceptElement {
     
     public AtomicConceptElement(Set<Individual> known, Set<Individual> possible) {
         if (known==null)
-            m_knownInstances=new HashSet<Individual>();
+            m_knownInstances= new HashSet<>();
         else 
             m_knownInstances=known;
         if (possible==null)
-            m_possibleInstances=new HashSet<Individual>();
+            m_possibleInstances= new HashSet<>();
         else 
             m_possibleInstances=possible;
     }

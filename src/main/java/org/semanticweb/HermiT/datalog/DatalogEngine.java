@@ -37,10 +37,10 @@ public final class DatalogEngine {
                 throw new IllegalArgumentException("The supplied DL ontology contains rules with disjunctive heads.");
         m_interruptFlag=new InterruptFlag(0);
         m_dlOntology=dlOntology;
-        m_termsToNodes=new HashMap<Term,Node>();
-        m_nodesToTerms=new HashMap<Node,Term>();
-        m_termsToEquivalenceClasses=new HashMap<Term,Set<Term>>();
-        m_termsToRepresentatives=new HashMap<Term,Term>();
+        m_termsToNodes= new HashMap<>();
+        m_nodesToTerms= new HashMap<>();
+        m_termsToEquivalenceClasses= new HashMap<>();
+        m_termsToRepresentatives= new HashMap<>();
     }
     public void interrupt() {
         m_interruptFlag.interrupt();
@@ -51,7 +51,7 @@ public final class DatalogEngine {
             m_nodesToTerms.clear();
             m_termsToEquivalenceClasses.clear();
             m_termsToRepresentatives.clear();
-            Tableau tableau=new Tableau(m_interruptFlag,null,NullExistentialExpansionStrategy.INSTANCE,false,m_dlOntology,null,new HashMap<String,Object>());
+            Tableau tableau=new Tableau(m_interruptFlag,null,NullExistentialExpansionStrategy.INSTANCE,false,m_dlOntology,null, new HashMap<>());
             Set<Atom> noAtoms=Collections.emptySet();
             tableau.isSatisfiable(true,false,noAtoms,noAtoms,noAtoms,noAtoms,m_termsToNodes,null,null);
             for (Map.Entry<Term,Node> entry : m_termsToNodes.entrySet())
@@ -61,11 +61,7 @@ public final class DatalogEngine {
             while (node!=null) {
                 Term term=m_nodesToTerms.get(node);
                 Term canonicalTerm=m_nodesToTerms.get(node.getCanonicalNode());
-                Set<Term> equivalenceClass=m_termsToEquivalenceClasses.get(canonicalTerm);
-                if (equivalenceClass==null) {
-                    equivalenceClass=new HashSet<Term>();
-                    m_termsToEquivalenceClasses.put(canonicalTerm,equivalenceClass);
-                }
+                Set<Term> equivalenceClass = m_termsToEquivalenceClasses.computeIfAbsent(canonicalTerm, k -> new HashSet<>());
                 if (!term.equals(canonicalTerm))
                     m_termsToEquivalenceClasses.put(term,equivalenceClass);
                 equivalenceClass.add(term);

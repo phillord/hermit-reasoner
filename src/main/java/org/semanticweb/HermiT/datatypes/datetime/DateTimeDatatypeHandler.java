@@ -41,12 +41,12 @@ public class DateTimeDatatypeHandler implements DatatypeHandler {
     protected static final DateTimeValueSpaceSubset ENTIRE_SUBSET=new DateTimeValueSpaceSubset(INTERVAL_ALL_WITH_TIMEZONE,INTERVAL_ALL_WITHOUT_TIMEZONE);
     protected static final DateTimeValueSpaceSubset WITH_TIMEZONE_SUBSET=new DateTimeValueSpaceSubset(INTERVAL_ALL_WITH_TIMEZONE,null);
     protected static final DateTimeValueSpaceSubset EMPTY_SUBSET=new DateTimeValueSpaceSubset();
-    protected static final Set<String> s_managedDatatypeURIs=new HashSet<String>();
+    protected static final Set<String> s_managedDatatypeURIs= new HashSet<>();
     static {
         s_managedDatatypeURIs.add(XSD_DATE_TIME);
         s_managedDatatypeURIs.add(XSD_DATE_TIME_STAMP);
     }
-    protected static final Set<String> s_supportedFacetURIs=new HashSet<String>();
+    protected static final Set<String> s_supportedFacetURIs= new HashSet<>();
     static {
         s_supportedFacetURIs.add(XSD_NS+"minInclusive");
         s_supportedFacetURIs.add(XSD_NS+"minExclusive");
@@ -97,17 +97,16 @@ public class DateTimeDatatypeHandler implements DatatypeHandler {
         else {
             DateTimeValueSpaceSubset dateTimeSubset=(DateTimeValueSpaceSubset)valueSpaceSubset;
             List<DateTimeInterval> oldIntervals=dateTimeSubset.m_intervals;
-            List<DateTimeInterval> newIntervals=new ArrayList<DateTimeInterval>();
-            for (int index=0;index<oldIntervals.size();index++) {
-                DateTimeInterval oldInterval=oldIntervals.get(index);
-                if (intervals[0]!=null) {
-                    DateTimeInterval intersection=oldInterval.intersectWith(intervals[0]);
-                    if (intersection!=null)
+            List<DateTimeInterval> newIntervals= new ArrayList<>();
+            for (DateTimeInterval oldInterval : oldIntervals) {
+                if (intervals[0] != null) {
+                    DateTimeInterval intersection = oldInterval.intersectWith(intervals[0]);
+                    if (intersection != null)
                         newIntervals.add(intersection);
                 }
-                if (intervals[1]!=null) {
-                    DateTimeInterval intersection=oldInterval.intersectWith(intervals[1]);
-                    if (intersection!=null)
+                if (intervals[1] != null) {
+                    DateTimeInterval intersection = oldInterval.intersectWith(intervals[1]);
+                    if (intersection != null)
                         newIntervals.add(intersection);
                 }
             }
@@ -123,7 +122,7 @@ public class DateTimeDatatypeHandler implements DatatypeHandler {
         if (intervals[0]==null && intervals[1]==null)
             return valueSpaceSubset;
         else {
-            List<DateTimeInterval> complementedIntervals=new ArrayList<DateTimeInterval>(4);
+            List<DateTimeInterval> complementedIntervals= new ArrayList<>(4);
             if (intervals[0]==null)
                 complementedIntervals.add(INTERVAL_ALL_WITH_TIMEZONE);
             else {
@@ -142,13 +141,11 @@ public class DateTimeDatatypeHandler implements DatatypeHandler {
             }
             DateTimeValueSpaceSubset dateTimeSubset=(DateTimeValueSpaceSubset)valueSpaceSubset;
             List<DateTimeInterval> oldIntervals=dateTimeSubset.m_intervals;
-            List<DateTimeInterval> newIntervals=new ArrayList<DateTimeInterval>();
-            for (int index=0;index<oldIntervals.size();index++) {
-                DateTimeInterval oldInterval=oldIntervals.get(index);
-                for (int complementedIndex=0;complementedIndex<complementedIntervals.size();complementedIndex++) {
-                    DateTimeInterval complementedInterval=complementedIntervals.get(complementedIndex);
-                    DateTimeInterval intersection=oldInterval.intersectWith(complementedInterval);
-                    if (intersection!=null)
+            List<DateTimeInterval> newIntervals= new ArrayList<>();
+            for (DateTimeInterval oldInterval : oldIntervals) {
+                for (DateTimeInterval complementedInterval : complementedIntervals) {
+                    DateTimeInterval intersection = oldInterval.intersectWith(complementedInterval);
+                    if (intersection != null)
                         newIntervals.add(intersection);
                 }
             }

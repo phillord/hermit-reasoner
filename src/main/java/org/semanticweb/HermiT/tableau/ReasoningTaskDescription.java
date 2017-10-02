@@ -7,7 +7,7 @@ import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.model.Term;
 
 public class ReasoningTaskDescription {
-    public static enum StandardTestType {
+    public enum StandardTestType {
         CONCEPT_SATISFIABILITY("satisfiability of concept '{0}'"),
         CONSISTENCY("ABox satisfiability"),
         CONCEPT_SUBSUMPTION("concept subsumption '{0}' => '{1}'"),

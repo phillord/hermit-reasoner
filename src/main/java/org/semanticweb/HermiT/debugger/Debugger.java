@@ -75,9 +75,9 @@ public class Debugger extends TableauMonitorForwarder {
 
     public static final Font s_monospacedFont=new Font("Monospaced",Font.PLAIN,12);
 
-    public static enum WaitOption {
+    public enum WaitOption {
         GRAPH_EXPANSION,EXISTENTIAL_EXPANSION,CLASH,MERGE,DATATYPE_CHECKING,BLOCKING_VALIDATION_STARTED,BLOCKING_VALIDATION_FINISHED
-    };
+    }
 
     protected final Map<String,DebuggerCommand> m_commandsByName;
     protected final Prefixes m_prefixes;
@@ -101,7 +101,7 @@ public class Debugger extends TableauMonitorForwarder {
 
     public Debugger(Prefixes prefixes,boolean historyOn) {
         super(new DerivationHistory());
-        m_commandsByName=new TreeMap<String,DebuggerCommand>();
+        m_commandsByName= new TreeMap<>();
         registerCommands();
         m_prefixes=prefixes;
         m_derivationHistory=(DerivationHistory)m_forwardingTargetMonitor;
@@ -119,8 +119,8 @@ public class Debugger extends TableauMonitorForwarder {
         Dimension preferredSize=m_mainFrame.getPreferredSize();
         m_mainFrame.setLocation((screenSize.width-preferredSize.width)/2,screenSize.height-100-preferredSize.height);
         m_forwardingOn=historyOn;
-        m_waitOptions=new HashSet<WaitOption>();
-        m_nodeCreationInfos=new HashMap<Node,NodeCreationInfo>();
+        m_waitOptions= new HashSet<>();
+        m_nodeCreationInfos= new HashMap<>();
         m_forever=false;
         m_singlestep=false;
         m_breakpointTime=30000;
@@ -238,7 +238,7 @@ public class Debugger extends TableauMonitorForwarder {
     }
     protected String[] parse(String command) {
         command=command.trim();
-        List<String> arguments=new ArrayList<String>();
+        List<String> arguments= new ArrayList<>();
         int firstChar=0;
         int nextSpace=command.indexOf(' ');
         while (nextSpace!=-1) {
@@ -404,7 +404,7 @@ public class Debugger extends TableauMonitorForwarder {
             m_node=node;
             m_createdByNode=createdByNode;
             m_createdByExistential=createdByExistential;
-            m_children=new ArrayList<Node>(4);
+            m_children= new ArrayList<>(4);
         }
     }
 }

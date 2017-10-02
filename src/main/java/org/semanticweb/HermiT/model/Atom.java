@@ -28,7 +28,7 @@ import org.semanticweb.HermiT.Prefixes;
  */
 public class Atom implements Serializable {
     private static final long serialVersionUID=7884900540178779422L;
-    public static final Set<DLPredicate> s_infixPredicates=new HashSet<DLPredicate>();
+    public static final Set<DLPredicate> s_infixPredicates= new HashSet<>();
     static {
         s_infixPredicates.add(Equality.INSTANCE);
         s_infixPredicates.add(Inequality.INSTANCE);

@@ -450,7 +450,7 @@ class ValidatedBlockersCache {
                         else
                             lastEntry.m_nextEntry=entry.m_nextEntry;
                         entry.m_nextEntry=m_emptyEntries;
-                        entry.m_nodes=new ArrayList<Node>();
+                        entry.m_nodes= new ArrayList<>();
                         entry.m_hashCode=0;
                         m_emptyEntries=entry;
                         m_numberOfElements--;
@@ -512,14 +512,14 @@ class ValidatedBlockersCache {
     }
     protected void resize(int newCapacity) {
         CacheEntry[] newBuckets=new CacheEntry[newCapacity];
-        for (int i=0;i<m_buckets.length;i++) {
-            CacheEntry entry=m_buckets[i];
-            while (entry!=null) {
-                CacheEntry nextEntry=entry.m_nextEntry;
-                int newIndex=getIndexFor(entry.m_hashCode,newCapacity);
-                entry.m_nextEntry=newBuckets[newIndex];
-                newBuckets[newIndex]=entry;
-                entry=nextEntry;
+        for (CacheEntry m_bucket : m_buckets) {
+            CacheEntry entry = m_bucket;
+            while (entry != null) {
+                CacheEntry nextEntry = entry.m_nextEntry;
+                int newIndex = getIndexFor(entry.m_hashCode, newCapacity);
+                entry.m_nextEntry = newBuckets[newIndex];
+                newBuckets[newIndex] = entry;
+                entry = nextEntry;
             }
         }
         m_buckets=newBuckets;
@@ -558,7 +558,7 @@ class ValidatedBlockersCache {
                 entry=entry.m_nextEntry;
             }
         }
-        return new ArrayList<Node>();
+        return new ArrayList<>();
     }
     protected static int getIndexFor(int hashCode,int tableLength) {
         hashCode+=~(hashCode<<9);
@@ -586,7 +586,7 @@ class ValidatedBlockersCache {
         protected CacheEntry m_nextEntry;
 
         public void initialize(Node node,int hashCode,CacheEntry nextEntry) {
-            m_nodes=new ArrayList<Node>();
+            m_nodes= new ArrayList<>();
             add(node);
             m_hashCode=hashCode;
             m_nextEntry=nextEntry;

@@ -34,7 +34,7 @@ public class RDFPlainLiteralLengthValueSpaceSubset implements ValueSpaceSubset {
         m_intervals=Collections.singletonList(interval);
     }
     public RDFPlainLiteralLengthValueSpaceSubset(RDFPlainLiteralLengthInterval interval1,RDFPlainLiteralLengthInterval interval2) {
-        m_intervals=new ArrayList<RDFPlainLiteralLengthInterval>(2);
+        m_intervals= new ArrayList<>(2);
         m_intervals.add(interval1);
         m_intervals.add(interval2);
     }

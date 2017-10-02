@@ -53,7 +53,7 @@ import org.semanticweb.HermiT.tableau.Tableau;
  */
 public abstract class AbstractExpansionStrategy implements ExistentialExpansionStrategy,Serializable {
     private static final long serialVersionUID=2831957929321676444L;
-    protected static enum SatType { NOT_SATISFIED,PERMANENTLY_SATISFIED,CURRENTLY_SATISFIED };
+    protected enum SatType { NOT_SATISFIED,PERMANENTLY_SATISFIED,CURRENTLY_SATISFIED }
 
     protected final BlockingStrategy m_blockingStrategy;
     protected final boolean m_expandNodeAtATime;
@@ -71,9 +71,9 @@ public abstract class AbstractExpansionStrategy implements ExistentialExpansionS
     public AbstractExpansionStrategy(BlockingStrategy blockingStrategy,boolean expandNodeAtATime) {
         m_blockingStrategy=blockingStrategy;
         m_expandNodeAtATime=expandNodeAtATime;
-        m_processedExistentials=new ArrayList<ExistentialConcept>();
-        m_auxiliaryNodes1=new ArrayList<Node>();
-        m_auxiliaryNodes2=new ArrayList<Node>();
+        m_processedExistentials= new ArrayList<>();
+        m_auxiliaryNodes1= new ArrayList<>();
+        m_auxiliaryNodes2= new ArrayList<>();
     }
     public void initialize(Tableau tableau) {
         m_tableau=tableau;
@@ -293,9 +293,8 @@ public abstract class AbstractExpansionStrategy implements ExistentialExpansionS
         else {
             outer: for (int index=startAt;index<nodes.size();index++) {
                 Node node=nodes.get(index);
-                for (int selectedNodeIndex=0;selectedNodeIndex<selectedNodes.size();selectedNodeIndex++) {
-                    Node selectedNode=selectedNodes.get(selectedNodeIndex);
-                    if (!m_extensionManager.containsAssertion(Inequality.INSTANCE,node,selectedNode) && !m_extensionManager.containsAssertion(Inequality.INSTANCE,selectedNode,node))
+                for (Node selectedNode : selectedNodes) {
+                    if (!m_extensionManager.containsAssertion(Inequality.INSTANCE, node, selectedNode) && !m_extensionManager.containsAssertion(Inequality.INSTANCE, selectedNode, node))
                         continue outer;
                 }
                 selectedNodes.add(node);
