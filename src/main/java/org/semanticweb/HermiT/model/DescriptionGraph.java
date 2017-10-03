@@ -80,7 +80,7 @@ public class DescriptionGraph implements DLPredicate,Serializable {
         return toString(Prefixes.ImmutablePrefixes.getStandartPrefixes());
     }
     public String getTextRepresentation() {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         String CRLF=System.getProperty("line.separator");
         buffer.append('[');
         buffer.append(CRLF);

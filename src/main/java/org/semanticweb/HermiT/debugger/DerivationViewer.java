@@ -186,7 +186,7 @@ public class DerivationViewer extends JFrame {
         public Component getTreeCellRendererComponent(JTree tree,Object value,boolean selected,boolean expanded,boolean leaf,int row,boolean hasFocus) {
             DerivationHistory.Fact fact=(DerivationHistory.Fact)value;
             DerivationHistory.Derivation derivation=fact.getDerivation();
-            StringBuffer text=new StringBuffer();
+            StringBuilder text=new StringBuilder();
             text.append(fact.toString(m_prefixes));
             text.append(derivation.toString(m_prefixes));
             super.getTreeCellRendererComponent(tree,text.toString(),selected,expanded,leaf,row,hasFocus);

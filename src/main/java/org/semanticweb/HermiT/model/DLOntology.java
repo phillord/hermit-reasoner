@@ -313,7 +313,7 @@ public class DLOntology implements Serializable {
         return change;
     }
     public String toString(Prefixes prefixes) {
-        StringBuffer stringBuffer=new StringBuffer();
+        StringBuilder stringBuffer=new StringBuilder();
         stringBuffer.append("Prefixes: [");
         stringBuffer.append(CRLF);
         for (Map.Entry<String,String> entry : prefixes.getPrefixIRIsByPrefixName().entrySet()) {
@@ -398,7 +398,7 @@ public class DLOntology implements Serializable {
                 }
             }
         }
-        StringBuffer stringBuffer=new StringBuffer();
+        StringBuilder stringBuffer=new StringBuilder();
         stringBuffer.append("DL clauses statistics: [");
         stringBuffer.append(CRLF);
         stringBuffer.append("  Number of deterministic clauses: ").append(numDeterministicClauses);

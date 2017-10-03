@@ -60,7 +60,7 @@ public class DateTimeValueSpaceSubset implements ValueSpaceSubset {
             m_intervals.get(index).enumerateDateTimes(dataValues);
     }
     public String toString() {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         buffer.append("xsd:dateTime{");
         for (int index=0;index<m_intervals.size();index++) {
             if (index!=0)

@@ -71,7 +71,7 @@ public class DoubleInterval {
         numbers.add(m_upperBoundInclusive);
     }
     public String toString() {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         buffer.append("DOUBLE[");
         buffer.append(m_lowerBoundInclusive);
         buffer.append("..");

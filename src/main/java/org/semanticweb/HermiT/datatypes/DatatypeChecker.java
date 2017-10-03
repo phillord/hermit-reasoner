@@ -71,7 +71,7 @@ public abstract class DatatypeChecker<NT> implements Serializable {
         return toString(Prefixes.ImmutablePrefixes.getStandartPrefixes());
     }
     public String toString(Prefixes prefixes) {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         boolean first=true;
         for (int variableIndex=0;variableIndex<m_activeVariables.size();variableIndex++) {
             if (first)
@@ -334,7 +334,7 @@ public abstract class DatatypeChecker<NT> implements Serializable {
             return toString(Prefixes.ImmutablePrefixes.getStandartPrefixes());
         }
         public String toString(Prefixes prefixes) {
-            StringBuffer buffer=new StringBuffer();
+            StringBuilder buffer=new StringBuilder();
             boolean first=true;
             buffer.append('[');
             for (ConstantEnumeration m_positiveConstantEnumeration : m_positiveConstantEnumerations) {

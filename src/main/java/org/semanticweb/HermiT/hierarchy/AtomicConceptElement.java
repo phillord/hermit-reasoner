@@ -66,7 +66,7 @@ public class AtomicConceptElement {
         return m_possibleInstances.addAll(individuals);
     }
     public String toString() {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         buffer.append(" (known instances: ");
         boolean notfirst=false;
         for (Individual individual : m_knownInstances) {

@@ -842,7 +842,7 @@ class Option {
     }
 
     public static String formatOptionHelp(Option[] opts) {
-        StringBuffer out=new StringBuffer();
+        StringBuilder out=new StringBuilder();
         int fieldWidth=0;
         for (Option o : opts) {
             int curWidth=o.getLongOptExampleStr().length();
@@ -887,7 +887,7 @@ class Option {
     }
 
     public static String formatOptionsString(Option[] opts) {
-        StringBuffer out=new StringBuffer();
+        StringBuilder out=new StringBuilder();
         for (Option o : opts) {
             if (o.optChar<256) {
                 out.appendCodePoint(o.optChar);
@@ -907,7 +907,7 @@ class Option {
     }
 
     protected static String breakLines(String str,int lineWidth,int indent) {
-        StringBuffer out=new StringBuffer();
+        StringBuilder out=new StringBuilder();
         BreakIterator i=BreakIterator.getLineInstance();
         i.setText(str);
         int curPos=0;

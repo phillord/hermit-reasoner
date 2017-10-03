@@ -46,7 +46,7 @@ public class ConstantEnumeration extends AtomicDataRange {
         return m_constants.length==0;
     }
     public String toString(Prefixes prefixes) {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         buffer.append("{ ");
         for (int index=0;index<m_constants.length;index++) {
             if (index>0)

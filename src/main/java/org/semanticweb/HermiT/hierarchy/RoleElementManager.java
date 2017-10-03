@@ -46,7 +46,7 @@ public class RoleElementManager {
         }
     }
     public String toString() {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         for (AtomicRole role : m_roleToElement.keySet()) {
             buffer.append(role);
             buffer.append(" -> ");
@@ -128,7 +128,7 @@ public class RoleElementManager {
             return successors.addAll(individuals);
         }
         public String toString() {
-            StringBuffer buffer=new StringBuffer();
+            StringBuilder buffer=new StringBuilder();
             buffer.append(m_role);
             buffer.append(" (known instances: ");
             boolean notfirst=false;

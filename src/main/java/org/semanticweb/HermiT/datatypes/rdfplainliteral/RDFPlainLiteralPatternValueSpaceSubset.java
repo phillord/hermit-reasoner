@@ -137,7 +137,7 @@ public class RDFPlainLiteralPatternValueSpaceSubset implements ValueSpaceSubset 
         }
     }
     public String toString() {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         buffer.append("rdf:PlainLiteral{");
         buffer.append(m_automaton.toString());
         buffer.append('}');

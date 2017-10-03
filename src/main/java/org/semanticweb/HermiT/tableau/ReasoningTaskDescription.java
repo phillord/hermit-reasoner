@@ -78,7 +78,7 @@ public class ReasoningTaskDescription {
         return new ReasoningTaskDescription(true,StandardTestType.CONCEPT_SUBSUMPTION,atomicSubconcept,atomicSuperconcept);
     }
     public static ReasoningTaskDescription isConceptSubsumedByList(Object atomicSubconcept,Object... atomicSuperconcepts) {
-        StringBuffer message=new StringBuffer();
+        StringBuilder message=new StringBuilder();
         message.append("satisiability of concept '{0}' ");
         for (int index=0;index<atomicSuperconcepts.length;index++) {
             message.append(" and not({");
@@ -91,7 +91,7 @@ public class ReasoningTaskDescription {
         return new ReasoningTaskDescription(false,message.toString(),arguments);
     }
     public static ReasoningTaskDescription isRoleSubsumedByList(Object subrole,Object... superroles) {
-        StringBuffer message=new StringBuffer();
+        StringBuilder message=new StringBuilder();
         message.append("satisiability of role '{0}' ");
         for (int index=0;index<superroles.length;index++) {
             message.append(" and not({");

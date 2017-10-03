@@ -250,7 +250,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
             if (m_tuple.length==0)
                 return "[ ]";
             else {
-                StringBuffer buffer=new StringBuffer();
+                StringBuilder buffer=new StringBuilder();
                 Object dlPredicate=getDLPredicate();
                 if (org.semanticweb.HermiT.model.Atom.s_infixPredicates.contains(dlPredicate)) {
                     buffer.append(getArgument(0).getNodeID());
@@ -313,7 +313,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
             return m_derivedBy;
         }
         public String toString(Prefixes prefixes) {
-            StringBuffer buffer=new StringBuffer();
+            StringBuilder buffer=new StringBuilder();
             for (int disjunctIndex=0;disjunctIndex<m_atoms.length;disjunctIndex++) {
                 if (disjunctIndex!=0)
                     buffer.append(" v ");

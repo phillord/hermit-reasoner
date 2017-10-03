@@ -59,7 +59,7 @@ public class DatatypeRestriction extends AtomicDataRange {
         return false;
     }
     public String toString(Prefixes prefixes) {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         buffer.append(prefixes.abbreviateIRI(m_datatypeURI));
         if (m_facetURIs.length>0) {
             buffer.append('[');

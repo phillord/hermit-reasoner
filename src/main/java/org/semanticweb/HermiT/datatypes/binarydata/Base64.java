@@ -29,7 +29,7 @@ public class Base64 {
         int arrayLength=array.length;
         int nummerOfFullGroups=arrayLength/3;
         int bytesInLastGroup=arrayLength-3*nummerOfFullGroups;
-        StringBuffer result=new StringBuffer(((arrayLength+2)/3)*4);
+        StringBuilder result=new StringBuilder(((arrayLength+2)/3)*4);
         int index=0;
         for (int i=0;i<nummerOfFullGroups;i++) {
             int byte0=array[index++] & 0xff;

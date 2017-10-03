@@ -86,7 +86,7 @@ public class DLClauseEvaluator implements Serializable {
         }
     }
     public String toString() {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         int maximalPCLength=String.valueOf(m_workers.length-1).length();
         for (int programCounter=0;programCounter<m_workers.length;programCounter++) {
             String programCounterString=String.valueOf(programCounter);

@@ -53,7 +53,7 @@ public final class PermanentDependencySet implements DependencySet,Serializable 
         return m_branchingPoint;
     }
     public String toString() {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         buffer.append("{ ");
         PermanentDependencySet dependencySet=this;
         while (dependencySet.m_branchingPoint!=-1) {

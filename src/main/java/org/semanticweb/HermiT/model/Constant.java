@@ -52,7 +52,7 @@ public class Constant extends Term {
         return toString(Prefixes.ImmutablePrefixes.getStandartPrefixes());
     }
     public String toString(Prefixes prefixes) {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         buffer.append('"');
         for (int index=0;index<m_lexicalForm.length();index++) {
             char c=m_lexicalForm.charAt(index);

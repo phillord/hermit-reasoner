@@ -83,7 +83,7 @@ public class Atom implements Serializable {
         return create(newDLPredicate,m_arguments);
     }
     public String toString(Prefixes prefixes) {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         if (s_infixPredicates.contains(m_dlPredicate)) {
             buffer.append(m_arguments[0].toString(prefixes));
             buffer.append(' ');

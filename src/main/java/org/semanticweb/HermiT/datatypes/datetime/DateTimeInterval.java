@@ -193,7 +193,7 @@ public class DateTimeInterval {
         return lowerBound>upperBound ||(lowerBound==upperBound && (lowerBoundType==BoundType.EXCLUSIVE || upperBoundType==BoundType.EXCLUSIVE));
     }
     public String toString() {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         buffer.append(m_intervalType.toString());
         if (m_lowerBoundType==BoundType.INCLUSIVE)
             buffer.append('[');

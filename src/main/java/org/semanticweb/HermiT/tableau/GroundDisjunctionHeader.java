@@ -113,7 +113,7 @@ public final class GroundDisjunctionHeader {
         }
     }
     public String toString(Prefixes prefixes) {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         for (int disjunctIndex=0;disjunctIndex<m_dlPredicates.length;disjunctIndex++) {
         	if (disjunctIndex>0)
         	    buffer.append(" \\/ ");

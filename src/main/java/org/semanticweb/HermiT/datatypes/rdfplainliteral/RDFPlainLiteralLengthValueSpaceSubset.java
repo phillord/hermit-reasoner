@@ -67,7 +67,7 @@ public class RDFPlainLiteralLengthValueSpaceSubset implements ValueSpaceSubset {
             m_intervals.get(index).enumerateValues(dataValues);
     }
     public String toString() {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         buffer.append("rdf:PlainLiteral{");
         for (int index=0;index<m_intervals.size();index++) {
             if (index!=0)

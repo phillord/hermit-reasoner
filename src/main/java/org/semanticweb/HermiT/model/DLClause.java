@@ -211,7 +211,7 @@ public class DLClause implements Serializable {
         return false;
     }
     public String toString(Prefixes prefixes) {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         for (int headIndex=0;headIndex<m_headAtoms.length;headIndex++) {
             if (headIndex!=0)
                 buffer.append(" v ");
