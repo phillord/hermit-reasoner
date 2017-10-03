@@ -1918,7 +1918,7 @@ Ontology(
     &lt;rdfs:range rdf:resource="http://example.org/c3"/&gt;
   &lt;/owl:DatatypeProperty&gt;
   &lt;owl:DatatypeProperty rdf:about="http://example.org/p6"&gt;
-    &lt;rdfs:range rdf:resource="http://example.org/c6"/&gt;
+    &lt;rdfs:range rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral"/&gt;
   &lt;/owl:DatatypeProperty&gt;
   &lt;owl:DatatypeProperty rdf:about="http://example.org/p2"&gt;
     &lt;rdfs:domain rdf:resource="http://example.org/c2"/&gt;
@@ -1946,7 +1946,7 @@ Ontology(
     ObjectPropertyRange(:p3 :c3)
     ObjectPropertyDomain(:p4 :c4)
     AnnotationPropertyDomain(:p5 :c5)
-    AnnotationPropertyRange(:p6 :c6))</test:fsPremiseOntology>
+    AnnotationPropertyRange(:p6 rdf:PlainLiteral))</test:fsPremiseOntology>
 	</test:TestCase>
 
 
@@ -3231,7 +3231,7 @@ Ontology(
 		<rdf:type rdf:resource="&test;NegativeEntailmentTest" />
 		<rdf:type rdf:resource="&test;ConsistencyTest" />
 		<test:identifier rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Individual-Class_Punning_vs._ObjectOneOf</test:identifier>
-		<test:creator rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Markus Krötzsch</test:creator>
+		<test:creator rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Markus Kr?tzsch</test:creator>
 		<test:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Tools must not confuse atomic classes with ObjectOneOf expressions that contain a single individual named like that class.</test:description>
 		<test:normativeSyntax rdf:resource="&test;FUNCTIONAL" />
 		<test:semantics rdf:resource="&test;DIRECT" />
@@ -14046,7 +14046,7 @@ the formal machinery of OWL.</test:description>
 		<test:identifier rdf:datatype="http://www.w3.org/2001/XMLSchema#string">WebOnt-I5.2-011</test:identifier>
 		<test:creator rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Jeremy J. Carroll</test:creator>
 		<test:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The informal semantics indicated by comments concerning user defined classes
- are not respected by the formal machinery of OWL.</test:description>
+?are not respected by the formal machinery of OWL.</test:description>
 		<test:normativeSyntax rdf:resource="&test;RDFXML" />
 		<test:status rdf:resource="&test;Proposed" />
 		<test:semantics rdf:resource="&test;DIRECT" />
