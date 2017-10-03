@@ -768,12 +768,12 @@ public class CommandLine {
                             status.log(2,"Default prefix "+defaultPrefix+" could not be registered because there is already a registered default prefix. ");
                         }
                     }
-                    for (String prefixName : prefixMappings.keySet()) {
+                    for (Map.Entry<String, String> entry : prefixMappings.entrySet()) {
                         try {
-                            prefixes.declarePrefix(prefixName, prefixMappings.get(prefixName));
+                            prefixes.declarePrefix(entry.getKey(), entry.getValue());
                         }
                         catch (IllegalArgumentException e) {
-                            status.log(2,"Prefixname "+prefixName+" could not be set to "+prefixMappings.get(prefixName)+" because there is already a registered prefix name for the IRI. ");
+                            status.log(2,"Prefixname "+entry.getKey()+" could not be set to "+entry.getValue()+" because there is already a registered prefix name for the IRI. ");
                         }
                     }
                     long loadTime=System.currentTimeMillis()-startTime;

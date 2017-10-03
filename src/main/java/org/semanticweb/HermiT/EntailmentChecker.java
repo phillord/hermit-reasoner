@@ -539,8 +539,8 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
             Set<Set<OWLAnonymousIndividual>> components=getComponents();
             Map<Set<OWLAnonymousIndividual>,OWLAnonymousIndividual> componentsToRoots=findSuitableRoots(components);
             // It seems the forest is valid, so we can read off the concepts.
-            for (Set<OWLAnonymousIndividual> component : componentsToRoots.keySet()) {
-                OWLAnonymousIndividual root=componentsToRoots.get(component);
+            for (Map.Entry<Set<OWLAnonymousIndividual>, OWLAnonymousIndividual> entry : componentsToRoots.entrySet()) {
+                OWLAnonymousIndividual root= entry.getValue();
                 if (!specialOPEdges.containsKey(root)) {
                     // It was not possible to find a root that has exactly one relationship with a named individual,
                     // otherwise findSuitableRoots() had given preference to that root.
@@ -556,14 +556,14 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
                     if (ind2OP.size()!=1) {
                         throw new RuntimeException("Internal error: HermiT decided that the anonymous individuals form a valid forest, but actually they do not. ");
                     }
-                    OWLNamedIndividual subject=ind2OP.keySet().iterator().next();
-                    Set<OWLObjectPropertyExpression> ops=ind2OP.get(subject);
+                    Map.Entry<OWLNamedIndividual, Set<OWLObjectPropertyExpression>> subject=ind2OP.entrySet().iterator().next();
+                    Set<OWLObjectPropertyExpression> ops=subject.getValue();
                     if (ops.size()!=1) {
                         throw new RuntimeException("Internal error: HermiT decided that the anonymous individuals form a valid forest, but actually they do not. ");
                     }
                     OWLObjectPropertyExpression op=ops.iterator().next().getInverseProperty();
                     OWLClassExpression c=getClassExpressionFor(factory,root,null);
-                    anonIndAxioms.add(factory.getOWLClassAssertionAxiom(factory.getOWLObjectSomeValuesFrom(op,c),subject));
+                    anonIndAxioms.add(factory.getOWLClassAssertionAxiom(factory.getOWLObjectSomeValuesFrom(op,c),subject.getKey()));
                 }
             }
         }

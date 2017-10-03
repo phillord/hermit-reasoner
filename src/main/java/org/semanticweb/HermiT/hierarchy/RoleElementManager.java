@@ -47,10 +47,10 @@ public class RoleElementManager {
     }
     public String toString() {
         StringBuilder buffer=new StringBuilder();
-        for (AtomicRole role : m_roleToElement.keySet()) {
-            buffer.append(role);
+        for (Map.Entry<AtomicRole, RoleElement> entry : m_roleToElement.entrySet()) {
+            buffer.append(entry.getKey());
             buffer.append(" -> ");
-            buffer.append(m_roleToElement.get(role).toString());
+            buffer.append(entry.getValue().toString());
             buffer.append(LB);
         }
         return buffer.toString();
@@ -132,14 +132,14 @@ public class RoleElementManager {
             buffer.append(m_role);
             buffer.append(" (known instances: ");
             boolean notfirst=false;
-            for (Individual individual : m_knownRelations.keySet()) {
-                for (Individual successor : m_knownRelations.get(individual)) {
+            for (Map.Entry<Individual, Set<Individual>> entry : m_knownRelations.entrySet()) {
+                for (Individual successor : entry.getValue()) {
                     if (notfirst) { 
                         buffer.append(", ");
                         notfirst=true;
                     }
                     buffer.append("(");
-                    buffer.append(individual.toString());
+                    buffer.append(entry.getKey().toString());
                     buffer.append(", ");
                     buffer.append(successor.toString());
                     buffer.append(")");
@@ -147,14 +147,14 @@ public class RoleElementManager {
             }
             buffer.append(" | possible instances: ");
             notfirst=false;
-            for (Individual individual : m_possibleRelations.keySet()) {
-                for (Individual successor : m_possibleRelations.get(individual)) {
+            for (Map.Entry<Individual, Set<Individual>> entry : m_possibleRelations.entrySet()) {
+                for (Individual successor : entry.getValue()) {
                     if (notfirst) { 
                         buffer.append(", ");
                         notfirst=true;
                     }
                     buffer.append("(");
-                    buffer.append(individual.toString());
+                    buffer.append(entry.getKey().toString());
                     buffer.append(", ");
                     buffer.append(successor.toString());
                     buffer.append(")");

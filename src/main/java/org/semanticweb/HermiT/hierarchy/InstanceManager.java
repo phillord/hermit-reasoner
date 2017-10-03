@@ -567,14 +567,14 @@ public class InstanceManager {
     }
     protected void initializeSameAs() {
         m_individualToPossibleEquivalenceClass= new HashMap<>();
-        for (Node node : m_individualsForNodes.keySet()) {
-            Node mergedInto=node.getMergedInto();
+        for (Map.Entry<Node, Individual> entry : m_individualsForNodes.entrySet()) {
+            Node mergedInto=entry.getKey().getMergedInto();
             if (mergedInto!=null) {
-                Individual individual1=m_individualsForNodes.get(node);
+                Individual individual1=entry.getValue();
                 Individual individual2=m_individualsForNodes.get(mergedInto);
                 Set<Individual> individual1Equivalences=m_individualToEquivalenceClass.get(individual1);
                 Set<Individual> individual2Equivalences=m_individualToEquivalenceClass.get(individual2);
-                if (node.getMergedIntoDependencySet().isEmpty()) {
+                if (entry.getKey().getMergedIntoDependencySet().isEmpty()) {
                     individual1Equivalences.addAll(individual2Equivalences);
                     m_individualToEquivalenceClass.put(individual2, individual1Equivalences);
                 }
@@ -1136,21 +1136,21 @@ public class InstanceManager {
             }
         }
         Map<Individual,Set<Individual>> knownInstances=representativeElement.getKnownRelations();
-        for (Individual instance1 : knownInstances.keySet()) {
-            if (isResultRelevantIndividual(instance1)) {
-                Set<Individual> successors=result.get(instance1);
+        for (Map.Entry<Individual, Set<Individual>> entry : knownInstances.entrySet()) {
+            if (isResultRelevantIndividual(entry.getKey())) {
+                Set<Individual> successors=result.get(entry.getKey());
                 boolean isNew=false;
                 if (successors==null) {
                     successors= new HashSet<>();
                     isNew=true;
                 }
-                for (Individual instance2 : knownInstances.get(instance1)) {
+                for (Individual instance2 : entry.getValue()) {
                     if (isResultRelevantIndividual(instance2)) {
                         successors.add(instance2);
                     }
                 }
                 if (isNew && !successors.isEmpty())
-                    result.put(instance1, successors);
+                    result.put(entry.getKey(), successors);
             }
         }
         for (HierarchyNode<RoleElement> child : node.getChildNodes())

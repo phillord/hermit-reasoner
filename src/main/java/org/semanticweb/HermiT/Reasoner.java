@@ -1780,10 +1780,10 @@ public class Reasoner implements OWLReasoner {
         AtomicRole role=H(property);
         Map<Individual,Set<Individual>> relations=m_instanceManager.getObjectPropertyInstances(role);
         OWLDataFactory factory=getDataFactory();
-        for (Individual individual : relations.keySet()) {
+        for (Map.Entry<Individual, Set<Individual>> entry : relations.entrySet()) {
             Set<OWLNamedIndividual> successors= new HashSet<>();
-            result.put(factory.getOWLNamedIndividual(IRI.create(individual.getIRI())),successors);
-            for (Individual successorIndividual : relations.get(individual))
+            result.put(factory.getOWLNamedIndividual(IRI.create(entry.getKey().getIRI())),successors);
+            for (Individual successorIndividual : entry.getValue())
                 successors.add(factory.getOWLNamedIndividual(IRI.create(successorIndividual.getIRI())));
         }
         return result;
