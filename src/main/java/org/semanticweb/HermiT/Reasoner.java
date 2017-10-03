@@ -871,7 +871,7 @@ public class Reasoner implements OWLReasoner {
         if (m_directDisjointClasses.containsKey(node))
             return m_directDisjointClasses.get(node);
         else {
-            Set<HierarchyNode<AtomicConcept>> result= new HashSet<>();
+            Set<HierarchyNode<AtomicConcept>> result;
             OWLDataFactory factory=getDataFactory();
             OWLClassExpression negated=factory.getOWLObjectComplementOf(factory.getOWLClass(IRI.create(node.getRepresentative().getIRI())));
             HierarchyNode<AtomicConcept> equivalentToComplement=getHierarchyNode(negated);

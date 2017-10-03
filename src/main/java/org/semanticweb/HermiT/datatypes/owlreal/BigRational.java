@@ -61,7 +61,7 @@ public class BigRational extends Number implements Comparable<BigRational> {
     public boolean equals(Object that) {
         if (that==this)
             return true;
-        if (!(that instanceof BigRational) || that==null)
+        if (!(that instanceof BigRational))
             return false;
         BigRational thatRational=(BigRational)that;
         return m_numerator.equals(thatRational.m_numerator) && m_denominator.equals(thatRational.m_denominator);

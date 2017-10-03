@@ -854,10 +854,8 @@ class Option {
             if (o.group!=null) {
                 curGroup=o.group;
                 out.append(System.getProperty("line.separator"));
-                if (o.group!=null) {
-                    out.append(curGroup).append(":");
-                    out.append(System.getProperty("line.separator"));
-                }
+                out.append(curGroup).append(":");
+                out.append(System.getProperty("line.separator"));
             }
             if (o.optChar<256) {
                 out.append("  -");
