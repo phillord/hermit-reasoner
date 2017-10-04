@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
-public class Graph<T> implements Serializable {
+public class Graph<T> implements Serializable, Cloneable {
     private static final long serialVersionUID = 5372948202031042380L;
 
     protected final Set<T> m_elements;

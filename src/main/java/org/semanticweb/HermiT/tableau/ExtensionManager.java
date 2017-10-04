@@ -75,7 +75,7 @@ public final class ExtensionManager implements Serializable {
                     return ((Node)m_tupleTable.getTupleObject(tupleIndex,1)).isActive();
                 }
             };
-        m_extensionTablesByArity.put(new Integer(2),m_binaryExtensionTable);
+        m_extensionTablesByArity.put(Integer.valueOf(2),m_binaryExtensionTable);
         m_ternaryExtensionTable=
             new ExtensionTableWithTupleIndexes(m_tableau,3,!m_tableau.isDeterministic(),
                 new TupleIndex[] {
@@ -94,7 +94,7 @@ public final class ExtensionManager implements Serializable {
                         && ((Node)m_tupleTable.getTupleObject(tupleIndex,2)).isActive();
                 }
             };
-        m_extensionTablesByArity.put(new Integer(3),m_ternaryExtensionTable);
+        m_extensionTablesByArity.put(Integer.valueOf(3),m_ternaryExtensionTable);
         for (DescriptionGraph descriptionGraph : m_tableau.m_permanentDLOntology.getAllDescriptionGraphs()) {
             Integer arityInteger=Integer.valueOf(descriptionGraph.getNumberOfVertices()+1);
             if (!m_extensionTablesByArity.containsKey(arityInteger))

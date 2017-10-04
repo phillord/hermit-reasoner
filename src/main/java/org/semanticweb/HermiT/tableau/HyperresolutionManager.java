@@ -373,6 +373,8 @@ public final class HyperresolutionManager implements Serializable {
             m_hashCode=hashCode;
         }
         public boolean equals(Object that) {
+            if (that == null)
+                return false;
             if (this==that)
                 return true;
             DLClause thatDLClause=((DLClauseBodyKey)that).m_dlClause;
