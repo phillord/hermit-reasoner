@@ -77,7 +77,7 @@ public class OWLClausification {
         String ontologyIRI=defaultDocumentIRI.isPresent()?defaultDocumentIRI.get().toString(): "urn:hermit:kb" ;
         OWLAxioms axioms=new OWLAxioms();
         OWLNormalization normalization=new OWLNormalization(factory,axioms,0);
-        rootOntology.importsClosure().forEach(o->normalization.processOntology(o));
+        rootOntology.importsClosure().forEach(normalization::processOntology);
         BuiltInPropertyManager builtInPropertyManager=new BuiltInPropertyManager(factory);
         builtInPropertyManager.axiomatizeBuiltInPropertiesAsNeeded(axioms);
         ObjectPropertyInclusionManager objectPropertyInclusionManager=new ObjectPropertyInclusionManager(axioms);

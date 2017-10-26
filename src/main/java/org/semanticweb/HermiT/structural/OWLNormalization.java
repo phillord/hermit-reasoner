@@ -358,7 +358,7 @@ public class OWLNormalization {
     protected OWLClassExpression getDefinitionFor(OWLClassExpression description,boolean[] alreadyExists,boolean forcePositive) {
         OWLClassExpression definition=m_definitions.get(description);
         if (definition==null || (forcePositive && !(definition instanceof OWLClass))) {
-            definition=m_factory.getOWLClass(IRI.create("internal:def#"+(m_definitions.size()+m_firstReplacementIndex)));
+            definition=m_factory.getOWLClass(IRI.create("internal:def#","a"+(m_definitions.size()+m_firstReplacementIndex)));
             if (!forcePositive && !description.accept(m_plVisitor).booleanValue())
                 definition=m_factory.getOWLObjectComplementOf(definition);
             m_definitions.put(description,definition);
@@ -389,7 +389,7 @@ public class OWLNormalization {
     protected OWLClass getDefinitionForNegativeNominal(OWLObjectOneOf nominal,boolean[] alreadyExists) {
         OWLClass definition=m_definitionsForNegativeNominals.get(nominal);
         if (definition==null) {
-            definition=m_factory.getOWLClass(IRI.create("internal:nnq#"+m_definitionsForNegativeNominals.size()));
+            definition=m_factory.getOWLClass(IRI.create("internal:nnq#", "b"+m_definitionsForNegativeNominals.size()));
             m_definitionsForNegativeNominals.put(nominal,definition);
             alreadyExists[0]=false;
         }
@@ -423,36 +423,6 @@ public class OWLNormalization {
             m_alreadyExists=new boolean[1];
         }
 
-        @Override
-        public void visit(OWLDeclarationAxiom axiom) {
-//            if (axiom.getEntity().isOWLClass()) {
-//                OWLClass cls=(OWLClass)axiom.getEntity(); 
-//                if (!m_axioms.m_classes.contains(cls)) 
-//                    m_axioms.m_classes.add(cls);
-//            }
-//            if (axiom.getEntity().isOWLObjectProperty()) {
-//                OWLObjectProperty op=(OWLObjectProperty)axiom.getEntity(); 
-//                if (!m_axioms.m_objectProperties.contains(op)) 
-//                    m_axioms.m_objectProperties.add(op);
-//            }
-//            if (axiom.getEntity().isOWLDataProperty()) {
-//                OWLDataProperty dp=(OWLDataProperty)axiom.getEntity(); 
-//                if (!m_axioms.m_dataProperties.contains(dp)) 
-//                    m_axioms.m_dataProperties.add(dp);
-//            }
-        }
-        @Override
-        public void visit(OWLAnnotationAssertionAxiom axiom) {
-        }
-        @Override
-        public void visit(OWLSubAnnotationPropertyOfAxiom axiom) {
-        }
-        @Override
-        public void visit(OWLAnnotationPropertyDomainAxiom axiom) {
-        }
-        @Override
-        public void visit(OWLAnnotationPropertyRangeAxiom axiom) {
-        }
 
         // Class axioms
 
