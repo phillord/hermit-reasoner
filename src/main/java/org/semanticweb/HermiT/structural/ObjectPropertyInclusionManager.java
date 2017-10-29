@@ -74,10 +74,11 @@ public class ObjectPropertyInclusionManager {
                     // C(a) and not C or forall op not{b}
                     OWLIndividual individual=negAssertion.getObject();
                     // neg. op assertions cannot contain anonymous individuals
-                    OWLClass individualConcept=factory.getOWLClass(IRI.create("internal:nom#"+individual.asOWLNamedIndividual().getIRI().toString()));
+                    IRI iri = individual.asOWLNamedIndividual().getIRI();
+                    OWLClass individualConcept=factory.getOWLClass(IRI.create("internal:nom#"+iri.getNamespace(), iri.getFragment()));
                     OWLClassExpression notIndividualConcept=factory.getOWLObjectComplementOf(individualConcept);
                     OWLClassExpression allNotIndividualConcept=factory.getOWLObjectAllValuesFrom(prop,notIndividualConcept);
-                    OWLClassExpression definition=factory.getOWLClass(IRI.create("internal:def#"+(replacementIndex++)));
+                    OWLClassExpression definition=factory.getOWLClass(IRI.create("internal:def#","a"+(replacementIndex++)));
                     axioms.m_conceptInclusions.add(Arrays.asList(factory.getOWLObjectComplementOf(definition), allNotIndividualConcept));
                     additionalFacts.add(factory.getOWLClassAssertionAxiom(definition,negAssertion.getSubject()));
                     additionalFacts.add(factory.getOWLClassAssertionAxiom(individualConcept,individual));
@@ -131,7 +132,7 @@ public class ObjectPropertyInclusionManager {
                         if (m_automataByProperty.containsKey(objectProperty)) {
                             OWLClassExpression replacement=replacedDescriptions.get(objectAll);
                             if (replacement==null) {
-                                replacement=dataFactory.getOWLClass(IRI.create("internal:all#"+(firstReplacementIndex++)));
+                                replacement=dataFactory.getOWLClass(IRI.create("internal:all#","a"+(firstReplacementIndex++)));
                                 if (objectAll.getFiller() instanceof OWLObjectComplementOf || objectAll.getFiller().equals(dataFactory.getOWLNothing()))
                                     replacement=replacement.getComplementNNF();
                                 replacedDescriptions.put(objectAll,replacement);
@@ -153,7 +154,7 @@ public class ObjectPropertyInclusionManager {
                 if (state.isInitial())
                     statesToConcepts.put(state,replacement.getValue());
                 else {
-                    OWLClassExpression stateConcept=dataFactory.getOWLClass(IRI.create("internal:all#"+(firstReplacementIndex++)));
+                    OWLClassExpression stateConcept=dataFactory.getOWLClass(IRI.create("internal:all#","a"+(firstReplacementIndex++)));
                     if (isOfNegativePolarity)
                         stateConcept=stateConcept.getComplementNNF();
                     statesToConcepts.put(state,stateConcept);
