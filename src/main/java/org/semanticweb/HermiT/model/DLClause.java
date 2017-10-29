@@ -18,6 +18,7 @@
 package org.semanticweb.HermiT.model;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -53,7 +54,7 @@ public class DLClause implements Serializable {
      * @return atoms
      */
     public Atom[] getHeadAtoms() {
-        return m_headAtoms.clone();
+        return m_headAtoms;
     }
     /**
      * @return body length
@@ -72,7 +73,7 @@ public class DLClause implements Serializable {
      * @return body atoms
      */
     public Atom[] getBodyAtoms() {
-        return m_bodyAtoms.clone();
+        return m_bodyAtoms;
     }
     /**
      * @param safeMakingPredicate safeMakingPredicate
@@ -279,26 +280,27 @@ public class DLClause implements Serializable {
         return toString(Prefixes.STANDARD_PREFIXES);
     }
 
-    protected final static InterningManager<DLClause> s_interningManager=new InterningManager<DLClause>() {
+    protected final static InterningManager<DLClause> s_interningManager = new InterningManager<DLClause>() {
         @Override
-        protected boolean equal(DLClause object1,DLClause object2) {
+        protected boolean equal(DLClause object1, DLClause object2) {
             if (object1.m_headAtoms.length!=object2.m_headAtoms.length || object1.m_bodyAtoms.length!=object2.m_bodyAtoms.length)
                 return false;
-            for (int index=object1.m_headAtoms.length-1;index>=0;--index)
-                if (object1.m_headAtoms[index]!=object2.m_headAtoms[index])
+            for (int index = object1.m_headAtoms.length - 1; index >= 0; --index)
+                if (object1.m_headAtoms[index] != object2.m_headAtoms[index])
                     return false;
-            for (int index=object1.m_bodyAtoms.length-1;index>=0;--index)
-                if (object1.m_bodyAtoms[index]!=object2.m_bodyAtoms[index])
+            for (int index = object1.m_bodyAtoms.length - 1; index >= 0; --index)
+                if (object1.m_bodyAtoms[index] != object2.m_bodyAtoms[index])
                     return false;
             return true;
         }
+
         @Override
         protected int getHashCode(DLClause object) {
-            int hashCode=0;
-            for (int index=object.m_bodyAtoms.length-1;index>=0;--index)
-                hashCode+=object.m_bodyAtoms[index].hashCode();
-            for (int index=object.m_headAtoms.length-1;index>=0;--index)
-                hashCode+=object.m_headAtoms[index].hashCode();
+            int hashCode = 0;
+            for (int index = object.m_bodyAtoms.length - 1; index >= 0; --index)
+                hashCode += object.m_bodyAtoms[index].hashCode();
+            for (int index = object.m_headAtoms.length - 1; index >= 0; --index)
+                hashCode += object.m_headAtoms[index].hashCode();
             return hashCode;
         }
     };
