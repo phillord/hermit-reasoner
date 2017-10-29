@@ -300,11 +300,12 @@ public class OWLNormalization {
         if (andIndex==-1)
             return false;
         OWLObjectIntersectionOf objectAnd=(OWLObjectIntersectionOf)descriptions.get(andIndex);
-        for (OWLClassExpression description : asList(objectAnd.operands())) {
+        int index=andIndex;
+        objectAnd.operands().forEach(description->{
             List<OWLClassExpression> newDescriptions=new ArrayList<>(descriptions);
-            newDescriptions.set(andIndex, description);
+            newDescriptions.set(index, description);
             inclusions.add(newDescriptions);
-        }
+        });
         return true;
     }
     protected boolean distributeUnionOverAnd(List<OWLDataRange> descriptions,List<List<OWLDataRange>> inclusions) {
@@ -371,7 +372,7 @@ public class OWLNormalization {
     protected OWLDatatype getDefinitionFor(OWLDataRange dr,boolean[] alreadyExists) {
         OWLDatatype definition=m_dataRangeDefinitions.get(dr);
         if (definition==null) {
-            definition=m_factory.getOWLDatatype(IRI.create("internal:defdata#"+m_dataRangeDefinitions.size()));
+            definition=m_factory.getOWLDatatype(IRI.create("internal:defdata#","a"+m_dataRangeDefinitions.size()));
             m_dataRangeDefinitions.put(dr,definition);
             alreadyExists[0]=false;
         }
@@ -459,21 +460,22 @@ public class OWLNormalization {
         public void visit(OWLDisjointUnionAxiom axiom) {
             // DisjointUnion(C CE1 ... CEn)
             // 1. add C implies CE1 or ... or CEn, which is { not C or CE1 or ... or CEn }
-            List<? extends OWLClassExpression> classExpressions = asList(axiom.classExpressions());
-            Set<OWLClassExpression> inclusion=asSet(axiom.classExpressions(), OWLClassExpression.class);
-            inclusion.add(m_expressionManager.getComplementNNF(axiom.getOWLClass()));
-            m_classExpressionInclusionsAsDisjunctions.add(new ArrayList<>(inclusion));
+            List<OWLClassExpression> classExpressions = asList(axiom.classExpressions());
+            List<OWLClassExpression> inclusion= new ArrayList<>(classExpressions);
+            OWLClassExpression complementNNF = m_expressionManager.getComplementNNF(axiom.getOWLClass());
+            if(!inclusion.contains(complementNNF)) {
+                inclusion.add(complementNNF);
+            }
+            m_classExpressionInclusionsAsDisjunctions.add(inclusion);
             // 2. add CEi implies C, which is { not CEi or C }
             for (OWLClassExpression description : classExpressions)
                 m_classExpressionInclusionsAsDisjunctions.add(Arrays.asList( negative(description),axiom.getOWLClass() ));
             // 3. add CEi and CEj implies bottom (not CEi or not CEj) for 1 <= i < j <= n
-            OWLClassExpression[] descriptions=new OWLClassExpression[classExpressions.size()];
-            classExpressions.toArray(descriptions);
-            for (int i=0;i<descriptions.length;i++)
-                descriptions[i]=m_expressionManager.getComplementNNF(descriptions[i]);
-            for (int i=0;i<descriptions.length;i++)
-                for (int j=i+1;j<descriptions.length;j++)
-                    m_classExpressionInclusionsAsDisjunctions.add(Arrays.asList( descriptions[i],descriptions[j] ));
+            for (int i=0;i<classExpressions.size();i++)
+                classExpressions.set(i, m_expressionManager.getComplementNNF(classExpressions.get(i)));
+            for (int i=0;i<classExpressions.size();i++)
+                for (int j=i+1;j<classExpressions.size();j++)
+                    m_classExpressionInclusionsAsDisjunctions.add(Arrays.asList( classExpressions.get(i),classExpressions.get(j) ));
         }
 
         // Object property axioms
@@ -799,7 +801,7 @@ public class OWLNormalization {
         }
         @Override
         public OWLClassExpression visit(OWLObjectOneOf object) {
-            if(object.individuals().anyMatch(i->i.isAnonymous()))
+            if(object.individuals().anyMatch(OWLIndividual::isAnonymous))
                     throw new IllegalArgumentException("Error: The class expression "+object+" contains anonymous individuals, which is not allowed in OWL 2 (erratum in first OWL 2 spec, to be fixed with next publication of minor corrections). ");
             return object;
         }
@@ -1002,14 +1004,14 @@ public class OWLNormalization {
             m_newInclusions=newInclusions;
         }
         protected OWLNamedIndividual getFreshIndividual() {
-            OWLNamedIndividual freshInd=m_factory.getOWLNamedIndividual(IRI.create("internal:nom#swrlfact"+freshIndividuals));
+            OWLNamedIndividual freshInd=m_factory.getOWLNamedIndividual(IRI.create("internal:nom#","swrlfact"+freshIndividuals));
             freshIndividuals++;
             m_axioms.m_namedIndividuals.add(freshInd);
             return freshInd;
         }
         protected OWLDataProperty getFreshDataProperty() {
             freshDataProperties++;
-            return m_factory.getOWLDataProperty(IRI.create("internal:freshDP#"+freshDataProperties));
+            return m_factory.getOWLDataProperty(IRI.create("internal:freshDP#", "p"+freshDataProperties));
         }
         @Override
         public void visit(SWRLRule rule) {
@@ -1349,7 +1351,7 @@ public class OWLNormalization {
                 return representative;
         }
         protected SWRLVariable getFreshVariable() {
-            SWRLVariable variable=m_factory.getSWRLVariable(IRI.create("internal:swrl#"+m_newVariableIndex));
+            SWRLVariable variable=m_factory.getSWRLVariable(IRI.create("internal:swrl#", "v"+m_newVariableIndex));
             m_newVariableIndex++;
             return variable;
         }
