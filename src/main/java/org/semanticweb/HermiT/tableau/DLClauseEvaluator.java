@@ -147,24 +147,17 @@ public class DLClauseEvaluator implements Serializable {
     /**BufferSupply.*/
     public static class BufferSupply {
         protected final List<Object[]> m_allBuffers=new ArrayList<>();
-        protected final Map<Integer,List<Object[]>> m_availableBuffersByArity=new HashMap<>();
+        protected final TIntObjectHashMap<List<Object[]>> m_availableBuffersByArity=new TIntObjectHashMap<>();
 
         void reuseBuffers() {
             m_availableBuffersByArity.clear();
-            for (Object[] buffer : m_allBuffers) {
-                Integer arityInteger=Integer.valueOf(buffer.length);
-                List<Object[]> buffers=m_availableBuffersByArity.get(arityInteger);
-                if (buffers==null) {
-                    buffers=new ArrayList<>();
-                    m_availableBuffersByArity.put(arityInteger,buffers);
-                }
-                buffers.add(buffer);
-            }
+            m_allBuffers.stream().mapToInt(o->o.length)
+            .distinct()
+            .forEach(t->m_availableBuffersByArity.put(t, new ArrayList<>()));
         }
         Object[] getBuffer(int arity) {
             Object[] buffer;
-            Integer arityInteger=Integer.valueOf(arity);
-            List<Object[]> buffers=m_availableBuffersByArity.get(arityInteger);
+            List<Object[]> buffers=m_availableBuffersByArity.get(arity);
             if (buffers==null || buffers.isEmpty()) {
                 buffer=new Object[arity];
                 m_allBuffers.add(buffer);
