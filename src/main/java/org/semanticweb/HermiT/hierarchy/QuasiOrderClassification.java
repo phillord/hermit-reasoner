@@ -17,10 +17,12 @@
  */
 package org.semanticweb.HermiT.hierarchy;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
@@ -261,7 +263,7 @@ public class QuasiOrderClassification {
         }
     }
     protected void prunePossibleSubsumersOfConcept(AtomicConcept atomicConcept,Node node) {
-        Set<AtomicConcept> possibleSubsumersOfConcept=new HashSet<>(m_possibleSubsumptions.getSuccessors(atomicConcept));
+        List<AtomicConcept> possibleSubsumersOfConcept=new ArrayList<>(m_possibleSubsumptions.getSuccessors(atomicConcept));
         for (AtomicConcept atomicCon : possibleSubsumersOfConcept)
             if (!m_tableau.getExtensionManager().containsConceptAssertion(atomicCon,node))
                 m_possibleSubsumptions.getSuccessors(atomicConcept).remove(atomicCon);

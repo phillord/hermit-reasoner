@@ -17,13 +17,8 @@
 */
 package org.semanticweb.HermiT.structural;
 
-import static org.junit.Assert.assertEquals;
-import static org.semanticweb.owlapi.util.OWLAPIStreamUtils.*;
-
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
