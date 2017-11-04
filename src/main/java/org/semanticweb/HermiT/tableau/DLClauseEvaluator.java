@@ -34,6 +34,10 @@ import org.semanticweb.HermiT.model.NodeIDsAscendingOrEqual;
 import org.semanticweb.HermiT.model.Term;
 import org.semanticweb.HermiT.model.Variable;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
+
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 /**DLClauseEvaluator*/
 public class DLClauseEvaluator implements Serializable {
     private static final long serialVersionUID=4639844159658590456L;
@@ -870,7 +874,7 @@ public class DLClauseEvaluator implements Serializable {
         protected final List<ExtensionTable.Retrieval> m_retrievals;
         /**Workers.*/
         public final List<Worker> m_workers;
-        protected final List<Integer> m_labels;
+        protected final TIntArrayList m_labels;
 
         /**
          * @param bufferSupply bufferSupply
@@ -914,10 +918,10 @@ public class DLClauseEvaluator implements Serializable {
                 m_unionDependencySet=null;
             m_retrievals=new ArrayList<>();
             m_workers=new ArrayList<>();
-            m_labels=new ArrayList<>();
+            m_labels=new TIntArrayList();
         }
         protected final void generateCode(int firstBodyAtomToCompile,ExtensionTable.Retrieval firstAtomRetrieval) {
-            m_labels.add(null);
+            m_labels.add(0);
             m_retrievals.add(firstAtomRetrieval);
             int afterRule=addLabel();
             if (firstBodyAtomToCompile>0) {
@@ -933,7 +937,7 @@ public class DLClauseEvaluator implements Serializable {
                     BranchingWorker branchingWorker=(BranchingWorker)worker;
                     int branchingAddress=branchingWorker.getBranchingAddress();
                     if (branchingAddress<0) {
-                        int resolvedAddress=m_labels.get(-branchingAddress).intValue();
+                        int resolvedAddress=m_labels.get(-branchingAddress);
                         branchingWorker.setBranchingAddress(resolvedAddress);
                     }
                 }
@@ -1045,7 +1049,7 @@ public class DLClauseEvaluator implements Serializable {
         }
         protected final int addLabel() {
             int labelIndex=m_labels.size();
-            m_labels.add(null);
+            m_labels.add(0);
             return -labelIndex;
         }
         protected final void setLabelProgramCounter(int labelID) {
