@@ -84,7 +84,7 @@ public class DatatypeRestriction extends AtomicDataRange {
     }
     @Override
     public String toString(Prefixes prefixes) {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         buffer.append(prefixes.abbreviateIRI(m_datatypeURI));
         if (m_facetURIs.length>0) {
             buffer.append('[');
@@ -103,7 +103,7 @@ public class DatatypeRestriction extends AtomicDataRange {
         return s_interningManager.intern(this);
     }
 
-    protected final static InterningManager<DatatypeRestriction> s_interningManager=new InterningManager<DatatypeRestriction>() {
+    protected static final InterningManager<DatatypeRestriction> s_interningManager=new InterningManager<DatatypeRestriction>() {
         @Override
         protected boolean equal(DatatypeRestriction object1,DatatypeRestriction object2) {
             if (!object1.m_datatypeURI.equals(object2.m_datatypeURI) || object1.m_facetURIs.length!=object2.m_facetURIs.length)

@@ -70,7 +70,7 @@ public class BuiltInPropertyManager {
         // SymmetricObjectProperty( owl:topObjectProperty )
         axioms.m_simpleObjectPropertyInclusions.add(Arrays.asList(m_topObjectProperty,m_topObjectProperty.getInverseProperty()));
         // SubClassOf( owl:Thing ObjectSomeValuesFrom( owl:topObjectProperty ObjectOneOf( <internal:nam#topIndividual> ) ) )
-        OWLIndividual newIndividual=m_factory.getOWLNamedIndividual(IRI.create("internal:nam#topIndividual"));
+        OWLIndividual newIndividual=m_factory.getOWLNamedIndividual(IRI.create("internal:nam#","topIndividual"));
         OWLObjectOneOf oneOfNewIndividual=m_factory.getOWLObjectOneOf(newIndividual);
         OWLObjectSomeValuesFrom hasTopNewIndividual=m_factory.getOWLObjectSomeValuesFrom(m_topObjectProperty,oneOfNewIndividual);
         axioms.m_conceptInclusions.add(Arrays.asList(hasTopNewIndividual));
@@ -106,7 +106,7 @@ public class BuiltInPropertyManager {
                     visitProperty(subObjectProperty);
                 visitProperty(inclusion.m_superObjectProperty);
             }
-            axioms.m_disjointObjectProperties.forEach(c->c.forEach(d->visitProperty(d)));
+            axioms.m_disjointObjectProperties.forEach(c->c.forEach(this::visitProperty));
             for (OWLObjectPropertyExpression property : axioms.m_reflexiveObjectProperties)
                 visitProperty(property);
             for (OWLObjectPropertyExpression property : axioms.m_irreflexiveObjectProperties)
@@ -139,10 +139,6 @@ public class BuiltInPropertyManager {
         }
 
         @Override
-        public void visit(OWLClass object) {
-        }
-
-        @Override
         public void visit(OWLObjectComplementOf object) {
             object.getOperand().accept(this);
         }
@@ -155,10 +151,6 @@ public class BuiltInPropertyManager {
         @Override
         public void visit(OWLObjectUnionOf object) {
             object.operands().forEach(d->d.accept(this));
-        }
-
-        @Override
-        public void visit(OWLObjectOneOf object) {
         }
 
         @Override

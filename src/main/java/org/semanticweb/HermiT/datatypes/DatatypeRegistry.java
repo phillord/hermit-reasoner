@@ -165,7 +165,7 @@ public class DatatypeRegistry {
 
     protected static class AnonymousConstantsDatatypeHandler implements DatatypeHandler {
         protected static final String ANONYMOUS_CONSTANTS="internal:anonymous-constants";
-        protected final static Set<String> s_managedDatatypeURIs=Collections.singleton(ANONYMOUS_CONSTANTS);
+        protected static final Set<String> s_managedDatatypeURIs=Collections.singleton(ANONYMOUS_CONSTANTS);
 
         @Override
         public Set<String> getManagedDatatypeURIs() {

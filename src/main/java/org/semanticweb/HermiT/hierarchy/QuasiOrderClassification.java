@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
-import java.util.Stack;
 
 import org.semanticweb.HermiT.graph.Graph;
 import org.semanticweb.HermiT.hierarchy.DeterministicClassification.GraphNode;
@@ -70,26 +69,24 @@ public class QuasiOrderClassification {
      * @return classified hierarchy
      */
     public Hierarchy<AtomicConcept> classify() {
-        Relation<AtomicConcept> relation=new Relation<AtomicConcept>() {
-            @Override
-            public boolean doesSubsume(AtomicConcept parent,AtomicConcept child) {
-                Set<AtomicConcept> allKnownSubsumers=getAllKnownSubsumers(child);
-                if (allKnownSubsumers.contains(parent))
-                    return true;
-                else if (!m_possibleSubsumptions.getSuccessors(child).contains(parent))
-                    return false;
-                Individual freshIndividual=Individual.createAnonymous("fresh-individual");
-                Map<Individual,Node> checkedNode=new HashMap<>();
-                checkedNode.put(freshIndividual,null);
-                boolean isSubsumedBy=!m_tableau.isSatisfiable(true,Collections.singleton(Atom.create(child,freshIndividual)),null,null,Collections.singleton(Atom.create(parent,freshIndividual)),checkedNode,getSubsumptionTestDescription(child,parent));
-                if (!isSubsumedBy)
-                    prunePossibleSubsumers();
-                readKnownSubsumersFromRootNode(child, checkedNode.get(freshIndividual));
-                m_possibleSubsumptions.getSuccessors(child).removeAll(getAllKnownSubsumers(child));
-                return isSubsumedBy;
-            }
-        };
-        return buildHierarchy(relation);
+        return buildHierarchy(this::classifyDoesSubsume);
+    }
+
+    private boolean classifyDoesSubsume(AtomicConcept parent,AtomicConcept child) {
+        Set<AtomicConcept> allKnownSubsumers=getAllKnownSubsumers(child);
+        if (allKnownSubsumers.contains(parent))
+            return true;
+        else if (!m_possibleSubsumptions.getSuccessors(child).contains(parent))
+            return false;
+        Individual freshIndividual=Individual.createAnonymous("fresh-individual");
+        Map<Individual,Node> checkedNode=new HashMap<>();
+        checkedNode.put(freshIndividual,null);
+        boolean isSubsumedBy=!m_tableau.isSatisfiable(true,Collections.singleton(Atom.create(child,freshIndividual)),null,null,Collections.singleton(Atom.create(parent,freshIndividual)),checkedNode,getSubsumptionTestDescription(child,parent));
+        if (!isSubsumedBy)
+            prunePossibleSubsumers();
+        readKnownSubsumersFromRootNode(child, checkedNode.get(freshIndividual));
+        m_possibleSubsumptions.getSuccessors(child).removeAll(getAllKnownSubsumers(child));
+        return isSubsumedBy;
     }
     protected Hierarchy<AtomicConcept> buildHierarchy(Relation<AtomicConcept> hierarchyRelation) {
         double totalNumberOfTasks=m_elements.size();
@@ -152,10 +149,10 @@ public class QuasiOrderClassification {
     protected double updateSubsumptionsUsingLeafNodeStrategy(double totalNumberOfTasks) {
         double conceptsProcessed = 0;
         Hierarchy<AtomicConcept> hierarchy=buildTransitivelyReducedHierarchy(m_knownSubsumptions,m_elements);
-        Stack<HierarchyNode<AtomicConcept>> toProcess=new Stack<>();
+        LinkedList<HierarchyNode<AtomicConcept>> toProcess=new LinkedList<>();
         toProcess.addAll(hierarchy.getBottomNode().getParentNodes());
         Set<HierarchyNode<AtomicConcept>> unsatHierarchyNodes=new HashSet<>();
-        while (!toProcess.empty()) {
+        while (!toProcess.isEmpty()) {
             HierarchyNode<AtomicConcept> currentHierarchyElement=toProcess.pop();
             AtomicConcept currentHierarchyConcept=currentHierarchyElement.getRepresentative();
             if (conceptsProcessed < Math.ceil(totalNumberOfTasks*0.85)) {

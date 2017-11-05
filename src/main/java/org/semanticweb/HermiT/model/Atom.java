@@ -109,7 +109,7 @@ public class Atom implements Serializable {
      * @return toString
      */
     public String toString(Prefixes prefixes) {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         if (s_infixPredicates.contains(m_dlPredicate)) {
             buffer.append(m_arguments[0].toString(prefixes));
             buffer.append(' ');
@@ -155,7 +155,7 @@ public class Atom implements Serializable {
         return s_interningManager.intern(this);
     }
 
-    protected final static InterningManager<Atom> s_interningManager=new InterningManager<Atom>() {
+    protected static final InterningManager<Atom> s_interningManager=new InterningManager<Atom>() {
         @Override
         protected boolean equal(Atom object1,Atom object2) {
             if (object1.m_dlPredicate!=object2.m_dlPredicate)

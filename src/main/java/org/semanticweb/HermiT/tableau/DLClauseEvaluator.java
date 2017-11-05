@@ -37,7 +37,6 @@ import org.semanticweb.HermiT.monitor.TableauMonitor;
 
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.map.hash.TObjectIntHashMap;
 /**DLClauseEvaluator*/
 public class DLClauseEvaluator implements Serializable {
     private static final long serialVersionUID=4639844159658590456L;
@@ -131,7 +130,7 @@ public class DLClauseEvaluator implements Serializable {
     }
     @Override
     public String toString() {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         int maximalPCLength=String.valueOf(m_workers.length-1).length();
         for (int programCounter=0;programCounter<m_workers.length;programCounter++) {
             String programCounterString=String.valueOf(programCounter);
@@ -856,7 +855,7 @@ public class DLClauseEvaluator implements Serializable {
         }
     }
     /**ConjunctionCompiler.*/
-    public static abstract class ConjunctionCompiler {
+    public abstract static class ConjunctionCompiler {
         protected final BufferSupply m_bufferSupply;
         protected final ValuesBufferManager m_valuesBufferManager;
         protected final ExtensionManager m_extensionManager;
@@ -1046,7 +1045,7 @@ public class DLClauseEvaluator implements Serializable {
             return -labelIndex;
         }
         protected final void setLabelProgramCounter(int labelID) {
-            m_labels.set(-labelID,Integer.valueOf(m_workers.size()));
+            m_labels.set(-labelID,m_workers.size());
         }
         protected abstract void compileHeads();
    }

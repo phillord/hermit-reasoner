@@ -48,7 +48,7 @@ public class Variable extends Term {
         return s_interningManager.intern(this);
     }
 
-    protected final static InterningManager<Variable> s_interningManager=new InterningManager<Variable>() {
+    protected static final InterningManager<Variable> s_interningManager=new InterningManager<Variable>() {
         @Override
         protected boolean equal(Variable object1,Variable object2) {
             return object1.m_name.equals(object2.m_name);

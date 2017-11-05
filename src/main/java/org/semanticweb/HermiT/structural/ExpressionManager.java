@@ -251,11 +251,11 @@ public class ExpressionManager {
         }
         @Override
         public OWLDataRange visit(OWLDataIntersectionOf range) {
-            return m_factory.getOWLDataIntersectionOf(range.operands().map(dr->getNNF(dr)));
+            return m_factory.getOWLDataIntersectionOf(range.operands().map(ExpressionManager.this::getNNF));
         }
         @Override
         public OWLDataRange visit(OWLDataUnionOf range) {
-            return m_factory.getOWLDataUnionOf(range.operands().map(dr->getNNF(dr)));
+            return m_factory.getOWLDataUnionOf(range.operands().map(ExpressionManager.this::getNNF));
          }
     }
 
@@ -403,11 +403,11 @@ public class ExpressionManager {
         }
         @Override
         public OWLDataRange visit(OWLDataIntersectionOf range) {
-            return m_factory.getOWLDataUnionOf(range.operands().map(dr->getComplementNNF(dr)));
+            return m_factory.getOWLDataUnionOf(range.operands().map(ExpressionManager.this::getComplementNNF));
         }
         @Override
         public OWLDataRange visit(OWLDataUnionOf range) {
-            return m_factory.getOWLDataIntersectionOf(range.operands().map(dr->getComplementNNF(dr)));
+            return m_factory.getOWLDataIntersectionOf(range.operands().map(ExpressionManager.this::getComplementNNF));
          }
     }
 

@@ -45,7 +45,7 @@ public class OWLAxiomsExpressivity implements OWLClassExpressionVisitor, OWLAxio
                 visitProperty(subObjectProperty);
             visitProperty(inclusion.m_superObjectProperty);
         }
-        axioms.m_disjointObjectProperties.forEach(c->c.forEach(d->visitProperty(d)));
+        axioms.m_disjointObjectProperties.forEach(c->c.forEach(this::visitProperty));
         for (OWLObjectPropertyExpression property : axioms.m_reflexiveObjectProperties)
             visitProperty(property);
         for (OWLObjectPropertyExpression property : axioms.m_irreflexiveObjectProperties)
@@ -65,10 +65,6 @@ public class OWLAxiomsExpressivity implements OWLClassExpressionVisitor, OWLAxio
     protected void visitProperty(OWLObjectPropertyExpression object) {
         if (object.isAnonymous())
             m_hasInverseRoles=true;
-    }
-
-    @Override
-    public void visit(OWLClass desc) {
     }
 
     @Override

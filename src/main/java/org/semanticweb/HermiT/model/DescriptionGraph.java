@@ -115,7 +115,7 @@ public class DescriptionGraph implements DLPredicate,Serializable {
      * @return text representation
      */
     public String getTextRepresentation() {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         buffer.append('[');
         buffer.append('\n');
        for (int vertex=0;vertex<m_atomicConceptsByVertices.length;vertex++) {

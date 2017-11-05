@@ -300,7 +300,7 @@ public class Reasoner implements OWLReasoner {
         String versionString=Reasoner.class.getPackage().getImplementationVersion();
         String[] splitted;
         int filled=0;
-        int version[]=new int[4];
+        int[] version=new int[4];
         if (versionString!=null) {
             splitted=versionString.split("\\.");
             while (filled<splitted.length) {
@@ -643,7 +643,7 @@ public class Reasoner implements OWLReasoner {
                 if (m_dlOntology.hasInverseRoles())
                     noComplexRoles=noComplexRoles/2;
                 int noIndividuals=m_dlOntology.getAllIndividuals().size();
-                int chunks=(((2*noComplexRoles*noIndividuals)/InstanceManager.thresholdForAdditionalAxioms))+1;
+                int chunks=((2*noComplexRoles*noIndividuals)/InstanceManager.thresholdForAdditionalAxioms)+1;
                 int stepsAdditionalAxioms=noComplexRoles*noIndividuals;
                 int stepsRewritingAdditionalAxioms=(5*noComplexRoles*noIndividuals)/chunks;
                 int stepsTableauExpansion=(stepsAdditionalAxioms/chunks)+noAxioms+noIndividuals;
@@ -920,19 +920,18 @@ public class Reasoner implements OWLReasoner {
         if (m_directDisjointClasses.containsKey(node))
             return m_directDisjointClasses.get(node);
         else {
-            Set<HierarchyNode<AtomicConcept>> result=new HashSet<>();
             OWLDataFactory factory=getDataFactory();
             OWLClassExpression negated=factory.getOWLObjectComplementOf(factory.getOWLClass(IRI.create(node.getRepresentative().getIRI())));
             HierarchyNode<AtomicConcept> equivalentToComplement=getHierarchyNode(negated);
             for (AtomicConcept equiv : equivalentToComplement.getEquivalentElements()) {
                 if (!Prefixes.isInternalIRI(equiv.getIRI())) {
                     HierarchyNode<AtomicConcept> rootDisjoint=m_atomicConceptHierarchy.getNodeForElement(equiv);
-                    result=Collections.singleton(rootDisjoint);
+                    Set<HierarchyNode<AtomicConcept>> result=Collections.singleton(rootDisjoint);
                     m_directDisjointClasses.put(node,result);
                     return result;
                 }
             }
-            result=equivalentToComplement.getChildNodes();
+            Set<HierarchyNode<AtomicConcept>> result=equivalentToComplement.getChildNodes();
             m_directDisjointClasses.put(node,result);
             return result;
         }
@@ -1447,7 +1446,7 @@ public class Reasoner implements OWLReasoner {
                     // Create the additional axioms for classification
                     List<OWLAxiom> additionalAxioms=new ArrayList<>();
                     OWLDataFactory factory=getDataFactory();
-                    OWLDatatype unknownDatatypeA=factory.getOWLDatatype(IRI.create("internal:unknown-datatype#A"));
+                    OWLDatatype unknownDatatypeA=factory.getOWLDatatype(IRI.create("internal:unknown-datatype#","A"));
                     for (AtomicRole dataRole : relevantDataRoles) {
                         AtomicConcept conceptForRole;
                         if (AtomicRole.TOP_DATA_ROLE.equals(dataRole))
@@ -1688,7 +1687,7 @@ public class Reasoner implements OWLReasoner {
 
     protected void realise() {
         checkPreConditions();
-        if (m_dlOntology.getAllIndividuals().size()>0) {
+        if (!m_dlOntology.getAllIndividuals().isEmpty()) {
             classifyClasses();
             initialiseClassInstanceManager();
             m_instanceManager.realize(m_configuration.reasonerProgressMonitor);
@@ -1699,7 +1698,7 @@ public class Reasoner implements OWLReasoner {
      */
     public void realiseObjectProperties() {
         checkPreConditions();
-        if (m_dlOntology.getAllIndividuals().size()>0) {
+        if (!m_dlOntology.getAllIndividuals().isEmpty()) {
             classifyObjectProperties();
             initialisePropertiesInstanceManager();
             m_instanceManager.realizeObjectRoles(m_configuration.reasonerProgressMonitor);
@@ -1710,7 +1709,7 @@ public class Reasoner implements OWLReasoner {
      */
     public void precomputeSameAsEquivalenceClasses() {
         checkPreConditions();
-        if (m_dlOntology.getAllIndividuals().size()>0) {
+        if (!m_dlOntology.getAllIndividuals().isEmpty()) {
             initialiseClassInstanceManager();
             m_instanceManager.computeSameAsEquivalenceClasses(m_configuration.reasonerProgressMonitor);
         }
@@ -1767,7 +1766,7 @@ public class Reasoner implements OWLReasoner {
     }
     @Override
     public NodeSet<OWLNamedIndividual> getInstances(OWLClassExpression classExpression,boolean direct) {
-        if (m_dlOntology.getAllIndividuals().size()>0) {
+        if (!m_dlOntology.getAllIndividuals().isEmpty()) {
             checkPreConditions(classExpression);
             if (!m_isConsistent.booleanValue()) {
                 Node<OWLNamedIndividual> node=new OWLNamedIndividualNode(getAllNamedIndividuals());
@@ -1776,7 +1775,7 @@ public class Reasoner implements OWLReasoner {
             if (direct || !(classExpression instanceof OWLClass))
                 classifyClasses();
             initialiseClassInstanceManager();
-            Set<Individual> result=new HashSet<>();
+            Set<Individual> result=null;
             if (classExpression instanceof OWLClass)
                 result=m_instanceManager.getInstances(H((OWLClass)classExpression),direct);
             else {
@@ -1818,7 +1817,7 @@ public class Reasoner implements OWLReasoner {
         checkPreConditions(namedIndividual1,namedIndividual2);
         if (!m_isConsistent.booleanValue())
             return true;
-        if (m_dlOntology.getAllIndividuals().size()==0)
+        if (m_dlOntology.getAllIndividuals().isEmpty())
             return false;
         else {
             initialiseClassInstanceManager();
@@ -1831,7 +1830,7 @@ public class Reasoner implements OWLReasoner {
         checkPreConditions(namedIndividual);
         if (!m_isConsistent.booleanValue())
             return new OWLNamedIndividualNode(getAllNamedIndividuals());
-        if (m_dlOntology.getAllIndividuals().size()==0 || !m_dlOntology.containsIndividual(H(namedIndividual)))
+        if (m_dlOntology.getAllIndividuals().isEmpty() || !m_dlOntology.containsIndividual(H(namedIndividual)))
             return new OWLNamedIndividualNode(namedIndividual);
         else {
             initialiseClassInstanceManager();
@@ -2301,16 +2300,16 @@ public class Reasoner implements OWLReasoner {
                 if (!(object instanceof OWLEntity) || !((OWLEntity)object).isBuiltIn()) {
                     object.dataPropertiesInSignature()
                         .filter(dp->!isDefined(dp) && notInternal(dp))
-                        .forEach(dp->undeclaredEntities.add(dp));
+                        .forEach(undeclaredEntities::add);
                     object.objectPropertiesInSignature()
                         .filter(op->!isDefined(op) && notInternal(op))
-                        .forEach(op->undeclaredEntities.add(op));
+                        .forEach(undeclaredEntities::add);
                     object.individualsInSignature()
                         .filter(i->!isDefined(i) && notInternal(i))
-                        .forEach(i->undeclaredEntities.add(i));
+                        .forEach(undeclaredEntities::add);
                     object.classesInSignature()
                         .filter(c->!isDefined(c) && notInternal(c))
-                        .forEach(c->undeclaredEntities.add(c));
+                        .forEach(undeclaredEntities::add);
                 }
             }
             if (!undeclaredEntities.isEmpty())

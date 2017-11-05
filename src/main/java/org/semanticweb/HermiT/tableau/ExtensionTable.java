@@ -44,7 +44,7 @@ import org.semanticweb.HermiT.monitor.TableauMonitor;
 public abstract class ExtensionTable implements Serializable {
     private static final long serialVersionUID=-5029938218056017193L;
     /**View.*/
-    public static enum View { 
+    public enum View { 
         /**EXTENSION_THIS*/
         EXTENSION_THIS,
         /**EXTENSION_OLD*/
@@ -482,9 +482,11 @@ public abstract class ExtensionTable implements Serializable {
         }
         @Override
         public void setDependencySet(int tupleIndex,DependencySet dependencySet) {
+            // nothing to do
         }
         @Override
         public void forgetDependencySet(int tupleIndex) {
+            // nothing to do
         }
     }
 
@@ -528,9 +530,11 @@ public abstract class ExtensionTable implements Serializable {
         }
         @Override
         public void addCore(int tupleIndex) {
+            // nothing to do
         }
         @Override
         public void setCore(int tupleIndex,boolean isCore) {
+            // nothing to do
         }
     }
 

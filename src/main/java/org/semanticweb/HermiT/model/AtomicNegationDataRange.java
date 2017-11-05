@@ -60,7 +60,7 @@ public class AtomicNegationDataRange extends LiteralDataRange {
         return s_interningManager.intern(this);
     }
 
-    protected final static InterningManager<AtomicNegationDataRange> s_interningManager=new InterningManager<AtomicNegationDataRange>() {
+    protected static final InterningManager<AtomicNegationDataRange> s_interningManager=new InterningManager<AtomicNegationDataRange>() {
         @Override
         protected boolean equal(AtomicNegationDataRange object1,AtomicNegationDataRange object2) {
             return object1.m_negatedDataRange==object2.m_negatedDataRange;

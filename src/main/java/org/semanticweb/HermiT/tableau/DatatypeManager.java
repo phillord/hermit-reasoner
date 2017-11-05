@@ -672,7 +672,7 @@ public final class DatatypeManager implements Serializable {
          * @return tostring
          */
         public String toString(Prefixes prefixes) {
-            StringBuffer buffer=new StringBuffer();
+            StringBuilder buffer=new StringBuilder();
             boolean first=true;
             for (int variableIndex=0;variableIndex<m_activeVariables.size();variableIndex++) {
                 if (first)
@@ -816,7 +816,7 @@ public final class DatatypeManager implements Serializable {
          * @return toString
          */
         public String toString(Prefixes prefixes) {
-            StringBuffer buffer=new StringBuffer();
+            StringBuilder buffer=new StringBuilder();
             boolean first=true;
             buffer.append('[');
             for (int index=0;index<m_positiveConstantEnumerations.size();index++) {

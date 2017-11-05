@@ -317,27 +317,23 @@ public class Printing {
         case AtomicConcept:
             return ((AtomicConcept)c1).getIRI().compareTo(((AtomicConcept)c2).getIRI());
         case AtLeastConcept:
-            {
                 AtLeastConcept l1=(AtLeastConcept)c1;
                 AtLeastConcept l2=(AtLeastConcept)c2;
                 int comparison=roleCompare(l1.getOnRole(),l2.getOnRole());
                 if (comparison!=0)
                     return comparison;
                 return conceptCompare(l1.getToConcept(),l2.getToConcept());
-            }
         case ExistsDescriptionGraph:
-            {
                 ExistsDescriptionGraph g1=(ExistsDescriptionGraph)c1;
                 ExistsDescriptionGraph g2=(ExistsDescriptionGraph)c2;
                 return g1.getDescriptionGraph().getName().compareTo(g2.getDescriptionGraph().getName());
-            }
         case AtomicNegationConcept:
             return ((AtomicNegationConcept)c1).getNegatedAtomicConcept().getIRI().compareTo(((AtomicNegationConcept)c2).getNegatedAtomicConcept().getIRI());
         default:
             throw new IllegalArgumentException();
         }
     }
-    protected static enum ConceptType {
+    protected enum ConceptType {
         AtomicConcept(0),
         AtLeastConcept(1),
         ExistsDescriptionGraph(2), 
@@ -377,18 +373,16 @@ public class Printing {
         case ConstantEnumeration:
             return compareConstantEnumerations((ConstantEnumeration)c1,(ConstantEnumeration)c2);
         case AtomicNegationDataRange:
-            {
                 AtomicNegationDataRange ndr1=(AtomicNegationDataRange)c1;
                 AtomicNegationDataRange ndr2=(AtomicNegationDataRange)c2;
                 return dataRangeCompare(ndr1.getNegatedDataRange(),ndr2.getNegatedDataRange());
-            }
         case InternalDatatype:
             return ((InternalDatatype)c1).getIRI().compareTo(((InternalDatatype)c2).getIRI());
         default:
             throw new IllegalArgumentException();
         }
     }
-    protected static enum DataRangeType {
+    protected enum DataRangeType {
         DatatypeRestriction(0),
         ConstantEnumeration(1),
         AtomicNegationDataRange(2), 

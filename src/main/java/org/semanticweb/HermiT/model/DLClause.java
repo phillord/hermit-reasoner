@@ -18,7 +18,6 @@
 package org.semanticweb.HermiT.model;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -261,7 +260,7 @@ public class DLClause implements Serializable {
      * @return toString
      */
     public String toString(Prefixes prefixes) {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         for (int headIndex=0;headIndex<m_headAtoms.length;headIndex++) {
             if (headIndex!=0)
                 buffer.append(" v ");
@@ -280,7 +279,7 @@ public class DLClause implements Serializable {
         return toString(Prefixes.STANDARD_PREFIXES);
     }
 
-    protected final static InterningManager<DLClause> s_interningManager = new InterningManager<DLClause>() {
+    protected static final InterningManager<DLClause> s_interningManager = new InterningManager<DLClause>() {
         @Override
         protected boolean equal(DLClause object1, DLClause object2) {
             if (object1.m_headAtoms.length!=object2.m_headAtoms.length || object1.m_bodyAtoms.length!=object2.m_bodyAtoms.length)

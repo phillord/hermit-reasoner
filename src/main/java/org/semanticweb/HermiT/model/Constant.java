@@ -66,7 +66,7 @@ public class Constant extends Term {
     }
     @Override
     public String toString(Prefixes prefixes) {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         buffer.append('"');
         for (int index=0;index<m_lexicalForm.length();index++) {
             char c=m_lexicalForm.charAt(index);
@@ -90,7 +90,7 @@ public class Constant extends Term {
         return s_interningManager.intern(this);
     }
 
-    protected final static InterningManager<Constant> s_interningManager=new InterningManager<Constant>() {
+    protected static final InterningManager<Constant> s_interningManager=new InterningManager<Constant>() {
         @Override
         protected boolean equal(Constant object1,Constant object2) {
             return object1.m_lexicalForm.equals(object2.m_lexicalForm) && object1.m_datatypeURI.equals(object2.m_datatypeURI);

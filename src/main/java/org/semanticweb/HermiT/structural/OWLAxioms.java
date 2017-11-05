@@ -82,7 +82,7 @@ public class OWLAxioms {
         }
         @Override
         public String toString() {
-            StringBuffer buffer=new StringBuffer();
+            StringBuilder buffer=new StringBuilder();
             boolean first=true;
             for (SWRLAtom atom : m_body) {
                 if (first)

@@ -36,7 +36,7 @@ public class Explanations {
         // Lets make things worth and turn Pizza into an inconsistent ontology by asserting that the 
         // unsatisfiable icecream class has some instance. 
         // First, create an instance of the OWLClass object for the unsatisfiable  icecream class.
-        IRI icecreamIRI=IRI.create("http://www.co-ode.org/ontologies/pizza/pizza.owl#IceCream");
+        IRI icecreamIRI=IRI.create("http://www.co-ode.org/ontologies/pizza/pizza.owl#","IceCream");
         OWLClass icecream=dataFactory.getOWLClass(icecreamIRI);
         // Now we can start and create the reasoner. Since explanation is not natively supported by 
         // HermiT and is realised in the OWL API, we need to instantiate HermiT 
@@ -73,7 +73,7 @@ public class Explanations {
         // reasoner to throw.  
         // Let's start by adding a dummy individual to the unsatisfiable Icecream class. 
         // This will cause an inconsistency. 
-        OWLAxiom ax=dataFactory.getOWLClassAssertionAxiom(icecream, dataFactory.getOWLNamedIndividual(IRI.create("http://www.co-ode.org/ontologies/pizza/pizza.owl#dummyIndividual")));
+        OWLAxiom ax=dataFactory.getOWLClassAssertionAxiom(icecream, dataFactory.getOWLNamedIndividual(IRI.create("http://www.co-ode.org/ontologies/pizza/pizza.owl#","dummyIndividual")));
         manager.addAxiom(ontology, ax);
         // Let us confirm that the ontology is inconsistent
         reasoner=factory.createReasoner(ontology, configuration);

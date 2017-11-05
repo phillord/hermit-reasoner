@@ -876,7 +876,7 @@ public class InstanceManager {
      * @param monitor monitor
      */
     public void realize(ReasonerProgressMonitor monitor) {
-        assert m_usesClassifiedConceptHierarchy==true;
+        assert m_usesClassifiedConceptHierarchy;
         if (m_readingOffFoundPossibleConceptInstance && !m_realizationCompleted) {
             if (monitor!=null)
                 monitor.reasonerTaskStarted("Computing instances for all classes");

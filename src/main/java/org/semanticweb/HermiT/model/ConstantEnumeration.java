@@ -57,7 +57,7 @@ public class ConstantEnumeration extends AtomicDataRange {
     }
     @Override
     public String toString(Prefixes prefixes) {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         buffer.append("{ ");
         for (int index=0;index<m_constants.length;index++) {
             if (index>0)
@@ -71,7 +71,7 @@ public class ConstantEnumeration extends AtomicDataRange {
         return s_interningManager.intern(this);
     }
 
-    protected final static InterningManager<ConstantEnumeration> s_interningManager=new InterningManager<ConstantEnumeration>() {
+    protected static final InterningManager<ConstantEnumeration> s_interningManager=new InterningManager<ConstantEnumeration>() {
         @Override
         protected boolean equal(ConstantEnumeration object1,ConstantEnumeration object2) {
             if (object1.m_constants.length!=object2.m_constants.length)

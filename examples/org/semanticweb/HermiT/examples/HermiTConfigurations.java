@@ -60,7 +60,7 @@ public class HermiTConfigurations {
 	    // Lets see whether HermiT finds that the icecream class in the pizza ontology is unsatisfiable
 	    // (I know it is).
 	    // First, create an instance of the OWLClass object for the icecream class.
-	    IRI icecreamIRI=IRI.create("http://www.co-ode.org/ontologies/pizza/pizza.owl#IceCream");
+	    IRI icecreamIRI=IRI.create("http://www.co-ode.org/ontologies/pizza/pizza.owl#","IceCream");
 	    OWLClass owlClass=manager.getOWLDataFactory().getOWLClass(icecreamIRI);
 	    // Since we have used the timing monitor HermiT will print some information while it
 	    // is doing the reasoning and then it will print the result as instructed below.

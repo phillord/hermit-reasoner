@@ -33,10 +33,10 @@ public class EntailmentChecking {
         OWLOntology ontology=manager.loadOntologyFromOntologyDocument(inputOntologyFile);
         
         // First, create several OWL API objects that we will use in our queries
-        OWLClass margherita=dataFactory.getOWLClass(IRI.create("http://www.co-ode.org/ontologies/pizza/pizza.owl#Margherita"));
-        OWLObjectProperty hasTopping=dataFactory.getOWLObjectProperty(IRI.create("http://www.co-ode.org/ontologies/pizza/pizza.owl#hasTopping"));
-        OWLClass mozzarellaTopping=dataFactory.getOWLClass(IRI.create("http://www.co-ode.org/ontologies/pizza/pizza.owl#MozzarellaTopping"));
-        OWLClass goatsCheeseTopping=dataFactory.getOWLClass(IRI.create("http://www.co-ode.org/ontologies/pizza/pizza.owl#GoatsCheeseTopping"));
+        OWLClass margherita=dataFactory.getOWLClass(IRI.create("http://www.co-ode.org/ontologies/pizza/pizza.owl#", "Margherita"));
+        OWLObjectProperty hasTopping=dataFactory.getOWLObjectProperty(IRI.create("http://www.co-ode.org/ontologies/pizza/pizza.owl#","hasTopping"));
+        OWLClass mozzarellaTopping=dataFactory.getOWLClass(IRI.create("http://www.co-ode.org/ontologies/pizza/pizza.owl#","MozzarellaTopping"));
+        OWLClass goatsCheeseTopping=dataFactory.getOWLClass(IRI.create("http://www.co-ode.org/ontologies/pizza/pizza.owl#","GoatsCheeseTopping"));
         OWLClassExpression mozarellaOrGoatsCheese=dataFactory.getOWLObjectUnionOf(mozzarellaTopping, goatsCheeseTopping);
         OWLClassExpression hasToppingMozarellaOrGoatsCheese=dataFactory.getOWLObjectSomeValuesFrom(hasTopping, mozarellaOrGoatsCheese);
         OWLAxiom axiom=dataFactory.getOWLSubClassOfAxiom(margherita, hasToppingMozarellaOrGoatsCheese);

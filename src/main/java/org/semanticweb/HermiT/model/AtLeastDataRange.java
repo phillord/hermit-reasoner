@@ -49,7 +49,7 @@ public class AtLeastDataRange extends AtLeast {
         return "atLeast("+m_number+' '+m_onRole.toString(prefixes)+' '+m_toDataRange.toString(prefixes)+')';
     }
 
-    protected final static InterningManager<AtLeastDataRange> s_interningManager=new InterningManager<AtLeastDataRange>() {
+    protected static final InterningManager<AtLeastDataRange> s_interningManager=new InterningManager<AtLeastDataRange>() {
         @Override
         protected boolean equal(AtLeastDataRange object1,AtLeastDataRange object2) {
             return object1.m_number==object2.m_number && object1.m_onRole==object2.m_onRole && object1.m_toDataRange==object2.m_toDataRange;

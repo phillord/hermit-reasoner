@@ -23,9 +23,6 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
-import org.semanticweb.owlapi.model.OWLAnnotationPropertyDomainAxiom;
-import org.semanticweb.owlapi.model.OWLAnnotationPropertyRangeAxiom;
 import org.semanticweb.owlapi.model.OWLAsymmetricObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLAxiomVisitor;
@@ -54,7 +51,6 @@ import org.semanticweb.owlapi.model.OWLDataVisitorEx;
 import org.semanticweb.owlapi.model.OWLDatatype;
 import org.semanticweb.owlapi.model.OWLDatatypeDefinitionAxiom;
 import org.semanticweb.owlapi.model.OWLDatatypeRestriction;
-import org.semanticweb.owlapi.model.OWLDeclarationAxiom;
 import org.semanticweb.owlapi.model.OWLDifferentIndividualsAxiom;
 import org.semanticweb.owlapi.model.OWLDisjointClassesAxiom;
 import org.semanticweb.owlapi.model.OWLDisjointDataPropertiesAxiom;
@@ -95,7 +91,6 @@ import org.semanticweb.owlapi.model.OWLObjectUnionOf;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLReflexiveObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLSameIndividualAxiom;
-import org.semanticweb.owlapi.model.OWLSubAnnotationPropertyOfAxiom;
 import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
 import org.semanticweb.owlapi.model.OWLSubDataPropertyOfAxiom;
 import org.semanticweb.owlapi.model.OWLSubObjectPropertyOfAxiom;
@@ -657,13 +652,16 @@ public class OWLNormalization {
         @Override
         public void visit(OWLSameIndividualAxiom axiom) {
             if (axiom.containsAnonymousIndividuals())
-                throw new IllegalArgumentException("The axiom "+axiom+" contains anonymous individuals, which is not allowed in OWL 2. ");
+                throw new IllegalArgumentException(noAnons(axiom));
             addFact(axiom);
+        }
+        protected String noAnons(OWLAxiom axiom) {
+            return "The axiom "+axiom+" contains anonymous individuals, which is not allowed in OWL 2. ";
         }
         @Override
         public void visit(OWLDifferentIndividualsAxiom axiom) {
             if (axiom.containsAnonymousIndividuals())
-                throw new IllegalArgumentException("The axiom "+axiom+" contains anonymous individuals, which is not allowed in OWL 2. ");
+                throw new IllegalArgumentException(noAnons(axiom));
             addFact(axiom);
         }
         @Override
@@ -1014,9 +1012,6 @@ public class OWLNormalization {
             return m_factory.getOWLDataProperty(IRI.create("internal:freshDP#", "p"+freshDataProperties));
         }
         @Override
-        public void visit(SWRLRule rule) {
-        }
-        @Override
         public void visit(SWRLClassAtom atom) {
             if (!(atom.getArgument() instanceof SWRLIndividualArgument))
                 throw new IllegalArgumentException("A SWRL rule contains a head atom "+atom+" with a variable that does not occur in the body. ");
@@ -1106,15 +1101,6 @@ public class OWLNormalization {
                 inds.add(ind.asOWLNamedIndividual());
             }
             addFact(m_factory.getOWLDifferentIndividualsAxiom(inds));
-        }
-        @Override
-        public void visit(SWRLVariable variable) {
-        }
-        @Override
-        public void visit(SWRLIndividualArgument argument) {
-        }
-        @Override
-        public void visit(SWRLLiteralArgument argument) {
         }
         protected void throwAnonIndError(SWRLAtom atom) {
             throw new IllegalArgumentException("A SWRL rule contains a fact ("+atom+") with an anonymous individual, which is not allowed. ");

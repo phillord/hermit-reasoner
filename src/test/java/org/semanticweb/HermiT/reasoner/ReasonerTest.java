@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Ignore;
 import org.semanticweb.HermiT.AbstractOntologyTest;
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.ReasonerFactory;

@@ -65,7 +65,7 @@ public class ExistsDescriptionGraph extends ExistentialConcept implements DLPred
         return s_interningManager.intern(this);
     }
 
-    protected final static InterningManager<ExistsDescriptionGraph> s_interningManager=new InterningManager<ExistsDescriptionGraph>() {
+    protected static final InterningManager<ExistsDescriptionGraph> s_interningManager=new InterningManager<ExistsDescriptionGraph>() {
         @Override
         protected boolean equal(ExistsDescriptionGraph object1,ExistsDescriptionGraph object2) {
             return object1.m_descriptionGraph.equals(object2.m_descriptionGraph) && object1.m_vertex==object2.m_vertex;

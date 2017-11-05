@@ -32,7 +32,7 @@ public class XMLLiteralDatatypeHandler implements DatatypeHandler {
     protected static final String RDF_XML_LITERAL=Prefixes.s_semanticWebPrefixes.get("rdf:")+"XMLLiteral";
     protected static final ValueSpaceSubset XML_LITERAL_ALL=new XMLLiteralAll();
     protected static final ValueSpaceSubset EMPTY=new XMLLiteralNone();
-    protected final static Set<String> s_managedDatatypeURIs=Collections.singleton(RDF_XML_LITERAL);
+    protected static final Set<String> s_managedDatatypeURIs=Collections.singleton(RDF_XML_LITERAL);
 
     @Override
     public Set<String> getManagedDatatypeURIs() {
@@ -113,6 +113,7 @@ public class XMLLiteralDatatypeHandler implements DatatypeHandler {
         }
         @Override
         public void enumerateDataValues(Collection<Object> dataValues) {
+         // nothing to do
         }
     }
 }

@@ -167,7 +167,7 @@ public class Graph<T> implements Serializable, Cloneable {
     }
     @Override
     public String toString() {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         for (T element : m_elements) {
             buffer.append(element.toString());
             buffer.append(" -> { ");

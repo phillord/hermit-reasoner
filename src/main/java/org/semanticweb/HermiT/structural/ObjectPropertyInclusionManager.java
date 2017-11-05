@@ -42,6 +42,7 @@ import rationals.State;
 import rationals.Transition;
 /**ObjectPropertyInclusionManager.*/
 public class ObjectPropertyInclusionManager {
+    private static final String COULD_NOT_CREATE_AUTOMATON = "Could not create automaton";
     protected final Map<OWLObjectPropertyExpression,Automaton> m_automataByProperty;
 
     /**
@@ -454,12 +455,12 @@ public class ObjectPropertyInclusionManager {
                 State initialState=biggerPropertyAutomaton.addState(true,false);
                 State finalState=biggerPropertyAutomaton.addState(false,true);
                 Transition transition=new Transition(initialState,propertyToBuildAutomatonFor,finalState);
-                biggerPropertyAutomaton.addTransition(transition, "Could not create automaton");
+                biggerPropertyAutomaton.addTransition(transition, COULD_NOT_CREATE_AUTOMATON);
                 for (OWLObjectPropertyExpression smallerProperty : inversedPropertyDependencyGraph.getSuccessors(propertyToBuildAutomatonFor)) {
                     Automaton smallerPropertyAutomaton=buildCompleteAutomataForProperties(smallerProperty,inversePropertiesMap,individualAutomata,completeAutomata,inversedPropertyDependencyGraph,symmetricObjectProperties,transitiveProperties);
                     automataConnector(biggerPropertyAutomaton,smallerPropertyAutomaton,transition);
                         Transition t = new Transition(initialState,smallerProperty,finalState);
-                        biggerPropertyAutomaton.addTransition(t, "Could not create automaton");
+                        biggerPropertyAutomaton.addTransition(t, COULD_NOT_CREATE_AUTOMATON);
                 }
                 if (propertyToBuildAutomatonFor.getInverseProperty().isAnonymous() && individualAutomata.containsKey(propertyToBuildAutomatonFor.getInverseProperty())) {
                     Automaton inversePropertyAutomaton=buildCompleteAutomataForProperties(propertyToBuildAutomatonFor.getInverseProperty(),inversePropertiesMap,individualAutomata,completeAutomata,inversedPropertyDependencyGraph,symmetricObjectProperties,transitiveProperties);
@@ -657,7 +658,7 @@ public class ObjectPropertyInclusionManager {
                 automaton=new Automaton();
                 initialState=automaton.addState(true,false);
                 finalState=automaton.addState(false,true);
-                automaton.addTransition(new Transition(initialState,superObjectProperty,finalState), "Could not create automaton");
+                automaton.addTransition(new Transition(initialState,superObjectProperty,finalState), COULD_NOT_CREATE_AUTOMATON);
             }
             else {
                 automaton=automataMap.get(superObjectProperty);
@@ -666,7 +667,7 @@ public class ObjectPropertyInclusionManager {
             }
             // RR->R
             if (subObjectProperties.length==2 && subObjectProperties[0].equals(superObjectProperty) && subObjectProperties[1].equals(superObjectProperty)) {
-                    automaton.addTransition(new Transition(finalState,null,initialState), "Could not create automaton");
+                    automaton.addTransition(new Transition(finalState,null,initialState), COULD_NOT_CREATE_AUTOMATON);
                     transitiveProperties.add(superObjectProperty);
             }
             // R S2...Sn->R
@@ -682,7 +683,7 @@ public class ObjectPropertyInclusionManager {
                     transitionLabel=subObjectProperties[subObjectProperties.length-1];
                     if (equivalentPropertiesMap.containsKey(superObjectProperty) && equivalentPropertiesMap.get(superObjectProperty).contains(transitionLabel))
                         transitionLabel=superObjectProperty;
-                    automaton.addTransition(new Transition(fromState,transitionLabel,finalState), "Could not create automaton");
+                    automaton.addTransition(new Transition(fromState,transitionLabel,finalState), COULD_NOT_CREATE_AUTOMATON);
             }
             // S1...Sn-1 R->R
             else if (subObjectProperties[subObjectProperties.length-1].equals(superObjectProperty)) {
@@ -697,7 +698,7 @@ public class ObjectPropertyInclusionManager {
                     transitionLabel=subObjectProperties[subObjectProperties.length-2];
                     if (equivalentPropertiesMap.containsKey(superObjectProperty) && equivalentPropertiesMap.get(superObjectProperty).contains(transitionLabel))
                         transitionLabel=superObjectProperty;
-                    automaton.addTransition(new Transition(fromState,transitionLabel,initialState), "Could not create automaton");
+                    automaton.addTransition(new Transition(fromState,transitionLabel,initialState), COULD_NOT_CREATE_AUTOMATON);
             }
             // S1...Sn->R
             else {
@@ -712,7 +713,7 @@ public class ObjectPropertyInclusionManager {
                     transitionLabel=subObjectProperties[subObjectProperties.length-1];
                     if (equivalentPropertiesMap.containsKey(superObjectProperty) && equivalentPropertiesMap.get(superObjectProperty).contains(transitionLabel))
                         transitionLabel=superObjectProperty;
-                    automaton.addTransition(new Transition(fromState,transitionLabel,finalState), "Could not create automaton");
+                    automaton.addTransition(new Transition(fromState,transitionLabel,finalState), COULD_NOT_CREATE_AUTOMATON);
             }
             automataMap.put(superObjectProperty,automaton);
         }
@@ -736,8 +737,8 @@ public class ObjectPropertyInclusionManager {
                 Automaton automaton=new Automaton();
                 State initialState=automaton.addState(true,false);
                 State finalState=automaton.addState(false,true);
-                automaton.addTransition(new Transition(initialState,topOP,finalState), "Could not create automaton");
-                automaton.addTransition(new Transition(finalState,null,initialState), "Could not create automaton");
+                automaton.addTransition(new Transition(initialState,topOP,finalState), COULD_NOT_CREATE_AUTOMATON);
+                automaton.addTransition(new Transition(finalState,null,initialState), COULD_NOT_CREATE_AUTOMATON);
                 automataMap.put(topOP, automaton);
         }        
         return automataMap;
@@ -773,7 +774,7 @@ public class ObjectPropertyInclusionManager {
     protected State addNewTransition(Automaton automaton,State fromState,OWLObjectPropertyExpression objectPropertyExpression) {
         OWLObjectPropertyExpression propertyOfChain=objectPropertyExpression;
         State toState=automaton.addState(false,false);
-        automaton.addTransition(new Transition(fromState,propertyOfChain,toState), "Could not create automaton");
+        automaton.addTransition(new Transition(fromState,propertyOfChain,toState), COULD_NOT_CREATE_AUTOMATON);
         return toState;
     }
 }

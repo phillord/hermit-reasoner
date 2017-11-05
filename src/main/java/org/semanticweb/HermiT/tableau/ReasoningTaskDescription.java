@@ -7,7 +7,7 @@ import org.semanticweb.HermiT.model.Role;
 import org.semanticweb.HermiT.model.Term;
 /**Reasoning task description.*/
 public class ReasoningTaskDescription {
-    private static enum StandardTestType {
+    private enum StandardTestType {
         CONCEPT_SATISFIABILITY("satisfiability of concept '{0}'"),
         CONSISTENCY("ABox satisfiability"),
         CONCEPT_SUBSUMPTION("concept subsumption '{0}' => '{1}'"),
@@ -116,7 +116,7 @@ public class ReasoningTaskDescription {
      * @return task description
      */
     public static ReasoningTaskDescription isConceptSubsumedByList(Object atomicSubconcept,Object... atomicSuperconcepts) {
-        StringBuffer message=new StringBuffer();
+        StringBuilder message=new StringBuilder();
         message.append("satisiability of concept '{0}' ");
         for (int index=0;index<atomicSuperconcepts.length;index++) {
             message.append(" and not({");
@@ -134,7 +134,7 @@ public class ReasoningTaskDescription {
      * @return task description
      */
     public static ReasoningTaskDescription isRoleSubsumedByList(Object subrole,Object... superroles) {
-        StringBuffer message=new StringBuffer();
+        StringBuilder message=new StringBuilder();
         message.append("satisiability of role '{0}' ");
         for (int index=0;index<superroles.length;index++) {
             message.append(" and not({");

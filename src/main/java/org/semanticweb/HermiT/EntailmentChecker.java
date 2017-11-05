@@ -34,6 +34,7 @@ import org.semanticweb.HermiT.tableau.ReasoningTaskDescription;
 import org.semanticweb.HermiT.tableau.Tableau;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.IsAnonymous;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLAnnotationPropertyDomainAxiom;
 import org.semanticweb.owlapi.model.OWLAnnotationPropertyRangeAxiom;
@@ -212,8 +213,10 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
         // see OWL 2 Syntax, Sec 11.2
         // No axiom in Ax of the following form contains anonymous individuals:
         // SameIndividual, DifferentIndividuals, NegativeObjectPropertyAssertion, and NegativeDataPropertyAssertion.
-        axiom.individuals().filter(i->i.isAnonymous()).forEach(i->{
-                throw new IllegalArgumentException("OWLSameIndividualAxiom axioms are not allowed to be used "+"with anonymous individuals (see OWL 2 Syntax Sec 11.2) but the axiom "+axiom+" cotains an anonymous individual. ");});
+        if(axiom.individuals().anyMatch(IsAnonymous::isAnonymous)) {
+            throw new IllegalArgumentException("OWLSameIndividualAxiom axioms are not allowed to be used "
+                    +"with anonymous individuals (see OWL 2 Syntax Sec 11.2) but the axiom "+axiom+" cotains an anonymous individual. ");
+        }
         Iterator<OWLIndividual> i=axiom.individuals().iterator();
         if (i.hasNext()) {
             OWLNamedIndividual first=i.next().asOWLNamedIndividual();
@@ -812,7 +815,7 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
                 OWLAnonymousIndividual objAnon=obj.asOWLAnonymousIndividual();
                 nodes.add(subAnon);
                 nodes.add(objAnon);
-                if ((edges.containsKey(subAnon)&&edges.get(subAnon).contains(objAnon))||((edges.containsKey(objAnon)&&edges.get(objAnon).contains(subAnon)))) {
+                if ((edges.containsKey(subAnon)&&edges.get(subAnon).contains(objAnon))||(edges.containsKey(objAnon)&&edges.get(objAnon).contains(subAnon))) {
                     throw new IllegalArgumentException("Invalid input ontology: There are two object property assertions for the same anonymous individuals, "+"which is not allowed (see OWL 2 Syntax Sec 11.2). ");
                 }
                 if (edges.containsKey(subAnon)) {
@@ -850,114 +853,6 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
                 labels.add(c);
                 nodelLabels.put(sub,labels);
             }
-        }
-        @Override
-        public void visit(OWLDeclarationAxiom axiom) {
-        }
-        @Override
-        public void visit(OWLSubClassOfAxiom axiom) {
-        }
-        @Override
-        public void visit(OWLNegativeObjectPropertyAssertionAxiom axiom) {
-        }
-        @Override
-        public void visit(OWLAsymmetricObjectPropertyAxiom axiom) {
-        }
-        @Override
-        public void visit(OWLReflexiveObjectPropertyAxiom axiom) {
-        }
-        @Override
-        public void visit(OWLDisjointClassesAxiom axiom) {
-        }
-        @Override
-        public void visit(OWLDataPropertyDomainAxiom axiom) {
-        }
-        @Override
-        public void visit(OWLObjectPropertyDomainAxiom axiom) {
-        }
-        @Override
-        public void visit(OWLEquivalentObjectPropertiesAxiom axiom) {
-        }
-        @Override
-        public void visit(OWLNegativeDataPropertyAssertionAxiom axiom) {
-        }
-        @Override
-        public void visit(OWLDifferentIndividualsAxiom axiom) {
-        }
-        @Override
-        public void visit(OWLDisjointDataPropertiesAxiom axiom) {
-        }
-        @Override
-        public void visit(OWLDisjointObjectPropertiesAxiom axiom) {
-        }
-        @Override
-        public void visit(OWLObjectPropertyRangeAxiom axiom) {
-        }
-        @Override
-        public void visit(OWLFunctionalObjectPropertyAxiom axiom) {
-        }
-        @Override
-        public void visit(OWLSubObjectPropertyOfAxiom axiom) {
-        }
-        @Override
-        public void visit(OWLDisjointUnionAxiom axiom) {
-        }
-        @Override
-        public void visit(OWLSymmetricObjectPropertyAxiom axiom) {
-        }
-        @Override
-        public void visit(OWLDataPropertyRangeAxiom axiom) {
-        }
-        @Override
-        public void visit(OWLFunctionalDataPropertyAxiom axiom) {
-        }
-        @Override
-        public void visit(OWLEquivalentDataPropertiesAxiom axiom) {
-        }
-        @Override
-        public void visit(OWLEquivalentClassesAxiom axiom) {
-        }
-        @Override
-        public void visit(OWLTransitiveObjectPropertyAxiom axiom) {
-        }
-        @Override
-        public void visit(OWLIrreflexiveObjectPropertyAxiom axiom) {
-        }
-        @Override
-        public void visit(OWLSubDataPropertyOfAxiom axiom) {
-        }
-        @Override
-        public void visit(OWLInverseFunctionalObjectPropertyAxiom axiom) {
-        }
-        @Override
-        public void visit(OWLSameIndividualAxiom axiom) {
-        }
-        @Override
-        public void visit(OWLSubPropertyChainOfAxiom axiom) {
-        }
-        @Override
-        public void visit(OWLInverseObjectPropertiesAxiom axiom) {
-        }
-        @Override
-        public void visit(OWLHasKeyAxiom axiom) {
-        }
-        @Override
-        public void visit(OWLDatatypeDefinitionAxiom axiom) {
-        }
-        @Override
-        public void visit(SWRLRule rule) {
-        }
-        @Override
-        public void visit(OWLAnnotationAssertionAxiom axiom) {
-        }
-        @Override
-        public void visit(OWLSubAnnotationPropertyOfAxiom axiom) {
-        }
-        @Override
-        public void visit(OWLAnnotationPropertyDomainAxiom axiom) {
-        }
-        @Override
-        public void visit(OWLAnnotationPropertyRangeAxiom axiom) {
         }
     }
 

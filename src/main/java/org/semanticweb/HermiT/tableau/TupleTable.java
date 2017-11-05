@@ -140,7 +140,7 @@ public final class TupleTable implements Serializable {
         m_firstFreeTupleIndex=0;
     }
 
-    protected final static class Page implements Serializable {
+    protected static final class Page implements Serializable {
         private static final long serialVersionUID=2239482172592108644L;
 
         public final int m_arity;

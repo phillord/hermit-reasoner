@@ -17,6 +17,8 @@
 */
 package org.semanticweb.HermiT.datatypes;
 
+import org.semanticweb.owlapi.model.IRI;
+
 /**
  * Malformed literal exception.
  */
@@ -36,6 +38,21 @@ public class MalformedLiteralException extends RuntimeException {
      * @param cause cause
      */
     public MalformedLiteralException(String lexicalForm,String datatypeURI,Throwable cause) {
+        super("Literal \""+lexicalForm+"\"^^<"+datatypeURI+"> is malformed",cause);
+    }
+    /**
+     * @param lexicalForm lexicalForm
+     * @param datatypeURI datatypeURI
+     */
+    public MalformedLiteralException(String lexicalForm,IRI datatypeURI) {
+        this(lexicalForm,datatypeURI,null);
+    }
+    /**
+     * @param lexicalForm lexicalForm
+     * @param datatypeURI datatypeURI
+     * @param cause cause
+     */
+    public MalformedLiteralException(String lexicalForm,IRI datatypeURI,Throwable cause) {
         super("Literal \""+lexicalForm+"\"^^<"+datatypeURI+"> is malformed",cause);
     }
 }

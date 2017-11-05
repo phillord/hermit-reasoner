@@ -32,7 +32,7 @@ public class BooleanDatatypeHandler implements DatatypeHandler {
     protected static final String XSD_BOOLEAN=Prefixes.s_semanticWebPrefixes.get("xsd:")+"boolean";
     protected static final ValueSpaceSubset BOOLEAN_ALL=new BooleanAll();
     protected static final ValueSpaceSubset EMPTY=new BooleanNone();
-    protected final static Set<String> s_managedDatatypeURIs=Collections.singleton(XSD_BOOLEAN);
+    protected static final Set<String> s_managedDatatypeURIs=Collections.singleton(XSD_BOOLEAN);
 
     @Override
     public Set<String> getManagedDatatypeURIs() {
@@ -116,6 +116,7 @@ public class BooleanDatatypeHandler implements DatatypeHandler {
         }
         @Override
         public void enumerateDataValues(Collection<Object> dataValues) {
+            // nothing to do
         }
     }
 }

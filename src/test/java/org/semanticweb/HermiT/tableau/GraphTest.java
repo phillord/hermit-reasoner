@@ -1,5 +1,6 @@
 package org.semanticweb.HermiT.tableau;
 
+import org.semanticweb.owlapi.model.IRI;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -21,6 +22,9 @@ public class GraphTest extends AbstractReasonerInternalsTest {
         m_descriptionGraphs = new HashSet<>();
     }
 
+    private static IRI i(String s) {
+        return IRI.create(s);
+    }
     public void testGraphMerging() throws Exception {
         DescriptionGraph graph = G(new String[] { "A", // 0
                 "B", // 1

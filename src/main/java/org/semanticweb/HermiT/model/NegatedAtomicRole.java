@@ -53,7 +53,7 @@ public class NegatedAtomicRole {
         return s_interningManager.intern(this);
     }
 
-    protected final static InterningManager<NegatedAtomicRole> s_interningManager=new InterningManager<NegatedAtomicRole>() {
+    protected static final InterningManager<NegatedAtomicRole> s_interningManager=new InterningManager<NegatedAtomicRole>() {
         @Override
         protected boolean equal(NegatedAtomicRole object1,NegatedAtomicRole object2) {
             return object1.m_negatedAtomicRole==object2.m_negatedAtomicRole;

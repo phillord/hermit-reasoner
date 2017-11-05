@@ -82,7 +82,7 @@ public class HermiTDebugger {
         // HermiT will tell you that it started, but before really deriving anything,
         // HermiT waits again to see whether you want to set further breakpoints, etc, but 
         // just type 'c' again for now. 
-	    IRI sicilianaIRI=IRI.create("http://www.co-ode.org/ontologies/pizza/pizza.owl#Siciliana");
+	    IRI sicilianaIRI=IRI.create("http://www.co-ode.org/ontologies/pizza/pizza.owl#","Siciliana");
 	    OWLClass siciliana=manager.getOWLDataFactory().getOWLClass(sicilianaIRI);
 	    hermit.isSatisfiable(siciliana);
 	    // HermiT should now have said 'Reasoning task finished: true' in the debugger window. 
@@ -112,7 +112,7 @@ public class HermiTDebugger {
 
 	    // Lets continue and see whether HermiT finds that the CheeseyVegetableTopping class is 
 	    // unsatisfiable (I know it is).
-	    IRI cheeseyVegetableToppingIRI=IRI.create("http://www.co-ode.org/ontologies/pizza/pizza.owl#CheeseyVegetableTopping");
+	    IRI cheeseyVegetableToppingIRI=IRI.create("http://www.co-ode.org/ontologies/pizza/pizza.owl#","CheeseyVegetableTopping");
 	    OWLClass cheeseyVegetableTopping=manager.getOWLDataFactory().getOWLClass(cheeseyVegetableToppingIRI);
         hermit.isSatisfiable(cheeseyVegetableTopping);
         // Type 'c' twice to start the task and continue to the end. 

@@ -31,6 +31,9 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 public abstract class AbstractOntologyTest extends AbstractHermiTTest {
     protected static final IRI ONTOLOGY_IRI = IRI.create("file:/c/test.owl");
     protected static final String NS = ONTOLOGY_IRI + "#";
+    protected static final IRI NS(String local) {
+        return IRI.create(NS, local);
+    }
     protected OWLOntologyManager m_ontologyManager;
     protected OWLDataFactory m_dataFactory;
     protected OWLOntology m_ontology;

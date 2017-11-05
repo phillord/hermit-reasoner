@@ -65,7 +65,7 @@ public class AtomicConcept extends LiteralConcept implements DLPredicate {
         return s_interningManager.intern(this);
     }
 
-    protected final static InterningManager<AtomicConcept> s_interningManager=new InterningManager<AtomicConcept>() {
+    protected static final InterningManager<AtomicConcept> s_interningManager=new InterningManager<AtomicConcept>() {
         @Override
         protected boolean equal(AtomicConcept object1,AtomicConcept object2) {
             return object1.m_iri.equals(object2.m_iri);
