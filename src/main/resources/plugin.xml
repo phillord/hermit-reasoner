@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <plugin>
 	<extension id="HermiT.reasoner.factory" point="org.protege.editor.owl.inference_reasonerfactory">
-        <name value="HermiT 1.4.0.510"/>
-        <label value="HermiT 1.4.0.510"/>
+        <name value="HermiT 1.4.0.513"/>
+        <label value="HermiT 1.4.0.513"/>
         <class value="org.semanticweb.HermiT.ProtegeReasonerFactory"/>
     </extension>
 </plugin>
