@@ -2,15 +2,10 @@ package org.semanticweb.HermiT.reasoner;
 
 import org.semanticweb.HermiT.Configuration;
 @SuppressWarnings("javadoc")
-public class ClassificationIndividualReuseTest extends ClassificationTest {
+public class ClassificationIndividualReuseTest extends AbstractReasonerTest {
 
     public ClassificationIndividualReuseTest(String name) {
         super(name);
-    }
-
-    @Override
-    public void testGalenIansFullUndoctored() {
-        // omitted for now until we get this under control
     }
 
     public void testDolce() throws Exception {

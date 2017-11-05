@@ -164,6 +164,7 @@ public class DatatypeRegistry {
     }
 
     protected static class AnonymousConstantsDatatypeHandler implements DatatypeHandler {
+        private static final String ANONYMOUS_CONSTANTS_DATATYPE = "Internal error: anonymous constants datatype should not occur in datatype restrictions.";
         protected static final String ANONYMOUS_CONSTANTS="internal:anonymous-constants";
         protected static final Set<String> s_managedDatatypeURIs=Collections.singleton(ANONYMOUS_CONSTANTS);
 
@@ -178,27 +179,27 @@ public class DatatypeRegistry {
         }
         @Override
         public void validateDatatypeRestriction(DatatypeRestriction datatypeRestriction) throws UnsupportedFacetException {
-            throw new IllegalStateException("Internal error: anonymous constants datatype should not occur in datatype restrictions.");
+            throw new IllegalStateException(ANONYMOUS_CONSTANTS_DATATYPE);
         }
         @Override
         public ValueSpaceSubset createValueSpaceSubset(DatatypeRestriction datatypeRestriction) {
-            throw new IllegalStateException("Internal error: anonymous constants datatype should not occur in datatype restrictions.");
+            throw new IllegalStateException(ANONYMOUS_CONSTANTS_DATATYPE);
         }
         @Override
         public ValueSpaceSubset conjoinWithDR(ValueSpaceSubset valueSpaceSubset,DatatypeRestriction datatypeRestriction) {
-            throw new IllegalStateException("Internal error: anonymous constants datatype should not occur in datatype restrictions.");
+            throw new IllegalStateException(ANONYMOUS_CONSTANTS_DATATYPE);
         }
         @Override
         public ValueSpaceSubset conjoinWithDRNegation(ValueSpaceSubset valueSpaceSubset,DatatypeRestriction datatypeRestriction) {
-            throw new IllegalStateException("Internal error: anonymous constants datatype should not occur in datatype restrictions.");
+            throw new IllegalStateException(ANONYMOUS_CONSTANTS_DATATYPE);
         }
         @Override
         public boolean isSubsetOf(String subsetDatatypeURI,String supersetDatatypeURI) {
-            throw new IllegalStateException("Internal error: anonymous constants datatype should not occur in datatype restrictions.");
+            throw new IllegalStateException(ANONYMOUS_CONSTANTS_DATATYPE);
         }
         @Override
         public boolean isDisjointWith(String datatypeURI1,String datatypeURI2) {
-            throw new IllegalStateException("Internal error: anonymous constants datatype should not occur in datatype restrictions.");
+            throw new IllegalStateException(ANONYMOUS_CONSTANTS_DATATYPE);
         }
     }
 

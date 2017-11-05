@@ -150,9 +150,14 @@ public class DLClauseEvaluator implements Serializable {
 
         void reuseBuffers() {
             m_availableBuffersByArity.clear();
-            m_allBuffers.stream().mapToInt(o->o.length)
-            .distinct()
-            .forEach(t->m_availableBuffersByArity.put(t, new ArrayList<>()));
+            for (Object[] buffer : m_allBuffers) {
+                List<Object[]> buffers=m_availableBuffersByArity.get(buffer.length);
+                if (buffers==null) {
+                    buffers=new ArrayList<>();
+                    m_availableBuffersByArity.put(buffer.length,buffers);
+                }
+                buffers.add(buffer);
+            }
         }
         Object[] getBuffer(int arity) {
             Object[] buffer;

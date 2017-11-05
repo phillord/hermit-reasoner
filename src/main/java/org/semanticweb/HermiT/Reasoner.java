@@ -143,6 +143,7 @@ import org.semanticweb.owlapi.util.Version;
  * Answers queries about the logical implications of a particular knowledge base. A Reasoner is associated with a single knowledge base, which is "loaded" when the reasoner is constructed. By default a full classification of all atomic terms in the knowledge base is also performed at this time (which can take quite a while for large or complex ontologies), but this behavior can be disabled as a part of the Reasoner configuration. Internal details of the loading and reasoning algorithms can be configured in the Reasoner constructor and do not change over the lifetime of the Reasoner object---internal data structures and caches are optimized for a particular configuration. By default, HermiT will use the set of options which provide optimal performance.
  */
 public class Reasoner implements OWLReasoner {
+    private static final IRI PSEUDO_NOMINAL = IRI.create("internal:pseudo-nominal");
     protected final OntologyChangeListener m_ontologyChangeListener;
     protected final Configuration m_configuration;
     protected final OWLOntology m_rootOntology;
@@ -979,12 +980,9 @@ public class Reasoner implements OWLReasoner {
             OWLClass queryConcept=factory.getOWLClass(IRI.create("internal:query-concept"));
             OWLAxiom classDefinitionAxiom=factory.getOWLEquivalentClassesAxiom(queryConcept,classExpression);
             final Tableau tableau=getTableau(classDefinitionAxiom);
-            HierarchySearch.Relation<AtomicConcept> hierarchyRelation=new HierarchySearch.Relation<AtomicConcept>() {
-                @Override
-                public boolean doesSubsume(AtomicConcept parent,AtomicConcept child) {
+            HierarchySearch.Relation<AtomicConcept> hierarchyRelation=(parent, child) ->{
                     Individual freshIndividual=Individual.createAnonymous("fresh-individual");
                     return !tableau.isSatisfiable(true,Collections.singleton(Atom.create(child,freshIndividual)),null,null,Collections.singleton(Atom.create(parent,freshIndividual)),null,ReasoningTaskDescription.isConceptSubsumedBy(child,parent));
-                }
             };
             HierarchyNode<AtomicConcept> extendedHierarchy=HierarchySearch.findPosition(hierarchyRelation,AtomicConcept.create("internal:query-concept"),m_atomicConceptHierarchy.getTopNode(),m_atomicConceptHierarchy.getBottomNode());
             tableau.clearAdditionalDLOntology();
@@ -1108,7 +1106,7 @@ public class Reasoner implements OWLReasoner {
         }
         else {
             OWLDataFactory factory=getDataFactory();
-            OWLClass pseudoNominal=factory.getOWLClass(IRI.create("internal:pseudo-nominal"));
+            OWLClass pseudoNominal=factory.getOWLClass(PSEUDO_NOMINAL);
             OWLClassExpression allSuperNotPseudoNominal=factory.getOWLObjectAllValuesFrom(superObjectPropertyExpression,pseudoNominal.getObjectComplementOf());
             OWLIndividual freshIndividualA=factory.getOWLAnonymousIndividual("fresh-individual-A");
             OWLIndividual freshIndividualB=factory.getOWLAnonymousIndividual("fresh-individual-B");
@@ -1131,7 +1129,7 @@ public class Reasoner implements OWLReasoner {
             return true;
         else {
             OWLDataFactory factory=getDataFactory();
-            OWLClass pseudoNominal=factory.getOWLClass(IRI.create("internal:pseudo-nominal"));
+            OWLClass pseudoNominal=factory.getOWLClass(PSEUDO_NOMINAL);
             OWLClassExpression allSuperNotPseudoNominal=factory.getOWLObjectAllValuesFrom(superObjectPropertyExpression,pseudoNominal.getObjectComplementOf());
             OWLAxiom[] additionalAxioms=new OWLAxiom[subPropertyChain.size()+2];
             int axiomIndex=0;
@@ -1351,7 +1349,7 @@ public class Reasoner implements OWLReasoner {
         if (!m_isConsistent.booleanValue())
             return true;
         OWLDataFactory factory=getDataFactory();
-        OWLClass pseudoNominal=factory.getOWLClass(IRI.create("internal:pseudo-nominal"));
+        OWLClass pseudoNominal=factory.getOWLClass(PSEUDO_NOMINAL);
         OWLClassExpression allNotPseudoNominal=factory.getOWLObjectAllValuesFrom(propertyExpression,pseudoNominal.getObjectComplementOf());
         OWLIndividual freshIndividual=factory.getOWLAnonymousIndividual("fresh-individual");
         OWLAxiom pseudoNominalAssertion=factory.getOWLClassAssertionAxiom(pseudoNominal,freshIndividual);
@@ -1380,7 +1378,7 @@ public class Reasoner implements OWLReasoner {
         if (!m_isConsistent.booleanValue() || propertyExpression.getNamedProperty().isOWLTopObjectProperty())
             return true;
         OWLDataFactory factory=getDataFactory();
-        OWLClass pseudoNominal=factory.getOWLClass(IRI.create("internal:pseudo-nominal"));
+        OWLClass pseudoNominal=factory.getOWLClass(PSEUDO_NOMINAL);
         OWLClassExpression allNotPseudoNominal=factory.getOWLObjectAllValuesFrom(propertyExpression,pseudoNominal.getObjectComplementOf());
         OWLIndividual freshIndividualA=factory.getOWLAnonymousIndividual("fresh-individual-A");
         OWLIndividual freshIndividualB=factory.getOWLAnonymousIndividual("fresh-individual-B");
@@ -1397,7 +1395,7 @@ public class Reasoner implements OWLReasoner {
         if (!m_isConsistent.booleanValue())
             return true;
         OWLDataFactory factory=getDataFactory();
-        OWLClass pseudoNominal=factory.getOWLClass(IRI.create("internal:pseudo-nominal"));
+        OWLClass pseudoNominal=factory.getOWLClass(PSEUDO_NOMINAL);
         OWLClassExpression allNotPseudoNominal=factory.getOWLObjectAllValuesFrom(propertyExpression,pseudoNominal.getObjectComplementOf());
         OWLIndividual freshIndividualA=factory.getOWLAnonymousIndividual("fresh-individual-A");
         OWLIndividual freshIndividualB=factory.getOWLAnonymousIndividual("fresh-individual-B");
