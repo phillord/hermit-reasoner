@@ -19,8 +19,11 @@ package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -190,13 +193,12 @@ public class DLClauseEvaluator implements Serializable {
          * @param dlClauses dlClauses
          * @param termsToNodes termsToNodes
          */
-        public ValuesBufferManager(Set<DLClause> dlClauses,Map<Term,Node> termsToNodes) {
+        public ValuesBufferManager(Collection<DLClause> dlClauses,Map<Term,Node> termsToNodes) {
             Set<DLPredicate> bodyDLPredicates=new HashSet<>();
-            Set<Variable> variables=new HashSet<>();
             m_bodyNonvariableTermsToIndexes=new HashMap<>();
             int maxNumberOfVariables=0;
             for (DLClause dlClause : dlClauses) {
-                variables.clear();
+                Set<Variable> variables=Collections.newSetFromMap(new IdentityHashMap<>());
                 for (int bodyIndex=dlClause.getBodyLength()-1;bodyIndex>=0;--bodyIndex) {
                     Atom atom=dlClause.getBodyAtom(bodyIndex);
                     bodyDLPredicates.add(atom.getDLPredicate());
@@ -887,7 +889,7 @@ public class DLClauseEvaluator implements Serializable {
             m_extensionManager=extensionManager;
             m_bodyAtoms=bodyAtoms;
             m_variables=new ArrayList<>();
-            m_boundSoFar=new HashSet<>();
+            m_boundSoFar=Collections.newSetFromMap(new IdentityHashMap<>());
             int numberOfRealAtoms=0;
             for (int bodyIndex=0;bodyIndex<getBodyLength();bodyIndex++) {
                 Atom atom=getBodyAtom(bodyIndex);

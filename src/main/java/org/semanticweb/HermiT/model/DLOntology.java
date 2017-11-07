@@ -23,9 +23,12 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -40,7 +43,7 @@ public class DLOntology implements Serializable {
     protected static final String CRLF="\n";
 
     protected final String m_ontologyIRI;
-    protected final Set<DLClause> m_dlClauses;
+    protected final Collection<DLClause> m_dlClauses;
     protected final Set<Atom> m_positiveFacts;
     protected final Set<Atom> m_negativeFacts;
     protected final boolean m_hasInverseRoles;
@@ -76,7 +79,7 @@ public class DLOntology implements Serializable {
      * @param hasNominals hasNominals
      * @param hasDatatypes hasDatatypes
      */
-    public DLOntology(String ontologyIRI,Set<DLClause> dlClauses,Set<Atom> positiveFacts,Set<Atom> negativeFacts, Set<AtomicConcept> atomicConcepts,
+    public DLOntology(String ontologyIRI,Collection<DLClause> dlClauses,Set<Atom> positiveFacts,Set<Atom> negativeFacts, Set<AtomicConcept> atomicConcepts,
             Set<AtomicRole> atomicObjectRoles,Set<Role> allComplexObjectRoles,Set<AtomicRole> atomicDataRoles,
             Set<DatatypeRestriction> allUnknownDatatypeRestrictions,Set<String> definedDatatypeIRIs,Set<Individual> individuals,
             boolean hasInverseRoles,boolean hasAtMostRestrictions,boolean hasNominals,boolean hasDatatypes) {
@@ -90,8 +93,10 @@ public class DLOntology implements Serializable {
         m_hasDatatypes=hasDatatypes;
         if (atomicConcepts==null)
             m_allAtomicConcepts=new TreeSet<>(Comparator.comparing(AtomicConcept::getIRI));
-        else
-            m_allAtomicConcepts=atomicConcepts;
+        else {
+            m_allAtomicConcepts=Collections.newSetFromMap(new IdentityHashMap<>());
+            m_allAtomicConcepts.addAll(atomicConcepts);
+        }
         int numberOfExternalConcepts=0;
         for (AtomicConcept c : m_allAtomicConcepts)
             if (!Prefixes.isInternalIRI(c.getIRI()))
@@ -284,7 +289,7 @@ public class DLOntology implements Serializable {
     /**
      * @return dl clauses
      */
-    public Set<DLClause> getDLClauses() {
+    public Collection<DLClause> getDLClauses() {
         return m_dlClauses;
     }
     /**

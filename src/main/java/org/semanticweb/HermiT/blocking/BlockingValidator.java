@@ -18,6 +18,7 @@
 package org.semanticweb.HermiT.blocking;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -66,7 +67,7 @@ public class BlockingValidator {
      * @param tableau tableau
      * @param dlClauses dlClauses
      */
-    public BlockingValidator(Tableau tableau,Set<DLClause> dlClauses) {
+    public BlockingValidator(Tableau tableau,Collection<DLClause> dlClauses) {
         m_extensionManager=tableau.getExtensionManager();
         m_binaryRetrieval1Bound=m_extensionManager.getBinaryExtensionTable().createRetrieval(new boolean[] { false, true }, ExtensionTable.View.TOTAL);
         m_ternaryRetrieval01Bound=m_extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,true,false }, ExtensionTable.View.TOTAL);

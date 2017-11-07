@@ -17,6 +17,7 @@
  */
 package org.semanticweb.HermiT.hierarchy;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -50,7 +51,7 @@ public class QuasiOrderClassificationForRoles extends QuasiOrderClassification {
         m_rolesForConcepts=rolesForConcepts;
     }
     @Override
-    protected void initialiseKnownSubsumptionsUsingToldSubsumers(Set<DLClause> dlClauses) {
+    protected void initialiseKnownSubsumptionsUsingToldSubsumers(Collection<DLClause> dlClauses) {
         for (DLClause dlClause : dlClauses) {
             if (dlClause.getHeadLength()==1 && dlClause.getBodyLength()==1) {
                 DLPredicate headPredicate=dlClause.getHeadAtom(0).getDLPredicate();

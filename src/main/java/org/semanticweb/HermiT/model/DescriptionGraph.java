@@ -18,6 +18,7 @@
 package org.semanticweb.HermiT.model;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Set;
 
 import org.semanticweb.HermiT.Prefixes;
@@ -87,7 +88,7 @@ public class DescriptionGraph implements DLPredicate,Serializable {
     /**
      * @param resultingDLClauses resultingDLClauses
      */
-    public void produceStartDLClauses(Set<DLClause> resultingDLClauses) {
+    public void produceStartDLClauses(Collection<DLClause> resultingDLClauses) {
         Variable X=Variable.create("X");
         for (AtomicConcept startAtomicConcept : m_startConcepts) {
             Atom[] antecedent=new Atom[] { Atom.create(startAtomicConcept,X) };

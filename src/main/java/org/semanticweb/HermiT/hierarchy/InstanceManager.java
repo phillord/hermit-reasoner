@@ -20,6 +20,7 @@ package org.semanticweb.HermiT.hierarchy;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -205,7 +206,7 @@ public class InstanceManager {
         if (m_usesInverseRoles)
             knownSubsumptions.addEdge(subRole.getInverse(),superRole.getInverse());
     }
-    protected void updateKnownSubsumptionsUsingToldSubsumers(Set<DLClause> dlClauses, Graph<AtomicConcept> knownConceptSubsumptions,Set<AtomicConcept> concepts,Graph<Role> knownRoleSubsumptions,Set<Role> roles) {
+    protected void updateKnownSubsumptionsUsingToldSubsumers(Collection<DLClause> dlClauses, Graph<AtomicConcept> knownConceptSubsumptions,Set<AtomicConcept> concepts,Graph<Role> knownRoleSubsumptions,Set<Role> roles) {
         boolean requiresConceptSubsumers=knownConceptSubsumptions!=null;
         boolean requiresRoleSubsumers=knownRoleSubsumptions!=null;
         if (requiresConceptSubsumers || requiresRoleSubsumers) {

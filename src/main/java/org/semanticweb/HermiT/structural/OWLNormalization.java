@@ -155,7 +155,7 @@ public class OWLNormalization {
         add(m_axioms.m_objectProperties, ontology.objectPropertiesInSignature(Imports.INCLUDED));
         add(m_axioms.m_dataProperties, ontology.dataPropertiesInSignature(Imports.INCLUDED));
         add(m_axioms.m_namedIndividuals, ontology.individualsInSignature(Imports.INCLUDED));
-        processAxioms(ontology.logicalAxioms());
+        processAxioms(ontology.logicalAxioms(Imports.INCLUDED));
     }
     /**
      * @param axioms axioms
@@ -441,10 +441,10 @@ public class OWLNormalization {
         }
         @Override
         public void visit(OWLDisjointClassesAxiom axiom) {
-            if (axiom.classExpressions().count()<=1) {
+            if (axiom.getOperandsAsList().size()<=1) {
                 throw new IllegalArgumentException("Error: Parsed "+axiom.toString()+". A DisjointClasses axiom in OWL 2 DL must have at least two classes as parameters. ");
             }
-            List<OWLClassExpression> descriptions=asList(axiom.classExpressions());
+            List<OWLClassExpression> descriptions=new ArrayList<>(axiom.getOperandsAsList());
             for (int i=0;i<descriptions.size();i++)
                 descriptions.set(i, m_expressionManager.getComplementNNF(descriptions.get(i)));
             for (int i=0;i<descriptions.size()-1;i++)
@@ -455,7 +455,7 @@ public class OWLNormalization {
         public void visit(OWLDisjointUnionAxiom axiom) {
             // DisjointUnion(C CE1 ... CEn)
             // 1. add C implies CE1 or ... or CEn, which is { not C or CE1 or ... or CEn }
-            List<OWLClassExpression> classExpressions = asList(axiom.classExpressions());
+            List<OWLClassExpression> classExpressions = new ArrayList<>( axiom.getOperandsAsList());
             List<OWLClassExpression> inclusion= new ArrayList<>(classExpressions);
             OWLClassExpression complementNNF = m_expressionManager.getComplementNNF(axiom.getOWLClass());
             if(!inclusion.contains(complementNNF)) {

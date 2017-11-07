@@ -19,6 +19,7 @@ package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -93,7 +94,7 @@ public final class ExistentialExpansionManager implements Serializable {
             }
         }
     }
-    protected static void loadDLClausesIntoGraph(Set<DLClause> dlClauses,Graph<Role> superRoleGraph,Set<Role> functionalRoles) {
+    protected static void loadDLClausesIntoGraph(Collection<DLClause> dlClauses,Graph<Role> superRoleGraph,Set<Role> functionalRoles) {
         for (DLClause dlClause : dlClauses) {
             if (dlClause.isAtomicRoleInclusion()) {
                 AtomicRole subrole=(AtomicRole)dlClause.getBodyAtom(0).getDLPredicate();

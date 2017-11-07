@@ -19,9 +19,11 @@ package org.semanticweb.HermiT.tableau;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -58,7 +60,7 @@ public final class HyperresolutionManager implements Serializable {
      * @param tableau tableau
      * @param dlClauses dlClauses
      */
-    public HyperresolutionManager(Tableau tableau,Set<DLClause> dlClauses) {
+    public HyperresolutionManager(Tableau tableau,Collection<DLClause> dlClauses) {
         InterruptFlag interruptFlag=tableau.m_interruptFlag;
         m_extensionManager=tableau.m_extensionManager;
         m_tupleConsumersByDeltaPredicate=new HashMap<>();
@@ -292,7 +294,7 @@ public final class HyperresolutionManager implements Serializable {
             m_nodeIDComparisonAtoms=new ArrayList<>(m_dlClause.getBodyLength());
             m_usedAtoms=new boolean[m_dlClause.getBodyLength()];
             m_reorderedAtoms=new ArrayList<>(m_dlClause.getBodyLength());
-            m_boundVariables=new HashSet<>();
+            m_boundVariables=Collections.newSetFromMap(new IdentityHashMap<>());
         }
         /**
          * @param bodyIndex bodyIndex
