@@ -119,7 +119,7 @@ public class EntailmentTest extends AbstractReasonerTest {
     }
 
     protected OWLOntology getOntologyWithAxioms(String axioms) throws Exception {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append("Prefix(:=<" + NS + ">)");
         buffer.append("Prefix(a:=<" + NS + ">)");
         buffer.append("Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)");

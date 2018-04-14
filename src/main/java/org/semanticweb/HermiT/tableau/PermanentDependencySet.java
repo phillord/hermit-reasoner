@@ -57,7 +57,7 @@ public final class PermanentDependencySet implements DependencySet,Serializable 
     }
     @Override
     public String toString() {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         buffer.append("{ ");
         PermanentDependencySet dependencySet=this;
         while (dependencySet.m_branchingPoint!=-1) {

@@ -132,7 +132,7 @@ public class DatalogEngineTest extends AbstractReasonerTest {
 
         @Override
         public String toString() {
-            StringBuffer buffer = new StringBuffer();
+            StringBuilder buffer = new StringBuilder();
             buffer.append('[');
             for (int index = 0; index < m_terms.length; ++index) {
                 if (index != 0)

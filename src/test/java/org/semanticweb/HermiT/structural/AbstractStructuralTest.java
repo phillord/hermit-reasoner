@@ -112,7 +112,7 @@ public abstract class AbstractStructuralTest extends AbstractOntologyTest {
     }
 
     protected static String toOrderedString(DLClause dlClause, Prefixes prefixes) {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         SortedSet<Atom> headAtoms = new TreeSet<>(AbstractStructuralTest::atomLexicalCompare);
         for (int atomIndex = 0; atomIndex < dlClause.getHeadLength(); atomIndex++)
             headAtoms.add(dlClause.getHeadAtom(atomIndex));

@@ -73,7 +73,7 @@ public class AnyURIValueSpaceSubset implements ValueSpaceSubset {
     }
     @Override
     public String toString() {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         buffer.append("xsd:anyURI{");
         buffer.append(m_automaton.toString());
         buffer.append('}');

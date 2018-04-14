@@ -120,7 +120,7 @@ public class QueryCommand extends AbstractCommand {
             CharArrayWriter buffer=new CharArrayWriter();
             PrintWriter writer=new PrintWriter(buffer);
             writer.println("===========================================");
-            StringBuffer queryName=new StringBuffer("Query:");
+            StringBuilder queryName=new StringBuilder("Query:");
             writer.print("Query:");
             for (int index=1;index<args.length;index++) {
                 writer.print(' ');

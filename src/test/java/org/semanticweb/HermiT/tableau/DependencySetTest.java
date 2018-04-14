@@ -94,7 +94,7 @@ public class DependencySetTest extends TestCase {
         for (int index = expectedSortedMembers.length - 1; index >= 0; --index) {
             int expectedBranchingPoint = expectedSortedMembers[index];
             if (expectedBranchingPoint != checkSet.m_branchingPoint) {
-                StringBuffer buffer = new StringBuffer();
+                StringBuilder buffer = new StringBuilder();
                 buffer.append("Dependency sets are different: expected { ");
                 for (int i = expectedSortedMembers.length - 1; i >= 0; --i) {
                     buffer.append(expectedSortedMembers[i]);

@@ -59,7 +59,7 @@ public class ReasonerCoreBlockingTest extends ReasonerTest {
 
     @Override
     public void testIanT6() throws Exception {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append("InverseObjectProperties(:r :r-)");
         buffer.append("InverseObjectProperties(:f :f-)");
         buffer.append("TransitiveObjectProperty(:r)");
@@ -91,7 +91,7 @@ public class ReasonerCoreBlockingTest extends ReasonerTest {
 
     @Override
     public void testIanT9() throws Exception {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append("InverseObjectProperties(:successor :successor-)");
         buffer.append("TransitiveObjectProperty(:descendant)");
         buffer.append("SubObjectPropertyOf(:successor :descendant)");

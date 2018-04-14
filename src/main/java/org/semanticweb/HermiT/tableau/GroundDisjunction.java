@@ -183,7 +183,7 @@ public final class GroundDisjunction implements Serializable {
      * @return toString
      */
     public String toString(Prefixes prefixes) {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         for (int disjunctIndex=0;disjunctIndex<getNumberOfDisjuncts();disjunctIndex++) {
             if (disjunctIndex!=0)
                 buffer.append(" v ");

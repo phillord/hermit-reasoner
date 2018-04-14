@@ -65,7 +65,7 @@ public class NoNaNDoubleSubset implements ValueSpaceSubset {
     }
     @Override
     public String toString() {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         buffer.append("xsd:double{");
         for (int index=0;index<m_intervals.size();index++) {
             if (index==0)

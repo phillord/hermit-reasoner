@@ -280,7 +280,7 @@ public class SubtreeViewer extends JFrame {
         @Override
         public Component getTreeCellRendererComponent(JTree tree,Object value,boolean s,boolean expanded,boolean leaf,int row,boolean focus) {
             Node node=(Node)value;
-            StringBuffer buffer=new StringBuffer();
+            StringBuilder buffer=new StringBuilder();
             ExistentialConcept existentialConcept=m_debugger.getNodeCreationInfo(node).m_createdByExistential;
             if (existentialConcept==null) {
                 buffer.append(node.getNodeID());

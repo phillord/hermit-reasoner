@@ -424,7 +424,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
 
     protected void assertDRSatisfiableNEQ(boolean value, int cardinality, String[] forbiddenValues, String... parts)
             throws Exception {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append(
                 "Declaration(NamedIndividual(test:a)) Declaration(Class(test:A)) Declaration(DataProperty(test:dp)) SubClassOf( test:A DataMinCardinality( ");
         buffer.append(cardinality);
@@ -517,7 +517,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     }
 
     protected static String DR(String datatype, String... restrictions) {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         if (restrictions.length == 0)
             buffer.append(datatype);
         else {
@@ -533,7 +533,7 @@ public abstract class AbstractReasonerTest extends AbstractOntologyTest {
     }
 
     protected static String OO(String... elements) {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append("DataOneOf(");
         for (String element : elements) {
             buffer.append(' ');

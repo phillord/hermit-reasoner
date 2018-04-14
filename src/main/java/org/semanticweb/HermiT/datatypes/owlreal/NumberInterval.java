@@ -222,7 +222,7 @@ public class NumberInterval {
     }
     @Override
     public String toString() {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         buffer.append(m_baseRange.toString());
         if (m_excludedRange!=NumberRange.NOTHING) {
             buffer.append('\\');

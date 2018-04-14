@@ -414,40 +414,40 @@ public class DLOntology implements Serializable {
      * @return toString
      */
     public String toString(Prefixes prefixes) {
-        StringBuilder stringBuffer=new StringBuilder("Prefixes: [").append(CRLF);
+        StringBuilder StringBuilder=new StringBuilder("Prefixes: [").append(CRLF);
         for (Map.Entry<String,String> entry : prefixes.getPrefixIRIsByPrefixName().entrySet()) {
-            stringBuffer.append("  ").append(entry.getKey()).append(" = <").append(entry.getValue()).append('>').append(CRLF);
+            StringBuilder.append("  ").append(entry.getKey()).append(" = <").append(entry.getValue()).append('>').append(CRLF);
         }
-        stringBuffer.append("]").append(CRLF).append("Deterministic DL-clauses: [").append(CRLF);
+        StringBuilder.append("]").append(CRLF).append("Deterministic DL-clauses: [").append(CRLF);
         int numDeterministicClauses=0;
         for (DLClause dlClause : m_dlClauses)
             if (dlClause.getHeadLength()<=1) {
                 numDeterministicClauses++;
-                stringBuffer.append("  ").append(dlClause.toString(prefixes)).append(CRLF);
+                StringBuilder.append("  ").append(dlClause.toString(prefixes)).append(CRLF);
             }
-        stringBuffer.append("]").append(CRLF).append("Disjunctive DL-clauses: [").append(CRLF);
+        StringBuilder.append("]").append(CRLF).append("Disjunctive DL-clauses: [").append(CRLF);
         int numNondeterministicClauses=0;
         int numDisjunctions=0;
         for (DLClause dlClause : m_dlClauses)
             if (dlClause.getHeadLength()>1) {
                 numNondeterministicClauses++;
                 numDisjunctions+=dlClause.getHeadLength();
-                stringBuffer.append("  ").append(dlClause.toString(prefixes)).append(CRLF);
+                StringBuilder.append("  ").append(dlClause.toString(prefixes)).append(CRLF);
             }
-        stringBuffer.append("]").append(CRLF).append("ABox: [").append(CRLF);
+        StringBuilder.append("]").append(CRLF).append("ABox: [").append(CRLF);
         for (Atom atom : m_positiveFacts) {
-            stringBuffer.append("  ").append(atom.toString(prefixes)).append(CRLF);
+            StringBuilder.append("  ").append(atom.toString(prefixes)).append(CRLF);
         }
         for (Atom atom : m_negativeFacts) {
-            stringBuffer.append("  !").append(atom.toString(prefixes)).append(CRLF);
+            StringBuilder.append("  !").append(atom.toString(prefixes)).append(CRLF);
         }
-        stringBuffer.append("]").append(CRLF).append("Statistics: [").append(CRLF)
+        StringBuilder.append("]").append(CRLF).append("Statistics: [").append(CRLF)
         .append("  Number of deterministic clauses: " + numDeterministicClauses).append(CRLF)
         .append("  Number of nondeterministic clauses: " + numNondeterministicClauses).append(CRLF)
         .append("  Number of disjunctions: " + numDisjunctions).append(CRLF)
         .append("  Number of positive facts: " + m_positiveFacts.size()).append(CRLF)
         .append("  Number of negative facts: " + m_negativeFacts.size()).append(CRLF).append("]");
-        return stringBuffer.toString();
+        return StringBuilder.toString();
     }
     /**
      * @return statistics
@@ -474,7 +474,7 @@ public class DLOntology implements Serializable {
             numNondeterministicClauses=_numNondeterministicClauses.intValue();
             numDisjunctions=_numDisjunctions.intValue();
         }
-        StringBuilder stringBuffer=new StringBuilder("DL clauses statistics: [").append(CRLF)
+        StringBuilder StringBuilder=new StringBuilder("DL clauses statistics: [").append(CRLF)
                 .append("  Number of deterministic clauses: " ).append( numDeterministicClauses).append(CRLF)
                 .append("  Number of nondeterministic clauses: " ).append( numNondeterministicClauses).append(CRLF)
                 .append("  Overall number of disjunctions: " ).append( numDisjunctions).append(CRLF)
@@ -488,7 +488,7 @@ public class DLOntology implements Serializable {
                 .append("  Number of object properties: ").append( m_allAtomicObjectRoles.size()).append(CRLF)
                 .append("  Number of data properties: ").append( m_allAtomicDataRoles.size()).append(CRLF)
                 .append("  Number of individuals: " ).append( m_allIndividuals.size()).append(CRLF).append("]");
-        return stringBuffer.toString();
+        return StringBuilder.toString();
     }
     @Override
     public String toString() {

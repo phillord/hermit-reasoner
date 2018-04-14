@@ -212,7 +212,7 @@ public class DateTimeInterval {
     }
     @Override
     public String toString() {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         buffer.append(m_intervalType.toString());
         if (m_lowerBoundType==BoundType.INCLUSIVE)
             buffer.append('[');

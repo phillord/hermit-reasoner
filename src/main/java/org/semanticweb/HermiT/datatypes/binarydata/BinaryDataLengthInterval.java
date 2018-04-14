@@ -118,7 +118,7 @@ public class BinaryDataLengthInterval {
     }
     @Override
     public String toString() {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         buffer.append(m_binaryDataType.toString());
         buffer.append('[');
         buffer.append(m_minLength);

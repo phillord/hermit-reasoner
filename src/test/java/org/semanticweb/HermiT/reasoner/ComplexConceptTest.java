@@ -18,7 +18,7 @@ public class ComplexConceptTest extends AbstractReasonerTest {
     }
 
     public void testConceptWithDatatypes() throws Exception {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append("Declaration(NamedIndividual(:a))");
         buffer.append("Declaration(Class(:A))");
         buffer.append("Declaration(Class(:B))");
@@ -45,7 +45,7 @@ public class ComplexConceptTest extends AbstractReasonerTest {
     }
 
     public void testConceptWithDatatypes2() throws Exception {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append("Declaration(NamedIndividual(:a))");
         buffer.append("Declaration(Class(:A))");
         buffer.append("Declaration(DataProperty(:dp))");
@@ -63,7 +63,7 @@ public class ComplexConceptTest extends AbstractReasonerTest {
     }
 
     public void testConceptWithNominals() throws Exception {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append("Declaration(NamedIndividual(:a))");
         buffer.append("Declaration(NamedIndividual(:b))");
         buffer.append("Declaration(NamedIndividual(:o))");
@@ -93,7 +93,7 @@ public class ComplexConceptTest extends AbstractReasonerTest {
     }
 
     public void testConceptWithNominals2() throws Exception {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append("Declaration(NamedIndividual(:a))");
         buffer.append("Declaration(NamedIndividual(:b))");
         buffer.append("Declaration(NamedIndividual(:o))");
@@ -120,7 +120,7 @@ public class ComplexConceptTest extends AbstractReasonerTest {
     }
 
     public void testConceptWithNominals3() throws Exception {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append("Declaration(NamedIndividual(:a))");
         buffer.append("Declaration(NamedIndividual(:b))");
         buffer.append("Declaration(NamedIndividual(:o))");
@@ -142,7 +142,7 @@ public class ComplexConceptTest extends AbstractReasonerTest {
     }
 
     public void testConceptWithNominals4() throws Exception {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append("Declaration(NamedIndividual(:a))");
         buffer.append("Declaration(NamedIndividual(:b))");
         buffer.append("Declaration(NamedIndividual(:o))");
@@ -160,7 +160,7 @@ public class ComplexConceptTest extends AbstractReasonerTest {
     }
 
     public void testConceptWithNominals5() throws Exception {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append("Declaration(NamedIndividual(:a))");
         buffer.append("Declaration(NamedIndividual(:b))");
         buffer.append("Declaration(Class(:B))");
@@ -182,7 +182,7 @@ public class ComplexConceptTest extends AbstractReasonerTest {
     public void testJustifications() throws Exception {
         // test for Matthew's justifications that HermiT originally didn't
         // answer correctly
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append("Declaration(NamedIndividual(:Matt))");
         buffer.append("Declaration(NamedIndividual(:Gemma))");
         buffer.append("Declaration(Class(:Person))");

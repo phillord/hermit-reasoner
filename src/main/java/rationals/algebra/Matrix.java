@@ -120,7 +120,7 @@ public final class Matrix implements SemiRing {
     
     @Override
     public String toString() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (int i = 0; i < line; i++) {
             sb.append("[ ");
             for (int j = 0; j < col; j++) {

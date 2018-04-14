@@ -104,7 +104,7 @@ public class BinaryData {
         }
     }
     protected String toHexBinary() {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         for (int index=0;index<m_data.length;index++) {
             int octet=(m_data[index] & 0xFF);
             int high=octet/16;

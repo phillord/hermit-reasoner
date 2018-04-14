@@ -153,7 +153,7 @@ public class RDFPlainLiteralLengthInterval {
     }
     @Override
     public String toString() {
-        StringBuffer buffer=new StringBuffer();
+        StringBuilder buffer=new StringBuilder();
         buffer.append('[');
         buffer.append(m_minLength);
         buffer.append("..");
