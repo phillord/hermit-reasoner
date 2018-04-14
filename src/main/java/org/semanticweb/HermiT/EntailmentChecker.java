@@ -747,15 +747,9 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
                 namedNodes.add(node.asOWLNamedIndividual());
             }
             else {
-                nodes.add(node.asOWLAnonymousIndividual());
-                if (nodelLabels.containsKey(node)) {
-                    nodelLabels.get(node).add(axiom.getClassExpression());
-                }
-                else {
-                    Set<OWLClassExpression> label=new HashSet<>();
-                    label.add(axiom.getClassExpression());
-                    nodelLabels.put(node.asOWLAnonymousIndividual(),label);
-                }
+                OWLAnonymousIndividual anon = node.asOWLAnonymousIndividual();
+                nodes.add(anon);
+                nodelLabels.computeIfAbsent(anon, x->new HashSet<>()).add(axiom.getClassExpression());
             }
         }
         @Override

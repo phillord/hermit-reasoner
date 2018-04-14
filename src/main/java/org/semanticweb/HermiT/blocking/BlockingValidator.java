@@ -18,12 +18,14 @@
 package org.semanticweb.HermiT.blocking;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.semanticweb.HermiT.blocking.ValidatedSingleDirectBlockingChecker.ValidatedBlockingObject;
 import org.semanticweb.HermiT.model.AnnotatedEquality;
@@ -914,11 +916,7 @@ public class BlockingValidator {
         }
         @Override
         public String toString() {
-            String result="";
-            for (Object o : m_assertionBuffer) {
-                result+=" "+o.toString();
-            }
-            return result;
+            return Arrays.stream(m_assertionBuffer).map(Object::toString).collect(Collectors.joining(" "));
         }
     }
 

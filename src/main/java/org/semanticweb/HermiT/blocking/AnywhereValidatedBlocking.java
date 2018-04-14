@@ -20,6 +20,8 @@ package org.semanticweb.HermiT.blocking;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import org.semanticweb.HermiT.blocking.ValidatedSingleDirectBlockingChecker.ValidatedBlockingObject;
 import org.semanticweb.HermiT.model.AtomicRole;
@@ -575,14 +577,14 @@ class ValidatedBlockersCache {
     }
     @Override
     public String toString() {
-        String buckets="";
+        StringBuilder buckets= new StringBuilder();
         for (int i=0;i<m_buckets.length;i++) {
             CacheEntry entry=m_buckets[i];
             if (entry!=null) {
-                buckets+="Bucket "+i+": ["+entry.toString()+"] ";
+                buckets.append("Bucket ").append(i).append(": [").append(entry.toString()).append("] ");
             }
         }
-        return buckets;
+        return buckets.toString();
     }
 
     public static class CacheEntry implements Serializable {
@@ -606,11 +608,7 @@ class ValidatedBlockersCache {
         }
         @Override
         public String toString() {
-            String nodes="HashCode: "+m_hashCode+" Nodes: ";
-            for (Node n : m_nodes) {
-                nodes+=n.getNodeID()+" ";
-            }
-            return nodes;
+            return m_nodes.stream().map(Object::toString).collect(Collectors.joining(" ", "HashCode: "+m_hashCode+" Nodes: ", ""));
         }
     }
 }

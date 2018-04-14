@@ -1135,27 +1135,19 @@ public class Reasoner implements OWLReasoner {
     @Override
     public NodeSet<OWLObjectPropertyExpression> getSuperObjectProperties(OWLObjectPropertyExpression propertyExpression,boolean direct) {
         HierarchyNode<Role> node=getHierarchyNode(propertyExpression);
-        Set<HierarchyNode<Role>> result=new HashSet<>();
         if (direct)
-            for (HierarchyNode<Role> n : node.getParentNodes())
-                result.add(n);
-        else {
-            result=node.getAncestorNodes();
-            result.remove(node);
-        }
+            return objectPropertyHierarchyNodesToNodeSet(node.getParentNodes());
+        Set<HierarchyNode<Role>> result=node.getAncestorNodes();
+        result.remove(node);
         return objectPropertyHierarchyNodesToNodeSet(result);
     }
     @Override
     public NodeSet<OWLObjectPropertyExpression> getSubObjectProperties(OWLObjectPropertyExpression propertyExpression,boolean direct) {
         HierarchyNode<Role> node=getHierarchyNode(propertyExpression);
-        Set<HierarchyNode<Role>> result=new HashSet<>();
         if (direct)
-            for (HierarchyNode<Role> n : node.getChildNodes())
-                result.add(n);
-        else {
-            result=node.getDescendantNodes();
-            result.remove(node);
-        }
+            return objectPropertyHierarchyNodesToNodeSet(node.getChildNodes());
+        Set<HierarchyNode<Role>> result=node.getDescendantNodes();
+        result.remove(node);
         return objectPropertyHierarchyNodesToNodeSet(result);
     }
     @Override
