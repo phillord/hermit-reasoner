@@ -18,6 +18,7 @@
 package org.semanticweb.HermiT.datatypes.binarydata;
 
 import java.io.ByteArrayOutputStream;
+import java.util.Arrays;
 import java.util.Base64;
 
 /**
@@ -25,17 +26,18 @@ import java.util.Base64;
  */
 public class BinaryData {
     protected static final char[] INT_TO_HEX=new char[] { '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F' };
-    protected static final int[] HEX_TO_INT=new int[127];
-    static {
-        for (int i=0;i<HEX_TO_INT.length;i++)
-            HEX_TO_INT[i]=-1;
-        for (int i='0';i<='9';i++)
-            HEX_TO_INT[i]=i-'0';
-        for (int i='A';i<='F';i++)
-            HEX_TO_INT[i]=i-'A'+10;
-        for (int i='a';i<='f';i++)
-            HEX_TO_INT[i]=i-'a'+10;
-    }
+    protected static final int[] HEX_TO_INT=new int[] {
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+            // '0'-'9'
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 
+            -1, -1, -1, -1, -1, -1, -1,
+            // 'A'-'F'
+            10, 11, 12, 13, 14, 15, 
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            //'a'-'f'
+            10, 11, 12, 13, 14, 15, 
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+    };
     
     protected final BinaryDataType m_binaryDataType;
     protected final byte[] m_data;

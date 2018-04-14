@@ -18,6 +18,7 @@
 package org.semanticweb.HermiT.datatypes.binarydata;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -39,17 +40,8 @@ public class BinaryDataDatatypeHandler implements DatatypeHandler {
     protected static final ValueSpaceSubset HEX_BINARY_ALL=new BinaryDataValueSpaceSubset(new BinaryDataLengthInterval(BinaryDataType.HEX_BINARY,0,Integer.MAX_VALUE));
     protected static final ValueSpaceSubset BASE_64_BINARY_ALL=new BinaryDataValueSpaceSubset(new BinaryDataLengthInterval(BinaryDataType.BASE_64_BINARY,0,Integer.MAX_VALUE));
     protected static final ValueSpaceSubset EMPTY=new BinaryDataValueSpaceSubset();
-    protected static final Set<String> s_managedDatatypeURIs=new HashSet<>();
-    static {
-        s_managedDatatypeURIs.add(XSD_HEX_BINARY);
-        s_managedDatatypeURIs.add(XSD_BASE_64_BINARY);
-    }
-    protected static final Set<String> s_supportedFacetURIs=new HashSet<>();
-    static {
-        s_supportedFacetURIs.add(XSD_NS+"minLength");
-        s_supportedFacetURIs.add(XSD_NS+"maxLength");
-        s_supportedFacetURIs.add(XSD_NS+"length");
-    }
+    protected static final Set<String> s_managedDatatypeURIs=new HashSet<>(Arrays.asList(XSD_HEX_BINARY, XSD_BASE_64_BINARY));
+    protected static final Set<String> s_supportedFacetURIs=new HashSet<>(Arrays.asList(XSD_NS+"minLength", XSD_NS+"maxLength", XSD_NS+"length"));
 
     @Override
     public Set<String> getManagedDatatypeURIs() {
@@ -183,7 +175,7 @@ public class BinaryDataDatatypeHandler implements DatatypeHandler {
                 maxLength=Math.min(maxLength,facetDataValue);
             }
             else
-                throw new IllegalStateException("Internal error: facet '"+facetURI+"' is not supported by "+Prefixes.STANDARD_PREFIXES.abbreviateIRI(datatypeURI)+".");
+                throw new IllegalStateException("Internal error: facet '"+facetURI+"' is not supported by "+Prefixes.expandAbbreviation(datatypeURI)+".");
         }
         BinaryDataType binaryDataType=(XSD_HEX_BINARY.equals(datatypeURI) ? BinaryDataType.HEX_BINARY : BinaryDataType.BASE_64_BINARY);
         if (BinaryDataLengthInterval.isIntervalEmpty(minLength,maxLength))

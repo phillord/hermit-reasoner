@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.datatypes.DatatypeHandler;
@@ -38,25 +39,23 @@ import dk.brics.automaton.Automaton;
 public class RDFPlainLiteralDatatypeHandler implements DatatypeHandler {
     protected static final String XSD_NS=Prefixes.s_semanticWebPrefixes.get("xsd:");
     protected static final String RDF_NS=Prefixes.s_semanticWebPrefixes.get("rdf:");
-    protected static final Map<String,ValueSpaceSubset> s_subsetsByDatatype=new HashMap<>();
-    static {
-        s_subsetsByDatatype.put(RDF_NS+"PlainLiteral",new RDFPlainLiteralLengthValueSpaceSubset(new RDFPlainLiteralLengthInterval(RDFPlainLiteralLengthInterval.LanguageTagMode.ABSENT,0,Integer.MAX_VALUE),new RDFPlainLiteralLengthInterval(RDFPlainLiteralLengthInterval.LanguageTagMode.PRESENT,0,Integer.MAX_VALUE)));
-        s_subsetsByDatatype.put(RDF_NS+"langString",new RDFPlainLiteralLengthValueSpaceSubset(new RDFPlainLiteralLengthInterval(RDFPlainLiteralLengthInterval.LanguageTagMode.ABSENT,0,Integer.MAX_VALUE),new RDFPlainLiteralLengthInterval(RDFPlainLiteralLengthInterval.LanguageTagMode.PRESENT,0,Integer.MAX_VALUE)));
-        s_subsetsByDatatype.put(XSD_NS+"string",new RDFPlainLiteralLengthValueSpaceSubset(new RDFPlainLiteralLengthInterval(RDFPlainLiteralLengthInterval.LanguageTagMode.ABSENT,0,Integer.MAX_VALUE)));
-        registerPatternDatatype(XSD_NS+"normalizedString");
-        registerPatternDatatype(XSD_NS+"token");
-        registerPatternDatatype(XSD_NS+"Name");
-        registerPatternDatatype(XSD_NS+"NCName");
-        registerPatternDatatype(XSD_NS+"NMTOKEN");
-        registerPatternDatatype(XSD_NS+"language");
-    }
-    protected static void registerPatternDatatype(String datatypeURI) {
-        Automaton automaton=RDFPlainLiteralPatternValueSpaceSubset.getDatatypeAutomaton(datatypeURI);
-        s_subsetsByDatatype.put(datatypeURI,new RDFPlainLiteralPatternValueSpaceSubset(automaton));
+    protected static final Map<String,ValueSpaceSubset> s_subsetsByDatatype=subsets();
+    static final Map<String,ValueSpaceSubset> subsets() {
+        Map<String,ValueSpaceSubset> subsetsByDatatype = new ConcurrentHashMap<>();
+        subsetsByDatatype.put(RDF_NS+"PlainLiteral",      new RDFPlainLiteralLengthValueSpaceSubset(new RDFPlainLiteralLengthInterval(RDFPlainLiteralLengthInterval.LanguageTagMode.ABSENT,0,Integer.MAX_VALUE),new RDFPlainLiteralLengthInterval(RDFPlainLiteralLengthInterval.LanguageTagMode.PRESENT,0,Integer.MAX_VALUE)));
+        subsetsByDatatype.put(RDF_NS+"langString",        new RDFPlainLiteralLengthValueSpaceSubset(new RDFPlainLiteralLengthInterval(RDFPlainLiteralLengthInterval.LanguageTagMode.ABSENT,0,Integer.MAX_VALUE),new RDFPlainLiteralLengthInterval(RDFPlainLiteralLengthInterval.LanguageTagMode.PRESENT,0,Integer.MAX_VALUE)));
+        subsetsByDatatype.put(XSD_NS+"string",            new RDFPlainLiteralLengthValueSpaceSubset(new RDFPlainLiteralLengthInterval(RDFPlainLiteralLengthInterval.LanguageTagMode.ABSENT,0,Integer.MAX_VALUE)));
+        subsetsByDatatype.put(XSD_NS+"normalizedString",  new RDFPlainLiteralPatternValueSpaceSubset(RDFPlainLiteralPatternValueSpaceSubset.getDatatypeAutomaton(XSD_NS+"normalizedString")));
+        subsetsByDatatype.put(XSD_NS+"token",             new RDFPlainLiteralPatternValueSpaceSubset(RDFPlainLiteralPatternValueSpaceSubset.getDatatypeAutomaton(XSD_NS+"token")));
+        subsetsByDatatype.put(XSD_NS+"Name",              new RDFPlainLiteralPatternValueSpaceSubset(RDFPlainLiteralPatternValueSpaceSubset.getDatatypeAutomaton(XSD_NS+"Name")));
+        subsetsByDatatype.put(XSD_NS+"NCName",            new RDFPlainLiteralPatternValueSpaceSubset(RDFPlainLiteralPatternValueSpaceSubset.getDatatypeAutomaton(XSD_NS+"NCName")));
+        subsetsByDatatype.put(XSD_NS+"NMTOKEN",           new RDFPlainLiteralPatternValueSpaceSubset(RDFPlainLiteralPatternValueSpaceSubset.getDatatypeAutomaton(XSD_NS+"NMTOKEN")));
+        subsetsByDatatype.put(XSD_NS+"language",          new RDFPlainLiteralPatternValueSpaceSubset(RDFPlainLiteralPatternValueSpaceSubset.getDatatypeAutomaton(XSD_NS+"language")));
+        return subsetsByDatatype;
     }
     protected static final ValueSpaceSubset EMPTY_SUBSET=new RDFPlainLiteralLengthValueSpaceSubset(Collections.emptyList());
-    protected static final Map<String,Set<String>> s_datatypeSupersets=new HashMap<>();
-    static {
+    protected static final Map<String,Set<String>> s_datatypeSupersets = datatypeSupersets();
+    static final Map<String,Set<String>> datatypeSupersets() {
         String[][] initializer=new String[][] {
             { RDF_NS+"PlainLiteral",     RDF_NS+"PlainLiteral" },
             { RDF_NS+"langString",       RDF_NS+"PlainLiteral" },
@@ -68,13 +67,15 @@ public class RDFPlainLiteralDatatypeHandler implements DatatypeHandler {
             { XSD_NS+"NMTOKEN",          RDF_NS+"PlainLiteral", XSD_NS+"string", XSD_NS+"normalizedString", XSD_NS+"token", XSD_NS+"NMTOKEN"},
             { XSD_NS+"language",         RDF_NS+"PlainLiteral", XSD_NS+"string", XSD_NS+"normalizedString", XSD_NS+"token", XSD_NS+"language" },
         };
+        Map<String,Set<String>> datatypeSupersets=new ConcurrentHashMap<>();
         for (int datatype1Index=0;datatype1Index<initializer.length;datatype1Index++) {
             String datatype1URI=initializer[datatype1Index][0];
             Set<String> set=new HashSet<>();
             for (int datatype2Index=1;datatype2Index<initializer[datatype1Index].length;datatype2Index++)
                 set.add(initializer[datatype1Index][datatype2Index]);
-            s_datatypeSupersets.put(datatype1URI,set);
+            datatypeSupersets.put(datatype1URI,set);
         }
+        return datatypeSupersets;
     }
 
     @Override

@@ -276,7 +276,7 @@ public class DLClause implements Serializable {
     }
     @Override
     public String toString() {
-        return toString(Prefixes.STANDARD_PREFIXES);
+        return toString(Prefixes.ImmutablePrefixes.getStandardPrefixes());
     }
 
     protected static final InterningManager<DLClause> s_interningManager = new InterningManager<DLClause>() {

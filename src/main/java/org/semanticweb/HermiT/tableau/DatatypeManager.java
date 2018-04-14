@@ -665,7 +665,7 @@ public final class DatatypeManager implements Serializable {
         }
         @Override
         public String toString() {
-            return toString(Prefixes.STANDARD_PREFIXES);
+            return toString(Prefixes.ImmutablePrefixes.getStandardPrefixes());
         }
         /**
          * @param prefixes prefixes
@@ -809,7 +809,7 @@ public final class DatatypeManager implements Serializable {
         }
         @Override
         public String toString() {
-            return toString(Prefixes.STANDARD_PREFIXES);
+            return toString(Prefixes.ImmutablePrefixes.getStandardPrefixes());
         }
         /**
          * @param prefixes prefixes

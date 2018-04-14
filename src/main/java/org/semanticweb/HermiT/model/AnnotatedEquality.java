@@ -63,7 +63,7 @@ public class AnnotatedEquality implements DLPredicate,Serializable {
     }
     @Override
     public String toString() {
-        return toString(Prefixes.STANDARD_PREFIXES);
+        return toString(Prefixes.ImmutablePrefixes.getStandardPrefixes());
     }
     @Override
     public String toString(Prefixes prefixes) {

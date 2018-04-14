@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.semanticweb.HermiT.datatypes.ValueSpaceSubset;
 
@@ -36,39 +37,29 @@ import dk.brics.automaton.RegExp;
  */
 public class RDFPlainLiteralPatternValueSpaceSubset implements ValueSpaceSubset {
     private static final char SEPARATOR='\u0001';
-    protected static final Automaton s_separator;
-    protected static final Automaton s_languagePatternEnd;
-    protected static final Automaton s_languageTag;
-    protected static final Automaton s_languageTagOrEmpty;
-    protected static final Automaton s_emptyLangTag;
-    protected static final Automaton s_nonemptyLangTag;
-    protected static final Automaton s_anyLangTag;
-    protected static final Automaton s_xsdString;
-    protected static final Map<String,Automaton> s_anyDatatype;
-    protected static final Automaton s_anyString;
-    protected static final Automaton s_anyChar;
-    protected static final Automaton s_anyStringWithNonemptyLangTag;
-    static {
-        s_separator=BasicAutomata.makeChar(SEPARATOR);
-        s_languagePatternEnd=BasicOperations.optional(BasicAutomata.makeChar('-').concatenate(BasicAutomata.makeAnyString()));
-        s_languageTag=languageTagAutomaton();
-        s_languageTagOrEmpty=s_languageTag.union(BasicAutomata.makeEmptyString());
-        s_emptyLangTag=s_separator;
-        s_nonemptyLangTag=s_separator.concatenate(s_languageTag);
-        s_anyLangTag=s_separator.concatenate(s_languageTagOrEmpty);
-        s_xsdString=Datatypes.get("string");
-        s_anyDatatype=new HashMap<>();
-        s_anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"string",s_xsdString.concatenate(s_emptyLangTag));
-        s_anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"normalizedString",normalizedStringAutomaton().concatenate(s_emptyLangTag));
-        s_anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"token",tokenAutomaton().concatenate(s_emptyLangTag));
-        s_anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"Name",Datatypes.get("Name2").concatenate(s_emptyLangTag));
-        s_anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"NCName",Datatypes.get("NCName").concatenate(s_emptyLangTag));
-        s_anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"NMTOKEN",Datatypes.get("Nmtoken2").concatenate(s_emptyLangTag));
-        s_anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"language",Datatypes.get("language").concatenate(s_emptyLangTag));
-        s_anyDatatype.put(RDFPlainLiteralDatatypeHandler.RDF_NS+"PlainLiteral",s_xsdString.concatenate(s_anyLangTag));
-        s_anyChar=xmlChar();
-        s_anyString=s_anyChar.repeat();
-        s_anyStringWithNonemptyLangTag=s_anyString.concatenate(s_nonemptyLangTag);
+    protected static final Automaton s_separator=BasicAutomata.makeChar(SEPARATOR);
+    protected static final Automaton s_languagePatternEnd=BasicOperations.optional(BasicAutomata.makeChar('-').concatenate(BasicAutomata.makeAnyString()));
+    protected static final Automaton s_languageTag=languageTagAutomaton();
+    protected static final Automaton s_languageTagOrEmpty=s_languageTag.union(BasicAutomata.makeEmptyString());
+    protected static final Automaton s_emptyLangTag=s_separator;
+    protected static final Automaton s_nonemptyLangTag=s_separator.concatenate(s_languageTag);
+    protected static final Automaton s_anyLangTag=s_separator.concatenate(s_languageTagOrEmpty);
+    protected static final Automaton s_xsdString=Datatypes.get("string");
+    protected static final Map<String,Automaton> s_anyDatatype=anyDatatype();
+    protected static final Automaton s_anyChar=xmlChar();
+    protected static final Automaton s_anyString=s_anyChar.repeat();
+    protected static final Automaton s_anyStringWithNonemptyLangTag=s_anyString.concatenate(s_nonemptyLangTag);
+    static Map<String,Automaton> anyDatatype() {
+        Map<String,Automaton> anyDatatype=new ConcurrentHashMap<>();
+        anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"string",s_xsdString.concatenate(s_emptyLangTag));
+        anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"normalizedString",normalizedStringAutomaton().concatenate(s_emptyLangTag));
+        anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"token",tokenAutomaton().concatenate(s_emptyLangTag));
+        anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"Name",Datatypes.get("Name2").concatenate(s_emptyLangTag));
+        anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"NCName",Datatypes.get("NCName").concatenate(s_emptyLangTag));
+        anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"NMTOKEN",Datatypes.get("Nmtoken2").concatenate(s_emptyLangTag));
+        anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"language",Datatypes.get("language").concatenate(s_emptyLangTag));
+        anyDatatype.put(RDFPlainLiteralDatatypeHandler.RDF_NS+"PlainLiteral",s_xsdString.concatenate(s_anyLangTag));
+        return anyDatatype;
     }
     protected static Automaton languageTagAutomaton() {
         return new RegExp(

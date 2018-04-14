@@ -1257,7 +1257,8 @@ public class ReasonerTest extends AbstractReasonerTest {
                 + "Declaration(DataProperty(:p6))" + "Declaration(Class(:c2))" + "Declaration(Class(:c3))"
                 + "Declaration(Class(:c4))" + "Declaration(Class(:c5))" + "Declaration(Class(:c6))"
                 + "DataPropertyRange(:p1 rdf:PlainLiteral)" + "DataPropertyDomain(:p2 :c2)"
-                + "ObjectPropertyRange(:p3 :c3)" + "ObjectPropertyDomain(:p4 :c4)" + "AnnotationPropertyDomain(:p5 :c5)";
+                + "ObjectPropertyRange(:p3 :c3)" + "ObjectPropertyDomain(:p4 :c4)" + "AnnotationPropertyDomain(:p5 :c5)"
+                + "AnnotationPropertyRange(:p6 rdf:PlainLiteral)";
         loadReasonerWithAxioms(axioms);
         assertABoxSatisfiable(true);
     }

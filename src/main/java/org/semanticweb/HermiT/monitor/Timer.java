@@ -50,7 +50,7 @@ public class Timer extends TableauMonitorAdapter {
     }
     @Override
     public void isSatisfiableStarted(ReasoningTaskDescription reasoningTaskDescription) {
-        m_output.print(reasoningTaskDescription.getTaskDescription(Prefixes.STANDARD_PREFIXES)+" ...");
+        m_output.print(reasoningTaskDescription.getTaskDescription(Prefixes.ImmutablePrefixes.getStandardPrefixes())+" ...");
         m_output.flush();
         start();
     }

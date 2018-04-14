@@ -141,7 +141,7 @@ public final class GroundDisjunctionHeader {
     }
     @Override
     public String toString() {
-        return toString(Prefixes.STANDARD_PREFIXES);
+        return toString(Prefixes.ImmutablePrefixes.getStandardPrefixes());
     }
 
     protected static class DisjunctIndexWithBacktrackings {

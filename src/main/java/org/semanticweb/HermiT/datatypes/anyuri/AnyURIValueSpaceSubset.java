@@ -33,16 +33,10 @@ import dk.brics.automaton.RegExp;
  * AnyURI value subset.
  */
 public class AnyURIValueSpaceSubset implements ValueSpaceSubset {
-    protected static final Automaton s_anyChar;
-    protected static final Automaton s_anyString;
-    protected static final Automaton s_anyURI;
-    protected static final Automaton s_empty;
-    static {
-        s_anyChar=BasicAutomata.makeAnyChar();
-        s_anyString=BasicAutomata.makeAnyString();
-        s_anyURI=Datatypes.get("URI");
-        s_empty=BasicAutomata.makeEmpty();
-    }
+    protected static final Automaton s_anyChar = BasicAutomata.makeAnyChar();
+    protected static final Automaton s_anyString = BasicAutomata.makeAnyString();
+    protected static final Automaton s_anyURI = Datatypes.get("URI");
+    protected static final Automaton s_empty = BasicAutomata.makeEmpty();
 
     protected final Automaton m_automaton;
     

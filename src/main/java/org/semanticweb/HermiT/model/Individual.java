@@ -44,7 +44,7 @@ public class Individual extends Term {
     }
     @Override
     public String toString() {
-        return toString(Prefixes.STANDARD_PREFIXES);
+        return toString(Prefixes.ImmutablePrefixes.getStandardPrefixes());
     }
     protected Object readResolve() {
         return s_interningManager.intern(this);

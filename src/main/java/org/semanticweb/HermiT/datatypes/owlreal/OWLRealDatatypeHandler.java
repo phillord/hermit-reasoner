@@ -19,11 +19,13 @@ package org.semanticweb.HermiT.datatypes.owlreal;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.datatypes.DatatypeHandler;
@@ -45,8 +47,8 @@ public class OWLRealDatatypeHandler implements DatatypeHandler {
     protected static final String OWL_NS=Prefixes.s_semanticWebPrefixes.get("owl:");
     protected static final String XSD_NS=Prefixes.s_semanticWebPrefixes.get("xsd:");
 
-    protected static final Map<String,NumberInterval> s_intervalsByDatatype=new HashMap<>();
-    protected static final Map<String,ValueSpaceSubset> s_subsetsByDatatype=new HashMap<>();
+    protected static final Map<String,NumberInterval> s_intervalsByDatatype;
+    protected static final Map<String,ValueSpaceSubset> s_subsetsByDatatype;
     static {
         Object[][] initializer=new Object[][] {
             { OWL_NS+"real",              NumberRange.REAL,    MinusInfinity.INSTANCE,BoundType.EXCLUSIVE,PlusInfinity.INSTANCE,                  BoundType.EXCLUSIVE },
@@ -66,27 +68,27 @@ public class OWLRealDatatypeHandler implements DatatypeHandler {
             { XSD_NS+"unsignedShort",     NumberRange.INTEGER, Integer.valueOf(0),    BoundType.INCLUSIVE,Integer.valueOf(65535),                                  BoundType.INCLUSIVE },
             { XSD_NS+"unsignedByte",      NumberRange.INTEGER, Integer.valueOf(0),    BoundType.INCLUSIVE,Integer.valueOf(255),                                    BoundType.INCLUSIVE },
         };
+        Map<String,NumberInterval> intervalsByDatatype=new ConcurrentHashMap<>();
+        Map<String,ValueSpaceSubset> subsetsByDatatype=new ConcurrentHashMap<>();
         for (Object[] row : initializer) {
             String datatypeURI=(String)row[0];
             NumberInterval interval=new NumberInterval((NumberRange)row[1],NumberRange.NOTHING,(Number)row[2],(BoundType)row[3],(Number)row[4],(BoundType)row[5]);
-            s_intervalsByDatatype.put(datatypeURI,interval);
-            s_subsetsByDatatype.put(datatypeURI,new OWLRealValueSpaceSubset(interval));
+            intervalsByDatatype.put(datatypeURI,interval);
+            subsetsByDatatype.put(datatypeURI,new OWLRealValueSpaceSubset(interval));
         }
+        s_intervalsByDatatype=intervalsByDatatype;
+        s_subsetsByDatatype=subsetsByDatatype;
     }
     protected static final ValueSpaceSubset EMPTY_SUBSET=new OWLRealValueSpaceSubset();
-    protected static final Set<String> s_supportedFacetURIs=new HashSet<>();
+    protected static final Set<String> s_supportedFacetURIs=new HashSet<>(Arrays.asList(XSD_NS+"minInclusive",XSD_NS+"minExclusive",XSD_NS+"maxInclusive",XSD_NS+"maxExclusive"));
+    protected static final Map<String,Set<String>> s_datatypeSupersets;
+    protected static final Map<String,Set<String>> s_datatypeDisjoints;
     static {
-        s_supportedFacetURIs.add(XSD_NS+"minInclusive");
-        s_supportedFacetURIs.add(XSD_NS+"minExclusive");
-        s_supportedFacetURIs.add(XSD_NS+"maxInclusive");
-        s_supportedFacetURIs.add(XSD_NS+"maxExclusive");
-    }
-    protected static final Map<String,Set<String>> s_datatypeSupersets=new HashMap<>();
-    protected static final Map<String,Set<String>> s_datatypeDisjoints=new HashMap<>();
-    static {
+        Map<String,Set<String>> datatypeSupersets=new HashMap<>();
+        Map<String,Set<String>> datatypeDisjoints=new HashMap<>();
         for (String datatypeURI : s_intervalsByDatatype.keySet()) {
-            s_datatypeSupersets.put(datatypeURI,new HashSet<String>());
-            s_datatypeDisjoints.put(datatypeURI,new HashSet<String>());
+            datatypeSupersets.put(datatypeURI,new HashSet<String>());
+            datatypeDisjoints.put(datatypeURI,new HashSet<String>());
         }
         for (Map.Entry<String,NumberInterval> entry1 : s_intervalsByDatatype.entrySet()) {
             String datatypeURI1=entry1.getKey();
@@ -96,14 +98,16 @@ public class OWLRealDatatypeHandler implements DatatypeHandler {
                 NumberInterval interval2=entry2.getValue();
                 NumberInterval intersection=interval1.intersectWith(interval2);
                 if (intersection==null)
-                    s_datatypeDisjoints.get(datatypeURI1).add(datatypeURI2);
+                    datatypeDisjoints.get(datatypeURI1).add(datatypeURI2);
                 else if (intersection==interval1) {
                     // The above test depends on the fact that NumberInterval.intersectWith() will not
                     // create a new interval object if interval1 is contained in interval2.
-                    s_datatypeSupersets.get(datatypeURI1).add(datatypeURI2);
+                    datatypeSupersets.get(datatypeURI1).add(datatypeURI2);
                 }
             }
         }
+        s_datatypeDisjoints=datatypeDisjoints;
+        s_datatypeSupersets=datatypeSupersets;
     }
 
     @Override

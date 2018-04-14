@@ -18,6 +18,7 @@
 package org.semanticweb.HermiT.datatypes.doublenum;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -36,13 +37,7 @@ public class DoubleDatatypeHandler implements DatatypeHandler {
     protected static final ValueSpaceSubset DOUBLE_ENTIRE=new EntireDoubleSubset();
     protected static final ValueSpaceSubset EMPTY_SUBSET=new EmptyDoubleSubset();
     protected static final Set<String> s_managedDatatypeURIs=Collections.singleton(XSD_DOUBLE);
-    protected static final Set<String> s_supportedFacetURIs=new HashSet<>();
-    static {
-        s_supportedFacetURIs.add(XSD_NS+"minInclusive");
-        s_supportedFacetURIs.add(XSD_NS+"minExclusive");
-        s_supportedFacetURIs.add(XSD_NS+"maxInclusive");
-        s_supportedFacetURIs.add(XSD_NS+"maxExclusive");
-    }
+    protected static final Set<String> s_supportedFacetURIs=new HashSet<>(Arrays.asList(XSD_NS+"minInclusive",XSD_NS+"minExclusive",XSD_NS+"maxInclusive",XSD_NS+"maxExclusive"));
 
     @Override
     public Set<String> getManagedDatatypeURIs() {

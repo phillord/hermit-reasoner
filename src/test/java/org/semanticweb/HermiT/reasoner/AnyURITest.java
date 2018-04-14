@@ -174,7 +174,7 @@ public class AnyURITest extends AbstractReasonerTest {
         String[] facetURIs = new String[arguments.length / 2];
         Constant[] facetValues = new Constant[arguments.length / 2];
         for (int index = 0; index < arguments.length; index += 2) {
-            facetURIs[index / 2] = Prefixes.STANDARD_PREFIXES.expandAbbreviatedIRI((String) arguments[index]);
+            facetURIs[index / 2] = Prefixes.expandAbbreviation((String) arguments[index]);
             facetValues[index / 2] = (Constant) arguments[index + 1];
         }
         return DatatypeRestriction.create(XSD_ANY_URI, facetURIs, facetValues);

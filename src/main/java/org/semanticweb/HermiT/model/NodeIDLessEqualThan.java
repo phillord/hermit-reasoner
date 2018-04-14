@@ -41,7 +41,7 @@ public class NodeIDLessEqualThan implements DLPredicate,Serializable {
     }
     @Override
     public String toString() {
-        return toString(Prefixes.STANDARD_PREFIXES);
+        return toString(Prefixes.ImmutablePrefixes.getStandardPrefixes());
     }
     protected Object readResolve() {
         return INSTANCE;

@@ -44,6 +44,6 @@ public abstract class Role implements Serializable {
     public abstract String toString(Prefixes prefixes);
     @Override
     public String toString() {
-        return toString(Prefixes.STANDARD_PREFIXES);
+        return toString(Prefixes.ImmutablePrefixes.getStandardPrefixes());
     }
 }
