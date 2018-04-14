@@ -8,7 +8,7 @@ import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 public class ReasonerFactory implements OWLReasonerFactory {
     @Override
     public String getReasonerName() {
-        return getClass().getPackage().getImplementationTitle();
+        return "HermiT";
     }
     @Override
     public OWLReasoner createReasoner(OWLOntology ontology) {

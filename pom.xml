@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2008, 2009, 2010, 2011, 2015 by the Department of Computer 
+	Science in the University of Oxford; see lgpl-3.0.txt and gpl.txt for details -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
@@ -9,29 +11,44 @@
 		<version>7</version>
 	</parent>
 
+	<!-- USAGE: `mvn compile` to compile main sources. `mvn test` to compile 
+		all tests and run AllQuickTests. `mvn -PallTests test` to compile all tests 
+		and run AllTests. `mvn package` to assemble the Protege plugin, the standalone 
+		CLI with all dependencies, and the source code package. `mvn install` to 
+		run all the preceeding tasks, and to generate a standalone HermiT library 
+		without dependencies. This will also generate the JUnit reports and attempt 
+		to SCP the build results to linux.cs.ox.ac.uk. -->
+
 	<groupId>net.sourceforge.owlapi</groupId>
 	<artifactId>org.semanticweb.hermit</artifactId>
-	<version>1.4.1.513</version>
+	<version>1.4.1.514-SNAPSHOT</version>
 	<packaging>bundle</packaging>
 
 	<name>HermiT</name>
 	<url>http://hermit-reasoner.com/</url>
 	<description>HermiT is reasoner for ontologies written using the Web Ontology Language (OWL). Given an OWL file, HermiT can determine whether or not the ontology is consistent, identify subsumption relationships between classes, and much more.
-    This is the maven build of HermiT and is designed for people who wish to use HermiT from within the OWL API. It is now versioned in the main HermiT version repository, although not officially supported by the HermiT developers.
-    The version number of this package is a composite of the HermiT version and a value representing the OWLAPI release it is compatible with. Note that the group id for the upstream HermiT is com.hermit-reasoner, while this fork is released under net.sourceforge.owlapi.
-    This fork exists to allow HermiT users to use newer OWLAPI versions than the ones supported by the original HermiT codebase.
-    This package includes the Jautomata library (http://jautomata.sourceforge.net/), and builds with it directly. This library appears to be no longer under active development, and so a &quot;fork&quot; seems appropriate. No development is intended or anticipated on this code base.</description>
+	This is the maven build of HermiT and is designed for people who wish to use HermiT from within the OWL API. It is now versioned in the main HermiT version repository, although not officially supported by the HermiT developers.
+	The version number of this package is a composite of the HermiT version and a value representing the OWLAPI release it is compatible with. Note that the group id for the upstream HermiT is com.hermit-reasoner, while this fork is released under net.sourceforge.owlapi.
+	This fork exists to allow HermiT users to use newer OWLAPI versions than the ones supported by the original HermiT codebase.
+	This package includes the Jautomata library (http://jautomata.sourceforge.net/), and builds with it directly. This library appears to be no longer under active development, and so a &quot;fork&quot; seems appropriate. No development is intended or anticipated on this code base.</description>
 
 	<licenses>
 		<license>
 			<name>LGPL</name>
-		</license>
-		<license>
-			<name>BSD</name>
+			<url>http://www.gnu.org/licenses/lgpl-3.0.txt</url>
 		</license>
 	</licenses>
 
 	<properties>
+		<!-- General info. -->
+		<homepage>http://hermit-reasoner.com/</homepage>
+		<updatefile>PUT ON GITHUB/update.properties</updatefile>
+		<mainClass>org.semanticweb.HermiT.cli.CommandLine</mainClass>
+		<!-- structure of output files -->
+		<reportsDirectory>${project.build.directory}/junit-reports</reportsDirectory>
+		<!-- To generate a debug version, use `mvn -DdebugHermiT=true` when running 
+			Maven. -->
+		<debugHermiT>false</debugHermiT>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
@@ -121,7 +138,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.4</version>
+				<version>2.6</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -139,7 +156,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.9</version>
+				<version>3.0.0</version>
 				<configuration>
 					<show>public</show>
 				</configuration>
@@ -155,14 +172,24 @@
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
-				<version>2.4.0</version>
+				<version>3.2.0</version>
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<Bundle-SymbolicName>${project.artifactId};singleton:=true</Bundle-SymbolicName>
-						<Bundle-Vendor>The HermiT authors, wrapped by the OWLAPI Team</Bundle-Vendor>
+						<Implementation-Title>${project.name}</Implementation-Title>
+						<Implementation-Vendor>Oxford University, wrapped by the OWLAPI
+							Team</Implementation-Vendor>
 						<Implementation-Version>${project.version}.${maven.build.timestamp}</Implementation-Version>
+						<Build-Date>${timestamp}</Build-Date>
+						<Bundle-Name>HermiT Reasoner</Bundle-Name>
+						<Bundle-Category>protege</Bundle-Category>
+						<Bundle-Description>An OWL 2 reasoner</Bundle-Description>
+						<Bundle-DocURL>${homepage}</Bundle-DocURL>
+						<Bundle-SymbolicName>${project.artifactId};singleton:=true</Bundle-SymbolicName>
+						<Bundle-Vendor>Boris Motik, Birte Glimm, Giorgos Stoilos, and Ian
+							Horrocks, wrapped by the OWLAPI Team</Bundle-Vendor>
 						<Bundle-Version>${project.version}</Bundle-Version>
+						<Update-Url>${updatefile}</Update-Url>
 						<Embed-Transitive>true</Embed-Transitive>
 						<Embed-Dependency>
 							automaton,
@@ -199,7 +226,6 @@
 			</plugin>
 		</plugins>
 	</build>
-
 
 	<dependencies>
 		<dependency>
@@ -240,7 +266,7 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.11</version>
+			<version>4.12</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -270,6 +296,16 @@
 	</dependencies>
 
 	<developers>
+		<developer>
+			<id>bmotik</id>
+			<name>Boris Motik</name>
+			<email>boris.motik@cs.ox.ac.uk</email>
+		</developer>
+		<developer>
+			<id>bglimm</id>
+			<name>Birte Glimm</name>
+			<email>birte.glimm@uni-ulm.de</email>
+		</developer>
 		<developer>
 			<id>ignazio1977</id>
 			<name>Ignazio Palmisano</name>

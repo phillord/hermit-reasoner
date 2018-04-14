@@ -143,6 +143,7 @@ import org.semanticweb.owlapi.util.Version;
  * Answers queries about the logical implications of a particular knowledge base. A Reasoner is associated with a single knowledge base, which is "loaded" when the reasoner is constructed. By default a full classification of all atomic terms in the knowledge base is also performed at this time (which can take quite a while for large or complex ontologies), but this behavior can be disabled as a part of the Reasoner configuration. Internal details of the loading and reasoning algorithms can be configured in the Reasoner constructor and do not change over the lifetime of the Reasoner object---internal data structures and caches are optimized for a particular configuration. By default, HermiT will use the set of options which provide optimal performance.
  */
 public class Reasoner implements OWLReasoner {
+    private static final Version version=new Version(1, 4, 1, 513);
     private static final IRI PSEUDO_NOMINAL = IRI.create("internal:pseudo-nominal");
     protected final OntologyChangeListener m_ontologyChangeListener;
     protected final Configuration m_configuration;
@@ -294,26 +295,11 @@ public class Reasoner implements OWLReasoner {
 
     @Override
     public String getReasonerName() {
-        return getClass().getPackage().getImplementationTitle();
+        return "HermiT";
     }
     @Override
     public Version getReasonerVersion() {
-        String versionString=Reasoner.class.getPackage().getImplementationVersion();
-        String[] splitted;
-        int filled=0;
-        int[] version=new int[4];
-        if (versionString!=null) {
-            splitted=versionString.split("\\.");
-            while (filled<splitted.length) {
-                version[filled]=Integer.parseInt(splitted[filled]);
-                filled++;
-            }
-        }
-        while (filled<version.length) {
-            version[filled]=0;
-            filled++;
-        }
-        return new Version(version[0],version[1],version[2],version[3]);
+        return version;
     }
     @Override
     public OWLOntology getRootOntology() {
