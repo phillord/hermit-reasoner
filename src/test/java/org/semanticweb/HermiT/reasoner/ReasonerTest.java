@@ -613,20 +613,20 @@ public class ReasonerTest extends AbstractReasonerTest {
                 + "ClassAssertion(ObjectSomeValuesFrom(:t ObjectSomeValuesFrom(:t ObjectSomeValuesFrom(:t ObjectOneOf(:d)))) :b)");
         createReasoner();
         Map<OWLNamedIndividual, Set<OWLNamedIndividual>> result = m_reasoner.getObjectPropertyInstances(NS_OP("r"));
-        assertTrue(result.keySet().size() == 2);
+        assertTrue(result.size() == 2);
         assertTrue(result.containsKey(NS_NI("a")) && result.get(NS_NI("a")).contains(NS_NI("a"))
                 && result.get(NS_NI("a")).size() == 1);
         assertTrue(result.containsKey(NS_NI("b")) && result.get(NS_NI("b")).contains(NS_NI("c"))
                 && result.get(NS_NI("b")).size() == 1);
         result = m_reasoner.getObjectPropertyInstances(NS_OP("rp"));
         assertTrue(result.containsKey(NS_NI("b")) && result.get(NS_NI("b")).contains(NS_NI("c"))
-                && result.keySet().size() == 1 && result.get(NS_NI("b")).size() == 1);
+                && result.size() == 1 && result.get(NS_NI("b")).size() == 1);
         result = m_reasoner.getObjectPropertyInstances(NS_OP("s1"));
         assertTrue(result.isEmpty());
         result = m_reasoner.getObjectPropertyInstances(NS_OP("s2"));
         assertTrue(result.isEmpty());
         result = m_reasoner.getObjectPropertyInstances(NS_OP("s"));
-        assertTrue(result.keySet().size() == 3);
+        assertTrue(result.size() == 3);
         assertTrue(result.containsKey(NS_NI("a")) && result.get(NS_NI("a")).contains(NS_NI("a"))
                 && result.get(NS_NI("a")).size() == 1);
         assertTrue(result.containsKey(NS_NI("b")) && result.get(NS_NI("b")).contains(NS_NI("c"))
@@ -634,11 +634,11 @@ public class ReasonerTest extends AbstractReasonerTest {
         assertTrue(result.containsKey(NS_NI("c")) && result.get(NS_NI("c")).contains(NS_NI("d"))
                 && result.get(NS_NI("c")).size() == 1);
         result = m_reasoner.getObjectPropertyInstances(NS_OP("t"));
-        assertTrue(result.keySet().size() == 1);
+        assertTrue(result.size() == 1);
         assertTrue(result.containsKey(NS_NI("b")) && result.get(NS_NI("b")).contains(NS_NI("d"))
                 && result.get(NS_NI("b")).contains(NS_NI("a")) && result.get(NS_NI("b")).size() == 2);
         result = m_reasoner.getObjectPropertyInstances(NS_OP("tp"));
-        assertTrue(result.keySet().size() == 1);
+        assertTrue(result.size() == 1);
         assertTrue(result.containsKey(NS_NI("b")) && result.get(NS_NI("b")).contains(NS_NI("d"))
                 && result.get(NS_NI("b")).contains(NS_NI("a")) && result.get(NS_NI("b")).size() == 2);
     }
@@ -1088,7 +1088,7 @@ public class ReasonerTest extends AbstractReasonerTest {
         assertTrue(result.get(b).contains(c));
         assertTrue(result.get(b).contains(d));
         assertTrue(result.get(a).contains(c));
-        assertTrue(result.keySet().size() == 2);
+        assertTrue(result.size() == 2);
         assertTrue(result.get(a).size() == 2);
         assertTrue(result.get(b).size() == 2);
     }

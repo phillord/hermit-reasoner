@@ -234,16 +234,15 @@ public class Reasoner implements OWLReasoner {
         OWLDocumentFormat format=m_rootOntology.getOWLOntologyManager().getOntologyFormat(m_rootOntology);
         if (format instanceof PrefixDocumentFormat) {
             PrefixDocumentFormat prefixFormat=(PrefixDocumentFormat)format;
-            for (String prefixName : prefixFormat.getPrefixName2PrefixMap().keySet()) {
-                String prefix=prefixFormat.getPrefixName2PrefixMap().get(prefixName);
-                if (m_prefixes.getPrefixName(prefix)==null)
-                    try {
-                        m_prefixes.declarePrefix(prefixName,prefix);
-                    }
-                    catch (@SuppressWarnings("unused") IllegalArgumentException e) {
-                        // ignore
-                    }
-            }
+            prefixFormat.getPrefixName2PrefixMap().forEach((prefixName,prefix)->{
+            if (m_prefixes.getPrefixName(prefix)==null)
+                try {
+                    m_prefixes.declarePrefix(prefixName,prefix);
+                }
+                catch (@SuppressWarnings("unused") IllegalArgumentException e) {
+                    // ignore
+                }
+            });
         }
     }
     protected void addIRI(String uri,Set<String> prefixIRIs) {
@@ -930,7 +929,7 @@ public class Reasoner implements OWLReasoner {
         checkPreConditions();
         if (!m_isConsistent.booleanValue())
             return;
-        if (m_atomicConceptHierarchy==null || m_directDisjointClasses.keySet().size()<m_atomicConceptHierarchy.getAllNodesSet().size()-2) {
+        if (m_atomicConceptHierarchy==null || m_directDisjointClasses.size()<m_atomicConceptHierarchy.getAllNodesSet().size()-2) {
             classifyClasses();
             Set<HierarchyNode<AtomicConcept>> nodes=new HashSet<>(m_atomicConceptHierarchy.getAllNodes());
             nodes.remove(m_atomicConceptHierarchy.getTopNode());
@@ -1873,12 +1872,12 @@ public class Reasoner implements OWLReasoner {
         AtomicRole role=H(property);
         Map<Individual,Set<Individual>> relations=m_instanceManager.getObjectPropertyInstances(role);
         OWLDataFactory factory=getDataFactory();
-        for (Individual individual : relations.keySet()) {
+        relations.forEach((individual, set)->{
             Set<OWLNamedIndividual> successors=new HashSet<>();
             result.put(factory.getOWLNamedIndividual(IRI.create(individual.getIRI())),successors);
-            for (Individual successorIndividual : relations.get(individual))
+            for (Individual successorIndividual : set)
                 successors.add(factory.getOWLNamedIndividual(IRI.create(successorIndividual.getIRI())));
-        }
+        });
         return result;
     }
     /**

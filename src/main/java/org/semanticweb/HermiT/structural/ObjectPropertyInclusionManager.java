@@ -214,25 +214,23 @@ public class ObjectPropertyInclusionManager {
 
         connectAllAutomata(automataByProperty,propertyDependencyGraph,inversePropertiesMap,individualAutomata,symmetricObjectProperties,transitiveProperties);
         Map<OWLObjectPropertyExpression,Automaton> individualAutomataForEquivRoles=new HashMap<>();
-        for (OWLObjectPropertyExpression propExprWithAutomaton : automataByProperty.keySet())
-            if (equivalentPropertiesMap.get(propExprWithAutomaton)!=null) {
-                Automaton autoOfPropExpr = automataByProperty.get(propExprWithAutomaton);
-                for (OWLObjectPropertyExpression equivProp : equivalentPropertiesMap.get(propExprWithAutomaton)) {
-                    if (!equivProp.equals(propExprWithAutomaton) && !automataByProperty.containsKey(equivProp)) {
-                        Automaton automatonOfEquivalent=(Automaton)autoOfPropExpr.clone();
-                        individualAutomataForEquivRoles.put(equivProp, automatonOfEquivalent);
-                        simpleProperties.remove(equivProp);
-                        complexObjectPropertyExpressions.add(equivProp);
-                    }
-                    OWLObjectPropertyExpression inverseEquivProp = equivProp.getInverseProperty();
-                    if (!inverseEquivProp.equals(propExprWithAutomaton) && !automataByProperty.containsKey(inverseEquivProp)) {
-                        Automaton automatonOfEquivalent=(Automaton)autoOfPropExpr.clone();
-                        individualAutomataForEquivRoles.put(inverseEquivProp, getMirroredCopy(automatonOfEquivalent));
-                        simpleProperties.remove(inverseEquivProp);
-                        complexObjectPropertyExpressions.add(inverseEquivProp);
-                    }
+        automataByProperty.forEach((propExprWithAutomaton, autoOfPropExpr)->{
+            for (OWLObjectPropertyExpression equivProp : equivalentPropertiesMap.getOrDefault(propExprWithAutomaton, Collections.emptySet())) {
+                if (!equivProp.equals(propExprWithAutomaton) && !automataByProperty.containsKey(equivProp)) {
+                    Automaton automatonOfEquivalent=(Automaton)autoOfPropExpr.clone();
+                    individualAutomataForEquivRoles.put(equivProp, automatonOfEquivalent);
+                    simpleProperties.remove(equivProp);
+                    complexObjectPropertyExpressions.add(equivProp);
+                }
+                OWLObjectPropertyExpression inverseEquivProp = equivProp.getInverseProperty();
+                if (!inverseEquivProp.equals(propExprWithAutomaton) && !automataByProperty.containsKey(inverseEquivProp)) {
+                    Automaton automatonOfEquivalent=(Automaton)autoOfPropExpr.clone();
+                    individualAutomataForEquivRoles.put(inverseEquivProp, getMirroredCopy(automatonOfEquivalent));
+                    simpleProperties.remove(inverseEquivProp);
+                    complexObjectPropertyExpressions.add(inverseEquivProp);
                 }
             }
+        });
         automataByProperty.putAll(individualAutomataForEquivRoles);
     }
     private static Set<OWLObjectPropertyExpression> findSymmetricProperties(Collection<List<OWLObjectPropertyExpression>> simpleObjectPropertyInclusions) {
@@ -334,48 +332,47 @@ public class ObjectPropertyInclusionManager {
         for (OWLObjectPropertyExpression superproperty : propertiesToStartRecursion)
             buildCompleteAutomataForProperties(superproperty,inversePropertiesMap,individualAutomata,completeAutomata,inversePropertyDependencyGraph,symmetricObjectProperties,transitiveProperties);
 
-        for (OWLObjectPropertyExpression property : individualAutomata.keySet())
+        individualAutomata.forEach((property,propertyAutomaton)->{
             if (!completeAutomata.containsKey(property)) {
-                Automaton propertyAutomaton=individualAutomata.get(property);
                 if ((completeAutomata.containsKey(property.getInverseProperty()) && inversePropertyDependencyGraph.getElements().contains(property.getInverseProperty())) || individualAutomata.containsKey(property.getInverseProperty())) {
-                    Automaton inversePropertyAutomaton=completeAutomata.get(property.getInverseProperty());
-                    if (inversePropertyAutomaton==null)
-                        inversePropertyAutomaton=individualAutomata.get(property.getInverseProperty());
+                    Automaton inversePropertyAutomaton=completeAutomata.getOrDefault(property.getInverseProperty(), individualAutomata.get(property.getInverseProperty()));
                     increaseAutomatonWithInversePropertyAutomaton(propertyAutomaton,inversePropertyAutomaton);
                 }
                 completeAutomata.put(property,propertyAutomaton);
             }
+        });
 
         Map<OWLObjectPropertyExpression,Automaton> extraCompleteAutomataForInverseProperties=new HashMap<>();
-        for (OWLObjectPropertyExpression property : completeAutomata.keySet())
-            if (!completeAutomata.containsKey(property.getInverseProperty()))
-                extraCompleteAutomataForInverseProperties.put(property.getInverseProperty(),getMirroredCopy(completeAutomata.get(property)));
+        completeAutomata.forEach((property,automaton)->{
+            if (!completeAutomata.containsKey(property.getInverseProperty())) 
+                extraCompleteAutomataForInverseProperties.put(property.getInverseProperty(),getMirroredCopy(automaton));
+        });
 
         completeAutomata.putAll(extraCompleteAutomataForInverseProperties);
         extraCompleteAutomataForInverseProperties.clear();
 
-        for (OWLObjectPropertyExpression property : completeAutomata.keySet())
-            if (completeAutomata.containsKey(property) && !completeAutomata.containsKey(property.getInverseProperty()))
-                extraCompleteAutomataForInverseProperties.put(property.getInverseProperty(),getMirroredCopy(completeAutomata.get(property)));
+        completeAutomata.forEach((property,automaton)->{
+            if (!completeAutomata.containsKey(property.getInverseProperty())) {
+                extraCompleteAutomataForInverseProperties.put(property.getInverseProperty(),getMirroredCopy(automaton));
+            }
+        });
 
         completeAutomata.putAll(extraCompleteAutomataForInverseProperties);
         extraCompleteAutomataForInverseProperties.clear();
         
-        for (OWLObjectPropertyExpression propExprWithAutomaton : completeAutomata.keySet())
-            if (inversePropertiesMap.get(propExprWithAutomaton)!=null) {
-                Automaton autoOfPropExpr = completeAutomata.get(propExprWithAutomaton);
-                for (OWLObjectPropertyExpression inverseProp : inversePropertiesMap.get(propExprWithAutomaton)) {
-                    Automaton automatonOfInverse=completeAutomata.get(inverseProp);
-                    if (automatonOfInverse!=null) {
-                        increaseAutomatonWithInversePropertyAutomaton(autoOfPropExpr,automatonOfInverse);
-                        extraCompleteAutomataForInverseProperties.put(propExprWithAutomaton,autoOfPropExpr);
-                    }
-                    else {
-                        automatonOfInverse=getMirroredCopy(autoOfPropExpr);
-                        extraCompleteAutomataForInverseProperties.put(inverseProp,automatonOfInverse);
-                    }
+        completeAutomata.forEach((propExprWithAutomaton, autoOfPropExpr)->{
+            for (OWLObjectPropertyExpression inverseProp : inversePropertiesMap.getOrDefault(propExprWithAutomaton, Collections.emptySet())) {
+                Automaton automatonOfInverse=completeAutomata.get(inverseProp);
+                if (automatonOfInverse!=null) {
+                    increaseAutomatonWithInversePropertyAutomaton(autoOfPropExpr,automatonOfInverse);
+                    extraCompleteAutomataForInverseProperties.put(propExprWithAutomaton,autoOfPropExpr);
+                }
+                else {
+                    automatonOfInverse=getMirroredCopy(autoOfPropExpr);
+                    extraCompleteAutomataForInverseProperties.put(inverseProp,automatonOfInverse);
                 }
             }
+        });
         completeAutomata.putAll(extraCompleteAutomataForInverseProperties);
         
     }
@@ -733,7 +730,7 @@ public class ObjectPropertyInclusionManager {
         // the axiomatisation at query time fails if we don't have the automaton        
         OWLDataFactory df=OWLManager.createOWLOntologyManager().getOWLDataFactory();
         OWLObjectProperty topOP=df.getOWLTopObjectProperty();
-        if (!automataMap.keySet().contains(topOP)) {
+        if (!automataMap.containsKey(topOP)) {
                 Automaton automaton=new Automaton();
                 State initialState=automaton.addState(true,false);
                 State finalState=automaton.addState(false,true);

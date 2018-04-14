@@ -578,8 +578,7 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
             Set<Set<OWLAnonymousIndividual>> components=getComponents();
             Map<Set<OWLAnonymousIndividual>,OWLAnonymousIndividual> componentsToRoots=findSuitableRoots(components);
             // It seems the forest is valid, so we can read off the concepts.
-            for (Set<OWLAnonymousIndividual> component : componentsToRoots.keySet()) {
-                OWLAnonymousIndividual root=componentsToRoots.get(component);
+            componentsToRoots.forEach((component,root)->{
                 if (!specialOPEdges.containsKey(root)) {
                     // It was not possible to find a root that has exactly one relationship with a named individual,
                     // otherwise findSuitableRoots() had given preference to that root.
@@ -604,7 +603,7 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
                     OWLClassExpression c=getClassExpressionFor(df,root,null);
                     anonIndAxioms.add(df.getOWLClassAssertionAxiom(df.getOWLObjectSomeValuesFrom(op,c),subject));
                 }
-            }
+            });
         }
         /**
          * After calling constructConceptsForAnonymousIndividuals(), the method return a set of assertions that have to be entailed in order to satisfy the axioms that contain anonymous individuals. E.g., if the conclusion ontology contains axioms ObjectPropertyAssertion(:r :fred _:x), ObjectPropertyAssertion(:r _:x _:y), we get the assertion ClassAssertion(:fred ObjectSomeValuesFrom(:r ObjectSomeValuesFrom(:r owl:Thing))).

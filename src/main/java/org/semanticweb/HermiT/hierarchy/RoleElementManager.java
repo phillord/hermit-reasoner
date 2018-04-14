@@ -142,27 +142,19 @@ class RoleElementManager {
         @Override
         public String toString() {
             StringBuilder buffer=new StringBuilder(m_role.toString()).append(" (known instances: ");
-            boolean notfirst=false;
-            for (Individual individual : m_knownRelations.keySet()) {
-                for (Individual successor : m_knownRelations.get(individual)) {
-                    if (notfirst) { 
-                        buffer.append(", ");
-                        notfirst=true;
-                    }
-                    buffer.append("(").append(individual).append(", ").append(successor).append(")");
-                }
-            }
+            int initialSize=buffer.length();
+            m_knownRelations.forEach((i, set)->set.forEach(s->{
+                if(initialSize!=buffer.length())
+                    buffer.append(", ");
+                buffer.append("(").append(i).append(", ").append(s).append(")");
+            }));
             buffer.append(" | possible instances: ");
-            notfirst=false;
-            for (Individual individual : m_possibleRelations.keySet()) {
-                for (Individual successor : m_possibleRelations.get(individual)) {
-                    if (notfirst) { 
-                        buffer.append(", ");
-                        notfirst=true;
-                    }
-                    buffer.append("(").append(individual).append(", ").append(successor).append(")");
-                }
-            }
+            int initialSize1=buffer.length();
+            m_possibleRelations.forEach((i, set)->set.forEach(s->{
+                if(initialSize1!=buffer.length())
+                    buffer.append(", ");
+                buffer.append("(").append(i).append(", ").append(s).append(")");
+            }));
             buffer.append(") ");
             return buffer.toString();
         }

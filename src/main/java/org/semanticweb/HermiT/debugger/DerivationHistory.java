@@ -71,10 +71,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
         Atom[] premises=new Atom[regularBodyAtomsNumber];
         int atomIndex=0;
         for (int index=0;index<premises.length;index++) {
-            DLPredicate dlPredicate=dlClauseEvaluator.getBodyAtom(index).getDLPredicate();
-            if (!(dlPredicate instanceof NodeIDLessEqualThan) || 
-                    !(dlPredicate instanceof NodeIDsAscendingOrEqual))
-                premises[atomIndex++]=getAtom(dlClauseEvaluator.getTupleMatchedToBody(index));
+            premises[atomIndex++]=getAtom(dlClauseEvaluator.getTupleMatchedToBody(index));
         }
         m_derivations.push(new DLClauseApplication(dlClauseEvaluator.getDLClause(dlClauseIndex),premises));
     }

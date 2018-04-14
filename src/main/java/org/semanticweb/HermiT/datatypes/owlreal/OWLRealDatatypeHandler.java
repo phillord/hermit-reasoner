@@ -116,7 +116,7 @@ public class OWLRealDatatypeHandler implements DatatypeHandler {
     }
     @Override
     public Object parseLiteral(String lexicalForm,String datatypeURI) throws MalformedLiteralException {
-        assert s_intervalsByDatatype.keySet().contains(datatypeURI);
+        assert s_intervalsByDatatype.containsKey(datatypeURI);
         try {
             if ((OWL_NS+"real").equals(datatypeURI))
                 throw new MalformedLiteralException(lexicalForm,datatypeURI);
@@ -133,7 +133,7 @@ public class OWLRealDatatypeHandler implements DatatypeHandler {
     }
     @Override
     public void validateDatatypeRestriction(DatatypeRestriction datatypeRestriction) throws UnsupportedFacetException {
-        assert s_intervalsByDatatype.keySet().contains(datatypeRestriction.getDatatypeURI());
+        assert s_intervalsByDatatype.containsKey(datatypeRestriction.getDatatypeURI());
         for (int index=datatypeRestriction.getNumberOfFacetRestrictions()-1;index>=0;--index) {
             String facetURI=datatypeRestriction.getFacetURI(index);
             if (!s_supportedFacetURIs.contains(facetURI))
@@ -148,7 +148,7 @@ public class OWLRealDatatypeHandler implements DatatypeHandler {
     }
     @Override
     public ValueSpaceSubset createValueSpaceSubset(DatatypeRestriction datatypeRestriction) {
-        assert s_intervalsByDatatype.keySet().contains(datatypeRestriction.getDatatypeURI());
+        assert s_intervalsByDatatype.containsKey(datatypeRestriction.getDatatypeURI());
         if (datatypeRestriction.getNumberOfFacetRestrictions()==0)
             return s_subsetsByDatatype.get(datatypeRestriction.getDatatypeURI());
         NumberInterval interval=getIntervalFor(datatypeRestriction);
@@ -159,7 +159,7 @@ public class OWLRealDatatypeHandler implements DatatypeHandler {
     }
     @Override
     public ValueSpaceSubset conjoinWithDR(ValueSpaceSubset valueSpaceSubset,DatatypeRestriction datatypeRestriction) {
-        assert s_intervalsByDatatype.keySet().contains(datatypeRestriction.getDatatypeURI());
+        assert s_intervalsByDatatype.containsKey(datatypeRestriction.getDatatypeURI());
         NumberInterval interval=getIntervalFor(datatypeRestriction);
         if (interval==null)
             return EMPTY_SUBSET;
@@ -181,7 +181,7 @@ public class OWLRealDatatypeHandler implements DatatypeHandler {
     }
     @Override
     public ValueSpaceSubset conjoinWithDRNegation(ValueSpaceSubset valueSpaceSubset,DatatypeRestriction datatypeRestriction) {
-        assert s_intervalsByDatatype.keySet().contains(datatypeRestriction.getDatatypeURI());
+        assert s_intervalsByDatatype.containsKey(datatypeRestriction.getDatatypeURI());
         NumberInterval interval=getIntervalFor(datatypeRestriction);
         if (interval==null)
             return valueSpaceSubset;
@@ -285,14 +285,14 @@ public class OWLRealDatatypeHandler implements DatatypeHandler {
     }
     @Override
     public boolean isSubsetOf(String subsetDatatypeURI,String supersetDatatypeURI) {
-        assert s_intervalsByDatatype.keySet().contains(subsetDatatypeURI);
-        assert s_intervalsByDatatype.keySet().contains(supersetDatatypeURI);
+        assert s_intervalsByDatatype.containsKey(subsetDatatypeURI);
+        assert s_intervalsByDatatype.containsKey(supersetDatatypeURI);
         return s_datatypeSupersets.get(subsetDatatypeURI).contains(supersetDatatypeURI);
     }
     @Override
     public boolean isDisjointWith(String datatypeURI1,String datatypeURI2) {
-        assert s_intervalsByDatatype.keySet().contains(datatypeURI1);
-        assert s_intervalsByDatatype.keySet().contains(datatypeURI2);
+        assert s_intervalsByDatatype.containsKey(datatypeURI1);
+        assert s_intervalsByDatatype.containsKey(datatypeURI2);
         return s_datatypeDisjoints.get(datatypeURI1).contains(datatypeURI2);
     }
 }
