@@ -537,6 +537,8 @@ public class OWLNormalization {
         public void visit(OWLInverseObjectPropertiesAxiom axiom) {
             OWLObjectPropertyExpression first=axiom.getFirstProperty();
             OWLObjectPropertyExpression second=axiom.getSecondProperty();
+            m_axioms.m_explicitInverses.computeIfAbsent(first, x->new HashSet<>()).add(second);
+            m_axioms.m_explicitInverses.computeIfAbsent(second, x->new HashSet<>()).add(first);
             addInclusion(first,second.getInverseProperty());
             addInclusion(second,first.getInverseProperty());
             m_axioms.m_objectPropertiesOccurringInOWLAxioms.add(first.getNamedProperty());

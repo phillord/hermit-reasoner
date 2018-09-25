@@ -19,8 +19,10 @@ package org.semanticweb.HermiT.structural;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.semanticweb.owlapi.model.OWLClass;
@@ -52,6 +54,7 @@ public class OWLAxioms {
     final Set<OWLObjectPropertyExpression> m_asymmetricObjectProperties =new HashSet<>();
     final Collection<List<OWLDataPropertyExpression>> m_dataPropertyInclusions =new ArrayList<>();
     final Collection<List<OWLDataPropertyExpression>> m_disjointDataProperties =new ArrayList<>();
+    final Map<OWLObjectPropertyExpression,Set<OWLObjectPropertyExpression>> m_explicitInverses = new HashMap<>();
     final Collection<OWLIndividualAxiom> m_facts =new HashSet<>();
     final Set<OWLHasKeyAxiom> m_hasKeys =new HashSet<>();
     /** contains custom datatypes from DatatypeDefinition axioms*/
