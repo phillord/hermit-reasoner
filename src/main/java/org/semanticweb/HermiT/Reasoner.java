@@ -49,6 +49,7 @@ import org.semanticweb.HermiT.existentials.IndividualReuseStrategy;
 import org.semanticweb.HermiT.hierarchy.ClassificationProgressMonitor;
 import org.semanticweb.HermiT.hierarchy.DeterministicClassification;
 import org.semanticweb.HermiT.hierarchy.Hierarchy;
+import org.semanticweb.HermiT.hierarchy.HierarchyDumperFSS;
 import org.semanticweb.HermiT.hierarchy.HierarchyNode;
 import org.semanticweb.HermiT.hierarchy.HierarchyPrinterFSS;
 import org.semanticweb.HermiT.hierarchy.HierarchySearch;
@@ -2203,6 +2204,33 @@ public class Reasoner implements OWLReasoner {
     }
 
     // Hierarchy printing
+    /**
+     * Writes out the hierarchies quickly
+     *
+     * @param out
+     *            - the printwriter that is used to output the hierarchies
+     * @param classes
+     *            - if true, the class hierarchy is printed
+     * @param objectProperties
+     *            - if true, the object property hierarchy is printed
+     * @param dataProperties
+     *            - if true, the data property hierarchy is printed
+     */
+    public void dumpHierarchies(PrintWriter out,boolean classes,boolean objectProperties,boolean dataProperties) {
+        HierarchyDumperFSS printer=new HierarchyDumperFSS(out);
+        if (classes) {
+            classifyClasses();
+            printer.printAtomicConceptHierarchy(m_atomicConceptHierarchy);
+        }
+        if (objectProperties) {
+            classifyObjectProperties();
+            printer.printObjectPropertyHierarchy(m_objectRoleHierarchy);
+        }
+        if (dataProperties) {
+            classifyDataProperties();
+            printer.printDataPropertyHierarchy(m_dataRoleHierarchy);
+        }
+    }
 
     /**
      * Prints the hierarchies into a functional style syntax ontology all nicely sorted alphabetically.
