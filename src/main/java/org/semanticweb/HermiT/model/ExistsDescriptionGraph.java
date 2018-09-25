@@ -59,7 +59,7 @@ public class ExistsDescriptionGraph extends ExistentialConcept implements DLPred
     }
     @Override
     public String toString() {
-        return toString(Prefixes.ImmutablePrefixes.getStandardPrefixes());
+        return toString(Prefixes.STANDARD_PREFIXES);
     }
     protected Object readResolve() {
         return s_interningManager.intern(this);

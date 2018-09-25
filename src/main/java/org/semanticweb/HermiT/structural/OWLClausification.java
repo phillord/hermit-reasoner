@@ -779,7 +779,7 @@ public class OWLClausification {
         }
         @Override
         public Object visit(OWLDataOneOf object) {
-            Set<Constant> constants=new HashSet<>();
+            Set<Constant> constants=new LinkedHashSet<>();
             object.values().forEach(l-> constants.add((Constant)l.accept(this)));
             Constant[] constantsArray=new Constant[constants.size()];
             constants.toArray(constantsArray);

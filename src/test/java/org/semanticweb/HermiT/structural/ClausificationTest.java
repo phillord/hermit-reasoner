@@ -8,21 +8,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.Ignore;
 import org.semanticweb.HermiT.Configuration;
+import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLHasKeyAxiom;
-@Ignore
 @SuppressWarnings("javadoc")
 public class ClausificationTest extends AbstractStructuralTest {
-    static {
-        System.setProperty("entityExpansionLimit", String.valueOf(Integer.MAX_VALUE));
-    }
-
-    public ClausificationTest(String name) {
-        super(name);
-    }
 
     public void testBasic() throws Exception {
         assertClausification("res/basic-input.xml", "res/basic-control.txt");
@@ -72,22 +64,23 @@ public class ClausificationTest extends AbstractStructuralTest {
                 m_dataFactory.getOWLDataProperty(IRI.create("int:dp_test")));
         DLClause clause = clausifier.clausifyKey(key);
         Set<String> bAtoms = new HashSet<>();
-        bAtoms.add("<internal:nam#Named>(X)");
+        bAtoms.add("<internal:nam#Named>(X1)");
         bAtoms.add("<internal:nam#Named>(X2)");
-        bAtoms.add("<int:C_test>(X)");
+        bAtoms.add("<int:C_test>(X1)");
         bAtoms.add("<int:C_test>(X2)");
-        bAtoms.add("<int:r_test>(X,Y0)");
-        bAtoms.add("<int:r_test>(X2,Y0)");
-        bAtoms.add("<internal:nam#Named>(Y0)");
-        bAtoms.add("<int:dp_test>(X,Y1)");
-        bAtoms.add("<int:dp_test>(X2,Y2)");
+        bAtoms.add("<int:r_test>(X1,Y1)");
+        bAtoms.add("<int:r_test>(X2,Y1)");
+        bAtoms.add("<internal:nam#Named>(Y1)");
+        bAtoms.add("<int:dp_test>(X1,Y2)");
+        bAtoms.add("<int:dp_test>(X2,Y3)");
         assertTrue(bAtoms.size() == clause.getBodyLength());
         for (int i = 0; i < clause.getBodyLength(); i++) {
-            assertTrue(bAtoms.contains(clause.getBodyAtom(i).toString()));
+            String string = clause.getBodyAtom(i).toString();
+            assertTrue(string, bAtoms.contains(string));
         }
         Set<String> hAtoms = new HashSet<>();
-        hAtoms.add("X == X2");
-        hAtoms.add("Y1 != Y2");
+        hAtoms.add("X1 == X2");
+        hAtoms.add("Y2 != Y3");
         assertTrue(hAtoms.size() == clause.getHeadLength());
         for (int i = 0; i < clause.getHeadLength(); i++) {
             assertTrue(hAtoms.contains(clause.getHeadAtom(i).toString()));

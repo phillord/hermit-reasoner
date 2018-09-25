@@ -86,7 +86,7 @@ public class ReasoningTaskDescription {
     }
     @Override
     public String toString() {
-        return getTaskDescription(Prefixes.ImmutablePrefixes.getStandardPrefixes());
+        return getTaskDescription(Prefixes.STANDARD_PREFIXES);
     }
     
     /**

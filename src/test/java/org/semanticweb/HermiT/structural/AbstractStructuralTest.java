@@ -1,8 +1,10 @@
 package org.semanticweb.HermiT.structural;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -11,7 +13,6 @@ import java.util.TreeSet;
 
 import junit.framework.AssertionFailedError;
 
-import org.junit.Ignore;
 import org.semanticweb.HermiT.AbstractOntologyTest;
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.Prefixes;
@@ -21,13 +22,8 @@ import org.semanticweb.HermiT.model.DLOntology;
 import org.semanticweb.HermiT.model.DescriptionGraph;
 import org.semanticweb.HermiT.model.Individual;
 import org.semanticweb.owlapi.model.IRI;
-@Ignore
 @SuppressWarnings("javadoc")
 public abstract class AbstractStructuralTest extends AbstractOntologyTest {
-
-    public AbstractStructuralTest(String name) {
-        super(name);
-    }
 
     protected static void assertContainsAll(String testName, Collection<String> actual, String[] control) {
         try {
@@ -36,7 +32,7 @@ public abstract class AbstractStructuralTest extends AbstractOntologyTest {
                 isOK = true;
                 for (int i = 0; isOK && i < control.length; i++)
                     isOK = actual.contains(control[i]);
-            assertTrue(isOK);
+            assertTrue("Expected \n"+Arrays.toString(control)+ "\n but was \n"+actual.toString(), isOK);
         } catch (AssertionFailedError e) {
             System.out.println("Test " + testName + " failed!");
                 System.out.println("Control set (" + control.length + " elements):");

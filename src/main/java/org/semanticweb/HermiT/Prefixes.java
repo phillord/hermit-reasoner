@@ -63,6 +63,8 @@ public class Prefixes implements Serializable {
         semanticWebPrefixes.put("ruleml:","http://www.w3.org/2003/11/ruleml#");
         return semanticWebPrefixes;
     }
+    /**standard prefixes*/
+    public static final Prefixes STANDARD_PREFIXES=new ImmutablePrefixes(s_semanticWebPrefixes);
 
     protected final Map<String,String> m_prefixIRIsByPrefixName;
     protected final Map<String,String> m_prefixNamesByPrefixIRI;
@@ -301,20 +303,13 @@ public class Prefixes implements Serializable {
      * @return expanded string
      */
     public static String expandAbbreviation(String abbreviation) {
-        return ImmutablePrefixes.getStandardPrefixes().expandAbbreviatedIRI(abbreviation);
+        return Prefixes.STANDARD_PREFIXES.expandAbbreviatedIRI(abbreviation);
     }
     /**
      * Immutable prefixes.
      */
     public static class ImmutablePrefixes extends Prefixes {
         private static final long serialVersionUID=8517988865445255837L;
-
-        private static final Prefixes STANDARD_PREFIXES=new ImmutablePrefixes(s_semanticWebPrefixes);
-        
-        /** @return standard prefixes*/
-        public static Prefixes getStandardPrefixes() {
-            return STANDARD_PREFIXES;
-        }
 
         /**
          * @param initialPrefixes prefixes

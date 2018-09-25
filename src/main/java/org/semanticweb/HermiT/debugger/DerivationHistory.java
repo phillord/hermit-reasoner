@@ -328,7 +328,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
         }
         @Override
         public String toString() {
-            return toString(Prefixes.ImmutablePrefixes.getStandardPrefixes());
+            return toString(Prefixes.STANDARD_PREFIXES);
         }
     }
 
@@ -407,7 +407,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
         }
         @Override
         public String toString() {
-            return toString(Prefixes.ImmutablePrefixes.getStandardPrefixes());
+            return toString(Prefixes.STANDARD_PREFIXES);
         }
     }
 
@@ -423,7 +423,7 @@ public class DerivationHistory extends TableauMonitorAdapter {
         public abstract String toString(Prefixes prefixes);
         @Override
         public String toString() {
-            return toString(Prefixes.ImmutablePrefixes.getStandardPrefixes());
+            return toString(Prefixes.STANDARD_PREFIXES);
         }
         /**
          * @return number of premises

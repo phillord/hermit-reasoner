@@ -42,7 +42,7 @@ public class Inequality implements DLPredicate,Serializable {
     }
     @Override
     public String toString() {
-        return toString(Prefixes.ImmutablePrefixes.getStandardPrefixes());
+        return toString(Prefixes.STANDARD_PREFIXES);
     }
     protected Object readResolve() {
         return INSTANCE;

@@ -1,28 +1,21 @@
 package org.semanticweb.HermiT.structural;
 
 import java.util.List;
-
-import org.junit.Ignore;
-@Ignore
 @SuppressWarnings("javadoc")
 public class ClausificationDatatypesTest extends AbstractStructuralTest {
-
-    public ClausificationDatatypesTest(String name) {
-        super(name);
-    }
 
     public void testDataPropertiesHasValue1() throws Exception {
         String axioms = "Declaration(Class(:Eighteen)) Declaration(DataProperty(:hasAge)) SubClassOf(:Eighteen DataHasValue(:hasAge \"18\"^^xsd:integer))";
         loadOntologyWithAxioms(axioms);
         List<String> clauses = getDLClauses();
-        assertContainsAll(this.getName(), clauses, S("atLeast(1 :hasAge { \"18\"^^xsd:int })(X) :- :Eighteen(X)"));
+        assertContainsAll(this.getName(), clauses, S("atLeast(1 :hasAge { \"18\"^^xsd:integer })(X) :- :Eighteen(X)"));
     }
 
     public void testDataPropertiesHasValue2() throws Exception {
         String axioms = "Declaration(Class(:Eighteen)) Declaration(DataProperty(:hasAge)) SubClassOf(DataHasValue(:hasAge \"18\"^^xsd:integer) :Eighteen)";
         loadOntologyWithAxioms(axioms);
         List<String> clauses = getDLClauses();
-        assertContainsAll(this.getName(), clauses, S(":Eighteen(X) v not({ \"18\"^^xsd:int })(Y) :- :hasAge(X,Y)"));
+        assertContainsAll(this.getName(), clauses, S(":Eighteen(X) v not({ \"18\"^^xsd:integer })(Y) :- :hasAge(X,Y)"));
     }
 
     public void testDataPropertiesAll1() throws Exception {
@@ -57,7 +50,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
         String axioms = "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(:A DataAllValuesFrom(:dp DataOneOf(\"Peter\"^^xsd:string \"19\"^^xsd:integer)))";
         loadOntologyWithAxioms(axioms);
         List<String> clauses = getDLClauses();
-        assertContainsAll(this.getName(), clauses, S("{ \"Peter\" \"19\"^^xsd:int }(Y) :- :A(X), :dp(X,Y)"));
+        assertContainsAll(this.getName(), clauses, S("{ \"19\"^^xsd:integer \"Peter\"^^xsd:string }(Y) :- :A(X), :dp(X,Y)"));
     }
 
     public void testDataPropertiesDataOneOf2() throws Exception {
@@ -65,7 +58,7 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
         loadOntologyWithAxioms(axioms);
         List<String> clauses = getDLClauses();
         assertContainsAll(this.getName(), clauses,
-                S(":A(X) v atLeast(1 :dp not({ \"19\"^^xsd:int \"18\"^^xsd:int }))(X) :- owl:Thing(X)"));
+                S(":A(X) v atLeast(1 :dp not({ \"18\"^^xsd:integer \"19\"^^xsd:integer }))(X) :- owl:Thing(X)"));
     }
 
     public void testDataPropertiesDataOneOf3() throws Exception {
@@ -73,28 +66,28 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
         loadOntologyWithAxioms(axioms);
         List<String> clauses = getDLClauses();
         assertContainsAll(this.getName(), clauses,
-                S(":A(X) v atLeast(1 :dp not({ \"18\"^^xsd:int \"abc\" }))(X) :- owl:Thing(X)"));
+                S(":A(X) v atLeast(1 :dp not({ \"18\"^^xsd:integer \"abc\"^^xsd:string }))(X) :- owl:Thing(X)"));
     }
 
     public void testDataPropertiesDataOneOf4() throws Exception {
         String axioms = "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(:A DataAllValuesFrom(:dp DataOneOf(\"18\"^^xsd:integer \"abc\"^^xsd:string)))";
         loadOntologyWithAxioms(axioms);
         List<String> clauses = getDLClauses();
-        assertContainsAll(this.getName(), clauses, S("{ \"18\"^^xsd:int \"abc\" }(Y) :- :A(X), :dp(X,Y)"));
+        assertContainsAll(this.getName(), clauses, S("{ \"18\"^^xsd:integer \"abc\"^^xsd:string }(Y) :- :A(X), :dp(X,Y)"));
     }
 
     public void testDataPropertiesDataComplementOf1() throws Exception {
         String axioms = "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(:A DataAllValuesFrom(:dp DataComplementOf(DataComplementOf(DataOneOf(\"18\"^^xsd:integer \"19\"^^xsd:integer)))))";
         loadOntologyWithAxioms(axioms);
         List<String> clauses = getDLClauses();
-        assertContainsAll(this.getName(), clauses, S("{ \"19\"^^xsd:int \"18\"^^xsd:int }(Y) :- :A(X), :dp(X,Y)"));
+        assertContainsAll(this.getName(), clauses, S("{ \"18\"^^xsd:integer \"19\"^^xsd:integer }(Y) :- :A(X), :dp(X,Y)"));
     }
 
     public void testDataPropertiesDataComplementOf2() throws Exception {
         String axioms = "Declaration(Class(:A)) Declaration(DataProperty(:dp)) SubClassOf(:A DataAllValuesFrom(:dp DataComplementOf(DataOneOf(\"18\"^^xsd:integer \"19\"^^xsd:integer))))";
         loadOntologyWithAxioms(axioms);
         List<String> clauses = getDLClauses();
-        assertContainsAll(this.getName(), clauses, S("not({ \"19\"^^xsd:int \"18\"^^xsd:int })(Y) :- :A(X), :dp(X,Y)"));
+        assertContainsAll(this.getName(), clauses, S("not({ \"18\"^^xsd:integer \"19\"^^xsd:integer })(Y) :- :A(X), :dp(X,Y)"));
     }
 
     public void testDataPropertiesMax1() throws Exception {
@@ -252,15 +245,25 @@ public class ClausificationDatatypesTest extends AbstractStructuralTest {
         loadOntologyWithAxioms(axioms);
         List<String> clauses = getDLClauses();
         assertContainsAll(this.getName(), clauses,
-                S("not({ \"4.3\"^^xsd:double \"5\"^^xsd:int })(X) v not({ \"5\"^^xsd:int })(X) :- defdata:0(X)",
-                        "defdata:0(Y) :- :dp(X,Y)"));
+                S("defdata:0(Y) :- :dp(X,Y)",
+                        "not({ "
+                                + "\"4.3\"^^xsd:double"
+                        + " \"5\"^^xsd:nonNegativeInteger"
+                        + " })(X)"
+                        + " v "                        +
+                        "not({ \"5\"^^xsd:integer })(X)"
+                        + " :- defdata:0(X)"));
     }
 
     public void testDataComplementOf4() throws Exception {
         String axioms = "SubClassOf(DataAllValuesFrom(:dp DataComplementOf(DataIntersectionOf(DataOneOf(\"5\"^^xsd:nonNegativeInteger \"4.3\"^^xsd:double) DataOneOf(\"5\"^^xsd:integer)))) :A)";
         loadOntologyWithAxioms(axioms);
         List<String> clauses = getDLClauses();
-        assertContainsAll(this.getName(), clauses, S("{ \"4.3\"^^xsd:double \"5\"^^xsd:int }(X) :- defdata:0(X)",
-                "{ \"5\"^^xsd:int }(X) :- defdata:0(X)", ":A(X) v atLeast(1 :dp defdata:0)(X) :- owl:Thing(X)"));
+        assertContainsAll(this.getName(), clauses, S("{ "
+                + "\"4.3\"^^xsd:double"
+                + " "
+                + "\"5\"^^xsd:nonNegativeInteger"
+                + " }(X) :- defdata:0(X)",
+                "{ \"5\"^^xsd:integer }(X) :- defdata:0(X)", ":A(X) v atLeast(1 :dp defdata:0)(X) :- owl:Thing(X)"));
     }
 }

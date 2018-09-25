@@ -104,7 +104,7 @@ public class CountingMonitor extends TableauMonitorAdapter {
             records=new ArrayList<>();
             m_testRecords.put(messagePattern, records);
         }
-        records.add(new TestRecord(m_time, m_reasoningTaskDescription.getTaskDescription(Prefixes.ImmutablePrefixes.getStandardPrefixes()), m_testResult));
+        records.add(new TestRecord(m_time, m_reasoningTaskDescription.getTaskDescription(Prefixes.STANDARD_PREFIXES), m_testResult));
         m_overallTime+=m_time;
         m_overallNumberOfBacktrackings+=m_numberOfBacktrackings;
         m_numberOfNodes=m_tableau.getNumberOfNodesInTableau()-m_tableau.getNumberOfMergedOrPrunedNodes();
@@ -203,7 +203,7 @@ public class CountingMonitor extends TableauMonitorAdapter {
      * @return test description
      */
     public String getTestDescription() {
-        return m_reasoningTaskDescription.getTaskDescription(Prefixes.ImmutablePrefixes.getStandardPrefixes());
+        return m_reasoningTaskDescription.getTaskDescription(Prefixes.STANDARD_PREFIXES);
     }
     /**
      * @return test result

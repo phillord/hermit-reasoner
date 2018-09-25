@@ -38,7 +38,7 @@ public class Variable extends Term {
     }
     @Override
     public String toString() {
-        return toString(Prefixes.ImmutablePrefixes.getStandardPrefixes());
+        return toString(Prefixes.STANDARD_PREFIXES);
     }
     @Override
     public String toString(Prefixes prefixes) {

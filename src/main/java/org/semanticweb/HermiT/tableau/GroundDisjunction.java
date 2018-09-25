@@ -224,6 +224,6 @@ public final class GroundDisjunction implements Serializable {
     }
     @Override
     public String toString() {
-        return toString(Prefixes.ImmutablePrefixes.getStandardPrefixes());
+        return toString(Prefixes.STANDARD_PREFIXES);
     }
 }

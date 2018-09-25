@@ -50,6 +50,6 @@ public abstract class DataRange implements Serializable {
     public abstract String toString(Prefixes prefixes);
     @Override
     public String toString() {
-        return toString(Prefixes.ImmutablePrefixes.getStandardPrefixes());
+        return toString(Prefixes.STANDARD_PREFIXES);
     }
 }
