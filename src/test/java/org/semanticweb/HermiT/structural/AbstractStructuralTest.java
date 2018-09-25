@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import junit.framework.AssertionFailedError;
 
@@ -27,12 +28,7 @@ public abstract class AbstractStructuralTest extends AbstractOntologyTest {
 
     protected static void assertContainsAll(String testName, Collection<String> actual, String[] control) {
         try {
-            assertEquals(control.length, actual.size());
-            boolean isOK = false;
-                isOK = true;
-                for (int i = 0; isOK && i < control.length; i++)
-                    isOK = actual.contains(control[i]);
-            assertTrue("Expected \n"+Arrays.toString(control)+ "\n but was \n"+actual.toString(), isOK);
+            assertEquals(Arrays.stream(control).sorted().collect(Collectors.joining("\n")),actual.stream().sorted().collect(Collectors.joining("\n")));
         } catch (AssertionFailedError e) {
             System.out.println("Test " + testName + " failed!");
                 System.out.println("Control set (" + control.length + " elements):");
