@@ -388,16 +388,9 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
     @Override
     public Boolean visit(OWLDisjointDataPropertiesAxiom axiom) {
         List<OWLDataPropertyExpression> props=asList(axiom.properties());
-        for (int i=0;i<props.size()-1;i++) {
-            for (int j=i+1;j<props.size();j++) {
-                OWLDataSomeValuesFrom some_i=factory.getOWLDataSomeValuesFrom(props.get(i),factory.getOWLDatatype(IRI.create(InternalDatatype.RDFS_LITERAL.getIRI())));
-                OWLDataSomeValuesFrom some_j=factory.getOWLDataSomeValuesFrom(props.get(j),factory.getOWLDatatype(IRI.create(InternalDatatype.RDFS_LITERAL.getIRI())));
-                OWLDataMaxCardinality max1=factory.getOWLDataMaxCardinality(1,factory.getOWLDataProperty(IRI.create(AtomicRole.TOP_DATA_ROLE.getIRI())));
-                OWLClassExpression desc=factory.getOWLObjectIntersectionOf(some_i,some_j,max1);
-                if (reasoner.isSatisfiable(desc))
-                    return Boolean.FALSE;
-            }
-        }
+        for (int i=0;i<props.size()-1;i++)
+            for (int j=i+1;j<props.size();j++)
+                if (!reasoner.isDisjointDataProperty(props.get(i),props.get(j))) return Boolean.FALSE;
         return Boolean.TRUE;
     }
     @Override

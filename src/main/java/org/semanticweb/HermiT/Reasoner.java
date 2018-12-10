@@ -1631,6 +1631,21 @@ public class Reasoner implements OWLReasoner {
                 return new OWLDataPropertyNodeSet();
         }
     }
+    protected boolean isDisjointDataProperty(OWLDataPropertyExpression propertyExpression1,OWLDataPropertyExpression propertyExpression2) {
+        checkPreConditions(propertyExpression1,propertyExpression2);
+        if (!m_isConsistent.booleanValue())
+            return true;
+        Role role1=H(propertyExpression1);
+        Role role2=H(propertyExpression2);
+        Individual freshIndividualA=Individual.createAnonymous("fresh-individual");
+        Constant freshConstant=Constant.createAnonymous("fresh-constant");
+        Atom roleAssertion1=role1.getRoleAssertion(freshIndividualA,freshConstant);
+        Atom roleAssertion2=role2.getRoleAssertion(freshIndividualA,freshConstant);
+        Set<Atom> perTestAtoms=new HashSet<>(2);
+        perTestAtoms.add(roleAssertion1);
+        perTestAtoms.add(roleAssertion2);
+        return !getTableau().isSatisfiable(false,perTestAtoms,null,null,null,null,new ReasoningTaskDescription(true,"disjointness of {0} and {1}",role1,role2));
+    }
     protected boolean isFunctional(OWLDataProperty property) {
         checkPreConditions(property);
         if (!m_isConsistent.booleanValue())
