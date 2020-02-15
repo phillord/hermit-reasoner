@@ -38,7 +38,7 @@ public class DateTime {
         ":"+
         TWO_DIGITS+
         ":"+
-        TWO_DIGITS+"([.]([0-9]{1,3}))?"+
+        TWO_DIGITS+"([.]([0-9]{1,3})[0-9]*)?"+
         "((Z)|(([+]|-)"+TWO_DIGITS+":"+TWO_DIGITS+"))?"
     );
     // according to XML Schema 1.1 spec (http://www.w3.org/TR/xmlschema11-2/#dateTime) the reg exp is as follows:
