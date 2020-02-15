@@ -25,7 +25,7 @@
 
 	<groupId>net.sourceforge.owlapi</groupId>
 	<artifactId>org.semanticweb.hermit</artifactId>
-	<version>1.4.3.517</version>
+	<version>1.4.4.519</version>
 	<packaging>bundle</packaging>
 
 	<name>HermiT</name>
@@ -236,7 +236,7 @@
 		<dependency>
 			<groupId>net.sourceforge.owlapi</groupId>
 			<artifactId>owlapi-distribution</artifactId>
-			<version>5.1.7</version>
+			<version>5.1.9</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.ws.commons.axiom</groupId>

@@ -67,6 +67,7 @@ public class Printing {
     /**
      * @param collection collection
      * @param writer writer
+     * @param <T> type
      */
     public static <T> void printCollection(Collection<T> collection,PrintWriter writer) {
         for (T object : collection) {
@@ -79,6 +80,7 @@ public class Printing {
      * @param in1NotIn2 label 1
      * @param in2NotIn1 label 2
      * @param writer writer
+     * @param <T> type
      * @param c1 first collection
      * @param c2 second collection
      */

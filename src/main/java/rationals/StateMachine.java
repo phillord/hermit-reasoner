@@ -85,8 +85,8 @@ public interface StateMachine {
      * @param label
      *            a label used in this SM.
      * @return the set of all transitions of this automaton starting from state
-     *         <tt>state</tt> and labelled by <tt>label</tt>. Objects which are
-     *         contained in this set are instances of class <tt>Transition</tt>.
+     *         {@code state} and labelled by {@code label}. Objects which are
+     *         contained in this set are instances of class {@code Transition}.
      * @see Transition
      */
     Set<Transition> delta(State state, Object label);

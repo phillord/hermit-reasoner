@@ -68,7 +68,7 @@ public interface Rational {
      * 
      * @return the set of states <em>Q</em> associated with this automaton.
      *         Objects which are contained in this set are instances of class
-     *         <tt>State</tt>.
+     *         {@code State}.
      * @see State
      */
     Set<State> states();
@@ -79,7 +79,7 @@ public interface Rational {
      * 
      * @return the set of initial states <em>I</em> associated with this
      *         automaton. Objects which are contained in this set are instances
-     *         of class <tt>State</tt>.
+     *         of class {@code State}.
      * @see State
      */
     Set<State> initials();
@@ -90,7 +90,7 @@ public interface Rational {
      * 
      * @return set of terminal states <em>T</em> associated with this automaton.
      *         Objects which are contained in this set are instances of class
-     *         <tt>State</tt>.
+     *         {@code State}.
      * @see State
      */
     Set<State> terminals();
@@ -101,7 +101,7 @@ public interface Rational {
      * @return the set of all accessible states in this automaton. A state
      *         <em>s</em> is accessible if there exists a path from an initial
      *         state to <em>s</em>. Objects which are contained in this set are
-     *         instances of class <tt>State</tt>.
+     *         instances of class {@code State}.
      * @see State
      */
     Set<State> accessibleStates();
@@ -112,7 +112,7 @@ public interface Rational {
      * @return the set of all co-accessible states in this automaton. A state
      *         <em>s</em> is co-accessible if there exists a path from this
      *         state <em>s</em> to a terminal state. Objects which are contained
-     *         in this set are instances of class <tt>State</tt>.
+     *         in this set are instances of class {@code State}.
      * @see State
      */
     Set<State> coAccessibleStates();
@@ -126,7 +126,7 @@ public interface Rational {
      *         a path from an initial state to <em>s</em>. A state <em>s</em> is
      *         co-accessible if there exists a path from this state <em>s</em>
      *         to a terminal state. Objects which are contained in this set are
-     *         instances of class <tt>State</tt>.
+     *         instances of class {@code State}.
      * @see State
      */
     Set<State> accessibleAndCoAccessibleStates();
@@ -135,7 +135,7 @@ public interface Rational {
      * Returns the set of all transitions of this automaton
      * 
      * @return the set of all transitions of this automaton Objects which are
-     *         contained in this set are instances of class <tt>Transition</tt>.
+     *         contained in this set are instances of class {@code Transition}.
      * @see Transition
      */
     Set<Transition> delta();
@@ -149,8 +149,8 @@ public interface Rational {
      * @param label
      *            a label used in this automaton.
      * @return the set of all transitions of this automaton starting from state
-     *         <tt>state</tt> and labelled by <tt>label</tt>. Objects which are
-     *         contained in this set are instances of class <tt>Transition</tt>.
+     *         {@code state} and labelled by {@code label}. Objects which are
+     *         contained in this set are instances of class {@code Transition}.
      * @see Transition
      */
     Set<Transition> delta(State state, Object label);
@@ -181,7 +181,7 @@ public interface Rational {
      *         automaton <em>A' = (X , Q , T , I , D')</em> where <em>D'</em> is
      *         the set <em>{ (q , l , q') | (q' , l , q) in D}</em>. Objects
      *         which are contained in this set are instances of class
-     *         <tt>Transition</tt>.
+     *         {@code Transition}.
      * @see Transition
      */
     Set<Transition> deltaMinusOne(State state, Object label);
@@ -190,7 +190,7 @@ public interface Rational {
      * Adds a new transition in this automaton if it is a new transition for
      * this automaton. The parameter is considered as a new transition if there
      * is no transition in this automaton which is equal to the parameter in the
-     * sense of method <tt>equals</tt> of class <tt>Transition</tt>.
+     * sense of method {@code equals} of class {@code Transition}.
      * 
      * @param transition
      *            the transition to add.

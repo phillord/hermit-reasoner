@@ -91,8 +91,8 @@ public class Transition {
      * @param o
      *            any object.
      * @return true iff this transition is equal to the parameter. That is if
-     *         <tt>o</tt> is a transition which is composed same states and
-     *         label (in the sense of method <tt>equals</tt>).
+     *         {@code o} is a transition which is composed same states and
+     *         label (in the sense of method {@code equals}).
      */
     @Override
     public boolean equals(Object o) {
