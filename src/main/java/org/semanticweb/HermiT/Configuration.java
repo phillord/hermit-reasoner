@@ -171,14 +171,14 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
      * warning() method of the interface, e.g., if it ignores an unsupported datatype. HermiT does not provide an
      * implementation for the interface itself though.
      */
-    public final WarningMonitor warningMonitor;
+    public WarningMonitor warningMonitor;
     /**
      * If a progress monitor is set, HermiT will report the progress of a classification task. This is used for
      * example by Protege.
      */
     public ReasonerProgressMonitor reasonerProgressMonitor;
     /**tableau monitor type*/
-    public final TableauMonitorType tableauMonitorType;
+    public TableauMonitorType tableauMonitorType;
     /**direct blocking type*/
     public DirectBlockingType directBlockingType;
     /**blocking strategy type*/
@@ -237,7 +237,7 @@ public class Configuration implements Serializable,Cloneable,OWLReasonerConfigur
      * The default value is false and HermiT will use a specialiased classification strategy for deterministic ontologies, which often is faster, but not always.
      * If the value is set to true, then HermiT will use the Quasi Ordering Classification method even for deterministic ontologies.
      */
-    public final boolean forceQuasiOrderClassification;
+    public boolean forceQuasiOrderClassification;
 
     /**Create configuration.*/
     public Configuration() {
