@@ -18,7 +18,6 @@
 package org.semanticweb.HermiT.cli;
 
 import static org.semanticweb.HermiT.cli.constants.*;
-import gnu.getopt.Getopt;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -30,12 +29,18 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.semanticweb.HermiT.Configuration;
 import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.HermiT.monitor.Timer;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyIRIMapper;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -48,8 +53,10 @@ public class CommandLine {
 
     /**
      * @param argv args
+     * @throws ParseException if arguments are invalid
+     * @throws OWLException if a general error happens
      */
-    public static void main(String[] argv) {
+    public static void main(String[] argv) throws ParseException, OWLException {
         try {
             int verbosity=1;
             boolean ignoreOntologyPrefixes=false;
@@ -70,18 +77,15 @@ public class CommandLine {
                 base=new URI("file",System.getProperty("user.dir")+"/",null);
             }
             catch (java.net.URISyntaxException e) {
-                throw new RuntimeException("unable to create default IRI base");
+                throw new RuntimeException("unable to create default IRI base", e);
             }
             Collection<IRI> ontologies=new LinkedList<>();
             boolean didSomething=false;
-            {
-                Getopt g=new Getopt("java-jar Hermit.jar",argv,Option.formatOptionsString(Option.options),Option.createLongOpts(Option.options));
-                g.setOpterr(false);
-                int opt;
-                while ((opt=g.getopt())!=-1) {
-                    switch (opt) {
+                Options g=Option.createLongOpts(Option.options);
+                CommandLineParser parser = new DefaultParser();
+                org.apache.commons.cli.CommandLine cmd = parser.parse( g, argv);
                     // meta:
-                    case 'h': {
+                    if(cmd.hasOption('h')) {
                         System.out.println(usageString);
                         for (String s : helpHeader)
                             System.out.println(s);
@@ -91,17 +95,15 @@ public class CommandLine {
                         System.exit(0);
                         didSomething=true;
                     }
-                        break;
-                    case 'V': {
+                    if(cmd.hasOption('V')) {
                         System.out.println(versionString);
                         for (String s : footer)
                             System.out.println(s);
                         System.exit(0);
                         didSomething=true;
                     }
-                        break;
-                    case 'v': {
-                        String arg=g.getOptarg();
+                    if(cmd.hasOption('v')) {
+                        String arg=cmd.getOptionValue('v');
                         if (arg==null) {
                             verbosity+=1;
                         }
@@ -110,12 +112,11 @@ public class CommandLine {
                                 verbosity+=Integer.parseInt(arg,10);
                             }
                             catch (NumberFormatException e) {
-                                throw new UsageException("argument to --verbose must be a number");
+                                throw new UsageException("argument to --verbose must be a number", e);
                             }
                     }
-                        break;
-                    case 'q': {
-                        String arg=g.getOptarg();
+                    if(cmd.hasOption('q')) {
+                        String arg=cmd.getOptionValue('q');
                         if (arg==null) {
                             verbosity-=1;
                         }
@@ -124,12 +125,11 @@ public class CommandLine {
                                 verbosity-=Integer.parseInt(arg,10);
                             }
                             catch (NumberFormatException e) {
-                                throw new UsageException("argument to --quiet must be a number");
+                                throw new UsageException("argument to --quiet must be a number", e);
                             }
                     }
-                        break;
-                    case 'o': {
-                        String arg=g.getOptarg();
+                    if(cmd.hasOption('o')) {
+                        String arg=cmd.getOptionValue('o');
                         if (arg==null)
                             throw new UsageException("--output requires an argument");
                         if (arg.equals("-"))
@@ -154,119 +154,99 @@ public class CommandLine {
                             }
                         }
                     }
-                        break;
-                    case kPremise: {
-                        String arg=g.getOptarg();
+                        if(cmd.hasOption((char)kPremise)){
+                        String arg=cmd.getOptionValue((char)kPremise);
                         if (arg==null)
                             throw new UsageException("--premise requires a IRI as argument");
                         else {
                             ontologies.add(IRI.create(arg));
                         }
                     }
-                        break;
-                    case kConclusion: {
-                        String arg=g.getOptarg();
+                        if(cmd.hasOption((char)kConclusion)) {
+                        String arg=cmd.getOptionValue((char)kConclusion);
                         if (arg==null)
                             throw new UsageException("--conclusion requires a IRI as argument");
                         else {
                             conclusionIRI=IRI.create(arg);
                         }
                     }
-                        break;
                     // actions:
-                    case 'l': {
+                        if(cmd.hasOption( 'l')) {
                         // load is a no-op; loading happens no matter what the user asks
                     }
-                        break;
-                    case 'c': {
+                        if(cmd.hasOption( 'c')) {
                         classifyClasses=true;
                     }
-                        break;
-                    case 'O': {
+                        if(cmd.hasOption( 'O')) {
                         classifyOPs=true;
                     }
-                        break;
-                    case 'D': {
+                        if(cmd.hasOption( 'D')) {
                         classifyDPs=true;
                     }
-                        break;
-                    case 'P': {
+                        if(cmd.hasOption( 'P')) {
                         prettyPrint=true;
                     }
-                        break;
-                    case 'k': {
-                        String arg=g.getOptarg();
+                        if(cmd.hasOption( 'k')) {
+                        String arg=cmd.getOptionValue( 'k');
                         if (arg==null) {
                             arg="http://www.w3.org/2002/07/owl#Thing";
                         }
                         actions.add(new SatisfiabilityAction(arg));
                     }
-                        break;
-                    case 'd': {
+                        if(cmd.hasOption( 'd')) {
                         doAll=false;
                     }
-                        break;
-                    case 's': {
-                        String arg=g.getOptarg();
+                        if(cmd.hasOption( 's')) {
+                        String arg=cmd.getOptionValue( 's');
                         actions.add(new SubsAction(arg,doAll));
                         doAll=true;
                     }
-                        break;
-                    case 'S': {
-                        String arg=g.getOptarg();
+                        if(cmd.hasOption( 'S')) {
+                        String arg=cmd.getOptionValue( 'S');
                         actions.add(new SupersAction(arg,doAll));
                         doAll=true;
                     }
-                        break;
-                    case 'e': {
-                        String arg=g.getOptarg();
+                        if(cmd.hasOption( 'e')) {
+                        String arg=cmd.getOptionValue( 'e');
                         actions.add(new EquivalentsAction(arg));
                     }
-                        break;
-                    case 'U': {
+                        if(cmd.hasOption( 'U')) {
                         actions.add(new EquivalentsAction("http://www.w3.org/2002/07/owl#Nothing"));
                     }
-                        break;
-                    case 'E': {
+                        if(cmd.hasOption( 'E')) {
                         if (conclusionIRI!=null)
                             actions.add(new EntailsAction(config, conclusionIRI));
                     }
-                        break;
-                    case kDumpPrefixes: {
+                        if(cmd.hasOption((char) kDumpPrefixes)) {
                         actions.add(new DumpPrefixesAction());
                     }
-                        break;
-                    case 'N': {
+                        if(cmd.hasOption( 'N')) {
                         ignoreOntologyPrefixes=true;
                     }
-                        break;
-                    case 'p': {
-                        String arg=g.getOptarg();
+                        if(cmd.hasOption( 'p')) {
+                        String arg=cmd.getOptionValue( 'p');
                         int eqIndex=arg.indexOf('=');
                         if (eqIndex==-1) {
                             throw new IllegalArgumentException("the prefix declaration '"+arg+"' is not of the form PN=IRI.");
                         }
                         prefixMappings.put(arg.substring(0,eqIndex),arg.substring(eqIndex+1));
                     }
-                        break;
-                    case kDefaultPrefix: {
-                        String arg=g.getOptarg();
+                        if(cmd.hasOption((char) kDefaultPrefix)) {
+                        String arg=cmd.getOptionValue((char) kDefaultPrefix);
                         defaultPrefix=arg;
                     }
-                        break;
-                    case kBase: {
-                        String arg=g.getOptarg();
+                        if(cmd.hasOption((char) kBase)) {
+                        String arg=cmd.getOptionValue((char) kBase);
                         try {
                             base=new URI(arg);
                         }
                         catch (java.net.URISyntaxException e) {
-                            throw new IllegalArgumentException("'"+arg+"' is not a valid base URI.");
+                            throw new IllegalArgumentException("'"+arg+"' is not a valid base URI.", e);
                         }
                     }
-                        break;
 
-                    case kDirectBlock: {
-                        String arg=g.getOptarg();
+                        if(cmd.hasOption((char) kDirectBlock)) {
+                        String arg=cmd.getOptionValue((char) kDirectBlock);
                         if (arg.toLowerCase().equals("pairwise")) {
                             config.directBlockingType=Configuration.DirectBlockingType.PAIR_WISE;
                         }
@@ -279,9 +259,8 @@ public class CommandLine {
                         else
                             throw new UsageException("unknown direct blocking type '"+arg+"'; supported values are 'pairwise', 'single', and 'optimal'");
                     }
-                        break;
-                    case kBlockStrategy: {
-                        String arg=g.getOptarg();
+                        if(cmd.hasOption((char) kBlockStrategy)) {
+                        String arg=cmd.getOptionValue((char) kBlockStrategy);
                         if (arg.toLowerCase().equals("anywhere")) {
                             config.blockingStrategyType=Configuration.BlockingStrategyType.ANYWHERE;
                         }
@@ -297,13 +276,11 @@ public class CommandLine {
                         else
                             throw new UsageException("unknown blocking strategy type '"+arg+"'; supported values are 'ancestor' and 'anywhere'");
                     }
-                        break;
-                    case kBlockCache: {
+                        if(cmd.hasOption((char) kBlockCache)) {
                         config.blockingSignatureCacheType=Configuration.BlockingSignatureCacheType.CACHED;
                     }
-                        break;
-                    case kExpansion: {
-                        String arg=g.getOptarg();
+                        if(cmd.hasOption((char) kExpansion)) {
+                        String arg=cmd.getOptionValue((char) kExpansion);
                         if (arg.toLowerCase().equals("creation")) {
                             config.existentialStrategyType=Configuration.ExistentialStrategyType.CREATION_ORDER;
                         }
@@ -316,36 +293,24 @@ public class CommandLine {
                         else
                             throw new UsageException("unknown existential strategy type '"+arg+"'; supported values are 'creation', 'el', and 'reuse'");
                     }
-                        break;
-                    case kIgnoreUnsupportedDatatypes: {
+                        if(cmd.hasOption((char) kIgnoreUnsupportedDatatypes)) {
                         config.ignoreUnsupportedDatatypes=true;
                     }
-                        break;
-                    case kNoInconsistentException: {
+                        if(cmd.hasOption((char) kNoInconsistentException)) {
                         config.throwInconsistentOntologyException=false;
                     }
-                        break;
-                    case kDumpClauses: {
-                        actions.add(new DumpClausesAction(g.getOptarg()));
+                        if(cmd.hasOption((char) kDumpClauses)) {
+                        actions.add(new DumpClausesAction(cmd.getOptionValue((char) kDumpClauses)));
                     }
-                        break;
-                    default: {
-                        if (g.getOptopt()!=0) {
-                            throw new UsageException("invalid option -- "+(char)g.getOptopt());
-                        }
-                        throw new UsageException("invalid option");
-                    }
-                    } // end option switch
-                } // end loop over options
-                for (int i=g.getOptind();i<argv.length;++i) {
+                for (String i:cmd.getArgs()) {
                     try {
-                        ontologies.add(IRI.create(base.resolve(argv[i])));
+                        ontologies.add(IRI.create(base.resolve(i)));
                     }
                     catch (IllegalArgumentException e) {
-                        throw new UsageException(argv[i]+" is not a valid ontology name");
+                        throw new UsageException(i+" is not a valid ontology name", e);
                     }
                 }
-            } // done processing arguments
+             // done processing arguments
             StatusOutput status=new StatusOutput(verbosity);
             if (verbosity>3)
                 config.monitor=new Timer(System.err);
@@ -408,7 +373,7 @@ public class CommandLine {
                 }
                 catch (org.semanticweb.owlapi.model.OWLException e) {
                     System.err.println("It all went pear-shaped: "+e.getMessage());
-                    e.printStackTrace(System.err);
+                   throw e;
                 }
             }
             if (!didSomething)

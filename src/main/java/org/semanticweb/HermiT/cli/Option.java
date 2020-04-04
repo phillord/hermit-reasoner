@@ -18,96 +18,96 @@ import static org.semanticweb.HermiT.cli.constants.kPrefixes;
 import static org.semanticweb.HermiT.cli.constants.kPremise;
 
 import java.text.BreakIterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.function.Function;
 
-import gnu.getopt.LongOpt;
+import org.apache.commons.cli.OptionGroup;
+import org.apache.commons.cli.Options;
 
 class Option {
     protected static final Option[] options=new Option[] {
             // meta:
-            new Option('h',"help",kMisc,"display this help and exit"),
-            new Option('V',"version",kMisc,"display version information and exit"),
-            new Option('v',"verbose",kMisc,Boolean.FALSE,"AMOUNT","increase verbosity by AMOUNT levels (default 1)"),
-            new Option('q',"quiet",kMisc,Boolean.FALSE,"AMOUNT","decrease verbosity by AMOUNT levels (default 1)"),
-            new Option('o',"output",kMisc,Boolean.TRUE,"FILE","write output to FILE"),
-            new Option(kPremise,"premise",kMisc,Boolean.TRUE,"PREMISE","set the premise ontology to PREMISE"),
-            new Option(kConclusion,"conclusion",kMisc,Boolean.TRUE,"CONCLUSION","set the conclusion ontology to CONCLUSION"),
+            new Option("h","help",kMisc,"display this help and exit"),
+            new Option("V","version",kMisc,"display version information and exit"),
+            new Option("v","verbose",kMisc,Arg.OPTIONAL,"AMOUNT","increase verbosity by AMOUNT levels (default 1)"),
+            new Option("q","quiet",kMisc,Arg.OPTIONAL,"AMOUNT","decrease verbosity by AMOUNT levels (default 1)"),
+            new Option("o","output",kMisc,Arg.REQUIRED,"FILE","write output to FILE"),
+            new Option(String.valueOf(kPremise),"premise",kMisc,Arg.REQUIRED,"PREMISE","set the premise ontology to PREMISE"),
+            new Option(String.valueOf(kConclusion),"conclusion",kMisc,Arg.REQUIRED,"CONCLUSION","set the conclusion ontology to CONCLUSION"),
 
             // actions:
-            new Option('l',"load",kActions,"parse and preprocess ontologies (default action)"),
-            new Option('c',"classify",kActions,"classify the classes of the ontology, optionally writing taxonomy to a file if -o (--output) is used"),
-            new Option('O',"classifyOPs",kActions,"classify the object properties of the ontology, optionally writing taxonomy to a file if -o (--output) is used"),
-            new Option('D',"classifyDPs",kActions,"classify the data properties of the ontology, optionally writing taxonomy to a file if -o (--output) is used"),
-            new Option('P',"prettyPrint",kActions,"when writing the classified hierarchy to a file, create a proper ontology and nicely indent the axioms according to their leven in the hierarchy"),
-            new Option('k',"consistency",kActions,Boolean.FALSE,"CLASS","check satisfiability of CLASS (default owl:Thing)"),
-            new Option('d',"direct",kActions,"restrict next subs/supers call to only direct sub/superclasses"),
-            new Option('s',"subs",kActions,Boolean.TRUE,"CLASS","output classes subsumed by CLASS (or only direct subs if following --direct)"),
-            new Option('S',"supers",kActions,Boolean.TRUE,"CLASS","output classes subsuming CLASS (or only direct supers if following --direct)"),
-            new Option('e',"equivalents",kActions,Boolean.TRUE,"CLASS","output classes equivalent to CLASS"),
-            new Option('U',"unsatisfiable",kActions,"output unsatisfiable classes (equivalent to --equivalents=owl:Nothing)"),
-            new Option(kDumpPrefixes,"print-prefixes",kActions,"output prefix names available for use in identifiers"),
-            new Option('E',"checkEntailment",kActions,"check whether the premise (option premise) ontology entails the conclusion ontology (option conclusion)"),
+            new Option("l","load",kActions,"parse and preprocess ontologies (default action)"),
+            new Option("c","classify",kActions,"classify the classes of the ontology, optionally writing taxonomy to a file if -o (--output) is used"),
+            new Option("O","classifyOPs",kActions,"classify the object properties of the ontology, optionally writing taxonomy to a file if -o (--output) is used"),
+            new Option("D","classifyDPs",kActions,"classify the data properties of the ontology, optionally writing taxonomy to a file if -o (--output) is used"),
+            new Option("P","prettyPrint",kActions,"when writing the classified hierarchy to a file, create a proper ontology and nicely indent the axioms according to their leven in the hierarchy"),
+            new Option("k","consistency",kActions,Arg.OPTIONAL,"CLASS","check satisfiability of CLASS (default owl:Thing)"),
+            new Option("d","direct",kActions,"restrict next subs/supers call to only direct sub/superclasses"),
+            new Option("s","subs",kActions,Arg.REQUIRED,"CLASS","output classes subsumed by CLASS (or only direct subs if following --direct)"),
+            new Option("S","supers",kActions,Arg.REQUIRED,"CLASS","output classes subsuming CLASS (or only direct supers if following --direct)"),
+            new Option("e","equivalents",kActions,Arg.REQUIRED,"CLASS","output classes equivalent to CLASS"),
+            new Option("U","unsatisfiable",kActions,"output unsatisfiable classes (equivalent to --equivalents=owl:Nothing)"),
+            new Option(String.valueOf(kDumpPrefixes),"print-prefixes",kActions,"output prefix names available for use in identifiers"),
+            new Option("E","checkEntailment",kActions,"check whether the premise (option premise) ontology entails the conclusion ontology (option conclusion)"),
 
-            new Option('N',"no-prefixes",kPrefixes,"do not abbreviate or expand identifiers using prefixes defined in input ontology"),
-            new Option('p',"prefix",kPrefixes,Boolean.TRUE,"PN=IRI","use PN as an abbreviation for IRI in identifiers"),
-            new Option(kDefaultPrefix,"prefix",kPrefixes,Boolean.TRUE,"IRI","use IRI as the default identifier prefix"),
+            new Option("N","no-prefixes",kPrefixes,"do not abbreviate or expand identifiers using prefixes defined in input ontology"),
+            new Option("p","prefix",kPrefixes,Arg.REQUIRED,"PN=IRI","use PN as an abbreviation for IRI in identifiers"),
+            new Option(String.valueOf(kDefaultPrefix),"prefix",kPrefixes,Arg.REQUIRED,"IRI","use IRI as the default identifier prefix"),
 
             // algorithm tweaks:
-            new Option(kDirectBlock,"block-match",kAlgorithm,Boolean.TRUE,"TYPE","identify blocked nodes with TYPE blocking; supported values are 'single', 'pairwise', and 'optimal' (default 'optimal')"),
-            new Option(kBlockStrategy,"block-strategy",kAlgorithm,Boolean.TRUE,"TYPE","use TYPE as blocking strategy; supported values are 'ancestor', 'anywhere', 'core', and 'optimal' (default 'optimal')"),
-            new Option(kBlockCache,"blockersCache",kAlgorithm,"cache blocking nodes for use in later tests; not possible with nominals or core blocking"),
-            new Option(kIgnoreUnsupportedDatatypes,"ignoreUnsupportedDatatypes",kAlgorithm,"ignore unsupported datatypes"),
-            new Option(kExpansion,"expansion-strategy",kAlgorithm,Boolean.TRUE,"TYPE","use TYPE as existential expansion strategy; supported values are 'el', 'creation', 'reuse', and 'optimal' (default 'optimal')"),
-            new Option(kNoInconsistentException,"noInconsistentException",kAlgorithm,"do not throw an exception for an inconsistent ontology"),
+            new Option(String.valueOf(kDirectBlock),"block-match",kAlgorithm,Arg.REQUIRED,"TYPE","identify blocked nodes with TYPE blocking; supported values are 'single', 'pairwise', and 'optimal' (default 'optimal')"),
+            new Option(String.valueOf(kBlockStrategy),"block-strategy",kAlgorithm,Arg.REQUIRED,"TYPE","use TYPE as blocking strategy; supported values are 'ancestor', 'anywhere', 'core', and 'optimal' (default 'optimal')"),
+            new Option(String.valueOf(kBlockCache),"blockersCache",kAlgorithm,"cache blocking nodes for use in later tests; not possible with nominals or core blocking"),
+            new Option(String.valueOf(kIgnoreUnsupportedDatatypes),"ignoreUnsupportedDatatypes",kAlgorithm,"ignore unsupported datatypes"),
+            new Option(String.valueOf(kExpansion),"expansion-strategy",kAlgorithm,Arg.REQUIRED,"TYPE","use TYPE as existential expansion strategy; supported values are 'el', 'creation', 'reuse', and 'optimal' (default 'optimal')"),
+            new Option(String.valueOf(kNoInconsistentException),"noInconsistentException",kAlgorithm,"do not throw an exception for an inconsistent ontology"),
             
             // internals:
-            new Option(kDumpClauses,"dump-clauses",kInternals,Boolean.FALSE,"FILE","output DL-clauses to FILE (default stdout)")
+            new Option(String.valueOf(kDumpClauses),"dump-clauses",kInternals,Arg.OPTIONAL,"FILE","output DL-clauses to FILE (default stdout)")
         };
 
     enum Arg { 
-        NONE(LongOpt.NO_ARGUMENT, "", f->""),
-        OPTIONAL(LongOpt.OPTIONAL_ARGUMENT,"::", f->"[="+f+"]"),
-        REQUIRED(LongOpt.REQUIRED_ARGUMENT,":",f->"="+f);
-        int longOpt;
+        NONE(false,"", f->""),
+        OPTIONAL(false,"::", f->"[="+f+"]"),
+        REQUIRED(true,":",f->"="+f);
         String format;
         Function<String, String> example;
+        boolean argRequired;
 
-        private Arg(int l, String format, Function<String, String> example) {
-            this.longOpt=l;
+        private Arg(boolean required, String format, Function<String, String> example) {
             this.format=format;
             this.example=example;
-        }
-        public static Arg fromBoolean(Boolean b) {
-            if(b==null) {return NONE;}
-            if(b.booleanValue()) {
-                return REQUIRED;
-            }
-            return OPTIONAL;
+            this.argRequired=required;
         }
     }
-    protected int optChar;
+    protected String optChar;
     protected String longStr;
     protected String group;
     protected Arg arg;
     protected String metavar;
     protected String help;
 
-    public Option(int inChar,String inLong,String inGroup,String inHelp) {
-        this(inChar, inLong, inGroup, null, null, inHelp);
+    public Option(String inChar,String inLong,String inGroup,String inHelp) {
+        this(inChar, inLong, inGroup, Arg.NONE, null, inHelp);
     }
-    public Option(int inChar,String inLong,String inGroup,Boolean argRequired,String inMetavar,String inHelp) {
+    public Option(String inChar,String inLong,String inGroup,Arg argRequired,String inMetavar,String inHelp) {
         optChar=inChar;
         longStr=inLong;
         group=inGroup;
-        arg=Arg.fromBoolean(argRequired);
+        arg=argRequired;
         metavar=inMetavar;
         help=inHelp;
     }
-    public static LongOpt[] createLongOpts(Option[] opts) {
-        LongOpt[] out=new LongOpt[opts.length];
-        for (int i=0;i<opts.length;++i) {
-            out[i]=new LongOpt(opts[i].longStr,opts[i].arg.longOpt,null,opts[i].optChar);
+    public static Options createLongOpts(Option[] opts) {
+        Options out=new Options();
+        Map<String,OptionGroup> groups=new LinkedHashMap<>();
+        for (Option o:opts) {
+            org.apache.commons.cli.Option option = new org.apache.commons.cli.Option(o.optChar, o.longStr, o.arg!=Arg.NONE, o.help);
+            option.setRequired(o.arg.argRequired);
+            groups.computeIfAbsent(o.group, x->new OptionGroup()).addOption(option);
         }
+        groups.values().forEach(out::addOptionGroup);
         return out;
     }
 
@@ -135,9 +135,9 @@ class Option {
                     out.append(System.getProperty("line.separator"));
                 }
             }
-            if (o.optChar<256) {
+            if (o.optChar.codePointAt(0)<256) {
                 out.append("  -");
-                out.appendCodePoint(o.optChar);
+                out.append(o.optChar);
                 if (o.longStr!=null&&o.longStr!="") {
                     out.append(", ");
                 }
@@ -165,8 +165,8 @@ class Option {
     public static String formatOptionsString(Option[] opts) {
         StringBuilder out=new StringBuilder();
         for (Option o : opts) {
-            if (o.optChar<256) {
-                out.appendCodePoint(o.optChar);
+            if (o.optChar.codePointAt(0)<256) {
+                out.append(o.optChar);
                 out.append(o.arg.format);
             }
         }
