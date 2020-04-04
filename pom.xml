@@ -130,7 +130,6 @@
 					<excludes>
 						<exclude>**/BlockingValidatorTest.java</exclude>
 					</excludes>
-
 				</configuration>
 			</plugin>
 			<plugin>
@@ -174,6 +173,7 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
+						<Main-Class>org.semanticweb.HermiT.cli.CommandLine</Main-Class>
 						<Implementation-Title>${project.name}</Implementation-Title>
 						<Implementation-Vendor>Oxford University, wrapped by the OWLAPI
 							Team</Implementation-Vendor>
