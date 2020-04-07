@@ -1,23 +1,6 @@
 package org.semanticweb.HermiT.cli;
 
 class constants {
-    protected static final int
-    kTime=1000,
-    kDumpClauses=1001,
-    kDumpRoleBox=1002,
-    kDirectBlock=1003,
-    kBlockStrategy=1004,
-    kBlockCache=1005,
-    kExpansion=1006,
-    kBase=1007,
-    kParser=1008,
-    kDefaultPrefix=1009,
-    kDumpPrefixes=1010,
-    kTaxonomy=1011,
-    kIgnoreUnsupportedDatatypes=1012,
-    kPremise=1013,
-    kConclusion=1014,
-    kNoInconsistentException=1015;
 
     protected static final String versionString=versionString();
     static String versionString() {
@@ -61,5 +44,4 @@ class constants {
         kPrefixes="Prefix name and IRI",
         kAlgorithm="Algorithm settings (expert users only!)",
         kInternals="Internals and debugging (unstable)";
-
 }
