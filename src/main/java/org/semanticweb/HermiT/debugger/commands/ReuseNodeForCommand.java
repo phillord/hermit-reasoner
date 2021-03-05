@@ -48,8 +48,9 @@ public class ReuseNodeForCommand extends AbstractCommand {
     }
     @Override
     public void execute(String[] args) {
+        PrintWriter output = m_debugger.getOutput();
         if (args.length<2) {
-            m_debugger.getOutput().println("Node ID is missing.");
+            output.println("Node ID is missing.");
             return;
         }
         int nodeID;
@@ -57,30 +58,30 @@ public class ReuseNodeForCommand extends AbstractCommand {
             nodeID=Integer.parseInt(args[1]);
         }
         catch (NumberFormatException e) {
-            m_debugger.getOutput().println("Invalid ID of the node. "+e.getMessage());
+            output.println("Invalid ID of the node. "+e.getMessage());
             return;
         }
         Node node=m_debugger.getTableau().getNode(nodeID);
         if (node==null) {
-            m_debugger.getOutput().println("Node with ID '"+nodeID+"' not found.");
+            output.println("Node with ID '"+nodeID+"' not found.");
             return;
         }
         ExistentialExpansionStrategy strategy=m_debugger.getTableau().getExistentialsExpansionStrategy();
         if (strategy instanceof IndividualReuseStrategy) {
             IndividualReuseStrategy reuseStrategy=(IndividualReuseStrategy)strategy;
             AtomicConcept conceptForNode=reuseStrategy.getConceptForNode(node);
-            m_debugger.getOutput().print("Node '");
-            m_debugger.getOutput().print(node.getNodeID());
-            m_debugger.getOutput().print("' is ");
+            output.print("Node '");
+            output.print(node.getNodeID());
+            output.print("' is ");
             if (conceptForNode==null)
-                m_debugger.getOutput().println("not a reuse node for any concept.");
+                output.println("not a reuse node for any concept.");
             else {
-                m_debugger.getOutput().print("a reuse node for the '");
-                m_debugger.getOutput().print(conceptForNode.toString(m_debugger.getPrefixes()));
-                m_debugger.getOutput().println("' concept.");
+                output.print("a reuse node for the '");
+                output.print(conceptForNode.toString(m_debugger.getPrefixes()));
+                output.println("' concept.");
             }
         }
         else
-            m_debugger.getOutput().println("Node reuse strategy is not currently in effect.");
+            output.println("Node reuse strategy is not currently in effect.");
     }
 }

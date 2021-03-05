@@ -10,7 +10,6 @@ import java.text.BreakIterator;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 
 import org.apache.commons.cli.Options;
@@ -128,13 +127,13 @@ class Option {
             org.apache.commons.cli.Option option = new org.apache.commons.cli.Option(o.optChar, o.longStr, o.arg!=Arg.NONE, o.help);
             option.setOptionalArg(o.arg.argRequired);
             if(optionTokens.containsKey(o.optChar)) {
-                throw new RuntimeException("Bug in command line setup: some options are in conflict. "+o.optChar + " is used for two options.");
+                throw new IllegalStateException("Bug in command line setup: some options are in conflict. "+o.optChar + " is used for two options.");
             }
             optionTokens.put(o.optChar, o.longStr);
             out.addOption(option);
         }
         if(optionTokens.values().size()!=new HashSet<>(optionTokens.values()).size()) {
-            throw new RuntimeException("Bug in command line setup: some options are in conflict. Long option keys are used for more than one option. "+optionTokens.values());
+            throw new IllegalStateException("Bug in command line setup: some options are in conflict. Long option keys are used for more than one option. "+optionTokens.values());
         }
         return out;
     }

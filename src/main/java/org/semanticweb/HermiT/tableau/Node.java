@@ -31,11 +31,11 @@ import org.semanticweb.HermiT.model.ExistentialConcept;
  */
 public final class Node implements Serializable {
     private static final long serialVersionUID=-2549229429321484690L;
-    private final static List<ExistentialConcept> NO_EXISTENTIALS=Collections.emptyList();
+    private static final List<ExistentialConcept> NO_EXISTENTIALS=Collections.emptyList();
     /**Signature cache blocker.*/
     public static final Node SIGNATURE_CACHE_BLOCKER=new Node(null);
 
-    static enum NodeState { ACTIVE,MERGED,PRUNED }
+    enum NodeState { ACTIVE,MERGED,PRUNED }
 
     protected final Tableau m_tableau;
     protected int m_nodeID;

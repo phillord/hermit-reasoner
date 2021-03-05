@@ -34,9 +34,7 @@ public class EntireDoubleSubset implements ValueSpaceSubset {
     }
     @Override
     public boolean containsDataValue(Object dataValue) {
-        if (dataValue instanceof Double) 
-            return true;
-        return false;
+        return dataValue instanceof Double;
     }
     @Override
     public void enumerateDataValues(Collection<Object> dataValues) {

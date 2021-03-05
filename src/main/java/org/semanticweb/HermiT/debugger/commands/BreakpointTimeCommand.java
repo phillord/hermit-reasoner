@@ -45,8 +45,9 @@ public class BreakpointTimeCommand extends AbstractCommand {
     }
     @Override
     public void execute(String[] args) {
+        PrintWriter output = m_debugger.getOutput();
         if (args.length<2) {
-            m_debugger.getOutput().println("Time is missing.");
+            output.println("Time is missing.");
             return;
         }
         int breakpointTimeSeconds;
@@ -54,10 +55,10 @@ public class BreakpointTimeCommand extends AbstractCommand {
             breakpointTimeSeconds=Integer.parseInt(args[1]);
         }
         catch (NumberFormatException e) {
-            m_debugger.getOutput().println("Invalid time. "+e.getMessage());
+            output.println("Invalid time. "+e.getMessage());
             return;
         }
-        m_debugger.getOutput().println("Breakpoint time is "+breakpointTimeSeconds+" seconds.");
+        output.println("Breakpoint time is "+breakpointTimeSeconds+" seconds.");
         m_debugger.setBreakpointTime(breakpointTimeSeconds*1000);
     }
 }

@@ -60,13 +60,14 @@ public class DerivationTreeCommand extends AbstractCommand {
     @SuppressWarnings("unused")
     @Override
     public void execute(String[] args) {
+        PrintWriter output = m_debugger.getOutput();
         if (args.length<2) {
-            m_debugger.getOutput().println("The specification of the predicate is missing.");
+            output.println("The specification of the predicate is missing.");
             return;
         }
         Object[] tuple;
         String predicate=args[1];
-        if ("clash".equals(predicate.toLowerCase()))
+        if ("clash".equalsIgnoreCase(predicate))
             tuple=new Object[0];
         else {
             tuple=new Object[args.length-1];
@@ -74,10 +75,10 @@ public class DerivationTreeCommand extends AbstractCommand {
                 tuple[0]=getDLPredicate(predicate);
             }
             catch (Exception e) {
-                m_debugger.getOutput().println("Invalid predicate '"+predicate+"':"+e.getMessage());
+                output.println("Invalid predicate '"+predicate+"':"+e.getMessage());
             }
             if (tuple[0]==null) {
-                m_debugger.getOutput().println("Invalid predicate '"+predicate+"'.");
+                output.println("Invalid predicate '"+predicate+"'.");
                 return;
             }
         }
@@ -87,12 +88,12 @@ public class DerivationTreeCommand extends AbstractCommand {
                 nodeID=Integer.parseInt(args[index+1]);
             }
             catch (NumberFormatException e) {
-                m_debugger.getOutput().println("Invalid ID of the node at argument "+index+". "+e.getMessage());
+                output.println("Invalid ID of the node at argument "+index+". "+e.getMessage());
                 return;
             }
             Node node=m_debugger.getTableau().getNode(nodeID);
             if (node==null) {
-                m_debugger.getOutput().println("Node with ID '"+nodeID+"' not found.");
+                output.println("Node with ID '"+nodeID+"' not found.");
                 return;
             }
             tuple[index]=node;
@@ -103,6 +104,6 @@ public class DerivationTreeCommand extends AbstractCommand {
             selectConsoleWindow();
         }
         else
-            m_debugger.getOutput().println("Atom not found.");
+            output.println("Atom not found.");
     }
 }

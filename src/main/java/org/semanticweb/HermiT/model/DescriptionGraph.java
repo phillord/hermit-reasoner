@@ -89,9 +89,9 @@ public class DescriptionGraph implements DLPredicate,Serializable {
      * @param resultingDLClauses resultingDLClauses
      */
     public void produceStartDLClauses(Collection<DLClause> resultingDLClauses) {
-        Variable X=Variable.create("X");
+        Variable x=Variable.create("X");
         for (AtomicConcept startAtomicConcept : m_startConcepts) {
-            Atom[] antecedent=new Atom[] { Atom.create(startAtomicConcept,X) };
+            Atom[] antecedent=new Atom[] { Atom.create(startAtomicConcept,x) };
             int numberOfVerticesWithStartConcept=0;
             for (AtomicConcept vertexConcept : m_atomicConceptsByVertices)
                 if (vertexConcept.equals(startAtomicConcept))
@@ -100,7 +100,7 @@ public class DescriptionGraph implements DLPredicate,Serializable {
             Atom[] consequent=new Atom[numberOfVerticesWithStartConcept];
             for (int vertex=0;vertex<m_atomicConceptsByVertices.length;vertex++)
                 if (m_atomicConceptsByVertices[vertex].equals(startAtomicConcept))
-                    consequent[index++]=Atom.create(ExistsDescriptionGraph.create(this,vertex),X);
+                    consequent[index++]=Atom.create(ExistsDescriptionGraph.create(this,vertex),x);
             resultingDLClauses.add(DLClause.create(consequent,antecedent));
         }
     }

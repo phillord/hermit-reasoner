@@ -55,11 +55,11 @@ public class ObjectPropertyInclusionManager {
     /**
      * @param factory factory
      * @param axioms axioms
-     * @param _replacementIndex replacementIndex
+     * @param index replacementIndex
      * @return replacement index
      */
-    public int rewriteNegativeObjectPropertyAssertions(OWLDataFactory factory,OWLAxioms axioms,int _replacementIndex) {
-        int replacementIndex=_replacementIndex;
+    public int rewriteNegativeObjectPropertyAssertions(OWLDataFactory factory,OWLAxioms axioms,int index) {
+        int replacementIndex=index;
         // now object property inclusion manager added all non-simple properties to axioms.m_complexObjectPropertyExpressions
         // now that we know which roles are non-simple, we can decide which negative object property assertions have to be
         // expressed as concept assertions so that transitivity rewriting applies properly. All new concepts for the concept
@@ -94,10 +94,10 @@ public class ObjectPropertyInclusionManager {
     /**
      * @param dataFactory dataFactory
      * @param axioms axioms
-     * @param _firstReplacementIndex firstReplacementIndex
+     * @param firstReplacement firstReplacementIndex
      */
-    public void rewriteAxioms(OWLDataFactory dataFactory,OWLAxioms axioms,int _firstReplacementIndex) {
-        int firstReplacementIndex=_firstReplacementIndex;
+    public void rewriteAxioms(OWLDataFactory dataFactory,OWLAxioms axioms,int firstReplacement) {
+        int firstReplacementIndex=firstReplacement;
         // Check the asymmetric object properties for simplicity
         for (OWLObjectPropertyExpression objectPropertyExpression : axioms.m_asymmetricObjectProperties)
             if (axioms.m_complexObjectPropertyExpressions.contains(objectPropertyExpression))
@@ -150,8 +150,7 @@ public class ObjectPropertyInclusionManager {
             boolean isOfNegativePolarity=(replacement.getValue() instanceof OWLObjectComplementOf);
             // Generate states of the automaton
             Map<State,OWLClassExpression> statesToConcepts=new HashMap<>();
-            for (Object stateObject : automaton.states()) {
-                State state=(State)stateObject;
+            for (State state : automaton.states()) {
                 if (state.isInitial())
                     statesToConcepts.put(state,replacement.getValue());
                 else {
@@ -162,8 +161,7 @@ public class ObjectPropertyInclusionManager {
                 }
             }
             // Generate the transitions
-            for (Object transitionObject : automaton.delta()) {
-                Transition transition=(Transition)transitionObject;
+            for (Transition transition : automaton.delta()) {
                 OWLClassExpression fromStateConcept=statesToConcepts.get(transition.start()).getComplementNNF();
                 OWLClassExpression toStateConcept=statesToConcepts.get(transition.end());
                 if (transition.label()==null)
@@ -494,8 +492,7 @@ public class ObjectPropertyInclusionManager {
             else {
                 for (OWLObjectPropertyExpression smallerProperty : inversedPropertyDependencyGraph.getSuccessors(propertyToBuildAutomatonFor)) {
                     boolean someInternalTransitionMatched=false;
-                    for (Object transitionObject : biggerPropertyAutomaton.delta()) {
-                        Transition transition=(Transition)transitionObject;
+                    for (Transition transition : biggerPropertyAutomaton.delta()) {
                         if (transition.label()!=null && transition.label().equals(smallerProperty)) {
                             Automaton smallerPropertyAutomaton=buildCompleteAutomataForProperties(smallerProperty,inversePropertiesMap,individualAutomata,completeAutomata,inversedPropertyDependencyGraph,symmetricObjectProperties,transitiveProperties);
                             if (smallerPropertyAutomaton.delta().size()!=1)
@@ -554,8 +551,8 @@ public class ObjectPropertyInclusionManager {
             }
         }
         else if (individualAutomata.containsKey(propertyToBuildAutomatonFor.getInverseProperty())) {
-            Automaton autoOfInv_Role = individualAutomata.get(propertyToBuildAutomatonFor.getInverseProperty());
-            increaseAutomatonWithInversePropertyAutomaton(leafPropertyAutomaton,autoOfInv_Role);
+            Automaton autoOfInvRole = individualAutomata.get(propertyToBuildAutomatonFor.getInverseProperty());
+            increaseAutomatonWithInversePropertyAutomaton(leafPropertyAutomaton,autoOfInvRole);
         }
     }
     protected Automaton minimizeAndNormalizeAutomaton(Automaton automaton) {
@@ -597,8 +594,7 @@ public class ObjectPropertyInclusionManager {
     }
     protected Set<Transition> deltaToState(Automaton smallerPropertyAutomaton,State state) {
         Set<Transition> incommingTrans=new HashSet<>();
-        for (Object transitionObject : smallerPropertyAutomaton.delta()) {
-            Transition transition=(Transition)transitionObject;
+        for (Transition transition : smallerPropertyAutomaton.delta()) {
             if (transition.end().equals(state))
                 incommingTrans.add(transition);
         }
@@ -758,11 +754,10 @@ public class ObjectPropertyInclusionManager {
     }
     protected Map<State,State> getDisjointUnion(Automaton automaton1,Automaton automaton2) {
         Map<State,State> stateMapperUnionInverse=new HashMap<>();
-        for (Object stateObject : automaton2.states())
-            stateMapperUnionInverse.put((State)stateObject,automaton1.addState(false,false));
+        for (State stateObject : automaton2.states())
+            stateMapperUnionInverse.put(stateObject,automaton1.addState(false,false));
 
-        for (Object transitionObject : automaton2.delta()) {
-            Transition transition=(Transition)transitionObject;
+        for (Transition transition : automaton2.delta()) {
             automaton1.addTransition(new Transition(stateMapperUnionInverse.get(transition.start()),transition.label(),stateMapperUnionInverse.get(transition.end())), "Could not create disjoint union of automata");
         }
         return stateMapperUnionInverse;
@@ -770,12 +765,10 @@ public class ObjectPropertyInclusionManager {
     protected Automaton getMirroredCopy(Automaton automaton) {
         Automaton mirroredCopy=new Automaton();
         Map<State,State> map=new HashMap<>();
-        for (Object stateObject : automaton.states()) {
-            State state=(State)stateObject;
+        for (State state : automaton.states()) {
             map.put(state,mirroredCopy.addState(state.isTerminal(),state.isInitial()));
         }
-        for (Object transitionObject : automaton.delta()) {
-            Transition transition=(Transition)transitionObject;
+        for (Transition transition : automaton.delta()) {
                 Object label = transition.label();
                 if (label instanceof OWLObjectPropertyExpression) {
                     label = ((OWLObjectPropertyExpression)label).getInverseProperty();

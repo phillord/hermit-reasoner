@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.semanticweb.HermiT.Configuration;
-import org.semanticweb.HermiT.model.Atom;
 import org.semanticweb.HermiT.model.DLClause;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLHasKeyAxiom;

@@ -256,6 +256,7 @@ public class Reasoner implements OWLReasoner {
         }
     }
     @Override
+    @Deprecated
     protected void finalize() {
         dispose();
     }
@@ -479,11 +480,9 @@ public class Reasoner implements OWLReasoner {
                     }
                 } else if (axiom instanceof OWLDeclarationAxiom) {
                     OWLEntity entity=((OWLDeclarationAxiom)axiom).getEntity();
-                    if (entity.isOWLClass() && !(isDefined((OWLClass)entity) || Prefixes.isInternalIRI(((OWLClass)entity).getIRI().toString())))
-                        return false;
-                    else if (entity.isOWLObjectProperty() && !(isDefined((OWLObjectProperty)entity) || Prefixes.isInternalIRI(((OWLObjectProperty)entity).getIRI().toString())))
-                        return false;
-                    else if (entity.isOWLDataProperty() && !(isDefined((OWLDataProperty)entity) || Prefixes.isInternalIRI(((OWLDataProperty)entity).getIRI().toString())))
+                    if (entity.isOWLClass() && !(isDefined((OWLClass)entity) || Prefixes.isInternalIRI(entity.getIRI().toString())) 
+                            || entity.isOWLObjectProperty() && !(isDefined((OWLObjectProperty)entity) || Prefixes.isInternalIRI(entity.getIRI().toString()))
+                            || entity.isOWLDataProperty() && !(isDefined((OWLDataProperty)entity) || Prefixes.isInternalIRI(entity.getIRI().toString())))
                         return false;
                 }
             }
@@ -1127,7 +1126,7 @@ public class Reasoner implements OWLReasoner {
             OWLIndividual freshIndividual0=factory.getOWLAnonymousIndividual("fresh-individual-0");
             OWLIndividual freshIndividualN=factory.getOWLAnonymousIndividual("fresh-individual-"+subPropertyChain.size());
             additionalAxioms[axiomIndex++]=factory.getOWLClassAssertionAxiom(pseudoNominal,freshIndividualN);
-            additionalAxioms[axiomIndex++]=factory.getOWLClassAssertionAxiom(allSuperNotPseudoNominal,freshIndividual0);
+            additionalAxioms[axiomIndex]=factory.getOWLClassAssertionAxiom(allSuperNotPseudoNominal,freshIndividual0);
             Tableau tableau=getTableau(additionalAxioms);
             return !tableau.isSatisfiable(true,null,null,null,null,null,new ReasoningTaskDescription(true,"subproperty chain subsumption"));
         }
@@ -1797,7 +1796,7 @@ public class Reasoner implements OWLReasoner {
             return sortBySameAsIfNecessary(result);
         }
         else
-            return new OWLNamedIndividualNodeSet(new HashSet<Node<OWLNamedIndividual>>());
+            return new OWLNamedIndividualNodeSet(new HashSet<>());
     }
     /**
      * @param namedIndividual1 namedIndividual1
@@ -1897,14 +1896,14 @@ public class Reasoner implements OWLReasoner {
         return result;
     }
     /**
-     * @param _subject subject
+     * @param s subject
      * @param propertyExpression propertyExpression
-     * @param _object object
+     * @param o object
      * @return true if has object property relationships
      */
-    public boolean hasObjectPropertyRelationship(OWLNamedIndividual _subject,OWLObjectPropertyExpression propertyExpression,OWLNamedIndividual _object) {
-        OWLNamedIndividual subject=_subject;
-        OWLNamedIndividual object=_object;
+    public boolean hasObjectPropertyRelationship(OWLNamedIndividual s,OWLObjectPropertyExpression propertyExpression,OWLNamedIndividual o) {
+        OWLNamedIndividual subject=s;
+        OWLNamedIndividual object=o;
         checkPreConditions(subject,propertyExpression,object);
         if (!m_isConsistent.booleanValue())
             return true;
@@ -2289,7 +2288,6 @@ public class Reasoner implements OWLReasoner {
             if (!atLF)
                 out.println();
             printer.printRoleHierarchy(m_dataRoleHierarchy,false);
-            atLF=false;
         }
         printer.endPrinting();
     }

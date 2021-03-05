@@ -71,7 +71,10 @@ public class DerivationHistory extends TableauMonitorAdapter {
         Atom[] premises=new Atom[regularBodyAtomsNumber];
         int atomIndex=0;
         for (int index=0;index<premises.length;index++) {
-            premises[atomIndex++]=getAtom(dlClauseEvaluator.getTupleMatchedToBody(index));
+            DLPredicate dlPredicate=dlClauseEvaluator.getBodyAtom(index).getDLPredicate();
+            if (!(dlPredicate instanceof NodeIDLessEqualThan) || 
+                    !(dlPredicate instanceof NodeIDsAscendingOrEqual))
+                premises[atomIndex++]=getAtom(dlClauseEvaluator.getTupleMatchedToBody(index));
         }
         m_derivations.push(new DLClauseApplication(dlClauseEvaluator.getDLClause(dlClauseIndex),premises));
     }
@@ -502,12 +505,9 @@ public class DerivationHistory extends TableauMonitorAdapter {
         }
         @Override
         public Fact getPremise(int premiseIndex) {
-            switch (premiseIndex) {
-            case 0:
+            if (premiseIndex == 0)
                 return m_disjunction;
-            default:
-                throw new IndexOutOfBoundsException();
-            }
+            throw new IndexOutOfBoundsException();
         }
         @Override
         public String toString(Prefixes prefixes) {

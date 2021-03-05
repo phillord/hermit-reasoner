@@ -367,7 +367,7 @@ public class CountingMonitor extends TableauMonitorAdapter {
     }
     protected double getRounded(long nominator, long denominator, int noDecimalPlaces) {
         double number=(double)(nominator)/(double)denominator;
-        int tmp=(int)((number*Math.pow(10,noDecimalPlaces)));
+        int tmp=(int)(number*Math.pow(10,noDecimalPlaces));
         return (tmp/Math.pow(10,noDecimalPlaces));
     }
     /**

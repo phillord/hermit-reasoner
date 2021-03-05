@@ -136,9 +136,9 @@ public class IndividualReuseStrategy extends AbstractExpansionStrategy implement
         // Mark existential as processed BEFORE branching takes place!
         m_existentialExpansionManager.markExistentialProcessed(atLeast,forNode);
         if (!m_existentialExpansionManager.tryFunctionalExpansion(atLeast,forNode)) 
-            if (atLeast instanceof AtLeastDataRange)
+            if (atLeast instanceof AtLeastDataRange) {
                 m_existentialExpansionManager.doNormalExpansion((AtLeastDataRange)atLeast,forNode);
-            else {
+            } else {
                 AtLeastConcept atLeastConcept=(AtLeastConcept)atLeast;
                 if (!tryParentReuse(atLeastConcept,forNode))
                     if (!expandWithModelReuse(atLeastConcept,forNode))

@@ -79,7 +79,7 @@ public class CommandLine {
             try {
                 base = new URI("file", System.getProperty("user.dir") + "/", null);
             } catch (java.net.URISyntaxException e) {
-                throw new RuntimeException("unable to create default IRI base", e);
+                throw new IllegalArgumentException("unable to create default IRI base", e);
             }
             Collection<IRI> ontologies = new LinkedList<>();
             boolean didSomething = false;
@@ -141,11 +141,11 @@ public class CommandLine {
                         output = new PrintWriter(new BufferedOutputStream(new FileOutputStream(file)), true);
                         resultsFileLocation = file.getAbsolutePath();
                     } catch (FileNotFoundException e) {
-                        throw new IllegalArgumentException("unable to open " + arg + " for writing");
+                        throw new IllegalArgumentException("unable to open " + arg + " for writing", e);
                     } catch (SecurityException e) {
-                        throw new IllegalArgumentException("unable to write to " + arg);
+                        throw new IllegalArgumentException("unable to write to " + arg, e);
                     } catch (IOException e) {
-                        throw new IllegalArgumentException("unable to write to " + arg + ": " + e.getMessage());
+                        throw new IllegalArgumentException("unable to write to " + arg + ": " + e.getMessage(), e);
                     }
                 }
             }
@@ -199,7 +199,6 @@ public class CommandLine {
             if (cmd.hasOption(Option.SUPERS)) {
                 String arg = cmd.getOptionValue(Option.SUPERS);
                 actions.add(new SupersAction(arg, doAll));
-                doAll = true;
             }
             if (cmd.hasOption(Option.EQUIVALENTS)) {
                 String arg = cmd.getOptionValue(Option.EQUIVALENTS);
@@ -210,7 +209,7 @@ public class CommandLine {
             }
             if (cmd.hasOption(Option.CHECK_ENTAILMENT)) {
                 if (conclusionIRI != null)
-                    actions.add(new EntailsAction(config, conclusionIRI));
+                    actions.add(new EntailsAction(conclusionIRI));
             }
             if (cmd.hasOption(Option.DUMP_PREFIXES)) {
                 actions.add(new DumpPrefixesAction());
@@ -242,11 +241,11 @@ public class CommandLine {
 
             if (cmd.hasOption(Option.DIRECT_BLOCK)) {
                 String arg = cmd.getOptionValue(Option.DIRECT_BLOCK);
-                if (arg.toLowerCase().equals("pairwise")) {
+                if (arg.equalsIgnoreCase("pairwise")) {
                     config.directBlockingType = Configuration.DirectBlockingType.PAIR_WISE;
-                } else if (arg.toLowerCase().equals("single")) {
+                } else if (arg.equalsIgnoreCase("single")) {
                     config.directBlockingType = Configuration.DirectBlockingType.SINGLE;
-                } else if (arg.toLowerCase().equals("optimal")) {
+                } else if (arg.equalsIgnoreCase("optimal")) {
                     config.directBlockingType = Configuration.DirectBlockingType.OPTIMAL;
                 } else
                     throw new UsageException("unknown direct blocking type '" + arg
@@ -254,13 +253,13 @@ public class CommandLine {
             }
             if (cmd.hasOption(Option.BLOCK_STRATEGY)) {
                 String arg = cmd.getOptionValue(Option.BLOCK_STRATEGY);
-                if (arg.toLowerCase().equals("anywhere")) {
+                if (arg.equalsIgnoreCase("anywhere")) {
                     config.blockingStrategyType = Configuration.BlockingStrategyType.ANYWHERE;
-                } else if (arg.toLowerCase().equals("ancestor")) {
+                } else if (arg.equalsIgnoreCase("ancestor")) {
                     config.blockingStrategyType = Configuration.BlockingStrategyType.ANCESTOR;
-                } else if (arg.toLowerCase().equals("core")) {
+                } else if (arg.equalsIgnoreCase("core")) {
                     config.blockingStrategyType = Configuration.BlockingStrategyType.SIMPLE_CORE;
-                } else if (arg.toLowerCase().equals("optimal")) {
+                } else if (arg.equalsIgnoreCase("optimal")) {
                     config.blockingStrategyType = Configuration.BlockingStrategyType.OPTIMAL;
                 } else
                     throw new UsageException("unknown blocking strategy type '" + arg
@@ -271,11 +270,11 @@ public class CommandLine {
             }
             if (cmd.hasOption(Option.EXPANSION)) {
                 String arg = cmd.getOptionValue(Option.EXPANSION);
-                if (arg.toLowerCase().equals("creation")) {
+                if (arg.equalsIgnoreCase("creation")) {
                     config.existentialStrategyType = Configuration.ExistentialStrategyType.CREATION_ORDER;
-                } else if (arg.toLowerCase().equals("el")) {
+                } else if (arg.equalsIgnoreCase("el")) {
                     config.existentialStrategyType = Configuration.ExistentialStrategyType.EL;
-                } else if (arg.toLowerCase().equals("reuse")) {
+                } else if (arg.equalsIgnoreCase("reuse")) {
                     config.existentialStrategyType = Configuration.ExistentialStrategyType.INDIVIDUAL_REUSE;
                 } else
                     throw new UsageException("unknown existential strategy type '" + arg
@@ -330,7 +329,7 @@ public class CommandLine {
                     // ToStringRenderer.getInstance().setRenderer(renderer);
                     // }
                     long parseTime = System.currentTimeMillis() - startTime;
-                    status.log(2, "Ontology parsed in " + String.valueOf(parseTime) + " msec.");
+                    status.log(2, "Ontology parsed in " + parseTime + " msec.");
                     startTime = System.currentTimeMillis();
                     Reasoner hermit = new Reasoner(config, ontology);
                     Prefixes prefixes = hermit.getPrefixes();
@@ -339,27 +338,27 @@ public class CommandLine {
                             prefixes.declareDefaultPrefix(defaultPrefix);
                         } catch (IllegalArgumentException e) {
                             status.log(2, "Default prefix " + defaultPrefix
-                                    + " could not be registered because there is already a registered default prefix. ");
+                                    + " could not be registered because there is already a registered default prefix. "+e.getMessage());
                         }
                     }
-                    for (String prefixName : prefixMappings.keySet()) {
+                    prefixMappings.forEach((prefixName, prefixMapping) -> {
                         try {
-                            prefixes.declarePrefix(prefixName, prefixMappings.get(prefixName));
+                            prefixes.declarePrefix(prefixName, prefixMapping);
                         } catch (IllegalArgumentException e) {
                             status.log(2,
                                     "Prefixname " + prefixName + " could not be set to "
-                                            + prefixMappings.get(prefixName)
-                                            + " because there is already a registered prefix name for the IRI. ");
+                                            + prefixMapping
+                                            + " because there is already a registered prefix name for the IRI. "+e.getMessage());
                         }
-                    }
+                    });
                     long loadTime = System.currentTimeMillis() - startTime;
-                    status.log(2, "Reasoner created in " + String.valueOf(loadTime) + " msec.");
+                    status.log(2, "Reasoner created in " + loadTime + " msec.");
                     for (Action action : actions) {
                         status.log(2, "Doing action...");
                         startTime = System.currentTimeMillis();
                         action.run(hermit, status, output, ignoreOntologyPrefixes);
                         long actionTime = System.currentTimeMillis() - startTime;
-                        status.log(2, "...action completed in " + String.valueOf(actionTime) + " msec.");
+                        status.log(2, "...action completed in " + actionTime + " msec.");
                     }
                 } catch (org.semanticweb.owlapi.model.OWLException e) {
                     System.err.println("It all went pear-shaped: " + e.getMessage());

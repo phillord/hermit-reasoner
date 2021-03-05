@@ -31,9 +31,7 @@ class EntireFloatSubset implements ValueSpaceSubset {
     }
     @Override
     public boolean containsDataValue(Object dataValue) {
-        if (dataValue instanceof Float)
-            return true;
-        return false;
+        return dataValue instanceof Float;
     }
     @Override
     public void enumerateDataValues(Collection<Object> dataValues) {

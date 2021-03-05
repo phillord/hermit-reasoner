@@ -20,7 +20,6 @@ package org.semanticweb.HermiT.datatypes.owlreal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -46,30 +45,37 @@ import org.semanticweb.HermiT.model.DatatypeRestriction;
 public class OWLRealDatatypeHandler implements DatatypeHandler {
     protected static final String OWL_NS=Prefixes.s_semanticWebPrefixes.get("owl:");
     protected static final String XSD_NS=Prefixes.s_semanticWebPrefixes.get("xsd:");
+    private static final String MAXEXCLUSIVE = XSD_NS+"maxExclusive";
+    private static final String MAXINCLUSIVE = XSD_NS+"maxInclusive";
+    private static final String MINEXCLUSIVE = XSD_NS+"minExclusive";
+    private static final String MININCLUSIVE = XSD_NS+"minInclusive";
+    private static final String OWLRATIONAL = OWL_NS+"rational";
+    private static final String XSDDECIMAL = XSD_NS+"decimal";
+    private static final String OWLREAL = OWL_NS+"real";
 
     protected static final Map<String,NumberInterval> s_intervalsByDatatype;
     protected static final Map<String,ValueSpaceSubset> s_subsetsByDatatype;
     static {
         Object[][] initializer=new Object[][] {
-            { OWL_NS+"real",              NumberRange.REAL,    MinusInfinity.INSTANCE,BoundType.EXCLUSIVE,PlusInfinity.INSTANCE,                  BoundType.EXCLUSIVE },
-            { OWL_NS+"rational",          NumberRange.RATIONAL,MinusInfinity.INSTANCE,BoundType.EXCLUSIVE,PlusInfinity.INSTANCE,                  BoundType.EXCLUSIVE },
-            { XSD_NS+"decimal",           NumberRange.DECIMAL, MinusInfinity.INSTANCE,BoundType.EXCLUSIVE,PlusInfinity.INSTANCE,                  BoundType.EXCLUSIVE },
-            { XSD_NS+"integer",           NumberRange.INTEGER, MinusInfinity.INSTANCE,BoundType.EXCLUSIVE,PlusInfinity.INSTANCE,                  BoundType.EXCLUSIVE },
-            { XSD_NS+"nonNegativeInteger",NumberRange.INTEGER, Integer.valueOf(0),    BoundType.INCLUSIVE,PlusInfinity.INSTANCE,                  BoundType.EXCLUSIVE },
-            { XSD_NS+"positiveInteger",   NumberRange.INTEGER, Integer.valueOf(0),    BoundType.EXCLUSIVE,PlusInfinity.INSTANCE,                  BoundType.EXCLUSIVE },
-            { XSD_NS+"nonPositiveInteger",NumberRange.INTEGER, MinusInfinity.INSTANCE,BoundType.EXCLUSIVE,Integer.valueOf(0),                     BoundType.INCLUSIVE },
-            { XSD_NS+"negativeInteger",   NumberRange.INTEGER, MinusInfinity.INSTANCE,BoundType.EXCLUSIVE,Integer.valueOf(0),                     BoundType.EXCLUSIVE },
-            { XSD_NS+"long",              NumberRange.INTEGER, Long.valueOf(Long.MIN_VALUE),        BoundType.INCLUSIVE,Long.valueOf(Long.MAX_VALUE),                         BoundType.INCLUSIVE },
-            { XSD_NS+"int",               NumberRange.INTEGER, Integer.valueOf(Integer.MIN_VALUE),     BoundType.INCLUSIVE,Integer.valueOf(Integer.MAX_VALUE),                      BoundType.INCLUSIVE },
-            { XSD_NS+"short",             NumberRange.INTEGER, Integer.valueOf(Short.MIN_VALUE),  BoundType.INCLUSIVE,Integer.valueOf(Short.MAX_VALUE),                   BoundType.INCLUSIVE },
-            { XSD_NS+"byte",              NumberRange.INTEGER, Integer.valueOf(Byte.MIN_VALUE),   BoundType.INCLUSIVE,Integer.valueOf(Byte.MAX_VALUE),                    BoundType.INCLUSIVE },
-            { XSD_NS+"unsignedLong",      NumberRange.INTEGER, Integer.valueOf(0),    BoundType.INCLUSIVE,new BigInteger("18446744073709551615"), BoundType.INCLUSIVE },
-            { XSD_NS+"unsignedInt",       NumberRange.INTEGER, Integer.valueOf(0),    BoundType.INCLUSIVE,Long.valueOf(4294967295L),                            BoundType.INCLUSIVE },
-            { XSD_NS+"unsignedShort",     NumberRange.INTEGER, Integer.valueOf(0),    BoundType.INCLUSIVE,Integer.valueOf(65535),                                  BoundType.INCLUSIVE },
-            { XSD_NS+"unsignedByte",      NumberRange.INTEGER, Integer.valueOf(0),    BoundType.INCLUSIVE,Integer.valueOf(255),                                    BoundType.INCLUSIVE },
+            { OWLREAL,                    NumberRange.REAL,    MinusInfinity.INSTANCE,            BoundType.EXCLUSIVE,PlusInfinity.INSTANCE,                  BoundType.EXCLUSIVE },
+            { OWLRATIONAL,                NumberRange.RATIONAL,MinusInfinity.INSTANCE,            BoundType.EXCLUSIVE,PlusInfinity.INSTANCE,                  BoundType.EXCLUSIVE },
+            { XSDDECIMAL,                 NumberRange.DECIMAL, MinusInfinity.INSTANCE,            BoundType.EXCLUSIVE,PlusInfinity.INSTANCE,                  BoundType.EXCLUSIVE },
+            { XSD_NS+"integer",           NumberRange.INTEGER, MinusInfinity.INSTANCE,            BoundType.EXCLUSIVE,PlusInfinity.INSTANCE,                  BoundType.EXCLUSIVE },
+            { XSD_NS+"nonNegativeInteger",NumberRange.INTEGER, Integer.valueOf(0),                BoundType.INCLUSIVE,PlusInfinity.INSTANCE,                  BoundType.EXCLUSIVE },
+            { XSD_NS+"positiveInteger",   NumberRange.INTEGER, Integer.valueOf(0),                BoundType.EXCLUSIVE,PlusInfinity.INSTANCE,                  BoundType.EXCLUSIVE },
+            { XSD_NS+"nonPositiveInteger",NumberRange.INTEGER, MinusInfinity.INSTANCE,            BoundType.EXCLUSIVE,Integer.valueOf(0),                     BoundType.INCLUSIVE },
+            { XSD_NS+"negativeInteger",   NumberRange.INTEGER, MinusInfinity.INSTANCE,            BoundType.EXCLUSIVE,Integer.valueOf(0),                     BoundType.EXCLUSIVE },
+            { XSD_NS+"long",              NumberRange.INTEGER, Long.valueOf(Long.MIN_VALUE),      BoundType.INCLUSIVE,Long.valueOf(Long.MAX_VALUE),           BoundType.INCLUSIVE },
+            { XSD_NS+"int",               NumberRange.INTEGER, Integer.valueOf(Integer.MIN_VALUE),BoundType.INCLUSIVE,Integer.valueOf(Integer.MAX_VALUE),     BoundType.INCLUSIVE },
+            { XSD_NS+"short",             NumberRange.INTEGER, Integer.valueOf(Short.MIN_VALUE),  BoundType.INCLUSIVE,Integer.valueOf(Short.MAX_VALUE),       BoundType.INCLUSIVE },
+            { XSD_NS+"byte",              NumberRange.INTEGER, Integer.valueOf(Byte.MIN_VALUE),   BoundType.INCLUSIVE,Integer.valueOf(Byte.MAX_VALUE),        BoundType.INCLUSIVE },
+            { XSD_NS+"unsignedLong",      NumberRange.INTEGER, Integer.valueOf(0),                BoundType.INCLUSIVE,new BigInteger("18446744073709551615"), BoundType.INCLUSIVE },
+            { XSD_NS+"unsignedInt",       NumberRange.INTEGER, Integer.valueOf(0),                BoundType.INCLUSIVE,Long.valueOf(4294967295L),              BoundType.INCLUSIVE },
+            { XSD_NS+"unsignedShort",     NumberRange.INTEGER, Integer.valueOf(0),                BoundType.INCLUSIVE,Integer.valueOf(65535),                 BoundType.INCLUSIVE },
+            { XSD_NS+"unsignedByte",      NumberRange.INTEGER, Integer.valueOf(0),                BoundType.INCLUSIVE,Integer.valueOf(255),                   BoundType.INCLUSIVE },
         };
-        Map<String,NumberInterval> intervalsByDatatype=new ConcurrentHashMap<>();
-        Map<String,ValueSpaceSubset> subsetsByDatatype=new ConcurrentHashMap<>();
+        Map<String,NumberInterval> intervalsByDatatype=new ConcurrentHashMap<>(20, 0.75F, 1);
+        Map<String,ValueSpaceSubset> subsetsByDatatype=new ConcurrentHashMap<>(20, 0.75F, 1);
         for (Object[] row : initializer) {
             String datatypeURI=(String)row[0];
             NumberInterval interval=new NumberInterval((NumberRange)row[1],NumberRange.NOTHING,(Number)row[2],(BoundType)row[3],(Number)row[4],(BoundType)row[5]);
@@ -80,15 +86,15 @@ public class OWLRealDatatypeHandler implements DatatypeHandler {
         s_subsetsByDatatype=subsetsByDatatype;
     }
     protected static final ValueSpaceSubset EMPTY_SUBSET=new OWLRealValueSpaceSubset();
-    protected static final Set<String> s_supportedFacetURIs=new HashSet<>(Arrays.asList(XSD_NS+"minInclusive",XSD_NS+"minExclusive",XSD_NS+"maxInclusive",XSD_NS+"maxExclusive"));
+    protected static final Set<String> s_supportedFacetURIs=new HashSet<>(Arrays.asList(MININCLUSIVE,MINEXCLUSIVE,MAXINCLUSIVE,MAXEXCLUSIVE));
     protected static final Map<String,Set<String>> s_datatypeSupersets;
     protected static final Map<String,Set<String>> s_datatypeDisjoints;
     static {
-        Map<String,Set<String>> datatypeSupersets=new HashMap<>();
-        Map<String,Set<String>> datatypeDisjoints=new HashMap<>();
+        Map<String,Set<String>> datatypeSupersets=new ConcurrentHashMap<>(20, 0.75F, 1);
+        Map<String,Set<String>> datatypeDisjoints=new ConcurrentHashMap<>(20, 0.75F, 1);
         for (String datatypeURI : s_intervalsByDatatype.keySet()) {
-            datatypeSupersets.put(datatypeURI,new HashSet<String>());
-            datatypeDisjoints.put(datatypeURI,new HashSet<String>());
+            datatypeSupersets.put(datatypeURI,new HashSet<>());
+            datatypeDisjoints.put(datatypeURI,new HashSet<>());
         }
         for (Map.Entry<String,NumberInterval> entry1 : s_intervalsByDatatype.entrySet()) {
             String datatypeURI1=entry1.getKey();
@@ -118,11 +124,11 @@ public class OWLRealDatatypeHandler implements DatatypeHandler {
     public Object parseLiteral(String lexicalForm,String datatypeURI) throws MalformedLiteralException {
         assert s_intervalsByDatatype.containsKey(datatypeURI);
         try {
-            if ((OWL_NS+"real").equals(datatypeURI))
+            if (OWLREAL.equals(datatypeURI))
                 throw new MalformedLiteralException(lexicalForm,datatypeURI);
-            else if ((OWL_NS+"rational").equals(datatypeURI))
+            else if (OWLRATIONAL.equals(datatypeURI))
                 return Numbers.parseRational(lexicalForm);
-            else if ((XSD_NS+"decimal").equals(datatypeURI))
+            else if (XSDDECIMAL.equals(datatypeURI))
                 return Numbers.parseDecimal(lexicalForm);
             else
                 return Numbers.parseInteger(lexicalForm);
@@ -235,7 +241,7 @@ public class OWLRealDatatypeHandler implements DatatypeHandler {
         for (int index=datatypeRestriction.getNumberOfFacetRestrictions()-1;index>=0;--index) {
             String facetURI=datatypeRestriction.getFacetURI(index);
             Number facetDataValue=(Number)datatypeRestriction.getFacetValue(index).getDataValue();
-            if ((XSD_NS+"minInclusive").equals(facetURI)) {
+            if (MININCLUSIVE.equals(facetURI)) {
                 int comparison=Numbers.compare(facetDataValue,lowerBound);
                 if (comparison>0) {
                     lowerBound=facetDataValue;
@@ -244,7 +250,7 @@ public class OWLRealDatatypeHandler implements DatatypeHandler {
                 // If the numbers are equal, nothing needs to be done to the bound type because
                 // the existing one is at least as restrictive as INCLUSIVE.
             }
-            else if ((XSD_NS+"minExclusive").equals(facetURI)) {
+            else if (MINEXCLUSIVE.equals(facetURI)) {
                 int comparison=Numbers.compare(facetDataValue,lowerBound);
                 if (comparison>0) {
                     lowerBound=facetDataValue;
@@ -255,7 +261,7 @@ public class OWLRealDatatypeHandler implements DatatypeHandler {
                     lowerBoundType=BoundType.EXCLUSIVE;
                 }
             }
-            else if ((XSD_NS+"maxInclusive").equals(facetURI)) {
+            else if (MAXINCLUSIVE.equals(facetURI)) {
                 int comparison=Numbers.compare(facetDataValue,upperBound);
                 if (comparison<0) {
                     upperBound=facetDataValue;
@@ -264,7 +270,7 @@ public class OWLRealDatatypeHandler implements DatatypeHandler {
                 // If the numbers are equal, nothing needs to be done to the bound type because
                 // the existing one is at least as restrictive as INCLUSIVE.
             }
-            else if ((XSD_NS+"maxExclusive").equals(facetURI)) {
+            else if (MAXEXCLUSIVE.equals(facetURI)) {
                 int comparison=Numbers.compare(facetDataValue,upperBound);
                 if (comparison<0) {
                     upperBound=facetDataValue;

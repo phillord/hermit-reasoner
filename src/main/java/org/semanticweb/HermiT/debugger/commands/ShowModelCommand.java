@@ -69,11 +69,12 @@ public class ShowModelCommand extends AbstractCommand {
         }
         else {
             DLPredicate dlPredicate=null;
+            PrintWriter output = m_debugger.getOutput();
             try {
                 dlPredicate = getDLPredicate(args[1]);
             }
             catch (Exception e) {
-                m_debugger.getOutput().println(args[1]+" is invalid: "+e.getMessage());
+                output.println(args[1]+" is invalid: "+e.getMessage());
             }
             if (dlPredicate!=null) {
                 ExtensionTable extensionTable=m_debugger.getTableau().getExtensionManager().getExtensionTable(dlPredicate.getArity()+1);
@@ -90,12 +91,12 @@ public class ShowModelCommand extends AbstractCommand {
                     nodeID=Integer.parseInt(args[1]);
                 }
                 catch (NumberFormatException e) {
-                    m_debugger.getOutput().println("Invalid ID of the node. "+e.getMessage());
+                    output.println("Invalid ID of the node. "+e.getMessage());
                     return;
                 }
                 Node node=m_debugger.getTableau().getNode(nodeID);
                 if (node==null) {
-                    m_debugger.getOutput().println("Node with ID '"+nodeID+"' not found.");
+                    output.println("Node with ID '"+nodeID+"' not found.");
                     return;
                 }
                 for (ExtensionTable extensionTable : m_debugger.getTableau().getExtensionManager().getExtensionTables())

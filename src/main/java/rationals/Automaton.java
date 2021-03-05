@@ -355,7 +355,7 @@ public class Automaton implements Acceptor, StateMachine, Rational, Cloneable {
             if (o == this) {
                 return true;
             }
-            if (o == null || !(o instanceof Key))
+            if (!(o instanceof Key))
                 return false;
             Key t = (Key) o;
             return (l == null ? t.l == null : l.equals(t.l)) && (s == null ? t.s == null : s.equals(t.s));
@@ -383,8 +383,8 @@ public class Automaton implements Acceptor, StateMachine, Rational, Cloneable {
     }
 
     @Override
-    public Set<State> steps(Set<State> _s, List<?> word) {
-        Set<State> s = _s;
+    public Set<State> steps(Set<State> set, List<?> word) {
+        Set<State> s = set;
         for(Object o: word) {
             s = step(s, o);
             if (s.isEmpty())

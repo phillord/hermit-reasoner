@@ -34,6 +34,7 @@ import java.util.TreeMap;
 
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
+import javax.swing.WindowConstants;
 
 import org.semanticweb.HermiT.Prefixes;
 import org.semanticweb.HermiT.debugger.commands.ActiveNodesCommand;
@@ -76,7 +77,7 @@ public class Debugger extends TableauMonitorForwarder {
     /**Monospaced font.*/
     public static final Font s_monospacedFont=new Font("Monospaced",Font.PLAIN,12);
     /**WaitOption.*/
-    public static enum WaitOption {
+    public enum WaitOption {
         /**GRAPH_EXPANSION*/
         GRAPH_EXPANSION,
         /**EXISTENTIAL_EXPANSION*/
@@ -130,7 +131,7 @@ public class Debugger extends TableauMonitorForwarder {
         JScrollPane scrollPane=new JScrollPane(m_consoleTextArea);
         scrollPane.setPreferredSize(new Dimension(800,300));
         m_mainFrame=new JFrame("HermiT Debugger");
-        m_mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        m_mainFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         m_mainFrame.setContentPane(scrollPane);
         m_mainFrame.pack();
         Dimension screenSize=Toolkit.getDefaultToolkit().getScreenSize();
@@ -311,8 +312,8 @@ public class Debugger extends TableauMonitorForwarder {
                 m_lastCommand=commandLine;
         }
     }
-    protected String[] parse(String _command) {
-        String command=_command.trim();
+    protected String[] parse(String c) {
+        String command=c.trim();
         List<String> arguments=new ArrayList<>();
         int firstChar=0;
         int nextSpace=command.indexOf(' ');

@@ -56,8 +56,9 @@ public class ShowSubtreeCommand extends AbstractCommand {
     @SuppressWarnings("unused")
     @Override
     public void execute(String[] args) {
+        PrintWriter output = m_debugger.getOutput();
         if (args.length<2) {
-            m_debugger.getOutput().println("Node ID is missing.");
+            output.println("Node ID is missing.");
             return;
         }
         int nodeID;
@@ -65,12 +66,12 @@ public class ShowSubtreeCommand extends AbstractCommand {
             nodeID=Integer.parseInt(args[1]);
         }
         catch (NumberFormatException e) {
-            m_debugger.getOutput().println("Invalid ID of the first node. "+e.getMessage());
+            output.println("Invalid ID of the first node. "+e.getMessage());
             return;
         }
         Node subtreeRoot=m_debugger.getTableau().getNode(nodeID);
         if (subtreeRoot==null) {
-            m_debugger.getOutput().println("Node with ID '"+nodeID+"' not found.");
+            output.println("Node with ID '"+nodeID+"' not found.");
             return;
         }
         new SubtreeViewer(m_debugger,subtreeRoot);

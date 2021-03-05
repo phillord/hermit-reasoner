@@ -28,7 +28,7 @@ public class RDFPlainLiteralLengthInterval {
     /**
      * Language tag mode.
      */
-    public static enum LanguageTagMode {
+    public enum LanguageTagMode {
         /**
          * Present.
          */

@@ -166,9 +166,9 @@ public class DateTime {
             appendPadded(buffer,millisecond,3);
         }
         if (m_timeZoneOffset!=NO_TIMEZONE)
-            if (m_timeZoneOffset==0)
+            if (m_timeZoneOffset==0) {
                 buffer.append('Z');
-            else {
+            } else {
                 int absTimeZoneOffset;
                 if (m_timeZoneOffset>0) {
                     buffer.append('+');
@@ -283,7 +283,7 @@ public class DateTime {
         return (int)(m_timeOnTimeline*3L+m_timeZoneOffset+(m_lastDayInstant ? 117L : 0L));
     }
     protected long getTimeOnTimelineRaw(int year,int month,int day,int hour,int minute,int second,int millisecond) {
-        long yearMinusOne=year-1;
+        long yearMinusOne=year-1L;
         long timeOnTimeline=31536000L*yearMinusOne;
         timeOnTimeline+=86400L*(yearMinusOne/400-yearMinusOne/100+yearMinusOne/4);
         for (int monthIndex=1;monthIndex<month;monthIndex++)
@@ -294,7 +294,7 @@ public class DateTime {
         return timeOnTimeline;
     }
     protected static long daysToYearStart(int year) {
-        long yearMinusOne=year-1;
+        long yearMinusOne=year-1L;
         return 365*yearMinusOne+(yearMinusOne/400)-(yearMinusOne/100)+(yearMinusOne/4);
     }
     protected static int daysInMonth(int year,int month) {

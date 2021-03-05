@@ -80,16 +80,19 @@ public class BinaryDataDatatypeHandler implements DatatypeHandler {
     public ValueSpaceSubset createValueSpaceSubset(DatatypeRestriction datatypeRestriction) {
         String datatypeURI=datatypeRestriction.getDatatypeURI();
         assert s_managedDatatypeURIs.contains(datatypeURI);
-        if (datatypeRestriction.getNumberOfFacetRestrictions()==0)
-            if (XSD_HEX_BINARY.equals(datatypeURI))
+        if (datatypeRestriction.getNumberOfFacetRestrictions()==0) {
+            if (XSD_HEX_BINARY.equals(datatypeURI)) {
                 return HEX_BINARY_ALL;
-            else
+            } else {
                 return BASE_64_BINARY_ALL;
+            }
+        }
         BinaryDataLengthInterval interval=getIntervalFor(datatypeRestriction);
-        if (interval==null)
+        if (interval==null) {
             return EMPTY;
-        else
+        } else {
             return new BinaryDataValueSpaceSubset(interval);
+        }
     }
     @Override
     public ValueSpaceSubset conjoinWithDR(ValueSpaceSubset valueSpaceSubset,DatatypeRestriction datatypeRestriction) {

@@ -134,9 +134,9 @@ public class OWLClausification {
         for (List<OWLObjectPropertyExpression> properties : axioms.m_disjointObjectProperties)
             for (int i=0;i<properties.size();i++)
                 for (int j=i+1;j<properties.size();j++) {
-                    Atom atom_i=getRoleAtom(properties.get(i),X,Y);
-                    Atom atom_j=getRoleAtom(properties.get(j),X,Y);
-                    DLClause dlClause=DLClause.create(new Atom[] {},new Atom[] { atom_i,atom_j });
+                    Atom atomI=getRoleAtom(properties.get(i),X,Y);
+                    Atom atomJ=getRoleAtom(properties.get(j),X,Y);
+                    DLClause dlClause=DLClause.create(new Atom[] {},new Atom[] { atomI,atomJ });
                     dlClauses.add(dlClause);
                 }
         if (contains(axioms, factory.getOWLBottomDataProperty())) {
@@ -146,10 +146,10 @@ public class OWLClausification {
         for (List<OWLDataPropertyExpression> properties : axioms.m_disjointDataProperties)
             for (int i=0;i<properties.size();i++)
                 for (int j=i+1;j<properties.size();j++) {
-                    Atom atom_i=getRoleAtom(properties.get(i),X,Y);
-                    Atom atom_j=getRoleAtom(properties.get(j),X,Z);
+                    Atom atomI=getRoleAtom(properties.get(i),X,Y);
+                    Atom atomJ=getRoleAtom(properties.get(j),X,Z);
                     Atom atom_ij=Atom.create(Inequality.create(),Y,Z);
-                    DLClause dlClause=DLClause.create(new Atom[] { atom_ij },new Atom[] { atom_i,atom_j });
+                    DLClause dlClause=DLClause.create(new Atom[] { atom_ij },new Atom[] { atomI,atomJ });
                     dlClauses.add(dlClause);
                 }
         Set<Atom> positiveFacts=new HashSet<>();
@@ -210,28 +210,28 @@ public class OWLClausification {
         List<Atom> bodyAtoms=new ArrayList<>();
         // we have two named individuals (corresponding to X1 and X2) that
         // might have to be equated
-        Variable X2=Variable.create("X2");
-        Variable X1=Variable.create("X1");
-        headAtoms.add(Atom.create(Equality.INSTANCE,X1,X2));
+        Variable x2=Variable.create("X2");
+        Variable x1=Variable.create("X1");
+        headAtoms.add(Atom.create(Equality.INSTANCE,x1,x2));
         // keys only work on datatypes and named individuals
-        bodyAtoms.add(Atom.create(AtomicConcept.INTERNAL_NAMED,X1));
-        bodyAtoms.add(Atom.create(AtomicConcept.INTERNAL_NAMED,X2));
+        bodyAtoms.add(Atom.create(AtomicConcept.INTERNAL_NAMED,x1));
+        bodyAtoms.add(Atom.create(AtomicConcept.INTERNAL_NAMED,x2));
         // the concept expression of a hasKey statement is either a concept
         // name or a negated concept name after normalization
         OWLClassExpression description=object.getClassExpression();
         if (description instanceof OWLClass) {
             OWLClass owlClass=(OWLClass)description;
             if (!owlClass.isOWLThing()) {
-                bodyAtoms.add(Atom.create(AtomicConcept.create(owlClass.getIRI().toString()),X1));
-                bodyAtoms.add(Atom.create(AtomicConcept.create(owlClass.getIRI().toString()),X2));
+                bodyAtoms.add(Atom.create(AtomicConcept.create(owlClass.getIRI().toString()),x1));
+                bodyAtoms.add(Atom.create(AtomicConcept.create(owlClass.getIRI().toString()),x2));
             }
         }
         else if (description instanceof OWLObjectComplementOf) {
             OWLClassExpression internal=((OWLObjectComplementOf)description).getOperand();
             if (internal instanceof OWLClass) {
                 OWLClass owlClass=(OWLClass)internal;
-                headAtoms.add(Atom.create(AtomicConcept.create(owlClass.getIRI().toString()),X1));
-                headAtoms.add(Atom.create(AtomicConcept.create(owlClass.getIRI().toString()),X2));
+                headAtoms.add(Atom.create(AtomicConcept.create(owlClass.getIRI().toString()),x1));
+                headAtoms.add(Atom.create(AtomicConcept.create(owlClass.getIRI().toString()),x2));
             }
             else
                 throw new IllegalStateException(INVALID_NORMAL_FORM);
@@ -244,8 +244,8 @@ public class OWLClausification {
             Variable y;
             y=Variable.create("Y"+yIndex);
             yIndex++;
-            bodyAtoms.add(getRoleAtom(p,X1,y));
-            bodyAtoms.add(getRoleAtom(p,X2,y));
+            bodyAtoms.add(getRoleAtom(p,x1,y));
+            bodyAtoms.add(getRoleAtom(p,x2,y));
             // also the key criteria are named in case of object properties
             bodyAtoms.add(Atom.create(AtomicConcept.INTERNAL_NAMED,y));
         }
@@ -255,11 +255,11 @@ public class OWLClausification {
             Variable y;
             y=Variable.create("Y"+yIndex);
             yIndex++;
-            bodyAtoms.add(getRoleAtom(d,X1,y));
+            bodyAtoms.add(getRoleAtom(d,x1,y));
             Variable y2;
             y2=Variable.create("Y"+yIndex);
             yIndex++;
-            bodyAtoms.add(getRoleAtom(d,X2,y2));
+            bodyAtoms.add(getRoleAtom(d,x2,y2));
             headAtoms.add(Atom.create(Inequality.INSTANCE,y,y2));
         }
         Atom[] hAtoms=new Atom[headAtoms.size()];
@@ -591,7 +591,7 @@ public class OWLClausification {
         }
         @Override
         public void visit(OWLDataHasValue object) {
-            throw new IllegalStateException("Internal error: Invalid normal form.");
+            throw new IllegalStateException(INVALID_NORMAL_FORM);
         }
         @Override
         public void visit(OWLDataMinCardinality object) {

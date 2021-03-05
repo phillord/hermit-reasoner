@@ -59,9 +59,10 @@ public class Letter extends RationalExpr {
 
     @Override
     public boolean equals(Object obj) {
-        Letter lt = (Letter) obj;
-        if (lt == null)
+        if(!(obj instanceof Letter)) {
             return false;
+        }
+        Letter lt = (Letter) obj;
         return lt.label == null ? this.label == null : lt.label.equals(label);
     }
 

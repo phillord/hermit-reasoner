@@ -151,12 +151,12 @@ public final class GroundDisjunction implements Serializable {
     /**
      * @param tableau tableau
      * @param disjunctIndex disjunctIndex
-     * @param _dependencySet dependencySet
+     * @param dependencies dependencySet
      * @return true if modified
      */
     @SuppressWarnings("fallthrough")
-    public boolean addDisjunctToTableau(Tableau tableau,int disjunctIndex,DependencySet _dependencySet) {
-        DependencySet dependencySet=_dependencySet;
+    public boolean addDisjunctToTableau(Tableau tableau,int disjunctIndex,DependencySet dependencies) {
+        DependencySet dependencySet=dependencies;
         DLPredicate dlPredicate=getDLPredicate(disjunctIndex);
         switch (dlPredicate.getArity()) {
         case 1:

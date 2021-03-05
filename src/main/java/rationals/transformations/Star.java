@@ -16,7 +16,7 @@ import rationals.Transition;
 public class Star implements UnaryTransformation {
     @Override
     public Automaton transform(Automaton a) {
-        if (a.delta().size() == 0)
+        if (a.delta().isEmpty())
             return Automaton.epsilonAutomaton();
         Automaton b = new Automaton();
         State ni = b.addState(true, true);

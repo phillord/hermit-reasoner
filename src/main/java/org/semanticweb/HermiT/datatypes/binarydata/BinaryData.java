@@ -18,7 +18,6 @@
 package org.semanticweb.HermiT.datatypes.binarydata;
 
 import java.io.ByteArrayOutputStream;
-import java.util.Arrays;
 import java.util.Base64;
 
 /**
@@ -156,11 +155,9 @@ public class BinaryData {
     }
     protected static String removeWhitespace(String lexicalForm) {
         StringBuilder b=new StringBuilder(lexicalForm);
-        for(int i=0;i<b.length();) {
+        for(int i=b.length()-1;i>-1;i--) {
             if(Character.isWhitespace(b.charAt(i))) {
                 b.deleteCharAt(i);
-            }else {
-                i++;
             }
         }
         return b.toString();

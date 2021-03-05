@@ -19,7 +19,6 @@ package org.semanticweb.HermiT.datatypes.rdfplainliteral;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +40,7 @@ public class RDFPlainLiteralDatatypeHandler implements DatatypeHandler {
     protected static final String RDF_NS=Prefixes.s_semanticWebPrefixes.get("rdf:");
     protected static final Map<String,ValueSpaceSubset> s_subsetsByDatatype=subsets();
     static final Map<String,ValueSpaceSubset> subsets() {
-        Map<String,ValueSpaceSubset> subsetsByDatatype = new ConcurrentHashMap<>();
+        Map<String,ValueSpaceSubset> subsetsByDatatype = new ConcurrentHashMap<>(16, 0.75F, 1);
         subsetsByDatatype.put(RDF_NS+"PlainLiteral",      new RDFPlainLiteralLengthValueSpaceSubset(new RDFPlainLiteralLengthInterval(RDFPlainLiteralLengthInterval.LanguageTagMode.ABSENT,0,Integer.MAX_VALUE),new RDFPlainLiteralLengthInterval(RDFPlainLiteralLengthInterval.LanguageTagMode.PRESENT,0,Integer.MAX_VALUE)));
         subsetsByDatatype.put(RDF_NS+"langString",        new RDFPlainLiteralLengthValueSpaceSubset(new RDFPlainLiteralLengthInterval(RDFPlainLiteralLengthInterval.LanguageTagMode.ABSENT,0,Integer.MAX_VALUE),new RDFPlainLiteralLengthInterval(RDFPlainLiteralLengthInterval.LanguageTagMode.PRESENT,0,Integer.MAX_VALUE)));
         subsetsByDatatype.put(XSD_NS+"string",            new RDFPlainLiteralLengthValueSpaceSubset(new RDFPlainLiteralLengthInterval(RDFPlainLiteralLengthInterval.LanguageTagMode.ABSENT,0,Integer.MAX_VALUE)));
@@ -67,7 +66,7 @@ public class RDFPlainLiteralDatatypeHandler implements DatatypeHandler {
             { XSD_NS+"NMTOKEN",          RDF_NS+"PlainLiteral", XSD_NS+"string", XSD_NS+"normalizedString", XSD_NS+"token", XSD_NS+"NMTOKEN"},
             { XSD_NS+"language",         RDF_NS+"PlainLiteral", XSD_NS+"string", XSD_NS+"normalizedString", XSD_NS+"token", XSD_NS+"language" },
         };
-        Map<String,Set<String>> datatypeSupersets=new ConcurrentHashMap<>();
+        Map<String,Set<String>> datatypeSupersets=new ConcurrentHashMap<>(16, 0.75F, 1);
         for (int datatype1Index=0;datatype1Index<initializer.length;datatype1Index++) {
             String datatype1URI=initializer[datatype1Index][0];
             Set<String> set=new HashSet<>();

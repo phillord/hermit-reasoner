@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
@@ -155,16 +154,16 @@ public final class HyperresolutionManager implements Serializable {
         guardingAtomicConceptAtoms1.clear();
         guardingAtomicConceptAtoms2.clear();
         Atom deltaOldAtom=swappedDLClause.getBodyAtom(0);
-        Variable X=deltaOldAtom.getArgumentVariable(0);
-        Variable Y=deltaOldAtom.getArgumentVariable(1);
+        Variable x=deltaOldAtom.getArgumentVariable(0);
+        Variable y=deltaOldAtom.getArgumentVariable(1);
         for (int bodyIndex=1;bodyIndex<swappedDLClause.getBodyLength();bodyIndex++) {
             Atom atom=swappedDLClause.getBodyAtom(bodyIndex);
             if (atom.getDLPredicate() instanceof AtomicConcept) {
                 Variable variable=atom.getArgumentVariable(0);
                 if (variable!=null) {
-                    if (X.equals(variable))
+                    if (x.equals(variable))
                         guardingAtomicConceptAtoms1.add(atom);
-                    if (Y.equals(variable))
+                    if (y.equals(variable))
                         guardingAtomicConceptAtoms2.add(atom);
                 }
             }

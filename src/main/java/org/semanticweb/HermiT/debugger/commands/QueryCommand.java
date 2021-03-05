@@ -59,12 +59,13 @@ public class QueryCommand extends AbstractCommand {
     @Override
     public void execute(String[] args) {
         Object[] tuple=new Object[args.length-1];
+        PrintWriter output = m_debugger.getOutput();
         if (tuple.length==0) {
             // no further argument, so just check for a clash
             if (m_debugger.getTableau().getExtensionManager().containsClash())
-                m_debugger.getOutput().println("The model currently contains a clash.");
+                output.println("The model currently contains a clash.");
             else
-                m_debugger.getOutput().println("The modelcurrently does not contain a clash.");
+                output.println("The modelcurrently does not contain a clash.");
         }
         else {
             // further query arguments
@@ -75,10 +76,10 @@ public class QueryCommand extends AbstractCommand {
                     tuple[0]=getDLPredicate(args[1]);
                 }
                 catch (Exception e) {
-                    m_debugger.getOutput().println("Invalid predicate '"+args[1]+"':"+e.getMessage());
+                    output.println("Invalid predicate '"+args[1]+"':"+e.getMessage());
                 }
                 if (tuple[0]==null) {
-                    m_debugger.getOutput().println("Invalid predicate '"+args[1]+"'.");
+                    output.println("Invalid predicate '"+args[1]+"'.");
                     return;
                 }
             }
@@ -93,12 +94,12 @@ public class QueryCommand extends AbstractCommand {
                         nodeID=Integer.parseInt(nodeIDString);
                     }
                     catch (NumberFormatException e) {
-                        m_debugger.getOutput().println("Invalid node ID. "+e.getMessage());
+                        output.println("Invalid node ID. "+e.getMessage());
                         return;
                     }
                     tuple[index]=m_debugger.getTableau().getNode(nodeID);
                     if (tuple[index]==null) {
-                        m_debugger.getOutput().println("Node with ID '"+nodeID+"' not found.");
+                        output.println("Node with ID '"+nodeID+"' not found.");
                         return;
                     }
                 }

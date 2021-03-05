@@ -281,15 +281,17 @@ public class OWLNormalization {
         int andIndex=-1;
         for (int index=0;index<descriptions.size();index++) {
             OWLClassExpression description=descriptions.get(index);
-            if (!isSimple(description))
+            if (!isSimple(description)) {
                 if (description instanceof OWLObjectIntersectionOf) {
-                    if (andIndex==-1)
+                    if (andIndex==-1) {
                         andIndex=index;
-                    else
+                    } else {
                         return false;
-                }
-                else
+                    }
+                } else {
                     return false;
+                }
+            }
         }
         if (andIndex==-1)
             return false;
@@ -306,15 +308,17 @@ public class OWLNormalization {
         int andIndex=-1;
         for (int index=0;index<descriptions.size();index++) {
             OWLDataRange description=descriptions.get(index);
-            if (!isLiteral(description))
+            if (!isLiteral(description)) {
                 if (description instanceof OWLDataIntersectionOf) {
-                    if (andIndex==-1)
+                    if (andIndex==-1) {
                         andIndex=index;
-                    else
+                    } else {
                         return false;
-                }
-                else
+                    }
+                } else {
                     return false;
+                }
+            }
         }
         if (andIndex==-1)
             return false;
@@ -436,7 +440,7 @@ public class OWLNormalization {
                     last=next;
                 }
                 if(last!=first)
-                m_classExpressionInclusionsAsDisjunctions.add(Arrays.asList( negative(last),positive(first) ));
+                    m_classExpressionInclusionsAsDisjunctions.add(Arrays.asList( negative(last),positive(first) ));
         }
         @Override
         public void visit(OWLDisjointClassesAxiom axiom) {
@@ -614,7 +618,7 @@ public class OWLNormalization {
                     last=next;
                 }
                 if(first!=last)
-                addInclusion(last,first);
+                    addInclusion(last,first);
         }
         @Override
         public void visit(OWLDisjointDataPropertiesAxiom axiom) {

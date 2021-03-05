@@ -44,20 +44,21 @@ public class HistoryCommand extends AbstractCommand {
     }
     @Override
     public void execute(String[] args) {
+        PrintWriter output = m_debugger.getOutput();
         if (args.length<2) {
-            m_debugger.getOutput().println("The status is missing.");
+            output.println("The status is missing.");
             return;
         }
         String status=args[1].toLowerCase();
         if ("on".equals(status)) {
             m_debugger.setForwardingOn(true);
-            m_debugger.getOutput().println("Derivation history on.");
+            output.println("Derivation history on.");
         }
         else if ("off".equals(status)) {
             m_debugger.setForwardingOn(false);
-            m_debugger.getOutput().println("Derivation history off.");
+            output.println("Derivation history off.");
         }
         else
-            m_debugger.getOutput().println("Incorrect history status '"+status+"'.");
+            output.println("Incorrect history status '"+status+"'.");
     }
 }

@@ -162,9 +162,7 @@ public class NumberInterval {
         if (lowerBoundComparison>0 || (lowerBoundComparison==0 && m_lowerBoundType==BoundType.EXCLUSIVE))
             return false;
         int upperBoundComparison=Numbers.compare(m_upperBound,number);
-        if (upperBoundComparison<0 || (upperBoundComparison==0 && m_upperBoundType==BoundType.EXCLUSIVE))
-            return false;
-        return true;
+        return !(upperBoundComparison<0 || (upperBoundComparison==0 && m_upperBoundType==BoundType.EXCLUSIVE));
     }
     /**
      * @param numbers collection to add to

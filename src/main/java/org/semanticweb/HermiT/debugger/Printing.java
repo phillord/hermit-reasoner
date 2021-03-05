@@ -345,7 +345,7 @@ public class Printing {
         ConceptType(int typeIndex) {
             m_typeIndex=typeIndex;
         }
-        final int getTypeIndex() {
+        int getTypeIndex() {
             return m_typeIndex;
         }
     }

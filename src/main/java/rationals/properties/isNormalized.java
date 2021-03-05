@@ -18,11 +18,9 @@ public class isNormalized implements UnaryTest {
         if (a.terminals().size() != 1)
             return false;
         State e = a.initials().iterator().next();
-        if (a.deltaMinusOne(e).size() > 0)
+        if (!a.deltaMinusOne(e).isEmpty())
             return false;
         e = a.terminals().iterator().next();
-        if (a.delta(e).size() > 0)
-            return false;
-        return true;
+        return a.delta(e).isEmpty();
     }
 }

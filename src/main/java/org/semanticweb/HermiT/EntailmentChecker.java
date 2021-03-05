@@ -28,8 +28,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import org.semanticweb.HermiT.model.AtomicRole;
-import org.semanticweb.HermiT.model.InternalDatatype;
 import org.semanticweb.HermiT.tableau.ReasoningTaskDescription;
 import org.semanticweb.HermiT.tableau.Tableau;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -48,14 +46,12 @@ import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDataIntersectionOf;
-import org.semanticweb.owlapi.model.OWLDataMaxCardinality;
 import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLDataPropertyAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLDataPropertyDomainAxiom;
 import org.semanticweb.owlapi.model.OWLDataPropertyExpression;
 import org.semanticweb.owlapi.model.OWLDataPropertyRangeAxiom;
 import org.semanticweb.owlapi.model.OWLDataRange;
-import org.semanticweb.owlapi.model.OWLDataSomeValuesFrom;
 import org.semanticweb.owlapi.model.OWLDataUnionOf;
 import org.semanticweb.owlapi.model.OWLDatatype;
 import org.semanticweb.owlapi.model.OWLDatatypeDefinitionAxiom;
@@ -585,12 +581,12 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
                     // We now that the set of object properties is a singleton set since otherwise this would
                     // not be a valid root and the map should have one single entry, but lets double-check.
                     if (ind2OP.size()!=1) {
-                        throw new RuntimeException("Internal error: HermiT decided that the anonymous individuals form a valid forest, but actually they do not. ");
+                        throw new IllegalStateException("Internal error: HermiT decided that the anonymous individuals form a valid forest, but actually they do not. ");
                     }
                     OWLNamedIndividual subject=ind2OP.keySet().iterator().next();
                     Set<OWLObjectPropertyExpression> ops=ind2OP.get(subject);
                     if (ops.size()!=1) {
-                        throw new RuntimeException("Internal error: HermiT decided that the anonymous individuals form a valid forest, but actually they do not. ");
+                        throw new IllegalStateException("Internal error: HermiT decided that the anonymous individuals form a valid forest, but actually they do not. ");
                     }
                     OWLObjectPropertyExpression op=ops.iterator().next().getInverseProperty();
                     OWLClassExpression c=getClassExpressionFor(df,root,null);
@@ -651,7 +647,7 @@ public class EntailmentChecker implements OWLAxiomVisitorEx<Boolean> {
                 else {
                     pair=new Edge(successor,node);
                     if (!edgeOPLabels.containsKey(pair)) {
-                        throw new RuntimeException("Internal error: some edge in the forest of anonymous individuals has no edge label although it should. ");
+                        throw new IllegalStateException("Internal error: some edge in the forest of anonymous individuals has no edge label although it should. ");
                     }
                     else {
                         op=edgeOPLabels.get(pair);

@@ -41,9 +41,9 @@ public class Concatenation implements BinaryTransformation {
         ContainsEpsilon ce = new ContainsEpsilon();
         boolean ace = ce.test(a);
         boolean bce = ce.test(b);
-        if (ap.states().size() == 0 && ace)
+        if (ap.states().isEmpty() && ace)
             return b;
-        if (bp.states().size() == 0 && bce)
+        if (bp.states().isEmpty() && bce)
             return a;
         State junc = null; /* junction state */
         Automaton c = new Automaton();

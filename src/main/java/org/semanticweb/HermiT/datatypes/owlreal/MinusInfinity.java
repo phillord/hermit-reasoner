@@ -43,7 +43,7 @@ final class MinusInfinity extends Number {
     public long longValue() {
         throw new UnsupportedOperationException();
     }
-    protected static Object readResolve() {
+    protected Object readResolve() {
         return INSTANCE;
     }
 }

@@ -49,10 +49,7 @@ public class Reducer implements UnaryTransformation {
             }
             
         }
-        if (!tbs.isEmpty()) {
-            return false;
-        }
-        return true;
+        return tbs.isEmpty();
     }
 
     @Override

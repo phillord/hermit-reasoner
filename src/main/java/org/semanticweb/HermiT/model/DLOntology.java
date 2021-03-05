@@ -414,40 +414,40 @@ public class DLOntology implements Serializable {
      * @return toString
      */
     public String toString(Prefixes prefixes) {
-        StringBuilder StringBuilder=new StringBuilder("Prefixes: [").append(CRLF);
+        StringBuilder builder=new StringBuilder("Prefixes: [").append(CRLF);
         for (Map.Entry<String,String> entry : prefixes.getPrefixIRIsByPrefixName().entrySet()) {
-            StringBuilder.append("  ").append(entry.getKey()).append(" = <").append(entry.getValue()).append('>').append(CRLF);
+            builder.append("  ").append(entry.getKey()).append(" = <").append(entry.getValue()).append('>').append(CRLF);
         }
-        StringBuilder.append("]").append(CRLF).append("Deterministic DL-clauses: [").append(CRLF);
+        builder.append("]").append(CRLF).append("Deterministic DL-clauses: [").append(CRLF);
         int numDeterministicClauses=0;
         for (DLClause dlClause : m_dlClauses)
             if (dlClause.getHeadLength()<=1) {
                 numDeterministicClauses++;
-                StringBuilder.append("  ").append(dlClause.toString(prefixes)).append(CRLF);
+                builder.append("  ").append(dlClause.toString(prefixes)).append(CRLF);
             }
-        StringBuilder.append("]").append(CRLF).append("Disjunctive DL-clauses: [").append(CRLF);
+        builder.append("]").append(CRLF).append("Disjunctive DL-clauses: [").append(CRLF);
         int numNondeterministicClauses=0;
         int numDisjunctions=0;
         for (DLClause dlClause : m_dlClauses)
             if (dlClause.getHeadLength()>1) {
                 numNondeterministicClauses++;
                 numDisjunctions+=dlClause.getHeadLength();
-                StringBuilder.append("  ").append(dlClause.toString(prefixes)).append(CRLF);
+                builder.append("  ").append(dlClause.toString(prefixes)).append(CRLF);
             }
-        StringBuilder.append("]").append(CRLF).append("ABox: [").append(CRLF);
+        builder.append("]").append(CRLF).append("ABox: [").append(CRLF);
         for (Atom atom : m_positiveFacts) {
-            StringBuilder.append("  ").append(atom.toString(prefixes)).append(CRLF);
+            builder.append("  ").append(atom.toString(prefixes)).append(CRLF);
         }
         for (Atom atom : m_negativeFacts) {
-            StringBuilder.append("  !").append(atom.toString(prefixes)).append(CRLF);
+            builder.append("  !").append(atom.toString(prefixes)).append(CRLF);
         }
-        StringBuilder.append("]").append(CRLF).append("Statistics: [").append(CRLF)
+        builder.append("]").append(CRLF).append("Statistics: [").append(CRLF)
         .append("  Number of deterministic clauses: " + numDeterministicClauses).append(CRLF)
         .append("  Number of nondeterministic clauses: " + numNondeterministicClauses).append(CRLF)
         .append("  Number of disjunctions: " + numDisjunctions).append(CRLF)
         .append("  Number of positive facts: " + m_positiveFacts.size()).append(CRLF)
         .append("  Number of negative facts: " + m_negativeFacts.size()).append(CRLF).append("]");
-        return StringBuilder.toString();
+        return builder.toString();
     }
     /**
      * @return statistics
@@ -455,9 +455,9 @@ public class DLOntology implements Serializable {
     public String getStatistics() {
         return getStatistics(null,null,null);
     }
-    protected String getStatistics(Integer _numDeterministicClauses, Integer _numNondeterministicClauses, Integer _numDisjunctions) {
+    protected String getStatistics(Integer deterministicClauses, Integer nondeterministicClauses, Integer disjunctions) {
         int numDeterministicClauses;int numNondeterministicClauses; int numDisjunctions;
-        if (_numDeterministicClauses==null || _numNondeterministicClauses==null || _numDisjunctions==null) {
+        if (deterministicClauses==null || nondeterministicClauses==null || disjunctions==null) {
             numDeterministicClauses=0;
             numNondeterministicClauses=0;
             numDisjunctions=0;
@@ -470,11 +470,11 @@ public class DLOntology implements Serializable {
                 }
             }
         }else {
-            numDeterministicClauses=_numDeterministicClauses.intValue();
-            numNondeterministicClauses=_numNondeterministicClauses.intValue();
-            numDisjunctions=_numDisjunctions.intValue();
+            numDeterministicClauses=deterministicClauses.intValue();
+            numNondeterministicClauses=nondeterministicClauses.intValue();
+            numDisjunctions=disjunctions.intValue();
         }
-        StringBuilder StringBuilder=new StringBuilder("DL clauses statistics: [").append(CRLF)
+        StringBuilder builder=new StringBuilder("DL clauses statistics: [").append(CRLF)
                 .append("  Number of deterministic clauses: " ).append( numDeterministicClauses).append(CRLF)
                 .append("  Number of nondeterministic clauses: " ).append( numNondeterministicClauses).append(CRLF)
                 .append("  Overall number of disjunctions: " ).append( numDisjunctions).append(CRLF)
@@ -488,7 +488,7 @@ public class DLOntology implements Serializable {
                 .append("  Number of object properties: ").append( m_allAtomicObjectRoles.size()).append(CRLF)
                 .append("  Number of data properties: ").append( m_allAtomicDataRoles.size()).append(CRLF)
                 .append("  Number of individuals: " ).append( m_allIndividuals.size()).append(CRLF).append("]");
-        return StringBuilder.toString();
+        return builder.toString();
     }
     @Override
     public String toString() {

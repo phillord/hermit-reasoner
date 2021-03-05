@@ -119,20 +119,21 @@ public class Transition {
         /* store computed value */
         if (hash != Integer.MIN_VALUE)
             return hash;
-        int x, y, z;
-        if (start == null)
-            x = 0;
-        else
-            x = start.hashCode();
-        if (end == null)
-            y = 0;
-        else
-            y = end.hashCode();
-        if (label == null)
-            z = 0;
-        else
-            z = label.hashCode();
-        int t = new java.awt.Point(x, y).hashCode();
-        return hash = new java.awt.Point(t, z).hashCode();
+        hash=hash(val(start), val(end), val(label));
+        return hash;
+    }
+
+    private static int val(Object o) {
+        if(o==null) {
+            return 0;
+        }
+        return o.hashCode();
+    }
+
+    private static int hash(int x, int y, int z) {
+        long bits = x;
+        bits ^= ((long)y) * 31;
+        bits ^= ((long)z) * 31;
+        return (((int) bits) ^ ((int) (bits >> 32)));
     }
 }

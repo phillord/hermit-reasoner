@@ -125,8 +125,8 @@ public class AnyURIDatatypeHandler implements DatatypeHandler {
                 return new AnyURIValueSpaceSubset(difference);
         }
     }
-    protected Automaton getAutomatonFor(Automaton _automaton,DatatypeRestriction datatypeRestriction) {
-        Automaton automaton = _automaton;
+    protected Automaton getAutomatonFor(Automaton automa,DatatypeRestriction datatypeRestriction) {
+        Automaton automaton=automa;
         int minLength=0;
         int maxLength=Integer.MAX_VALUE;
         for (int index=datatypeRestriction.getNumberOfFacetRestrictions()-1;index>=0;--index) {

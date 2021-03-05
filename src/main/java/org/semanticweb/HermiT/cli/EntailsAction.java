@@ -1,5 +1,7 @@
 package org.semanticweb.HermiT.cli;
 
+import static org.semanticweb.owlapi.util.OWLAPIStreamUtils.asUnorderedSet;
+
 import java.io.PrintWriter;
 
 import org.semanticweb.HermiT.*;
@@ -10,7 +12,7 @@ class EntailsAction implements Action {
 
     final IRI conclusionIRI;
 
-    public EntailsAction(Configuration config,IRI conclusionIRI) {
+    public EntailsAction(IRI conclusionIRI) {
         this.conclusionIRI=conclusionIRI;
     }
     @Override
@@ -21,7 +23,7 @@ class EntailsAction implements Action {
             OWLOntology conclusions = m.loadOntology(conclusionIRI);
             status.log(2,"Conclusion ontology loaded.");
             EntailmentChecker checker=new EntailmentChecker(hermit, m.getOWLDataFactory());
-            boolean isEntailed=checker.entails(conclusions.getLogicalAxioms());
+            boolean isEntailed=checker.entails(asUnorderedSet( conclusions.logicalAxioms()));
             status.log(2,"Conclusion ontology is "+(isEntailed?"":"not ")+"entailed.");
             output.println(isEntailed);
         }

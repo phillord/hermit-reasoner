@@ -69,12 +69,12 @@ public class DatatypeRegistry {
             datatypeHandler=s_handlersByDatatypeURI.get(datatypeURI);
         }
         if (datatypeHandler==null) {
-            String CRLF=System.getProperty("line.separator");
+            String crlf=System.getProperty("line.separator");
             String message=
-                "HermiT supports all and only the datatypes of the OWL 2 datatype map, see "+CRLF+
-                "http://www.w3.org/TR/owl2-syntax/#Datatype_Maps. "+CRLF+
-                "The datatype '"+datatypeURI+"' is not part of the OWL 2 datatype map and "+CRLF+
-                "no custom datatype definition is given; "+CRLF+
+                "HermiT supports all and only the datatypes of the OWL 2 datatype map, see "+crlf+
+                "http://www.w3.org/TR/owl2-syntax/#Datatype_Maps. "+crlf+
+                "The datatype '"+datatypeURI+"' is not part of the OWL 2 datatype map and "+crlf+
+                "no custom datatype definition is given; "+crlf+
                 "therefore, HermiT cannot handle this datatype.";
             throw new UnsupportedDatatypeException(message);
         }
@@ -97,11 +97,11 @@ public class DatatypeRegistry {
             handler=getDatatypeHandlerFor(datatypeURI);
         }
         catch (UnsupportedDatatypeException e) {
-            String CRLF=System.getProperty("line.separator");
+            String crlf=System.getProperty("line.separator");
             String message=
-                "Literals can only use the datatypes from the OWL 2 datatype map, see "+CRLF+
-                "http://www.w3.org/TR/owl2-syntax/#Datatype_Maps. "+CRLF+
-                "The datatype '"+datatypeURI+"' is not part of the OWL 2 datatype map and "+CRLF+
+                "Literals can only use the datatypes from the OWL 2 datatype map, see "+crlf+
+                "http://www.w3.org/TR/owl2-syntax/#Datatype_Maps. "+crlf+
+                "The datatype '"+datatypeURI+"' is not part of the OWL 2 datatype map and "+crlf+
                 "HermiT cannot parse this literal.";
             throw new UnsupportedDatatypeException(message, e);
         }

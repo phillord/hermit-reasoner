@@ -276,8 +276,8 @@ public class DLClauseEvaluator implements Serializable {
             m_buckets=newBuckets;
             m_threshold=(int)(newCapacity*0.75);
         }
-        protected static int getIndexFor(int _hashCode,int tableLength) {
-            int hashCode=_hashCode;
+        protected static int getIndexFor(int c,int tableLength) {
+            int hashCode=c;
             hashCode+=~(hashCode << 9);
             hashCode^=(hashCode >>> 14);
             hashCode+=(hashCode << 4);

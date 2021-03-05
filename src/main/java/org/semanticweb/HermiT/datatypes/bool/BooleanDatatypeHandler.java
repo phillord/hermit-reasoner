@@ -39,10 +39,9 @@ public class BooleanDatatypeHandler implements DatatypeHandler {
         return s_managedDatatypeURIs;
     }
     @Override
-    public Object parseLiteral(String _lexicalForm,String datatypeURI) throws MalformedLiteralException {
-        String lexicalForm = _lexicalForm;
+    public Object parseLiteral(String form,String datatypeURI) throws MalformedLiteralException {
         assert XSD_BOOLEAN.equals(datatypeURI);
-        lexicalForm=lexicalForm.trim();
+        String lexicalForm=form.trim();
         if ("false".equalsIgnoreCase(lexicalForm) || "0".equals(lexicalForm))
             return Boolean.FALSE;
         else if ("true".equalsIgnoreCase(lexicalForm) || "1".equals(lexicalForm))

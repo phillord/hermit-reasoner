@@ -61,12 +61,10 @@ public class ValidatedSingleDirectBlockingChecker implements DirectBlockingCheck
     }
     @Override
     public boolean isBlockedBy(Node blocker,Node blocked) {
-        boolean isBlockedBy=
-            !blocker.isBlocked() &&
+        return !blocker.isBlocked() &&
             blocker.getNodeType()==NodeType.TREE_NODE &&
             blocked.getNodeType()==NodeType.TREE_NODE &&
             ((ValidatedSingleBlockingObject)blocker.getBlockingObject()).getAtomicConceptsLabel()==((ValidatedSingleBlockingObject)blocked.getBlockingObject()).getAtomicConceptsLabel();
-        return isBlockedBy;
     }
     @Override
     public int blockingHashCode(Node node) {

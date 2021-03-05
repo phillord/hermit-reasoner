@@ -152,31 +152,26 @@ public class Numbers {
         NumberType typeN2=NumberType.getNumberTypeFor(n2);
         NumberType maxType=NumberType.getMaxNumberType(typeN1,typeN2);
         switch (maxType) {
-        case INTEGER: {
+        case INTEGER:
                 int iv1=n1.intValue();
                 int iv2=n2.intValue();
-                return iv1<iv2 ? -1 : (iv1==iv2 ? 0 : 1);
-            }
-        case LONG: {
+                return Integer.compare(iv1, iv2);
+        case LONG:
                 long lv1=n1.longValue();
                 long lv2=n2.longValue();
-                return lv1<lv2 ? -1 : (lv1==lv2 ? 0 : 1);
-            }
-        case BIG_INTEGER: {
+                return Long.compare(lv1, lv2);
+        case BIG_INTEGER:
                 BigInteger bi1=toBigInteger(n1,typeN1);
                 BigInteger bi2=toBigInteger(n2,typeN2);
                 return bi1.compareTo(bi2);
-            }
-        case BIG_DECIMAL: {
+        case BIG_DECIMAL:
                 BigDecimal bd1=toBigDecimal(n1,typeN1);
                 BigDecimal bd2=toBigDecimal(n2,typeN2);
                 return bd1.compareTo(bd2);
-            }
-        case BIG_RATIONAL: {
+        case BIG_RATIONAL:
                 BigRational br1=toBigRational(n1,typeN1);
                 BigRational br2=toBigRational(n2,typeN2);
                 return br1.compareTo(br2);
-            }
         default:
             throw new IllegalArgumentException();
         }
@@ -226,12 +221,11 @@ public class Numbers {
             return new BigRational(BigInteger.valueOf(n.longValue()),BigInteger.ONE);
         case BIG_INTEGER:
             return new BigRational((BigInteger)n,BigInteger.ONE);
-        case BIG_DECIMAL: {
+        case BIG_DECIMAL:
                 BigDecimal decimal=(BigDecimal)n;
                 // This method assumes that all BigDecimals actually have some decimal digits.
                 assert decimal.scale()>0;
                 return new BigRational(decimal.unscaledValue(),BigInteger.TEN.pow(decimal.scale()));
-            }
         case BIG_RATIONAL: 
             return (BigRational)n;
         default:
@@ -242,7 +236,7 @@ public class Numbers {
     /**
      * Boundary direction.
      */
-    public static enum BoundaryDirection {
+    public enum BoundaryDirection {
         /**
          * Upper.
          */
@@ -302,7 +296,7 @@ public class Numbers {
                 return ((BigInteger)bound).add(BigInteger.ONE);
             else
                 return ((BigInteger)bound).subtract(BigInteger.ONE);
-        case BIG_DECIMAL: {
+        case BIG_DECIMAL:
                 // This method assumes that all BigDecimals actually have some decimal digits.
                 BigDecimal bd=(BigDecimal)bound;
                 assert bd.scale()>0;
@@ -322,8 +316,7 @@ public class Numbers {
                     return Long.valueOf(bi.longValue());
                 else
                     return bi;
-            }
-        case BIG_RATIONAL: {
+        case BIG_RATIONAL:
                 // This method assumes that all BigRationals are not integers.
                 BigRational br=(BigRational)bound;
                 BigDecimal numerator=new BigDecimal(br.getNumerator());
@@ -344,7 +337,6 @@ public class Numbers {
                     return Long.valueOf(quotient.longValue());
                 else
                     return quotient;
-            }
         default:
             throw new IllegalArgumentException();
         }
@@ -364,27 +356,24 @@ public class Numbers {
         NumberType typeUpperBound=NumberType.getNumberTypeFor(upperBoundInclusive);
         NumberType maxType=NumberType.getMaxNumberType(typeLowerBound,typeUpperBound);
         switch (maxType) {
-        case INTEGER: {
+        case INTEGER:
                 int size=upperBoundInclusive.intValue()-lowerBoundInclusive.intValue()+1;
                 if (size<=0)
                     return 0;
                 else
                     return Math.max(argument-size,0);
-            }
-        case LONG: {
-                long size=upperBoundInclusive.longValue()-lowerBoundInclusive.longValue()+1;
-                if (size<=0L)
+        case LONG:
+                long s=upperBoundInclusive.longValue()-lowerBoundInclusive.longValue()+1;
+                if (s<=0L)
                     return 0;
                 else
-                    return (int)Math.max((argument)-size,0);
-            }
-        case BIG_INTEGER: {
+                    return (int)Math.max((argument)-s,0);
+        case BIG_INTEGER:
                 BigInteger leftover=BigInteger.valueOf(argument).subtract(toBigInteger(upperBoundInclusive,typeUpperBound)).add(toBigInteger(lowerBoundInclusive,typeLowerBound)).subtract(BigInteger.ONE);
                 if (leftover.compareTo(BigInteger.ZERO)<=0)
                     return 0;
                 else
                     return leftover.intValue();
-            }
         case BIG_DECIMAL:
         case BIG_RATIONAL:
         default:
@@ -397,20 +386,18 @@ public class Numbers {
      */
     public static Number nextInteger(Number integer) {
         switch (NumberType.getNumberTypeFor(integer)) {
-        case INTEGER: {
+        case INTEGER:
                 int value=integer.intValue();
                 if (value==Integer.MAX_VALUE)
                     return Long.valueOf(((long)value)+1);
                 else
                     return Integer.valueOf(value+1);
-            }
-        case LONG: {
-                long value=integer.longValue();
-                if (value==Long.MAX_VALUE)
-                    return BigInteger.valueOf(value).add(BigInteger.ONE);
+        case LONG:
+                long v=integer.longValue();
+                if (v==Long.MAX_VALUE)
+                    return BigInteger.valueOf(v).add(BigInteger.ONE);
                 else
-                    return Long.valueOf(value+1);
-            }
+                    return Long.valueOf(v+1);
         case BIG_INTEGER:
             return ((BigInteger)integer).add(BigInteger.ONE);
         case BIG_DECIMAL:

@@ -46,8 +46,9 @@ public class ShowDescriptionGraphCommand extends AbstractCommand {
     }
     @Override
     public void execute(String[] args) {
+        PrintWriter output = m_debugger.getOutput();
         if (args.length<2) {
-            m_debugger.getOutput().println("Graph name is missing.");
+            output.println("Graph name is missing.");
             return;
         }
         String graphName=args[1];
@@ -64,6 +65,6 @@ public class ShowDescriptionGraphCommand extends AbstractCommand {
                 selectConsoleWindow();
                 return;
             }
-        m_debugger.getOutput().println("Graph '"+graphName+"' not found.");
+        output.println("Graph '"+graphName+"' not found.");
     }
 }

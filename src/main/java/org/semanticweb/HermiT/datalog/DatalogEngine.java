@@ -63,7 +63,7 @@ public final class DatalogEngine {
             m_nodesToTerms.clear();
             m_termsToEquivalenceClasses.clear();
             m_termsToRepresentatives.clear();
-            Tableau tableau=new Tableau(m_interruptFlag,null,NullExistentialExpansionStrategy.INSTANCE,false,m_dlOntology,null,new HashMap<String,Object>());
+            Tableau tableau=new Tableau(m_interruptFlag,null,NullExistentialExpansionStrategy.INSTANCE,false,m_dlOntology,null,new HashMap<>());
             Set<Atom> noAtoms=Collections.emptySet();
             tableau.isSatisfiable(true,false,noAtoms,noAtoms,noAtoms,noAtoms,m_termsToNodes,null,null);
             for (Map.Entry<Term,Node> entry : m_termsToNodes.entrySet())

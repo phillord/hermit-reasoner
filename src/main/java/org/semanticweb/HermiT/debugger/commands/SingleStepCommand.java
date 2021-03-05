@@ -45,20 +45,21 @@ public class SingleStepCommand extends AbstractCommand {
     }
     @Override
     public void execute(String[] args) {
+        PrintWriter output = m_debugger.getOutput();
         if (args.length<2) {
-            m_debugger.getOutput().println("The status is missing.");
+            output.println("The status is missing.");
             return;
         }
         String status=args[1].toLowerCase();
         if ("on".equals(status)) {
             m_debugger.setSinglestep(true);
-            m_debugger.getOutput().println("Single step mode on.");
+            output.println("Single step mode on.");
         }
         else if ("off".equals(status)) {
             m_debugger.setSinglestep(false);
-            m_debugger.getOutput().println("Single step mode off.");
+            output.println("Single step mode off.");
         }
         else
-            m_debugger.getOutput().println("Incorrect single step mode '"+status+"'.");
+            output.println("Incorrect single step mode '"+status+"'.");
     }
 }

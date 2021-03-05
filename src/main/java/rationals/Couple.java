@@ -38,7 +38,7 @@ public class Couple {
 
     @Override
     public boolean equals(Object o) {
-        if ((o != null) && (o instanceof Couple)) {
+        if (o instanceof Couple) {
             Couple c = (Couple) o;
             return from.equals(c.from) && to.equals(c.to);
         }

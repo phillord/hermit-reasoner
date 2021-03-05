@@ -63,7 +63,7 @@ public class BlockingValidator {
     protected final Map<DLClauseInfo,Node> inValidClausesForBlockedParent=new HashMap<>();
     protected final Map<AtLeastConcept,Node> inValidAtleastForBlocker=new HashMap<>();
     protected final Map<DLClauseInfo,Node> inValidClausesForBlocker=new HashMap<>();
-    protected final boolean debuggingMode=false;
+    protected static final boolean debuggingMode=false;
 
     /**
      * @param tableau tableau
@@ -135,9 +135,7 @@ public class BlockingValidator {
         // from previous check on the parent we know whether the block is invalid
         if (((ValidatedBlockingObject)blocked.getBlockingObject()).blockViolatesParentConstraints())
             return false;
-        if (!satisfiesConstraintsForBlockedX(blocked))
-            return false;
-        return true;
+        return satisfiesConstraintsForBlockedX(blocked);
     }
     protected void resetChildFlags(Node parent) {
         m_ternaryRetrieval1Bound.getBindingsBuffer()[1]=parent;
@@ -445,7 +443,7 @@ public class BlockingValidator {
                 }
                 retrieval.next();
             }
-            return;  // no z could be found that satisfies the constrains (clause is trivially satisfied)
+            // no z could be found that satisfies the constrains (clause is trivially satisfied)
         }
     }
     protected void checkDLClauseForNonblockedXAnyZAndAnyY(DLClauseInfo dlClauseInfo,Node nonblockedX,int toMatchIndexXtoY,int toMatchIndexYtoX) {
@@ -554,7 +552,7 @@ public class BlockingValidator {
             m_dlClause=dlClause;
             // TODO: We'll sort our variables by names. This introduces a dependency
             // to clausification. That's ugly and should be fixed later.
-            Variable X=Variable.create("X");
+            Variable x=Variable.create("X");
             Set<AtomicConcept> xConcepts=new HashSet<>();
             Set<AtomicRole> x2xRoles=new HashSet<>();
             Set<Variable> ys=new HashSet<>();
@@ -568,7 +566,7 @@ public class BlockingValidator {
                 DLPredicate predicate=atom.getDLPredicate();
                 Variable var1=atom.getArgumentVariable(0);
                 if (predicate instanceof AtomicConcept) {
-                    if (var1==X) {
+                    if (var1==x) {
                         xConcepts.add((AtomicConcept)predicate);
                     }
                     else if (var1.getName().startsWith("Y")) {
@@ -597,8 +595,8 @@ public class BlockingValidator {
                 }
                 else if (predicate instanceof AtomicRole) {
                     Variable var2=atom.getArgumentVariable(1);
-                    if (var1==X) {
-                        if (var2==X)
+                    if (var1==x) {
+                        if (var2==x)
                             x2xRoles.add((AtomicRole)atom.getDLPredicate());
                         else if (var2.getName().startsWith("Y")) {
                             ys.add(var2);
@@ -613,7 +611,7 @@ public class BlockingValidator {
                         else
                             throw new IllegalStateException("Internal error: Clause premise contains a role atom with virales other than X and Yi. ");
                     }
-                    else if (var2==X) {
+                    else if (var2==x) {
                         if (var1.getName().startsWith("Y")) {
                             ys.add(var1);
                             if (y2xRoles.containsKey(var1))
@@ -649,7 +647,7 @@ public class BlockingValidator {
             m_y2xRetrievals=new Retrieval[y2xRoles.size()];
             m_y2xRoles=new AtomicRole[y2xRoles.size()];
             int i=0;
-            int num_xyRoles=0;
+            int numXYRoles=0;
             for (i=0;i<m_yVariables.length;i++) {
                 Variable y=m_yVariables[i];
                 Set<AtomicConcept> yConcepts=y2concepts.get(y);
@@ -657,17 +655,17 @@ public class BlockingValidator {
                 if (xyRoles!=null) {
                     assert xyRoles.size()==1;
                     assert m_y2xRetrievals.length<m_x2yRetrievals.length;
-                    m_x2yRetrievals[num_xyRoles]=extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,true,false },ExtensionTable.View.TOTAL);
-                    m_x2yRoles[num_xyRoles]=xyRoles.iterator().next();
-                    num_xyRoles++;
+                    m_x2yRetrievals[numXYRoles]=extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,true,false },ExtensionTable.View.TOTAL);
+                    m_x2yRoles[numXYRoles]=xyRoles.iterator().next();
+                    numXYRoles++;
                 }
                 Set<AtomicRole> yxRoles=y2xRoles.get(y);
                 if (yxRoles!=null) {
                     assert yxRoles.size()==1;
-                    assert i-num_xyRoles>=0;
-                    assert i-num_xyRoles<m_y2xRetrievals.length;
-                    m_y2xRetrievals[i-num_xyRoles]=extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,false,true },ExtensionTable.View.TOTAL);
-                    m_y2xRoles[i-num_xyRoles]=yxRoles.iterator().next();
+                    assert i-numXYRoles>=0;
+                    assert i-numXYRoles<m_y2xRetrievals.length;
+                    m_y2xRetrievals[i-numXYRoles]=extensionManager.getTernaryExtensionTable().createRetrieval(new boolean[] { true,false,true },ExtensionTable.View.TOTAL);
+                    m_y2xRoles[i-numXYRoles]=yxRoles.iterator().next();
                 }
                 m_yConstraints[i]=new YConstraint(yConcepts!=null?yConcepts.toArray(noConcepts):noConcepts, xyRoles!=null?xyRoles.toArray(noRoles):noRoles, yxRoles!=null?yxRoles.toArray(noRoles):noRoles);
             }
@@ -701,7 +699,7 @@ public class BlockingValidator {
                     ArgumentType argType=ArgumentType.YVAR;
                     int argIndex=getIndexFor(m_yVariables, var1);
                     if (argIndex==-1) {
-                        assert var1==X;
+                        assert var1==x;
                         argIndex=0;
                         argType=ArgumentType.XVAR;
                     }
@@ -713,22 +711,22 @@ public class BlockingValidator {
                 }
                 else if (predicate instanceof AtLeastConcept) {
                     // >= h S.B(x)
-                    assert var1==X;
+                    assert var1==x;
                     m_consequencesForBlockedX[i]=new SimpleConsequenceAtom(predicate,new ArgumentType[] { ArgumentType.XVAR },new int[] { 0 });
                     m_consequencesForNonblockedX[i]=m_consequencesForBlockedX[i];
                 }
                 else if (predicate==Equality.INSTANCE) {
                     // x==zi or y==zi or yi===yj for datatype assertions
-                    if (var1==X || var2==X) {
+                    if (var1==x || var2==x) {
                         // x==zi
-                        if (var2==X) {
+                        if (var2==x) {
                             Variable tmp=var1;
                             var1=var2;
                             var2=tmp;
                         }
                         assert var2!=null &&  var2.getName().startsWith("Z");
                         int var2Index=getIndexFor(m_zVariables, var2);
-                        assert var1==X && var2Index!=-1;
+                        assert var1==x && var2Index!=-1;
                         m_consequencesForBlockedX[i]=new SimpleConsequenceAtom(predicate,new ArgumentType[] { ArgumentType.XVAR,ArgumentType.ZVAR },new int[] { 0,var2Index });
                         m_consequencesForNonblockedX[i]=m_consequencesForBlockedX[i];
                     }
@@ -772,14 +770,14 @@ public class BlockingValidator {
                     // R(x, x), R(x,yi), R(yi,x), R(x,zj), R(zj,x)
                     assert predicate instanceof AtomicRole;
                     AtomicRole role=(AtomicRole)predicate;
-                    if (X==var1 && X==var2) {
+                    if (x==var1 && x==var2) {
                         m_consequencesForBlockedX[i]=new SimpleConsequenceAtom(predicate,new ArgumentType[] { ArgumentType.XVAR,ArgumentType.XVAR },new int[] { 0,0 });
                         m_consequencesForNonblockedX[i]=m_consequencesForBlockedX[i];
                     }
                     else {
-                        assert var1==X || var2==X;
+                        assert var1==x || var2==x;
                         int argIndex=-1;
-                        if (var1==X) {
+                        if (var1==x) {
                             argIndex=getIndexFor(m_yVariables, var2);
                             if (argIndex==-1) {
                                 argIndex=getIndexFor(m_zVariables, var2);
@@ -871,7 +869,7 @@ public class BlockingValidator {
         }
     }
 
-    protected static enum ArgumentType { XVAR,YVAR,ZVAR }
+    protected enum ArgumentType { XVAR,YVAR,ZVAR }
 
     protected static interface ConsequenceAtom {
         boolean isSatisfied(ExtensionManager extensionManager,DLClauseInfo dlClauseInfo,Node blockedX);

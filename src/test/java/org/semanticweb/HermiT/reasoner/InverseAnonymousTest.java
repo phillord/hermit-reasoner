@@ -1,8 +1,10 @@
 package org.semanticweb.HermiT.reasoner;
 
 import static org.junit.Assert.assertEquals;
+import static org.semanticweb.owlapi.util.OWLAPIStreamUtils.asSet;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -12,7 +14,6 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.StringDocumentSource;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
-import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 
 public class InverseAnonymousTest {
     String input = "Prefix: : <http://example.org/>\n" + "        Ontology: <http://asdf>\n"
@@ -28,12 +29,12 @@ public class InverseAnonymousTest {
     OWLObjectPropertyExpression invHasPart = df.getOWLObjectInverseOf(hasPart);
     Set<OWLObjectPropertyExpression> expectedHasPart = new HashSet<>(Arrays.asList(invPartOf, hasPart));
     Set<OWLObjectPropertyExpression> expectedPartOf = new HashSet<>(Arrays.asList(invHasPart, partOf));
-    Set<OWLObjectPropertyExpression> expectedBigPart = new HashSet<>(Arrays.asList(bigPart));
+    Set<OWLObjectPropertyExpression> expectedBigPart = Collections.singleton(bigPart);
 
     protected void assertExpectedEquivalencies(OWLReasoner reasoner) {
-        assertEquals(expectedBigPart, reasoner.getEquivalentObjectProperties(bigPart).getEntities());
-        assertEquals(expectedHasPart, reasoner.getEquivalentObjectProperties(hasPart).getEntities());
-        assertEquals(expectedPartOf, reasoner.getEquivalentObjectProperties(partOf).getEntities());
+        assertEquals(expectedBigPart, asSet(reasoner.getEquivalentObjectProperties(bigPart).entities()));
+        assertEquals(expectedHasPart, asSet(reasoner.getEquivalentObjectProperties(hasPart).entities()));
+        assertEquals(expectedPartOf, asSet(reasoner.getEquivalentObjectProperties(partOf).entities()));
     }
 
     protected OWLReasoner reason(OWLOntology ont) {

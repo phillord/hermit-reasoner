@@ -75,8 +75,11 @@ public class DefaultStateFactory implements StateFactory, Cloneable {
 
         @Override
         public boolean equals(Object obj) {
+            if(!(obj instanceof DefaultStateSet)) {
+                return false;
+            }
             DefaultStateSet dss = (DefaultStateSet) obj;
-            return (dss == null) ? false : (dss.bits.equals(bits) && dss.df == df);
+            return dss.bits.equals(bits) && dss.df == df;
         }
 
         @Override

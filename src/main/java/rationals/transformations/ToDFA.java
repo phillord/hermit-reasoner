@@ -35,7 +35,7 @@ public Automaton transform(Automaton a) {
       Set<State> sts = todo.remove(0);
       from = bmap.get(sts);
       if (done.contains(sts))
-    continue;
+          continue;
       done.add(sts);
       /* get transition sets */
       Map<Object, Set<State>> tam = TransformationsToolBox.mapAlphabet(a.delta(sts), a);

@@ -502,8 +502,8 @@ public class InstanceManager {
             }
         }
     }
-    protected int readOffClassInstancesByIndividual(ReasonerProgressMonitor monitor, int _completedSteps, int steps) {
-        int completedSteps=_completedSteps;
+    protected int readOffClassInstancesByIndividual(ReasonerProgressMonitor monitor, int completed, int steps) {
+        int completedSteps=completed;
         for (Individual ind : m_individuals) {
             Node nodeForIndividual=m_nodesForIndividuals.get(ind);
             // read of concept instances and normal role instances only once, we don't slice that
@@ -526,12 +526,12 @@ public class InstanceManager {
     /**
      * @param monitor monitor
      * @param startIndividualIndex startIndividualIndex
-     * @param _completedSteps completedSteps
+     * @param completed completedSteps
      * @param steps steps
      * @return completed steps
      */
-    public int initializeKnowAndPossiblePropertyInstances(ReasonerProgressMonitor monitor, int startIndividualIndex, int _completedSteps, int steps) {
-        int completedSteps=_completedSteps;
+    public int initializeKnowAndPossiblePropertyInstances(ReasonerProgressMonitor monitor, int startIndividualIndex, int completed, int steps) {
+        int completedSteps=completed;
         if (!m_propertiesInitialised) {
             m_interruptFlag.startTask();
             try {
@@ -553,8 +553,8 @@ public class InstanceManager {
         }
         return completedSteps;
     }
-    protected int readOffPropertyInstancesByIndividual(ReasonerProgressMonitor monitor, int _completedSteps, int steps, int startIndividualIndex) {
-        int completedSteps=_completedSteps;
+    protected int readOffPropertyInstancesByIndividual(ReasonerProgressMonitor monitor, int completed, int steps, int startIndividualIndex) {
+        int completedSteps=completed;
         // first round we go over all individuals
         int endIndex=(startIndividualIndex==0) ? m_individuals.length : m_currentIndividualIndex;
         for (int index=startIndividualIndex;index<endIndex;index++) {
@@ -722,8 +722,8 @@ public class InstanceManager {
             m_ternaryRetrieval1Bound.next();
         }
     }
-    protected int readOffComplexRoleSuccessors(Individual ind, ReasonerProgressMonitor monitor, int _completedSteps, int steps) {
-        int completedSteps=_completedSteps;
+    protected int readOffComplexRoleSuccessors(Individual ind, ReasonerProgressMonitor monitor, int completed, int steps) {
+        int completedSteps=completed;
         String indIRI=ind.getIRI();
         AtomicConcept conceptForRole;
         for (AtomicRole atomicRole : m_complexRoles) {
@@ -1421,10 +1421,10 @@ public class InstanceManager {
         }
         return result;
     }
-    protected boolean isRoleInstance(Role role, Individual _individual1, Individual _individual2) {
+    protected boolean isRoleInstance(Role role, Individual ind1, Individual ind2) {
         OWLDataFactory factory=m_reasoner.getDataFactory();
-        Individual individual1=_individual1; 
-        Individual individual2=_individual2;
+        Individual individual1=ind1; 
+        Individual individual2=ind2;
         AtomicRole atomicRole;
         if (role instanceof InverseRole) {
             Individual tmp=individual1;

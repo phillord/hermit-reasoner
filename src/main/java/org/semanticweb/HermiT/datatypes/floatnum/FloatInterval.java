@@ -136,7 +136,7 @@ public class FloatInterval {
                 newPositive=true;
                 newMagnitude=magnitude+1;
             }
-            else if (!positive && magnitude==0) {
+            else if (magnitude==0) {
                 // The successor of -0 is +0
                 newPositive=true;
                 newMagnitude=0;
@@ -167,7 +167,7 @@ public class FloatInterval {
                 newPositive=false;
                 newMagnitude=magnitude+1;
             }
-            else if (positive && magnitude==0) {
+            else if (magnitude==0) {
                 // The predecessor of +0 is -0
                 newPositive=false;
                 newMagnitude=0;
@@ -183,11 +183,11 @@ public class FloatInterval {
     /**
      * @param lowerBoundInclusive lowerBoundInclusive
      * @param upperBoundInclusive upperBoundInclusive
-     * @param _argument argument
+     * @param arg argument
      * @return subtracted size
      */
-    public static int subtractIntervalSizeFrom(float lowerBoundInclusive,float upperBoundInclusive,int _argument) {
-        int argument=_argument;
+    public static int subtractIntervalSizeFrom(float lowerBoundInclusive,float upperBoundInclusive,int arg) {
+        int argument=arg;
         if (argument<=0)
             return 0;
         int bitsLowerBoundInclusive=Float.floatToIntBits(lowerBoundInclusive);
@@ -212,7 +212,7 @@ public class FloatInterval {
             int size=magnitudeLowerBoundInclusive-magnitudeUpperBoundInclusive+1;
             return Math.max(argument-size,0);
         }
-        else if (!positiveLowerBoundInclusive && positiveUpperBoundInclusive) {
+        else if (!positiveLowerBoundInclusive) {
             // the number of values from 'lowerBoundInclusive' to -0
             int startToMinusZero=magnitudeLowerBoundInclusive+1;
             if (startToMinusZero>=argument)
@@ -276,9 +276,9 @@ public class FloatInterval {
             return magnitude1<=magnitude2;
         else if (!positive1 && positive2)
             return true;
-        else if (positive1 && !positive2)
+        else if (positive1)
             return false;
-        else // if (!positive1 && !positive2)
+        else
             return magnitude1>=magnitude2;
     }
 }

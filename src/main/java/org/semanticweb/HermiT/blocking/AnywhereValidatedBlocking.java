@@ -20,7 +20,6 @@ package org.semanticweb.HermiT.blocking;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.semanticweb.HermiT.blocking.ValidatedSingleDirectBlockingChecker.ValidatedBlockingObject;
@@ -173,9 +172,9 @@ public class AnywhereValidatedBlocking implements BlockingStrategy {
                     if ((node.isDirectlyBlocked() && (m_directBlockingChecker.hasChangedSinceValidation(node) || m_directBlockingChecker.hasChangedSinceValidation(node.getParent()) || m_directBlockingChecker.hasChangedSinceValidation(node.getBlocker()))) || !node.getParent().isBlocked()) {
                         Node validBlocker=null;
                         Node currentBlocker=node.getBlocker();
-                        if (node.isDirectlyBlocked() && currentBlocker!=null) {
+                        if (node.isDirectlyBlocked() && currentBlocker!=null &&
                             // try the old blocker fist
-                            if (isBlockValid(node))
+                            isBlockValid(node)) {
                                 validBlocker=currentBlocker;
                         }
                         if (validBlocker==null) {
@@ -567,8 +566,8 @@ class ValidatedBlockersCache {
         }
         return new ArrayList<>();
     }
-    protected static int getIndexFor(int _hashCode,int tableLength) {
-        int hashCode=_hashCode;
+    protected static int getIndexFor(int c,int tableLength) {
+        int hashCode=c;
         hashCode+=~(hashCode<<9);
         hashCode^=(hashCode>>>14);
         hashCode+=(hashCode<<4);

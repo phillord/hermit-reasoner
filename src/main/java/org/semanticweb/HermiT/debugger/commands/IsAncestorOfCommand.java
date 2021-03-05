@@ -45,8 +45,9 @@ public class IsAncestorOfCommand extends AbstractCommand {
     }
     @Override
     public void execute(String[] args) {
+        PrintWriter output = m_debugger.getOutput();
         if (args.length<3) {
-            m_debugger.getOutput().println("Node IDs are missing.");
+            output.println("Node IDs are missing.");
             return;
         }
         int nodeID1;
@@ -54,7 +55,7 @@ public class IsAncestorOfCommand extends AbstractCommand {
             nodeID1=Integer.parseInt(args[1]);
         }
         catch (NumberFormatException e) {
-            m_debugger.getOutput().println("Invalid ID of the first node. "+e.getMessage());
+            output.println("Invalid ID of the first node. "+e.getMessage());
             return;
         }
         int nodeID2;
@@ -62,20 +63,20 @@ public class IsAncestorOfCommand extends AbstractCommand {
             nodeID2=Integer.parseInt(args[2]);
         }
         catch (NumberFormatException e) {
-            m_debugger.getOutput().println("Invalid ID of the second node. "+e.getMessage());
+            output.println("Invalid ID of the second node. "+e.getMessage());
             return;
         }
         Node node1=m_debugger.getTableau().getNode(nodeID1);
         Node node2=m_debugger.getTableau().getNode(nodeID2);
         if (node1==null) {
-            m_debugger.getOutput().println("Node with ID '"+nodeID1+"' not found.");
+            output.println("Node with ID '"+nodeID1+"' not found.");
             return;
         }
         if (node2==null) {
-            m_debugger.getOutput().println("Node with ID '"+nodeID2+"' not found.");
+            output.println("Node with ID '"+nodeID2+"' not found.");
             return;
         }
         boolean result=node1.isAncestorOf(node2);
-        m_debugger.getOutput().print("Node "+node1.getNodeID()+" is "+(result ? "" : "not ")+"an ancestor of node "+node2.getNodeID()+".");
+        output.print("Node "+node1.getNodeID()+" is "+(result ? "" : "not ")+"an ancestor of node "+node2.getNodeID()+".");
     }
 }

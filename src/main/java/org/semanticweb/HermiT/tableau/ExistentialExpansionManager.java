@@ -302,10 +302,12 @@ public final class ExistentialExpansionManager implements Serializable {
      * @param forNode forNode
      */
     public void expand(AtLeast atLeast,Node forNode) {
-        if (!tryFunctionalExpansion(atLeast,forNode))
-            if (atLeast instanceof AtLeastConcept)
+        if (!tryFunctionalExpansion(atLeast,forNode)) {
+            if (atLeast instanceof AtLeastConcept) {
                 doNormalExpansion((AtLeastConcept)atLeast,forNode);
-            else
+            } else {
                 doNormalExpansion((AtLeastDataRange)atLeast,forNode);
+            }
+        }
     }
 }

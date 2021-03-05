@@ -64,13 +64,11 @@ public class ValidatedPairwiseDirectBlockingChecker implements DirectBlockingChe
     public boolean isBlockedBy(Node blocker,Node blocked) {
         ValidatedPairwiseBlockingObject blockerObject=(ValidatedPairwiseBlockingObject)blocker.getBlockingObject();
         ValidatedPairwiseBlockingObject blockedObject=(ValidatedPairwiseBlockingObject)blocked.getBlockingObject();
-        boolean isBlockedBy=
-            !blocker.isBlocked() &&
+        return !blocker.isBlocked() &&
             blocker.getNodeType()==NodeType.TREE_NODE &&
             blocked.getNodeType()==NodeType.TREE_NODE &&
             blockerObject.getAtomicConceptsLabel()==blockedObject.getAtomicConceptsLabel() &&
             ((ValidatedPairwiseBlockingObject)blocker.getParent().getBlockingObject()).getAtomicConceptsLabel()==((ValidatedPairwiseBlockingObject)blocked.getParent().getBlockingObject()).getAtomicConceptsLabel();
-        return isBlockedBy;
     }
     @Override
     public int blockingHashCode(Node node) {

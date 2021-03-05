@@ -53,7 +53,7 @@ import org.semanticweb.HermiT.tableau.Tableau;
  */
 public abstract class AbstractExpansionStrategy implements ExistentialExpansionStrategy,Serializable {
     private static final long serialVersionUID=2831957929321676444L;
-    protected static enum SatType { NOT_SATISFIED,PERMANENTLY_SATISFIED,CURRENTLY_SATISFIED }
+    protected enum SatType { NOT_SATISFIED,PERMANENTLY_SATISFIED,CURRENTLY_SATISFIED }
 
     protected final BlockingStrategy m_blockingStrategy;
     protected final boolean m_expandNodeAtATime;

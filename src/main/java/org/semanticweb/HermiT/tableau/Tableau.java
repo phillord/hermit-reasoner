@@ -334,7 +334,7 @@ public final class Tableau implements Serializable {
      */
     public boolean isSatisfiable(boolean loadAdditionalABox,Set<Atom> perTestPositiveFactsNoDependency,Set<Atom> perTestNegativeFactsNoDependency,Set<Atom> perTestPositiveFactsDummyDependency,Set<Atom> perTestNegativeFactsDummyDependency,Map<Individual,Node> nodesForIndividuals,ReasoningTaskDescription reasoningTaskDescription) {
         boolean loadPermanentABox=m_permanentDLOntology.hasNominals() || (m_additionalDLOntology!=null && m_additionalDLOntology.hasNominals());
-        return isSatisfiable(loadPermanentABox,loadAdditionalABox,perTestPositiveFactsNoDependency,perTestNegativeFactsNoDependency,perTestPositiveFactsDummyDependency,perTestNegativeFactsDummyDependency,new HashMap<Term,Node>(),nodesForIndividuals,reasoningTaskDescription);
+        return isSatisfiable(loadPermanentABox,loadAdditionalABox,perTestPositiveFactsNoDependency,perTestNegativeFactsNoDependency,perTestPositiveFactsDummyDependency,perTestNegativeFactsDummyDependency,new HashMap<>(),nodesForIndividuals,reasoningTaskDescription);
     }
     /**
      * @param loadPermanentABox loadPermanentABox
@@ -348,7 +348,7 @@ public final class Tableau implements Serializable {
      * @return true if satisfiable
      */
     public boolean isSatisfiable(boolean loadPermanentABox,boolean loadAdditionalABox,Set<Atom> perTestPositiveFactsNoDependency,Set<Atom> perTestNegativeFactsNoDependency,Set<Atom> perTestPositiveFactsDummyDependency,Set<Atom> perTestNegativeFactsDummyDependency,Map<Individual,Node> nodesForIndividuals,ReasoningTaskDescription reasoningTaskDescription) {
-        return isSatisfiable(loadPermanentABox,loadAdditionalABox,perTestPositiveFactsNoDependency,perTestNegativeFactsNoDependency,perTestPositiveFactsDummyDependency,perTestNegativeFactsDummyDependency,new HashMap<Term,Node>(),nodesForIndividuals,reasoningTaskDescription);
+        return isSatisfiable(loadPermanentABox,loadAdditionalABox,perTestPositiveFactsNoDependency,perTestNegativeFactsNoDependency,perTestPositiveFactsDummyDependency,perTestNegativeFactsDummyDependency,new HashMap<>(),nodesForIndividuals,reasoningTaskDescription);
     }
     /**
      * @param loadPermanentABox loadPermanentABox

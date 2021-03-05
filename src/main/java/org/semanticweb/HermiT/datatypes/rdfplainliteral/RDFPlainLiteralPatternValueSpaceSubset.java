@@ -18,7 +18,6 @@
 package org.semanticweb.HermiT.datatypes.rdfplainliteral;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -50,7 +49,7 @@ public class RDFPlainLiteralPatternValueSpaceSubset implements ValueSpaceSubset 
     protected static final Automaton s_anyString=s_anyChar.repeat();
     protected static final Automaton s_anyStringWithNonemptyLangTag=s_anyString.concatenate(s_nonemptyLangTag);
     static Map<String,Automaton> anyDatatype() {
-        Map<String,Automaton> anyDatatype=new ConcurrentHashMap<>();
+        Map<String,Automaton> anyDatatype=new ConcurrentHashMap<>(20, 0.75F, 1);
         anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"string",s_xsdString.concatenate(s_emptyLangTag));
         anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"normalizedString",normalizedStringAutomaton().concatenate(s_emptyLangTag));
         anyDatatype.put(RDFPlainLiteralDatatypeHandler.XSD_NS+"token",tokenAutomaton().concatenate(s_emptyLangTag));

@@ -25,7 +25,7 @@ import org.semanticweb.owlapi.reasoner.TimeOutException;
 public final class InterruptFlag implements Serializable {
     private static final long serialVersionUID=-6983680374511847003L;
 
-    protected static enum InterruptType { INTERRUPTED,TIMEOUT }
+    protected enum InterruptType { INTERRUPTED,TIMEOUT }
 
     protected final InterruptTimer m_interruptTimer;
     protected volatile InterruptType m_interruptType;
@@ -71,7 +71,7 @@ public final class InterruptFlag implements Serializable {
             m_interruptTimer.dispose();
     }
 
-    protected static enum TimerState { WAIT_FOR_TASK,TIMING,TIMING_STOPPED,DISPOSED }
+    protected enum TimerState { WAIT_FOR_TASK,TIMING,TIMING_STOPPED,DISPOSED }
 
     protected class InterruptTimer extends Thread {
         protected final long m_timeout;
@@ -95,6 +95,7 @@ public final class InterruptFlag implements Serializable {
                     }
                     catch (InterruptedException stopped) {
                         m_timerState=TimerState.DISPOSED;
+                        Thread.currentThread().interrupt();
                     }
                 }
                 if (m_timerState==TimerState.TIMING) {
@@ -104,6 +105,7 @@ public final class InterruptFlag implements Serializable {
                             m_interruptType=InterruptType.TIMEOUT;
                     }
                     catch (InterruptedException stopped) {
+                        Thread.currentThread().interrupt();
                         m_timerState=TimerState.DISPOSED;
                     }
                 }
@@ -116,6 +118,7 @@ public final class InterruptFlag implements Serializable {
                     wait();
                 }
                 catch (InterruptedException stopped) {
+                    Thread.currentThread().interrupt();
                 }
             }
             if (m_timerState==TimerState.WAIT_FOR_TASK) {
@@ -132,6 +135,7 @@ public final class InterruptFlag implements Serializable {
                         wait();
                     }
                     catch (@SuppressWarnings("unused") InterruptedException stopped) {
+                        Thread.currentThread().interrupt();
                         return;
                     }
                 }
@@ -144,6 +148,7 @@ public final class InterruptFlag implements Serializable {
                 join();
             }
             catch (@SuppressWarnings("unused") InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
         }
     }
