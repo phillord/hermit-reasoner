@@ -268,7 +268,7 @@ public class Numbers {
             else {
                 int value=bound.intValue();
                 if (value==Integer.MIN_VALUE)
-                    return Long.valueOf( ((long)value)-11);
+                    return Long.valueOf( ((long)value)-1);
                 else
                     return Integer.valueOf(value-1);
             }

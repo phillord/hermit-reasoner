@@ -51,7 +51,7 @@ public class Prefixes implements Serializable {
     /**semantic prefixes*/
     public static final Map<String,String> s_semanticWebPrefixes = semanticPrefixes();
     static Map<String,String> semanticPrefixes() {
-        Map<String,String> semanticWebPrefixes=new ConcurrentHashMap<>();
+        Map<String,String> semanticWebPrefixes=new ConcurrentHashMap<>(12, 0.75F, 1);
         semanticWebPrefixes.put("rdf:","http://www.w3.org/1999/02/22-rdf-syntax-ns#");
         semanticWebPrefixes.put("rdfs:","http://www.w3.org/2000/01/rdf-schema#");
         semanticWebPrefixes.put("owl:","http://www.w3.org/2002/07/owl#");
