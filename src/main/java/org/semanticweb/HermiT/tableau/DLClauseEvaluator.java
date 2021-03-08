@@ -38,8 +38,9 @@ import org.semanticweb.HermiT.model.Term;
 import org.semanticweb.HermiT.model.Variable;
 import org.semanticweb.HermiT.monitor.TableauMonitor;
 
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.map.hash.TIntObjectHashMap;
+import com.carrotsearch.hppcrt.lists.IntArrayList;
+import com.carrotsearch.hppcrt.maps.IntObjectHashMap;
+
 /**DLClauseEvaluator*/
 public class DLClauseEvaluator implements Serializable {
     private static final long serialVersionUID=4639844159658590456L;
@@ -149,7 +150,7 @@ public class DLClauseEvaluator implements Serializable {
     /**BufferSupply.*/
     public static class BufferSupply {
         protected final List<Object[]> m_allBuffers=new ArrayList<>();
-        protected final TIntObjectHashMap<List<Object[]>> m_availableBuffersByArity=new TIntObjectHashMap<>();
+        protected final IntObjectHashMap<List<Object[]>> m_availableBuffersByArity=new IntObjectHashMap<>();
 
         void reuseBuffers() {
             m_availableBuffersByArity.clear();
@@ -873,7 +874,7 @@ public class DLClauseEvaluator implements Serializable {
         protected final List<ExtensionTable.Retrieval> m_retrievals;
         /**Workers.*/
         public final List<Worker> m_workers;
-        protected final TIntArrayList m_labels;
+        protected final IntArrayList m_labels;
 
         /**
          * @param bufferSupply bufferSupply
@@ -917,7 +918,7 @@ public class DLClauseEvaluator implements Serializable {
                 m_unionDependencySet=null;
             m_retrievals=new ArrayList<>();
             m_workers=new ArrayList<>();
-            m_labels=new TIntArrayList();
+            m_labels=new IntArrayList();
         }
         protected final void generateCode(int firstBodyAtomToCompile,ExtensionTable.Retrieval firstAtomRetrieval) {
             m_labels.add(0);
