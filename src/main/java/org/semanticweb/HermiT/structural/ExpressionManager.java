@@ -1,17 +1,17 @@
 /* Copyright 2009 by the Oxford University Computing Laboratory
-   
+
    This file is part of HermiT.
 
    HermiT is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    HermiT is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public License
    along with HermiT.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -60,7 +60,7 @@ public class ExpressionManager {
     protected final DataRangeComplementNNFVisitor m_dataRangeComplementNNFVisitor;
     protected final DescriptionSimplificationVisitor m_descriptionSimplificationVisitor;
     protected final DataRangeSimplificationVisitor m_dataRangeSimplificationVisitor;
-    
+
     public ExpressionManager(OWLDataFactory factory) {
         m_factory=factory;
         m_descriptionNNFVisitor=new DescriptionNNFVisitor();
@@ -92,7 +92,7 @@ public class ExpressionManager {
     // -----------------------------------------------------------------------------------
     // NNF
     // -----------------------------------------------------------------------------------
-    
+
     protected class DescriptionNNFVisitor implements OWLClassExpressionVisitorEx<OWLClassExpression> {
         public OWLClassExpression visit(OWLClass d) {
             return d;
@@ -169,7 +169,7 @@ public class ExpressionManager {
             return m_factory.getOWLDataExactCardinality(d.getCardinality(),d.getProperty(),filler);
         }
     }
-    
+
     protected class DataRangeNNFVisitor implements OWLDataVisitorEx<OWLDataRange> {
         public OWLDataRange visit(OWLDatatype o) {
             return o;
@@ -209,7 +209,7 @@ public class ExpressionManager {
     // -----------------------------------------------------------------------------------
     // Complement NNF
     // -----------------------------------------------------------------------------------
-    
+
     protected class DescriptionComplementNNFVisitor implements OWLClassExpressionVisitorEx<OWLClassExpression> {
         public OWLClassExpression visit(OWLClass d) {
             if (d.isOWLThing())
@@ -308,7 +308,7 @@ public class ExpressionManager {
             }
         }
     }
-    
+
     protected class DataRangeComplementNNFVisitor implements OWLDataVisitorEx<OWLDataRange> {
         public OWLDataRange visit(OWLDatatype o) {
             return m_factory.getOWLDataComplementOf(o);
@@ -345,7 +345,7 @@ public class ExpressionManager {
     // -----------------------------------------------------------------------------------
     // Simplification
     // -----------------------------------------------------------------------------------
-    
+
     protected class DescriptionSimplificationVisitor implements OWLClassExpressionVisitorEx<OWLClassExpression> {
         public OWLClassExpression visit(OWLClass d) {
             return d;
@@ -363,6 +363,12 @@ public class ExpressionManager {
                 else
                     newConjuncts.add(descriptionSimplified);
             }
+            if (newConjuncts.isEmpty()) {
+                return m_factory.getOWLThing();
+            }
+            if (newConjuncts.size() == 1) {
+                return newConjuncts.iterator().next();
+            }
             return m_factory.getOWLObjectIntersectionOf(newConjuncts);
         }
         public OWLClassExpression visit(OWLObjectUnionOf d) {
@@ -377,6 +383,12 @@ public class ExpressionManager {
                     newDisjuncts.addAll(((OWLObjectUnionOf)descriptionSimplified).getOperands());
                 else
                     newDisjuncts.add(descriptionSimplified);
+            }
+            if (newDisjuncts.isEmpty()) {
+                return m_factory.getOWLNothing();
+            }
+            if (newDisjuncts.size() == 1) {
+                return newDisjuncts.iterator().next();
             }
             return m_factory.getOWLObjectUnionOf(newDisjuncts);
         }
@@ -505,7 +517,7 @@ public class ExpressionManager {
             return dataRange instanceof OWLDataComplementOf && ((OWLDataComplementOf)dataRange).getDataRange().isTopDatatype();
         }
     }
-    
+
     protected class DataRangeSimplificationVisitor implements OWLDataVisitorEx<OWLDataRange> {
         public OWLDataRange visit(OWLDatatype o) {
             return o;
