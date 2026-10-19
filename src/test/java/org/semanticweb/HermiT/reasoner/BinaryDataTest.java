@@ -86,6 +86,24 @@ public class BinaryDataTest extends AbstractReasonerTest {
             NOT(DR("xsd:hexBinary","xsd:minLength",INT("1")))
         );
     }
+    public void testNegationWithoutFacets_1() throws Exception {
+        assertDRSatisfiable(false,
+            DR("xsd:hexBinary","xsd:minLength",INT("1")),
+            NOT(DR("xsd:hexBinary"))
+        );
+    }
+    public void testNegationWithoutFacets_2() throws Exception {
+        assertDRSatisfiable(false,
+            DR("xsd:base64Binary","xsd:maxLength",INT("3")),
+            NOT(DR("xsd:base64Binary"))
+        );
+    }
+    public void testNegationWithoutFacets_3() throws Exception {
+        assertDRSatisfiable(true,
+            DR("xsd:hexBinary","xsd:minLength",INT("1")),
+            NOT(DR("xsd:base64Binary"))
+        );
+    }
     public void testExplicitSize() throws Exception {
         BinaryDataLengthInterval imax2=interval(BinaryDataType.HEX_BINARY,0,2);
         assertEquals(10000000,imax2.subtractSizeFrom(10000000+1+256+256*256));
