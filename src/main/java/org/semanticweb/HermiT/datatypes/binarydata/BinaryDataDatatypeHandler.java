@@ -118,7 +118,7 @@ public class BinaryDataDatatypeHandler implements DatatypeHandler {
     }
     public ValueSpaceSubset conjoinWithDRNegation(ValueSpaceSubset valueSpaceSubset,DatatypeRestriction datatypeRestriction) {
         String datatypeURI=datatypeRestriction.getDatatypeURI();
-        assert datatypeRestriction.getNumberOfFacetRestrictions()!=0;
+        assert s_managedDatatypeURIs.contains(datatypeURI);
         if (datatypeRestriction.getNumberOfFacetRestrictions()==0 || valueSpaceSubset==EMPTY)
             return EMPTY;
         else {
